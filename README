@@ -1,0 +1,79 @@
+CheckStyle-IDEA
+---------------
+(c) 2006, James Shiell
+
+A plug-in for JetBrains' IntelliJ IDEA 6 which provides real-time feedback
+against a given CheckStyle (http://checkstyle.sourceforge.net/)
+profile by way of an inspection.
+
+
+Use
+---
+
+Once installed, a new inspection will be available in the group 'CheckStyle'.
+The 'Errors' item in the preferences panel will allow you to turn this on
+and to configure it.
+
+
+Configuration
+-------------
+
+Currently the only configuration option is that of the CheckStyle file. If
+this field is left empty then the Sun checks, as supplied with CheckStyle, will
+be used. Pointing this at the file of your choice will result in the contained
+rules being used.
+
+
+Limitations
+-----------
+
+This is an initial release and has some notable limitations:
+
+* Properties within configuration files cannot be defined or edited.
+* Only real-time scanning is supported. For static scanning try the
+  JETStyle plug-in (http://jetstyle.sourceforge.net/).
+* CheckStyle errors and warnings are both shown at a single level, as IDEA
+  will only allow one warning level for an inspection.
+* No caching of configuration files is currently performed. Hence
+  performance may be impacted.
+* Error handling is somewhat basic at present.
+
+
+Feedback
+--------
+
+Any comments or bug reports are most welcome - please e-mail
+me at james@infernus.org.
+
+
+Acknowledgements
+----------------
+
+This plug-in owes its existence to both the style-overlords at work mandating
+compliance with a CheckStyle configuration, and the Eclispe-CS
+(http://eclipse-cs.sourceforge.net/) authors for making me jealous of the
+real-time scan support available for Eclipse.
+
+In particular, thanks are due to the authors and contributors of:
+
+* Eclispe-CS, for inspiration and solutions to coding problems.
+* JetStyle, for filling the area of static scanning and also giving me
+  inspirations on coding solutions.
+* CheckStyle, for without them we'd have merely void and chaos.
+* JetBrains, for an IDE which is worth every penny and them some.
+
+
+Licence
+-------
+
+This code is released under a BSD licence, as specified in the accompanying
+LICENCE file.
+
+
+Version History
+---------------
+
+0.2 - Fix: File browser for configuration file filters out directories.
+
+0.1 - Initial release.
+

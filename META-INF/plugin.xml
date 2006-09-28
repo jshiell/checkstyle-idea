@@ -1,0 +1,19 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin>
+    <id>CheckStyle-IDEA</id>
+    <name>CheckStyle-IDEA</name>
+    <description>Real-time CheckStyle scanning for IDEA</description>
+    <version>0.2</version>
+    <idea-version since-build="5600"/>
+    <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
+    
+    <change-notes>
+        Fixed: Configuration file browser was filtering out directories.
+    </change-notes>
+                                
+    <application-components>
+        <component>
+            <implementation-class>org.infernus.idea.checkstyle.CheckStyleProvider</implementation-class>
+        </component>
+    </application-components>
+</idea-plugin>
