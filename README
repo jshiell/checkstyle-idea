@@ -2,6 +2,8 @@ CheckStyle-IDEA
 ---------------
 (c) 2006, James Shiell
 
+http://code.google.com/p/checkstyle-idea/
+
 A plug-in for JetBrains' IntelliJ IDEA 6 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
@@ -34,16 +36,14 @@ This is an initial release and has some notable limitations:
   JETStyle plug-in (http://jetstyle.sourceforge.net/).
 * CheckStyle errors and warnings are both shown at a single level, as IDEA
   will only allow one warning level for an inspection.
-* No caching of configuration files is currently performed. Hence
-  performance may be impacted.
 * Error handling is somewhat basic at present.
 
 
 Feedback
 --------
 
-Any comments or bug reports are most welcome - please e-mail
-me at james@infernus.org.
+Any comments or bug reports are most welcome - please visit
+the project website at http://code.google.com/p/checkstyle-idea/
 
 
 Acknowledgements
@@ -72,6 +72,9 @@ LICENCE file.
 
 Version History
 ---------------
+
+0.3 - Improved: CheckStyle caching improved.
+    - Improved: Temporary file deletion.
 
 0.2 - Fix: File browser for configuration file filters out directories.
 

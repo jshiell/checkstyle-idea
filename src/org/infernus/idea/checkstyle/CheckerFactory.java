@@ -14,11 +14,9 @@ import java.util.Map;
 
 /**
  * A configuration factory and resolver for CheckStyle.
- *
-   TODO cache these
  
  * @author James Shiell
- * @version 1.0
+ * @version 1.1
  */
 public class CheckerFactory implements PropertyResolver {
 
@@ -26,6 +24,9 @@ public class CheckerFactory implements PropertyResolver {
      * A singleton instance.
      */
     private static final CheckerFactory INSTANCE = new CheckerFactory();
+
+    private final Map<File, CheckerValue> cache
+            = new HashMap<File, CheckerValue>();
 
     private final Map<String, String> propertyNamesToValues = new HashMap<String, String>();
     private final List<String> propertyNames = new ArrayList<String>();
@@ -49,20 +50,27 @@ public class CheckerFactory implements PropertyResolver {
 
     /**
      * Get a checker for a given configuration.
+     * <p/>
+     * User with care: This does not cache the checker.
      *
-     * @param checkstyleConfigurationLocation the location of
-     * the configuration file.
+     * @param configStream a stream for a CheckStyle configuration file.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      * @return a checker.
      */
-    public Checker getChecker(final InputStream checkstyleConfigurationLocation)
+    public Checker getChecker(final InputStream configStream)
             throws CheckstyleException {
-        createChecker(checkstyleConfigurationLocation);
+        if (configStream == null) {
+            throw new IllegalArgumentException("Config stream may not be null");
+        }
+
+        createChecker(configStream);
         return checker;
     }
 
     /**
      * Get a checker for a given configuration file.
+     * <p/>
+     * This method operates with the aid of a cache.
      *
      * @param configFile the location of the configuration file.
      * @throws CheckstyleException if CheckStyle initialisation fails.
@@ -71,12 +79,33 @@ public class CheckerFactory implements PropertyResolver {
      */
     public Checker getChecker(final File configFile)
             throws CheckstyleException, IOException {
-        final InputStream in = new BufferedInputStream(
-                new FileInputStream(configFile));
-        createChecker(in);
-        in.close();
+        if (configFile == null) {
+            throw new IllegalArgumentException("Config file may not be null");
+        }
 
-        return checker;
+        if (!configFile.exists()) {
+            throw new FileNotFoundException("File does not exist: "
+                    + configFile);
+        }
+
+        final long configFileModified = configFile.lastModified();
+        final CheckerValue checkerValue = cache.get(configFile);
+
+        // if not cached or out of date...
+        if (checkerValue == null
+                || checkerValue.getTimeStamp() != configFileModified) {
+            final InputStream in = new BufferedInputStream(
+                new FileInputStream(configFile));
+            createChecker(in);
+            in.close();
+
+            cache.put(configFile, new CheckerValue(
+                    checker, configFileModified));
+
+            return checker;
+        }
+
+        return checkerValue.getChecker();
     }
 
     /**
@@ -221,6 +250,50 @@ public class CheckerFactory implements PropertyResolver {
         checker = (Checker) threadReturn[0];
 
         return checker;
+    }
+
+    /**
+     * Key for checker cache.
+     */
+    protected class CheckerValue {
+
+        private Checker checker;
+        private long timeStamp;
+
+        /**
+         * Create a new checker value.
+         *
+         * @param checker the checker instance.
+         * @param timeStamp the timestamp of the config file.
+         */
+        public CheckerValue(final Checker checker, final long timeStamp) {
+            if (checker == null) {
+                throw new IllegalArgumentException(
+                        "Checker may not be null");
+            }
+
+            this.checker = checker;
+            this.timeStamp = timeStamp;
+        }
+
+        /**
+         * Get the checker.
+         *
+         * @return the checker.
+         */
+        public Checker getChecker() {
+            return checker;
+        }
+
+        /**
+         * Get the timestamp of the config file.
+         *
+         * @return the timestamp of the config file.
+         */
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
     }
 
 }

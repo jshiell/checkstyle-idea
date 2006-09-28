@@ -171,7 +171,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
 
         File tempFile = null;
-        try {            
+        try {
             final Checker checker = getChecker();
 
             // we need to copy to a file as IntelliJ may not have saved the file recently...

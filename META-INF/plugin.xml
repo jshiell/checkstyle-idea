@@ -1,14 +1,25 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
-<idea-plugin>
+<idea-plugin version="2" url="http://code.google.com/p/checkstyle-idea/">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
-    <description>Real-time CheckStyle scanning for IDEA</description>
-    <version>0.2</version>
+    <description>
+        <![CDATA[
+        Real-time CheckStyle scanning for IDEA
+        ]]>
+    </description>
+    <version>0.3</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
-    
+
     <change-notes>
-        Fixed: Configuration file browser was filtering out directories.
+        <![CDATA[
+0.3 - Improved: CheckStyle caching improved.
+    - Improved: Temporary file deletion.
+
+0.2 - Fix: File browser for configuration file filters out directories.
+
+0.1 - Initial release.
+        ]]>
     </change-notes>
                                 
     <application-components>
