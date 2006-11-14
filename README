@@ -9,6 +9,17 @@ against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
 
+----------------------------------------------------------------------
+WARNING - if you've download the source from svn you'll be chuffed to
+          know it's currently unstable. Surprise! :-) Stable code can
+          be had from the IDEA Plugin Repository, or there might be a
+          tag for the last version.
+
+          The WIP is the static-scanning support... shouldn't be far
+          off a stable code base again.
+----------------------------------------------------------------------
+
+
 Use
 ---
 
@@ -32,8 +43,6 @@ Limitations
 This is an initial release and has some notable limitations:
 
 * Properties within configuration files cannot be defined or edited.
-* Only real-time scanning is supported. For static scanning try the
-  JETStyle plug-in (http://jetstyle.sourceforge.net/).
 * CheckStyle errors and warnings are both shown at a single level, as IDEA
   will only allow one warning level for an inspection.
 * Error handling is somewhat basic at present.
@@ -72,6 +81,8 @@ LICENCE file.
 
 Version History
 ---------------
+
+0.4 - Added static scanning support.
 
 0.3 - Improved: CheckStyle caching improved.
     - Improved: Temporary file deletion.

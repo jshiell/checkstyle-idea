@@ -1,0 +1,172 @@
+package org.infernus.idea.checkstyle;
+
+import com.puppycrawl.tools.checkstyle.api.AuditListener;
+import com.puppycrawl.tools.checkstyle.api.AuditEvent;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.codeInspection.ProblemHighlightType;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/**
+ * Listener for the CheckStyle process.
+ *
+ * @author James Shiell
+ * @version 1.1
+ */
+public class CheckStyleAuditListener implements AuditListener {
+
+    /**
+     * Logger for this class.
+     */
+    private static final Log LOG = LogFactory.getLog(
+            CheckStyleAuditListener.class);
+
+    private final PsiFile psiFile;
+    private final InspectionManager manager;
+
+    private List<AuditEvent> errors = new ArrayList<AuditEvent>();
+    private List<ProblemDescriptor> problems = new ArrayList<ProblemDescriptor>();
+
+    /**
+     * Create a new listener.
+     *
+     * @param psiFile the file being checked.
+     * @param manager the current inspection manager.
+     */
+    public CheckStyleAuditListener(final PsiFile psiFile,
+                                   final InspectionManager manager) {
+        this.psiFile = psiFile;
+        this.manager = manager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void auditStarted(final AuditEvent auditEvent) {
+        errors.clear();
+        problems.clear();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void auditFinished(final AuditEvent auditEvent) {
+        final char[] text = psiFile.textToCharArray();
+
+        // we cache the offset of each line as it is created, so as to
+        // avoid retreating ground we've already covered.
+        final List<Integer> lineLengthCache = new ArrayList<Integer>();
+        lineLengthCache.add(0); // line 1 is offset 0
+
+        for (final AuditEvent event : errors) {
+            int offset;
+            boolean endOfLine = false;
+
+            // start of file
+            if (event.getLine() == 0) { // start of file errors
+                offset = event.getColumn();
+
+                // line offset is cached...
+            } else if (event.getLine() <= lineLengthCache.size()) {
+                offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
+
+                // further search required
+            } else {
+                // start from end of cached data
+                offset = lineLengthCache.get(lineLengthCache.size() - 1);
+                int line = lineLengthCache.size();
+
+                int column = 0;
+                for (int i = offset; i < text.length; ++i) {
+                    final char character = text[i];
+
+                    // for linefeeds we need to handle CR, LF and CRLF,
+                    // hence we accept either and only trigger a new
+                    // line on the LF of CRLF.
+                    final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
+                    if (character == '\n' || character == '\r' && nextChar != '\n') {
+                        ++line;
+                        ++offset;
+                        lineLengthCache.add(offset);
+                        column = 0;
+                    } else {
+                        ++column;
+                        ++offset;
+                    }
+
+                    // need to go to end of line though
+                    if (event.getLine() == line && event.getColumn() == column) {
+                        if (column == 0 && Character.isWhitespace(nextChar)) {
+                            // move line errors to after EOL
+                            endOfLine = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            final PsiElement victim = psiFile.findElementAt(offset);
+
+            if (victim == null) {
+                LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
+                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
+            } else {
+                final String message = event.getLocalizedMessage() != null
+                        ? event.getLocalizedMessage().getMessage()
+                        : event.getMessage();
+                final ProblemHighlightType problemType
+                        = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+                final ProblemDescriptor problem = manager.createProblemDescriptor(
+                        victim, message, null, problemType, endOfLine);
+                problems.add(problem);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void fileStarted(final AuditEvent auditEvent) {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void fileFinished(final AuditEvent auditEvent) {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addError(final AuditEvent auditEvent) {
+        errors.add(auditEvent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addException(final AuditEvent auditEvent,
+                             final Throwable throwable) {
+        LOG.error("Exception during CheckStyle execution", throwable);
+        errors.add(auditEvent);
+    }
+
+    /**
+     * Get the problems found by this scan.
+     *
+     * @return the problems found by this scan.
+     */
+    public List<ProblemDescriptor> getProblems() {
+        return problems;
+    }
+
+}
