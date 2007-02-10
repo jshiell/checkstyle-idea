@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.DataConstants;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 /**
@@ -20,7 +19,11 @@ public class Close extends BaseAction {
      * {@inheritDoc}
      */
     public void actionPerformed(final AnActionEvent event) {
-        final Project project = (Project) event.getDataContext().getData(DataConstants.PROJECT);
+        final Project project = (Project) event.getDataContext().getData(
+                DataConstants.PROJECT);
+        if (project == null) {
+            return;
+        }
 
         final CheckStylePlugin checkStylePlugin
                 = project.getComponent(CheckStylePlugin.class);

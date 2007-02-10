@@ -44,42 +44,56 @@
                 class="org.infernus.idea.checkstyle.actions.Close"
                 text="Close CheckStyle Window"
                 description="Close the CheckStyle tool window."
-                icon="/actions/cancel.png">
+                icon="/actions/cancel.png" />
+
+            <separator />
+
+            <action id="CheckStyleCurrentFileAction"
+                class="org.infernus.idea.checkstyle.actions.ScanCurrentFile"
+                text="Check Current File"
+                description="Run Checkstyle on the current file in the editor."
+                icon="/actions/execute.png">
+                
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
+
+            <action id="CheckStyleModuleFilesAction"
+                class="org.infernus.idea.checkstyle.actions.ScanModule"
+                text="Check Module"
+                description="Run Checkstyle on all files in the current module."
+                icon="/modules/modulesNode.png">
+
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
+
+            <action id="CheckStyleProjectFilesAction"
+                class="org.infernus.idea.checkstyle.actions.ScanProject"
+                text="Check Project"
+                description="Run Checkstyle on all files in the current project."
+                icon="/general/projectTab.png">
+
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
+
+            <separator />
 
             <action id="CheckStyleScrollToSourceAction"
                 class="org.infernus.idea.checkstyle.actions.ScrollToSource"
                 text="Autoscroll to Source"
                 description="Auto-scroll to the source location of errors and warnings."
-                icon="/general/autoscrollToSource.png">
-            </action>
+                icon="/general/autoscrollToSource.png" />
 
-            <action id="CheckStyleCurrentFileAction"
-                class="org.infernus.idea.checkstyle.actions.CurrentFiles"
-                text="Check Selected File(s)"
-                description="Run Checkstyle on the currently selected file(s)."
-                icon="/actions/execute.png">
-                
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            </action>
-            <!--<action id="CheckStyleAllFilesAction"-->
-                <!--class="org.infernus.idea.checkstyle.actions.ProjectFiles"-->
-                <!--text="Check all Files in Project"-->
-                <!--description="Run Checkstyle on all files in the project."-->
-                <!--icon="/actions/resume.png">-->
-            <!--</action>-->
-            <!--<action id="CheckStyleExpandAllAction"-->
-                <!--class="org.infernus.idea.checkstyle.actions.ExpandAll"-->
-                <!--text="Expand All"-->
-                <!--description="Expand all elements in the tool window."-->
-                <!--icon="/actions/expandall.png">-->
-            <!--</action>-->
-            <!--<action id="CheckStyleCollapseAllAction"-->
-                <!--class="org.infernus.idea.checkstyle.actions.CollapseAll"-->
-                <!--text="Collapse All"-->
-                <!--description="Collapse all elements in the tool window."-->
-                <!--icon="/actions/collapseall.png">-->
-            <!--</action>-->
+            <action id="CheckStyleExpandAllAction"
+                class="org.infernus.idea.checkstyle.actions.ExpandAll"
+                text="Expand All"
+                description="Expand all elements in the tool window."
+                icon="/actions/expandall.png" />
+
+            <action id="CheckStyleCollapseAllAction"
+                class="org.infernus.idea.checkstyle.actions.CollapseAll"
+                text="Collapse All"
+                description="Collapse all elements in the tool window."
+                icon="/actions/collapseall.png" />
         </group>
     </actions>
 </idea-plugin>

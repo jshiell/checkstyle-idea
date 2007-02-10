@@ -199,7 +199,9 @@ public class ToolWindowPanel extends JPanel {
      * Collapse the tree so that only the root node is visible.
      */
     public void collapseTree() {
-        resultsTree.collapseRow(1);
+        for (int i = 1; i < resultsTree.getRowCount(); ++i) {
+            resultsTree.collapseRow(i);
+        }
     }
 
     /**

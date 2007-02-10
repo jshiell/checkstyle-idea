@@ -1,6 +1,6 @@
 CheckStyle-IDEA
 ---------------
-(c) 2006, James Shiell
+(c) 2006, 2007, James Shiell
 
 http://code.google.com/p/checkstyle-idea/
 
@@ -18,6 +18,10 @@ WARNING - if you've download the source from svn you'll be chuffed to
           The WIP is the static-scanning support... shouldn't be far
           off a stable code base again. In the meantime there's now
           support for a scan and report of the current file. Enjoy.
+
+  TODOs - Progress dialogues
+        - Module detection needs to be better
+        - Ability to scan selected elements in project tree
 ----------------------------------------------------------------------
 
 
@@ -44,8 +48,8 @@ Limitations
 This is an initial release and has some notable limitations:
 
 * Properties within configuration files cannot be defined or edited.
-* CheckStyle errors and warnings are both shown at a single level, as IDEA
-  will only allow one warning level for an inspection.
+* CheckStyle errors and warnings from the inspection are both shown at
+  a single level, as IDEA will only allow one warning level for an inspection.
 * Error handling is somewhat basic at present.
 
 

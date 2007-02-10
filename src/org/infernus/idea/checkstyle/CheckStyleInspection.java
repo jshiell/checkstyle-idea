@@ -13,6 +13,7 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
 import javax.swing.*;
 import java.io.*;
@@ -140,7 +141,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
         if (!psiFile.isValid() || !psiFile.isPhysical()
-                || !CheckStyleConstants.FILETYPE_JAVA.equals(psiFile.getFileType())) {
+                || !CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
             return null;
         }
 

@@ -5,6 +5,8 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
@@ -79,82 +81,13 @@ public class CheckStyleAuditListener implements AuditListener {
      * {@inheritDoc}
      */
     public void auditFinished(final AuditEvent auditEvent) {
-        final char[] text = psiFile.textToCharArray();
-
-        // we cache the offset of each line as it is created, so as to
-        // avoid retreating ground we've already covered.
-        final List<Integer> lineLengthCache = new ArrayList<Integer>();
-        lineLengthCache.add(0); // line 1 is offset 0
-
-        for (final AuditEvent event : errors) {
-            int offset;
-            boolean endOfLine = false;
-
-            // start of file
-            if (event.getLine() == 0) { // start of file errors
-                offset = event.getColumn();
-
-                // line offset is cached...
-            } else if (event.getLine() <= lineLengthCache.size()) {
-                offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
-
-                // further search required
-            } else {
-                // start from end of cached data
-                offset = lineLengthCache.get(lineLengthCache.size() - 1);
-                int line = lineLengthCache.size();
-
-                int column = 0;
-                for (int i = offset; i < text.length; ++i) {
-                    final char character = text[i];
-
-                    // for linefeeds we need to handle CR, LF and CRLF,
-                    // hence we accept either and only trigger a new
-                    // line on the LF of CRLF.
-                    final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
-                    if (character == '\n' || character == '\r' && nextChar != '\n') {
-                        ++line;
-                        ++offset;
-                        lineLengthCache.add(offset);
-                        column = 0;
-                    } else {
-                        ++column;
-                        ++offset;
-                    }
-
-                    // need to go to end of line though
-                    if (event.getLine() == line && event.getColumn() == column) {
-                        if (column == 0 && Character.isWhitespace(nextChar)) {
-                            // move line errors to after EOL
-                            endOfLine = true;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            final PsiElement victim = psiFile.findElementAt(offset);
-
-            if (victim == null) {
-                LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
-                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
-            } else {
-                final String message = event.getLocalizedMessage() != null
-                        ? event.getLocalizedMessage().getMessage()
-                        : event.getMessage();
-                final ProblemHighlightType problemType
-                        = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-                final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, message, null, problemType, endOfLine);
-
-                if (usingExtendedDescriptors) {
-                    final ProblemDescriptor delegate = new ExtendedProblemDescriptor(
-                            problem, event.getSeverityLevel(), event.getColumn());
-                    problems.add(delegate);
-                } else {
-                    problems.add(problem);
-                }
-            }
+        final ProcessResultsThread findThread = new ProcessResultsThread();
+        
+        final Application application = ApplicationManager.getApplication();
+        if (application.isDispatchThread()) {
+            findThread.run();
+        } else {
+            application.runReadAction(findThread);
         }
     }
 
@@ -195,6 +128,97 @@ public class CheckStyleAuditListener implements AuditListener {
      */
     public List<ProblemDescriptor> getProblems() {
         return problems;
+    }
+
+    /**
+     * Runnable to process an audit event.
+     */
+    private class ProcessResultsThread implements Runnable {
+
+        /**
+         * {@inheritDoc}
+         */
+        public void run() {
+            final char[] text = psiFile.textToCharArray();
+
+            // we cache the offset of each line as it is created, so as to
+            // avoid retreating ground we've already covered.
+            final List<Integer> lineLengthCache = new ArrayList<Integer>();
+            lineLengthCache.add(0); // line 1 is offset 0
+
+            for (final AuditEvent event : errors) {
+                int offset;
+                boolean endOfLine = false;
+
+                // start of file
+                if (event.getLine() == 0) { // start of file errors
+                    offset = event.getColumn();
+
+                    // line offset is cached...
+                } else if (event.getLine() <= lineLengthCache.size()) {
+                    offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
+
+                    // further search required
+                } else {
+                    // start from end of cached data
+                    offset = lineLengthCache.get(lineLengthCache.size() - 1);
+                    int line = lineLengthCache.size();
+
+                    int column = 0;
+                    for (int i = offset; i < text.length; ++i) {
+                        final char character = text[i];
+
+                        // for linefeeds we need to handle CR, LF and CRLF,
+                        // hence we accept either and only trigger a new
+                        // line on the LF of CRLF.
+                        final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
+                        if (character == '\n' || character == '\r' && nextChar != '\n') {
+                            ++line;
+                            ++offset;
+                            lineLengthCache.add(offset);
+                            column = 0;
+                        } else {
+                            ++column;
+                            ++offset;
+                        }
+
+                        // need to go to end of line though
+                        if (event.getLine() == line && event.getColumn() == column) {
+                            if (column == 0 && Character.isWhitespace(nextChar)) {
+                                // move line errors to after EOL
+                                endOfLine = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+
+                final PsiElement victim;
+                victim = psiFile.findElementAt(offset);
+
+                if (victim == null) {
+                    LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
+                            + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
+                } else {
+                    final String message = event.getLocalizedMessage() != null
+                            ? event.getLocalizedMessage().getMessage()
+                            : event.getMessage();
+                    final ProblemHighlightType problemType
+                            = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+                    final ProblemDescriptor problem = manager.createProblemDescriptor(
+                            victim, message, null, problemType, endOfLine);
+
+                    if (usingExtendedDescriptors) {
+                        final ProblemDescriptor delegate = new ExtendedProblemDescriptor(
+                                problem, event.getSeverityLevel(), event.getColumn());
+                        problems.add(delegate);
+                    } else {
+                        problems.add(problem);
+                    }
+                }
+            }
+        }
     }
 
 }

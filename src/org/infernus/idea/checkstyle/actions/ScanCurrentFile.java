@@ -8,24 +8,26 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
 /**
- * Action to execute a CheckStyle scan on the currently selected file.
+ * Action to execute a CheckStyle scan on the current editor file.
  *
  * @author James Shiell
  * @version 1.0
  */
-public class CurrentFiles extends BaseAction {
-
+public class ScanCurrentFile extends BaseAction {
 
     /**
      * {@inheritDoc}
      */
-    public void actionPerformed(final AnActionEvent event)
-    {
-        final Project project = (Project) event.getDataContext().getData(DataConstants.PROJECT);
+    public void actionPerformed(final AnActionEvent event) {
+        final Project project = (Project) event.getDataContext().getData(
+                DataConstants.PROJECT);
+        if (project == null) {
+            return;
+        }
 
         final CheckStylePlugin checkStylePlugin
                 = project.getComponent(CheckStylePlugin.class);
@@ -37,7 +39,13 @@ public class CurrentFiles extends BaseAction {
                 project).getToolWindow(checkStylePlugin.getToolWindowId());
         toolWindow.activate(null);
 
-        project.getComponent(CheckStylePlugin.class).checkCurrentFile(event);
+        // read select file
+        final VirtualFile[] selectedFiles
+                = FileEditorManager.getInstance(project).getSelectedFiles();
+        if (selectedFiles != null && selectedFiles.length > 0) {
+            project.getComponent(CheckStylePlugin.class).checkFiles(
+                    selectedFiles, event);
+        }
     }
 
     /**
@@ -53,10 +61,9 @@ public class CurrentFiles extends BaseAction {
             return;
         }
 
-        // todo this only operates on open file, not selected
         final VirtualFile[] selectedFiles
                 = FileEditorManager.getInstance(project).getSelectedFiles();
-        
+
         // disable if no files are selected
         final Presentation presentation = event.getPresentation();
         if (selectedFiles == null || selectedFiles.length == 0) {
@@ -65,8 +72,7 @@ public class CurrentFiles extends BaseAction {
         } else {
             // check files are valid
             for (final VirtualFile file : selectedFiles) {
-                // todo refactor check to utility method
-                if (!CheckStyleConstants.FILETYPE_JAVA.equals(file.getFileType())) {
+                if (!CheckStyleUtilities.isValidFileType(file.getFileType())) {
                     presentation.setEnabled(false);
                     return;
                 }

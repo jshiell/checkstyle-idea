@@ -18,12 +18,6 @@ public final class CheckStyleConstants {
             = "org.infernus.idea.checkstyle.resource";
 
     /**
-     * IDEA filetype for Java files.
-     */
-    public static final FileType FILETYPE_JAVA
-            = FileTypeManager.getInstance().getFileTypeByExtension("java");
-
-    /**
      * The prefix of the temporary files.
      */
     public static final String TEMPFILE_NAME = "checkstyle-idea";

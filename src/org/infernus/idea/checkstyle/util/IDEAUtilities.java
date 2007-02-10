@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
 import java.net.URL;
 
 /**
@@ -26,8 +26,7 @@ public final class IDEAUtilities {
      */
     public static ImageIcon getIcon(final String icon) {
         final URL url = IDEAUtilities.class.getResource(icon);
-        if (url != null)
-        {
+        if (url != null) {
             return new ImageIcon(url);
         }
 

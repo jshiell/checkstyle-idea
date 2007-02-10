@@ -3,16 +3,16 @@ package org.infernus.idea.checkstyle;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ToolWindowType;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
@@ -20,6 +20,7 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +54,8 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
      */
     public CheckStylePlugin(final Project project) {
         if (project != null) {
-            LOG.info("CheckStyle Plugin loaded with project: \"" + project.getProjectFilePath() + "\"");
+            LOG.info("CheckStyle Plugin loaded with project: \""
+                    + project.getProjectFilePath() + "\"");
         } else {
             LOG.info("CheckStyle Plugin loaded with no project.");
         }
@@ -225,44 +227,33 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     /**
      * Run a scan on the currently selected file.
      *
+     * @param files the files to check.
      * @param event the event that triggered this action.
      */
-    public void checkCurrentFile(final AnActionEvent event) {
-        LOG.info("Scanning current file(s).");
-
-        // TODO this picks up the open file. We need to have the intelligence
-        // to pick up files selected in the project/package view and, if none,
-        // fall back on the current open file.
-        final VirtualFile[] selectedFiles
-                = FileEditorManager.getInstance(project).getSelectedFiles();
-        
-        if (selectedFiles == null) {
-            LOG.debug("No selected files found.");
+    public void checkFiles(final List<VirtualFile> files, final AnActionEvent event) {
+        if (files == null) {
             return;
         }
 
-        // build flattened list of selected files
-        final List<VirtualFile> fileList = new ArrayList<VirtualFile>();
-        for (final VirtualFile element : selectedFiles) {
-            fileList.addAll(flattenFiles(element));
+        checkFiles(files.toArray(new VirtualFile[files.size()]), event);
+    }
+
+    /**
+     * Run a scan on the currently selected file.
+     *
+     * @param files the files to check.
+     * @param event the event that triggered this action.
+     */
+    public void checkFiles(final VirtualFile[] files, final AnActionEvent event) {
+        LOG.info("Scanning current file(s).");
+
+        if (files == null) {
+            LOG.debug("No files provided.");
+            return;
         }
-
-        final Map<PsiFile, List<ProblemDescriptor>> fileResults
-                = new HashMap<PsiFile, List<ProblemDescriptor>>();
-
-        for (final VirtualFile virtualFile : fileList) {
-            final PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
-            final List<ProblemDescriptor> results = checkPsiFile(psiFile);
-
-            // add results if necessary
-            if (results != null && results.size() > 0) {
-                // only PsiFiles will have returned results
-                fileResults.put(psiFile, results);
-            }
-        }
-
-        getToolWindowPanel().displayResults(fileResults);
-        getToolWindowPanel().expandTree();
+        
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(files);
+        checkFilesThread.start();
     }
 
     /**
@@ -289,10 +280,12 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
         }
 
         final PsiFile psiFile = (PsiFile) element;
-        LOG.debug("Scanning " + psiFile.getName());
+        LOG.debug("Scanning " + psiFile.getName());   
 
-        if (!CheckStyleConstants.FILETYPE_JAVA.equals(psiFile.getFileType())) {
-            LOG.debug(psiFile.getName() + " is not a Java file.");
+        final InspectionManager manager
+                = InspectionManager.getInstance(psiFile.getProject());
+
+        if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
             return null;
         }
 
@@ -301,16 +294,30 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
             final Checker checker = getChecker();
 
             // we need to copy to a file as IntelliJ may not have saved the file recently...
-            tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
-                    CheckStyleConstants.TEMPFILE_EXTENSION);
-            final BufferedWriter tempFileOut = new BufferedWriter(
-                    new FileWriter(tempFile));
-            tempFileOut.write(psiFile.getText());
-            tempFileOut.flush();
-            tempFileOut.close();
+            final CreateTempFileThread fileThread = new CreateTempFileThread(
+                    psiFile);
+            ApplicationManager.getApplication().runReadAction(fileThread);
 
-            final InspectionManager manager
-                    = InspectionManager.getInstance(psiFile.getProject());
+            // rethrow any error from the thread.
+            if (fileThread.getFailure() != null) {
+                if (Error.class.isAssignableFrom(
+                        fileThread.getFailure().getClass())) {
+                    throw (Error) fileThread.getFailure();
+                } else if (RuntimeException.class.isAssignableFrom(
+                        fileThread.getFailure().getClass())) {
+                    throw (RuntimeException) fileThread.getFailure();
+                } else if (IOException.class.isAssignableFrom(
+                        fileThread.getFailure().getClass())) {
+                    throw (IOException) fileThread.getFailure();
+                }
+                throw new RuntimeException(fileThread.getFailure());
+            }
+
+            tempFile = fileThread.getFile();
+            if (tempFile == null) {
+                throw new IllegalStateException(
+                        "Failed to create temporary file.");
+            }
 
             final CheckStyleAuditListener listener
                     = new CheckStyleAuditListener(psiFile, manager, true);
@@ -322,7 +329,7 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
 
         } catch (IOException e) {
             LOG.error("Failure when creating temp file", e);
-            throw new RuntimeException("Couldn't create temp file", e);
+            throw new IllegalStateException("Couldn't create temp file", e);
 
         } finally {
             if (tempFile != null && tempFile.exists()) {
@@ -332,44 +339,138 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     }
 
     /**
-     * Flatten the tree structure represented by a virtual file.
-     *
-     * @param file the tree to flatten.
-     * @return a list of flattened files.
+     * Thread to read the file to a temporary file.
      */
-    private List<VirtualFile> flattenFiles(final VirtualFile file) {
-        final List<VirtualFile> elementList = new ArrayList<VirtualFile>();
-        elementList.add(file);
+    private class CreateTempFileThread implements Runnable {
 
-        if (file.getChildren() != null) {
-            for (final VirtualFile childFile : file.getChildren()) {
-                elementList.addAll(flattenFiles(childFile));
+        private Throwable failure;
+        private PsiFile psiFile;
+        private File file;
+
+        /**
+         * Create a thread to read the given file to a temporary file.
+         *
+         * @param psiFile the file to read.
+         */
+        public CreateTempFileThread(final PsiFile psiFile) {
+            this.psiFile = psiFile;
+        }
+
+        /**
+         * Get any failure that occurred in this thread.
+         *
+         * @return the failure, if any.
+         */
+        public Throwable getFailure() {
+            return failure;
+        }
+
+        /**
+         * Get the temporary file.
+         *
+         * @return the temporary file.
+         */
+        public File getFile() {
+            return file;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void run() {
+            try {
+                file = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
+                        CheckStyleConstants.TEMPFILE_EXTENSION);
+                final BufferedWriter tempFileOut = new BufferedWriter(
+                        new FileWriter(file));
+                tempFileOut.write(psiFile.getText());
+                tempFileOut.flush();
+                tempFileOut.close();
+
+            } catch (Throwable e) {
+                failure = e;
+
+            } 
+        }
+    }
+
+    /**
+     * Thread for file checking, to ensure we don't lock up the UI.
+     */
+    private class CheckFilesThread extends Thread {
+
+        private final List<PsiFile> files = new ArrayList<PsiFile>();
+
+        /**
+         * Create a thread to check the given files.
+         *
+         * @param virtualFiles the files to check.
+         */
+        public CheckFilesThread(final VirtualFile[] virtualFiles) {
+            if (virtualFiles == null) {
+                throw new IllegalArgumentException("Files may not be null.");
+            }
+
+            final List<VirtualFile> fileList = new ArrayList<VirtualFile>();
+            for (final VirtualFile virtualFile : virtualFiles) {
+                fileList.addAll(flattenFiles(virtualFile));
+            }
+
+            // this needs to be done on the main thread.
+            final PsiManager psiManager = PsiManager.getInstance(project);
+            for (final VirtualFile virtualFile : fileList) {
+                files.add(psiManager.findFile(virtualFile));
             }
         }
 
-        return elementList;
-    }
+        /**
+         * Execute the file check.
+         */
+        public void run() {
+            try {
+                final Map<PsiFile, List<ProblemDescriptor>> fileResults
+                        = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
+                for (final PsiFile psiFile : files) {
+                    final List<ProblemDescriptor> results = checkPsiFile(psiFile);
 
-    /**
-     * Run a scan on all files in the current module.
-     *
-     * @param event the event that triggered this action.
-     */
-    public void checkCurrentModuleFiles(final AnActionEvent event) {
-        LOG.info("Scanning current module.");
-        // TODO
-    }
+                    // add results if necessary
+                    if (results != null && results.size() > 0) {
+                        fileResults.put(psiFile, results);
+                    }
+                }
 
+                // invoke Swing fun in Swing thread.
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        getToolWindowPanel().displayResults(fileResults);
+                        getToolWindowPanel().expandTree();
+                    }
+                });
+                
+            } catch (Throwable e) {
+                LOG.error("An error occurred while scanning a file.", e);
+            }
+        }
 
-    /**
-     * Run a scan on all project files.
-     *
-     * @param event the event that triggered this action.
-     */
-    public void checkProjectFiles(final AnActionEvent event) {
-        LOG.info("Scanning current project.");
-        // TODO
+        /**
+         * Flatten the tree structure represented by a virtual file.
+         *
+         * @param file the tree to flatten.
+         * @return a list of flattened files.
+         */
+        private List<VirtualFile> flattenFiles(final VirtualFile file) {
+            final List<VirtualFile> elementList = new ArrayList<VirtualFile>();
+            elementList.add(file);
+
+            if (file.getChildren() != null) {
+                for (final VirtualFile childFile : file.getChildren()) {
+                    elementList.addAll(flattenFiles(childFile));
+                }
+            }
+
+            return elementList;
+        }
     }
 
 }
