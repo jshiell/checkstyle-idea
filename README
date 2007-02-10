@@ -16,7 +16,8 @@ WARNING - if you've download the source from svn you'll be chuffed to
           tag for the last version.
 
           The WIP is the static-scanning support... shouldn't be far
-          off a stable code base again.
+          off a stable code base again. In the meantime there's now
+          support for a scan and report of the current file. Enjoy.
 ----------------------------------------------------------------------
 
 
