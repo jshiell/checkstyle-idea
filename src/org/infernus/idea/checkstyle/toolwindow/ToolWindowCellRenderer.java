@@ -30,7 +30,10 @@ public class ToolWindowCellRenderer extends JLabel
     public void paintComponent(final Graphics g) {
         g.setColor(getBackground());
 
-        final int offset = getIcon().getIconWidth() + getIconTextGap();
+        int offset = 0;
+        if (getIcon() != null) {
+            offset = getIcon().getIconWidth() + getIconTextGap();
+        }
 
         g.fillRect(offset, 0, (getWidth() - 1 - offset), (getHeight() - 1));
 
@@ -69,6 +72,7 @@ public class ToolWindowCellRenderer extends JLabel
 
                 setToolTipText(treeNode.getTooltip());
                 setText(treeNode.toString());
+                validate();
 
             } else {
                 setIcon(null);

@@ -4,13 +4,18 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -52,7 +57,9 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param project the project.
      */
-    public ToolWindowPanel(final Project project) {
+    public ToolWindowPanel(final Project project)
+
+    {
         super(new BorderLayout());
 
         this.project = project;
@@ -62,17 +69,23 @@ public class ToolWindowPanel extends JPanel {
 
         setBorder(new EmptyBorder(1, 1, 1, 1));
 
+        final CheckStylePlugin checkStylePlugin
+                = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+
         // Create the toolbar
         final ActionGroup actionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(CheckStyleConstants.ACTION_GROUP);
         final ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar(
-                CheckStyleConstants.ID_TOOL_WINDOW, actionGroup, false);
+                checkStylePlugin.getToolWindowId(), actionGroup, false);
         add(toolbar.getComponent(), BorderLayout.WEST);
 
         // Create the tree
-        final DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(
-                new ToolWindowTreeNode("root"));
-        treeModel = new DefaultTreeModel(rootNode);
+        visibleRootNode = new DefaultMutableTreeNode(new ToolWindowTreeNode(
+                resources.getString("plugin.results.no-scan")));
+        treeModel = new DefaultTreeModel(visibleRootNode);
 
         resultsTree = new JTree(treeModel);
         resultsTree.addTreeSelectionListener(treeSelectionListener);
@@ -80,10 +93,6 @@ public class ToolWindowPanel extends JPanel {
         resultsTree.setCellRenderer(new ToolWindowCellRenderer());
 
         add(new JScrollPane(resultsTree), BorderLayout.CENTER);
-
-        visibleRootNode = new DefaultMutableTreeNode(new ToolWindowTreeNode(
-                resources.getString("plugin.results.no-scan")));
-        rootNode.add(visibleRootNode);
 
         expandTree();
 
@@ -113,8 +122,12 @@ public class ToolWindowPanel extends JPanel {
                 nodeInfo.getFile().getVirtualFile(), true);
 
         if (editor != null && editor.length > 0 && editor[0] instanceof TextEditor) {
-            final int offset = nodeInfo.getProblem().getStartElement().getStartOffsetInParent();
-            ((TextEditor) editor[0]).getEditor().getCaretModel().moveToOffset(offset);
+            final int column = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
+                ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
+            final LogicalPosition problemPos = new LogicalPosition(
+                    nodeInfo.getProblem().getLineNumber() - 1, column);
+
+            ((TextEditor) editor[0]).getEditor().getCaretModel().moveToLogicalPosition(problemPos);
             ((TextEditor) editor[0]).getEditor().getScrollingModel().scrollToCaret(ScrollType.CENTER);
         }
     }
@@ -126,6 +139,15 @@ public class ToolWindowPanel extends JPanel {
      */
     public void setScrollToSource(final boolean scrollToSource) {
         this.scrollToSource = scrollToSource;
+    }
+
+    /**
+     * Should we scroll to the selected error in the editor automatically?
+     *
+     * @return true if the error should be scrolled to automatically.
+     */
+    public boolean isScrollToSource() {
+        return scrollToSource;
     }
 
 
@@ -162,6 +184,10 @@ public class ToolWindowPanel extends JPanel {
          * {@inheritDoc}
          */
         public void valueChanged(final TreeSelectionEvent e) {
+            if (!scrollToSource) {
+                return;
+            }
+
             if (e.getPath() != null) {
                 scrollToError(e.getPath());
             }
@@ -180,7 +206,7 @@ public class ToolWindowPanel extends JPanel {
      * Expand the error tree to the fullest.
      */
     public void expandTree() {
-        expandTree(4);
+        expandTree(3);
     }
 
     /**
@@ -232,6 +258,7 @@ public class ToolWindowPanel extends JPanel {
         if (results == null || results.size() == 0) {
             ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
                     resources.getString("plugin.results.scan-no-results"));
+
         } else {
             final MessageFormat fileResultMessage = new MessageFormat(
                     resources.getString("plugin.results.scan-file-result"));
@@ -240,27 +267,54 @@ public class ToolWindowPanel extends JPanel {
             for (final PsiFile file : results.keySet()) {
                 final DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode();
                 final List<ProblemDescriptor> problems = results.get(file);
-                for (final ProblemDescriptor problem : problems) {
-                    final DefaultMutableTreeNode problemNode = new DefaultMutableTreeNode(
-                            new ToolWindowTreeNode(file, problem));
-                    fileNode.add(problemNode);
+                if (problems != null) {
+                    for (final ProblemDescriptor problem : problems) {
+                        final ToolWindowTreeNode problemObj = new ToolWindowTreeNode(file, problem);
+
+                        final SeverityLevel severity = problem instanceof ExtendedProblemDescriptor
+                                ? ((ExtendedProblemDescriptor) problem).getSeverity() : null;
+                        final Icon problemIcon;
+                        if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
+                            problemIcon = IDEAUtilities.getIcon("/compiler/hideWarnings.png");
+                        } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
+                            problemIcon = IDEAUtilities.getIcon("/compiler/warning.png");
+                        } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
+                            problemIcon = IDEAUtilities.getIcon("/compiler/information.png");
+                        } else {
+                            problemIcon = IDEAUtilities.getIcon("/compiler/error.png");
+                        }
+
+                        problemObj.setExpandedIcon(problemIcon);
+                        problemObj.setCollapsedIcon(problemIcon);
+
+                        final DefaultMutableTreeNode problemNode = new DefaultMutableTreeNode(
+                                problemObj);
+                        fileNode.add(problemNode);
+                    }
                 }
 
-                fileNode.setUserObject(new ToolWindowTreeNode(
-                        fileResultMessage.format(new Object[]{file.getName(), problems.size()})));
-                itemCount += problems.size();
+                final int problemCount = problems != null ? problems.size() : 0;
+                itemCount += problemCount;
+
+                final ToolWindowTreeNode nodeObject = new ToolWindowTreeNode(
+                        fileResultMessage.format(new Object[]{file.getName(), problemCount}));
+
+                final Icon fileIcon = IDEAUtilities.getIcon("/fileTypes/java.png");
+                nodeObject.setExpandedIcon(fileIcon);
+                nodeObject.setCollapsedIcon(fileIcon);
+
+                fileNode.setUserObject(nodeObject);
 
                 visibleRootNode.add(fileNode);
             }
 
             final MessageFormat resultsMessage = new MessageFormat(
-                    resources.getString("plugin.results.scan-no-results"));
+                    resources.getString("plugin.results.scan-results"));
             ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
                     resultsMessage.format(new Object[]{itemCount, results.size()}));
-
-            treeModel.reload();
         }
 
+        treeModel.reload();
     }
 
 }

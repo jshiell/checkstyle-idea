@@ -1,18 +1,18 @@
 package org.infernus.idea.checkstyle;
 
-import com.puppycrawl.tools.checkstyle.api.AuditListener;
-import com.puppycrawl.tools.checkstyle.api.AuditEvent;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiElement;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.puppycrawl.tools.checkstyle.api.AuditEvent;
+import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Listener for the CheckStyle process.
@@ -28,6 +28,8 @@ public class CheckStyleAuditListener implements AuditListener {
     private static final Log LOG = LogFactory.getLog(
             CheckStyleAuditListener.class);
 
+    private final boolean usingExtendedDescriptors;
+
     private final PsiFile psiFile;
     private final InspectionManager manager;
 
@@ -42,8 +44,27 @@ public class CheckStyleAuditListener implements AuditListener {
      */
     public CheckStyleAuditListener(final PsiFile psiFile,
                                    final InspectionManager manager) {
+        this(psiFile, manager, false);
+    }
+
+    /**
+     * Create a new listener.
+     * <p/>
+     * Use the second argument to determine if we return our extended problem
+     * descriptors. This is provided to avoid problems with downstream code
+     * that may be interested in the implementation type.
+     *
+     * @param psiFile                the file being checked.
+     * @param manager                the current inspection manager.
+     * @param useExtendedDescriptors should we return standard IntelliJ
+     *                               problem descriptors or extended ones with severity information?
+     */
+    public CheckStyleAuditListener(final PsiFile psiFile,
+                                   final InspectionManager manager,
+                                   final boolean useExtendedDescriptors) {
         this.psiFile = psiFile;
         this.manager = manager;
+        this.usingExtendedDescriptors = useExtendedDescriptors;
     }
 
     /**
@@ -125,7 +146,14 @@ public class CheckStyleAuditListener implements AuditListener {
                         = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 final ProblemDescriptor problem = manager.createProblemDescriptor(
                         victim, message, null, problemType, endOfLine);
-                problems.add(problem);
+
+                if (usingExtendedDescriptors) {
+                    final ProblemDescriptor delegate = new ExtendedProblemDescriptor(
+                            problem, event.getSeverityLevel(), event.getColumn());
+                    problems.add(delegate);
+                } else {
+                    problems.add(problem);
+                }
             }
         }
     }

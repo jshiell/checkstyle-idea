@@ -43,12 +43,6 @@ public final class CheckStyleConstants {
      * to the CS configuration file.
      */
     public static final String CONFIG_FILEPATH_ELEMENT = "config-file";
-    
-    /**
-     * ID for the plug-in tool window.
-     */
-    public static final String ID_TOOL_WINDOW = CheckStyleConstants.class.getPackage().getName()
-            + ":ToolWindow";
 
     /**
      * Plug-in identifier.

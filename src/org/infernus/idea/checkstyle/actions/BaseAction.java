@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 /**
  * Base class for plug-in actions.
@@ -34,9 +35,15 @@ public abstract class BaseAction extends AnAction {
 
         }
 
+        final CheckStylePlugin checkStylePlugin
+                = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+
         // check if tool window is registered
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(CheckStyleConstants.ID_TOOL_WINDOW);
+                project).getToolWindow(checkStylePlugin.getToolWindowId());
         if (toolWindow == null) {
             presentation.setEnabled(false);
             presentation.setVisible(false);

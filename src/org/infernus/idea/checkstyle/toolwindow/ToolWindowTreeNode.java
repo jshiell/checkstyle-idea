@@ -4,6 +4,11 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 
 import javax.swing.*;
+import java.util.ResourceBundle;
+import java.text.MessageFormat;
+
+import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -157,5 +162,25 @@ public class ToolWindowTreeNode {
      */
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        if (text != null) {
+            return text;
+        }
+
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        final MessageFormat stringFormat = new MessageFormat(
+                resources.getString("plugin.results.file-result"));
+
+        final String column = problem instanceof ExtendedProblemDescriptor
+                ? Integer.toString(((ExtendedProblemDescriptor) problem).getColumn()) : "?";
+
+        return stringFormat.format(new Object[]{file.getName(), problem.getDescriptionTemplate(),
+                problem.getLineNumber(), column});
     }
 }

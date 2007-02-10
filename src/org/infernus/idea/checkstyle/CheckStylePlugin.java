@@ -1,7 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataConstants;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -10,9 +11,11 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ToolWindowType;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.psi.PsiFile;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,10 +24,8 @@ import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.util.ResourceBundle;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.*;
+import java.util.*;
 
 /**
  * Main class for the CheckStyle static scanning plug-n.
@@ -43,6 +44,8 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     private final Project project;
     private ToolWindow toolWindow;
 
+    private String toolWindowId;
+
     /**
      * Construct a plug-in instance for the given project.
      *
@@ -59,16 +62,28 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     }
 
     /**
+     * Get the ID for the tool window.
+     *
+     * @return the ID for the tool window.
+     */
+    public String getToolWindowId() {
+        return toolWindowId;
+    }
+
+    /**
      * Register the tool window with IDEA.
      */
     private void registerToolWindow() {
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
-        toolWindow = toolWindowManager.registerToolWindow(
-                CheckStyleConstants.ID_TOOL_WINDOW,
-                new ToolWindowPanel(project),
-                ToolWindowAnchor.BOTTOM);
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        toolWindowId = resources.getString("plugin.toolwindow.name");
+
+        toolWindow = toolWindowManager.registerToolWindow(toolWindowId,
+                new ToolWindowPanel(project), ToolWindowAnchor.BOTTOM);
+
 
         toolWindow.setIcon(IDEAUtilities.getIcon("/debugger/watches.png"));
         toolWindow.setType(ToolWindowType.DOCKED, null);
@@ -81,7 +96,7 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
-        toolWindowManager.unregisterToolWindow(CheckStyleConstants.ID_TOOL_WINDOW);
+        toolWindowManager.unregisterToolWindow(toolWindowId);
     }
 
     /**
@@ -194,6 +209,7 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
                         CheckStyleConstants.DEFAULT_CONFIG);
                 checker = CheckerFactory.getInstance().getChecker(in);
                 in.close();
+                
             } else {
                 checker = CheckerFactory.getInstance().getChecker(configFile);
             }
@@ -213,78 +229,121 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
      */
     public void checkCurrentFile(final AnActionEvent event) {
         LOG.info("Scanning current file(s).");
-        final PsiElement[] selectedElements = (PsiElement[]) event.getDataContext().getData(
-                DataConstants.PSI_ELEMENT_ARRAY);
-        if (selectedElements == null) {
+
+        // TODO this picks up the open file. We need to have the intelligence
+        // to pick up files selected in the project/package view and, if none,
+        // fall back on the current open file.
+        final VirtualFile[] selectedFiles
+                = FileEditorManager.getInstance(project).getSelectedFiles();
+        
+        if (selectedFiles == null) {
+            LOG.debug("No selected files found.");
             return;
         }
 
-        // build flattened list of elements
-        final List<PsiElement> elementList = new ArrayList<PsiElement>();
-        for (final PsiElement element : selectedElements) {
-            elementList.addAll(flattenElements(element));
+        // build flattened list of selected files
+        final List<VirtualFile> fileList = new ArrayList<VirtualFile>();
+        for (final VirtualFile element : selectedFiles) {
+            fileList.addAll(flattenFiles(element));
         }
 
-        // TODO make me work!
+        final Map<PsiFile, List<ProblemDescriptor>> fileResults
+                = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
-        for (final PsiElement element : elementList) {
-            if (!element.isValid() || element.isPhysical()
-                    || !PsiFile.class.isAssignableFrom(element.getClass())) {
-                continue;
-            }
+        for (final VirtualFile virtualFile : fileList) {
+            final PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
+            final List<ProblemDescriptor> results = checkPsiFile(psiFile);
 
-            final PsiFile psiFile = (PsiFile) element;
-            if (!CheckStyleConstants.FILETYPE_JAVA.equals(psiFile.getFileType())) {
-                continue;
-            }
-
-            File tempFile = null;
-            try {
-                final Checker checker = getChecker();
-
-                // we need to copy to a file as IntelliJ may not have saved the file recently...
-                tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME, CheckStyleConstants.TEMPFILE_EXTENSION);
-                final BufferedWriter tempFileOut = new BufferedWriter(
-                        new FileWriter(tempFile));
-                tempFileOut.write(psiFile.getText());
-                tempFileOut.flush();
-                tempFileOut.close();
-
-//                final CheckStyleAuditListener listener
-//                        = new CheckStyleAuditListener(psiFile, manager);
-//                checker.addListener(listener);
-//                checker.process(new File[]{tempFile});
-//                checker.destroy();
-//
-//                final List<ProblemDescriptor> problems = listener.getProblems();
-//                return problems.toArray(new ProblemDescriptor[problems.size()]);
-
-            } catch (IOException e) {
-                LOG.error("Failure when creating temp file", e);
-                throw new RuntimeException("Couldn't create temp file", e);
-
-            } finally {
-                if (tempFile != null && tempFile.exists()) {
-                    tempFile.delete();
-                }
+            // add results if necessary
+            if (results != null && results.size() > 0) {
+                // only PsiFiles will have returned results
+                fileResults.put(psiFile, results);
             }
         }
 
+        getToolWindowPanel().displayResults(fileResults);
+        getToolWindowPanel().expandTree();
     }
 
     /**
-     * Flatten the tree structure represented by element.
+     * Get the tool window panel for result display.
      *
-     * @param element the tree to flatten.
-     * @return a list of flattened elements.
+     * @return the tool window panel.
      */
-    private List<PsiElement> flattenElements(final PsiElement element) {
-        final List<PsiElement> elementList = new ArrayList<PsiElement>();
-        elementList.add(element);
+    private ToolWindowPanel getToolWindowPanel() {
+        return ((ToolWindowPanel) toolWindow.getComponent());
+    }
 
-        if (element.getChildren() != null) {
-            for (final PsiElement childElement : element.getChildren()) {
-                elementList.addAll(flattenElements(childElement));
+    /**
+     * Scan a PSI file with CheckStyle.
+     *
+     * @param element the PSI element to scan. This will be ignored if not
+     *                a java file.
+     * @return a list of tree nodes representing the result tree for this
+     *         file, an empty list or null if this file is invalid or has no errors.
+     */
+    private List<ProblemDescriptor> checkPsiFile(final PsiElement element) {
+        if (element == null || !element.isValid() || !element.isPhysical()
+                || !PsiFile.class.isAssignableFrom(element.getClass())) {
+            return null;
+        }
+
+        final PsiFile psiFile = (PsiFile) element;
+        LOG.debug("Scanning " + psiFile.getName());
+
+        if (!CheckStyleConstants.FILETYPE_JAVA.equals(psiFile.getFileType())) {
+            LOG.debug(psiFile.getName() + " is not a Java file.");
+            return null;
+        }
+
+        File tempFile = null;
+        try {
+            final Checker checker = getChecker();
+
+            // we need to copy to a file as IntelliJ may not have saved the file recently...
+            tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
+                    CheckStyleConstants.TEMPFILE_EXTENSION);
+            final BufferedWriter tempFileOut = new BufferedWriter(
+                    new FileWriter(tempFile));
+            tempFileOut.write(psiFile.getText());
+            tempFileOut.flush();
+            tempFileOut.close();
+
+            final InspectionManager manager
+                    = InspectionManager.getInstance(psiFile.getProject());
+
+            final CheckStyleAuditListener listener
+                    = new CheckStyleAuditListener(psiFile, manager, true);
+            checker.addListener(listener);
+            checker.process(new File[]{tempFile});
+            checker.destroy();
+
+            return listener.getProblems();
+
+        } catch (IOException e) {
+            LOG.error("Failure when creating temp file", e);
+            throw new RuntimeException("Couldn't create temp file", e);
+
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Flatten the tree structure represented by a virtual file.
+     *
+     * @param file the tree to flatten.
+     * @return a list of flattened files.
+     */
+    private List<VirtualFile> flattenFiles(final VirtualFile file) {
+        final List<VirtualFile> elementList = new ArrayList<VirtualFile>();
+        elementList.add(file);
+
+        if (file.getChildren() != null) {
+            for (final VirtualFile childFile : file.getChildren()) {
+                elementList.addAll(flattenFiles(childFile));
             }
         }
 

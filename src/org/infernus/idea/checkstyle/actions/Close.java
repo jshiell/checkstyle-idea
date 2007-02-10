@@ -22,8 +22,14 @@ public class Close extends BaseAction {
     public void actionPerformed(final AnActionEvent event) {
         final Project project = (Project) event.getDataContext().getData(DataConstants.PROJECT);
 
+        final CheckStylePlugin checkStylePlugin
+                = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(CheckStyleConstants.ID_TOOL_WINDOW);
+                project).getToolWindow(checkStylePlugin.getToolWindowId());
         toolWindow.hide(null);
     }
 

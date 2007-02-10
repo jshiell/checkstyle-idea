@@ -46,17 +46,20 @@
                 description="Close the CheckStyle tool window."
                 icon="/actions/cancel.png">
             </action>
-            <!--<action id="CheckStyleScrollToSourceAction"-->
-                <!--class="org.infernus.idea.checkstyle.actions.ScrollToSource"-->
-                <!--text="Autoscroll to Source"-->
-                <!--description="Auto-scroll to the source location of errors and warnings."-->
-                <!--icon="/general/autoscrollToSource.png">-->
-            <!--</action>-->
+
+            <action id="CheckStyleScrollToSourceAction"
+                class="org.infernus.idea.checkstyle.actions.ScrollToSource"
+                text="Autoscroll to Source"
+                description="Auto-scroll to the source location of errors and warnings."
+                icon="/general/autoscrollToSource.png">
+            </action>
+
             <action id="CheckStyleCurrentFileAction"
                 class="org.infernus.idea.checkstyle.actions.CurrentFiles"
                 text="Check Selected File(s)"
                 description="Run Checkstyle on the currently selected file(s)."
                 icon="/actions/execute.png">
+                
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
             <!--<action id="CheckStyleAllFilesAction"-->
