@@ -19,9 +19,10 @@ WARNING - if you've download the source from svn you'll be chuffed to
           off a stable code base again. In the meantime there's now
           support for a scan and report of the current file. Enjoy.
 
-  TODOs - Progress dialogues
-        - Module detection needs to be better
+  TODOs - Supress new scans while one in progress
+        - Module scan needs to work
         - Ability to scan selected elements in project tree
+        - Configuration
 ----------------------------------------------------------------------
 
 

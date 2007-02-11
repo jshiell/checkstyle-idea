@@ -210,8 +210,10 @@ public class CheckStyleAuditListener implements AuditListener {
                             victim, message, null, problemType, endOfLine);
 
                     if (usingExtendedDescriptors) {
-                        final ProblemDescriptor delegate = new ExtendedProblemDescriptor(
-                                problem, event.getSeverityLevel(), event.getColumn());
+                        final ProblemDescriptor delegate
+                                = new ExtendedProblemDescriptor(
+                                problem, event.getSeverityLevel(),
+                                event.getLine(), event.getColumn());
                         problems.add(delegate);
                     } else {
                         problems.add(problem);

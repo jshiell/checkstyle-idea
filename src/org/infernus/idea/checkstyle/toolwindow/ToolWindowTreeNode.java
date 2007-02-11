@@ -179,8 +179,11 @@ public class ToolWindowTreeNode {
 
         final String column = problem instanceof ExtendedProblemDescriptor
                 ? Integer.toString(((ExtendedProblemDescriptor) problem).getColumn()) : "?";
+        final int line = problem instanceof ExtendedProblemDescriptor
+                ? ((ExtendedProblemDescriptor) problem).getLine()
+                : problem.getLineNumber();
 
-        return stringFormat.format(new Object[]{file.getName(), problem.getDescriptionTemplate(),
-                problem.getLineNumber(), column});
+        return stringFormat.format(new Object[]{file.getName(),
+                problem.getDescriptionTemplate(), line, column});
     }
 }

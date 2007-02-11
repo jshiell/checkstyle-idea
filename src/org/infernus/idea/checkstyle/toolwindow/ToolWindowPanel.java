@@ -45,8 +45,12 @@ public class ToolWindowPanel extends JPanel {
     private final MouseListener treeMouseListener = new ToolWindowMouseListener();
     private final TreeSelectionListener treeSelectionListener
             = new ToolWindowSelectionListener();
+
     private final Project project;
     private final JTree resultsTree;
+    private final JToolBar progressPanel;
+    private final JProgressBar progressBar;
+    private final JLabel progressLabel;
     private final DefaultMutableTreeNode visibleRootNode;
 
     private DefaultTreeModel treeModel;
@@ -92,12 +96,95 @@ public class ToolWindowPanel extends JPanel {
         resultsTree.addMouseListener(treeMouseListener);
         resultsTree.setCellRenderer(new ToolWindowCellRenderer());
 
-        add(new JScrollPane(resultsTree), BorderLayout.CENTER);
+        progressLabel = new JLabel(" ");
+        progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+        progressBar.setMinimum(0);
+        final Dimension progressBarSize = new Dimension(
+                100, progressBar.getPreferredSize().height);
+        progressBar.setMinimumSize(progressBarSize);
+        progressBar.setPreferredSize(progressBarSize);
+        progressBar.setMaximumSize(progressBarSize);
+
+        progressPanel = new JToolBar(JToolBar.HORIZONTAL);
+        progressPanel.add(progressLabel);
+        progressPanel.add(Box.createHorizontalGlue());
+        progressPanel.setFloatable(false);
+        progressPanel.setBackground(UIManager.getColor("Panel.background"));
+        progressPanel.setBorder(null);
+
+        final JPanel toolPanel = new JPanel(new BorderLayout());
+
+        toolPanel.add(new JScrollPane(resultsTree), BorderLayout.CENTER);
+        toolPanel.add(progressPanel, BorderLayout.NORTH);
+
+        add(toolPanel, BorderLayout.CENTER);
 
         expandTree();
 
         ToolTipManager.sharedInstance().registerComponent(resultsTree);
         toolbar.getComponent().setVisible(true);
+    }
+
+    /**
+     * Update the progress text.
+     *
+     * @param text the new progress text, or null to clear.
+     */
+    public void setProgressText(final String text) {
+        if (text == null || text.trim().length() == 0) {
+            progressLabel.setText(" ");
+        } else {
+            progressLabel.setText(text);
+        }
+        progressLabel.validate();
+    }
+
+    /**
+     * Show and reset the progress bar.
+     */
+    public void resetProgressBar() {
+        progressBar.setValue(0);
+
+        // show if necessary
+        if (progressPanel.getComponentIndex(progressBar) == -1) {
+            progressPanel.add(progressBar);
+        }
+
+        progressPanel.revalidate();
+    }
+
+    /**
+     * Set the maxium limit, then show and reset the progress bar.
+     *
+     * @param max the maximum limit of the progress bar.
+     */
+    public void setProgressBarMax(final int max) {
+        progressBar.setMaximum(max);
+
+        resetProgressBar();
+    }
+
+    /**
+     * Increment the progress of the progress bar.
+     * <p/>
+     * You should call {@link #setProgressBarMax(int)} first for useful semantics.
+     */
+    public void incrementProgressBar() {
+        if (progressBar.getValue() < progressBar.getMaximum()) {
+            progressBar.setValue(progressBar.getValue() + 1);
+        }
+    }
+
+    /**
+     * Hides the progress bar.
+     */
+    public void clearProgressBar() {
+        final int progressIndex = progressPanel.getComponentIndex(progressBar);
+        if (progressIndex != -1) {
+            progressPanel.remove(progressIndex);
+            progressPanel.revalidate();
+            progressPanel.repaint();
+        }
     }
 
     /**
@@ -124,8 +211,11 @@ public class ToolWindowPanel extends JPanel {
         if (editor != null && editor.length > 0 && editor[0] instanceof TextEditor) {
             final int column = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
                 ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
+            final int line = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
+                ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine()
+                    : nodeInfo.getProblem().getLineNumber();
             final LogicalPosition problemPos = new LogicalPosition(
-                    nodeInfo.getProblem().getLineNumber() - 1, column);
+                    line - 1, column);
 
             ((TextEditor) editor[0]).getEditor().getCaretModel().moveToLogicalPosition(problemPos);
             ((TextEditor) editor[0]).getEditor().getScrollingModel().scrollToCaret(ScrollType.CENTER);
@@ -244,6 +334,36 @@ public class ToolWindowPanel extends JPanel {
     private void expandTree(int level) {
         expandNode(resultsTree, (TreeNode) resultsTree.getModel().getRoot(),
                 new TreePath(visibleRootNode), level);
+    }
+
+    /**
+     * Clear the results and display a 'scan in progress' notice.
+     */
+    public void displayInProgress() {
+        visibleRootNode.removeAllChildren();
+
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+
+        ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
+                resources.getString("plugin.results.in-progress"));
+
+        treeModel.reload();
+    }
+
+    /**
+     * Clear the results and display notice to say an error occurred.
+     */
+    public void displayErrorResult() {
+        visibleRootNode.removeAllChildren();
+
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+
+        ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
+                resources.getString("plugin.results.error"));
+
+        treeModel.reload();
     }
 
     /**

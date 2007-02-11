@@ -9,9 +9,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Action to execute a CheckStyle scan on the current project.
@@ -41,6 +44,14 @@ public class ScanProject extends BaseAction {
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
                 project).getToolWindow(checkStylePlugin.getToolWindowId());
         toolWindow.activate(null);
+
+        // show progress text
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        final String progressText = resources.getString(
+                "plugin.status.in-progress.project");
+        ((ToolWindowPanel) toolWindow.getComponent()).setProgressText(
+                progressText);
 
         // find project files
         ProjectRootManager projectRootManager
@@ -92,6 +103,12 @@ public class ScanProject extends BaseAction {
             return;
         }
 
+        final CheckStylePlugin checkStylePlugin
+                = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+
         ProjectRootManager projectRootManager
                 = ProjectRootManager.getInstance(project);
         final VirtualFile[] sourceRoots
@@ -102,7 +119,7 @@ public class ScanProject extends BaseAction {
             presentation.setEnabled(false);
 
         } else {
-            presentation.setEnabled(true);
+            presentation.setEnabled(!checkStylePlugin.isScanInProgress());
         }
 
 

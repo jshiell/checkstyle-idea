@@ -19,9 +19,11 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
     private final ProblemDescriptor delegate;
     private final SeverityLevel severity;
     private final int column;
+    private final int line;
 
     public ExtendedProblemDescriptor(final ProblemDescriptor delegate,
                                      final SeverityLevel severity,
+                                     final int line,
                                      final int column) {
         if (delegate == null) {
             throw new IllegalArgumentException("Delegate may not be null.");
@@ -32,6 +34,7 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
 
         this.delegate = delegate;
         this.severity = severity;
+        this.line = line;
         this.column = column;
     }
 
@@ -51,6 +54,18 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
      */
     public int getColumn() {
         return column;
+    }
+
+    /**
+     * Get the line position of this error.
+     * <p/>
+     * This is the line as reported by CheckStyle, rather than that computed
+     * by IDEA.
+     *
+     * @return the line position.
+     */
+    public int getLine() {
+        return line;
     }
 
     /**

@@ -47,6 +47,8 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
 
     private String toolWindowId;
 
+    private boolean scanInProgress;
+
     /**
      * Construct a plug-in instance for the given project.
      *
@@ -70,6 +72,28 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
      */
     public String getToolWindowId() {
         return toolWindowId;
+    }
+
+    /**
+     * Is a scan in progress?
+     * <p/>
+     * This is only expected to be called from the event thread.
+     *
+     * @return true if a scan is in progress.
+     */
+    public boolean isScanInProgress() {
+        return scanInProgress;
+    }
+
+    /**
+     * Set if a scan is in progress.
+     * <p/>
+     * This is only expected to be called from the event thread.
+     *
+     * @param scanInProgress true if a scan is in progress.
+     */
+    public void setScanInProgress(final boolean scanInProgress) {
+        this.scanInProgress = scanInProgress;
     }
 
     /**
@@ -253,6 +277,7 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
         }
         
         final CheckFilesThread checkFilesThread = new CheckFilesThread(files);
+        scanInProgress = true;
         checkFilesThread.start();
     }
 
@@ -428,6 +453,14 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
          */
         public void run() {
             try {
+                // set progress bar
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        getToolWindowPanel().setProgressBarMax(files.size());
+                        getToolWindowPanel().displayInProgress();
+                    }
+                });
+
                 final Map<PsiFile, List<ProblemDescriptor>> fileResults
                         = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
@@ -438,6 +471,13 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
                     if (results != null && results.size() > 0) {
                         fileResults.put(psiFile, results);
                     }
+
+                    // increment progress bar
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            getToolWindowPanel().incrementProgressBar();
+                        }
+                    });
                 }
 
                 // invoke Swing fun in Swing thread.
@@ -445,11 +485,25 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
                     public void run() {
                         getToolWindowPanel().displayResults(fileResults);
                         getToolWindowPanel().expandTree();
+                        getToolWindowPanel().clearProgressBar();
+                        getToolWindowPanel().setProgressText(null);
+
+                        scanInProgress = false;
                     }
                 });
                 
             } catch (Throwable e) {
                 LOG.error("An error occurred while scanning a file.", e);
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        getToolWindowPanel().displayErrorResult();
+                        getToolWindowPanel().clearProgressBar();
+                        getToolWindowPanel().setProgressText(null);
+
+                        scanInProgress = false;
+                    }
+                });
             }
         }
 

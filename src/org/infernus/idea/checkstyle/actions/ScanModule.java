@@ -11,6 +11,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+
+import java.util.ResourceBundle;
 
 /**
  * Action to execute a CheckStyle scan on the current module.
@@ -47,6 +51,14 @@ public class ScanModule extends BaseAction {
                 project).getToolWindow(checkStylePlugin.getToolWindowId());
         toolWindow.activate(null);
 
+        // show progress text
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        final String progressText = resources.getString(
+                "plugin.status.in-progress.module");
+        ((ToolWindowPanel) toolWindow.getComponent()).setProgressText(
+                progressText);
+
         // find module files
         ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
@@ -82,6 +94,12 @@ public class ScanModule extends BaseAction {
             return;
         }
 
+        final CheckStylePlugin checkStylePlugin
+                = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+
         // TODO we should rather get the module for the currently editable file
         ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
@@ -93,7 +111,7 @@ public class ScanModule extends BaseAction {
             presentation.setEnabled(false);
 
         } else {
-            presentation.setEnabled(true);
+            presentation.setEnabled(!checkStylePlugin.isScanInProgress());
         }
 
 
