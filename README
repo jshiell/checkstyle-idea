@@ -34,7 +34,7 @@ rules being used.
 Limitations
 -----------
 
-This is an initial release and has some notable limitations:
+This release has some notable limitations:
 
 * Properties within configuration files cannot be defined or edited.
 * CheckStyle errors and warnings from the inspection are both shown at
