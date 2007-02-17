@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.util.ObjectUtils;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
@@ -13,17 +15,19 @@ import java.io.File;
  * @author James Shiell
  * @version 1.0
  */
-public class CheckStyleFilePanel extends JPanel {
+public final class CheckStyleConfigPanel extends JPanel {
 
     private final JLabel fileLabel = new JLabel();
     private final JTextField fileField = new JTextField();
     private final JButton browseButton = new JButton();
     private final JTextArea descriptionLabel = new JTextArea();
 
+    private String configFile;
+
     /**
      * Create a new panel.
      */
-    public CheckStyleFilePanel() {
+    public CheckStyleConfigPanel() {
         super(new GridBagLayout());
 
         initialise();
@@ -81,12 +85,12 @@ public class CheckStyleFilePanel extends JPanel {
      *
      * @return the currently selected configuration file.
      */
-    public File getConfigFile() {
+    public String getConfigFile() {
         final String fileName = fileField.getText();
         if (fileName != null) {
             final File configFile = new File(fileName);
             if (configFile.exists()) {
-                return configFile;
+                return configFile.getAbsolutePath();
             }
         }
         return null;
@@ -100,9 +104,42 @@ public class CheckStyleFilePanel extends JPanel {
     public void setConfigFile(final File configFile) {
         if (configFile == null) {
             fileField.setText("");
+            this.configFile = null;
         } else {
             fileField.setText(configFile.getAbsolutePath());
+            this.configFile = configFile.getAbsolutePath();
         }
+    }
+
+    /**
+     * Set the configuration file.
+     *
+     * @param configFile the configuration file.
+     */
+    public void setConfigFile(final String configFile) {
+        if (configFile == null) {
+            fileField.setText("");
+        } else {
+            fileField.setText(configFile);
+        }
+
+        this.configFile = configFile;
+    }
+
+    /**
+     * Reset the configuration to the original values.
+     */
+    public void reset() {
+        setConfigFile(configFile);
+    }
+
+    /**
+     * Have the settings been modified?
+     *
+     * @return true if the settngs have been modified.
+     */
+    public boolean isModified() {
+        return ObjectUtils.equals(configFile, fileField.getText());
     }
 
     /**
@@ -133,12 +170,13 @@ public class CheckStyleFilePanel extends JPanel {
             final JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new XMLFileFilter());
 
-            if (getConfigFile() != null) {
-                fileChooser.setSelectedFile(getConfigFile());
+            final String configFile = getConfigFile();
+            if (configFile != null) {
+                fileChooser.setSelectedFile(new File(configFile));
             }
 
             final int result = fileChooser.showOpenDialog(
-                    CheckStyleFilePanel.this);
+                    CheckStyleConfigPanel.this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 fileField.setText(fileChooser.getSelectedFile().getAbsolutePath());
             }

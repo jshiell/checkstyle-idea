@@ -71,23 +71,39 @@
         <option name="myName" value="Project Default" />
         <option name="myLocal" value="false" />
         <used_levels>
+          <info color="800080">
+            <option name="myName" value="CheckStyle" />
+            <option name="myVal" value="200" />
+            <option name="myExternalName" value="CheckStyle" />
+            <option name="myDefaultAttributes">
+              <value>
+                <option name="FOREGROUND" />
+                <option name="BACKGROUND" />
+                <option name="FONT_TYPE" value="0" />
+                <option name="EFFECT_COLOR" value="800080" />
+                <option name="EFFECT_TYPE" value="2" />
+                <option name="ERROR_STRIPE_COLOR" value="800080" />
+              </value>
+            </option>
+          </info>
           <error>
             <option name="myName" value="ERROR" />
-            <option name="myVal" value="400" />
+            <option name="myVal" value="500" />
           </error>
           <warning>
             <option name="myName" value="WARNING" />
-            <option name="myVal" value="300" />
+            <option name="myVal" value="400" />
           </warning>
           <information>
             <option name="myName" value="INFO" />
-            <option name="myVal" value="200" />
+            <option name="myVal" value="300" />
           </information>
           <server>
             <option name="myName" value="SERVER PROBLEM" />
             <option name="myVal" value="100" />
           </server>
         </used_levels>
+        <inspection_tool class="CheckStyle-IDEA" level="CheckStyle" enabled="true" />
       </profile>
     </profiles>
   </component>
@@ -276,16 +292,14 @@
     </option>
   </component>
   <component name="libraryTable">
-    <library name="CheckStyle 4.2">
+    <library name="CheckStyle 4.3">
       <CLASSES>
-        <root url="jar:///Developer/Java/Libraries/checkstyle-4.2/checkstyle-all-4.2.jar!/" />
+        <root url="jar:///Developer/Java/Libraries/checkstyle-4.3/checkstyle-all-4.3.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="file:///Developer/Java/Libraries/checkstyle-4.2/docs/api" />
+        <root url="file:///Developer/Java/Libraries/checkstyle-4.3/docs/api" />
       </JAVADOC>
-      <SOURCES>
-        <root url="file:///Developer/Java/Libraries/checkstyle-4.2/src/checkstyle" />
-      </SOURCES>
+      <SOURCES />
     </library>
   </component>
   <component name="uidesigner-configuration">

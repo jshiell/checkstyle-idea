@@ -28,15 +28,10 @@ public final class CheckStyleConstants {
     public static final String TEMPFILE_EXTENSION = ".java";
 
     /**
-     * The CP location of the default CheckStyle configuration.
-     */
-    public static final String DEFAULT_CONFIG = "/sun_checks.xml";
-
-    /**
      * XML element name in the IDEA configuration file for the path
      * to the CS configuration file.
      */
-    public static final String CONFIG_FILEPATH_ELEMENT = "config-file";
+    public static final String CONFIG_ELEMENT = "checkstyle-config";
 
     /**
      * Plug-in identifier.

@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
@@ -15,7 +16,7 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
  * @author James Shiell
  * @version 1.0
  */
-public class ScrollToSource extends ToggleAction {
+public final class ScrollToSource extends ToggleAction {
 
     /**
      * {@inheritDoc}

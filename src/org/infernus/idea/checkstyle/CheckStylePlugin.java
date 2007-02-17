@@ -8,6 +8,9 @@ import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.InvalidDataException;
+import com.intellij.openapi.util.JDOMExternalizable;
+import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
@@ -22,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -34,7 +38,8 @@ import java.util.*;
  * @author James Shiell
  * @version 1.0
  */
-public class CheckStylePlugin implements ProjectComponent, Configurable {
+public final class CheckStylePlugin implements ProjectComponent, Configurable,
+        JDOMExternalizable {
 
     /**
      * Logger for this class.
@@ -42,12 +47,20 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     private static final Log LOG = LogFactory.getLog(
             CheckStylePlugin.class);
 
+    /**
+     * The configuration panel for the plug-in.
+     */
+    private final CheckStyleConfigPanel configPanel = new CheckStyleConfigPanel();
+
     private final Project project;
     private ToolWindow toolWindow;
 
     private String toolWindowId;
 
     private boolean scanInProgress;
+
+    private CheckStyleConfiguration configuration
+            = new CheckStyleConfiguration();
 
     /**
      * Construct a plug-in instance for the given project.
@@ -63,6 +76,15 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
         }
 
         this.project = project;
+    }
+
+    /**
+     * Get the plugin configuration.
+     *
+     * @return the plug-in configuration.
+     */
+    public CheckStyleConfiguration getConfiguration() {
+        return configuration;
     }
 
     /**
@@ -142,6 +164,35 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     /**
      * {@inheritDoc}
      */
+    public void readExternal(final Element element)
+            throws InvalidDataException {
+        if (configuration == null) {
+            configuration = new CheckStyleConfiguration();
+        }
+
+        final Element childElement = element.getChild(
+                CheckStyleConstants.CONFIG_ELEMENT);
+        configuration.readExternal(childElement);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeExternal(final Element element)
+            throws WriteExternalException {
+        if (configuration == null) {
+            configuration = new CheckStyleConfiguration();
+        }
+
+        final Element configElement = new Element(
+                CheckStyleConstants.CONFIG_ELEMENT);
+        configuration.writeExternal(configElement);
+        element.addContent(configElement);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     @NotNull
     public String getComponentName() {
         return CheckStyleConstants.ID_PLUGIN;
@@ -151,14 +202,14 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
      * {@inheritDoc}
      */
     public void initComponent() {
-
+        // do nada
     }
-
+    
     /**
      * {@inheritDoc}
      */
     public void disposeComponent() {
-
+        // do nada
     }
 
     /**
@@ -188,30 +239,29 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
      * {@inheritDoc}
      */
     public JComponent createComponent() {
-        // TODO configuration panel
-        return null;
+        return configPanel;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isModified() {
-        // TODO test if config is modified
-        return true;
+        return configPanel.isModified();
     }
 
     /**
      * {@inheritDoc}
      */
     public void apply() throws ConfigurationException {
-        // TODO apply configuration
+        configuration.setProperty(CheckStyleConfiguration.CONFIG_FILE,
+                configPanel.getConfigFile());
     }
 
     /**
      * {@inheritDoc}
      */
     public void reset() {
-        // TODO reset configuration
+        configPanel.reset();
     }
 
     /**
@@ -229,15 +279,20 @@ public class CheckStylePlugin implements ProjectComponent, Configurable {
     public Checker getChecker() {
         try {
             final Checker checker;
-            final File configFile = null; // TODO load from configuration
+            final String configFile = configuration.getProperty(
+                    CheckStyleConfiguration.CONFIG_FILE);
             if (configFile == null) {
+                LOG.info("Loading default configuration");
+                
                 final InputStream in = CheckStyleInspection.class.getResourceAsStream(
-                        CheckStyleConstants.DEFAULT_CONFIG);
+                        CheckStyleConfiguration.DEFAULT_CONFIG);
                 checker = CheckerFactory.getInstance().getChecker(in);
                 in.close();
                 
             } else {
-                checker = CheckerFactory.getInstance().getChecker(configFile);
+                LOG.info("Loading configuration from " + configFile);
+                checker = CheckerFactory.getInstance().getChecker(
+                        new File(configFile));
             }
 
             return checker;

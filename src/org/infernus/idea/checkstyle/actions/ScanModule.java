@@ -100,7 +100,6 @@ public class ScanModule extends BaseAction {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }
 
-        // TODO we should rather get the module for the currently editable file
         ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
         final VirtualFile[] virtualFiles = moduleRootManager.getFiles(

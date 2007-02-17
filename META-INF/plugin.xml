@@ -4,7 +4,10 @@
     <name>CheckStyle-IDEA</name>
     <description>
         <![CDATA[
-        Real-time CheckStyle scanning for IDEA
+<p>
+    This plugin provides both real-time and on-demand scanning
+    of Java files with CheckStyle from within the IDEA IDE.
+</p>
         ]]>
     </description>
     <version>0.4</version>
@@ -13,14 +16,14 @@
 
     <change-notes>
         <![CDATA[
-0.4 - Static scanning implemented.        
-
-0.3 - Improved: CheckStyle caching improved.
-    - Improved: Temporary file deletion.
-
-0.2 - Fix: File browser for configuration file filters out directories.
-
-0.1 - Initial release.
+<ul>
+    <li>0.4 - New: Static scanning implemented.</li>
+    <li>&nbsp;&nbsp;&nbsp; - New: Updated CheckStyle to 4.3.</li>
+    <li>0.3 - Improved: CheckStyle caching improved.</li>
+    <li>&nbsp;&nbsp;&nbsp; - Improved: Temporary file deletion.</li>
+    <li>0.2 - Fix: File browser for configuration file filters out directories.</li>
+    <li>0.1 - Initial release.</li>
+</ul>
         ]]>
     </change-notes>
                                 
@@ -57,15 +60,6 @@
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
-            <action id="CheckStyleModuleFilesAction"
-                class="org.infernus.idea.checkstyle.actions.ScanModule"
-                text="Check Module"
-                description="Run Checkstyle on all files in the current module."
-                icon="/modules/modulesNode.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            </action>
-
             <action id="CheckStyleProjectFilesAction"
                 class="org.infernus.idea.checkstyle.actions.ScanProject"
                 text="Check Project"
@@ -95,5 +89,6 @@
                 description="Collapse all elements in the tool window."
                 icon="/actions/collapseall.png" />
         </group>
+                                                   
     </actions>
 </idea-plugin>
