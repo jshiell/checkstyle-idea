@@ -237,8 +237,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
     /**
      * {@inheritDoc}
-     */
+     */                                                   
     public JComponent createComponent() {
+        configPanel.setConfigFile(configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_FILE));
         return configPanel;
     }
 
@@ -253,8 +255,14 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void apply() throws ConfigurationException {
-        configuration.setProperty(CheckStyleConfiguration.CONFIG_FILE,
-                configPanel.getConfigFile());
+        final String configurationFile = configPanel.getConfigFile();
+        if (configurationFile != null) {
+            configuration.setProperty(CheckStyleConfiguration.CONFIG_FILE,
+                    configPanel.getConfigFile());
+
+        } else {
+            configuration.remove(CheckStyleConfiguration.CONFIG_FILE);
+        }
     }
 
     /**
@@ -262,10 +270,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void reset() {
         configPanel.reset();
+        configPanel.setConfigFile(configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_FILE));
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc}                                                    
      */
     public void disposeUIResources() {
 

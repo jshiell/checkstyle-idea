@@ -49,6 +49,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         add(fileLabel, fileLabelConstraints);
 
         fileField.setToolTipText(resources.getString("config.file.label.tooltip"));
+        fileField.setEditable(false);
 
         final GridBagConstraints fileFieldConstraints = new GridBagConstraints(
                 1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
@@ -87,9 +88,11 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public String getConfigFile() {
         final String fileName = fileField.getText();
+
+        this.configFile = fileName;
         if (fileName != null) {
             final File configFile = new File(fileName);
-            if (configFile.exists()) {
+            if (configFile.exists()) { 
                 return configFile.getAbsolutePath();
             }
         }
@@ -139,7 +142,18 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return true if the settngs have been modified.
      */
     public boolean isModified() {
-        return ObjectUtils.equals(configFile, fileField.getText());
+        final String configFileField = fileField.getText();
+        final int configFileFieldLength = configFileField != null
+                ? configFileField.trim().length() : 0;
+
+        final int originalConfigFileLength = configFile != null
+                ? configFile.trim().length() : 0;
+
+        if (configFileFieldLength == 0 && originalConfigFileLength == 0) {
+            return true;
+        }
+
+        return !ObjectUtils.equals(configFile, fileField.getText());
     }
 
     /**
