@@ -30,13 +30,17 @@ this field is left empty then the Sun checks, as supplied with CheckStyle, will
 be used. Pointing this at the file of your choice will result in the contained
 rules being used.
 
+Note that as per the limitations CheckStyle files requiring property definitions
+are not yet supported. Sorry.
+
 
 Limitations
 -----------
 
 This release has some notable limitations:
 
-* Properties within configuration files cannot be defined or edited.
+* Properties within configuration files cannot be defined or edited. Hence
+  CheckStyle files that use properties will fail.
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
 * Error handling is somewhat basic at present.
