@@ -39,17 +39,15 @@ public final class CheckStyleConfiguration extends Properties
             return;
         }
 
-        for (final Enumeration e = propertyNames(); e.hasMoreElements();) {
-            final String propertyName = (String) e.nextElement();
-            final String propertyValue = getProperty(propertyName);
+        for (Element propertyElement : (List<Element>)
+                element.getChildren("property")) {
+            final String propertyName = propertyElement.getAttributeValue("name");
+            final String propertyValue = propertyElement.getText();
 
-            final Element propertyElement = new Element("property");
-            propertyElement.setAttribute("name", propertyName);
-            propertyElement.setText(propertyValue);
-
-            element.addContent(propertyElement);
+            if (propertyName != null) {
+                put(propertyName, propertyValue);
+            }
         }
-
     }
 
     /**
@@ -61,14 +59,15 @@ public final class CheckStyleConfiguration extends Properties
             throw new IllegalArgumentException("Element may not be null.");
         }
 
-        for (Element propertyElement : (List<Element>)
-                element.getChildren("property")) {
-            final String propertyName = propertyElement.getAttributeValue("name");
-            final String propertyValue = propertyElement.getText();
+        for (final Enumeration e = propertyNames(); e.hasMoreElements();) {
+            final String propertyName = (String) e.nextElement();
+            final String propertyValue = getProperty(propertyName);
 
-            if (propertyName != null) {
-                put(propertyName, propertyValue);
-            }
+            final Element propertyElement = new Element("property");
+            propertyElement.setAttribute("name", propertyName);
+            propertyElement.setText(propertyValue);
+
+            element.addContent(propertyElement);
         }
     }
 }
