@@ -2,6 +2,7 @@
 <idea-plugin version="2" url="http://code.google.com/p/checkstyle-idea/">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
+    <resource-bundle>org.infernus.idea.checkstyle.resource</resource-bundle>
     <description>
         <![CDATA[
 <p>
@@ -17,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>0.5 - Improved: Localisation support.</li>
     <li>0.4 - New: Static scanning implemented.</li>
     <li>&nbsp;&nbsp;&nbsp; - New: Updated CheckStyle to 4.3.</li>
     <li>0.3 - Improved: CheckStyle caching improved.</li>
