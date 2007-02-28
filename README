@@ -90,6 +90,10 @@ LICENCE file.
 Version History
 ---------------
 
+0.5 - Improved: Localisation support.
+    - Improved: Config file locations under the project root are now
+      stored as relative rather than the system-specific absolute path.
+
 0.4 - New: Added static scanning support.
     - New: Updated CheckStyle to 4.3.
 

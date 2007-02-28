@@ -11,20 +11,22 @@
 </p>
         ]]>
     </description>
-    <version>0.4</version>
+    <version>0.5</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
-    <li>0.5 - Improved: Localisation support.</li>
-    <li>0.4 - New: Static scanning implemented.</li>
-    <li>&nbsp;&nbsp;&nbsp; - New: Updated CheckStyle to 4.3.</li>
-    <li>0.3 - Improved: CheckStyle caching improved.</li>
-    <li>&nbsp;&nbsp;&nbsp; - Improved: Temporary file deletion.</li>
-    <li>0.2 - Fix: File browser for configuration file filters out directories.</li>
-    <li>0.1 - Initial release.</li>
+    <li>0.5: Improved: Localisation support.</li>
+    <li>0.5: Improved: Config file locations under the project root are now
+      stored as relative rather than the system-specific absolute path.</li>
+    <li>0.4: New: Static scanning implemented.</li>
+    <li>0.4: New: Updated CheckStyle to 4.3.</li>
+    <li>0.3: Improved: CheckStyle caching improved.</li>
+    <li>0.3: Improved: Temporary file deletion.</li>
+    <li>0.2: Fix: File browser for configuration file filters out directories.</li>
+    <li>0.1: Initial release.</li>
 </ul>
         ]]>
     </change-notes>
