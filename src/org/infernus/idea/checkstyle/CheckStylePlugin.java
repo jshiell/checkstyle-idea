@@ -50,7 +50,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * The configuration panel for the plug-in.
      */
-    private final CheckStyleConfigPanel configPanel = new CheckStyleConfigPanel();
+    private final CheckStyleConfigPanel configPanel;
 
     private final Project project;
     private ToolWindow toolWindow;
@@ -61,6 +61,20 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
     private CheckStyleConfiguration configuration
             = new CheckStyleConfiguration();
+
+    /**
+     * Get the base path of the project.
+     *
+     * @return the base path of the project.
+     */
+    public String getProjectPath() {
+        String projectPath = project.getProjectFilePath();
+
+        // strip off project file name
+        projectPath = projectPath.substring(0, projectPath.lastIndexOf('/'));
+
+        return projectPath;
+    }
 
     /**
      * Construct a plug-in instance for the given project.
@@ -76,6 +90,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         }
 
         this.project = project;
+        this.configPanel = new CheckStyleConfigPanel(this);
     }
 
     /**
@@ -128,6 +143,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
         toolWindowId = resources.getString("plugin.toolwindow.name");
+        if (toolWindowId == null) {
+            throw new IllegalArgumentException("Could not read toolwindow "
+                    + "name from resource bundle.");
+        }
 
         toolWindow = toolWindowManager.registerToolWindow(toolWindowId,
                 new ToolWindowPanel(project), ToolWindowAnchor.BOTTOM);
@@ -189,7 +208,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         configuration.writeExternal(configElement);
         element.addContent(configElement);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -204,7 +223,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     public void initComponent() {
         // do nada
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -237,7 +256,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
     /**
      * {@inheritDoc}
-     */                                                   
+     */
     public JComponent createComponent() {
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE));
@@ -275,7 +294,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
-     * {@inheritDoc}                                                    
+     * {@inheritDoc}
      */
     public void disposeUIResources() {
 
@@ -289,17 +308,23 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     public Checker getChecker() {
         try {
             final Checker checker;
-            final String configFile = configuration.getProperty(
+            String configFile = configuration.getProperty(
                     CheckStyleConfiguration.CONFIG_FILE);
             if (configFile == null) {
                 LOG.info("Loading default configuration");
-                
+
                 final InputStream in = CheckStyleInspection.class.getResourceAsStream(
                         CheckStyleConfiguration.DEFAULT_CONFIG);
                 checker = CheckerFactory.getInstance().getChecker(in);
                 in.close();
-                
+
             } else {
+                // swap prefix if required
+                if (configFile.startsWith(CheckStyleConstants.CONFIG_ELEMENT)) {
+                    configFile = getProjectPath() + configFile.substring(
+                            CheckStyleConstants.CONFIG_ELEMENT.length());
+                }
+
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
                         new File(configFile));
@@ -319,7 +344,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @param files the files to check.
      * @param event the event that triggered this action.
      */
-    public void checkFiles(final List<VirtualFile> files, final AnActionEvent event) {
+    public void checkFiles(final List<VirtualFile> files,
+                           final AnActionEvent event) {
         if (files == null) {
             return;
         }
@@ -340,7 +366,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             LOG.debug("No files provided.");
             return;
         }
-        
+
         final CheckFilesThread checkFilesThread = new CheckFilesThread(files);
         scanInProgress = true;
         checkFilesThread.start();
@@ -370,7 +396,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         }
 
         final PsiFile psiFile = (PsiFile) element;
-        LOG.debug("Scanning " + psiFile.getName());   
+        LOG.debug("Scanning " + psiFile.getName());
 
         final InspectionManager manager
                 = InspectionManager.getInstance(psiFile.getProject());
@@ -480,7 +506,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             } catch (Throwable e) {
                 failure = e;
 
-            } 
+            }
         }
     }
 
@@ -556,7 +582,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         scanInProgress = false;
                     }
                 });
-                
+
             } catch (Throwable e) {
                 LOG.error("An error occurred while scanning a file.", e);
 

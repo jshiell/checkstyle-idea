@@ -70,4 +70,28 @@ public final class CheckStyleConfiguration extends Properties
             element.addContent(propertyElement);
         }
     }
+
+    /**
+     * Get a boolean property value.
+     *
+     * @param propertyName the name of the property.
+     * @param defaultValue the default value if the property is not set.
+     * @return the value of the property.
+     */
+    public boolean getBooleanProperty(final String propertyName,
+                                      final boolean defaultValue) {
+        return Boolean.valueOf(getProperty(propertyName,
+                Boolean.TRUE.toString()));
+    }
+
+    /**
+     * Set a boolean property value.
+     *
+     * @param propertyName the name of the property.
+     * @param value the value of the property.
+     */
+    public void setBooleanProperty(final String propertyName,
+                                   final boolean value) {
+        setProperty(propertyName, Boolean.toString(value));
+    }
 }

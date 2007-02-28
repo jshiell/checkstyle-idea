@@ -24,11 +24,21 @@ public final class CheckStyleConfigPanel extends JPanel {
 
     private String configFile;
 
+    private CheckStylePlugin plugin;
+
     /**
      * Create a new panel.
+     *
+     * @param plugin the plugin that owns this panel.
      */
-    public CheckStyleConfigPanel() {
+    public CheckStyleConfigPanel(final CheckStylePlugin plugin) {
         super(new GridBagLayout());
+
+        if (plugin == null) {
+            throw new IllegalArgumentException("Plugin may not be null.");
+        }
+
+        this.plugin = plugin;
 
         initialise();
     }
@@ -64,7 +74,8 @@ public final class CheckStyleConfigPanel extends JPanel {
         add(browseButton, browseButtonConstraints);
 
         // fake a multi-line label with a text area
-        descriptionLabel.setText(resources.getString("config.file.description"));
+        descriptionLabel.setText(resources.getString(
+                "config.file.description"));
         descriptionLabel.setEditable(false);
         descriptionLabel.setEnabled(false);
         descriptionLabel.setWrapStyleWord(true);
@@ -73,7 +84,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         descriptionLabel.setDisabledTextColor(descriptionLabel.getForeground());
 
         final GridBagConstraints descLabelConstraints = new GridBagConstraints(
-                0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,
+                0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,
                 GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0);
         add(descriptionLabel, descLabelConstraints);
     }
@@ -91,9 +102,18 @@ public final class CheckStyleConfigPanel extends JPanel {
 
         this.configFile = fileName;
         if (fileName != null) {
-            final File configFile = new File(fileName);
-            if (configFile.exists()) { 
-                return configFile.getAbsolutePath();
+            final File newConfigFile = new File(fileName);
+            if (newConfigFile.exists()) {
+                final String filePath = newConfigFile.getAbsolutePath();
+
+                final String projectPath = plugin.getProjectPath();
+                if (filePath != null
+                        && filePath.startsWith(projectPath)) {
+                    return CheckStyleConstants.PROJECT_DIR + filePath.substring(
+                            projectPath.length());
+                }
+
+                return filePath;
             }
         }
         return null;
@@ -106,11 +126,9 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public void setConfigFile(final File configFile) {
         if (configFile == null) {
-            fileField.setText("");
-            this.configFile = null;
+            setConfigFile((String) null);
         } else {
-            fileField.setText(configFile.getAbsolutePath());
-            this.configFile = configFile.getAbsolutePath();
+            setConfigFile(configFile.getAbsolutePath());
         }
     }
 
@@ -119,10 +137,16 @@ public final class CheckStyleConfigPanel extends JPanel {
      *
      * @param configFile the configuration file.
      */
-    public void setConfigFile(final String configFile) {
+    public void setConfigFile(String configFile) {
         if (configFile == null) {
             fileField.setText("");
         } else {
+            if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+                final String projectPath = plugin.getProjectPath();
+                configFile = projectPath
+                        + configFile.substring(CheckStyleConstants.PROJECT_DIR.length());
+
+            }
             fileField.setText(configFile);
         }
 

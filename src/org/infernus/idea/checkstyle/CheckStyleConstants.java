@@ -42,6 +42,10 @@ public final class CheckStyleConstants {
      * The action group for the plug-in tool window.
      */
     public static final String ACTION_GROUP = "CheckStylePluginActions";
+    /**
+     * Constant used to represent project directory.
+     */
+    static final String PROJECT_DIR = "$PROJECT_DIR$";
 
     /**
      * This is a constants class and cannot be instantiated.
