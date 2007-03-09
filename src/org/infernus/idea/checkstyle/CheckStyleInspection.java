@@ -32,6 +32,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
     private static final Log LOG = LogFactory.getLog(
             CheckStyleInspection.class);
 
+    /**
+     * The configuration panel.
+     */
     private final CheckStyleInspectionPanel configPanel
             = new CheckStyleInspectionPanel();
 
@@ -52,8 +55,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         "Couldn't get checkstyle plugin");
             }
 
-            final String configFile = checkStylePlugin.getConfiguration()
-                    .getProperty(CheckStyleConfiguration.CONFIG_FILE);
+            String configFile = checkStylePlugin.getConfiguration().getProperty(
+                    CheckStyleConfiguration.CONFIG_FILE);
             if (configFile == null) {
                 LOG.info("Loading default configuration");
 
@@ -63,6 +66,14 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 in.close();
 
             } else {
+                if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+                    final String projectPath
+                            = checkStylePlugin.getProjectPath();
+                    configFile = projectPath + configFile.substring(
+                            CheckStyleConstants.PROJECT_DIR.length());
+
+                }
+
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
                         new File(configFile));

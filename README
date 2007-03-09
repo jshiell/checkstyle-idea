@@ -39,11 +39,12 @@ Limitations
 
 This release has some notable limitations:
 
+* If you change the configuration file the real-time scan will not be updated
+  until the file is either changed or reopened.
 * Properties within configuration files cannot be defined or edited. Hence
-  CheckStyle files that use properties will fail.
+  CheckStyle files that require externally defined properties will fail.
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
-* Error handling is somewhat basic at present.
 
 
 Future
@@ -54,6 +55,7 @@ for future releases.
 
 * Scan files in the current module.
 * Scan selected files in the project panel.
+* Property definition support.
 
 
 Feedback
@@ -93,6 +95,7 @@ Version History
 0.5 - Improved: Localisation support.
     - Improved: Config file locations under the project root are now
       stored as relative rather than the system-specific absolute path.
+    - New: CheckStyle icons added.
 
 0.4 - New: Added static scanning support.
     - New: Updated CheckStyle to 4.3.

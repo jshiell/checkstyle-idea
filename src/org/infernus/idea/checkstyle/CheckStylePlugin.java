@@ -152,7 +152,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 new ToolWindowPanel(project), ToolWindowAnchor.BOTTOM);
 
 
-        toolWindow.setIcon(IDEAUtilities.getIcon("/debugger/watches.png"));
+        toolWindow.setIcon(IDEAUtilities.getIcon(
+                "/org/infernus/idea/checkstyle/images/checkstyle16.png"));
         toolWindow.setType(ToolWindowType.DOCKED, null);
     }
 
@@ -244,7 +245,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public Icon getIcon() {
-        return IDEAUtilities.getIcon("/general/configurableErrorHighlighting.png");
+        return IDEAUtilities.getIcon(
+                "/org/infernus/idea/checkstyle/images/checkstyle32.png");
     }
 
     /**
