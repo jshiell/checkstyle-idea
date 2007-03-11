@@ -45,6 +45,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * @return a checker.
      */
     public Checker getChecker(final Project project) {
+        LOG.debug("Getting CheckStyle checker for inspection.");
+
         try {
             final Checker checker;
 
@@ -131,8 +133,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
+        LOG.debug("Inspection has been invoked.");
+
         if (!psiFile.isValid() || !psiFile.isPhysical()
                 || !CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
+            LOG.debug("Skipping file as invalid: " + psiFile.getName());
             return null;
         }
 

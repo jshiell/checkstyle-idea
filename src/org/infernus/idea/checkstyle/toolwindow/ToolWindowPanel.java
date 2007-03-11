@@ -251,7 +251,7 @@ public class ToolWindowPanel extends JPanel {
          */
         @Override
         public void mouseClicked(final MouseEvent e) {
-            if (!scrollToSource || e.getClickCount() < 2) {
+            if (!scrollToSource && e.getClickCount() < 2) {
                 return;
             }
 

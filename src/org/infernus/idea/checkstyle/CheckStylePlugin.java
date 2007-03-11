@@ -137,6 +137,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * Register the tool window with IDEA.
      */
     private void registerToolWindow() {
+        LOG.debug("Registering tool window.");
+
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
@@ -161,6 +163,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * Un-register the tool window from IDEA.
      */
     private void unregisterToolWindow() {
+        LOG.debug("Deregistering tool window.");
+
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
@@ -171,6 +175,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void projectOpened() {
+        LOG.debug("Project opened.");
+
         registerToolWindow();
     }
 
@@ -178,6 +184,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void projectClosed() {
+        LOG.debug("Project closed.");
+
         unregisterToolWindow();
     }
 
@@ -186,6 +194,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void readExternal(final Element element)
             throws InvalidDataException {
+        LOG.debug("Reading configuration.");
+
         if (configuration == null) {
             configuration = new CheckStyleConfiguration();
         }
@@ -200,6 +210,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void writeExternal(final Element element)
             throws WriteExternalException {
+        LOG.debug("Writing configuration.");
+
         if (configuration == null) {
             configuration = new CheckStyleConfiguration();
         }
@@ -308,6 +320,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return a checker.
      */
     public Checker getChecker() {
+        LOG.debug("Getting CheckStyle checker.");
+
         try {
             final Checker checker;
             String configFile = configuration.getProperty(
@@ -348,6 +362,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void checkFiles(final List<VirtualFile> files,
                            final AnActionEvent event) {
+
         if (files == null) {
             return;
         }
@@ -394,6 +409,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     private List<ProblemDescriptor> checkPsiFile(final PsiElement element) {
         if (element == null || !element.isValid() || !element.isPhysical()
                 || !PsiFile.class.isAssignableFrom(element.getClass())) {
+            LOG.debug("Skipping as invalid type: " + element.toString());
             return null;
         }
 
