@@ -137,17 +137,11 @@ public final class CheckStyleConfigPanel extends JPanel {
      *
      * @param configFile the configuration file.
      */
-    public void setConfigFile(String configFile) {
+    public void setConfigFile(final String configFile) {
         if (configFile == null) {
             fileField.setText("");
         } else {
-            if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-                final String projectPath = plugin.getProjectPath();
-                configFile = projectPath
-                        + configFile.substring(CheckStyleConstants.PROJECT_DIR.length());
-
-            }
-            fileField.setText(configFile);
+            fileField.setText(plugin.processConfigFilePath(configFile));
         }
 
         this.configFile = configFile;
