@@ -68,13 +68,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 in.close();
 
             } else {
-                if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-                    final String projectPath
-                            = checkStylePlugin.getProjectPath();
-                    configFile = projectPath + configFile.substring(
-                            CheckStyleConstants.PROJECT_DIR.length());
-
-                }
+                configFile = checkStylePlugin.processConfigFilePath(configFile);
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(

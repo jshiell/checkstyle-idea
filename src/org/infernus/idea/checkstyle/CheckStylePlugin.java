@@ -52,13 +52,29 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     private final CheckStyleConfigPanel configPanel;
 
+    /**
+     * A reference to the current project.
+     */
     private final Project project;
+
+    /**
+     * The tool window for the plugin.
+     */
     private ToolWindow toolWindow;
 
+    /**
+     * The ID of the plugin's tool window.
+     */
     private String toolWindowId;
 
+    /**
+     * Flag to track if a scan is in progress.
+     */
     private boolean scanInProgress;
 
+    /**
+     * Configuration store.
+     */
     private CheckStyleConfiguration configuration
             = new CheckStyleConfiguration();
 
@@ -71,7 +87,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         String projectPath = project.getProjectFilePath();
 
         // strip off project file name
-        projectPath = projectPath.substring(0, projectPath.lastIndexOf('/'));
+        int lastSlashIndex = projectPath.lastIndexOf(File.pathSeparatorChar);
+        if (lastSlashIndex != -1) {
+            projectPath = projectPath.substring(0, lastSlashIndex);
+        }
 
         return projectPath;
     }
@@ -329,17 +348,15 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             if (configFile == null) {
                 LOG.info("Loading default configuration");
 
-                final InputStream in = CheckStyleInspection.class.getResourceAsStream(
+                final InputStream in = CheckStyleInspection.class
+                        .getResourceAsStream(
                         CheckStyleConfiguration.DEFAULT_CONFIG);
                 checker = CheckerFactory.getInstance().getChecker(in);
                 in.close();
 
             } else {
                 // swap prefix if required
-                if (configFile.startsWith(CheckStyleConstants.CONFIG_ELEMENT)) {
-                    configFile = getProjectPath() + configFile.substring(
-                            CheckStyleConstants.CONFIG_ELEMENT.length());
-                }
+                configFile = processConfigFilePath(configFile);
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
@@ -352,6 +369,23 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             LOG.error("Error", e);
             throw new RuntimeException("Couldn't create Checker", e);
         }
+    }
+
+    /**
+     * Process a stored configuration file path for any tokens.
+     *
+     * @param configFile the path to process.
+     * @return the processed path.
+     */
+    public String processConfigFilePath(final String configFile) {
+        LOG.debug("Processing config file: " + configFile);
+
+        if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+            return getProjectPath() + configFile.substring(
+                    CheckStyleConstants.PROJECT_DIR.length());
+        }
+
+        return configFile;
     }
 
     /**
@@ -376,7 +410,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @param files the files to check.
      * @param event the event that triggered this action.
      */
-    public void checkFiles(final VirtualFile[] files, final AnActionEvent event) {
+    public void checkFiles(final VirtualFile[] files,
+                           final AnActionEvent event) {
         LOG.info("Scanning current file(s).");
 
         if (files == null) {
@@ -404,7 +439,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @param element the PSI element to scan. This will be ignored if not
      *                a java file.
      * @return a list of tree nodes representing the result tree for this
-     *         file, an empty list or null if this file is invalid or has no errors.
+     *         file, an empty list or null if this file is invalid or
+     *         has no errors.
      */
     private List<ProblemDescriptor> checkPsiFile(final PsiElement element) {
         if (element == null || !element.isValid() || !element.isPhysical()
@@ -477,8 +513,19 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     private class CreateTempFileThread implements Runnable {
 
+        /**
+         * Any failure that occurred on the thread.
+         */
         private Throwable failure;
+
+        /**
+         * The file we are creating a temporary file from.
+         */
         private PsiFile psiFile;
+
+        /**
+         * The created temporary file.
+         */
         private File file;
 
         /**
