@@ -106,11 +106,12 @@ public final class CheckStyleConfigPanel extends JPanel {
             if (newConfigFile.exists()) {
                 final String filePath = newConfigFile.getAbsolutePath();
 
-                final String projectPath = plugin.getProjectPath();
+                final File projectPath = plugin.getProjectPath();
+                final String projectPathAbs = projectPath.getAbsolutePath();
                 if (filePath != null
-                        && filePath.startsWith(projectPath)) {
+                        && filePath.startsWith(projectPathAbs)) {
                     return CheckStyleConstants.PROJECT_DIR + filePath.substring(
-                            projectPath.length());
+                            projectPathAbs.length());
                 }
 
                 return filePath;
@@ -202,9 +203,9 @@ public final class CheckStyleConfigPanel extends JPanel {
             final JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new XMLFileFilter());
 
-            final String configFile = getConfigFile();
-            if (configFile != null) {
-                fileChooser.setSelectedFile(new File(configFile));
+            final String configFilePath = getConfigFile();
+            if (configFilePath != null) {
+                fileChooser.setSelectedFile(new File(configFilePath));
             }
 
             final int result = fileChooser.showOpenDialog(

@@ -83,16 +83,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      *
      * @return the base path of the project.
      */
-    public String getProjectPath() {
-        String projectPath = project.getProjectFilePath();
-
-        // strip off project file name
-        int lastSlashIndex = projectPath.lastIndexOf(File.pathSeparatorChar);
-        if (lastSlashIndex != -1) {
-            projectPath = projectPath.substring(0, lastSlashIndex);
-        }
-
-        return projectPath;
+    public File getProjectPath() {
+        final File projectFile = new File(project.getProjectFilePath());
+        return projectFile.getParentFile();
     }
 
     /**
@@ -381,8 +374,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         LOG.debug("Processing config file: " + configFile);
 
         if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            return getProjectPath() + configFile.substring(
-                    CheckStyleConstants.PROJECT_DIR.length());
+            final File fullConfigFile = new File(getProjectPath(), configFile.substring(
+                    CheckStyleConstants.PROJECT_DIR.length()));
+            return fullConfigFile.getAbsolutePath();
         }
 
         return configFile;
