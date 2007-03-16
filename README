@@ -92,18 +92,20 @@ LICENCE file.
 Version History
 ---------------
 
-0.5 - Improved: Localisation support.
-    - Improved: Config file locations under the project root are now
-      stored as relative rather than the system-specific absolute path.
-    - New: CheckStyle icons added.
+0.5.1 - Fixed: NullPointer when a null PSI element is encountered
+        during scanning.
+0.5   - Improved: Localisation support.
+      - Improved: Config file locations under the project root are now
+        stored as relative rather than the system-specific absolute path.
+      - New: CheckStyle icons added.
 
-0.4 - New: Added static scanning support.
-    - New: Updated CheckStyle to 4.3.
+0.4   - New: Added static scanning support.
+      - New: Updated CheckStyle to 4.3.
 
-0.3 - Improved: CheckStyle caching improved.
-    - Improved: Temporary file deletion.
+0.3   - Improved: CheckStyle caching improved.
+      - Improved: Temporary file deletion.
 
-0.2 - Fix: File browser for configuration file filters out directories.
+0.2   - Fix: File browser for configuration file filters out directories.
 
-0.1 - Initial release.
+0.1   - Initial release.
 

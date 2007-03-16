@@ -4,6 +4,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -439,7 +440,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     private List<ProblemDescriptor> checkPsiFile(final PsiElement element) {
         if (element == null || !element.isValid() || !element.isPhysical()
                 || !PsiFile.class.isAssignableFrom(element.getClass())) {
-            LOG.debug("Skipping as invalid type: " + element.toString());
+            final String elementString = (element != null
+                    ? element.toString() : null);
+            LOG.debug("Skipping as invalid type: " + elementString);
             return null;
         }
 
@@ -615,16 +618,17 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
                 for (final PsiFile psiFile : files) {
-                    final List<ProblemDescriptor> results = checkPsiFile(psiFile);
-
-                    // add results if necessary
-                    if (results != null && results.size() > 0) {
-                        fileResults.put(psiFile, results);
-                    }
-
-                    // increment progress bar
-                    SwingUtilities.invokeLater(new Runnable() {
+                    // scan file and increment progress bar
+                    // this must be done on the dispatch thread.
+                    SwingUtilities.invokeAndWait(new Runnable() {
                         public void run() {
+                            final List<ProblemDescriptor> results = checkPsiFile(psiFile);
+
+                            // add results if necessary
+                            if (results != null && results.size() > 0) {
+                                fileResults.put(psiFile, results);
+                            }
+
                             getToolWindowPanel().incrementProgressBar();
                         }
                     });

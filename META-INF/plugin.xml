@@ -11,14 +11,15 @@
 </p>
         ]]>
     </description>
-    <version>0.5</version>
+    <version>0.5.1</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
-    <li>0.5: Improved: Localisation support.</li>
+    <li>0.5.1: Fixed: NullPointer when a null PSI element is encountered
+        during scanning.</li>
     <li>0.5: Improved: Config file locations under the project root are now
       stored as relative rather than the system-specific absolute path.</li>
     <li>0.5: New: CheckStyle icons added.</li>
