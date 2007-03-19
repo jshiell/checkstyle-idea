@@ -92,6 +92,7 @@ LICENCE file.
 Version History
 ---------------
 
+0.5.2 - New: Settings are now stored in project, not workspace.
 0.5.1 - Fixed: NullPointer when a null PSI element is encountered
         during scanning.
 0.5   - Improved: Localisation support.
