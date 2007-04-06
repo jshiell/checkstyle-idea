@@ -4,6 +4,8 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
@@ -59,8 +61,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         "Couldn't get checkstyle plugin");
             }
 
+            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
             final ClassLoader moduleClassLoader
-                    = checkStylePlugin.buildModuleClassLoader(psiFile);
+                    = checkStylePlugin.buildModuleClassLoader(module);
 
             String configFile = checkStylePlugin.getConfiguration().getProperty(
                     CheckStyleConfiguration.CONFIG_FILE);

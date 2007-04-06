@@ -69,10 +69,9 @@ public class ScanModule extends BaseAction {
         // find module files
         final ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
-        final VirtualFile[] moduleFiles = moduleRootManager.getFiles(
-                OrderRootType.SOURCES);
+        final VirtualFile[] moduleFiles = moduleRootManager.getSourceRoots();
 
-        if (moduleFiles != null && moduleFiles.length > 0) {
+        if (moduleFiles.length > 0) {
             project.getComponent(CheckStylePlugin.class).checkFiles(
                     moduleFiles, event);
         }
@@ -114,11 +113,10 @@ public class ScanModule extends BaseAction {
 
         ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
-        final VirtualFile[] moduleFiles = moduleRootManager.getFiles(
-                OrderRootType.SOURCES);
+        final VirtualFile[] moduleFiles = moduleRootManager.getSourceRoots();
 
         // disable if no files are selected
-        if (moduleFiles == null || moduleFiles.length == 0) {
+        if (moduleFiles.length == 0) {
             presentation.setEnabled(false);
 
         } else {

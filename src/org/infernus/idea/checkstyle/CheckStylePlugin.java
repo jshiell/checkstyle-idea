@@ -584,21 +584,15 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
-     * Build a class loader for the compilation path of the module
-     * of the given file.
+     * Build a class loader for the compilation path of the module.
      *
-     * @param psiFile the file in question.
+     * @param module the module in question.
      * @return the class loader to use, or null if none applicable.
      * @throws MalformedURLException if the URL conversion fails.
      */
-    protected ClassLoader buildModuleClassLoader(final PsiFile psiFile)
+    protected ClassLoader buildModuleClassLoader(final Module module)
             throws MalformedURLException {
-        if (psiFile == null) {
-            return null;
-        }
 
-        // find all compiled output paths for the module and deps
-        final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
         if (module == null) {
             return null;
         }
@@ -634,6 +628,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         private final List<PsiFile> files = new ArrayList<PsiFile>();
 
+        private final Map<PsiFile, Module> fileToModuleMap
+                = new HashMap<PsiFile, Module>();
+
         /**
          * Create a thread to check the given files.
          *
@@ -652,7 +649,16 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             // this needs to be done on the main thread.
             final PsiManager psiManager = PsiManager.getInstance(project);
             for (final VirtualFile virtualFile : fileList) {
-                files.add(psiManager.findFile(virtualFile));
+                final PsiFile psiFile = psiManager.findFile(virtualFile);
+                if (psiFile != null) {
+                    files.add(psiFile);
+                }
+            }
+
+            // build module map (also on main frame)
+            for (final PsiFile file : files) {
+                fileToModuleMap.put(file, ModuleUtil.findModuleForPsiElement(
+                        file));
             }
         }
 
@@ -661,6 +667,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
          */
         public void run() {
             try {
+                final Map<Module, ClassLoader> moduleClassLoaderMap
+                        = new HashMap<Module, ClassLoader>();
+
                 // set progress bar
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
@@ -677,8 +686,13 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         continue;
                     }
 
-                    final ClassLoader moduleClassLoader
-                            = buildModuleClassLoader(psiFile);
+                    final Module module = fileToModuleMap.get(psiFile);
+                    final ClassLoader moduleClassLoader;
+                    if (moduleClassLoaderMap.containsKey(module)) {
+                        moduleClassLoader = moduleClassLoaderMap.get(module);
+                    } else {
+                        moduleClassLoader = buildModuleClassLoader(module);
+                    }
 
                     // scan file and increment progress bar
                     // this must be done on the dispatch thread.
