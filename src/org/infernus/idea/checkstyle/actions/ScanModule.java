@@ -4,12 +4,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataConstants;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
@@ -24,19 +26,24 @@ import java.util.ResourceBundle;
  */
 public class ScanModule extends BaseAction {
 
-
     /**
      * {@inheritDoc}
      */
-    public void actionPerformed(final AnActionEvent event) {
+    public final void actionPerformed(final AnActionEvent event) {
         final Project project = (Project) event.getDataContext().getData(
                 DataConstants.PROJECT);
         if (project == null) {
             return;
         }
 
-        final Module module = (Module) event.getDataContext().getData(
-                DataConstants.MODULE);
+        final VirtualFile[] selectedFiles
+                = FileEditorManager.getInstance(project).getSelectedFiles();
+        if (selectedFiles == null || selectedFiles.length == 0) {
+            return;
+        }
+
+        final Module module = ModuleUtil.findModuleForFile(
+                selectedFiles[0], project);
         if (module == null) {
             return;
         }
@@ -60,14 +67,14 @@ public class ScanModule extends BaseAction {
                 progressText);
 
         // find module files
-        ModuleRootManager moduleRootManager
+        final ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
-        final VirtualFile[] virtualFiles = moduleRootManager.getFiles(
+        final VirtualFile[] moduleFiles = moduleRootManager.getFiles(
                 OrderRootType.SOURCES);
 
-        if (virtualFiles != null && virtualFiles.length > 0) {
+        if (moduleFiles != null && moduleFiles.length > 0) {
             project.getComponent(CheckStylePlugin.class).checkFiles(
-                    virtualFiles, event);
+                    moduleFiles, event);
         }
     }
 
@@ -75,7 +82,7 @@ public class ScanModule extends BaseAction {
      * {@inheritDoc}
      */
     @Override
-    public void update(final AnActionEvent event) {
+    public final void update(final AnActionEvent event) {
         super.update(event);
 
         final Presentation presentation = event.getPresentation();
@@ -87,9 +94,14 @@ public class ScanModule extends BaseAction {
             return;
         }
 
-        final Module module = (Module) event.getDataContext().getData(
-                DataConstants.MODULE);
-        presentation.setEnabled(false);
+        final VirtualFile[] selectedFiles
+                = FileEditorManager.getInstance(project).getSelectedFiles();
+        if (selectedFiles == null || selectedFiles.length == 0) {
+            return;
+        }
+
+        final Module module = ModuleUtil.findModuleForFile(
+                selectedFiles[0], project);
         if (module == null) {
             return;
         }
@@ -102,11 +114,11 @@ public class ScanModule extends BaseAction {
 
         ModuleRootManager moduleRootManager
                 = ModuleRootManager.getInstance(module);
-        final VirtualFile[] virtualFiles = moduleRootManager.getFiles(
+        final VirtualFile[] moduleFiles = moduleRootManager.getFiles(
                 OrderRootType.SOURCES);
 
         // disable if no files are selected
-        if (virtualFiles == null || virtualFiles.length == 0) {
+        if (moduleFiles == null || moduleFiles.length == 0) {
             presentation.setEnabled(false);
 
         } else {

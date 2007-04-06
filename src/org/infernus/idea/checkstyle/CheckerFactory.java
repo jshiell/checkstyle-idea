@@ -14,24 +14,22 @@ import java.util.Map;
 
 /**
  * A configuration factory and resolver for CheckStyle.
- 
+ *
  * @author James Shiell
  * @version 1.1
  */
-public class CheckerFactory implements PropertyResolver {
+public class CheckerFactory {
 
     /**
      * A singleton instance.
      */
     private static final CheckerFactory INSTANCE = new CheckerFactory();
 
+    /**
+     * Cached checkers for
+     */
     private final Map<File, CheckerValue> cache
             = new HashMap<File, CheckerValue>();
-
-    private final Map<String, String> propertyNamesToValues = new HashMap<String, String>();
-    private final List<String> propertyNames = new ArrayList<String>();
-
-    private Checker checker;
 
     /**
      * Create a new factory.
@@ -51,33 +49,45 @@ public class CheckerFactory implements PropertyResolver {
     /**
      * Get a checker for a given configuration.
      * <p/>
-     * User with care: This does not cache the checker.
+     * Use with care: This does not cache the checker.
      *
      * @param configStream a stream for a CheckStyle configuration file.
-     * @throws CheckstyleException if CheckStyle initialisation fails.
+     * @param classLoader  class loader for CheckStyle use, or null to use
+     *                     the default.
      * @return a checker.
+     * @throws CheckstyleException if CheckStyle initialisation fails.
      */
-    public Checker getChecker(final InputStream configStream)
+    public Checker getChecker(final InputStream configStream,
+                              final ClassLoader classLoader)
             throws CheckstyleException {
         if (configStream == null) {
             throw new IllegalArgumentException("Config stream may not be null");
         }
 
-        createChecker(configStream);
-        return checker;
+        return createChecker(configStream, classLoader);
     }
 
     /**
      * Get a checker for a given configuration file.
      * <p/>
-     * This method operates with the aid of a cache.
+     * This method operates with the aid of a cache. However, forceReload
+     * is provided to allow static scans to force a reload and ensure latest
+     * classloader changes are picked up. For the real-time scan, where
+     * performance is more of an issue, we can ignore this and use the cached
+     * version.
      *
-     * @param configFile the location of the configuration file.
-     * @throws CheckstyleException if CheckStyle initialisation fails.
-     * @throws IOException if the file cannot be successfully read.
+     * @param configFile  the location of the configuration file.
+     * @param classLoader class loader for CheckStyle use, or null to use
+     *                    the default.
+     * @param forceReload force a reload of the checker rather than using
+     *                    a cached value.
      * @return a checker.
+     * @throws CheckstyleException if CheckStyle initialisation fails.
+     * @throws IOException         if the file cannot be successfully read.
      */
-    public Checker getChecker(final File configFile)
+    public Checker getChecker(final File configFile,
+                              final ClassLoader classLoader,
+                              final boolean forceReload)
             throws CheckstyleException, IOException {
         if (configFile == null) {
             throw new IllegalArgumentException("Config file may not be null");
@@ -92,11 +102,11 @@ public class CheckerFactory implements PropertyResolver {
         final CheckerValue checkerValue = cache.get(configFile);
 
         // if not cached or out of date...
-        if (checkerValue == null
+        if (forceReload || checkerValue == null
                 || checkerValue.getTimeStamp() != configFileModified) {
             final InputStream in = new BufferedInputStream(
-                new FileInputStream(configFile));
-            createChecker(in);
+                    new FileInputStream(configFile));
+            final Checker checker = createChecker(in, classLoader);
             in.close();
 
             cache.put(configFile, new CheckerValue(
@@ -108,89 +118,20 @@ public class CheckerFactory implements PropertyResolver {
         return checkerValue.getChecker();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String resolve(final String propertyName) throws CheckstyleException {
-        return propertyNamesToValues.get(propertyName);
-    }
-
-    /**
-     * Get the number of properties.
-     *
-     * @return the number of properties.
-     */
-    public int getPropertyCount() {
-        return propertyNames.size();
-    }
-
-    /**
-     * Get the property name at the given index.
-     *
-     * @param index the index.
-     * @return the property name at that index.
-     */
-    public String getPropertyName(final int index) {
-        return propertyNames.get(index);
-    }
-
-    /**
-     * Get the property value at the given index.
-     *
-     * @param index the index.
-     * @return the property value at the index.
-     */
-    public String getPropertyValue(final int index) {
-        return propertyNamesToValues.get(propertyNames.get(index));
-    }
-
-    /**
-     * Add or update the property with the given name.
-     *
-     * @param name the name of the property.
-     * @param value the value of the property.
-     */
-    public void setProperty(final String name, final String value) {
-        if (!propertyNames.contains(name)) {
-            propertyNames.add(name);
-        }
-
-        propertyNamesToValues.put(name, value);
-    }
 
     /**
      * Create a checker with configuration in a given location.
      *
      * @param location the location of the configuration.
+     * @param contextClassLoader the context class loader, or null for default.
      * @return the checker.
      * @throws CheckstyleException if checker initialisation fails.
      */
-    private Checker createChecker(final InputStream location)
+    private Checker createChecker(final InputStream location,
+                                  final ClassLoader contextClassLoader)
             throws CheckstyleException {
-        propertyNames.clear();
-        propertyNamesToValues.clear();
-
-        // collect properties that are referenced in the config file
-        PropertyResolver collector = new PropertyResolver() {
-
-            public String resolve(final String propertyName) throws CheckstyleException {
-                if (!propertyNames.contains(propertyName)) {
-                    propertyNames.add(propertyName);
-                    propertyNamesToValues.put(propertyName,
-                            "Property '" + propertyName
-                                    + "' has no value defined in the configuration.");
-                }
-
-                return CheckerFactory.this.resolve(propertyName);
-            }
-        };
-
-        if (location != null) {
-            // ok load the checkstyle configuration in seperate thread
-            return createChecker(location, collector);
-        }
-
-        return checker;
+        return createChecker(location, new ListPropertyResolver(),
+                contextClassLoader);
     }
 
     /**
@@ -198,11 +139,13 @@ public class CheckerFactory implements PropertyResolver {
      *
      * @param configPath The path to the Checkstyle configuration file
      * @param resolver   the resolver
+     * @param contextClassLoader the context class loader, or null for default.
      * @return loaded Configuration object
-     * @throws CheckstyleException If there was any error loading the configuration file
+     * @throws CheckstyleException If there was any error loading the configuration file.
      */
     public Checker createChecker(final InputStream configPath,
-                                 final PropertyResolver resolver)
+                                 final PropertyResolver resolver,
+                                 final ClassLoader contextClassLoader)
             throws CheckstyleException {
 
         // This variable needs to be final so that it can be accessed from the
@@ -213,10 +156,14 @@ public class CheckerFactory implements PropertyResolver {
         Thread worker = new Thread() {
             public void run() {
                 try {
-                    final Configuration config = ConfigurationLoader.loadConfiguration(
-                            configPath, resolver, true);
                     threadReturn[0] = new Checker();
-                    ((Checker) threadReturn[0]).configure(config);
+
+                    if (configPath != null) {
+                        final Configuration config
+                                = ConfigurationLoader.loadConfiguration(
+                                configPath, resolver, true);
+                        ((Checker) threadReturn[0]).configure(config);
+                    }
 
                 } catch (CheckstyleException e) {
                     threadReturn[0] = e;
@@ -225,10 +172,12 @@ public class CheckerFactory implements PropertyResolver {
         };
 
         // Fetch the class loader from the JetStyle plugin
-        final ClassLoader loader = getClass().getClassLoader();
-
-        // Set the context Class loader
-        worker.setContextClassLoader(loader);
+        if (contextClassLoader != null) {
+            worker.setContextClassLoader(contextClassLoader);
+        } else {
+            final ClassLoader loader = getClass().getClassLoader();
+            worker.setContextClassLoader(loader);
+        }        
 
         // Begin reading the configuration
         worker.start();
@@ -244,12 +193,10 @@ public class CheckerFactory implements PropertyResolver {
 
         // Did the process of reading the configuration fail?
         if (threadReturn[0] instanceof CheckstyleException) {
-            throw(CheckstyleException) threadReturn[0];
+            throw (CheckstyleException) threadReturn[0];
         }
 
-        checker = (Checker) threadReturn[0];
-
-        return checker;
+        return (Checker) threadReturn[0];
     }
 
     /**
@@ -263,7 +210,7 @@ public class CheckerFactory implements PropertyResolver {
         /**
          * Create a new checker value.
          *
-         * @param checker the checker instance.
+         * @param checker   the checker instance.
          * @param timeStamp the timestamp of the config file.
          */
         public CheckerValue(final Checker checker, final long timeStamp) {
@@ -293,7 +240,92 @@ public class CheckerFactory implements PropertyResolver {
         public long getTimeStamp() {
             return timeStamp;
         }
-
     }
 
+    /**
+     * Property resolver using internal lists.
+     */
+    protected class ListPropertyResolver implements PropertyResolver {
+
+        private final Map<String, String> propertyNamesToValues
+                = new HashMap<String, String>();
+
+        private final List<String> propertyNames = new ArrayList<String>();
+
+        /**
+         * Get the list of property names.
+         *
+         * @return the list of property names.
+         */
+        public List<String> getPropertyNames() {
+            return propertyNames;
+        }
+
+        /**
+         * Get the map of property names to values.
+         *
+         * @return the map of property names to values.
+         */
+        public Map<String, String> getPropertyNamesToValues() {
+            return propertyNamesToValues;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public String resolve(final String propertyName) throws CheckstyleException {
+            // collect properties that are referenced in the config file
+            if (!propertyNames.contains(propertyName)) {
+                propertyNames.add(propertyName);
+
+                propertyNamesToValues.put(propertyName, "Property '" + propertyName
+                        + "' has no value defined in the configuration.");
+            }
+
+            return propertyNamesToValues.get(propertyName);
+        }
+
+        /**
+         * Get the number of properties.
+         *
+         * @return the number of properties.
+         */
+        public int getPropertyCount() {
+            return propertyNames.size();
+        }
+
+        /**
+         * Get the property name at the given index.
+         *
+         * @param index the index.
+         * @return the property name at that index.
+         */
+        public String getPropertyName(final int index) {
+            return propertyNames.get(index);
+        }
+
+        /**
+         * Get the property value at the given index.
+         *
+         * @param index the index.
+         * @return the property value at the index.
+         */
+        public String getPropertyValue(final int index) {
+            return propertyNamesToValues.get(propertyNames.get(index));
+        }
+
+        /**
+         * Add or update the property with the given name.
+         *
+         * @param name  the name of the property.
+         * @param value the value of the property.
+         */
+        public void setProperty(final String name, final String value) {
+            if (!propertyNames.contains(name)) {
+                propertyNames.add(name);
+            }
+
+            propertyNamesToValues.put(name, value);
+        }
+    }
 }

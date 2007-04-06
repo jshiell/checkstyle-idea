@@ -11,12 +11,26 @@ profile by way of an inspection.
 Released under a BSD-style licence - please see the LICENCE file for details.
 
 
+---------------------------------------
+TODO - Thing to fix before next release
+---------------------------------------
+
+1) Test and fix module scan.
+2) Test on bigger project.
+
+
 Use
 ---
 
 Once installed, a new inspection will be available in the group 'CheckStyle'.
 The 'Errors' item in the preferences panel will allow you to turn this on
 and to configure it.
+
+Project exception are treated a little oddly. Because CheckStyle demands these
+to be on the current classpath errors will appear if these have not as yet
+been compiled. Further, because we cache the real-time checkers for performance
+reasons, real-time scans may continue to show the errors after a compilation.
+A static scan will force a reload of the Checker and should resolve this.
 
 
 Configuration
@@ -32,6 +46,15 @@ rules being used.
 
 Note that as per the limitations CheckStyle files requiring property definitions
 are not yet supported. Sorry.
+
+
+Frequently Asked Questions
+--------------------------
+
+q) I see 'Got an exception - java.lang.RuntimeException: Unable to get class
+   information for <Exception Class>. (0:0)'
+a) CheckStyle is unable to retrieve information on exceptions in your project
+   until you have built it. Make your project in IDEA and then rescan.
 
 
 Limitations
@@ -53,9 +76,10 @@ Future
 The following are potential features which are likely to be investigated
 for future releases.
 
-* Scan files in the current module.
-* Scan selected files in the project panel.
+* Scan selected files/folder in the project panel.
 * Property definition support.
+* Better configuration dialogue with support for reverting to inbuilt
+  CheckStyle configuration.
 
 
 Feedback
@@ -92,9 +116,15 @@ LICENCE file.
 Version History
 ---------------
 
+0.6   - New: Static scanning for current module implemented.
+      - Fixed: Exceptions defined in project will no longer generate
+        a CheckStyle error once they have been compiled.
+
 0.5.2 - New: Settings are now stored in project, not workspace.
+
 0.5.1 - Fixed: NullPointer when a null PSI element is encountered
         during scanning.
+        
 0.5   - Improved: Localisation support.
       - Improved: Config file locations under the project root are now
         stored as relative rather than the system-specific absolute path.

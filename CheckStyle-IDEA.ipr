@@ -108,7 +108,7 @@
             <option name="myVal" value="100" />
           </server>
         </used_levels>
-        <inspection_tool class="CheckStyle-IDEA" level="CheckStyle" enabled="true" />
+        <inspection_tool class="CheckStyle-IDEA" level="CheckStyle" enabled="false" />
       </profile>
     </profiles>
   </component>
@@ -276,7 +276,7 @@
       <module fileurl="file://$PROJECT_DIR$/CheckStyle-IDEA.iml" filepath="$PROJECT_DIR$/CheckStyle-IDEA.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="IDEA 6148" project-jdk-type="IDEA JDK">
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="IDEA 6180" project-jdk-type="IDEA JDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="ProjectRunConfigurationManager" />

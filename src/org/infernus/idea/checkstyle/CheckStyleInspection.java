@@ -42,9 +42,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Produce a CheckStyle checker.
      *
      * @param project the currently open project.
+     * @param psiFile the psiFile being scanned.
      * @return a checker.
      */
-    public Checker getChecker(final Project project) {
+    public Checker getChecker(final Project project,
+                              final PsiFile psiFile) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
         try {
@@ -57,6 +59,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         "Couldn't get checkstyle plugin");
             }
 
+            final ClassLoader moduleClassLoader
+                    = checkStylePlugin.buildModuleClassLoader(psiFile);
+
             String configFile = checkStylePlugin.getConfiguration().getProperty(
                     CheckStyleConfiguration.CONFIG_FILE);
             if (configFile == null) {
@@ -64,7 +69,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
                 final InputStream in = CheckStyleInspection.class.getResourceAsStream(
                         CheckStyleConfiguration.DEFAULT_CONFIG);
-                checker = CheckerFactory.getInstance().getChecker(in);
+                checker = CheckerFactory.getInstance().getChecker(in, null);
                 in.close();
 
             } else {
@@ -72,7 +77,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile));
+                        new File(configFile), moduleClassLoader, false);
             }
 
             return checker;
@@ -137,7 +142,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         File tempFile = null;
         try {
-            final Checker checker = getChecker(manager.getProject());
+            final Checker checker = getChecker(manager.getProject(), psiFile);
 
             // we need to copy to a file as IntelliJ may not have saved the
             // file recently...

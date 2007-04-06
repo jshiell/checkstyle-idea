@@ -11,13 +11,16 @@
 </p>
         ]]>
     </description>
-    <version>0.5.2</version>
+    <version>0.6</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>0.6: New: Static scanning for current module implemented.</li>
+    <li>0.6: Fixed: Exceptions defined in project will no longer generate
+        a CheckStyle error once they have been compiled.</li>
     <li>0.5.2: New: Settings are now stored in project, not workspace.</li>
     <li>0.5.1: Fixed: NullPointer when a null PSI element is encountered
         during scanning.</li>
@@ -63,6 +66,15 @@
                 description="Run Checkstyle on the current file in the editor."
                 icon="/actions/execute.png">
                 
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
+
+            <action id="CheckStyleModuleFilesAction"
+                class="org.infernus.idea.checkstyle.actions.ScanModule"
+                text="Check Module"
+                description="Run Checkstyle on all files in the current module."
+                icon="/modules/modulesNode.png">
+
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 

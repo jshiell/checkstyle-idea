@@ -4,11 +4,13 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.Application;
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.JDOMExternalizable;
 import com.intellij.openapi.util.WriteExternalException;
@@ -31,6 +33,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -72,6 +77,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * Flag to track if a scan is in progress.
      */
     private boolean scanInProgress;
+
 
     /**
      * Configuration store.
@@ -330,9 +336,11 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * Produce a CheckStyle checker.
      *
+     * @param classLoader CheckStyle classloader or null if default
+     *                    should be used.
      * @return a checker.
      */
-    public Checker getChecker() {
+    public Checker getChecker(final ClassLoader classLoader) {
         LOG.debug("Getting CheckStyle checker.");
 
         try {
@@ -344,8 +352,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                 final InputStream in = CheckStyleInspection.class
                         .getResourceAsStream(
-                        CheckStyleConfiguration.DEFAULT_CONFIG);
-                checker = CheckerFactory.getInstance().getChecker(in);
+                                CheckStyleConfiguration.DEFAULT_CONFIG);
+                checker = CheckerFactory.getInstance().getChecker(
+                        in, classLoader);
                 in.close();
 
             } else {
@@ -354,7 +363,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile));
+                        new File(configFile), classLoader, true);
             }
 
             return checker;
@@ -431,13 +440,15 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * Scan a PSI file with CheckStyle.
      *
-     * @param element the PSI element to scan. This will be ignored if not
-     *                a java file.
+     * @param element           the PSI element to scan. This will be ignored if not
+     *                          a java file.
+     * @param moduleClassLoader the class loader for the current module.
      * @return a list of tree nodes representing the result tree for this
      *         file, an empty list or null if this file is invalid or
      *         has no errors.
      */
-    private List<ProblemDescriptor> checkPsiFile(final PsiElement element) {
+    private List<ProblemDescriptor> checkPsiFile(final PsiElement element,
+                                                 final ClassLoader moduleClassLoader) {
         if (element == null || !element.isValid() || !element.isPhysical()
                 || !PsiFile.class.isAssignableFrom(element.getClass())) {
             final String elementString = (element != null
@@ -458,7 +469,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         File tempFile = null;
         try {
-            final Checker checker = getChecker();
+            final Checker checker = getChecker(moduleClassLoader);
 
             // we need to copy to a file as IntelliJ may not have saved the file recently...
             final CreateTempFileThread fileThread = new CreateTempFileThread(
@@ -573,6 +584,50 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
+     * Build a class loader for the compilation path of the module
+     * of the given file.
+     *
+     * @param psiFile the file in question.
+     * @return the class loader to use, or null if none applicable.
+     * @throws MalformedURLException if the URL conversion fails.
+     */
+    protected ClassLoader buildModuleClassLoader(final PsiFile psiFile)
+            throws MalformedURLException {
+        if (psiFile == null) {
+            return null;
+        }
+
+        // find all compiled output paths for the module and deps
+        final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+        if (module == null) {
+            return null;
+        }
+
+        final ModuleRootManager rootManager
+                = ModuleRootManager.getInstance(module);
+
+        final List<URL> outputPaths = new ArrayList<URL>();
+        if (rootManager.getCompilerOutputPath() != null) {
+            final String outputPath
+                    = rootManager.getCompilerOutputPath().getPath();
+            outputPaths.add(new File(outputPath).toURL());
+        }
+
+        for (final Module depModule : rootManager.getDependencies()) {
+            final ModuleRootManager depRootManager
+                    = ModuleRootManager.getInstance(depModule);
+            if (depRootManager.getCompilerOutputPath() != null) {
+                final String depOutputPath
+                        = depRootManager.getCompilerOutputPath().getPath();
+                outputPaths.add(new File(depOutputPath).toURL());
+            }
+        }
+
+        return new URLClassLoader(outputPaths.toArray(
+                new URL[outputPaths.size()]), getClass().getClassLoader());
+    }
+
+    /**
      * Thread for file checking, to ensure we don't lock up the UI.
      */
     private class CheckFilesThread extends Thread {
@@ -618,11 +673,19 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
                 for (final PsiFile psiFile : files) {
+                    if (psiFile == null) {
+                        continue;
+                    }
+
+                    final ClassLoader moduleClassLoader
+                            = buildModuleClassLoader(psiFile);
+
                     // scan file and increment progress bar
                     // this must be done on the dispatch thread.
                     SwingUtilities.invokeAndWait(new Runnable() {
                         public void run() {
-                            final List<ProblemDescriptor> results = checkPsiFile(psiFile);
+                            final List<ProblemDescriptor> results
+                                    = checkPsiFile(psiFile, moduleClassLoader);
 
                             // add results if necessary
                             if (results != null && results.size() > 0) {
