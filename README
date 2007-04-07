@@ -11,14 +11,6 @@ profile by way of an inspection.
 Released under a BSD-style licence - please see the LICENCE file for details.
 
 
----------------------------------------
-TODO - Thing to fix before next release
----------------------------------------
-
-1) Test and fix module scan.
-2) Test on bigger project.
-
-
 Use
 ---
 
@@ -39,13 +31,20 @@ Configuration
 Configuration is available under the Settings dialogue. This controls
 configuration for both the inspection and static scanning.
 
-Currently the only configuration option is that of the CheckStyle file. If
-this field is left empty then the Sun checks, as supplied with CheckStyle, will
-be used. Pointing this at the file of your choice will result in the contained
-rules being used.
+- Configuration File tab -
+
+The main configuration option is that of the CheckStyle file. If
+this field is left empty, or the appropriate radio button is selected,
+then the Sun checks, as supplied with CheckStyle, will be used.
 
 Note that as per the limitations CheckStyle files requiring property definitions
 are not yet supported. Sorry.
+
+- Third Party Checks tab -
+
+This tab allows you to specify any third-party checks which your
+configuration file makes use of. All selected directories/JAR files
+will be added to CheckStyle's classpath.
 
 
 Frequently Asked Questions
@@ -78,8 +77,6 @@ for future releases.
 
 * Scan selected files/folder in the project panel.
 * Property definition support.
-* Better configuration dialogue with support for reverting to inbuilt
-  CheckStyle configuration.
 
 
 Feedback
@@ -117,6 +114,7 @@ Version History
 ---------------
 
 0.6   - New: Static scanning for current module implemented.
+      - New: Ability to add third-party checks.
       - Fixed: Exceptions defined in project will no longer generate
         a CheckStyle error once they have been compiled.
 

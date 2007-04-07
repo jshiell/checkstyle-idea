@@ -4,10 +4,12 @@ import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.JDOMExternalizable;
 import com.intellij.openapi.util.WriteExternalException;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.ArrayList;
 
 /**
  * A manager for CheckStyle plug-in configuration.
@@ -27,6 +29,11 @@ public final class CheckStyleConfiguration extends Properties
      * The CheckStyle file path.
      */
     public static final String CONFIG_FILE = "config-file";
+
+    /**
+     * The CheckStyle file path.
+     */
+    public static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
 
     /**
      * {@inheritDoc}
@@ -72,6 +79,51 @@ public final class CheckStyleConfiguration extends Properties
     }
 
     /**
+     * Get a string list property value.
+     *
+     * @param propertyName the name of the property.
+     * @return the value of the property.
+     */
+    @NotNull
+    public List<String> getListProperty(final String propertyName) {
+        final List<String> returnValue = new ArrayList<String>();
+
+        final String value = getProperty(propertyName);
+        if (value != null) {
+            final String[] parts = value.split(";");
+            for (final String part : parts) {
+                returnValue.add(part);
+            }
+        }
+
+        return returnValue;
+    }
+
+    /**
+     * Set a string list property value.
+     *
+     * @param propertyName the name of the property.
+     * @param value the value of the property.
+     */
+    public void setProperty(final String propertyName,
+                            final List<String> value) {
+        if (value == null) {
+            setProperty(propertyName, (String) null);
+            return;
+        }
+
+        final StringBuilder valueString = new StringBuilder();
+        for (final String part : value) {
+            if (valueString.length() > 0) {
+                valueString.append(";");
+            }
+            valueString.append(part);
+        }
+
+        setProperty(propertyName, valueString.toString());
+    }
+
+    /**
      * Get a boolean property value.
      *
      * @param propertyName the name of the property.
@@ -90,8 +142,8 @@ public final class CheckStyleConfiguration extends Properties
      * @param propertyName the name of the property.
      * @param value the value of the property.
      */
-    public void setBooleanProperty(final String propertyName,
-                                   final boolean value) {
+    public void setProperty(final String propertyName,
+                            final boolean value) {
         setProperty(propertyName, Boolean.toString(value));
     }
 }

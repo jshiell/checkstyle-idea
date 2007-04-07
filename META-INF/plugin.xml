@@ -19,6 +19,7 @@
         <![CDATA[
 <ul>
     <li>0.6: New: Static scanning for current module implemented.</li>
+    <li>0.6: New: Ability to add third-party checks.</li>
     <li>0.6: Fixed: Exceptions defined in project will no longer generate
         a CheckStyle error once they have been compiled.</li>
     <li>0.5.2: New: Settings are now stored in project, not workspace.</li>

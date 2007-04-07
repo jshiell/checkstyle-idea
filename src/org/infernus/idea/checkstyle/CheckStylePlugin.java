@@ -78,6 +78,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     private boolean scanInProgress;
 
+    /**
+     * Classloader for third party libraries.
+     */
+    private ClassLoader thirdPartyClassloader;
 
     /**
      * Configuration store.
@@ -110,6 +114,45 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         this.project = project;
         this.configPanel = new CheckStyleConfigPanel(this);
+    }
+
+    /**
+     * Get classloader for third party libraries.
+     *
+     * @return the classloader for third party libraries.
+     */
+    public synchronized ClassLoader getThirdPartyClassloader() {
+        if (thirdPartyClassloader == null) {
+            final List<String> thirdPartyClasses
+                    = configuration.getListProperty(
+                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH);
+            if (thirdPartyClasses.size() > 0) {
+                final URL[] urlList = new URL[thirdPartyClasses.size()];
+                int index = 0;
+                for (final String pathElement : thirdPartyClasses) {
+                    try {
+                        final String untokenisedPath = untokenisePath(
+                                pathElement);
+                        // toURI().toURL() escapes, whereas toURL() doesn't.
+                        urlList[index] = new File(
+                                untokenisedPath).toURI().toURL();
+                        ++index;
+
+                    } catch (MalformedURLException e) {
+                        LOG.error("Third party classpath element is malformed: "
+                                + pathElement, e);
+                    }
+                }
+
+                thirdPartyClassloader = new URLClassLoader(urlList,
+                        getClass().getClassLoader());
+
+            } else {
+                thirdPartyClassloader = getClass().getClassLoader();
+            }
+        }
+
+        return thirdPartyClassloader;
     }
 
     /**
@@ -291,8 +334,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public JComponent createComponent() {
+        // load configuration
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE));
+        configPanel.setThirdPartyClasspath(configuration.getListProperty(
+                CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
+
         return configPanel;
     }
 
@@ -315,6 +362,18 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         } else {
             configuration.remove(CheckStyleConfiguration.CONFIG_FILE);
         }
+
+        final List<String> thirdPartyClasspath
+                = configPanel.getThirdPartyClasspath();
+        if (thirdPartyClasspath.isEmpty()) {
+            configuration.remove(CheckStyleConfiguration.THIRDPARTY_CLASSPATH);
+        } else {
+            configuration.setProperty(
+                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH, 
+                    thirdPartyClasspath);
+        }
+
+        thirdPartyClassloader = null; // reset to force reload
     }
 
     /**
@@ -322,8 +381,11 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void reset() {
         configPanel.reset();
+        
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE));
+        configPanel.setThirdPartyClasspath(configuration.getListProperty(
+                CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
     }
 
     /**
@@ -359,7 +421,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
             } else {
                 // swap prefix if required
-                configFile = processConfigFilePath(configFile);
+                configFile = untokenisePath(configFile);
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
@@ -375,21 +437,37 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
-     * Process a stored configuration file path for any tokens.
+     * Process a stored file path for any tokens.
      *
-     * @param configFile the path to process.
+     * @param path the path to process.
      * @return the processed path.
      */
-    public String processConfigFilePath(final String configFile) {
-        LOG.debug("Processing config file: " + configFile);
+    public String untokenisePath(final String path) {
+        LOG.debug("Processing file: " + path);
 
-        if (configFile.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            final File fullConfigFile = new File(getProjectPath(), configFile.substring(
-                    CheckStyleConstants.PROJECT_DIR.length()));
+        if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+            final File fullConfigFile = new File(getProjectPath(),
+                    path.substring(CheckStyleConstants.PROJECT_DIR.length()));
             return fullConfigFile.getAbsolutePath();
         }
 
-        return configFile;
+        return path;
+    }
+
+    /**
+     * Process a path and add tokens as necessary.
+     *
+     * @param path the path to processed.
+     * @return the tokenised path.
+     */
+    public String tokenisePath(final String path) {
+        final String projectPathAbs = getProjectPath().getAbsolutePath();
+        if (path != null && path.startsWith(projectPathAbs)) {
+            return CheckStyleConstants.PROJECT_DIR + path.substring(
+                    projectPathAbs.length());
+        }
+
+        return path;   
     }
 
     /**
@@ -618,7 +696,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         }
 
         return new URLClassLoader(outputPaths.toArray(
-                new URL[outputPaths.size()]), getClass().getClassLoader());
+                new URL[outputPaths.size()]), getThirdPartyClassloader());
     }
 
     /**

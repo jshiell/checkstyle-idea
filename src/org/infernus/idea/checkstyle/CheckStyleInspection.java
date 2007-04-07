@@ -76,7 +76,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 in.close();
 
             } else {
-                configFile = checkStylePlugin.processConfigFilePath(configFile);
+                configFile = checkStylePlugin.untokenisePath(configFile);
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
