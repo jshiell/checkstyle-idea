@@ -26,7 +26,7 @@ public class CheckerFactory {
     private static final CheckerFactory INSTANCE = new CheckerFactory();
 
     /**
-     * Cached checkers for
+     * Cached checkers for the factory.
      */
     private final Map<File, CheckerValue> cache
             = new HashMap<File, CheckerValue>();
@@ -52,19 +52,21 @@ public class CheckerFactory {
      * Use with care: This does not cache the checker.
      *
      * @param configStream a stream for a CheckStyle configuration file.
+     * @param properties a list of properties to set. May be null.
      * @param classLoader  class loader for CheckStyle use, or null to use
      *                     the default.
      * @return a checker.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final InputStream configStream,
-                              final ClassLoader classLoader)
+                              final ClassLoader classLoader,
+                              final Map<String, String> properties)
             throws CheckstyleException {
         if (configStream == null) {
             throw new IllegalArgumentException("Config stream may not be null");
         }
 
-        return createChecker(configStream, classLoader);
+        return createChecker(configStream, classLoader, properties);
     }
 
     /**
@@ -79,6 +81,7 @@ public class CheckerFactory {
      * @param configFile  the location of the configuration file.
      * @param classLoader class loader for CheckStyle use, or null to use
      *                    the default.
+     * @param properties a list of properties to set. May be null.
      * @param forceReload force a reload of the checker rather than using
      *                    a cached value.
      * @return a checker.
@@ -87,6 +90,7 @@ public class CheckerFactory {
      */
     public Checker getChecker(final File configFile,
                               final ClassLoader classLoader,
+                              final Map<String, String> properties,
                               final boolean forceReload)
             throws CheckstyleException, IOException {
         if (configFile == null) {
@@ -106,7 +110,7 @@ public class CheckerFactory {
                 || checkerValue.getTimeStamp() != configFileModified) {
             final InputStream in = new BufferedInputStream(
                     new FileInputStream(configFile));
-            final Checker checker = createChecker(in, classLoader);
+            final Checker checker = createChecker(in, classLoader, properties);
             in.close();
 
             cache.put(configFile, new CheckerValue(
@@ -124,13 +128,15 @@ public class CheckerFactory {
      *
      * @param location the location of the configuration.
      * @param contextClassLoader the context class loader, or null for default.
+     * @param properties a list of properties to set. May be null.
      * @return the checker.
      * @throws CheckstyleException if checker initialisation fails.
      */
     private Checker createChecker(final InputStream location,
-                                  final ClassLoader contextClassLoader)
+                                  final ClassLoader contextClassLoader,
+                                  final Map<String, String> properties)
             throws CheckstyleException {
-        return createChecker(location, new ListPropertyResolver(),
+        return createChecker(location, new ListPropertyResolver(properties),
                 contextClassLoader);
     }
 
@@ -253,6 +259,21 @@ public class CheckerFactory {
         private final List<String> propertyNames = new ArrayList<String>();
 
         /**
+         * Create a default property resolver.
+         */
+        public ListPropertyResolver() {
+        }
+
+        /**
+         * Create a property resolver with the given properties.
+         *
+         * @param properties the properties to make available.
+         */
+        public ListPropertyResolver(final Map<String, String> properties) {
+            setProperties(properties);
+        }
+
+        /**
          * Get the list of property names.
          *
          * @return the list of property names.
@@ -326,6 +347,21 @@ public class CheckerFactory {
             }
 
             propertyNamesToValues.put(name, value);
+        }
+
+        /**
+         * Set all the properties in the map.
+         *
+         * @param properties a map of properties to set.
+         */
+        public void setProperties(final Map<String, String> properties) {
+            if (properties == null) {
+                return;
+            }
+
+            for (final String propertyName : properties.keySet()) {
+                setProperty(propertyName, properties.get(propertyName));
+            }
         }
     }
 }

@@ -6,10 +6,7 @@ import com.intellij.openapi.util.WriteExternalException;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * A manager for CheckStyle plug-in configuration.
@@ -34,6 +31,11 @@ public final class CheckStyleConfiguration extends Properties
      * The CheckStyle file path.
      */
     public static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
+
+    /**
+     * The prefix for stored properties.
+     */
+    public static final String PROPERTIES_PREFIX = "property.";
 
     /**
      * {@inheritDoc}
@@ -75,6 +77,65 @@ public final class CheckStyleConfiguration extends Properties
             propertyElement.setText(propertyValue);
 
             element.addContent(propertyElement);
+        }
+    }
+
+    /**
+     * Get all CheckStyle properties defined in the configuration.
+     *
+     * @return a map of CheckStyle property names to values.
+     */
+    public Map<String, String> getDefinedProperies() {
+        final Map<String, String> values = new HashMap<String, String>();
+
+        for (final Enumeration properties = propertyNames();
+             properties.hasMoreElements();) {
+            final String propertyName = (String) properties.nextElement();
+            if (propertyName.startsWith(PROPERTIES_PREFIX)) {
+                final String configPropertyName = propertyName.substring(
+                        PROPERTIES_PREFIX.length());
+                final String configPropertyValue = getProperty(
+                        configPropertyName);
+
+                values.put(configPropertyName, configPropertyValue);
+            }
+        }
+
+        return values;
+    }
+
+    /**
+     * Set the passed CheckStyle properties in the configuration.
+     * <p/>
+     * This will not erase old values. Use {@link #clearDefinedProperies()}
+     * for that.
+     *
+     * @param properties a map of CheckStyle property names to values.
+     */
+    public void setDefinedProperies(final Map<String, String> properties) {
+        if (properties == null || properties.size() == 0) {
+            return;
+        }
+
+        for (final String propertyName : properties.keySet()) {
+            final String value = properties.get(propertyName);
+            if (value != null) {
+                setProperty(PROPERTIES_PREFIX + propertyName,
+                        properties.get(propertyName));
+            }
+        }
+    }
+
+    /**
+     * Clear all CheckStyle properties defined in the configuration.
+     */
+    public void clearDefinedProperies() {
+        for (final Enumeration properties = propertyNames();
+             properties.hasMoreElements();) {
+            final String propertyName = (String) properties.nextElement();
+            if (propertyName.startsWith(PROPERTIES_PREFIX)) {
+                remove(propertyName);
+            }
         }
     }
 

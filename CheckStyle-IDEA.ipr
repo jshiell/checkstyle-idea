@@ -7,7 +7,9 @@
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
   <component name="CheckStyle-IDEA">
-    <checkstyle-config />
+    <checkstyle-config>
+      <property name="config-file">$PROJECT_DIR$/src/sun_checks.xml</property>
+    </checkstyle-config>
   </component>
   <component name="CodeStyleProjectProfileManger">
     <option name="PROJECT_PROFILE" />
@@ -106,7 +108,6 @@
             <option name="myVal" value="100" />
           </server>
         </used_levels>
-        <inspection_tool class="CheckStyle-IDEA" level="CheckStyle" enabled="false" />
       </profile>
     </profiles>
   </component>

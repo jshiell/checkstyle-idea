@@ -19,6 +19,7 @@ import javax.swing.*;
 import java.io.*;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Map;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -61,6 +62,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         "Couldn't get checkstyle plugin");
             }
 
+            final Map<String, String> checkstyleProperties
+                    = checkStylePlugin.getConfiguration().getDefinedProperies();
+
             final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
             final ClassLoader moduleClassLoader
                     = checkStylePlugin.buildModuleClassLoader(module);
@@ -72,7 +76,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
                 final InputStream in = CheckStyleInspection.class.getResourceAsStream(
                         CheckStyleConfiguration.DEFAULT_CONFIG);
-                checker = CheckerFactory.getInstance().getChecker(in, null);
+                checker = CheckerFactory.getInstance().getChecker(in, 
+                        moduleClassLoader, checkstyleProperties);
                 in.close();
 
             } else {
@@ -80,7 +85,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile), moduleClassLoader, false);
+                        new File(configFile), moduleClassLoader,
+                        checkstyleProperties, false);
             }
 
             return checker;

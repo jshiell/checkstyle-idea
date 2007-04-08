@@ -1,6 +1,11 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.util.ObjectUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -11,9 +16,8 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Provides an input box and browse button for CheckStyle file selection.
@@ -22,6 +26,12 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public final class CheckStyleConfigPanel extends JPanel {
+
+    /**
+     * Logger for this class.
+     */
+    private static final Log LOG = LogFactory.getLog(
+            CheckStyleConfigPanel.class);
 
     private final JLabel fileLabel = new JLabel();
     private final JTextField fileField = new JTextField();
@@ -38,6 +48,9 @@ public final class CheckStyleConfigPanel extends JPanel {
             new MoveUpPathAction());
     private final JButton moveDownPathButton = new JButton(
             new MoveDownPathAction());
+    private final CheckStylePropertiesTableModel propertiesModel
+            = new CheckStylePropertiesTableModel();
+    private final JTable propertiesTable = new JTable(propertiesModel);
 
     /**
      * Original configuration file for modification tests.
@@ -48,6 +61,11 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Original third party classpath for modification tests.
      */
     private List<String> thirdPartyClasspath;
+
+    /**
+     * Original CheckStyle properties for modification tests.
+     */
+    private Map<String, String> properties;
 
     /**
      * Plug-in reference.
@@ -101,6 +119,14 @@ public final class CheckStyleConfigPanel extends JPanel {
         fileLabel.setToolTipText(resources.getString(
                 "config.file.label.tooltip"));
 
+        propertiesTable.setToolTipText(resources.getString(
+                "config.file.properties.tooltip"));
+        final JScrollPane propertiesScroll = new JScrollPane(propertiesTable);
+        propertiesScroll.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        propertiesScroll.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
         browseButton.setAction(new BrowseAction());
 
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
@@ -121,9 +147,9 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(browseButton, new GridBagConstraints(
                 2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(Box.createVerticalGlue(), new GridBagConstraints(
-                0, 3, 3, 1, 0.0, 1.0, GridBagConstraints.NORTH,
-                GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(propertiesScroll, new GridBagConstraints(
+                0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
+                GridBagConstraints.BOTH, new Insets(4, 20, 4, 4), 0, 0));
 
         final JButton addPathButton = new JButton(new AddPathAction());
 
@@ -131,6 +157,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         removePathButton.setEnabled(false);
         moveUpPathButton.setEnabled(false);
         moveDownPathButton.setEnabled(false);
+        propertiesTable.setEnabled(false);
 
         pathList.addListSelectionListener(new PathListSelectionListener());
         final JScrollPane pathListScroll = new JScrollPane(pathList);
@@ -176,6 +203,21 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
+     * Validate the configuration data.
+     *
+     * @return null if valid, or the error message if not.
+     */
+    public String validateData() {
+        if (useCustomButton.isSelected() && getConfigFile() == null) {
+            return "No CheckStyle configuration file has been specified.";
+        }
+
+        // TODO property settings?
+
+        return null;
+    }
+
+    /**
      * Get the currently selected configuration file.
      * <p/>
      * This method will only return the configuration file
@@ -206,14 +248,13 @@ public final class CheckStyleConfigPanel extends JPanel {
      *
      * @param configFile the configuration file.
      */
-    public void setConfigFile(final File configFile) {
+    public void setConfigFile(final File configFile,
+                              final Map<String, String> properties) {
         if (configFile == null) {
-            setConfigFile((String) null);
-            useDefaultButton.setSelected(true);
+            setConfigFile((String) null, properties);
 
         } else {
-            setConfigFile(configFile.getAbsolutePath());
-            useCustomButton.setSelected(true);
+            setConfigFile(configFile.getAbsolutePath(), properties);
         }
     }
 
@@ -221,18 +262,115 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Set the configuration file.
      *
      * @param configFile the configuration file.
+     * @param properties a map of properties for this config file.
      */
-    public void setConfigFile(final String configFile) {
+    public void setConfigFile(final String configFile,
+                              final Map<String, String> properties) {
         if (configFile == null) {
             fileField.setText("");
             useDefaultButton.setSelected(true);
 
+            processConfigProperties(null, properties);
+
         } else {
             fileField.setText(plugin.untokenisePath(configFile));
             useCustomButton.setSelected(true);
+
+            processConfigProperties(new File(configFile), properties);
+        }
+
+        // save original properties
+        if (properties == null || configFile == null) {
+            this.properties = new HashMap<String, String>();
+        } else {
+            this.properties = properties;
         }
 
         this.configFile = configFile;
+    }
+
+    /**
+     * Extract all settable properties from the given file and set
+     * in the properties table.
+     *
+     * @param configFile the configuration file.
+     * @param properties any existing properties set.
+     */
+    private void processConfigProperties(final File configFile,
+                                         Map<String, String> properties) {
+        if (properties == null) {
+            properties = new HashMap<String, String>();
+        }
+
+        final List<String> propertiesInFile = extractProperties(configFile);
+
+        // merge properties from files
+        for (final String propertyName : propertiesInFile) {
+            if (!properties.containsKey(propertyName)) {
+                properties.put(propertyName, null);
+            }
+        }
+
+        // remove redundant properties
+        for (final String propertyName : properties.keySet()) {
+            if (!propertiesInFile.contains(propertyName)) {
+                properties.remove(propertyName);
+            }
+        }
+
+        // update UI
+        propertiesModel.setProperties(properties);
+    }
+
+    /**
+     * Extract all settable properties from the given configuration file.
+     *
+     * @param configFile the configuration file.
+     * @return the property names.
+     */
+    private List<String> extractProperties(final File configFile) {
+        if (configFile != null && configFile.exists()) {
+            try {
+                final Document configDoc = new SAXBuilder().build(configFile);
+                return extractProperties(configDoc.getRootElement());
+
+            } catch (Exception e) {
+                LOG.error("CheckStyle file could not be parsed for properties.",
+                        e);
+            }
+        }
+
+        return new ArrayList<String>();
+    }
+
+    /**
+     * Extract all settable properties from the given configuration element.
+     *
+     * @param element the configuration element.
+     * @return the settable property names.
+     */
+    private List<String> extractProperties(final Element element) {
+        final List<String> propertyNames = new ArrayList<String>();
+
+        if (element != null) {
+            if ("property".equals(element.getName())) {
+                final String value
+                        = element.getAttributeValue("value");
+                // check is value is a token
+                if (value != null && value.startsWith("${")
+                        && value.endsWith("}")) {
+                    final String propertyName = value.substring(2,
+                            value.length() - 1);
+                    propertyNames.add(propertyName);
+                }
+            }
+
+            for (final Element child : (List<Element>) element.getChildren()) {
+                propertyNames.addAll(extractProperties(child));
+            }
+        }
+
+        return propertyNames;
     }
 
     /**
@@ -277,10 +415,26 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
+     * Get the CheckStyle properties shown in this panel.
+     *
+     * @return the CheckStyle properties.
+     */
+    @NotNull
+    public Map<String, String> getProperties() {
+        final Map<String, String> properties = new HashMap<String, String>();
+
+        if (!useDefaultButton.isSelected()) {
+            properties.putAll(propertiesModel.getProperties());
+        }
+
+        return properties;
+    }
+
+    /**
      * Reset the configuration to the original values.
      */
     public void reset() {
-        setConfigFile(configFile);
+        setConfigFile(configFile, properties);
         setThirdPartyClasspath(thirdPartyClasspath);
     }
 
@@ -291,7 +445,8 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public boolean isModified() {
         return !ObjectUtils.equals(configFile, fileField.getText())
-                || !getThirdPartyClasspath().equals(thirdPartyClasspath);
+                || !getThirdPartyClasspath().equals(thirdPartyClasspath)
+                || !getProperties().equals(properties);
     }
 
     /**
@@ -344,6 +499,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             fileLabel.setEnabled(!useDefault);
             fileField.setEnabled(!useDefault);
             browseButton.setEnabled(!useDefault);
+            propertiesTable.setEnabled(!useDefault);
         }
     }
 
@@ -591,8 +747,11 @@ public final class CheckStyleConfigPanel extends JPanel {
             final int result = fileChooser.showOpenDialog(
                     CheckStyleConfigPanel.this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                fileField.setText(
-                        fileChooser.getSelectedFile().getAbsolutePath());
+                final File newConfigFile = fileChooser.getSelectedFile();
+                fileField.setText(newConfigFile.getAbsolutePath());
+
+                processConfigProperties(newConfigFile,
+                        propertiesModel.getProperties());
             }
         }
     }

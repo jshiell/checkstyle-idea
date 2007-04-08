@@ -336,7 +336,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     public JComponent createComponent() {
         // load configuration
         configPanel.setConfigFile(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE));
+                CheckStyleConfiguration.CONFIG_FILE),
+                configuration.getDefinedProperies());
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
 
@@ -354,6 +355,11 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void apply() throws ConfigurationException {
+        final String errorMessage = configPanel.validateData();
+        if (errorMessage != null) {
+            throw new ConfigurationException(errorMessage);
+        }
+
         final String configurationFile = configPanel.getConfigFile();
         if (configurationFile != null) {
             configuration.setProperty(CheckStyleConfiguration.CONFIG_FILE,
@@ -373,6 +379,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                     thirdPartyClasspath);
         }
 
+        configuration.clearDefinedProperies();
+        final Map<String, String> properties = configPanel.getProperties();
+        if (!properties.isEmpty()) {
+            configuration.setDefinedProperies(properties);
+        }
+
         thirdPartyClassloader = null; // reset to force reload
     }
 
@@ -383,7 +395,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         configPanel.reset();
         
         configPanel.setConfigFile(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE));
+                CheckStyleConfiguration.CONFIG_FILE),
+                configuration.getDefinedProperies());
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
     }
@@ -406,17 +419,20 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         LOG.debug("Getting CheckStyle checker.");
 
         try {
+            final Map<String, String> checkstyleProperties
+                    = configuration.getDefinedProperies();
+
             final Checker checker;
             String configFile = configuration.getProperty(
                     CheckStyleConfiguration.CONFIG_FILE);
             if (configFile == null) {
                 LOG.info("Loading default configuration");
 
-                final InputStream in = CheckStyleInspection.class
-                        .getResourceAsStream(
-                                CheckStyleConfiguration.DEFAULT_CONFIG);
+                final InputStream in
+                        = CheckStyleInspection.class.getResourceAsStream(
+                        CheckStyleConfiguration.DEFAULT_CONFIG);
                 checker = CheckerFactory.getInstance().getChecker(
-                        in, classLoader);
+                        in, classLoader, checkstyleProperties);
                 in.close();
 
             } else {
@@ -425,7 +441,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                 LOG.info("Loading configuration from " + configFile);
                 checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile), classLoader, true);
+                        new File(configFile), classLoader,
+                        checkstyleProperties, true);
             }
 
             return checker;
@@ -478,7 +495,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void checkFiles(final List<VirtualFile> files,
                            final AnActionEvent event) {
-
         if (files == null) {
             return;
         }
