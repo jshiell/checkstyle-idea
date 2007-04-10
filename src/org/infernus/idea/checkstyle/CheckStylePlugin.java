@@ -385,6 +385,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             configuration.setDefinedProperies(properties);
         }
 
+        reset(); // save current data as unmodified
+
         thirdPartyClassloader = null; // reset to force reload
     }
 
@@ -392,8 +394,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void reset() {
-        configPanel.reset();
-        
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
                 configuration.getDefinedProperies());
@@ -449,7 +449,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         } catch (Exception e) {
             LOG.error("Error", e);
-            throw new RuntimeException("Couldn't create Checker", e);
+            throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
 
@@ -460,6 +460,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return the processed path.
      */
     public String untokenisePath(final String path) {
+        if (path == null) {
+            return null;
+        }
+
         LOG.debug("Processing file: " + path);
 
         if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
@@ -478,6 +482,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return the tokenised path.
      */
     public String tokenisePath(final String path) {
+        if (path == null) {
+            return null;
+        }
+
         final String projectPathAbs = getProjectPath().getAbsolutePath();
         if (path != null && path.startsWith(projectPathAbs)) {
             return CheckStyleConstants.PROJECT_DIR + path.substring(
@@ -582,7 +590,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         fileThread.getFailure().getClass())) {
                     throw (IOException) fileThread.getFailure();
                 }
-                throw new RuntimeException(fileThread.getFailure());
+                throw new CheckStylePluginException(
+                        fileThread.getFailure().getMessage(),
+                        fileThread.getFailure());
             }
 
             tempFile = fileThread.getFile();
@@ -817,12 +827,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                     }
                 });
 
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 LOG.error("An error occurred while scanning a file.", e);
 
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        getToolWindowPanel().displayErrorResult();
+                        getToolWindowPanel().displayErrorResult(e);
                         getToolWindowPanel().clearProgressBar();
                         getToolWindowPanel().setProgressText(null);
 

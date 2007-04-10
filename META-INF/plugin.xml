@@ -11,16 +11,17 @@
 </p>
         ]]>
     </description>
-    <version>0.6</version>
+    <version>1.0</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
-    <li>0.6: New: Static scanning for current module implemented.</li>
-    <li>0.6: New: Ability to add third-party checks.</li>
-    <li>0.6: Fixed: Exceptions defined in project will no longer generate
+    <li>1.0: New: Static scanning for current module implemented.</li>
+    <li>1.0: New: Ability to add third-party checks.</li>
+    <li>1.0: New: Ability to define external properties.</li>
+    <li>1.0: Fixed: Exceptions defined in project will no longer generate
         a CheckStyle error once they have been compiled.</li>
     <li>0.5.2: New: Settings are now stored in project, not workspace.</li>
     <li>0.5.1: Fixed: NullPointer when a null PSI element is encountered

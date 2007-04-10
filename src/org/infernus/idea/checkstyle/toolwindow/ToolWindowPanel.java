@@ -12,8 +12,10 @@ import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
@@ -33,6 +35,9 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * The tool window for CheckStyle scans.
@@ -41,6 +46,9 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class ToolWindowPanel extends JPanel {
+
+    private static final Pattern PATTERN_MISSING_PROPERTY = Pattern.compile(
+            "Property \\$\\{([^\\}]*)\\} has not been set");
 
     private final MouseListener treeMouseListener = new ToolWindowMouseListener();
     private final TreeSelectionListener treeSelectionListener
@@ -353,15 +361,44 @@ public class ToolWindowPanel extends JPanel {
 
     /**
      * Clear the results and display notice to say an error occurred.
+     *
+     * @param error the error that occurred.
      */
-    public void displayErrorResult() {
+    public void displayErrorResult(Throwable error) {
         visibleRootNode.removeAllChildren();
 
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 
+        if (error instanceof InvocationTargetException) {
+            error = ((InvocationTargetException) error).getTargetException();
+        }
+
+        if (error instanceof CheckStylePluginException) {
+            error = error.getCause();
+        }
+
+        // match some friendly error messages.
+        String errorText = null;
+        if (error instanceof CheckstyleException) {
+            final String errorMessage = error.getMessage();
+
+            final Matcher missingPropertyMatcher
+                    = PATTERN_MISSING_PROPERTY.matcher(errorMessage);
+            if (missingPropertyMatcher.find()) {
+                final String propertyName = missingPropertyMatcher.group(1);
+                errorText = new MessageFormat(resources.getString(
+                        "plugin.results.error.missing-property")).format(
+                        new Object[]{propertyName});
+            }
+        }
+
+        if (errorText == null) {
+            errorText = resources.getString("plugin.results.error");
+        }
+
         ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
-                resources.getString("plugin.results.error"));
+                errorText);
 
         treeModel.reload();
     }

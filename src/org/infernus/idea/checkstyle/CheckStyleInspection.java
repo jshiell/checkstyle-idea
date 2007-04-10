@@ -93,7 +93,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } catch (Exception e) {
             LOG.error("Error", e);
-            throw new RuntimeException("Couldn't create Checker", e);
+            throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
 
@@ -174,7 +174,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } catch (IOException e) {
             LOG.error("Failure when creating temp file", e);
-            throw new RuntimeException("Couldn't create temp file", e);
+            throw new CheckStylePluginException("Couldn't create temp file", e);
 
         } finally {
             if (tempFile != null && tempFile.exists()) {

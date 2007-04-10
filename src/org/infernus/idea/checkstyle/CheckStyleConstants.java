@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.FileTypeManager;
-
 /**
  * Cross-application constants for the CheckStyle plug-in.
  *

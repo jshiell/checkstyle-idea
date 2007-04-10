@@ -37,14 +37,23 @@ The main configuration option is that of the CheckStyle file. If
 this field is left empty, or the appropriate radio button is selected,
 then the Sun checks, as supplied with CheckStyle, will be used.
 
-Note that as per the limitations CheckStyle files requiring property definitions
-are not yet supported. Sorry.
+If a custom file is being used and properties are available for definition
+then these will be displayed in the table below the file name.
 
 - Third Party Checks tab -
 
 This tab allows you to specify any third-party checks which your
 configuration file makes use of. All selected directories/JAR files
 will be added to CheckStyle's classpath.
+
+
+Troubleshooting
+---------------
+
+If an error occurs during the check an exception will be thrown, which
+IDEA will then catch and display in the standard exceptions dialogue. If
+you're unsure as to why things are awry this would be your best bet - chances
+are it's a missing property or classpath pre-requisite.
 
 
 Frequently Asked Questions
@@ -59,12 +68,12 @@ a) CheckStyle is unable to retrieve information on exceptions in your project
 Limitations
 -----------
 
-This release has some notable limitations:
-
 * If you change the configuration file the real-time scan will not be updated
   until the file is either changed or reopened.
-* Properties within configuration files cannot be defined or edited. Hence
-  CheckStyle files that require externally defined properties will fail.
+* We do not check if a property definition is required for a given file.
+  Hence you can exit configuration without setting required properties. Given,
+  however, that CheckStyle files can change without the plug-in being aware
+  this is something we'll always have to live with to some degree.
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
 
@@ -76,7 +85,7 @@ The following are potential features which are likely to be investigated
 for future releases.
 
 * Scan selected files/folder in the project panel.
-* Property definition support.
+* Better error feedback.
 
 
 Feedback
@@ -113,8 +122,9 @@ LICENCE file.
 Version History
 ---------------
 
-0.6   - New: Static scanning for current module implemented.
+1.0   - New: Static scanning for current module implemented.
       - New: Ability to add third-party checks.
+      - New: Ability to define external properties.
       - Fixed: Exceptions defined in project will no longer generate
         a CheckStyle error once they have been compiled.
 

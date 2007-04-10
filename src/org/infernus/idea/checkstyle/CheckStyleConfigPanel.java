@@ -13,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -50,7 +51,18 @@ public final class CheckStyleConfigPanel extends JPanel {
             new MoveDownPathAction());
     private final CheckStylePropertiesTableModel propertiesModel
             = new CheckStylePropertiesTableModel();
-    private final JTable propertiesTable = new JTable(propertiesModel);
+
+    /**
+     * Properties table, hacked for enable/disable support.
+     */
+    private final JTable propertiesTable = new JTable(propertiesModel) {
+        public Component prepareRenderer(final TableCellRenderer renderer,
+                                         final int row, final int column) {
+            final Component comp = super.prepareRenderer(renderer, row, column);
+            comp.setEnabled(isEnabled());
+            return comp;
+        }
+    };
 
     /**
      * Original configuration file for modification tests.
@@ -157,7 +169,6 @@ public final class CheckStyleConfigPanel extends JPanel {
         removePathButton.setEnabled(false);
         moveUpPathButton.setEnabled(false);
         moveDownPathButton.setEnabled(false);
-        propertiesTable.setEnabled(false);
 
         pathList.addListSelectionListener(new PathListSelectionListener());
         final JScrollPane pathListScroll = new JScrollPane(pathList);
@@ -273,10 +284,13 @@ public final class CheckStyleConfigPanel extends JPanel {
             processConfigProperties(null, properties);
 
         } else {
-            fileField.setText(plugin.untokenisePath(configFile));
+            final String processedConfigFile
+                    = plugin.untokenisePath(configFile);
+
+            fileField.setText(processedConfigFile);
             useCustomButton.setSelected(true);
 
-            processConfigProperties(new File(configFile), properties);
+            processConfigProperties(new File(processedConfigFile), properties);
         }
 
         // save original properties
@@ -312,9 +326,10 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         // remove redundant properties
-        for (final String propertyName : properties.keySet()) {
-            if (!propertiesInFile.contains(propertyName)) {
-                properties.remove(propertyName);
+        for (Iterator<String> i = properties.keySet().iterator();
+                i.hasNext();) {
+            if (!propertiesInFile.contains(i.next())) {
+                i.remove();
             }
         }
 
@@ -428,14 +443,6 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         return properties;
-    }
-
-    /**
-     * Reset the configuration to the original values.
-     */
-    public void reset() {
-        setConfigFile(configFile, properties);
-        setThirdPartyClasspath(thirdPartyClasspath);
     }
 
     /**

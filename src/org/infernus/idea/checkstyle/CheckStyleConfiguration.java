@@ -95,7 +95,7 @@ public final class CheckStyleConfiguration extends Properties
                 final String configPropertyName = propertyName.substring(
                         PROPERTIES_PREFIX.length());
                 final String configPropertyValue = getProperty(
-                        configPropertyName);
+                        propertyName);
 
                 values.put(configPropertyName, configPropertyValue);
             }
@@ -120,8 +120,7 @@ public final class CheckStyleConfiguration extends Properties
         for (final String propertyName : properties.keySet()) {
             final String value = properties.get(propertyName);
             if (value != null) {
-                setProperty(PROPERTIES_PREFIX + propertyName,
-                        properties.get(propertyName));
+                setProperty(PROPERTIES_PREFIX + propertyName, value);
             }
         }
     }
@@ -130,12 +129,19 @@ public final class CheckStyleConfiguration extends Properties
      * Clear all CheckStyle properties defined in the configuration.
      */
     public void clearDefinedProperies() {
+        final List<String> propertiesToRemove = new ArrayList<String>();
+
         for (final Enumeration properties = propertyNames();
              properties.hasMoreElements();) {
             final String propertyName = (String) properties.nextElement();
             if (propertyName.startsWith(PROPERTIES_PREFIX)) {
-                remove(propertyName);
+                // delay to stop concurrent modification
+                propertiesToRemove.add(propertyName);
             }
+        }
+
+        for (final String property : propertiesToRemove) {
+            remove(property);
         }
     }
 
