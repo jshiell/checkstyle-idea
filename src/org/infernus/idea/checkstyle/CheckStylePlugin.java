@@ -37,6 +37,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Main class for the CheckStyle static scanning plug-n.
@@ -91,12 +93,62 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
     /**
      * Get the base path of the project.
+     * <p/>
+     * The way to do this changes from IDEA 6 to IDEA 7. Hence we need to play
+     * silly buggers with introspection to determine the correct way to do this.
      *
      * @return the base path of the project.
      */
     public File getProjectPath() {
-        final File projectFile = new File(project.getProjectFilePath());
-        return projectFile.getParentFile();
+        if (project == null) {
+            return null;
+        }
+
+        final Class projectClass = project.getClass();
+
+        Method getBaseDirMethod;
+        try {
+            getBaseDirMethod = projectClass.getMethod("getBaseDir");
+        } catch (NoSuchMethodException e) {
+            getBaseDirMethod = null;
+        }
+
+        try {
+            if (getBaseDirMethod != null) { // IDEA 7 and above
+                final VirtualFile baseDir = (VirtualFile)
+                        getBaseDirMethod.invoke(project);
+                if (baseDir == null) {
+                    throw new IllegalStateException(
+                            "Cannot find project base directory.");
+                }
+
+                return new File(baseDir.getPath());
+
+            } else { // IDEA 6
+                final Method getProjectFilePathMethod
+                        = projectClass.getMethod("getProjectFilePath");
+
+                final String projectFilePath = (String)
+                        getProjectFilePathMethod.invoke(project);
+                final File projectFile = new File(projectFilePath);
+                return projectFile.getParentFile();
+            }
+
+        } catch (IllegalAccessException e) {
+            LOG.error("Cannot access method" , e);
+            throw new CheckStylePluginException(
+                    "Cannot access method", e);
+
+        } catch (InvocationTargetException e) {
+            LOG.error("Exception thrown from invoked method", e);
+            throw new CheckStylePluginException(
+                    "Exception thrown from invoked method", e);
+
+        } catch (NoSuchMethodException e) {
+            LOG.error("Unknown IDEA version, cannot obtain project path", e);
+            throw new CheckStylePluginException(
+                    "Unknown IDEA version, cannot obtain project path", e);
+        }
     }
 
     /**
@@ -105,14 +157,15 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @param project the current project.
      */
     public CheckStylePlugin(final Project project) {
+        this.project = project;
+
         if (project != null) {
-            LOG.info("CheckStyle Plugin loaded with project: \""
-                    + project.getProjectFilePath() + "\"");
+            LOG.info("CheckStyle Plugin loaded with project base dir: \""
+                    + getProjectPath() + "\"");
         } else {
             LOG.info("CheckStyle Plugin loaded with no project.");
         }
 
-        this.project = project;
         this.configPanel = new CheckStyleConfigPanel(this);
     }
 
@@ -487,7 +540,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         }
 
         final String projectPathAbs = getProjectPath().getAbsolutePath();
-        if (path != null && path.startsWith(projectPathAbs)) {
+        if (path.startsWith(projectPathAbs)) {
             return CheckStyleConstants.PROJECT_DIR + path.substring(
                     projectPathAbs.length());
         }
@@ -703,21 +756,31 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         final ModuleRootManager rootManager
                 = ModuleRootManager.getInstance(module);
+        if (rootManager == null) {
+            LOG.debug("Could not find root manager for module: "
+                    + module.getName());
+            return null;
+        }
 
         final List<URL> outputPaths = new ArrayList<URL>();
-        if (rootManager.getCompilerOutputPath() != null) {
-            final String outputPath
-                    = rootManager.getCompilerOutputPath().getPath();
-            outputPaths.add(new File(outputPath).toURL());
+        final VirtualFile outputPath = rootManager.getCompilerOutputPath();
+        if (outputPath != null) {
+            outputPaths.add(new File(outputPath.getPath()).toURL());
         }
 
         for (final Module depModule : rootManager.getDependencies()) {
             final ModuleRootManager depRootManager
                     = ModuleRootManager.getInstance(depModule);
-            if (depRootManager.getCompilerOutputPath() != null) {
-                final String depOutputPath
-                        = depRootManager.getCompilerOutputPath().getPath();
-                outputPaths.add(new File(depOutputPath).toURL());
+            if (depRootManager == null) {
+                LOG.debug("Could not find root manager for dependent module: "
+                        + depModule.getName());
+                continue;
+            }
+
+            final VirtualFile depOutputPath
+                        = depRootManager.getCompilerOutputPath();
+            if (depOutputPath != null) {
+                outputPaths.add(new File(depOutputPath.getPath()).toURL());
             }
         }
 
@@ -796,6 +859,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         moduleClassLoader = moduleClassLoaderMap.get(module);
                     } else {
                         moduleClassLoader = buildModuleClassLoader(module);
+                        moduleClassLoaderMap.put(module, moduleClassLoader);
                     }
 
                     // scan file and increment progress bar

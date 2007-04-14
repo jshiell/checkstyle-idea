@@ -11,6 +11,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.URLClassLoader;
+import java.net.URL;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * A configuration factory and resolver for CheckStyle.
@@ -19,6 +24,12 @@ import java.util.Map;
  * @version 1.1
  */
 public class CheckerFactory {
+
+    /**
+     * Logger for this class.
+     */
+    private static final Log LOG = LogFactory.getLog(
+            CheckerFactory.class);
 
     /**
      * A singleton instance.
@@ -153,6 +164,47 @@ public class CheckerFactory {
                                  final PropertyResolver resolver,
                                  final ClassLoader contextClassLoader)
             throws CheckstyleException {
+
+        if (LOG.isDebugEnabled()) {
+            // debug information
+
+            LOG.debug("Call to create new checker.");
+
+            // Log properties if known
+            if (resolver != null && resolver instanceof ListPropertyResolver) {
+                final ListPropertyResolver listResolver = (ListPropertyResolver)
+                        resolver;
+                final Map<String, String> propertiesToValues
+                        = listResolver.getPropertyNamesToValues();
+                for (final String propertyName : propertiesToValues.keySet()) {
+                    final String propertyValue
+                            = propertiesToValues.get(propertyName);
+                    LOG.debug("- Property: " + propertyName + "="
+                            + propertyValue);
+                }
+            }
+
+            // Log classloaders, if known
+            if (contextClassLoader != null) {
+                ClassLoader currentLoader = contextClassLoader;
+                while (currentLoader != null) {
+                    if (currentLoader instanceof URLClassLoader) {
+                        LOG.debug("+ URLClassLoader: " 
+                                + currentLoader.getClass().getName());
+                        final URLClassLoader urlLoader = (URLClassLoader)
+                                currentLoader;
+                        for (final URL url : urlLoader.getURLs()) {
+                            LOG.debug(" + URL: " + url);
+                        }
+                    } else {
+                        LOG.debug("+ ClassLoader: "
+                                + currentLoader.getClass().getName());
+                    }
+
+                    currentLoader = currentLoader.getParent();
+                }
+            }
+        }
 
         // This variable needs to be final so that it can be accessed from the
         // inner class, but at the same time we have to be able to set its
