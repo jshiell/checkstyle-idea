@@ -11,13 +11,15 @@
 </p>
         ]]>
     </description>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>1.0.1: Fixed: Potenially IllegalState if project path cannot be retrieved
+        within IDEA 7M1.</li>
     <li>1.0: New: Static scanning for current module implemented.</li>
     <li>1.0: New: Ability to add third-party checks.</li>
     <li>1.0: New: Ability to define external properties.</li>

@@ -30,6 +30,7 @@ import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.*;
@@ -99,6 +100,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      *
      * @return the base path of the project.
      */
+    @Nullable
     public File getProjectPath() {
         if (project == null) {
             return null;
@@ -118,8 +120,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 final VirtualFile baseDir = (VirtualFile)
                         getBaseDirMethod.invoke(project);
                 if (baseDir == null) {
-                    throw new IllegalStateException(
-                            "Cannot find project base directory.");
+                    return null;
                 }
 
                 return new File(baseDir.getPath());
@@ -520,9 +521,15 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         LOG.debug("Processing file: " + path);
 
         if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            final File fullConfigFile = new File(getProjectPath(),
-                    path.substring(CheckStyleConstants.PROJECT_DIR.length()));
-            return fullConfigFile.getAbsolutePath();
+            final File projectPath = getProjectPath();
+            if (projectPath != null) {
+                final File fullConfigFile = new File(projectPath,
+                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
+                return fullConfigFile.getAbsolutePath();
+            } else {
+                LOG.warn("Could not untokenise path as project dir is unset: "
+                        + path);
+            }
         }
 
         return path;
@@ -539,10 +546,13 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             return null;
         }
 
-        final String projectPathAbs = getProjectPath().getAbsolutePath();
-        if (path.startsWith(projectPathAbs)) {
-            return CheckStyleConstants.PROJECT_DIR + path.substring(
-                    projectPathAbs.length());
+        final File projectPath = getProjectPath();
+        if (projectPath != null) {
+            final String projectPathAbs = projectPath.getAbsolutePath();
+            if (path.startsWith(projectPathAbs)) {
+                return CheckStyleConstants.PROJECT_DIR + path.substring(
+                        projectPathAbs.length());
+            }
         }
 
         return path;   

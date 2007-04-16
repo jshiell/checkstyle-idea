@@ -122,6 +122,8 @@ LICENCE file.
 Version History
 ---------------
 
+1.0.1 - Fixed: Potenially IllegalState if project path cannot be retrieved
+        within IDEA 7M1.
 1.0   - New: Static scanning for current module implemented.
       - New: Ability to add third-party checks.
       - New: Ability to define external properties.
