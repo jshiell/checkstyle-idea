@@ -23,11 +23,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.puppycrawl.tools.checkstyle.Checker;
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,7 +62,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * The configuration panel for the plug-in.
      */
-    private final CheckStyleConfigPanel configPanel;
+    private CheckStyleConfigPanel configPanel;
 
     /**
      * A reference to the current project.
@@ -136,7 +139,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             }
 
         } catch (IllegalAccessException e) {
-            LOG.error("Cannot access method" , e);
+            LOG.error("Cannot access method", e);
             throw new CheckStylePluginException(
                     "Cannot access method", e);
 
@@ -160,14 +163,19 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     public CheckStylePlugin(final Project project) {
         this.project = project;
 
-        if (project != null) {
-            LOG.info("CheckStyle Plugin loaded with project base dir: \""
-                    + getProjectPath() + "\"");
-        } else {
-            LOG.info("CheckStyle Plugin loaded with no project.");
-        }
+        try {
+            if (project != null) {
+                LOG.info("CheckStyle Plugin loaded with project base dir: \""
+                        + getProjectPath() + "\"");
+            } else {
+                LOG.info("CheckStyle Plugin loaded with no project.");
+            }
 
-        this.configPanel = new CheckStyleConfigPanel(this);
+            this.configPanel = new CheckStyleConfigPanel(this);
+
+        } catch (Throwable t) {
+            LOG.error("Project initialisation failed.", t);
+        }
     }
 
     /**
@@ -260,11 +268,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
-        toolWindowId = resources.getString("plugin.toolwindow.name");
-        if (toolWindowId == null) {
-            throw new IllegalArgumentException("Could not read toolwindow "
-                    + "name from resource bundle.");
-        }
+        toolWindowId = IDEAUtilities.getResource("plugin.toolwindow.name",
+                "CheckStyle");
 
         toolWindow = toolWindowManager.registerToolWindow(toolWindowId,
                 new ToolWindowPanel(project), ToolWindowAnchor.BOTTOM);
@@ -364,9 +369,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public String getDisplayName() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        return resources.getString("plugin.configuration-name");
+        return IDEAUtilities.getResource("plugin.configuration-name",
+                "CheckStyle Plugin");
     }
 
     /**
@@ -388,6 +392,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public JComponent createComponent() {
+        if (configPanel == null) {
+            return null;
+        }
+
         // load configuration
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
@@ -402,6 +410,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public boolean isModified() {
+        if (configPanel == null) {
+            return false;
+        }
+
         return configPanel.isModified();
     }
 
@@ -409,6 +421,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void apply() throws ConfigurationException {
+        if (configPanel == null) {
+            return;
+        }
+
         final String errorMessage = configPanel.validateData();
         if (errorMessage != null) {
             throw new ConfigurationException(errorMessage);
@@ -429,7 +445,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             configuration.remove(CheckStyleConfiguration.THIRDPARTY_CLASSPATH);
         } else {
             configuration.setProperty(
-                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH, 
+                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH,
                     thirdPartyClasspath);
         }
 
@@ -448,6 +464,10 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void reset() {
+        if (configPanel == null) {
+            return;
+        }
+
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
                 configuration.getDefinedProperies());
@@ -460,6 +480,28 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void disposeUIResources() {
 
+    }
+
+    /**
+     * Process an error.
+     *
+     * @param message a description of the error. May be null.
+     * @param error   the exception.
+     * @return any exception to be passed upwards.
+     */
+    public static CheckStylePluginException processError(final String message,
+                                                         @NotNull final Throwable error) {
+        Throwable root = error;
+        while (root.getCause() != null
+                && !(root instanceof CheckstyleException)) {
+            root = root.getCause();
+        }
+
+        if (message != null) {
+            return new CheckStylePluginException(message, root);
+        }
+
+        return new CheckStylePluginException(root.getMessage(), root);
     }
 
     /**
@@ -501,8 +543,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
             return checker;
 
-        } catch (Exception e) {
-            LOG.error("Error", e);
+        } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
@@ -555,7 +596,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             }
         }
 
-        return path;   
+        return path;
     }
 
     /**
@@ -603,87 +644,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
-     * Scan a PSI file with CheckStyle.
-     *
-     * @param element           the PSI element to scan. This will be ignored if not
-     *                          a java file.
-     * @param moduleClassLoader the class loader for the current module.
-     * @return a list of tree nodes representing the result tree for this
-     *         file, an empty list or null if this file is invalid or
-     *         has no errors.
-     */
-    private List<ProblemDescriptor> checkPsiFile(final PsiElement element,
-                                                 final ClassLoader moduleClassLoader) {
-        if (element == null || !element.isValid() || !element.isPhysical()
-                || !PsiFile.class.isAssignableFrom(element.getClass())) {
-            final String elementString = (element != null
-                    ? element.toString() : null);
-            LOG.debug("Skipping as invalid type: " + elementString);
-            return null;
-        }
-
-        final PsiFile psiFile = (PsiFile) element;
-        LOG.debug("Scanning " + psiFile.getName());
-
-        final InspectionManager manager
-                = InspectionManager.getInstance(psiFile.getProject());
-
-        if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
-            return null;
-        }
-
-        File tempFile = null;
-        try {
-            final Checker checker = getChecker(moduleClassLoader);
-
-            // we need to copy to a file as IntelliJ may not have saved the file recently...
-            final CreateTempFileThread fileThread = new CreateTempFileThread(
-                    psiFile);
-            ApplicationManager.getApplication().runReadAction(fileThread);
-
-            // rethrow any error from the thread.
-            if (fileThread.getFailure() != null) {
-                if (Error.class.isAssignableFrom(
-                        fileThread.getFailure().getClass())) {
-                    throw (Error) fileThread.getFailure();
-                } else if (RuntimeException.class.isAssignableFrom(
-                        fileThread.getFailure().getClass())) {
-                    throw (RuntimeException) fileThread.getFailure();
-                } else if (IOException.class.isAssignableFrom(
-                        fileThread.getFailure().getClass())) {
-                    throw (IOException) fileThread.getFailure();
-                }
-                throw new CheckStylePluginException(
-                        fileThread.getFailure().getMessage(),
-                        fileThread.getFailure());
-            }
-
-            tempFile = fileThread.getFile();
-            if (tempFile == null) {
-                throw new IllegalStateException(
-                        "Failed to create temporary file.");
-            }
-
-            final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(psiFile, manager, true);
-            checker.addListener(listener);
-            checker.process(new File[]{tempFile});
-            checker.destroy();
-
-            return listener.getProblems();
-
-        } catch (IOException e) {
-            LOG.error("Failure when creating temp file", e);
-            throw new IllegalStateException("Couldn't create temp file", e);
-
-        } finally {
-            if (tempFile != null && tempFile.exists()) {
-                tempFile.delete();
-            }
-        }
-    }
-
-    /**
      * Thread to read the file to a temporary file.
      */
     private class CreateTempFileThread implements Runnable {
@@ -691,7 +651,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         /**
          * Any failure that occurred on the thread.
          */
-        private Throwable failure;
+        private IOException failure;
 
         /**
          * The file we are creating a temporary file from.
@@ -717,7 +677,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
          *
          * @return the failure, if any.
          */
-        public Throwable getFailure() {
+        public IOException getFailure() {
             return failure;
         }
 
@@ -743,9 +703,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 tempFileOut.flush();
                 tempFileOut.close();
 
-            } catch (Throwable e) {
+            } catch (IOException e) {
                 failure = e;
-
             }
         }
     }
@@ -788,7 +747,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             }
 
             final VirtualFile depOutputPath
-                        = depRootManager.getCompilerOutputPath();
+                    = depRootManager.getCompilerOutputPath();
             if (depOutputPath != null) {
                 outputPaths.add(new File(depOutputPath.getPath()).toURL());
             }
@@ -874,19 +833,21 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                     // scan file and increment progress bar
                     // this must be done on the dispatch thread.
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        public void run() {
-                            final List<ProblemDescriptor> results
-                                    = checkPsiFile(psiFile, moduleClassLoader);
+                    final FileScanner fileScanner = new FileScanner(
+                            psiFile, moduleClassLoader);
+                    SwingUtilities.invokeAndWait(fileScanner);
 
-                            // add results if necessary
-                            if (results != null && results.size() > 0) {
-                                fileResults.put(psiFile, results);
-                            }
+                    // check for errors
+                    if (fileScanner.getError() != null) {
+                        // throw any exceptions from the thread
+                        throw fileScanner.getError();
+                    }
 
-                            getToolWindowPanel().incrementProgressBar();
-                        }
-                    });
+                    // add results if necessary
+                    if (fileScanner.getResults() != null
+                            && fileScanner.getResults().size() > 0) {
+                        fileResults.put(psiFile, fileScanner.getResults());
+                    }
                 }
 
                 // invoke Swing fun in Swing thread.
@@ -902,17 +863,23 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 });
 
             } catch (final Throwable e) {
-                LOG.error("An error occurred while scanning a file.", e);
+                final CheckStylePluginException processedError = processError(
+                        "An error occurred during a file scan.", e);
 
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        getToolWindowPanel().displayErrorResult(e);
-                        getToolWindowPanel().clearProgressBar();
-                        getToolWindowPanel().setProgressText(null);
+                if (processedError != null) {
+                    LOG.error("An error occurred while scanning a file.",
+                            processedError);
 
-                        scanInProgress = false;
-                    }
-                });
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            getToolWindowPanel().displayErrorResult(processedError);
+                            getToolWindowPanel().clearProgressBar();
+                            getToolWindowPanel().setProgressText(null);
+
+                            scanInProgress = false;
+                        }
+                    });
+                }
             }
         }
 
@@ -924,11 +891,14 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
          */
         private List<VirtualFile> flattenFiles(final VirtualFile file) {
             final List<VirtualFile> elementList = new ArrayList<VirtualFile>();
-            elementList.add(file);
 
-            if (file.getChildren() != null) {
-                for (final VirtualFile childFile : file.getChildren()) {
-                    elementList.addAll(flattenFiles(childFile));
+            if (file != null) {
+                elementList.add(file);
+
+                if (file.getChildren() != null) {
+                    for (final VirtualFile childFile : file.getChildren()) {
+                        elementList.addAll(flattenFiles(childFile));
+                    }
                 }
             }
 
@@ -936,4 +906,129 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         }
     }
 
+    /**
+     * Runnable for scanning an individual file.
+     */
+    protected final class FileScanner implements Runnable {
+
+        private List<ProblemDescriptor> results;
+        private PsiFile fileToScan;
+        private ClassLoader moduleClassLoader;
+        private Throwable error;
+
+        /**
+         * Create a new file scanner.
+         *
+         * @param fileToScan        the file to scan.
+         * @param moduleClassLoader the class loader for the file's module
+         */
+        public FileScanner(final PsiFile fileToScan,
+                           final ClassLoader moduleClassLoader) {
+            this.fileToScan = fileToScan;
+            this.moduleClassLoader = moduleClassLoader;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void run() {
+            try {
+                results = checkPsiFile(fileToScan, moduleClassLoader);
+
+                getToolWindowPanel().incrementProgressBar();
+            } catch (Throwable e) {
+                error = e;
+            }
+        }
+
+        /**
+         * Get the results of the scan.
+         *
+         * @return the results of the scan.
+         */
+        public List<ProblemDescriptor> getResults() {
+            return results;
+        }
+
+        /**
+         * Get any error that may have occurred during the scan.
+         *
+         * @return any error that may have occurred during the scan
+         */
+        public Throwable getError() {
+            return error;
+        }
+
+        /**
+         * Scan a PSI file with CheckStyle.
+         *
+         * @param element           the PSI element to scan. This will be
+         *                          ignored if not a java file.
+         * @param moduleClassLoader the class loader for the current module.
+         * @return a list of tree nodes representing the result tree for this
+         *         file, an empty list or null if this file is invalid or
+         *         has no errors.
+         * @throws Throwable if the
+         */
+        private List<ProblemDescriptor> checkPsiFile(final PsiElement element,
+                                                     final ClassLoader moduleClassLoader)
+                throws Throwable {
+            if (element == null || !element.isValid() || !element.isPhysical()
+                    || !PsiFile.class.isAssignableFrom(element.getClass())) {
+                final String elementString = (element != null
+                        ? element.toString() : null);
+                LOG.debug("Skipping as invalid type: " + elementString);
+                return null;
+            }
+
+            final PsiFile psiFile = (PsiFile) element;
+            LOG.debug("Scanning " + psiFile.getName());
+
+            final InspectionManager manager
+                    = InspectionManager.getInstance(psiFile.getProject());
+
+            if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
+                return null;
+            }
+
+            File tempFile = null;
+            try {
+                final Checker checker = getChecker(moduleClassLoader);
+
+                // we need to copy to a file as IntelliJ may not have
+                // saved the file recently...
+                final CreateTempFileThread fileThread
+                        = new CreateTempFileThread(psiFile);
+                ApplicationManager.getApplication().runReadAction(fileThread);
+
+                // rethrow any error from the thread.
+                if (fileThread.getFailure() != null) {
+                    throw fileThread.getFailure();
+                }
+
+                tempFile = fileThread.getFile();
+                if (tempFile == null) {
+                    throw new IllegalStateException(
+                            "Failed to create temporary file.");
+                }
+
+                final CheckStyleAuditListener listener
+                        = new CheckStyleAuditListener(psiFile, manager, true);
+                checker.addListener(listener);
+                checker.process(new File[]{tempFile});
+                checker.destroy();
+
+                return listener.getProblems();
+
+            } catch (IOException e) {
+                LOG.error("Failure when creating temp file", e);
+                throw new IllegalStateException("Couldn't create temp file", e);
+
+            } finally {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
+            }
+        }
+    }
 }

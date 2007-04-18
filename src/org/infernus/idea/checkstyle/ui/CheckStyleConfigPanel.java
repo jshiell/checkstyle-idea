@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.util.ObjectUtils;
 import org.apache.commons.logging.Log;
@@ -7,6 +7,9 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.infernus.idea.checkstyle.CheckStylePropertiesTableModel;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

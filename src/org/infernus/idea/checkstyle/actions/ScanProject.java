@@ -10,7 +10,10 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,44 +27,58 @@ import java.util.ResourceBundle;
  */
 public class ScanProject extends BaseAction {
 
+    /**
+     * Logger for this class.
+     */
+    private static final Log LOG = LogFactory.getLog(
+            ScanProject.class);
 
     /**
      * {@inheritDoc}
      */
     public void actionPerformed(final AnActionEvent event) {
-        final Project project = (Project) event.getDataContext().getData(
-                DataConstants.PROJECT);
-        if (project == null) {
-            return;
-        }
+        try {
+            final Project project = (Project) event.getDataContext().getData(
+                    DataConstants.PROJECT);
+            if (project == null) {
+                return;
+            }
 
-        final CheckStylePlugin checkStylePlugin
-                = project.getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
+            final CheckStylePlugin checkStylePlugin
+                    = project.getComponent(CheckStylePlugin.class);
+            if (checkStylePlugin == null) {
+                throw new IllegalStateException("Couldn't get checkstyle plugin");
+            }
 
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(checkStylePlugin.getToolWindowId());
-        toolWindow.activate(null);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(
+                    project).getToolWindow(checkStylePlugin.getToolWindowId());
+            toolWindow.activate(null);
 
-        // show progress text
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        final String progressText = resources.getString(
-                "plugin.status.in-progress.project");
-        ((ToolWindowPanel) toolWindow.getComponent()).setProgressText(
-                progressText);
+            // show progress text
+            final ResourceBundle resources = ResourceBundle.getBundle(
+                    CheckStyleConstants.RESOURCE_BUNDLE);
+            final String progressText = resources.getString(
+                    "plugin.status.in-progress.project");
+            ((ToolWindowPanel) toolWindow.getComponent()).setProgressText(
+                    progressText);
 
-        // find project files
-        ProjectRootManager projectRootManager
-                = ProjectRootManager.getInstance(project);
-        final VirtualFile[] sourceRoots
-                = projectRootManager.getContentSourceRoots();
+            // find project files
+            ProjectRootManager projectRootManager
+                    = ProjectRootManager.getInstance(project);
+            final VirtualFile[] sourceRoots
+                    = projectRootManager.getContentSourceRoots();
 
-        if (sourceRoots != null && sourceRoots.length > 0) {
-            project.getComponent(CheckStylePlugin.class).checkFiles(
-                    flattenFiles(sourceRoots), event);
+            if (sourceRoots != null && sourceRoots.length > 0) {
+                project.getComponent(CheckStylePlugin.class).checkFiles(
+                        flattenFiles(sourceRoots), event);
+            }
+
+        } catch (Throwable e) {
+            final CheckStylePluginException processed
+                    = CheckStylePlugin.processError(null, e);
+            if (processed != null) {
+                LOG.error("Current project scan failed", processed);
+            }
         }
     }
 
@@ -94,34 +111,40 @@ public class ScanProject extends BaseAction {
     public void update(final AnActionEvent event) {
         super.update(event);
 
-        final Presentation presentation = event.getPresentation();
+        try {
+            final Presentation presentation = event.getPresentation();
 
-        final Project project = (Project) event.getDataContext().getData(
-                DataConstants.PROJECT);
-        if (project == null) { // check if we're loading...
-            presentation.setEnabled(false);
-            return;
+            final Project project = (Project) event.getDataContext().getData(
+                    DataConstants.PROJECT);
+            if (project == null) { // check if we're loading...
+                presentation.setEnabled(false);
+                return;
+            }
+
+            final CheckStylePlugin checkStylePlugin
+                    = project.getComponent(CheckStylePlugin.class);
+            if (checkStylePlugin == null) {
+                throw new IllegalStateException("Couldn't get checkstyle plugin");
+            }
+
+            ProjectRootManager projectRootManager
+                    = ProjectRootManager.getInstance(project);
+            final VirtualFile[] sourceRoots
+                    = projectRootManager.getContentSourceRoots();
+
+            // disable if no files are selected
+            if (sourceRoots == null || sourceRoots.length == 0) {
+                presentation.setEnabled(false);
+
+            } else {
+                presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+            }
+        } catch (Throwable e) {
+            final CheckStylePluginException processed
+                    = CheckStylePlugin.processError(null, e);
+            if (processed != null) {
+                LOG.error("Button update failed", processed);
+            }
         }
-
-        final CheckStylePlugin checkStylePlugin
-                = project.getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-
-        ProjectRootManager projectRootManager
-                = ProjectRootManager.getInstance(project);
-        final VirtualFile[] sourceRoots
-                = projectRootManager.getContentSourceRoots();
-
-        // disable if no files are selected
-        if (sourceRoots == null || sourceRoots.length == 0) {
-            presentation.setEnabled(false);
-
-        } else {
-            presentation.setEnabled(!checkStylePlugin.isScanInProgress());
-        }
-
-
     }
 }

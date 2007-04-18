@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.exception;
 
 /**
  * Exception thrown on a plug-in error.

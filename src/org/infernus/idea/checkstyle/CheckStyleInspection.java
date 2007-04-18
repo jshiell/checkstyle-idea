@@ -3,22 +3,27 @@ package org.infernus.idea.checkstyle;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Map;
 
 /**
@@ -92,7 +97,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return checker;
 
         } catch (Exception e) {
-            LOG.error("Error", e);
+            LOG.error("Checker could not be created.", e);
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
@@ -110,9 +115,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
      */
     @NotNull
     public String getGroupDisplayName() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        return resources.getString("plugin.group");
+        return IDEAUtilities.getResource("plugin.group", "CheckStyle");
     }
 
     /**
@@ -120,9 +123,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
      */
     @NotNull
     public String getDisplayName() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        return resources.getString("plugin.display-name");
+        return IDEAUtilities.getResource("plugin.display-name",
+                "Real-time scan");
     }
 
     /**
@@ -172,9 +174,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final List<ProblemDescriptor> problems = listener.getProblems();
             return problems.toArray(new ProblemDescriptor[problems.size()]);
 
-        } catch (IOException e) {
-            LOG.error("Failure when creating temp file", e);
-            throw new CheckStylePluginException("Couldn't create temp file", e);
+        } catch (Throwable e) {
+            final CheckStylePluginException processed
+                    = CheckStylePlugin.processError(
+                    "The inspection could not be executed.", e);
+            LOG.error("The inspection could not be executed.", processed);
+
+            return null;
 
         } finally {
             if (tempFile != null && tempFile.exists()) {

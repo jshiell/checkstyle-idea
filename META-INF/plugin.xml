@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <idea-version since-build="5600"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>1.0.2: Improved: Error handling.</li>
     <li>1.0.1: Fixed: Potenially IllegalState if project path cannot be retrieved
         within IDEA 7M1.</li>
     <li>1.0: New: Static scanning for current module implemented.</li>

@@ -1,4 +1,6 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.ui;
+
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.*;
 import java.awt.*;

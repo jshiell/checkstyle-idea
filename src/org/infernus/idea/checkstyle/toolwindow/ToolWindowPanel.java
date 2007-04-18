@@ -11,13 +11,14 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
+import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,9 +36,9 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * The tool window for CheckStyle scans.
@@ -47,8 +48,14 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class ToolWindowPanel extends JPanel {
 
-    private static final Pattern PATTERN_MISSING_PROPERTY = Pattern.compile(
-            "Property \\$\\{([^\\}]*)\\} has not been set");
+    /**
+     * Logger for this class.
+     */
+    private static final Log LOG = LogFactory.getLog(
+            ToolWindowPanel.class);
+
+    private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
+            = new HashMap<Pattern, String>();
 
     private final MouseListener treeMouseListener = new ToolWindowMouseListener();
     private final TreeSelectionListener treeSelectionListener
@@ -63,6 +70,20 @@ public class ToolWindowPanel extends JPanel {
 
     private DefaultTreeModel treeModel;
     private boolean scrollToSource;
+
+    static {
+        try {
+            CHECKSTYLE_ERROR_PATTERNS.put(
+                    Pattern.compile("Property \\$\\{([^\\}]*)\\} has not been set"),
+                    "plugin.results.error.missing-property");
+            CHECKSTYLE_ERROR_PATTERNS.put(
+                    Pattern.compile("Unable to instantiate (.*)"),
+                    "plugin.results.error.instantiation-failed");
+
+        } catch (Throwable t) {
+            LOG.error("Pattern mappings could not be instantiated.", t);
+        }
+    }
 
     /**
      * Create a tool window for the given project.
@@ -364,37 +385,38 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param error the error that occurred.
      */
-    public void displayErrorResult(Throwable error) {
+    public void displayErrorResult(final Throwable error) {
         visibleRootNode.removeAllChildren();
 
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 
-        if (error instanceof InvocationTargetException) {
-            error = ((InvocationTargetException) error).getTargetException();
-        }
-
-        if (error instanceof CheckStylePluginException) {
-            error = error.getCause();
-        }
-
         // match some friendly error messages.
         String errorText = null;
-        if (error instanceof CheckstyleException) {
-            final String errorMessage = error.getMessage();
+        if (error.getCause() != null
+                && error.getCause() instanceof CheckstyleException) {
 
-            final Matcher missingPropertyMatcher
-                    = PATTERN_MISSING_PROPERTY.matcher(errorMessage);
-            if (missingPropertyMatcher.find()) {
-                final String propertyName = missingPropertyMatcher.group(1);
-                errorText = new MessageFormat(resources.getString(
-                        "plugin.results.error.missing-property")).format(
-                        new Object[]{propertyName});
+            for (final Pattern errorPattern
+                    : CHECKSTYLE_ERROR_PATTERNS.keySet()) {
+                final Matcher errorMatcher
+                        = errorPattern.matcher(error.getCause().getMessage());
+                if (errorMatcher.find()) {
+                    final Object[] args = new Object[errorMatcher.groupCount()];
+
+                    for (int i = 0; i <  errorMatcher.groupCount(); ++i) {
+                        args[i] = errorMatcher.group(i + 1);
+                    }
+
+                    errorText = new MessageFormat(IDEAUtilities.getResource(
+                            CHECKSTYLE_ERROR_PATTERNS.get(errorPattern),
+                            "An error occurred during the scan.")).format(args);
+                }
             }
         }
 
         if (errorText == null) {
-            errorText = resources.getString("plugin.results.error");
+            errorText = IDEAUtilities.getResource("plugin.results.error",
+                    "An error occurred during the scan.");
         }
 
         ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
