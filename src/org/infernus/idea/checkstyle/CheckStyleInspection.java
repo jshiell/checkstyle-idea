@@ -6,6 +6,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
@@ -173,6 +174,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             final List<ProblemDescriptor> problems = listener.getProblems();
             return problems.toArray(new ProblemDescriptor[problems.size()]);
+
+        } catch (ProcessCanceledException e) {
+            LOG.warn("Process cancelled when scanning: " + psiFile.getName());
+            return null;
 
         } catch (Throwable e) {
             final CheckStylePluginException processed

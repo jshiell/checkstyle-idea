@@ -134,8 +134,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                 final String projectFilePath = (String)
                         getProjectFilePathMethod.invoke(project);
-                final File projectFile = new File(projectFilePath);
-                return projectFile.getParentFile();
+                if (projectFilePath != null) {
+                    final File projectFile = new File(projectFilePath);
+                    return projectFile.getParentFile();
+                }
+
+                return null;
             }
 
         } catch (IllegalAccessException e) {
