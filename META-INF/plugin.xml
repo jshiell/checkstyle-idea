@@ -19,6 +19,12 @@
         <![CDATA[
 <ul>
     <li>1.0.2: Improved: Error handling.</li>
+    <li>1.0.2: Fixed: Exception when settings opened while no project
+        loaded.</li>
+    <li>1.0.2: Fixed: Exception if inspection cancelled during results
+        processing.</li>
+    <li>1.0.2: Fixed: Exception if configuration panel opened while puppycrawl.com 
+        could not be accessed.</li>
     <li>1.0.1: Fixed: Potenially IllegalState if project path cannot be retrieved
         within IDEA 7M1.</li>
     <li>1.0: New: Static scanning for current module implemented.</li>

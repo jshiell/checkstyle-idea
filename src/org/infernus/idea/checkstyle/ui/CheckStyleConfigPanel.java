@@ -10,6 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import org.infernus.idea.checkstyle.CheckStylePropertiesTableModel;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
+import org.xml.sax.DTDHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,6 +25,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -349,7 +355,9 @@ public final class CheckStyleConfigPanel extends JPanel {
     private List<String> extractProperties(final File configFile) {
         if (configFile != null && configFile.exists()) {
             try {
-                final Document configDoc = new SAXBuilder().build(configFile);
+                final SAXBuilder saxBuilder = new SAXBuilder();
+                saxBuilder.setEntityResolver(new CheckStyleEntityResolver());
+                final Document configDoc = saxBuilder.build(configFile);
                 return extractProperties(configDoc.getRootElement());
 
             } catch (Exception e) {

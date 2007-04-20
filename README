@@ -111,6 +111,9 @@ In particular, thanks are due to the authors and contributors of:
 * CheckStyle, for without them we'd have merely void and chaos.
 * JetBrains, for an IDE which is worth every penny and them some.
 
+And a big thank-you to everyone who's sent me feedback or bug reports - both
+are much appreciated!
+
 
 Licence
 -------
@@ -123,6 +126,10 @@ Version History
 ---------------
 
 1.0.2 - Improved: Error handling
+1.0.2 - Fixed: Exception when settings opened while no project loaded.
+1.0.2 - Fixed: Exception if inspection cancelled during results processing.
+1.0.2 - Fixed: Exception if configuration panel opened while puppycrawl.com 
+        could not be accessed.
 1.0.1 - Fixed: Potenially IllegalState if project path cannot be retrieved
         within IDEA 7M1.
 1.0   - New: Static scanning for current module implemented.
