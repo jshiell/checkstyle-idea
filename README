@@ -68,6 +68,9 @@ a) CheckStyle is unable to retrieve information on exceptions in your project
 Limitations
 -----------
 
+* The following checks do not currently work:
+  * NewlineAtEndOfFile
+  * PackageHtml 
 * If you change the configuration file the real-time scan will not be updated
   until the file is either changed or reopened.
 * We do not check if a property definition is required for a given file.
