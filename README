@@ -4,7 +4,7 @@ CheckStyle-IDEA
 
 http://code.google.com/p/checkstyle-idea/
 
-A plug-in for JetBrains' IntelliJ IDEA 6 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 7 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -128,10 +128,14 @@ LICENCE file.
 Version History
 ---------------
 
+2.0.0 - This version offers no new features. However, 2.0.x versions will only work
+        with IDEA 7M2 or above.
+2.0.0 - Fixed: API changes for IDEA 7M2.
+
 1.0.2 - Improved: Error handling
 1.0.2 - Fixed: Exception when settings opened while no project loaded.
 1.0.2 - Fixed: Exception if inspection cancelled during results processing.
-1.0.2 - Fixed: Exception if configuration panel opened while puppycrawl.com 
+1.0.2 - Fixed: Exception if configuration panel opened while puppycrawl.com
         could not be accessed.
 1.0.1 - Fixed: Potenially IllegalState if project path cannot be retrieved
         within IDEA 7M1.

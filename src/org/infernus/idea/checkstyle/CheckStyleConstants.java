@@ -36,6 +36,11 @@ public final class CheckStyleConstants {
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
     /**
+     * Tool Window identifier.
+     */
+    public static final String ID_TOOLWINDOW = "CheckStyle";
+
+    /**
      * The action group for the plug-in tool window.
      */
     public static final String ACTION_GROUP = "CheckStylePluginActions";

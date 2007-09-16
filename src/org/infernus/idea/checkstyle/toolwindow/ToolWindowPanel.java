@@ -112,7 +112,7 @@ public class ToolWindowPanel extends JPanel {
         final ActionGroup actionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(CheckStyleConstants.ACTION_GROUP);
         final ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar(
-                checkStylePlugin.getToolWindowId(), actionGroup, false);
+                CheckStyleConstants.ID_TOOLWINDOW, actionGroup, false);
         add(toolbar.getComponent(), BorderLayout.WEST);
 
         // Create the tree

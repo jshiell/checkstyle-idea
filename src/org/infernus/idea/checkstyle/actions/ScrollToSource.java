@@ -8,6 +8,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
@@ -35,11 +36,11 @@ public final class ScrollToSource extends ToggleAction {
         }
 
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(checkStylePlugin.getToolWindowId());
+                project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         // toggle value
         final ToolWindowPanel panel = (ToolWindowPanel)
-                toolWindow.getComponent();
+                toolWindow.getContentManager().getContent(0).getComponent();
         return panel.isScrollToSource();
     }
 
@@ -60,11 +61,11 @@ public final class ScrollToSource extends ToggleAction {
         }
 
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(checkStylePlugin.getToolWindowId());
+                project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         // toggle value
         final ToolWindowPanel panel = (ToolWindowPanel)
-                toolWindow.getComponent();
+                toolWindow.getContentManager().getContent(0).getComponent();
         panel.setScrollToSource(selected);
 
     }

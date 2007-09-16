@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 /**
  * Action to close the tool window.
@@ -32,7 +33,7 @@ public class Close extends BaseAction {
         }
 
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(checkStylePlugin.getToolWindowId());
+                project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
         toolWindow.hide(null);
     }
 

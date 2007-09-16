@@ -50,7 +50,7 @@ public class ScanCurrentFile extends BaseAction {
             }
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(checkStylePlugin.getToolWindowId());
+                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
             toolWindow.activate(null);
 
             // show progress text
@@ -58,7 +58,7 @@ public class ScanCurrentFile extends BaseAction {
                     CheckStyleConstants.RESOURCE_BUNDLE);
             final String progressText = resources.getString(
                     "plugin.status.in-progress.current");
-            ((ToolWindowPanel) toolWindow.getComponent()).setProgressText(
+            ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent()).setProgressText(
                     progressText);
 
             // read select file

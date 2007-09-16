@@ -10,6 +10,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 
 /**
@@ -52,7 +53,7 @@ public abstract class BaseAction extends AnAction {
 
             // check if tool window is registered
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(checkStylePlugin.getToolWindowId());
+                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);

@@ -22,27 +22,29 @@ import com.intellij.openapi.wm.ToolWindowType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Main class for the CheckStyle static scanning plug-n.
@@ -73,11 +75,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * The tool window for the plugin.
      */
     private ToolWindow toolWindow;
-
-    /**
-     * The ID of the plugin's tool window.
-     */
-    private String toolWindowId;
 
     /**
      * Flag to track if a scan is in progress.
@@ -231,15 +228,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     }
 
     /**
-     * Get the ID for the tool window.
-     *
-     * @return the ID for the tool window.
-     */
-    public String getToolWindowId() {
-        return toolWindowId;
-    }
-
-    /**
      * Is a scan in progress?
      * <p/>
      * This is only expected to be called from the event thread.
@@ -270,15 +258,16 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        toolWindowId = IDEAUtilities.getResource("plugin.toolwindow.name",
-                "CheckStyle");
+        toolWindow = toolWindowManager.registerToolWindow(CheckStyleConstants.ID_TOOLWINDOW,
+                false, ToolWindowAnchor.BOTTOM);        
 
-        toolWindow = toolWindowManager.registerToolWindow(toolWindowId,
-                new ToolWindowPanel(project), ToolWindowAnchor.BOTTOM);
+        final Content toolContent = toolWindow.getContentManager().getFactory().createContent(
+                new ToolWindowPanel(project), IDEAUtilities.getResource("plugin.toolwindow.action",
+                "Scan"), false);
+        toolWindow.getContentManager().addContent(toolContent);
 
-
+        toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name",
+                "CheckStyle"));
         toolWindow.setIcon(IDEAUtilities.getIcon(
                 "/org/infernus/idea/checkstyle/images/checkstyle16.png"));
         toolWindow.setType(ToolWindowType.DOCKED, null);
@@ -293,7 +282,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         final ToolWindowManager toolWindowManager
                 = ToolWindowManager.getInstance(project);
 
-        toolWindowManager.unregisterToolWindow(toolWindowId);
+        toolWindowManager.unregisterToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
     }
 
     /**
@@ -644,7 +633,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return the tool window panel.
      */
     private ToolWindowPanel getToolWindowPanel() {
-        return ((ToolWindowPanel) toolWindow.getComponent());
+        return ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent());
     }
 
     /**

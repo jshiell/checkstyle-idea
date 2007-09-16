@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
@@ -33,10 +34,10 @@ public class CollapseAll extends BaseAction {
         }
 
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                project).getToolWindow(checkStylePlugin.getToolWindowId());
+                project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final ToolWindowPanel panel = (ToolWindowPanel)
-                toolWindow.getComponent();
+                toolWindow.getContentManager().getContent(0).getComponent();;
         panel.collapseTree();
     }
 
