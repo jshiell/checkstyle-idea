@@ -4,16 +4,16 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.util.InvalidDataException;
-import com.intellij.openapi.util.JDOMExternalizable;
-import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
@@ -23,7 +23,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
@@ -33,7 +32,7 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.jdom.Element;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,14 +51,21 @@ import java.util.*;
  * @author James Shiell
  * @version 1.0
  */
+@State(
+  name = CheckStyleConstants.ID_PLUGIN,
+  storages = {
+    @Storage(
+      id = "other",
+      file = "$PROJECT_FILE$"
+    )}
+)
 public final class CheckStylePlugin implements ProjectComponent, Configurable,
-        JDOMExternalizable {
+        PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
 
     /**
      * Logger for this class.
      */
-    private static final Log LOG = LogFactory.getLog(
-            CheckStylePlugin.class);
+    @NonNls private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
     /**
      * The configuration panel for the plug-in.
@@ -91,6 +97,31 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     private CheckStyleConfiguration configuration
             = new CheckStyleConfiguration();
+
+    /**
+     * {@inheritDoc}
+     */
+    public CheckStylePlugin.ConfigurationBean getState() {
+        final ConfigurationBean configBean = new ConfigurationBean();
+        for (final Enumeration confNames = configuration.propertyNames(); confNames.hasMoreElements();) {
+            final String elementName = (String) confNames.nextElement();
+            configBean.configuration.put(elementName, configuration.getProperty(elementName));
+        }
+        return configBean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void loadState(final CheckStylePlugin.ConfigurationBean newConfiguration) {
+        configuration.clear();
+
+        if (newConfiguration != null && newConfiguration.configuration != null) {
+            for (final String key : newConfiguration.configuration.keySet()) {
+                configuration.setProperty(key, newConfiguration.configuration.get(key));
+            }
+        }
+    }
 
     /**
      * Get the base path of the project.
@@ -306,39 +337,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * {@inheritDoc}
      */
-    public void readExternal(final Element element)
-            throws InvalidDataException {
-        LOG.debug("Reading configuration.");
-
-        if (configuration == null) {
-            configuration = new CheckStyleConfiguration();
-        }
-
-        final Element childElement = element.getChild(
-                CheckStyleConstants.CONFIG_ELEMENT);
-        configuration.readExternal(childElement);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void writeExternal(final Element element)
-            throws WriteExternalException {
-        LOG.debug("Writing configuration.");
-
-        if (configuration == null) {
-            configuration = new CheckStyleConfiguration();
-        }
-
-        final Element configElement = new Element(
-                CheckStyleConstants.CONFIG_ELEMENT);
-        configuration.writeExternal(configElement);
-        element.addContent(configElement);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getComponentName() {
         return CheckStyleConstants.ID_PLUGIN;
@@ -403,11 +401,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public boolean isModified() {
-        if (configPanel == null) {
-            return false;
-        }
-
-        return configPanel.isModified();
+        return configPanel != null && configPanel.isModified();
     }
 
     /**
@@ -633,7 +627,11 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return the tool window panel.
      */
     private ToolWindowPanel getToolWindowPanel() {
-        return ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent());
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            return ((ToolWindowPanel) content.getComponent());
+        }
+        return null;
     }
 
     /**
@@ -1001,8 +999,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
 
                 tempFile = fileThread.getFile();
                 if (tempFile == null) {
-                    throw new IllegalStateException(
-                            "Failed to create temporary file.");
+                    throw new IllegalStateException("Failed to create temporary file.");
                 }
 
                 final CheckStyleAuditListener listener
@@ -1023,5 +1020,12 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 }
             }
         }
+    }
+
+    /**
+     * Wrapper class for IDEA state serialisation.
+     */
+    public static class ConfigurationBean {
+        public Map<String, String> configuration = new HashMap<String, String>();
     }
 }

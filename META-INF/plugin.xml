@@ -18,9 +18,11 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.0.1: WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.</li>
     <li>2.0.1: Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.</li>
     <li>2.0.1: Changed: Remove deprecated API calls to [hopefully] ensure forward 7.0 compatibility.</li>
+    <li>2.0.1: Changed: Icons improved.</li>
     <li>2.0.0: This version offers no new features. However, 2.0.x versions will only work
         with IDEA 7M2 or above.</li>
     <li>2.0.0: Fixed: API changes for IDEA 7M2.</li>
