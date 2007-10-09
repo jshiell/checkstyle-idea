@@ -290,7 +290,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 = ToolWindowManager.getInstance(project);
 
         toolWindow = toolWindowManager.registerToolWindow(CheckStyleConstants.ID_TOOLWINDOW,
-                false, ToolWindowAnchor.BOTTOM);        
+                false, ToolWindowAnchor.BOTTOM);
 
         final Content toolContent = toolWindow.getContentManager().getFactory().createContent(
                 new ToolWindowPanel(project), IDEAUtilities.getResource("plugin.toolwindow.action",
@@ -298,7 +298,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         toolWindow.getContentManager().addContent(toolContent);
 
         toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name",
-                "CheckStyle"));
+                "Scan"));
         toolWindow.setIcon(IDEAUtilities.getIcon(
                 "/org/infernus/idea/checkstyle/images/checkstyle16.png"));
         toolWindow.setType(ToolWindowType.DOCKED, null);
