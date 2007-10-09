@@ -3,18 +3,14 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.util.ObjectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.CheckStylePropertiesTableModel;
+import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.infernus.idea.checkstyle.CheckStylePropertiesTableModel;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
-import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
-import org.xml.sax.DTDHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,7 +21,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -267,6 +262,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Set the configuration file.
      *
      * @param configFile the configuration file.
+     * @param properties the properties to populate the file with.
      */
     public void setConfigFile(final File configFile,
                               final Map<String, String> properties) {
@@ -464,7 +460,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     public boolean isModified() {
         return !ObjectUtils.equals(configFile, fileField.getText())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
-                || !getProperties().equals(properties);
+                || !getProperties().equals(properties)
+                || configFile != null && useDefaultButton.isSelected();
     }
 
     /**

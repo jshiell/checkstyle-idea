@@ -1,14 +1,14 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataConstants;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import com.intellij.ui.content.Content;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
@@ -23,8 +23,7 @@ public final class ScrollToSource extends ToggleAction {
      * {@inheritDoc}
      */
     public boolean isSelected(final AnActionEvent event) {
-        final Project project = (Project) event.getDataContext().getData(
-                DataConstants.PROJECT);
+        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
             return false;
         }
@@ -39,17 +38,20 @@ public final class ScrollToSource extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         // toggle value
-        final ToolWindowPanel panel = (ToolWindowPanel)
-                toolWindow.getContentManager().getContent(0).getComponent();
-        return panel.isScrollToSource();
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+            return panel.isScrollToSource();
+        }
+
+        return false;
     }
 
     /**
      * {@inheritDoc}
      */
     public void setSelected(final AnActionEvent event, final boolean selected) {
-        final Project project = (Project) event.getDataContext().getData(
-                DataConstants.PROJECT);
+        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
             return;
         }
@@ -64,9 +66,10 @@ public final class ScrollToSource extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         // toggle value
-        final ToolWindowPanel panel = (ToolWindowPanel)
-                toolWindow.getContentManager().getContent(0).getComponent();
-        panel.setScrollToSource(selected);
-
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+            panel.setScrollToSource(selected);
+        }
     }
 }

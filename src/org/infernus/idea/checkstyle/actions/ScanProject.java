@@ -1,19 +1,20 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataConstants;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import com.intellij.ui.content.Content;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,7 @@ public class ScanProject extends BaseAction {
      */
     public void actionPerformed(final AnActionEvent event) {
         try {
-            final Project project = (Project) event.getDataContext().getData(
-                    DataConstants.PROJECT);
+            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) {
                 return;
             }
@@ -59,8 +59,11 @@ public class ScanProject extends BaseAction {
                     CheckStyleConstants.RESOURCE_BUNDLE);
             final String progressText = resources.getString(
                     "plugin.status.in-progress.project");
-            ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent()).setProgressText(
-                    progressText);
+            final Content content = toolWindow.getContentManager().getContent(0);
+            if (content != null) {
+                final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+                panel.setProgressText(progressText);
+            }
 
             // find project files
             ProjectRootManager projectRootManager
@@ -114,8 +117,7 @@ public class ScanProject extends BaseAction {
         try {
             final Presentation presentation = event.getPresentation();
 
-            final Project project = (Project) event.getDataContext().getData(
-                    DataConstants.PROJECT);
+            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) { // check if we're loading...
                 presentation.setEnabled(false);
                 return;

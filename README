@@ -62,7 +62,7 @@ Frequently Asked Questions
 q) I see 'Got an exception - java.lang.RuntimeException: Unable to get class
    information for <Exception Class>. (0:0)'
 a) CheckStyle is unable to retrieve information on exceptions in your project
-   until you have built it. Make your project in IDEA and then rescan.
+   until you have built it. Build your project in IDEA and then rescan.
 
 
 Limitations
@@ -128,6 +128,9 @@ LICENCE file.
 Version History
 ---------------
 
+2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
+        scheme from a configuration file.
+2.0.1 - Changed: Remove deprecated API calls to [hopefully] ensure forward 7.0 compatibility.        
 2.0.0 - This version offers no new features. However, 2.0.x versions will only work
         with IDEA 7M2 or above.
 2.0.0 - Fixed: API changes for IDEA 7M2.

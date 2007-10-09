@@ -1,7 +1,7 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataConstants;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -36,8 +36,7 @@ public class ScanCurrentFile extends BaseAction {
      * {@inheritDoc}
      */
     public void actionPerformed(final AnActionEvent event) {
-        final Project project = (Project) event.getDataContext().getData(
-                DataConstants.PROJECT);
+        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
             return;
         }
@@ -85,8 +84,7 @@ public class ScanCurrentFile extends BaseAction {
         super.update(event);
 
         try {
-            final Project project = (Project) event.getDataContext().getData(
-                    DataConstants.PROJECT);
+            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) { // check if we're loading...
                 return;
             }

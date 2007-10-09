@@ -1,7 +1,7 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataConstants;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
@@ -11,6 +11,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -39,15 +40,14 @@ public class ScanModule extends BaseAction {
      */
     public final void actionPerformed(final AnActionEvent event) {
         try {
-            final Project project = (Project) event.getDataContext().getData(
-                    DataConstants.PROJECT);
+            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) {
                 return;
             }
 
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();
-            if (selectedFiles == null || selectedFiles.length == 0) {
+            if (selectedFiles.length == 0) {
                 return;
             }
 
@@ -72,8 +72,11 @@ public class ScanModule extends BaseAction {
                     CheckStyleConstants.RESOURCE_BUNDLE);
             final String progressText = resources.getString(
                     "plugin.status.in-progress.module");
-            ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent()).setProgressText(
-                    progressText);
+            final Content content = toolWindow.getContentManager().getContent(0);
+            if (content != null) {
+                final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+                panel.setProgressText(progressText);
+            }
 
             // find module files
             final ModuleRootManager moduleRootManager
@@ -104,8 +107,7 @@ public class ScanModule extends BaseAction {
         try {
             final Presentation presentation = event.getPresentation();
 
-            final Project project = (Project) event.getDataContext().getData(
-                    DataConstants.PROJECT);
+            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) { // check if we're loading...
                 presentation.setEnabled(false);
                 return;
@@ -113,7 +115,7 @@ public class ScanModule extends BaseAction {
 
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();
-            if (selectedFiles == null || selectedFiles.length == 0) {
+            if (selectedFiles.length == 0) {
                 return;
             }
 

@@ -158,9 +158,7 @@ public final class CheckStyleConfiguration extends Properties
         final String value = getProperty(propertyName);
         if (value != null) {
             final String[] parts = value.split(";");
-            for (final String part : parts) {
-                returnValue.add(part);
-            }
+            returnValue.addAll(Arrays.asList(parts));
         }
 
         return returnValue;
@@ -200,7 +198,7 @@ public final class CheckStyleConfiguration extends Properties
     public boolean getBooleanProperty(final String propertyName,
                                       final boolean defaultValue) {
         return Boolean.valueOf(getProperty(propertyName,
-                Boolean.TRUE.toString()));
+                Boolean.toString(defaultValue)));
     }
 
     /**
