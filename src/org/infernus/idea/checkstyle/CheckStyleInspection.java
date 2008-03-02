@@ -7,6 +7,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
@@ -150,6 +152,27 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 || !CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
             LOG.debug("Skipping file as invalid: " + psiFile.getName());
             return null;
+        }
+
+        final CheckStylePlugin checkStylePlugin
+                = manager.getProject().getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException(
+                    "Couldn't get checkstyle plugin");
+        }
+
+        final boolean checkTestClasses = checkStylePlugin.getConfiguration().getBooleanProperty(
+                CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
+        if (!checkTestClasses) {
+            final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
+            if (elementFile != null) {
+                final Module module = ModuleUtil.findModuleForFile(elementFile, manager.getProject());
+                if (ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(
+                        elementFile)) {
+                    LOG.debug("Skipping test class " + psiFile.getName());
+                    return null;
+                }
+            }
         }
 
         File tempFile = null;
