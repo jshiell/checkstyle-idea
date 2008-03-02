@@ -134,6 +134,9 @@ public class CheckStyleAuditListener implements AuditListener {
      * Runnable to process an audit event.
      */
     private class ProcessResultsThread implements Runnable {
+        private static final String PACKAGE_HTML_CHECK
+                = "com.puppycrawl.tools.checkstyle.checks.javadoc.PackageHtmlCheck";
+        private static final String PACKAGE_HTML_FILE = "package.html";
 
         /**
          * {@inheritDoc}
@@ -146,7 +149,20 @@ public class CheckStyleAuditListener implements AuditListener {
             final List<Integer> lineLengthCache = new ArrayList<Integer>();
             lineLengthCache.add(0); // line 1 is offset 0
 
+            AuditLoop:
             for (final AuditEvent event : errors) {
+                // check for package HTML siblings, as our scan can't find these
+                // if we're using a temporary file
+                if (PACKAGE_HTML_CHECK.equals(event.getSourceName())) {
+                    for (final PsiElement sibling : psiFile.getParent().getChildren()) {
+                        if (sibling.isPhysical() && sibling.isValid()
+                                && sibling instanceof PsiFile
+                                && PACKAGE_HTML_FILE.equals(((PsiFile) sibling).getName())) {
+                            continue AuditLoop;
+                        }
+                    }
+                }
+
                 int offset;
                 boolean endOfLine = false;
 

@@ -74,7 +74,6 @@ Limitations
 * Supression filters are ignored (issue #3).
 * The following checks do not currently work:
   * NewlineAtEndOfFile (issue #5).
-  * PackageHtml (issue #7). 
 * If you change the configuration options the real-time scan will not be updated
   until the file is either changed or reopened.
 * We do not check if a property definition is required for a given file.
@@ -134,12 +133,13 @@ Version History
 
 2.1   - New: Ability to supress checks on test classes.
 2.1   - New: Updated CheckStyle to 4.4.
+2.1   - Fixed: PackageHtml test will now work.
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.
 2.0.1 - Changed: Remove deprecated API calls to [hopefully] ensure forward 7.0 compatibility.      
 2.0.1 - Changed: Icons improved.
-2.0.0 - This version offers no new features. However, 2.0.x versions will only work
+2.0.0 - This version offers no new features. However, 2.x versions will only work
         with IDEA 7M2 or above.
 2.0.0 - Fixed: API changes for IDEA 7M2.
 
