@@ -11,13 +11,15 @@
 </p>
         ]]>
     </description>
-    <version>2.0.1</version>
+    <version>2.1</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.1: New: Ability to supress checks on test classes.</li>
+    <li>2.1: New: Updated CheckStyle to 4.4.</li>
     <li>2.0.1: WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.</li>
     <li>2.0.1: Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.</li>

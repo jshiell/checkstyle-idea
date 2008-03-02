@@ -7,7 +7,11 @@
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
   <component name="CheckStyle-IDEA">
-    <checkstyle-config />
+    <option name="configuration">
+      <map>
+        <entry key="check-test-classes" value="false" />
+      </map>
+    </option>
   </component>
   <component name="CodeStyleProjectProfileManger">
     <option name="PROJECT_PROFILE" />
@@ -309,6 +313,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
   </component>
+  <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
     <option name="USER_DEFINED_CONFIGS">
       <value>
@@ -317,12 +322,12 @@
     </option>
   </component>
   <component name="libraryTable">
-    <library name="CheckStyle 4.3">
+    <library name="CheckStyle 4.4">
       <CLASSES>
-        <root url="jar:///Developer/Java/Libraries/checkstyle-4.3/checkstyle-all-4.3.jar!/" />
+        <root url="jar:///Developer/Java/Libraries/checkstyle-4.4/checkstyle-all-4.4.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="file:///Developer/Java/Libraries/checkstyle-4.3/docs/api" />
+        <root url="file:///Developer/Java/Libraries/checkstyle-4.4/docs/api" />
       </JAVADOC>
       <SOURCES />
     </library>

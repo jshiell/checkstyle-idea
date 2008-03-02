@@ -55,6 +55,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             new MoveDownPathAction());
     private final CheckStylePropertiesTableModel propertiesModel
             = new CheckStylePropertiesTableModel();
+    private final JCheckBox testClassesCheckbox = new JCheckBox();
 
     /**
      * Properties table, hacked for enable/disable support.
@@ -135,6 +136,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         fileLabel.setToolTipText(resources.getString(
                 "config.file.label.tooltip"));
 
+        testClassesCheckbox.setText(resources.getString(
+                "config.test-classes.checkbox.text"));
+        testClassesCheckbox.setToolTipText(resources.getString(
+                "config.test-classes.checkbox.tooltip"));
+
         propertiesTable.setToolTipText(resources.getString(
                 "config.file.properties.tooltip"));
         final JScrollPane propertiesScroll = new JScrollPane(propertiesTable);
@@ -163,8 +169,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(browseButton, new GridBagConstraints(
                 2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
+                0, 3, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(propertiesScroll, new GridBagConstraints(
-                0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
+                0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
                 GridBagConstraints.BOTH, new Insets(4, 20, 4, 4), 0, 0));
 
         final JButton addPathButton = new JButton(new AddPathAction());
@@ -371,6 +380,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @param element the configuration element.
      * @return the settable property names.
      */
+    @SuppressWarnings("unchecked")
     private List<String> extractProperties(final Element element) {
         final List<String> propertyNames = new ArrayList<String>();
 
@@ -393,6 +403,24 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         return propertyNames;
+    }
+
+    /**
+     * Should we scan test classes?
+     *
+     * @param scanTestClasses true to scan test classes.
+     */
+    public void setScanTestClasses(final boolean scanTestClasses) {
+        testClassesCheckbox.setSelected(scanTestClasses);
+    }
+
+    /**
+     * Determine if we should scan test classes.
+     *
+     * @return true if test classes should be scanned.
+     */
+    public boolean isScanTestClasses() {
+        return testClassesCheckbox.isSelected();
     }
 
     /**

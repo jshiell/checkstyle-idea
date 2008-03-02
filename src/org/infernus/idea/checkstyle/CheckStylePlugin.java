@@ -52,12 +52,12 @@ import java.util.*;
  * @version 1.0
  */
 @State(
-  name = CheckStyleConstants.ID_PLUGIN,
-  storages = {
-    @Storage(
-      id = "other",
-      file = "$PROJECT_FILE$"
-    )}
+        name = CheckStyleConstants.ID_PLUGIN,
+        storages = {
+        @Storage(
+                id = "other",
+                file = "$PROJECT_FILE$"
+        )}
 )
 public final class CheckStylePlugin implements ProjectComponent, Configurable,
         PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
@@ -65,7 +65,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * Logger for this class.
      */
-    @NonNls private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
+    @NonNls
+    private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
     /**
      * The configuration panel for the plug-in.
@@ -391,6 +392,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
                 configuration.getDefinedProperies());
+        configPanel.setScanTestClasses(configuration.getBooleanProperty(
+                CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
 
@@ -426,6 +429,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             configuration.remove(CheckStyleConfiguration.CONFIG_FILE);
         }
 
+        configuration.setProperty(CheckStyleConfiguration.CHECK_TEST_CLASSES,
+                Boolean.toString(configPanel.isScanTestClasses()));
+
         final List<String> thirdPartyClasspath
                 = configPanel.getThirdPartyClasspath();
         if (thirdPartyClasspath.isEmpty()) {
@@ -460,6 +466,8 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 configuration.getDefinedProperies());
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
+        configPanel.setScanTestClasses(configuration.getBooleanProperty(
+                CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
     }
 
     /**
@@ -690,6 +698,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                         CheckStyleConstants.TEMPFILE_EXTENSION);
                 final BufferedWriter tempFileOut = new BufferedWriter(
                         new FileWriter(file));
+                // TODO defect 5 - on Windows EOF newline check doesn't work
                 tempFileOut.write(psiFile.getText());
                 tempFileOut.flush();
                 tempFileOut.close();
@@ -969,11 +978,26 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 final String elementString = (element != null
                         ? element.toString() : null);
                 LOG.debug("Skipping as invalid type: " + elementString);
+
                 return null;
             }
 
             final PsiFile psiFile = (PsiFile) element;
             LOG.debug("Scanning " + psiFile.getName());
+
+            final boolean checkTestClasses = configuration.getBooleanProperty(
+                    CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
+            if (!checkTestClasses) {
+                final VirtualFile elementFile = element.getContainingFile().getVirtualFile();
+                if (elementFile != null) {
+                    final Module module = ModuleUtil.findModuleForFile(elementFile, project);
+                    if (ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(
+                            elementFile)) {
+                        LOG.debug("Skipping test class " + psiFile.getName());
+                        return null;
+                    }
+                }
+            }
 
             final InspectionManager manager
                     = InspectionManager.getInstance(psiFile.getProject());

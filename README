@@ -1,6 +1,6 @@
 CheckStyle-IDEA
 ---------------
-(c) 2006, 2007, James Shiell
+(c) Copyright 2006-2008 James Shiell
 
 http://code.google.com/p/checkstyle-idea/
 
@@ -128,6 +128,8 @@ LICENCE file.
 Version History
 ---------------
 
+2.1   - New: Ability to supress checks on test classes.
+2.1   - New: Updated CheckStyle to 4.4.
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.
