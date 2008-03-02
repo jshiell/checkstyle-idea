@@ -37,6 +37,9 @@ The main configuration option is that of the CheckStyle file. If
 this field is left empty, or the appropriate radio button is selected,
 then the Sun checks, as supplied with CheckStyle, will be used.
 
+The 'Scan Test Classes' checkbox will enable scanning of Java files
+under test source roots. If disabled, these files will be ignored.
+
 If a custom file is being used and properties are available for definition
 then these will be displayed in the table below the file name.
 
@@ -68,10 +71,11 @@ a) CheckStyle is unable to retrieve information on exceptions in your project
 Limitations
 -----------
 
+* Supression filters are ignored (issue #3).
 * The following checks do not currently work:
-  * NewlineAtEndOfFile
-  * PackageHtml 
-* If you change the configuration file the real-time scan will not be updated
+  * NewlineAtEndOfFile (issue #5).
+  * PackageHtml (issue #7). 
+* If you change the configuration options the real-time scan will not be updated
   until the file is either changed or reopened.
 * We do not check if a property definition is required for a given file.
   Hence you can exit configuration without setting required properties. Given,
