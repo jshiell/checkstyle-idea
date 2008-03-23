@@ -71,6 +71,11 @@ a) CheckStyle is unable to retrieve information on exceptions in your project
 Limitations
 -----------
 
+* The plugin will throw exceptions if used with class files targetted at a
+  later version than that of the JDK used by IDEA. In particular, this will
+  affect Mac users with the pre-release of JDK6. The solution is to target
+  class files at the version of the IDEA JRE (i.e. 1.5 for Mac users). Thanks
+  to J. G. Christopher.
 * Supression filters are ignored (issue #3).
 * The following checks do not currently work:
   * NewlineAtEndOfFile (issue #5).
