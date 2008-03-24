@@ -76,9 +76,6 @@ Limitations
   affect Mac users with the pre-release of JDK6. The solution is to target
   class files at the version of the IDEA JRE (i.e. 1.5 for Mac users). Thanks
   to J. G. Christopher.
-* Supression filters are ignored (issue #3).
-* The following checks do not currently work:
-  * NewlineAtEndOfFile (issue #5).
 * If you change the configuration options the real-time scan will not be updated
   until the file is either changed or reopened.
 * We do not check if a property definition is required for a given file.
@@ -146,7 +143,9 @@ Version History
 2.1   - New: Ability to supress checks on test classes.
 2.1   - New: Updated CheckStyle to 4.4.
 2.1   - Fixed: Supression filters with relative paths now load correctly.
+2.1   - Fixed: NewlineAtEndOfFile now works on Windows.
 2.1   - Fixed: PackageHtml test will now work.
+
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.
