@@ -9,7 +9,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiDocumentManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -179,13 +181,24 @@ public class CheckStyleInspection extends LocalInspectionTool {
         try {
             final Checker checker = getChecker(manager.getProject(), psiFile);
 
+            // TODO test for EOL problem
+            // TODO ensure propogated to Plugin if working
+
             // we need to copy to a file as IntelliJ may not have saved the
             // file recently...
+            final Document fileDocument = PsiDocumentManager.getInstance(
+                    manager.getProject()).getDocument(psiFile);
+            if (fileDocument == null) {
+                LOG.debug("Skipping check - file is binary or has no document: "
+                        + psiFile.getName());
+                return null;
+            }
+
             tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
                     CheckStyleConstants.TEMPFILE_EXTENSION);
             final BufferedWriter tempFileOut = new BufferedWriter(
                     new FileWriter(tempFile));
-            tempFileOut.write(psiFile.getText());
+            tempFileOut.write(fileDocument.getText());
             tempFileOut.flush();
             tempFileOut.close();
 

@@ -1,6 +1,6 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2008 James Shiell
+(c) Copyright 2006-2008 CheckStyle-IDEA Contributors
 
 http://code.google.com/p/checkstyle-idea/
 
@@ -114,7 +114,11 @@ compliance with a CheckStyle configuration, and the Eclispe-CS
 (http://eclipse-cs.sourceforge.net/) authors for making me jealous of the
 real-time scan support available for Eclipse.
 
-In particular, thanks are due to the authors and contributors of:
+Thanks to those who have contributed work and effort directly to this project:
+
+*  J. G. Christopher
+
+And also thanks are due to the authors and contributors of:
 
 * Eclispe-CS, for inspiration and solutions to coding problems.
 * JetStyle, for filling the area of static scanning and also giving me
@@ -136,8 +140,12 @@ LICENCE file.
 Version History
 ---------------
 
+2.1   - New: Ability to scan only modified files if project uses VCS. If the project
+        does not use VCS then this action will have no effect. Thanks to J. G. Christopher
+        for this patch.
 2.1   - New: Ability to supress checks on test classes.
 2.1   - New: Updated CheckStyle to 4.4.
+2.1   - Fixed: Supression filters with relative paths now load correctly.
 2.1   - Fixed: PackageHtml test will now work.
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default

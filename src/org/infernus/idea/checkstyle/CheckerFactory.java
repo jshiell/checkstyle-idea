@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
+import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 
@@ -77,7 +78,7 @@ public class CheckerFactory {
             throw new IllegalArgumentException("Config stream may not be null");
         }
 
-        return createChecker(configStream, classLoader, properties);
+        return createChecker(configStream, null, classLoader, properties);
     }
 
     /**
@@ -121,7 +122,7 @@ public class CheckerFactory {
                 || checkerValue.getTimeStamp() != configFileModified) {
             final InputStream in = new BufferedInputStream(
                     new FileInputStream(configFile));
-            final Checker checker = createChecker(in, classLoader, properties);
+            final Checker checker = createChecker(in, configFile.getParentFile(), classLoader, properties);
             in.close();
 
             cache.put(configFile, new CheckerValue(
@@ -138,29 +139,33 @@ public class CheckerFactory {
      * Create a checker with configuration in a given location.
      *
      * @param location the location of the configuration.
+     * @param baseDir the base directory of the configuration file, if available.
      * @param contextClassLoader the context class loader, or null for default.
      * @param properties a list of properties to set. May be null.
      * @return the checker.
      * @throws CheckstyleException if checker initialisation fails.
      */
     private Checker createChecker(final InputStream location,
+                                  final File baseDir,
                                   final ClassLoader contextClassLoader,
                                   final Map<String, String> properties)
             throws CheckstyleException {
-        return createChecker(location, new ListPropertyResolver(properties),
+        return createChecker(location, baseDir, new ListPropertyResolver(properties),
                 contextClassLoader);
     }
 
     /**
      * Load the Checkstyle configuration in a separate thread.
      *
-     * @param configPath The path to the Checkstyle configuration file
-     * @param resolver   the resolver
+     * @param configPath The path to the Checkstyle configuration file.
+     * @param baseDir the base directory of the configuration file, if available.
+     * @param resolver   the resolver.
      * @param contextClassLoader the context class loader, or null for default.
      * @return loaded Configuration object
      * @throws CheckstyleException If there was any error loading the configuration file.
      */
     public Checker createChecker(final InputStream configPath,
+                                 final File baseDir,
                                  final PropertyResolver resolver,
                                  final ClassLoader contextClassLoader)
             throws CheckstyleException {
@@ -211,6 +216,9 @@ public class CheckerFactory {
         // value. Therefor we use a final array.
         final Object[] threadReturn = new Object[1];
 
+        // TODO: the suppressions filter is loaded from the current directory and
+        // as such will not be found (as the current dir is the IDEA bin dir)
+
         Thread worker = new Thread() {
             public void run() {
                 try {
@@ -220,6 +228,10 @@ public class CheckerFactory {
                         final Configuration config
                                 = ConfigurationLoader.loadConfiguration(
                                 configPath, resolver, true);
+
+                        // replace relative supression file paths
+                        replaceSupressionFilterPath(config, baseDir);
+
                         ((Checker) threadReturn[0]).configure(config);
                     }
 
@@ -255,6 +267,34 @@ public class CheckerFactory {
         }
 
         return (Checker) threadReturn[0];
+    }
+
+    /**
+     * Scans the configurtion for supression filters and replaces relative paths with absolute ones.
+     *
+     * @param config the current configuration.
+     * @param baseDir the base directory of the configuration file.
+     * @throws CheckstyleException if configuration fails.
+     */
+    private void replaceSupressionFilterPath(final Configuration config,
+                                             final File baseDir)
+            throws CheckstyleException {
+        if (baseDir == null) {
+            return;
+        }
+
+        for (final Configuration configurationElement : config.getChildren()) {
+            if (!"SuppressionFilter".equals(configurationElement.getName())) {
+                continue;
+            }
+
+            final String suppressionFile = configurationElement.getAttribute("file");
+            if (suppressionFile != null && !new File(suppressionFile).exists()
+                    && configurationElement instanceof DefaultConfiguration) {
+                ((DefaultConfiguration) configurationElement).addAttribute(
+                        "file", new File(baseDir, suppressionFile).getAbsolutePath());
+            }
+        }
     }
 
     /**
