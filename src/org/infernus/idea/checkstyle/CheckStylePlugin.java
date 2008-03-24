@@ -22,6 +22,8 @@ import com.intellij.openapi.wm.ToolWindowType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.ui.content.Content;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
@@ -696,10 +698,20 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             try {
                 file = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
                         CheckStyleConstants.TEMPFILE_EXTENSION);
+
+                final CodeStyleSettings codeStyleSettings
+                        = CodeStyleSettingsManager.getSettings(psiFile.getProject());
+
                 final BufferedWriter tempFileOut = new BufferedWriter(
                         new FileWriter(file));
-                // TODO defect 5 - on Windows EOF newline check doesn't work
-                tempFileOut.write(psiFile.getText());
+                for (final char character : psiFile.getText().toCharArray())
+                {
+                    if (character == '\n') { // IDEA uses \n internally
+                        tempFileOut.write(codeStyleSettings.getLineSeparator());
+                    } else {
+                        tempFileOut.write(character);
+                    }
+                }
                 tempFileOut.flush();
                 tempFileOut.close();
 

@@ -12,6 +12,8 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -181,11 +183,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         try {
             final Checker checker = getChecker(manager.getProject(), psiFile);
 
-            // TODO test for EOL problem
-            // TODO ensure propogated to Plugin if working
-
             // we need to copy to a file as IntelliJ may not have saved the
-            // file recently...
+            // file recently (or the file may even be being edited at this moment)
             final Document fileDocument = PsiDocumentManager.getInstance(
                     manager.getProject()).getDocument(psiFile);
             if (fileDocument == null) {
@@ -194,11 +193,21 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
+            final CodeStyleSettings codeStyleSettings
+                    = CodeStyleSettingsManager.getSettings(psiFile.getProject());
+
             tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
                     CheckStyleConstants.TEMPFILE_EXTENSION);
             final BufferedWriter tempFileOut = new BufferedWriter(
                     new FileWriter(tempFile));
-            tempFileOut.write(fileDocument.getText());
+            for (final char character : psiFile.getText().toCharArray())
+            {
+                if (character == '\n') { // IDEA uses \n internally
+                    tempFileOut.write(codeStyleSettings.getLineSeparator());
+                } else {
+                    tempFileOut.write(character);
+                }
+            }
             tempFileOut.flush();
             tempFileOut.close();
 
