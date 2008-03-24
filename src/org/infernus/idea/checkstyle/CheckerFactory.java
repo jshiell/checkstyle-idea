@@ -216,9 +216,6 @@ public class CheckerFactory {
         // value. Therefor we use a final array.
         final Object[] threadReturn = new Object[1];
 
-        // TODO: the suppressions filter is loaded from the current directory and
-        // as such will not be found (as the current dir is the IDEA bin dir)
-
         Thread worker = new Thread() {
             public void run() {
                 try {
@@ -229,7 +226,6 @@ public class CheckerFactory {
                                 = ConfigurationLoader.loadConfiguration(
                                 configPath, resolver, true);
 
-                        // replace relative supression file paths
                         replaceSupressionFilterPath(config, baseDir);
 
                         ((Checker) threadReturn[0]).configure(config);
