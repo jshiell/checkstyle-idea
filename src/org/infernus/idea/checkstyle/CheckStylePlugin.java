@@ -1,51 +1,53 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vcs.CheckinProjectPanel;
+import com.intellij.openapi.vcs.ProjectLevelVcsManager;
+import com.intellij.openapi.vcs.checkin.CheckinHandler;
+import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ToolWindowType;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.ui.content.Content;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Main class for the CheckStyle static scanning plug-n.
@@ -61,7 +63,7 @@ import java.util.*;
                 file = "$PROJECT_FILE$"
         )}
 )
-public final class CheckStylePlugin implements ProjectComponent, Configurable,
+public final class CheckStylePlugin extends CheckinHandlerFactory implements ProjectComponent, Configurable,
         PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
 
     /**
@@ -78,7 +80,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * A reference to the current project.
      */
-    private final Project project;
+    final Project project;
 
     /**
      * The tool window for the plugin.
@@ -88,7 +90,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * Flag to track if a scan is in progress.
      */
-    private boolean scanInProgress;
+    boolean scanInProgress;
 
     /**
      * Classloader for third party libraries.
@@ -98,7 +100,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
     /**
      * Configuration store.
      */
-    private CheckStyleConfiguration configuration
+    CheckStyleConfiguration configuration
             = new CheckStyleConfiguration();
 
     /**
@@ -349,14 +351,14 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * {@inheritDoc}
      */
     public void initComponent() {
-        // do nada
+        ProjectLevelVcsManager.getInstance(this.project).registerCheckinHandlerFactory(this);
     }
 
     /**
      * {@inheritDoc}
      */
     public void disposeComponent() {
-        // do nada
+        ProjectLevelVcsManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
     }
 
     /**
@@ -604,21 +606,6 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      */
     public void checkFiles(final List<VirtualFile> files,
                            final AnActionEvent event) {
-        if (files == null) {
-            return;
-        }
-
-        checkFiles(files.toArray(new VirtualFile[files.size()]), event);
-    }
-
-    /**
-     * Run a scan on the currently selected file.
-     *
-     * @param files the files to check.
-     * @param event the event that triggered this action.
-     */
-    public void checkFiles(final VirtualFile[] files,
-                           final AnActionEvent event) {
         LOG.info("Scanning current file(s).");
 
         if (files == null) {
@@ -626,17 +613,37 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(files);
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files);
         scanInProgress = true;
         checkFilesThread.start();
     }
 
+    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files) {
+        LOG.info("Scanning current file(s).");
+        Map<PsiFile, List<ProblemDescriptor>> results = new HashMap<PsiFile, List<ProblemDescriptor>>();
+        if (files == null) {
+            LOG.debug("No files provided.");
+            return results ;
+        }
+        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
+        scanInProgress = true;
+        scanFilesThread.start();
+        try {
+            scanFilesThread.join();
+        } catch (final Throwable e) {
+            LOG.error("Error scanning files");
+        } finally {
+            scanInProgress = false;
+        }
+        return results;
+    }
+    
     /**
      * Get the tool window panel for result display.
      *
      * @return the tool window panel.
      */
-    private ToolWindowPanel getToolWindowPanel() {
+    public ToolWindowPanel getToolWindowPanel() {
         final Content content = toolWindow.getContentManager().getContent(0);
         if (content != null) {
             return ((ToolWindowPanel) content.getComponent());
@@ -644,80 +651,11 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
         return null;
     }
 
-    /**
-     * Thread to read the file to a temporary file.
-     */
-    private class CreateTempFileThread implements Runnable {
-
-        /**
-         * Any failure that occurred on the thread.
-         */
-        private IOException failure;
-
-        /**
-         * The file we are creating a temporary file from.
-         */
-        private PsiFile psiFile;
-
-        /**
-         * The created temporary file.
-         */
-        private File file;
-
-        /**
-         * Create a thread to read the given file to a temporary file.
-         *
-         * @param psiFile the file to read.
-         */
-        public CreateTempFileThread(final PsiFile psiFile) {
-            this.psiFile = psiFile;
-        }
-
-        /**
-         * Get any failure that occurred in this thread.
-         *
-         * @return the failure, if any.
-         */
-        public IOException getFailure() {
-            return failure;
-        }
-
-        /**
-         * Get the temporary file.
-         *
-         * @return the temporary file.
-         */
-        public File getFile() {
-            return file;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void run() {
-            try {
-                file = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
-                        CheckStyleConstants.TEMPFILE_EXTENSION);
-
-                final CodeStyleSettings codeStyleSettings
-                        = CodeStyleSettingsManager.getSettings(psiFile.getProject());
-
-                final BufferedWriter tempFileOut = new BufferedWriter(
-                        new FileWriter(file));
-                for (final char character : psiFile.getText().toCharArray())
-                {
-                    if (character == '\n') { // IDEA uses \n internally
-                        tempFileOut.write(codeStyleSettings.getLineSeparator());
-                    } else {
-                        tempFileOut.write(character);
-                    }
-                }
-                tempFileOut.flush();
-                tempFileOut.close();
-
-            } catch (IOException e) {
-                failure = e;
-            }
+    public void activeToolWindow(boolean activate) {
+        if (activate) {
+            this.toolWindow.show(null);
+        } else {
+            this.toolWindow.hide(null);
         }
     }
 
@@ -728,7 +666,7 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
      * @return the class loader to use, or null if none applicable.
      * @throws MalformedURLException if the URL conversion fails.
      */
-    protected ClassLoader buildModuleClassLoader(final Module module)
+    ClassLoader buildModuleClassLoader(final Module module)
             throws MalformedURLException {
 
         if (module == null) {
@@ -769,293 +707,9 @@ public final class CheckStylePlugin implements ProjectComponent, Configurable,
                 new URL[outputPaths.size()]), getThirdPartyClassloader());
     }
 
-    /**
-     * Thread for file checking, to ensure we don't lock up the UI.
-     */
-    private class CheckFilesThread extends Thread {
-
-        private final List<PsiFile> files = new ArrayList<PsiFile>();
-
-        private final Map<PsiFile, Module> fileToModuleMap
-                = new HashMap<PsiFile, Module>();
-
-        /**
-         * Create a thread to check the given files.
-         *
-         * @param virtualFiles the files to check.
-         */
-        public CheckFilesThread(final VirtualFile[] virtualFiles) {
-            if (virtualFiles == null) {
-                throw new IllegalArgumentException("Files may not be null.");
-            }
-
-            final List<VirtualFile> fileList = new ArrayList<VirtualFile>();
-            for (final VirtualFile virtualFile : virtualFiles) {
-                fileList.addAll(flattenFiles(virtualFile));
-            }
-
-            // this needs to be done on the main thread.
-            final PsiManager psiManager = PsiManager.getInstance(project);
-            for (final VirtualFile virtualFile : fileList) {
-                final PsiFile psiFile = psiManager.findFile(virtualFile);
-                if (psiFile != null) {
-                    files.add(psiFile);
-                }
-            }
-
-            // build module map (also on main frame)
-            for (final PsiFile file : files) {
-                fileToModuleMap.put(file, ModuleUtil.findModuleForPsiElement(
-                        file));
-            }
-        }
-
-        /**
-         * Execute the file check.
-         */
-        public void run() {
-            try {
-                final Map<Module, ClassLoader> moduleClassLoaderMap
-                        = new HashMap<Module, ClassLoader>();
-
-                // set progress bar
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        getToolWindowPanel().setProgressBarMax(files.size());
-                        getToolWindowPanel().displayInProgress();
-                    }
-                });
-
-                final Map<PsiFile, List<ProblemDescriptor>> fileResults
-                        = new HashMap<PsiFile, List<ProblemDescriptor>>();
-
-                for (final PsiFile psiFile : files) {
-                    if (psiFile == null) {
-                        continue;
-                    }
-
-                    final Module module = fileToModuleMap.get(psiFile);
-                    final ClassLoader moduleClassLoader;
-                    if (moduleClassLoaderMap.containsKey(module)) {
-                        moduleClassLoader = moduleClassLoaderMap.get(module);
-                    } else {
-                        moduleClassLoader = buildModuleClassLoader(module);
-                        moduleClassLoaderMap.put(module, moduleClassLoader);
-                    }
-
-                    // scan file and increment progress bar
-                    // this must be done on the dispatch thread.
-                    final FileScanner fileScanner = new FileScanner(
-                            psiFile, moduleClassLoader);
-                    SwingUtilities.invokeAndWait(fileScanner);
-
-                    // check for errors
-                    if (fileScanner.getError() != null) {
-                        // throw any exceptions from the thread
-                        throw fileScanner.getError();
-                    }
-
-                    // add results if necessary
-                    if (fileScanner.getResults() != null
-                            && fileScanner.getResults().size() > 0) {
-                        fileResults.put(psiFile, fileScanner.getResults());
-                    }
-                }
-
-                // invoke Swing fun in Swing thread.
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        getToolWindowPanel().displayResults(fileResults);
-                        getToolWindowPanel().expandTree();
-                        getToolWindowPanel().clearProgressBar();
-                        getToolWindowPanel().setProgressText(null);
-
-                        scanInProgress = false;
-                    }
-                });
-
-            } catch (final Throwable e) {
-                final CheckStylePluginException processedError = processError(
-                        "An error occurred during a file scan.", e);
-
-                if (processedError != null) {
-                    LOG.error("An error occurred while scanning a file.",
-                            processedError);
-
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            getToolWindowPanel().displayErrorResult(processedError);
-                            getToolWindowPanel().clearProgressBar();
-                            getToolWindowPanel().setProgressText(null);
-
-                            scanInProgress = false;
-                        }
-                    });
-                }
-            }
-        }
-
-        /**
-         * Flatten the tree structure represented by a virtual file.
-         *
-         * @param file the tree to flatten.
-         * @return a list of flattened files.
-         */
-        private List<VirtualFile> flattenFiles(final VirtualFile file) {
-            final List<VirtualFile> elementList = new ArrayList<VirtualFile>();
-
-            if (file != null) {
-                elementList.add(file);
-
-                if (file.getChildren() != null) {
-                    for (final VirtualFile childFile : file.getChildren()) {
-                        elementList.addAll(flattenFiles(childFile));
-                    }
-                }
-            }
-
-            return elementList;
-        }
-    }
-
-    /**
-     * Runnable for scanning an individual file.
-     */
-    protected final class FileScanner implements Runnable {
-
-        private List<ProblemDescriptor> results;
-        private PsiFile fileToScan;
-        private ClassLoader moduleClassLoader;
-        private Throwable error;
-
-        /**
-         * Create a new file scanner.
-         *
-         * @param fileToScan        the file to scan.
-         * @param moduleClassLoader the class loader for the file's module
-         */
-        public FileScanner(final PsiFile fileToScan,
-                           final ClassLoader moduleClassLoader) {
-            this.fileToScan = fileToScan;
-            this.moduleClassLoader = moduleClassLoader;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void run() {
-            try {
-                results = checkPsiFile(fileToScan, moduleClassLoader);
-
-                getToolWindowPanel().incrementProgressBar();
-            } catch (Throwable e) {
-                error = e;
-            }
-        }
-
-        /**
-         * Get the results of the scan.
-         *
-         * @return the results of the scan.
-         */
-        public List<ProblemDescriptor> getResults() {
-            return results;
-        }
-
-        /**
-         * Get any error that may have occurred during the scan.
-         *
-         * @return any error that may have occurred during the scan
-         */
-        public Throwable getError() {
-            return error;
-        }
-
-        /**
-         * Scan a PSI file with CheckStyle.
-         *
-         * @param element           the PSI element to scan. This will be
-         *                          ignored if not a java file.
-         * @param moduleClassLoader the class loader for the current module.
-         * @return a list of tree nodes representing the result tree for this
-         *         file, an empty list or null if this file is invalid or
-         *         has no errors.
-         * @throws Throwable if the
-         */
-        private List<ProblemDescriptor> checkPsiFile(final PsiElement element,
-                                                     final ClassLoader moduleClassLoader)
-                throws Throwable {
-            if (element == null || !element.isValid() || !element.isPhysical()
-                    || !PsiFile.class.isAssignableFrom(element.getClass())) {
-                final String elementString = (element != null
-                        ? element.toString() : null);
-                LOG.debug("Skipping as invalid type: " + elementString);
-
-                return null;
-            }
-
-            final PsiFile psiFile = (PsiFile) element;
-            LOG.debug("Scanning " + psiFile.getName());
-
-            final boolean checkTestClasses = configuration.getBooleanProperty(
-                    CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
-            if (!checkTestClasses) {
-                final VirtualFile elementFile = element.getContainingFile().getVirtualFile();
-                if (elementFile != null) {
-                    final Module module = ModuleUtil.findModuleForFile(elementFile, project);
-                    if (ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(
-                            elementFile)) {
-                        LOG.debug("Skipping test class " + psiFile.getName());
-                        return null;
-                    }
-                }
-            }
-
-            final InspectionManager manager
-                    = InspectionManager.getInstance(psiFile.getProject());
-
-            if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
-                return null;
-            }
-
-            File tempFile = null;
-            try {
-                final Checker checker = getChecker(moduleClassLoader);
-
-                // we need to copy to a file as IntelliJ may not have
-                // saved the file recently...
-                final CreateTempFileThread fileThread
-                        = new CreateTempFileThread(psiFile);
-                ApplicationManager.getApplication().runReadAction(fileThread);
-
-                // rethrow any error from the thread.
-                if (fileThread.getFailure() != null) {
-                    throw fileThread.getFailure();
-                }
-
-                tempFile = fileThread.getFile();
-                if (tempFile == null) {
-                    throw new IllegalStateException("Failed to create temporary file.");
-                }
-
-                final CheckStyleAuditListener listener
-                        = new CheckStyleAuditListener(psiFile, manager, true);
-                checker.addListener(listener);
-                checker.process(new File[]{tempFile});
-                checker.destroy();
-
-                return listener.getProblems();
-
-            } catch (IOException e) {
-                LOG.error("Failure when creating temp file", e);
-                throw new IllegalStateException("Couldn't create temp file", e);
-
-            } finally {
-                if (tempFile != null && tempFile.exists()) {
-                    tempFile.delete();
-                }
-            }
-        }
+    @NotNull
+    public CheckinHandler createHandler(CheckinProjectPanel checkinProjectPanel) {
+        return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
     }
 
     /**

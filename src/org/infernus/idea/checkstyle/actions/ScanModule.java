@@ -20,6 +20,7 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 import java.util.ResourceBundle;
+import java.util.Arrays;
 
 /**
  * Action to execute a CheckStyle scan on the current module.
@@ -85,7 +86,7 @@ public class ScanModule extends BaseAction {
 
             if (moduleFiles.length > 0) {
                 project.getComponent(CheckStylePlugin.class).checkFiles(
-                        moduleFiles, event);
+                        Arrays.asList(moduleFiles), event);
             }
 
         } catch (Throwable e) {

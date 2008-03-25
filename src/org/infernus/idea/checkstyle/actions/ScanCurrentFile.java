@@ -17,6 +17,8 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
 import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Action to execute a CheckStyle scan on the current editor file.
@@ -63,9 +65,9 @@ public class ScanCurrentFile extends BaseAction {
             // read select file
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();
-            if (selectedFiles != null && selectedFiles.length > 0) {
+            if (selectedFiles.length > 0) {
                 project.getComponent(CheckStylePlugin.class).checkFiles(
-                        selectedFiles, event);
+                        Arrays.asList(selectedFiles), event);
             }
         } catch (Throwable e) {
             final CheckStylePluginException processed
@@ -118,7 +120,7 @@ public class ScanCurrentFile extends BaseAction {
             final CheckStylePluginException processed
                     = CheckStylePlugin.processError(null, e);
             if (processed != null) {
-                LOG.error("Button update failed.", processed);   
+                LOG.error("Button update failed.", processed);
             }
         }
     }

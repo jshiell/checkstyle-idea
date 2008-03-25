@@ -38,6 +38,11 @@ public final class CheckStyleConfiguration extends Properties {
     public static final String PROPERTIES_PREFIX = "property.";
 
     /**
+     * Scan files before vcs checkin.
+     */
+    public boolean SCAN_FILES_BEFORE_CHECKIN = false;
+
+    /**
      * Get all CheckStyle properties defined in the configuration.
      *
      * @return a map of CheckStyle property names to values.
