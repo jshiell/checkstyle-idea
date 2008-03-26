@@ -129,6 +129,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
 
     /**
+     * Project getter.
+     * @return Project
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
      * Get the base path of the project.
      * <p/>
      * The way to do this changes from IDEA 6 to IDEA 7. Hence we need to play
@@ -618,9 +626,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         checkFilesThread.start();
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files) {
+    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files, Map<PsiFile, List<ProblemDescriptor>> results) {
         LOG.info("Scanning current file(s).");
-        Map<PsiFile, List<ProblemDescriptor>> results = new HashMap<PsiFile, List<ProblemDescriptor>>();
         if (files == null) {
             LOG.debug("No files provided.");
             return results ;

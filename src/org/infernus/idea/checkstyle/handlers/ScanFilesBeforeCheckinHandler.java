@@ -6,6 +6,8 @@ import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitExecutor;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiFile;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -21,12 +23,21 @@ import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
+/**
+ * Before Checkin Handler to scan files with Checkstyle.
+ */
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
     private final CheckStylePlugin plugin;
     private final CheckinProjectPanel checkinPanel;
 
+    /**
+     * Checkstyle before checkin handler. 
+     * @param plugin Checkstyle plugin reference
+     * @param myCheckinPanel checkin project panel
+     */
     public ScanFilesBeforeCheckinHandler(final CheckStylePlugin plugin, CheckinProjectPanel myCheckinPanel) {
         this.plugin = plugin;
         this.checkinPanel = myCheckinPanel;
@@ -57,10 +68,23 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         };
     }
 
+    /**
+     * Run Check if selected. 
+     * @param commitExecutor commit executor
+     * @return ReturnResult
+     */
     public ReturnResult beforeCheckin(@Nullable CommitExecutor commitExecutor) {
         if (getSettings().SCAN_FILES_BEFORE_CHECKIN) {
             try {
-                Map<PsiFile, java.util.List<ProblemDescriptor>> scanResults = this.plugin.scanFiles(new ArrayList<VirtualFile>(checkinPanel.getVirtualFiles()));
+                final Map<PsiFile, java.util.List<ProblemDescriptor>> scanResults = new HashMap<PsiFile, List<ProblemDescriptor>>();
+                new Task.Modal(this.plugin.getProject(), "CheckStyle is Scanning", false) {
+                    public void run(ProgressIndicator progressIndicator) {
+                        progressIndicator.setText("Scanning ...");
+                        progressIndicator.setIndeterminate(true);
+                        ScanFilesBeforeCheckinHandler.this.plugin.scanFiles(new ArrayList<VirtualFile>(checkinPanel.getVirtualFiles()),scanResults);
+                    }
+                }.queue();
+
                 if (!scanResults.isEmpty()) {
                     return processScanResults(scanResults, commitExecutor);
                 } else {
@@ -76,10 +100,20 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         }
     }
 
+    /**
+     * Get plugin configuration.
+     * @return CheckStyleConfiguration plugin configuration
+     */
     private CheckStyleConfiguration getSettings() {
         return this.plugin.getConfiguration();
     }
-    
+
+    /**
+     * Process scan results and allow user to decide what to do.
+     * @param results scan results.
+     * @param executor commit executor
+     * @return ReturnResult Users decision.
+     */
     private ReturnResult processScanResults(Map<PsiFile, java.util.List<ProblemDescriptor>> results, CommitExecutor executor) {
         int errorCount = results.keySet().size();
         String commitButtonText = executor != null ? executor.getActionText() : checkinPanel.getCommitActionName();
