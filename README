@@ -137,6 +137,8 @@ LICENCE file.
 Version History
 ---------------
 
+2.2   - Fixed: Now works with IDEA8.0M1.
+2.2   - New: Ability to scan on checkin. Thanks to J. G. Christopher.
 2.1   - New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.

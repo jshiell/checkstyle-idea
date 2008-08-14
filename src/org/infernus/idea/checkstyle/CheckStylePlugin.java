@@ -11,6 +11,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
@@ -689,8 +690,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         final List<URL> outputPaths = new ArrayList<URL>();
-        final VirtualFile outputPath = rootManager.getCompilerOutputPath();
-        if (outputPath != null) {
+		for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
             outputPaths.add(new File(outputPath.getPath()).toURL());
         }
 
@@ -703,9 +703,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 continue;
             }
 
-            final VirtualFile depOutputPath
-                    = depRootManager.getCompilerOutputPath();
-            if (depOutputPath != null) {
+            for (final VirtualFile depOutputPath : depRootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT))
+			{
                 outputPaths.add(new File(depOutputPath.getPath()).toURL());
             }
         }
@@ -725,4 +724,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     public static class ConfigurationBean {
         public Map<String, String> configuration = new HashMap<String, String>();
     }
+
+
 }

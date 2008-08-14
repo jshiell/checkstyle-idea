@@ -11,13 +11,15 @@
 </p>
         ]]>
     </description>
-    <version>2.1</version>
+    <version>2.2pre</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+	<li>2.2: Fixed: Now works with IDEA8.0M1.</li>
+	<li>2.2: New: Ability to scan on checkin. Thanks to J. G. Christopher.</li>
     <li>2.1: New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.</li>
