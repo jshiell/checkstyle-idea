@@ -70,6 +70,11 @@ public final class CheckStyleConfigPanel extends JPanel {
     };
 
     /**
+     * Original scan test classes for modification tests.
+     */
+    private boolean scanTestClasses;
+
+    /**
      * Original configuration file for modification tests.
      */
     private String configFile;
@@ -411,6 +416,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @param scanTestClasses true to scan test classes.
      */
     public void setScanTestClasses(final boolean scanTestClasses) {
+        this.scanTestClasses = scanTestClasses;
         testClassesCheckbox.setSelected(scanTestClasses);
     }
 
@@ -489,6 +495,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         return !ObjectUtils.equals(configFile, fileField.getText())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || !getProperties().equals(properties)
+                || isScanTestClasses() != scanTestClasses
                 || configFile != null && useDefaultButton.isSelected();
     }
 
