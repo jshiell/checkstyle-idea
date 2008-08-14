@@ -59,10 +59,10 @@ import java.util.Map;
 @State(
         name = CheckStyleConstants.ID_PLUGIN,
         storages = {
-        @Storage(
-                id = "other",
-                file = "$PROJECT_FILE$"
-        )}
+                @Storage(
+                        id = "other",
+                        file = "$PROJECT_FILE$"
+                )}
 )
 public final class CheckStylePlugin extends CheckinHandlerFactory implements ProjectComponent, Configurable,
         PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
@@ -131,6 +131,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
     /**
      * Project getter.
+     *
      * @return Project
      */
     public Project getProject() {
@@ -139,9 +140,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
     /**
      * Get the base path of the project.
-     * <p/>
-     * The way to do this changes from IDEA 6 to IDEA 7. Hence we need to play
-     * silly buggers with introspection to determine the correct way to do this.
      *
      * @return the base path of the project.
      */
@@ -151,54 +149,12 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return null;
         }
 
-        final Class projectClass = project.getClass();
-
-        Method getBaseDirMethod;
-        try {
-            getBaseDirMethod = projectClass.getMethod("getBaseDir");
-        } catch (NoSuchMethodException e) {
-            getBaseDirMethod = null;
+        final VirtualFile baseDir = project.getBaseDir();
+        if (baseDir == null) {
+            return null;
         }
 
-        try {
-            if (getBaseDirMethod != null) { // IDEA 7 and above
-                final VirtualFile baseDir = (VirtualFile)
-                        getBaseDirMethod.invoke(project);
-                if (baseDir == null) {
-                    return null;
-                }
-
-                return new File(baseDir.getPath());
-
-            } else { // IDEA 6
-                final Method getProjectFilePathMethod
-                        = projectClass.getMethod("getProjectFilePath");
-
-                final String projectFilePath = (String)
-                        getProjectFilePathMethod.invoke(project);
-                if (projectFilePath != null) {
-                    final File projectFile = new File(projectFilePath);
-                    return projectFile.getParentFile();
-                }
-
-                return null;
-            }
-
-        } catch (IllegalAccessException e) {
-            LOG.error("Cannot access method", e);
-            throw new CheckStylePluginException(
-                    "Cannot access method", e);
-
-        } catch (InvocationTargetException e) {
-            LOG.error("Exception thrown from invoked method", e);
-            throw new CheckStylePluginException(
-                    "Exception thrown from invoked method", e);
-
-        } catch (NoSuchMethodException e) {
-            LOG.error("Unknown IDEA version, cannot obtain project path", e);
-            throw new CheckStylePluginException(
-                    "Unknown IDEA version, cannot obtain project path", e);
-        }
+        return new File(baseDir.getPath());
     }
 
     /**
@@ -308,7 +264,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
         final Content toolContent = toolWindow.getContentManager().getFactory().createContent(
                 new ToolWindowPanel(project), IDEAUtilities.getResource("plugin.toolwindow.action",
-                "Scan"), false);
+                        "Scan"), false);
         toolWindow.getContentManager().addContent(toolContent);
 
         toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name",
@@ -631,7 +587,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         LOG.info("Scanning current file(s).");
         if (files == null) {
             LOG.debug("No files provided.");
-            return results ;
+            return results;
         }
         final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
         scanInProgress = true;
@@ -645,7 +601,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
         return results;
     }
-    
+
     /**
      * Get the tool window panel for result display.
      *
@@ -690,7 +646,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         final List<URL> outputPaths = new ArrayList<URL>();
-		for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
+        for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
             outputPaths.add(new File(outputPath.getPath()).toURL());
         }
 
@@ -703,8 +659,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 continue;
             }
 
-            for (final VirtualFile depOutputPath : depRootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT))
-			{
+            for (final VirtualFile depOutputPath : depRootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
                 outputPaths.add(new File(depOutputPath.getPath()).toURL());
             }
         }
