@@ -37,18 +37,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 /**
  * Main class for the CheckStyle static scanning plug-n.
@@ -361,6 +352,9 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
                 configuration.getDefinedProperies());
+        configPanel.setConfigUrl(configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_URL),
+                configuration.getDefinedProperies());
         configPanel.setScanTestClasses(configuration.getBooleanProperty(
                 CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
@@ -398,6 +392,15 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             configuration.remove(CheckStyleConfiguration.CONFIG_FILE);
         }
 
+        final String configurationUrl = configPanel.getConfigUrl();
+        if (configurationUrl != null) {
+            configuration.setProperty(CheckStyleConfiguration.CONFIG_URL,
+                    configPanel.getConfigUrl());
+
+        } else {
+            configuration.remove(CheckStyleConfiguration.CONFIG_URL);
+        }
+
         configuration.setProperty(CheckStyleConfiguration.CHECK_TEST_CLASSES,
                 Boolean.toString(configPanel.isScanTestClasses()));
 
@@ -432,6 +435,9 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
         configPanel.setConfigFile(configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE),
+                configuration.getDefinedProperies());
+        configPanel.setConfigUrl(configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_URL),
                 configuration.getDefinedProperies());
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
@@ -485,7 +491,34 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             final Checker checker;
             String configFile = configuration.getProperty(
                     CheckStyleConfiguration.CONFIG_FILE);
-            if (configFile == null) {
+            String configUrl = configuration.getProperty(
+                    CheckStyleConfiguration.CONFIG_URL);
+            if (configFile != null) {
+                // swap prefix if required
+                final File configFileToLoad = new File(untokenisePath(configFile));
+                if (!configFileToLoad.exists()) {
+                    throw new CheckStylePluginException("CheckStyle file does not exist at "
+                            + configFileToLoad.getAbsolutePath());
+                }                             
+
+                LOG.info("Loading configuration from " + configFileToLoad.getAbsolutePath());
+                checker = CheckerFactory.getInstance().getChecker(
+                        configFileToLoad, classLoader,
+                        checkstyleProperties, true);
+
+            } else if (configUrl != null) {
+                LOG.info("Loading configuration from " + configUrl);
+
+                final File checkstyleFile = getUrl(configUrl);
+                if (checkstyleFile != null) {
+                    checker = CheckerFactory.getInstance().getChecker(
+                            checkstyleFile, classLoader,
+                            checkstyleProperties, true);
+                } else {
+                    throw new CheckStylePluginException("CheckStyle file does not exist at " + configUrl);
+                }
+
+            } else {
                 LOG.info("Loading default configuration");
 
                 final InputStream in
@@ -494,15 +527,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 checker = CheckerFactory.getInstance().getChecker(
                         in, classLoader, checkstyleProperties);
                 in.close();
-
-            } else {
-                // swap prefix if required
-                configFile = untokenisePath(configFile);
-
-                LOG.info("Loading configuration from " + configFile);
-                checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile), classLoader,
-                        checkstyleProperties, true);
             }
 
             return checker;
@@ -680,5 +704,52 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         public Map<String, String> configuration = new HashMap<String, String>();
     }
 
+    /**
+     * Fetch the contents of a URL.
+     *
+     * @param url the URL. If invalid null will be returned.
+     * @return the contents in a temporary file, or null if retrieval failed.
+     */
+    public File getUrl(final String url) {
+        Reader reader = null;
+        Writer writer = null;
+        try {
+            final URLConnection urlConnection = new URL(url).openConnection();
+            urlConnection.setDoInput(true);
+            urlConnection.setDoOutput(false);
 
+            final File tempFile = File.createTempFile("checkStyle", ".xml");
+            writer = new BufferedWriter(new FileWriter(tempFile));
+
+            urlConnection.connect();
+            reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            int readChar;
+            while ((readChar = reader.read()) != -1) {
+                writer.write(readChar);
+            }
+
+            writer.flush();
+            return tempFile;
+
+        } catch (IOException e) {
+            LOG.error("Couldn't read URL: " + url, e);
+            return null;
+
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+    }
 }

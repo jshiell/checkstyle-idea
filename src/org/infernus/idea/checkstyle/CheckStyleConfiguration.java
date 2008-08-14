@@ -23,6 +23,11 @@ public final class CheckStyleConfiguration extends Properties {
     public static final String CONFIG_FILE = "config-file";
 
     /**
+     * The CheckStyle configuration URL.
+     */
+    public static final String CONFIG_URL = "config-url";
+
+    /**
      * Should test classes be checked?
      */
     public static final String CHECK_TEST_CLASSES = "check-test-classes";

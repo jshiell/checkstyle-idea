@@ -23,6 +23,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * Provides an input box and browse button for CheckStyle file selection.
@@ -40,10 +42,14 @@ public final class CheckStyleConfigPanel extends JPanel {
 
     private final JLabel fileLabel = new JLabel();
     private final JTextField fileField = new JTextField();
+    private final JLabel urlLabel = new JLabel();
+    private final JTextField urlField = new JTextField();
     private final JButton browseButton = new JButton();
     private final JRadioButton useDefaultButton = new JRadioButton(
             new ConfigurationSelectionAction());
-    private final JRadioButton useCustomButton = new JRadioButton(
+    private final JRadioButton useFileConfigButton = new JRadioButton(
+            new ConfigurationSelectionAction());
+    private final JRadioButton useUrlConfigButton = new JRadioButton(
             new ConfigurationSelectionAction());
     private final JList pathList = new JList(new DefaultListModel());
     private final JButton editPathButton = new JButton(new EditPathAction());
@@ -78,6 +84,11 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Original configuration file for modification tests.
      */
     private String configFile;
+
+    /**
+     * Original configuration URL for modification tests.
+     */
+    private String configUrl;
 
     /**
      * Original third party classpath for modification tests.
@@ -123,14 +134,20 @@ public final class CheckStyleConfigPanel extends JPanel {
         useDefaultButton.setToolTipText(resources.getString(
                 "config.file.default-radio.use-default.tooltip"));
 
-        useCustomButton.setText(resources.getString(
+        useFileConfigButton.setText(resources.getString(
                 "config.file.default-radio.use-custom.text"));
-        useCustomButton.setToolTipText(resources.getString(
+        useFileConfigButton.setToolTipText(resources.getString(
                 "config.file.default-radio.use-custom.tooltip"));
+
+        useUrlConfigButton.setText(resources.getString(
+                "config.url.default-radio.use-custom.text"));
+        useUrlConfigButton.setToolTipText(resources.getString(
+                "config.url.default-radio.use-custom.tooltip"));
 
         final ButtonGroup configButtonGroup = new ButtonGroup();
         configButtonGroup.add(useDefaultButton);
-        configButtonGroup.add(useCustomButton);
+        configButtonGroup.add(useFileConfigButton);
+        configButtonGroup.add(useUrlConfigButton);
         configButtonGroup.setSelected(useDefaultButton.getModel(), true);
 
         fileField.setToolTipText(resources.getString(
@@ -140,6 +157,13 @@ public final class CheckStyleConfigPanel extends JPanel {
         fileLabel.setText(resources.getString("config.file.label.text"));
         fileLabel.setToolTipText(resources.getString(
                 "config.file.label.tooltip"));
+
+        urlField.setToolTipText(resources.getString(
+                "config.url.label.tooltip"));
+
+        urlLabel.setText(resources.getString("config.url.label.text"));
+        urlLabel.setToolTipText(resources.getString(
+                "config.url.label.tooltip"));
 
         testClassesCheckbox.setText(resources.getString(
                 "config.test-classes.checkbox.text"));
@@ -162,8 +186,8 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(useDefaultButton, new GridBagConstraints(
                 0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(useCustomButton, new GridBagConstraints(
-                0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST, 
+        configFilePanel.add(useFileConfigButton, new GridBagConstraints(
+                0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(fileLabel, new GridBagConstraints(
                 0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
@@ -174,11 +198,20 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(browseButton, new GridBagConstraints(
                 2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(useUrlConfigButton, new GridBagConstraints(
+                0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(urlLabel, new GridBagConstraints(
+                0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 20, 4, 4), 0, 0));
+        configFilePanel.add(urlField, new GridBagConstraints(
+                1, 4, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
-                0, 3, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                0, 5, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(propertiesScroll, new GridBagConstraints(
-                0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
+                0, 6, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
                 GridBagConstraints.BOTH, new Insets(4, 20, 4, 4), 0, 0));
 
         final JButton addPathButton = new JButton(new AddPathAction());
@@ -237,10 +270,25 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return null if valid, or the error message if not.
      */
     public String validateData() {
-        if (useCustomButton.isSelected() && getConfigFile() == null) {
-            return "No CheckStyle configuration file has been specified.";
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+
+        if (useFileConfigButton.isSelected() && getConfigFile() == null) {
+            return resources.getString("error.no-config-file");
         }
 
+        if (useUrlConfigButton.isSelected()) {
+            if (getConfigUrl() == null) {
+                return resources.getString("error.no-config-url");
+            }
+
+            try {
+                new URL(getConfigUrl());
+            } catch (MalformedURLException e) {
+                return resources.getString("error.invalid-config-url");
+            }
+        }
+        
         // TODO property settings?
 
         return null;
@@ -255,7 +303,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return the currently selected configuration file.
      */
     public String getConfigFile() {
-        if (useDefaultButton.isSelected()) {
+        if (useDefaultButton.isSelected() || useUrlConfigButton.isSelected()) {
             return null;
         }
 
@@ -270,6 +318,69 @@ public final class CheckStyleConfigPanel extends JPanel {
             }
         }
         return null;
+    }
+
+    /**
+     * Get the currently selected configuration file.
+     * <p/>
+     * This method will only return the configuration file
+     * if it currently exists.
+     *
+     * @return the currently selected configuration file.
+     */
+    public String getConfigUrl() {
+        if (useDefaultButton.isSelected() || useFileConfigButton.isSelected()) {
+            return null;
+        }
+
+        final String configUrl = urlField.getText();
+
+        this.configUrl = configUrl;
+        return configUrl;
+    }
+
+    /**
+     * Set the configuration URL.
+     *
+     * @param configUrl the configuration URL.
+     * @param properties a map of properties for this config URL.
+     */
+    public void setConfigUrl(final String configUrl,
+                              final Map<String, String> properties) {
+        if (configUrl == null) {
+            urlField.setText("");
+
+            final String fileText = fileField.getText();
+            if (fileText != null && fileText.trim().length() > 0) {
+                useFileConfigButton.setSelected(true);
+            } else {
+                useDefaultButton.setSelected(true);
+            }
+
+            processConfigProperties((File) null, properties);
+
+        } else {
+            urlField.setText(configUrl);
+            useUrlConfigButton.setSelected(true);
+
+            try {
+                processConfigProperties(new URL(configUrl), properties);
+                
+            } catch (MalformedURLException e) {
+                processConfigProperties((File) null, properties);
+            }
+        }
+
+        // save original properties
+        if (properties == null || configUrl == null) {
+            this.properties = new HashMap<String, String>();
+        } else {
+            this.properties = properties;
+        }
+
+        this.configUrl = configUrl;
+
+        new ConfigurationSelectionAction().actionPerformed(null);
     }
 
     /**
@@ -298,16 +409,22 @@ public final class CheckStyleConfigPanel extends JPanel {
                               final Map<String, String> properties) {
         if (configFile == null) {
             fileField.setText("");
-            useDefaultButton.setSelected(true);
 
-            processConfigProperties(null, properties);
+            final String urlText = urlField.getText();
+            if (urlText != null && urlText.trim().length() > 0) {
+                useUrlConfigButton.setSelected(true);
+            } else {
+                useDefaultButton.setSelected(true);
+            }
+
+            processConfigProperties((File) null, properties);
 
         } else {
             final String processedConfigFile
                     = plugin.untokenisePath(configFile);
 
             fileField.setText(processedConfigFile);
-            useCustomButton.setSelected(true);
+            useFileConfigButton.setSelected(true);
 
             processConfigProperties(new File(processedConfigFile), properties);
         }
@@ -320,6 +437,15 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         this.configFile = configFile;
+
+        new ConfigurationSelectionAction().actionPerformed(null);
+    }
+
+    private void processConfigProperties(final URL configUrl,
+                                         final Map<String, String> properties)
+    {
+        final File retrievedFile = plugin.getUrl(configUrl.toString());
+        processConfigProperties(retrievedFile, properties);
     }
 
     /**
@@ -426,7 +552,8 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return true if test classes should be scanned.
      */
     public boolean isScanTestClasses() {
-        return testClassesCheckbox.isSelected();
+        this.scanTestClasses = testClassesCheckbox.isSelected();
+        return scanTestClasses;
     }
 
     /**
@@ -466,7 +593,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             final String path = (String) listModel.get(i);
             classpath.add(plugin.tokenisePath(path));
         }
-        
+
         return classpath;
     }
 
@@ -493,10 +620,11 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public boolean isModified() {
         return !ObjectUtils.equals(configFile, fileField.getText())
+                || !ObjectUtils.equals(configUrl, urlField.getText())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || !getProperties().equals(properties)
-                || isScanTestClasses() != scanTestClasses
-                || configFile != null && useDefaultButton.isSelected();
+                || testClassesCheckbox.isSelected() != scanTestClasses
+                || ((configFile != null || configUrl != null) && useDefaultButton.isSelected());
     }
 
     /**
@@ -544,12 +672,14 @@ public final class CheckStyleConfigPanel extends JPanel {
          * {@inheritDoc}
          */
         public void actionPerformed(final ActionEvent e) {
-            final boolean useDefault = useDefaultButton.isSelected();
+            fileLabel.setEnabled(useFileConfigButton.isSelected());
+            fileField.setEnabled(useFileConfigButton.isSelected());
+            browseButton.setEnabled(useFileConfigButton.isSelected());
 
-            fileLabel.setEnabled(!useDefault);
-            fileField.setEnabled(!useDefault);
-            browseButton.setEnabled(!useDefault);
-            propertiesTable.setEnabled(!useDefault);
+            urlLabel.setEnabled(useUrlConfigButton.isSelected());
+            urlField.setEnabled(useUrlConfigButton.isSelected());
+
+            propertiesTable.setEnabled(useFileConfigButton.isSelected() || useUrlConfigButton.isSelected());
         }
     }
 
@@ -773,7 +903,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
             final ResourceBundle resources = ResourceBundle.getBundle(
                     CheckStyleConstants.RESOURCE_BUNDLE);
-                         
+
             putValue(Action.NAME, resources.getString(
                     "config.file.browse.text"));
             putValue(Action.SHORT_DESCRIPTION,
