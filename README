@@ -84,6 +84,8 @@ Limitations
   this is something we'll always have to live with to some degree.
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
+* Loading a file from a URL is current experimental and not guaranteed to do
+  anything at all.
 
 
 Future
@@ -139,6 +141,7 @@ Version History
 
 2.2   - Fixed: Now works with IDEA8.0M1.
 2.2   - New: Ability to scan on checkin. Thanks to J. G. Christopher.
+2.2   - Experimental: Ability to load Checkstyle configuration from a URL. This is NOT robust at present.
 2.1   - New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.
