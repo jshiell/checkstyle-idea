@@ -171,11 +171,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
             if (elementFile != null) {
                 final Module module = ModuleUtil.findModuleForFile(elementFile, manager.getProject());
-                final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
-                if (moduleRootManager != null && moduleRootManager.getFileIndex() != null
-                        && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
-                    LOG.debug("Skipping test class " + psiFile.getName());
-                    return null;
+                if (module != null) {
+                    final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
+                    if (moduleRootManager != null && moduleRootManager.getFileIndex() != null
+                            && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
+                        LOG.debug("Skipping test class " + psiFile.getName());
+                        return null;
+                    }
                 }
             }
         }

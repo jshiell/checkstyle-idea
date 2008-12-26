@@ -499,7 +499,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 if (!configFileToLoad.exists()) {
                     throw new CheckStylePluginException("CheckStyle file does not exist at "
                             + configFileToLoad.getAbsolutePath());
-                }                             
+                }
 
                 LOG.info("Loading configuration from " + configFileToLoad.getAbsolutePath());
                 checker = CheckerFactory.getInstance().getChecker(
@@ -603,11 +603,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files);
+        checkFilesThread.setPriority(Thread.MIN_PRIORITY);
+
         scanInProgress = true;
         checkFilesThread.start();
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files, Map<PsiFile, List<ProblemDescriptor>> results) {
+    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files,
+                                                           final Map<PsiFile, List<ProblemDescriptor>> results) {
         LOG.info("Scanning current file(s).");
         if (files == null) {
             LOG.debug("No files provided.");
@@ -670,22 +673,12 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         final List<URL> outputPaths = new ArrayList<URL>();
-        for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
-            outputPaths.add(new File(outputPath.getPath()).toURL());
-        }
-
-        for (final Module depModule : rootManager.getDependencies()) {
-            final ModuleRootManager depRootManager
-                    = ModuleRootManager.getInstance(depModule);
-            if (depRootManager == null) {
-                LOG.debug("Could not find root manager for dependent module: "
-                        + depModule.getName());
-                continue;
+        for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.COMPILATION_CLASSES)) {
+            String filePath = outputPath.getPath();
+            if (filePath.endsWith("!/")) { // filter JAR suffix
+                filePath = filePath.substring(0, filePath.length() - 2);
             }
-
-            for (final VirtualFile depOutputPath : depRootManager.getFiles(OrderRootType.CLASSES_AND_OUTPUT)) {
-                outputPaths.add(new File(depOutputPath.getPath()).toURL());
-            }
+            outputPaths.add(new File(filePath).toURL());
         }
 
         return new URLClassLoader(outputPaths.toArray(

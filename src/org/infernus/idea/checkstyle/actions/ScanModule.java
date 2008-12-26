@@ -46,15 +46,20 @@ public class ScanModule extends BaseAction {
                 return;
             }
 
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(
+                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();
             if (selectedFiles.length == 0) {
+                setProgressText(toolWindow, "plugin.status.in-progress.no-file");
                 return;
             }
 
             final Module module = ModuleUtil.findModuleForFile(
                     selectedFiles[0], project);
             if (module == null) {
+                setProgressText(toolWindow, "plugin.status.in-progress.no-module");
                 return;
             }
 
@@ -64,20 +69,9 @@ public class ScanModule extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
             toolWindow.activate(null);
 
-            // show progress text
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-            final String progressText = resources.getString(
-                    "plugin.status.in-progress.module");
-            final Content content = toolWindow.getContentManager().getContent(0);
-            if (content != null) {
-                final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
-                panel.setProgressText(progressText);
-            }
+            setProgressText(toolWindow, "plugin.status.in-progress.module");
 
             // find module files
             final ModuleRootManager moduleRootManager

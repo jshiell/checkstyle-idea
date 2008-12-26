@@ -41,22 +41,39 @@ public abstract class AbstractCheckerThread extends Thread {
 
     public AbstractCheckerThread(CheckStylePlugin checkStylePlugin, final List<VirtualFile> virtualFiles) {
         this.plugin = checkStylePlugin;
-        
+
         if (files == null) {
             throw new IllegalArgumentException("Files may not be null.");
         }
         // this needs to be done on the main thread.
         final PsiManager psiManager = PsiManager.getInstance(this.plugin.project);
         for (final VirtualFile virtualFile : virtualFiles) {
-            final PsiFile psiFile = psiManager.findFile(virtualFile);
-            if (psiFile != null) {
-                files.add(psiFile);
-            }
+            processFile(psiManager, virtualFile);
         }
 
         // build module map (also on main frame)
         for (final PsiFile file : files) {
             this.fileToModuleMap.put(file, ModuleUtil.findModuleForPsiElement(file));
+        }
+    }
+
+    /**
+     * Process each virtual file, adding to the map or finding children if a container.
+     *
+     * @param psiManager  the current manager.
+     * @param virtualFile the file to process.
+     */
+    private void processFile(final PsiManager psiManager, final VirtualFile virtualFile) {
+        if (virtualFile.isDirectory()) {
+            for (final VirtualFile child : virtualFile.getChildren()) {
+                processFile(psiManager, child);
+            }
+
+        } else {
+            final PsiFile psiFile = psiManager.findFile(virtualFile);
+            if (psiFile != null) {
+                files.add(psiFile);
+            }
         }
     }
 
@@ -81,7 +98,7 @@ public abstract class AbstractCheckerThread extends Thread {
 
             final FileScanner fileScanner = new FileScanner(this.plugin,
                     psiFile, moduleClassLoader);
-            
+
             this.runFileScanner(fileScanner);
 
             // check for errors

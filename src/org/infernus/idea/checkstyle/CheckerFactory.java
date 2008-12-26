@@ -237,7 +237,6 @@ public class CheckerFactory {
             }
         };
 
-        // Fetch the class loader from the JetStyle plugin
         if (contextClassLoader != null) {
             worker.setContextClassLoader(contextClassLoader);
         } else {

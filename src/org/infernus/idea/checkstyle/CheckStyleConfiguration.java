@@ -12,6 +12,8 @@ import java.util.*;
  */
 public final class CheckStyleConfiguration extends Properties {
 
+    private static final long serialVersionUID = 2804470793153612480L;
+    
     /**
      * The CP location of the default CheckStyle configuration.
      */
@@ -45,7 +47,7 @@ public final class CheckStyleConfiguration extends Properties {
     /**
      * Scan files before vcs checkin.
      */
-    public boolean SCAN_FILES_BEFORE_CHECKIN = false;
+    private boolean scanFilesBeforeCheckin = false;
 
     /**
      * Get all CheckStyle properties defined in the configuration.
@@ -177,5 +179,13 @@ public final class CheckStyleConfiguration extends Properties {
     public void setProperty(final String propertyName,
                             final boolean value) {
         setProperty(propertyName, Boolean.toString(value));
+    }
+
+    public boolean isScanFilesBeforeCheckin() {
+        return scanFilesBeforeCheckin;
+    }
+
+    public void setScanFilesBeforeCheckin(final boolean scanFilesBeforeCheckin) {
+        this.scanFilesBeforeCheckin = scanFilesBeforeCheckin;
     }
 }

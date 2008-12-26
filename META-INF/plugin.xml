@@ -11,13 +11,17 @@
 </p>
         ]]>
     </description>
-    <version>2.2</version>
+    <version>2.3</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
-<ul>
+<ul>                                                                                             
+    <li>2.3: Fixed: Exceptions in JAR files are not picked up.</li>
+    <li>2.3: Fixed: Scan Modified Files is now disabled while other scans are active.</li>
+    <li>2.3: Fixed: Background scan thread is now lower priority.</li>
+    <li>2.3: Fixed: Module scan now works again.</li>
 	<li>2.2: Fixed: Now works with IDEA8.0.</li>
 	<li>2.2: New: Ability to scan on checkin. Thanks to J. G. Christopher.</li>
 	<li>2.2: Experimental: Ability to load Checkstyle configuration from a URL. This is NOT robust at present.</li>

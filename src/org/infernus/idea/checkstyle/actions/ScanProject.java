@@ -54,16 +54,7 @@ public class ScanProject extends BaseAction {
                     project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
             toolWindow.activate(null);
 
-            // show progress text
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-            final String progressText = resources.getString(
-                    "plugin.status.in-progress.project");
-            final Content content = toolWindow.getContentManager().getContent(0);
-            if (content != null) {
-                final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
-                panel.setProgressText(progressText);
-            }
+            setProgressText(toolWindow, "plugin.status.in-progress.project");
 
             // find project files
             ProjectRootManager projectRootManager

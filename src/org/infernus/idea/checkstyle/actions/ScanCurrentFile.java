@@ -54,13 +54,7 @@ public class ScanCurrentFile extends BaseAction {
                     project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
             toolWindow.activate(null);
 
-            // show progress text
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-            final String progressText = resources.getString(
-                    "plugin.status.in-progress.current");
-            ((ToolWindowPanel) toolWindow.getContentManager().getContent(0).getComponent()).setProgressText(
-                    progressText);
+            setProgressText(toolWindow, "plugin.status.in-progress.current");
 
             // read select file
             final VirtualFile[] selectedFiles

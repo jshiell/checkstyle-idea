@@ -7,11 +7,15 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+
+import java.util.ResourceBundle;
 
 /**
  * Base class for plug-in actions.
@@ -73,4 +77,13 @@ public abstract class BaseAction extends AnAction {
         }
     }
 
+    protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            final ResourceBundle resources = ResourceBundle.getBundle(
+                    CheckStyleConstants.RESOURCE_BUNDLE);
+            final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+            panel.setProgressText(resources.getString(progressTextKey));
+        }
+    }
 }

@@ -59,11 +59,11 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             }
 
             public void saveState() {
-                getSettings().SCAN_FILES_BEFORE_CHECKIN = checkBox.isSelected();
+                getSettings().setScanFilesBeforeCheckin(checkBox.isSelected());
             }
 
             public void restoreState() {
-                checkBox.setSelected(getSettings().SCAN_FILES_BEFORE_CHECKIN);
+                checkBox.setSelected(getSettings().isScanFilesBeforeCheckin());
             }
         };
     }
@@ -74,7 +74,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
      * @return ReturnResult
      */
     public ReturnResult beforeCheckin(@Nullable CommitExecutor commitExecutor) {
-        if (getSettings().SCAN_FILES_BEFORE_CHECKIN) {
+        if (getSettings().isScanFilesBeforeCheckin()) {
             try {
                 final Map<PsiFile, java.util.List<ProblemDescriptor>> scanResults = new HashMap<PsiFile, List<ProblemDescriptor>>();
                 new Task.Modal(this.plugin.getProject(), "CheckStyle is Scanning", false) {

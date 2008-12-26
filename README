@@ -1,10 +1,10 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2008 CheckStyle-IDEA Contributors
+(c) Copyright 2006-2009 CheckStyle-IDEA Contributors
 
 http://code.google.com/p/checkstyle-idea/
 
-A plug-in for JetBrains' IntelliJ IDEA 7 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 8 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -71,7 +71,7 @@ a) CheckStyle is unable to retrieve information on exceptions in your project
 Limitations
 -----------
 
-* The plugin will throw exceptions if used with class files targetted at a
+* The plugin will throw exceptions if used with class files targeted at a
   later version than that of the JDK used by IDEA. In particular, this will
   affect Mac users with the pre-release of JDK6. The solution is to target
   class files at the version of the IDEA JRE (i.e. 1.5 for Mac users). Thanks
@@ -139,7 +139,11 @@ LICENCE file.
 Version History
 ---------------
 
-2.2   - Fixed: Now works with IDEA8.0M1.
+2.3   - Fixed: Exceptions in JAR files are not picked up.
+2.3   - Fixed: Scan Modified Files is now disabled while other scans are active.
+2.3   - Fixed: Background scan thread is now lower priority.
+2.3   - Fixed: Module scan now works again.
+2.2   - Fixed: Now works with IDEA8.0.
 2.2   - New: Ability to scan on checkin. Thanks to J. G. Christopher.
 2.2   - Experimental: Ability to load Checkstyle configuration from a URL. This is NOT robust at present.
 2.1   - New: Ability to scan only modified files if project uses VCS. If the project
