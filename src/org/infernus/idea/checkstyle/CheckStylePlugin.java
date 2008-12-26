@@ -349,12 +349,17 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         // load configuration
-        configPanel.setConfigFile(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE),
-                configuration.getDefinedProperies());
-        configPanel.setConfigUrl(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_URL),
-                configuration.getDefinedProperies());
+        final String configFile = configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_FILE);
+        
+        if (configFile != null) {
+            configPanel.setConfigFile(configFile,
+                    configuration.getDefinedProperies());
+        } else {
+            configPanel.setConfigUrl(configuration.getProperty(
+                    CheckStyleConfiguration.CONFIG_URL),
+                    configuration.getDefinedProperies());
+        }
         configPanel.setScanTestClasses(configuration.getBooleanProperty(
                 CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
@@ -433,12 +438,18 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        configPanel.setConfigFile(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE),
-                configuration.getDefinedProperies());
-        configPanel.setConfigUrl(configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_URL),
-                configuration.getDefinedProperies());
+        final String configFile = configuration.getProperty(
+                CheckStyleConfiguration.CONFIG_FILE);
+
+        if (configFile != null) {
+            configPanel.setConfigFile(configFile,
+                    configuration.getDefinedProperies());
+        } else {
+            configPanel.setConfigUrl(configuration.getProperty(
+                    CheckStyleConfiguration.CONFIG_URL),
+                    configuration.getDefinedProperies());
+        }
+        
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
         configPanel.setScanTestClasses(configuration.getBooleanProperty(

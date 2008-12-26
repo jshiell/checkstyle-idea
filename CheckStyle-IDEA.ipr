@@ -10,6 +10,7 @@
     <option name="configuration">
       <map>
         <entry key="check-test-classes" value="false" />
+        <entry key="config-file" value="$PROJECT_DIR$/sun_checks.xml" />
       </map>
     </option>
   </component>

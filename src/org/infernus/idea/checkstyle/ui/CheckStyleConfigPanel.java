@@ -350,13 +350,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         if (configUrl == null) {
             urlField.setText("");
 
-            final String fileText = fileField.getText();
-            if (fileText != null && fileText.trim().length() > 0) {
-                useFileConfigButton.setSelected(true);
-            } else {
-                useDefaultButton.setSelected(true);
-            }
-
+            useDefaultButton.setSelected(true);
             processConfigProperties((File) null, properties);
 
         } else {
@@ -410,13 +404,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         if (configFile == null) {
             fileField.setText("");
 
-            final String urlText = urlField.getText();
-            if (urlText != null && urlText.trim().length() > 0) {
-                useUrlConfigButton.setSelected(true);
-            } else {
-                useDefaultButton.setSelected(true);
-            }
-
+            useDefaultButton.setSelected(true);
             processConfigProperties((File) null, properties);
 
         } else {
