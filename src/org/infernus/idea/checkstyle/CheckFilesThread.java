@@ -1,18 +1,18 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.psi.PsiFile;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.codeInspection.ProblemDescriptor;
-
-import javax.swing.*;
-import java.util.List;
-import java.util.HashMap;
-import java.lang.reflect.InvocationTargetException;
-
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.jetbrains.annotations.NonNls;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.jetbrains.annotations.NonNls;
+
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.List;
 
 class CheckFilesThread extends AbstractCheckerThread {
 
@@ -28,13 +28,14 @@ class CheckFilesThread extends AbstractCheckerThread {
      * @param checkStylePlugin CheckStylePlugin.
      * @param virtualFiles the files to check.
      */
-    public CheckFilesThread(CheckStylePlugin checkStylePlugin, final List<VirtualFile> virtualFiles) {
+    public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
+                            final List<VirtualFile> virtualFiles) {
         super(checkStylePlugin, virtualFiles);
         this.fileResults = new HashMap<PsiFile, List<ProblemDescriptor>>();
     }
 
-    public void runFileScanner(FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
-        SwingUtilities.invokeAndWait(fileScanner);
+    public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
+        ApplicationManager.getApplication().runReadAction(fileScanner);
     }
 
     /**

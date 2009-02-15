@@ -139,6 +139,7 @@ LICENCE file.
 Version History
 ---------------
 
+2.4   - Fixed: Background scan thread does not wait on event thread.
 2.3   - Fixed: Property values are not lost on configuration commit.
 2.3   - Fixed: Exceptions in JAR files are not picked up.
 2.3   - Fixed: Scan Modified Files is now disabled while other scans are active.
