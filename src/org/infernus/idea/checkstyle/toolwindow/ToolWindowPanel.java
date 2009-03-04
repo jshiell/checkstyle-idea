@@ -90,9 +90,7 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param project the project.
      */
-    public ToolWindowPanel(final Project project)
-
-    {
+    public ToolWindowPanel(final Project project) {
         super(new BorderLayout());
 
         this.project = project;

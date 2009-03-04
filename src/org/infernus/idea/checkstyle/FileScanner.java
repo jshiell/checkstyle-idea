@@ -1,24 +1,23 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.InspectionManager;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiElement;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
-
-import java.util.List;
-import java.io.File;
-import java.io.IOException;
-
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
-import org.jetbrains.annotations.NonNls;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.jetbrains.annotations.NonNls;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Runnable for scanning an individual file.
@@ -30,8 +29,8 @@ final class FileScanner implements Runnable {
     private PsiFile fileToScan;
     private ClassLoader moduleClassLoader;
     private Throwable error;
-    
-        /**
+
+    /**
      * Logger for this class.
      */
     @NonNls
@@ -110,16 +109,9 @@ final class FileScanner implements Runnable {
 
         final boolean checkTestClasses = this.plugin.configuration.getBooleanProperty(
                 CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
-        if (!checkTestClasses) {
-            final VirtualFile elementFile = element.getContainingFile().getVirtualFile();
-            if (elementFile != null) {
-                final Module module = ModuleUtil.findModuleForFile(elementFile, this.plugin.project);
-                if (ModuleRootManager.getInstance(module).getFileIndex().isInTestSourceContent(
-                        elementFile)) {
-                    LOG.debug("Skipping test class " + psiFile.getName());
-                    return null;
-                }
-            }
+        if (!checkTestClasses && isTestClass(element)) {
+            LOG.debug("Skipping test class " + psiFile.getName());
+            return null;
         }
 
         final InspectionManager manager
@@ -166,5 +158,20 @@ final class FileScanner implements Runnable {
                 tempFile.delete();
             }
         }
+    }
+
+    private boolean isTestClass(final PsiElement element) {
+        final VirtualFile elementFile = element.getContainingFile().getVirtualFile();
+        if (elementFile == null) {
+            return false;
+        }
+
+        final Module module = ModuleUtil.findModuleForFile(elementFile, this.plugin.project);
+        if (module == null) {
+            return false;
+        }
+
+        final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
+        return moduleRootManager != null && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile);
     }
 }

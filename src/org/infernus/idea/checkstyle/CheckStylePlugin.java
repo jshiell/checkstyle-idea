@@ -38,7 +38,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.util.*;
 
 /**
@@ -65,6 +68,12 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
     /**
+     * Any threads in progress.
+     */
+    private final Set<AbstractCheckerThread> checksInProgress
+            = new HashSet<AbstractCheckerThread>();
+
+    /**
      * The configuration panel for the plug-in.
      */
     private CheckStyleConfigPanel configPanel;
@@ -78,11 +87,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * The tool window for the plugin.
      */
     private ToolWindow toolWindow;
-
-    /**
-     * Flag to track if a scan is in progress.
-     */
-    boolean scanInProgress;
 
     /**
      * Classloader for third party libraries.
@@ -227,18 +231,9 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * @return true if a scan is in progress.
      */
     public boolean isScanInProgress() {
-        return scanInProgress;
-    }
-
-    /**
-     * Set if a scan is in progress.
-     * <p/>
-     * This is only expected to be called from the event thread.
-     *
-     * @param scanInProgress true if a scan is in progress.
-     */
-    public void setScanInProgress(final boolean scanInProgress) {
-        this.scanInProgress = scanInProgress;
+        synchronized (checksInProgress) {
+            return checksInProgress.size() > 0;
+        }
     }
 
     /**
@@ -351,7 +346,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         // load configuration
         final String configFile = configuration.getProperty(
                 CheckStyleConfiguration.CONFIG_FILE);
-        
+
         if (configFile != null) {
             configPanel.setConfigFile(configFile,
                     configuration.getDefinedProperies());
@@ -449,7 +444,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                     CheckStyleConfiguration.CONFIG_URL),
                     configuration.getDefinedProperies());
         }
-        
+
         configPanel.setThirdPartyClasspath(configuration.getListProperty(
                 CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
         configPanel.setScanTestClasses(configuration.getBooleanProperty(
@@ -616,8 +611,39 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files);
         checkFilesThread.setPriority(Thread.MIN_PRIORITY);
 
-        scanInProgress = true;
+        synchronized (checksInProgress) {
+            checksInProgress.add(checkFilesThread);
+        }
+
         checkFilesThread.start();
+    }
+
+    /**
+     * Stop any checks in progress.
+     */
+    public void stopChecks() {
+        synchronized (checksInProgress) {
+            for (final AbstractCheckerThread thread : checksInProgress) {
+                thread.stopCheck();
+            }
+
+            checksInProgress.clear();
+        }
+    }
+
+    /**
+     * Mark a thread as complete.
+     *
+     * @param thread the thread to mark.
+     */
+    public void setThreadComplete(final AbstractCheckerThread thread) {
+        if (thread == null) {
+            return;
+        }
+
+        synchronized (checksInProgress) {
+            checksInProgress.remove(thread);
+        }
     }
 
     public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files,
@@ -628,14 +654,22 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return results;
         }
         final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
-        scanInProgress = true;
+
+        synchronized (checksInProgress) {
+            checksInProgress.add(scanFilesThread);
+        }
+
         scanFilesThread.start();
         try {
             scanFilesThread.join();
+
         } catch (final Throwable e) {
             LOG.error("Error scanning files");
+
         } finally {
-            scanInProgress = false;
+            synchronized (checksInProgress) {
+                checksInProgress.remove(scanFilesThread);
+            }
         }
         return results;
     }

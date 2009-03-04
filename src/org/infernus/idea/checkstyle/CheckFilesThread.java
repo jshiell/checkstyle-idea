@@ -21,12 +21,12 @@ class CheckFilesThread extends AbstractCheckerThread {
      */
     @NonNls
     private static final Log LOG = LogFactory.getLog(CheckFilesThread.class);
-    
+
     /**
      * Create a thread to check the given files.
      *
      * @param checkStylePlugin CheckStylePlugin.
-     * @param virtualFiles the files to check.
+     * @param virtualFiles     the files to check.
      */
     public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
                             final List<VirtualFile> virtualFiles) {
@@ -42,6 +42,8 @@ class CheckFilesThread extends AbstractCheckerThread {
      * Execute the file check.
      */
     public void run() {
+        setRunning(true);
+
         try {
             // set progress bar
             SwingUtilities.invokeLater(new Runnable() {
@@ -61,7 +63,7 @@ class CheckFilesThread extends AbstractCheckerThread {
                     CheckFilesThread.this.plugin.getToolWindowPanel().clearProgressBar();
                     CheckFilesThread.this.plugin.getToolWindowPanel().setProgressText(null);
 
-                    CheckFilesThread.this.plugin.scanInProgress = false;
+                    CheckFilesThread.this.plugin.setThreadComplete(CheckFilesThread.this);
                 }
             });
 
@@ -79,7 +81,7 @@ class CheckFilesThread extends AbstractCheckerThread {
                         CheckFilesThread.this.plugin.getToolWindowPanel().clearProgressBar();
                         CheckFilesThread.this.plugin.getToolWindowPanel().setProgressText(null);
 
-                        CheckFilesThread.this.plugin.scanInProgress = false;
+                        CheckFilesThread.this.plugin.setThreadComplete(CheckFilesThread.this);
                     }
                 });
             }

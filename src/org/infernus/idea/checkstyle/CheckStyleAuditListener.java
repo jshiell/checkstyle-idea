@@ -153,13 +153,22 @@ public class CheckStyleAuditListener implements AuditListener {
             for (final AuditEvent event : errors) {
                 // check for package HTML siblings, as our scan can't find these
                 // if we're using a temporary file
+
                 if (PACKAGE_HTML_CHECK.equals(event.getSourceName())) {
-                    for (final PsiElement sibling : psiFile.getParent().getChildren()) {
-                        if (sibling.isPhysical() && sibling.isValid()
-                                && sibling instanceof PsiFile
-                                && PACKAGE_HTML_FILE.equals(((PsiFile) sibling).getName())) {
+                    // find the first sibling
+                    PsiElement currentSibling = psiFile;
+                    while (currentSibling.getPrevSibling() != null) {
+                        currentSibling = currentSibling.getPrevSibling();
+                    }
+
+                    while (currentSibling != null) {
+                        if (currentSibling.isPhysical() && currentSibling.isValid()
+                                && currentSibling instanceof PsiFile
+                                && PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
                             continue AuditLoop;
                         }
+
+                        currentSibling = currentSibling.getNextSibling();
                     }
                 }
 

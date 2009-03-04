@@ -18,6 +18,9 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.4: New: Scans in progress may be aborted.</li>
+    <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
+    <li>2.4: Fixed: Null Pointer Exception when files have no module.</li>
     <li>2.4: Fixed: Background scan thread does not wait on event thread.</li>
     <li>2.3: Fixed: Property values are not lost on configuration commit.</li>
     <li>2.3: Fixed: Exceptions in JAR files are not picked up.</li>
@@ -94,6 +97,15 @@
                     text="Close CheckStyle Window"
                     description="Close the CheckStyle tool window."
                     icon="/actions/cancel.png"/>
+
+            <action id="CheckStyleStopCheck"
+                    class="org.infernus.idea.checkstyle.actions.StopCheck"
+                    text="Stop the running scan."
+                    description="Stop the scan currently being run."
+                    icon="/actions/suspend.png">
+
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
 
             <separator/>
 

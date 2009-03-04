@@ -34,6 +34,20 @@ public abstract class AbstractCheckerThread extends Thread {
      */
     protected Map<PsiFile, List<ProblemDescriptor>> fileResults;
 
+    private boolean running = true;
+
+    protected synchronized boolean isRunning() {
+        return running;
+    }
+
+    protected synchronized void setRunning(final boolean running) {
+        this.running = running;
+    }
+
+    public void stopCheck() {
+        setRunning(false);
+    }
+
     /**
      * Reference to plugin
      */
@@ -83,6 +97,10 @@ public abstract class AbstractCheckerThread extends Thread {
 
 
         for (final PsiFile psiFile : files) {
+            if (!isRunning()) {
+                break;
+            }
+
             if (psiFile == null) {
                 continue;
             }

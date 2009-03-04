@@ -27,7 +27,9 @@ public class ScanFilesThread extends AbstractCheckerThread {
      * @param vFiles files to scan 
      * @param results Map to store scan results
      */
-    public ScanFilesThread(CheckStylePlugin checkStylePlugin, final List<VirtualFile> vFiles, Map<PsiFile, List<ProblemDescriptor>> results) {
+    public ScanFilesThread(final CheckStylePlugin checkStylePlugin,
+                           final List<VirtualFile> vFiles, 
+                           final Map<PsiFile, List<ProblemDescriptor>> results) {
         super(checkStylePlugin, vFiles);
         this.fileResults = results;
     }
@@ -36,8 +38,11 @@ public class ScanFilesThread extends AbstractCheckerThread {
      * Run scan against files.
      */
     public void run() {
+        setRunning(true);
+
         try {
             this.processFilesForModuleInfoAndScan();
+
         } catch (final Throwable e) {
             final CheckStylePluginException processedError = CheckStylePlugin.processError(
                     "An error occurred during a file scan.", e);
