@@ -139,6 +139,7 @@ LICENCE file.
 Version History
 ---------------
 
+2.4   - New: Default CheckStyle file now has generics patch applied.
 2.4   - New: Scans in progress may be aborted.
 2.4   - Fixed: Null Pointer Exception with package HTML check.
 2.4   - Fixed: Null Pointer Exception when files have no module.

@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>
     <li>2.4: New: Scans in progress may be aborted.</li>
     <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
     <li>2.4: Fixed: Null Pointer Exception when files have no module.</li>
