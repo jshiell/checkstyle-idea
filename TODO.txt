@@ -1,0 +1,12 @@
+Things to do before the next release:
+
+Basics:
+
+1) Move checker code to own package
+2) Finish refactoring, cleanup, debug
+3) Write model tests
+
+Features:
+
+1) Tree filtering
+2) Notification of file load failure

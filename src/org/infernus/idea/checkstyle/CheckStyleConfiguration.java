@@ -1,7 +1,17 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -12,37 +22,21 @@ import java.util.*;
  */
 public final class CheckStyleConfiguration extends Properties {
 
+    @NonNls
+    private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
+
     private static final long serialVersionUID = 2804470793153612480L;
-    
-    /**
-     * The CP location of the default CheckStyle configuration.
-     */
-    public static final String DEFAULT_CONFIG = "/sun_checks.xml";
 
-    /**
-     * The CheckStyle file path.
-     */
-    public static final String CONFIG_FILE = "config-file";
+    private static final String ACTIVE_CONFIG = "active-configuration";
+    private static final String CHECK_TEST_CLASSES = "check-test-classes";
+    private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
+    private static final String LOCATION_PREFIX = "location-";
+    private static final String PROPERTIES_PREFIX = "property-";
 
-    /**
-     * The CheckStyle configuration URL.
-     */
-    public static final String CONFIG_URL = "config-url";
+    private static final String DEFAULT_CONFIG = "/sun_checks.xml";
 
-    /**
-     * Should test classes be checked?
-     */
-    public static final String CHECK_TEST_CLASSES = "check-test-classes";
-
-    /**
-     * The CheckStyle file path.
-     */
-    public static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
-
-    /**
-     * The prefix for stored properties.
-     */
-    public static final String PROPERTIES_PREFIX = "property.";
+    private final Project project;
+    private final ConfigurationLocation defaultLocation;
 
     /**
      * Scan files before vcs checkin.
@@ -50,99 +44,135 @@ public final class CheckStyleConfiguration extends Properties {
     private boolean scanFilesBeforeCheckin = false;
 
     /**
-     * Get all CheckStyle properties defined in the configuration.
+     * Create a new configuration bean.
      *
-     * @return a map of CheckStyle property names to values.
+     * @param project the project we belong to.
      */
-    public Map<String, String> getDefinedProperies() {
-        final Map<String, String> values = new HashMap<String, String>();
+    public CheckStyleConfiguration(final Project project) {
+        if (project == null) {
+            throw new IllegalArgumentException("Project is required");
+        }
 
-        for (final Enumeration properties = propertyNames();
-             properties.hasMoreElements();) {
-            final String propertyName = (String) properties.nextElement();
-            if (propertyName.startsWith(PROPERTIES_PREFIX)) {
-                final String configPropertyName = propertyName.substring(
-                        PROPERTIES_PREFIX.length());
-                final String configPropertyValue = getProperty(
-                        propertyName);
+        this.project = project;
 
-                values.put(configPropertyName, configPropertyValue);
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        defaultLocation = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
+                DEFAULT_CONFIG, resources.getString("file.default.description"));
+    }
+
+    public ConfigurationLocation getDefaultLocation() {
+        return defaultLocation;
+    }
+
+    public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
+        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
+
+        if (configurationLocation != null && !configurationLocations.contains(configurationLocation)) {
+            throw new IllegalArgumentException("Location is not valid: " + configurationLocation);
+        }
+
+        if (configurationLocation != null) {
+            setProperty(ACTIVE_CONFIG, Integer.toString(configurationLocations.indexOf(configurationLocation)));
+        } else {
+            remove(ACTIVE_CONFIG);
+        }
+    }
+
+    public ConfigurationLocation getActiveConfiguration() {
+        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
+
+        if (!contains(ACTIVE_CONFIG)) {
+            return defaultLocation;
+        }
+
+        final int activeIndex = Integer.parseInt(getProperty(ACTIVE_CONFIG));
+        if (activeIndex < 0 || activeIndex >= configurationLocations.size()) {
+            LOG.info("Active configuration is invalid, returning default");
+            return defaultLocation;
+        }
+
+        return configurationLocations.get(activeIndex);
+    }
+
+    public List<ConfigurationLocation> getConfigurationLocations() {
+        final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
+
+        for (Object configProperty : keySet()) {
+            if (!configProperty.toString().startsWith(LOCATION_PREFIX)) {
+                continue;
+            }
+
+            final ConfigurationLocation location = ConfigurationLocationFactory.create(
+                    project, getProperty(configProperty.toString()));
+
+            final Map<String, String> properties = new HashMap<String, String>();
+
+            final int index = Integer.parseInt(configProperty.toString().substring(LOCATION_PREFIX.length()));
+            final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
+            for (Object innerConfigProperty : keySet()) {
+                if (!innerConfigProperty.toString().startsWith(propertyPrefix)) {
+                    continue;
+                }
+
+                final String propertyName = innerConfigProperty.toString().substring(propertyPrefix.length());
+                properties.put(propertyName, getProperty(innerConfigProperty.toString()));
+            }
+
+            location.setProperties(properties);
+            locations.add(location);
+        }
+
+        if (!locations.contains(defaultLocation)) {
+            locations.add(0, defaultLocation);
+        }
+
+        return locations;
+    }
+
+    public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
+        for (Iterator i = keySet().iterator(); i.hasNext();) {
+            final String propertyName = i.next().toString();
+            if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
+                i.remove();
             }
         }
 
-        return values;
-    }
-
-    /**
-     * Set the passed CheckStyle properties in the configuration.
-     * <p/>
-     * This will not erase old values. Use {@link #clearDefinedProperies()}
-     * for that.
-     *
-     * @param properties a map of CheckStyle property names to values.
-     */
-    public void setDefinedProperies(final Map<String, String> properties) {
-        if (properties == null || properties.size() == 0) {
+        if (configurationLocations == null) {
             return;
         }
 
-        for (final String propertyName : properties.keySet()) {
-            final String value = properties.get(propertyName);
-            if (value != null) {
-                setProperty(PROPERTIES_PREFIX + propertyName, value);
+        int index = 0;
+        for (ConfigurationLocation configurationLocation : configurationLocations) {
+            setProperty(LOCATION_PREFIX + index, configurationLocation.toString());
+
+            final Map<String, String> properties = configurationLocation.getProperties();
+            for (final String property : properties.keySet()) {
+                setProperty(PROPERTIES_PREFIX + index + "." + property, properties.get(property));
             }
+
+            ++index;
         }
     }
 
-    /**
-     * Clear all CheckStyle properties defined in the configuration.
-     */
-    public void clearDefinedProperies() {
-        final List<String> propertiesToRemove = new ArrayList<String>();
-
-        for (final Enumeration properties = propertyNames();
-             properties.hasMoreElements();) {
-            final String propertyName = (String) properties.nextElement();
-            if (propertyName.startsWith(PROPERTIES_PREFIX)) {
-                // delay to stop concurrent modification
-                propertiesToRemove.add(propertyName);
-            }
-        }
-
-        for (final String property : propertiesToRemove) {
-            remove(property);
-        }
-    }
-
-    /**
-     * Get a string list property value.
-     *
-     * @param propertyName the name of the property.
-     * @return the value of the property.
-     */
     @NotNull
-    public List<String> getListProperty(final String propertyName) {
-        final List<String> returnValue = new ArrayList<String>();
+    public List<String> getThirdPartyClassPath() {
+        final List<String> thirdPartyClasspath = new ArrayList<String>();
 
-        final String value = getProperty(propertyName);
+        final String value = getProperty(THIRDPARTY_CLASSPATH);
         if (value != null) {
             final String[] parts = value.split(";");
-            returnValue.addAll(Arrays.asList(parts));
+            for (final String part : parts) {
+                thirdPartyClasspath.add(untokenisePath(part));
+            }
         }
 
-        return returnValue;
+        return thirdPartyClasspath;
     }
 
-    /**
-     * Set a string list property value.
-     *
-     * @param propertyName the name of the property.
-     * @param value the value of the property.
-     */
-    public void setProperty(final String propertyName,
-                            final List<String> value) {
+    public void setThirdPartyClassPath(final List<String> value) {
         if (value == null) {
-            setProperty(propertyName, (String) null);
+            remove(THIRDPARTY_CLASSPATH);
             return;
         }
 
@@ -151,34 +181,19 @@ public final class CheckStyleConfiguration extends Properties {
             if (valueString.length() > 0) {
                 valueString.append(";");
             }
-            valueString.append(part);
+            valueString.append(tokenisePath(part));
         }
 
-        setProperty(propertyName, valueString.toString());
+        setProperty(THIRDPARTY_CLASSPATH, valueString.toString());
     }
 
-    /**
-     * Get a boolean property value.
-     *
-     * @param propertyName the name of the property.
-     * @param defaultValue the default value if the property is not set.
-     * @return the value of the property.
-     */
-    public boolean getBooleanProperty(final String propertyName,
-                                      final boolean defaultValue) {
-        return Boolean.valueOf(getProperty(propertyName,
-                Boolean.toString(defaultValue)));
+    public boolean isScanningTestClasses() {
+        return Boolean.valueOf(getProperty(CHECK_TEST_CLASSES,
+                Boolean.toString(false)));
     }
 
-    /**
-     * Set a boolean property value.
-     *
-     * @param propertyName the name of the property.
-     * @param value the value of the property.
-     */
-    public void setProperty(final String propertyName,
-                            final boolean value) {
-        setProperty(propertyName, Boolean.toString(value));
+    public void setScanningTestClasses(final boolean scanTestFles) {
+        setProperty(CHECK_TEST_CLASSES, Boolean.toString(scanTestFles));
     }
 
     public boolean isScanFilesBeforeCheckin() {
@@ -187,5 +202,75 @@ public final class CheckStyleConfiguration extends Properties {
 
     public void setScanFilesBeforeCheckin(final boolean scanFilesBeforeCheckin) {
         this.scanFilesBeforeCheckin = scanFilesBeforeCheckin;
+    }
+
+    /**
+     * Process a stored file path for any tokens.
+     *
+     * @param path the path to process.
+     * @return the processed path.
+     */
+    private String untokenisePath(final String path) {
+        if (path == null) {
+            return null;
+        }
+
+        LOG.debug("Processing file: " + path);
+
+        if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+            final File projectPath = getProjectPath();
+            if (projectPath != null) {
+                final File fullConfigFile = new File(projectPath,
+                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
+                return fullConfigFile.getAbsolutePath();
+            } else {
+                LOG.warn("Could not untokenise path as project dir is unset: "
+                        + path);
+            }
+        }
+
+        return path;
+    }
+
+    /**
+     * Process a path and add tokens as necessary.
+     *
+     * @param path the path to processed.
+     * @return the tokenised path.
+     */
+    private String tokenisePath(final String path) {
+        if (path == null) {
+            return null;
+        }
+
+        final File projectPath = getProjectPath();
+        if (projectPath != null) {
+            final String projectPathAbs = projectPath.getAbsolutePath();
+            if (path.startsWith(projectPathAbs)) {
+                return CheckStyleConstants.PROJECT_DIR + path.substring(
+                        projectPathAbs.length());
+            }
+        }
+
+        return path;
+    }
+
+    /**
+     * Get the base path of the project.
+     *
+     * @return the base path of the project.
+     */
+    @Nullable
+    private File getProjectPath() {
+        if (project == null) {
+            return null;
+        }
+
+        final VirtualFile baseDir = project.getBaseDir();
+        if (baseDir == null) {
+            return null;
+        }
+
+        return new File(baseDir.getPath());
     }
 }

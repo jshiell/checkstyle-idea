@@ -3,24 +3,25 @@ package org.infernus.idea.checkstyle;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.psi.PsiFile;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,9 +30,7 @@ import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -74,32 +73,17 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         "Couldn't get checkstyle plugin");
             }
 
-            final Map<String, String> checkstyleProperties
-                    = checkStylePlugin.getConfiguration().getDefinedProperies();
+            final ConfigurationLocation configurationLocation
+                    = checkStylePlugin.getConfiguration().getActiveConfiguration();
 
             final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
             final ClassLoader moduleClassLoader
                     = checkStylePlugin.buildModuleClassLoader(module);
 
-            String configFile = checkStylePlugin.getConfiguration().getProperty(
-                    CheckStyleConfiguration.CONFIG_FILE);
-            if (configFile == null) {
-                LOG.info("Loading default configuration");
-
-                final InputStream in = CheckStyleInspection.class.getResourceAsStream(
-                        CheckStyleConfiguration.DEFAULT_CONFIG);
-                checker = CheckerFactory.getInstance().getChecker(in, 
-                        moduleClassLoader, checkstyleProperties);
-                in.close();
-
-            } else {
-                configFile = checkStylePlugin.untokenisePath(configFile);
-
-                LOG.info("Loading configuration from " + configFile);
-                checker = CheckerFactory.getInstance().getChecker(
-                        new File(configFile), moduleClassLoader,
-                        checkstyleProperties, false);
-            }
+            LOG.info("Loading configuration from " + configurationLocation);
+            checker = CheckerFactory.getInstance().getChecker(
+                    configurationLocation.resolve(), moduleClassLoader,
+                    configurationLocation.getProperties());
 
             return checker;
 
@@ -165,8 +149,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     "Couldn't get checkstyle plugin");
         }
 
-        final boolean checkTestClasses = checkStylePlugin.getConfiguration().getBooleanProperty(
-                CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
+        final boolean checkTestClasses = checkStylePlugin.getConfiguration().isScanningTestClasses();
         if (!checkTestClasses) {
             final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
             if (elementFile != null) {
@@ -203,8 +186,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     CheckStyleConstants.TEMPFILE_EXTENSION);
             final BufferedWriter tempFileOut = new BufferedWriter(
                     new FileWriter(tempFile));
-            for (final char character : psiFile.getText().toCharArray())
-            {
+            for (final char character : psiFile.getText().toCharArray()) {
                 if (character == '\n') { // IDEA uses \n internally
                     tempFileOut.write(codeStyleSettings.getLineSeparator());
                 } else {
@@ -217,7 +199,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final CheckStyleAuditListener listener
                     = new CheckStyleAuditListener(psiFile, manager);
             checker.addListener(listener);
-            checker.process(new File[] {tempFile});
+            checker.process(new File[]{tempFile});
             checker.destroy();
 
             final List<ProblemDescriptor> problems = listener.getProblems();

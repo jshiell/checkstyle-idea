@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
@@ -37,11 +38,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.*;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.util.*;
 
 /**
@@ -96,8 +96,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     /**
      * Configuration store.
      */
-    CheckStyleConfiguration configuration
-            = new CheckStyleConfiguration();
+    CheckStyleConfiguration configuration;
 
     /**
      * {@inheritDoc}
@@ -159,6 +158,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      */
     public CheckStylePlugin(final Project project) {
         this.project = project;
+        this.configuration = new CheckStyleConfiguration(project);
 
         try {
             if (project != null) {
@@ -183,18 +183,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     public synchronized ClassLoader getThirdPartyClassloader() {
         if (thirdPartyClassloader == null) {
             final List<String> thirdPartyClasses
-                    = configuration.getListProperty(
-                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH);
+                    = configuration.getThirdPartyClassPath();
             if (thirdPartyClasses.size() > 0) {
                 final URL[] urlList = new URL[thirdPartyClasses.size()];
                 int index = 0;
                 for (final String pathElement : thirdPartyClasses) {
                     try {
-                        final String untokenisedPath = untokenisePath(
-                                pathElement);
                         // toURI().toURL() escapes, whereas toURL() doesn't.
-                        urlList[index] = new File(
-                                untokenisedPath).toURI().toURL();
+                        urlList[index] = new File(pathElement).toURI().toURL();
                         ++index;
 
                     } catch (MalformedURLException e) {
@@ -343,22 +339,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return null;
         }
 
-        // load configuration
-        final String configFile = configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE);
-
-        if (configFile != null) {
-            configPanel.setConfigFile(configFile,
-                    configuration.getDefinedProperies());
-        } else {
-            configPanel.setConfigUrl(configuration.getProperty(
-                    CheckStyleConfiguration.CONFIG_URL),
-                    configuration.getDefinedProperies());
-        }
-        configPanel.setScanTestClasses(configuration.getBooleanProperty(
-                CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
-        configPanel.setThirdPartyClasspath(configuration.getListProperty(
-                CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
+        reset();
 
         return configPanel;
     }
@@ -378,47 +359,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        final String errorMessage = configPanel.validateData();
-        if (errorMessage != null) {
-            throw new ConfigurationException(errorMessage);
-        }
+        configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
+        configuration.setActiveConfiguration(configPanel.getActiveLocation());
 
-        final String configurationFile = configPanel.getConfigFile();
-        if (configurationFile != null) {
-            configuration.setProperty(CheckStyleConfiguration.CONFIG_FILE,
-                    configPanel.getConfigFile());
-
-        } else {
-            configuration.remove(CheckStyleConfiguration.CONFIG_FILE);
-        }
-
-        final String configurationUrl = configPanel.getConfigUrl();
-        if (configurationUrl != null) {
-            configuration.setProperty(CheckStyleConfiguration.CONFIG_URL,
-                    configPanel.getConfigUrl());
-
-        } else {
-            configuration.remove(CheckStyleConfiguration.CONFIG_URL);
-        }
-
-        configuration.setProperty(CheckStyleConfiguration.CHECK_TEST_CLASSES,
-                Boolean.toString(configPanel.isScanTestClasses()));
+        configuration.setScanningTestClasses(configPanel.isScanTestClasses());
 
         final List<String> thirdPartyClasspath
                 = configPanel.getThirdPartyClasspath();
-        if (thirdPartyClasspath.isEmpty()) {
-            configuration.remove(CheckStyleConfiguration.THIRDPARTY_CLASSPATH);
-        } else {
-            configuration.setProperty(
-                    CheckStyleConfiguration.THIRDPARTY_CLASSPATH,
-                    thirdPartyClasspath);
-        }
-
-        configuration.clearDefinedProperies();
-        final Map<String, String> properties = configPanel.getProperties();
-        if (!properties.isEmpty()) {
-            configuration.setDefinedProperies(properties);
-        }
+        configuration.setThirdPartyClassPath(thirdPartyClasspath);
 
         reset(); // save current data as unmodified
 
@@ -433,22 +381,11 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        final String configFile = configuration.getProperty(
-                CheckStyleConfiguration.CONFIG_FILE);
-
-        if (configFile != null) {
-            configPanel.setConfigFile(configFile,
-                    configuration.getDefinedProperies());
-        } else {
-            configPanel.setConfigUrl(configuration.getProperty(
-                    CheckStyleConfiguration.CONFIG_URL),
-                    configuration.getDefinedProperies());
-        }
-
-        configPanel.setThirdPartyClasspath(configuration.getListProperty(
-                CheckStyleConfiguration.THIRDPARTY_CLASSPATH));
-        configPanel.setScanTestClasses(configuration.getBooleanProperty(
-                CheckStyleConfiguration.CHECK_TEST_CLASSES, true));
+        configPanel.setDefaultLocation(configuration.getDefaultLocation());
+        configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
+        configPanel.setActiveLocation(configuration.getActiveConfiguration());
+        configPanel.setScanTestClasses(configuration.isScanningTestClasses());
+        configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
     }
 
     /**
@@ -491,106 +428,22 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         LOG.debug("Getting CheckStyle checker.");
 
         try {
-            final Map<String, String> checkstyleProperties
-                    = configuration.getDefinedProperies();
-
-            final Checker checker;
-            String configFile = configuration.getProperty(
-                    CheckStyleConfiguration.CONFIG_FILE);
-            String configUrl = configuration.getProperty(
-                    CheckStyleConfiguration.CONFIG_URL);
-            if (configFile != null) {
-                // swap prefix if required
-                final File configFileToLoad = new File(untokenisePath(configFile));
-                if (!configFileToLoad.exists()) {
-                    throw new CheckStylePluginException("CheckStyle file does not exist at "
-                            + configFileToLoad.getAbsolutePath());
-                }
-
-                LOG.info("Loading configuration from " + configFileToLoad.getAbsolutePath());
-                checker = CheckerFactory.getInstance().getChecker(
-                        configFileToLoad, classLoader,
-                        checkstyleProperties, true);
-
-            } else if (configUrl != null) {
-                LOG.info("Loading configuration from " + configUrl);
-
-                final File checkstyleFile = getUrl(configUrl);
-                if (checkstyleFile != null) {
-                    checker = CheckerFactory.getInstance().getChecker(
-                            checkstyleFile, classLoader,
-                            checkstyleProperties, true);
-                } else {
-                    throw new CheckStylePluginException("CheckStyle file does not exist at " + configUrl);
-                }
-
-            } else {
-                LOG.info("Loading default configuration");
-
-                final InputStream in
-                        = CheckStyleInspection.class.getResourceAsStream(
-                        CheckStyleConfiguration.DEFAULT_CONFIG);
-                checker = CheckerFactory.getInstance().getChecker(
-                        in, classLoader, checkstyleProperties);
-                in.close();
+            final ConfigurationLocation location = configuration.getActiveConfiguration();
+            if (location == null) {
+                return null;
             }
+
+            // TODO caching
+
+            final Checker checker = CheckerFactory.getInstance().getChecker(
+                    location.resolve(), classLoader,
+                    location.getProperties());
 
             return checker;
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
-    }
-
-    /**
-     * Process a stored file path for any tokens.
-     *
-     * @param path the path to process.
-     * @return the processed path.
-     */
-    public String untokenisePath(final String path) {
-        if (path == null) {
-            return null;
-        }
-
-        LOG.debug("Processing file: " + path);
-
-        if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            final File projectPath = getProjectPath();
-            if (projectPath != null) {
-                final File fullConfigFile = new File(projectPath,
-                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
-                return fullConfigFile.getAbsolutePath();
-            } else {
-                LOG.warn("Could not untokenise path as project dir is unset: "
-                        + path);
-            }
-        }
-
-        return path;
-    }
-
-    /**
-     * Process a path and add tokens as necessary.
-     *
-     * @param path the path to processed.
-     * @return the tokenised path.
-     */
-    public String tokenisePath(final String path) {
-        if (path == null) {
-            return null;
-        }
-
-        final File projectPath = getProjectPath();
-        if (projectPath != null) {
-            final String projectPathAbs = projectPath.getAbsolutePath();
-            if (path.startsWith(projectPathAbs)) {
-                return CheckStyleConstants.PROJECT_DIR + path.substring(
-                        projectPathAbs.length());
-            }
-        }
-
-        return path;
     }
 
     /**
@@ -740,54 +593,5 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      */
     public static class ConfigurationBean {
         public Map<String, String> configuration = new HashMap<String, String>();
-    }
-
-    /**
-     * Fetch the contents of a URL.
-     *
-     * @param url the URL. If invalid null will be returned.
-     * @return the contents in a temporary file, or null if retrieval failed.
-     */
-    public File getUrl(final String url) {
-        Reader reader = null;
-        Writer writer = null;
-        try {
-            final URLConnection urlConnection = new URL(url).openConnection();
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(false);
-
-            final File tempFile = File.createTempFile("checkStyle", ".xml");
-            writer = new BufferedWriter(new FileWriter(tempFile));
-
-            urlConnection.connect();
-            reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            int readChar;
-            while ((readChar = reader.read()) != -1) {
-                writer.write(readChar);
-            }
-
-            writer.flush();
-            return tempFile;
-
-        } catch (IOException e) {
-            LOG.error("Couldn't read URL: " + url, e);
-            return null;
-
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
     }
 }

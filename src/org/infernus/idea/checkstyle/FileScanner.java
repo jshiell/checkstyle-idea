@@ -107,8 +107,7 @@ final class FileScanner implements Runnable {
         final PsiFile psiFile = (PsiFile) element;
         LOG.debug("Scanning " + psiFile.getName());
 
-        final boolean checkTestClasses = this.plugin.configuration.getBooleanProperty(
-                CheckStyleConfiguration.CHECK_TEST_CLASSES, true);
+        final boolean checkTestClasses = this.plugin.configuration.isScanningTestClasses();
         if (!checkTestClasses && isTestClass(element)) {
             LOG.debug("Skipping test class " + psiFile.getName());
             return null;

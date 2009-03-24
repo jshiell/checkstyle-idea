@@ -1,30 +1,22 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.util.ObjectUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.CheckStylePropertiesTableModel;
-import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.net.URL;
-import java.net.MalformedURLException;
+import java.util.ResourceBundle;
 
 /**
  * Provides an input box and browse button for CheckStyle file selection.
@@ -34,71 +26,25 @@ import java.net.MalformedURLException;
  */
 public final class CheckStyleConfigPanel extends JPanel {
 
-    /**
-     * Logger for this class.
-     */
-    private static final Log LOG = LogFactory.getLog(
-            CheckStyleConfigPanel.class);
-
-    private final JLabel fileLabel = new JLabel();
-    private final JTextField fileField = new JTextField();
-    private final JLabel urlLabel = new JLabel();
-    private final JTextField urlField = new JTextField();
-    private final JButton browseButton = new JButton();
-    private final JRadioButton useDefaultButton = new JRadioButton(
-            new ConfigurationSelectionAction());
-    private final JRadioButton useFileConfigButton = new JRadioButton(
-            new ConfigurationSelectionAction());
-    private final JRadioButton useUrlConfigButton = new JRadioButton(
-            new ConfigurationSelectionAction());
     private final JList pathList = new JList(new DefaultListModel());
     private final JButton editPathButton = new JButton(new EditPathAction());
-    private final JButton removePathButton = new JButton(
-            new RemovePathAction());
-    private final JButton moveUpPathButton = new JButton(
-            new MoveUpPathAction());
-    private final JButton moveDownPathButton = new JButton(
-            new MoveDownPathAction());
-    private final CheckStylePropertiesTableModel propertiesModel
-            = new CheckStylePropertiesTableModel();
+    private final JButton removePathButton = new JButton(new RemovePathAction());
+    private final JButton moveUpPathButton = new JButton(new MoveUpPathAction());
+    private final JButton moveDownPathButton = new JButton(new MoveDownPathAction());
+
     private final JCheckBox testClassesCheckbox = new JCheckBox();
 
-    /**
-     * Properties table, hacked for enable/disable support.
-     */
-    private final JTable propertiesTable = new JTable(propertiesModel) {
-        public Component prepareRenderer(final TableCellRenderer renderer,
-                                         final int row, final int column) {
-            final Component comp = super.prepareRenderer(renderer, row, column);
-            comp.setEnabled(isEnabled());
-            return comp;
-        }
-    };
+    private final LocationTableModel locationModel = new LocationTableModel();
+    private final JTable locationTable = new JTable(locationModel);
+    private final JButton addLocationButton = new JButton(new AddLocationAction());
+    private final JButton removeLocationButton = new JButton(new RemoveLocationAction());
+    private final JButton editLocationPropertiesButton = new JButton(new EditPropertiesAction());
 
-    /**
-     * Original scan test classes for modification tests.
-     */
     private boolean scanTestClasses;
-
-    /**
-     * Original configuration file for modification tests.
-     */
-    private String configFile;
-
-    /**
-     * Original configuration URL for modification tests.
-     */
-    private String configUrl;
-
-    /**
-     * Original third party classpath for modification tests.
-     */
     private List<String> thirdPartyClasspath;
-
-    /**
-     * Original CheckStyle properties for modification tests.
-     */
-    private Map<String, String> properties;
+    private List<ConfigurationLocation> locations;
+    private ConfigurationLocation activeLocation;
+    private ConfigurationLocation defaultLocation;
 
     /**
      * Plug-in reference.
@@ -129,91 +75,59 @@ public final class CheckStyleConfigPanel extends JPanel {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 
-        useDefaultButton.setText(resources.getString(
-                "config.file.default-radio.use-default.text"));
-        useDefaultButton.setToolTipText(resources.getString(
-                "config.file.default-radio.use-default.tooltip"));
+        final JPanel configFilePanel = buildConfigPanel();
 
-        useFileConfigButton.setText(resources.getString(
-                "config.file.default-radio.use-custom.text"));
-        useFileConfigButton.setToolTipText(resources.getString(
-                "config.file.default-radio.use-custom.tooltip"));
+        final JPanel pathPanel = buildPathPanel();
 
-        useUrlConfigButton.setText(resources.getString(
-                "config.url.default-radio.use-custom.text"));
-        useUrlConfigButton.setToolTipText(resources.getString(
-                "config.url.default-radio.use-custom.tooltip"));
+        final JTabbedPane rootTabPane = new JTabbedPane();
+        rootTabPane.add(configFilePanel, resources.getString("config.file.tab"));
+        rootTabPane.add(pathPanel, resources.getString("config.path.tab"));
 
-        final ButtonGroup configButtonGroup = new ButtonGroup();
-        configButtonGroup.add(useDefaultButton);
-        configButtonGroup.add(useFileConfigButton);
-        configButtonGroup.add(useUrlConfigButton);
-        configButtonGroup.setSelected(useDefaultButton.getModel(), true);
+        add(rootTabPane, BorderLayout.CENTER);
+    }
 
-        fileField.setToolTipText(resources.getString(
-                "config.file.label.tooltip"));
-        fileField.setEditable(false);
-
-        fileLabel.setText(resources.getString("config.file.label.text"));
-        fileLabel.setToolTipText(resources.getString(
-                "config.file.label.tooltip"));
-
-        urlField.setToolTipText(resources.getString(
-                "config.url.label.tooltip"));
-
-        urlLabel.setText(resources.getString("config.url.label.text"));
-        urlLabel.setToolTipText(resources.getString(
-                "config.url.label.tooltip"));
+    private JPanel buildConfigPanel() {
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
 
         testClassesCheckbox.setText(resources.getString(
                 "config.test-classes.checkbox.text"));
         testClassesCheckbox.setToolTipText(resources.getString(
                 "config.test-classes.checkbox.tooltip"));
 
-        propertiesTable.setToolTipText(resources.getString(
-                "config.file.properties.tooltip"));
-        final JScrollPane propertiesScroll = new JScrollPane(propertiesTable);
-        propertiesScroll.setHorizontalScrollBarPolicy(
-                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        propertiesScroll.setVerticalScrollBarPolicy(
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        editLocationPropertiesButton.setEnabled(false);
+        removeLocationButton.setEnabled(false);
 
-        browseButton.setAction(new BrowseAction());
+        final JToolBar locationToolBar = new JToolBar();
+        locationToolBar.setFloatable(false);
+        locationToolBar.add(addLocationButton);
+        locationToolBar.add(editLocationPropertiesButton);
+        locationToolBar.add(removeLocationButton);
+
+        locationTable.getSelectionModel().addListSelectionListener(new LocationTableSelectionListener());
+        final JScrollPane locationScrollPane = new JScrollPane(locationTable,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+        final JPanel locationPanel = new JPanel(new BorderLayout());
+        locationPanel.add(locationToolBar, BorderLayout.NORTH);
+        locationPanel.add(locationScrollPane, BorderLayout.CENTER);
 
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setBorder(new EmptyBorder(4, 4, 4, 4));
         configFilePanel.setOpaque(false);
-        configFilePanel.add(useDefaultButton, new GridBagConstraints(
-                0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(useFileConfigButton, new GridBagConstraints(
-                0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(fileLabel, new GridBagConstraints(
-                0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 20, 4, 4), 0, 0));
-        configFilePanel.add(fileField, new GridBagConstraints(
-                1, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(browseButton, new GridBagConstraints(
-                2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(useUrlConfigButton, new GridBagConstraints(
-                0, 3, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(urlLabel, new GridBagConstraints(
-                0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 20, 4, 4), 0, 0));
-        configFilePanel.add(urlField, new GridBagConstraints(
-                1, 4, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
-                0, 5, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(propertiesScroll, new GridBagConstraints(
-                0, 6, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH,
-                GridBagConstraints.BOTH, new Insets(4, 20, 4, 4), 0, 0));
 
+        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
+                0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(locationPanel, new GridBagConstraints(
+                0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+
+        return configFilePanel;
+    }
+
+    private JPanel buildPathPanel() {
         final JButton addPathButton = new JButton(new AddPathAction());
 
         editPathButton.setEnabled(false);
@@ -255,273 +169,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         pathPanel.add(Box.createVerticalGlue(), new GridBagConstraints(
                 1, 6, 1, 1, 0.0, 1.0, GridBagConstraints.NORTH,
                 GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
-
-        final JTabbedPane rootTabPane = new JTabbedPane();
-        rootTabPane.add(configFilePanel, resources.getString(
-                "config.file.tab"));
-        rootTabPane.add(pathPanel, resources.getString("config.path.tab"));
-
-        add(rootTabPane, BorderLayout.CENTER);
-    }
-
-    /**
-     * Validate the configuration data.
-     *
-     * @return null if valid, or the error message if not.
-     */
-    public String validateData() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        if (useFileConfigButton.isSelected() && getConfigFile() == null) {
-            return resources.getString("error.no-config-file");
-        }
-
-        if (useUrlConfigButton.isSelected()) {
-            if (getConfigUrl() == null) {
-                return resources.getString("error.no-config-url");
-            }
-
-            try {
-                new URL(getConfigUrl());
-            } catch (MalformedURLException e) {
-                return resources.getString("error.invalid-config-url");
-            }
-        }
-        
-        // TODO property settings?
-
-        return null;
-    }
-
-    /**
-     * Get the currently selected configuration file.
-     * <p/>
-     * This method will only return the configuration file
-     * if it currently exists.
-     *
-     * @return the currently selected configuration file.
-     */
-    public String getConfigFile() {
-        if (useDefaultButton.isSelected() || useUrlConfigButton.isSelected()) {
-            return null;
-        }
-
-        final String fileName = fileField.getText();
-
-        this.configFile = fileName;
-        if (fileName != null) {
-            final File newConfigFile = new File(fileName);
-            if (newConfigFile.exists()) {
-                final String filePath = newConfigFile.getAbsolutePath();
-                return plugin.tokenisePath(filePath);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the currently selected configuration file.
-     * <p/>
-     * This method will only return the configuration file
-     * if it currently exists.
-     *
-     * @return the currently selected configuration file.
-     */
-    public String getConfigUrl() {
-        if (useDefaultButton.isSelected() || useFileConfigButton.isSelected()) {
-            return null;
-        }
-
-        final String configUrl = urlField.getText();
-
-        this.configUrl = configUrl;
-        return configUrl;
-    }
-
-    /**
-     * Set the configuration URL.
-     *
-     * @param configUrl the configuration URL.
-     * @param properties a map of properties for this config URL.
-     */
-    public void setConfigUrl(final String configUrl,
-                              final Map<String, String> properties) {
-        if (configUrl == null) {
-            urlField.setText("");
-
-            useDefaultButton.setSelected(true);
-            processConfigProperties((File) null, properties);
-
-        } else {
-            urlField.setText(configUrl);
-            useUrlConfigButton.setSelected(true);
-
-            try {
-                processConfigProperties(new URL(configUrl), properties);
-                
-            } catch (MalformedURLException e) {
-                processConfigProperties((File) null, properties);
-            }
-        }
-
-        // save original properties
-        if (properties == null || configUrl == null) {
-            this.properties = new HashMap<String, String>();
-        } else {
-            this.properties = properties;
-        }
-
-        this.configUrl = configUrl;
-
-        new ConfigurationSelectionAction().actionPerformed(null);
-    }
-
-    /**
-     * Set the configuration file.
-     *
-     * @param configFile the configuration file.
-     * @param properties the properties to populate the file with.
-     */
-    public void setConfigFile(final File configFile,
-                              final Map<String, String> properties) {
-        if (configFile == null) {
-            setConfigFile((String) null, properties);
-
-        } else {
-            setConfigFile(configFile.getAbsolutePath(), properties);
-        }
-    }
-
-    /**
-     * Set the configuration file.
-     *
-     * @param configFile the configuration file.
-     * @param properties a map of properties for this config file.
-     */
-    public void setConfigFile(final String configFile,
-                              final Map<String, String> properties) {
-        if (configFile == null) {
-            fileField.setText("");
-
-            useDefaultButton.setSelected(true);
-            processConfigProperties((File) null, properties);
-
-        } else {
-            final String processedConfigFile
-                    = plugin.untokenisePath(configFile);
-
-            fileField.setText(processedConfigFile);
-            useFileConfigButton.setSelected(true);
-
-            processConfigProperties(new File(processedConfigFile), properties);
-        }
-
-        // save original properties
-        if (properties == null || configFile == null) {
-            this.properties = new HashMap<String, String>();
-        } else {
-            this.properties = properties;
-        }
-
-        this.configFile = configFile;
-
-        new ConfigurationSelectionAction().actionPerformed(null);
-    }
-
-    private void processConfigProperties(final URL configUrl,
-                                         final Map<String, String> properties)
-    {
-        final File retrievedFile = plugin.getUrl(configUrl.toString());
-        processConfigProperties(retrievedFile, properties);
-    }
-
-    /**
-     * Extract all settable properties from the given file and set
-     * in the properties table.
-     *
-     * @param configFile the configuration file.
-     * @param properties any existing properties set.
-     */
-    private void processConfigProperties(final File configFile,
-                                         Map<String, String> properties) {
-        if (properties == null) {
-            properties = new HashMap<String, String>();
-        }
-
-        final List<String> propertiesInFile = extractProperties(configFile);
-
-        // merge properties from files
-        for (final String propertyName : propertiesInFile) {
-            if (!properties.containsKey(propertyName)) {
-                properties.put(propertyName, null);
-            }
-        }
-
-        // remove redundant properties
-        for (Iterator<String> i = properties.keySet().iterator();
-                i.hasNext();) {
-            if (!propertiesInFile.contains(i.next())) {
-                i.remove();
-            }
-        }
-
-        // update UI
-        propertiesModel.setProperties(properties);
-    }
-
-    /**
-     * Extract all settable properties from the given configuration file.
-     *
-     * @param configFile the configuration file.
-     * @return the property names.
-     */
-    private List<String> extractProperties(final File configFile) {
-        if (configFile != null && configFile.exists()) {
-            try {
-                final SAXBuilder saxBuilder = new SAXBuilder();
-                saxBuilder.setEntityResolver(new CheckStyleEntityResolver());
-                final Document configDoc = saxBuilder.build(configFile);
-                return extractProperties(configDoc.getRootElement());
-
-            } catch (Exception e) {
-                LOG.error("CheckStyle file could not be parsed for properties.",
-                        e);
-            }
-        }
-
-        return new ArrayList<String>();
-    }
-
-    /**
-     * Extract all settable properties from the given configuration element.
-     *
-     * @param element the configuration element.
-     * @return the settable property names.
-     */
-    @SuppressWarnings("unchecked")
-    private List<String> extractProperties(final Element element) {
-        final List<String> propertyNames = new ArrayList<String>();
-
-        if (element != null) {
-            if ("property".equals(element.getName())) {
-                final String value
-                        = element.getAttributeValue("value");
-                // check is value is a token
-                if (value != null && value.startsWith("${")
-                        && value.endsWith("}")) {
-                    final String propertyName = value.substring(2,
-                            value.length() - 1);
-                    propertyNames.add(propertyName);
-                }
-            }
-
-            for (final Element child : (List<Element>) element.getChildren()) {
-                propertyNames.addAll(extractProperties(child));
-            }
-        }
-
-        return propertyNames;
+        return pathPanel;
     }
 
     /**
@@ -561,8 +209,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         listModel.clear();
 
         for (final String classPathFile : thirdPartyClasspath) {
-            final String processedPath = plugin.untokenisePath(classPathFile);
-            listModel.addElement(processedPath);
+            listModel.addElement(classPathFile);
         }
     }
 
@@ -579,26 +226,10 @@ public final class CheckStyleConfigPanel extends JPanel {
                 pathList.getModel();
         for (int i = 0; i < listModel.size(); ++i) {
             final String path = (String) listModel.get(i);
-            classpath.add(plugin.tokenisePath(path));
+            classpath.add(path);
         }
 
         return classpath;
-    }
-
-    /**
-     * Get the CheckStyle properties shown in this panel.
-     *
-     * @return the CheckStyle properties.
-     */
-    @NotNull
-    public Map<String, String> getProperties() {
-        final Map<String, String> properties = new HashMap<String, String>();
-
-        if (!useDefaultButton.isSelected()) {
-            properties.putAll(propertiesModel.getProperties());
-        }
-
-        return properties;
     }
 
     /**
@@ -607,12 +238,172 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return true if the settngs have been modified.
      */
     public boolean isModified() {
-        return !ObjectUtils.equals(configFile, fileField.getText())
-                || !ObjectUtils.equals(configUrl, urlField.getText())
+        return !ObjectUtils.equals(locations, locationModel.getLocations())
+                || !ObjectUtils.equals(activeLocation, locationModel.getActiveLocation())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
-                || !getProperties().equals(properties)
-                || testClassesCheckbox.isSelected() != scanTestClasses
-                || ((configFile != null || configUrl != null) && useDefaultButton.isSelected());
+                || testClassesCheckbox.isSelected() != scanTestClasses;
+    }
+
+    public List<ConfigurationLocation> getConfigurationLocations() {
+        return Collections.unmodifiableList(locationModel.getLocations());
+    }
+
+    public void setConfigurationLocations(final List<ConfigurationLocation> locations) {
+        this.locations = locations;
+        locationModel.setLocations(locations);
+    }
+
+    public void setActiveLocation(final ConfigurationLocation activeLocation) {
+        this.activeLocation = activeLocation;
+        locationModel.setActiveLocation(activeLocation);
+    }
+
+    public ConfigurationLocation getActiveLocation() {
+        return locationModel.getActiveLocation();
+    }
+
+    public void setDefaultLocation(final ConfigurationLocation defaultLocation) {
+        this.defaultLocation = defaultLocation;
+    }
+
+    /**
+     * Process the addition of a configuration location.
+     */
+    protected final class AddLocationAction extends AbstractAction {
+        private static final long serialVersionUID = -7266120887003483814L;
+
+        public AddLocationAction() {
+            final ResourceBundle resources = ResourceBundle.getBundle(
+                    CheckStyleConstants.RESOURCE_BUNDLE);
+
+            putValue(Action.NAME, resources.getString("config.file.add.text"));
+            putValue(Action.SHORT_DESCRIPTION,
+                    resources.getString("config.file.add.tooltip"));
+            putValue(Action.LONG_DESCRIPTION,
+                    resources.getString("config.file.add.tooltip"));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void actionPerformed(final ActionEvent e) {
+            final LocationDialogue dialogue = new LocationDialogue(plugin.getProject());
+
+            dialogue.setVisible(true);
+
+            if (dialogue.isCommitted()) {
+                final ConfigurationLocation newLocation = dialogue.getConfigurationLocation();
+                if (locationModel.getLocations().contains(newLocation)) {
+                    final ResourceBundle resources = ResourceBundle.getBundle(
+                            CheckStyleConstants.RESOURCE_BUNDLE);
+
+                    JOptionPane.showMessageDialog(CheckStyleConfigPanel.this,
+                            resources.getString("config.file.error.duplicate.text"),
+                            resources.getString("config.file.error.duplicate.title"), JOptionPane.WARNING_MESSAGE);
+
+                } else {
+                    locationModel.addLocation(dialogue.getConfigurationLocation());
+                }
+            }
+        }
+    }
+
+    /**
+     * Process the removal of a configuration location.
+     */
+    protected final class RemoveLocationAction extends AbstractAction {
+        private static final long serialVersionUID = -799542186049804472L;
+
+        public RemoveLocationAction() {
+            final ResourceBundle resources = ResourceBundle.getBundle(
+                    CheckStyleConstants.RESOURCE_BUNDLE);
+
+            putValue(Action.NAME, resources.getString("config.file.remove.text"));
+            putValue(Action.SHORT_DESCRIPTION,
+                    resources.getString("config.file.remove.tooltip"));
+            putValue(Action.LONG_DESCRIPTION,
+                    resources.getString("config.file.remove.tooltip"));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void actionPerformed(final ActionEvent e) {
+            final int selectedIndex = locationTable.getSelectedRow();
+            if (selectedIndex == -1) {
+                return;
+            }
+
+            locationModel.removeLocationAt(selectedIndex);
+        }
+    }
+
+    /**
+     * Edit the properties of a configuration location.
+     */
+    protected final class EditPropertiesAction extends AbstractAction {
+        private static final long serialVersionUID = -799542186049804472L;
+
+        public EditPropertiesAction() {
+            final ResourceBundle resources = ResourceBundle.getBundle(
+                    CheckStyleConstants.RESOURCE_BUNDLE);
+
+            putValue(Action.NAME, resources.getString("config.file.properties.text"));
+            putValue(Action.SHORT_DESCRIPTION,
+                    resources.getString("config.file.properties.tooltip"));
+            putValue(Action.LONG_DESCRIPTION,
+                    resources.getString("config.file.properties.tooltip"));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void actionPerformed(final ActionEvent e) {
+            final int selectedIndex = locationTable.getSelectedRow();
+            if (selectedIndex == -1) {
+                return;
+            }
+
+            final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
+
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue();
+            propertiesDialogue.setConfigurationLocation(location);
+
+            propertiesDialogue.setVisible(true);
+
+            if (propertiesDialogue.isCommitted()) {
+                final ConfigurationLocation editedLocation = propertiesDialogue.getConfigurationLocation();
+                locationModel.updateLocation(location, editedLocation);
+            }
+        }
+    }
+
+    /**
+     * Location table selection listener.
+     */
+    protected final class LocationTableSelectionListener
+            implements ListSelectionListener {
+        /**
+         * {@inheritDoc}
+         */
+        public void valueChanged(final ListSelectionEvent e) {
+            if (e.getValueIsAdjusting()) {
+                return;
+            }
+
+            final int selectedItem = locationTable.getSelectedRow();
+            if (selectedItem == -1) {
+                editLocationPropertiesButton.setEnabled(false);
+                removeLocationButton.setEnabled(false);
+
+            } else {
+                final ConfigurationLocation location = locationModel.getLocationAt(selectedItem);
+                ;
+
+                editLocationPropertiesButton.setEnabled(!ObjectUtils.equals(location, defaultLocation));
+                removeLocationButton.setEnabled(!ObjectUtils.equals(location, defaultLocation));
+            }
+        }
     }
 
     /**
@@ -624,6 +415,10 @@ public final class CheckStyleConfigPanel extends JPanel {
          * {@inheritDoc}
          */
         public void valueChanged(final ListSelectionEvent e) {
+            if (e.getValueIsAdjusting()) {
+                return;
+            }
+
             final int[] selectedItems = pathList.getSelectedIndices();
             final boolean single = selectedItems != null
                     && selectedItems.length == 1;
@@ -639,35 +434,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     != 0);
             moveDownPathButton.setEnabled(single && pathList.getSelectedIndex()
                     != (listModel.getSize() - 1));
-        }
-    }
-
-    /**
-     * Process a click on the configuration file radio buttons.
-     */
-    protected final class ConfigurationSelectionAction extends AbstractAction {
-
-        /**
-         * Create a new configuration selection action.
-         */
-        public ConfigurationSelectionAction() {
-            super();
-
-            putValue(Action.NAME, "ConfigurationSelectionAction");
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void actionPerformed(final ActionEvent e) {
-            fileLabel.setEnabled(useFileConfigButton.isSelected());
-            fileField.setEnabled(useFileConfigButton.isSelected());
-            browseButton.setEnabled(useFileConfigButton.isSelected());
-
-            urlLabel.setEnabled(useUrlConfigButton.isSelected());
-            urlField.setEnabled(useUrlConfigButton.isSelected());
-
-            propertiesTable.setEnabled(useFileConfigButton.isSelected() || useUrlConfigButton.isSelected());
         }
     }
 
@@ -839,6 +605,9 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
+     * Process a click on the browse button.
+     */
+    /**
      * Process the move down of a path element.
      */
     protected final class MoveDownPathAction extends AbstractAction {
@@ -877,90 +646,4 @@ public final class CheckStyleConfigPanel extends JPanel {
             pathList.setSelectedIndex(selected + 1);
         }
     }
-
-    /**
-     * Process a click on the browse button.
-     */
-    protected final class BrowseAction extends AbstractAction {
-
-        /**
-         * Create a new browse action.
-         */
-        public BrowseAction() {
-            super();
-
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
-                    "config.file.browse.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void actionPerformed(final ActionEvent e) {
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new ExtensionFileFilter("xml"));
-
-            final String configFilePath = getConfigFile();
-            if (configFilePath != null) {
-                fileChooser.setSelectedFile(new File(configFilePath));
-            }
-
-            final int result = fileChooser.showOpenDialog(
-                    CheckStyleConfigPanel.this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                final File newConfigFile = fileChooser.getSelectedFile();
-                fileField.setText(newConfigFile.getAbsolutePath());
-
-                processConfigProperties(newConfigFile,
-                        propertiesModel.getProperties());
-            }
-        }
-    }
-
-    /**
-     * File filter for files with a specified extension.
-     */
-    protected final class ExtensionFileFilter extends FileFilter {
-
-        private final String extension;
-
-        /**
-         * Create a filter for the given extension.
-         *
-         * @param extension the extension.
-         */
-        public ExtensionFileFilter(@NotNull final String extension) {
-            this.extension = extension;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean accept(final File f) {
-            if (f.isDirectory()) {
-                return true;
-            }
-
-            final String fileName = f.getName();
-            return fileName.toLowerCase().endsWith("." + extension);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public String getDescription() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-            return resources.getString("config.file." + extension
-                    + ".description");
-        }
-    }
-
 }

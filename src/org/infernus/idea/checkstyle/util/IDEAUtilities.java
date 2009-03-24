@@ -30,6 +30,15 @@ public final class IDEAUtilities {
     }
 
     /**
+     * Are we running on Mac OS X?
+     *
+     * @return true if this is a Mac OS.
+     */
+    public static boolean isMacOSX() {
+        return System.getProperty("os.name").toLowerCase().contains("mac os x");
+    }
+
+    /**
      * Get an internal IDEA icon.
      *
      * @param icon the relative path to the icon.

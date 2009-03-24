@@ -41,7 +41,7 @@ public final class CheckStyleConstants {
     /**
      * Constant used to represent project directory.
      */
-    static final String PROJECT_DIR = "$PROJECT_DIR$";
+    public static final String PROJECT_DIR = "$PROJECT_DIR$";
 
     /**
      * This is a constants class and cannot be instantiated.

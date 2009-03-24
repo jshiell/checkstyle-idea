@@ -1,4 +1,6 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.ui;
+
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
@@ -9,7 +11,7 @@ import java.util.*;
  * @author James Shiell
  * @version 1.0
  */
-public class CheckStylePropertiesTableModel extends AbstractTableModel {
+public class PropertiesTableModel extends AbstractTableModel {
 
     protected static final int COLUMN_NAME = 0;
     protected static final int COLUMN_VALUE = 1;
@@ -21,7 +23,7 @@ public class CheckStylePropertiesTableModel extends AbstractTableModel {
     /**
      * Create a new empty properties table model.
      */
-    public CheckStylePropertiesTableModel() {
+    public PropertiesTableModel() {
     }
 
     /**
@@ -29,7 +31,7 @@ public class CheckStylePropertiesTableModel extends AbstractTableModel {
      *
      * @param properties the map of property names to values.
      */
-    public CheckStylePropertiesTableModel(
+    public PropertiesTableModel(
             final Map<String, String> properties) {
         setProperties(properties);
     }
