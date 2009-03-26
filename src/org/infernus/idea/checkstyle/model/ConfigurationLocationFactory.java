@@ -71,7 +71,7 @@ public class ConfigurationLocationFactory {
         final String description = stringRepresentation.substring(descriptionSplitIndex + 1);
 
 
-        final ConfigurationType type = ConfigurationType.valueOf(typeString);
+        final ConfigurationType type = ConfigurationType.parse(typeString);
 
         switch (type) {
             case FILE:

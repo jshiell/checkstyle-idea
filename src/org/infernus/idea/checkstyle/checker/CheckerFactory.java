@@ -33,11 +33,6 @@ public class CheckerFactory {
             CheckerFactory.class);
 
     /**
-     * The number of milliseconds a checker may remain unused in the cache.
-     */
-    private static final int CACHE_VALID_TIME = 60000;
-
-    /**
      * A singleton instance.
      */
     private static final CheckerFactory INSTANCE = new CheckerFactory();
@@ -45,8 +40,6 @@ public class CheckerFactory {
     /**
      * Cached checkers for the factory.
      * <p/>
-     * We cache purely to ignore repeated requests in a multi-file scan. Hence we'll treat the cached
-     * value as valid for {@link #CACHE_VALID_TIME} with use.
      */
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
 
@@ -82,10 +75,9 @@ public class CheckerFactory {
         }
 
         if (cache.containsKey(location)) {
-            CachedChecker cachedCachedChecker = cache.get(location);
-            if ((cachedCachedChecker.getTimeStamp() + CACHE_VALID_TIME) >= System.currentTimeMillis()) {
-                cachedCachedChecker.updateTimeStamp(); // mark the use of this checker
-                return cachedCachedChecker.getChecker();
+            CachedChecker cachedChecker = cache.get(location);
+            if (cachedChecker.isValid()) {
+                return cachedChecker.getChecker();
             }
         }
 

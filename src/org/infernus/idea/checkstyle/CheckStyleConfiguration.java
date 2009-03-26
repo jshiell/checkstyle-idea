@@ -147,8 +147,10 @@ public final class CheckStyleConfiguration extends Properties {
             setProperty(LOCATION_PREFIX + index, configurationLocation.toString());
 
             final Map<String, String> properties = configurationLocation.getProperties();
-            for (final String property : properties.keySet()) {
-                setProperty(PROPERTIES_PREFIX + index + "." + property, properties.get(property));
+            if (properties != null) {
+                for (final String property : properties.keySet()) {
+                    setProperty(PROPERTIES_PREFIX + index + "." + property, properties.get(property));
+                }
             }
 
             ++index;

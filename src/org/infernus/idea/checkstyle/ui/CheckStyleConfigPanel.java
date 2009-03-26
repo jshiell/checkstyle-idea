@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.util.ObjectUtils;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -297,9 +299,9 @@ public final class CheckStyleConfigPanel extends JPanel {
                     final ResourceBundle resources = ResourceBundle.getBundle(
                             CheckStyleConstants.RESOURCE_BUNDLE);
 
-                    JOptionPane.showMessageDialog(CheckStyleConfigPanel.this,
+                    Messages.showWarningDialog(plugin.getProject(),
                             resources.getString("config.file.error.duplicate.text"),
-                            resources.getString("config.file.error.duplicate.title"), JOptionPane.WARNING_MESSAGE);
+                            resources.getString("config.file.error.duplicate.title"));
 
                 } else {
                     locationModel.addLocation(dialogue.getConfigurationLocation());
@@ -366,7 +368,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
             final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
 
-            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue();
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(plugin.getProject());
             propertiesDialogue.setConfigurationLocation(location);
 
             propertiesDialogue.setVisible(true);

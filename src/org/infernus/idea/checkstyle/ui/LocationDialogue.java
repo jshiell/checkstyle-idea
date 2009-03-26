@@ -1,11 +1,14 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,6 +42,8 @@ public class LocationDialogue extends JDialog {
      * @param project the current project.
      */
     public LocationDialogue(final Project project) {
+        super(WindowManager.getInstance().getFrame(project));
+
         if (project == null) {
             throw new IllegalArgumentException("Project may not be null");
         }
@@ -160,13 +165,13 @@ public class LocationDialogue extends JDialog {
      */
     public ConfigurationLocation getConfigurationLocation() {
         if (fileLocationField.isEnabled()) {
-            if (fileLocationField.getText() != null) {
+            if (StringUtils.isNotBlank(fileLocationField.getText())) {
                 return ConfigurationLocationFactory.create(project, ConfigurationType.FILE,
                         fileLocationField.getText(), descriptionField.getText());
             }
 
         } else if (urlLocationField.isEnabled()) {
-            if (urlLocationField.getText() != null) {
+            if (StringUtils.isNotBlank(urlLocationField.getText())) {
                 return ConfigurationLocationFactory.create(project, ConfigurationType.HTTP_URL,
                         urlLocationField.getText(), descriptionField.getText());
             }
@@ -251,8 +256,8 @@ public class LocationDialogue extends JDialog {
                     CheckStyleConstants.RESOURCE_BUNDLE);
 
             if (location == null) {
-                JOptionPane.showMessageDialog(LocationDialogue.this, resources.getString("config.file.no-file"),
-                        resources.getString("config.file.error.title"), JOptionPane.ERROR);
+                Messages.showErrorDialog(project, resources.getString("config.file.no-file"),
+                        resources.getString("config.file.error.title"));
                 return;
             }
 
@@ -262,8 +267,7 @@ public class LocationDialogue extends JDialog {
             } catch (IOException e) {
                 final String message = resources.getString("config.file.resolve-failed");
                 final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-                JOptionPane.showMessageDialog(LocationDialogue.this, formattedMessage,
-                        resources.getString("config.file.error.title"), JOptionPane.ERROR);
+                Messages.showErrorDialog(project, formattedMessage, resources.getString("config.file.error.title"));
 
                 return;
             }

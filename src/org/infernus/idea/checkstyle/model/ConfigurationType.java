@@ -18,6 +18,21 @@ public enum ConfigurationType {
     /**
      * Located in a local file.
      */
-    FILE
+    FILE;
+
+    /**
+     * Parse a case-insensitive type string.
+     *
+     * @param typeAsString the type, as a string.
+     * @return the type.
+     */
+    public static ConfigurationType parse(final String typeAsString) {
+        if (typeAsString == null) {
+            return null;
+        }
+
+        final String processedType = typeAsString.toUpperCase().replace(' ', '_');
+        return valueOf(processedType);
+    }
 
 }

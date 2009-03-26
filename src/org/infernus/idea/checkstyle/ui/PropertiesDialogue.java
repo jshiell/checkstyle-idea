@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.wm.WindowManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -22,8 +25,9 @@ public class PropertiesDialogue extends JDialog {
 
     private static final Log LOG = LogFactory.getLog(PropertiesDialogue.class);
 
-    private final PropertiesTableModel propertiesModel
-            = new PropertiesTableModel();
+    private final PropertiesTableModel propertiesModel = new PropertiesTableModel();
+    private final Project project;
+
     /**
      * Properties table, hacked for enable/disable support.
      */
@@ -39,7 +43,15 @@ public class PropertiesDialogue extends JDialog {
     private boolean committed = true;
     private ConfigurationLocation configurationLocation;
 
-    public PropertiesDialogue() {
+    public PropertiesDialogue(final Project project) {
+        super(WindowManager.getInstance().getFrame(project));
+
+        if (project == null) {
+            throw new IllegalArgumentException("Project is required");
+        }
+
+        this.project = project;
+
         initialise();
     }
 
@@ -132,8 +144,8 @@ public class PropertiesDialogue extends JDialog {
 
             final String message = resources.getString("config.file.resolve-failed");
             final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-            JOptionPane.showMessageDialog(this, formattedMessage,
-                    resources.getString("config.file.error.title"), JOptionPane.ERROR);
+            Messages.showErrorDialog(project, formattedMessage,
+                    resources.getString("config.file.error.title"));
         }
 
         propertiesModel.setProperties(configurationLocation.getProperties());

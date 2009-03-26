@@ -61,7 +61,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * @param psiFile the psiFile being scanned.
      * @return a checker.
      */
-    public Checker getChecker(final Project project,
+    private Checker getChecker(final Project project,
                               final PsiFile psiFile) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
@@ -210,8 +210,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return null;
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(
+            final CheckStylePluginException processed = CheckStylePlugin.processError(
                     "The inspection could not be executed.", e);
             LOG.error("The inspection could not be executed.", processed);
 

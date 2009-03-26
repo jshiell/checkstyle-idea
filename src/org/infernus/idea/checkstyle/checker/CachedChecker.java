@@ -7,6 +7,12 @@ import com.puppycrawl.tools.checkstyle.Checker;
  */
 class CachedChecker {
 
+    /**
+     * We cache purely to ignore repeated requests in a multi-file scan. Hence we'll treat the cached
+     * value as valid for time in ms.
+     */
+    private static final int CACHE_VALID_TIME = 60000;
+
     private Checker checker;
     private long timeStamp;
 
@@ -31,6 +37,7 @@ class CachedChecker {
      * @return the checker.
      */
     public Checker getChecker() {
+        this.timeStamp = System.currentTimeMillis();
         return checker;
     }
 
@@ -43,7 +50,7 @@ class CachedChecker {
         return timeStamp;
     }
 
-    public void updateTimeStamp() {
-        this.timeStamp = System.currentTimeMillis();
+    public boolean isValid() {
+        return (getTimeStamp() + CACHE_VALID_TIME) >= System.currentTimeMillis();
     }
 }
