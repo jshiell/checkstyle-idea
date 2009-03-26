@@ -2,9 +2,8 @@ Things to do before the next release:
 
 Basics:
 
-1) Move checker code to own package
-2) Finish refactoring, cleanup, debug
-3) Write model tests
+1) Finish refactoring, cleanup, debug
+2) Write model tests
 
 Features:
 

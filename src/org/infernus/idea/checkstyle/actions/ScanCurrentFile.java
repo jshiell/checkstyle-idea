@@ -13,11 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
-import java.util.ResourceBundle;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**

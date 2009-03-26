@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -13,6 +13,7 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
@@ -107,7 +108,7 @@ final class FileScanner implements Runnable {
         final PsiFile psiFile = (PsiFile) element;
         LOG.debug("Scanning " + psiFile.getName());
 
-        final boolean checkTestClasses = this.plugin.configuration.isScanningTestClasses();
+        final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
         if (!checkTestClasses && isTestClass(element)) {
             LOG.debug("Skipping test class " + psiFile.getName());
             return null;
@@ -165,7 +166,7 @@ final class FileScanner implements Runnable {
             return false;
         }
 
-        final Module module = ModuleUtil.findModuleForFile(elementFile, this.plugin.project);
+        final Module module = ModuleUtil.findModuleForFile(elementFile, plugin.getProject());
         if (module == null) {
             return false;
         }

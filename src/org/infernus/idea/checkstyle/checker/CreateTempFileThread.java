@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 /**
  * Thread to read the file to a temporary file.

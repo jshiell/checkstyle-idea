@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NonNls;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 public class ScanFilesThread extends AbstractCheckerThread {
 

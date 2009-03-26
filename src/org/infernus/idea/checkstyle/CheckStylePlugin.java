@@ -33,6 +33,10 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.checker.ScanFilesThread;
+import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.CheckFilesThread;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -81,7 +85,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     /**
      * A reference to the current project.
      */
-    final Project project;
+    private final Project project;
 
     /**
      * The tool window for the plugin.
@@ -96,7 +100,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     /**
      * Configuration store.
      */
-    CheckStyleConfiguration configuration;
+    private CheckStyleConfiguration configuration;
 
     /**
      * {@inheritDoc}
@@ -433,13 +437,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 return null;
             }
 
-            // TODO caching
-
-            final Checker checker = CheckerFactory.getInstance().getChecker(
-                    location.resolve(), classLoader,
-                    location.getProperties());
-
-            return checker;
+            return CheckerFactory.getInstance().getChecker(location, classLoader);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
@@ -555,7 +553,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * @return the class loader to use, or null if none applicable.
      * @throws MalformedURLException if the URL conversion fails.
      */
-    ClassLoader buildModuleClassLoader(final Module module)
+    public ClassLoader buildModuleClassLoader(final Module module)
             throws MalformedURLException {
 
         if (module == null) {

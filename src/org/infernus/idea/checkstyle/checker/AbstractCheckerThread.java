@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.module.Module;
@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.lang.reflect.InvocationTargetException;
 
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+
 /**
  * Abstract CheckerThread.
  */
@@ -26,8 +28,7 @@ public abstract class AbstractCheckerThread extends Thread {
     /**
      * Map files to modules.
      */
-    protected final Map<PsiFile, Module> fileToModuleMap
-            = new HashMap<PsiFile, Module>();
+    protected final Map<PsiFile, Module> fileToModuleMap = new HashMap<PsiFile, Module>();
 
     /**
      * Scan results.
@@ -35,6 +36,12 @@ public abstract class AbstractCheckerThread extends Thread {
     protected Map<PsiFile, List<ProblemDescriptor>> fileResults;
 
     private boolean running = true;
+
+    private CheckStylePlugin plugin;
+
+    protected CheckStylePlugin getPlugin() {
+        return plugin;
+    }
 
     protected synchronized boolean isRunning() {
         return running;
@@ -48,11 +55,6 @@ public abstract class AbstractCheckerThread extends Thread {
         setRunning(false);
     }
 
-    /**
-     * Reference to plugin
-     */
-    protected CheckStylePlugin plugin;
-
     public AbstractCheckerThread(CheckStylePlugin checkStylePlugin, final List<VirtualFile> virtualFiles) {
         this.plugin = checkStylePlugin;
 
@@ -60,7 +62,7 @@ public abstract class AbstractCheckerThread extends Thread {
             throw new IllegalArgumentException("Files may not be null.");
         }
         // this needs to be done on the main thread.
-        final PsiManager psiManager = PsiManager.getInstance(this.plugin.project);
+        final PsiManager psiManager = PsiManager.getInstance(this.plugin.getProject());
         for (final VirtualFile virtualFile : virtualFiles) {
             processFile(psiManager, virtualFile);
         }
@@ -110,12 +112,11 @@ public abstract class AbstractCheckerThread extends Thread {
             if (moduleClassLoaderMap.containsKey(module)) {
                 moduleClassLoader = moduleClassLoaderMap.get(module);
             } else {
-                moduleClassLoader = AbstractCheckerThread.this.plugin.buildModuleClassLoader(module);
+                moduleClassLoader = plugin.buildModuleClassLoader(module);
                 moduleClassLoaderMap.put(module, moduleClassLoader);
             }
 
-            final FileScanner fileScanner = new FileScanner(this.plugin,
-                    psiFile, moduleClassLoader);
+            final FileScanner fileScanner = new FileScanner(plugin, psiFile, moduleClassLoader);
 
             this.runFileScanner(fileScanner);
 

@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
@@ -7,6 +7,7 @@ import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NonNls;
 
 import javax.swing.*;
@@ -14,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
-class CheckFilesThread extends AbstractCheckerThread {
+public class CheckFilesThread extends AbstractCheckerThread {
 
     /**
      * Logger for this class.
@@ -48,8 +49,8 @@ class CheckFilesThread extends AbstractCheckerThread {
             // set progress bar
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    CheckFilesThread.this.plugin.getToolWindowPanel().setProgressBarMax(files.size());
-                    CheckFilesThread.this.plugin.getToolWindowPanel().displayInProgress();
+                    getPlugin().getToolWindowPanel().setProgressBarMax(files.size());
+                    getPlugin().getToolWindowPanel().displayInProgress();
                 }
             });
 
@@ -58,12 +59,12 @@ class CheckFilesThread extends AbstractCheckerThread {
             // invoke Swing fun in Swing thread.
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    CheckFilesThread.this.plugin.getToolWindowPanel().displayResults(fileResults);
-                    CheckFilesThread.this.plugin.getToolWindowPanel().expandTree();
-                    CheckFilesThread.this.plugin.getToolWindowPanel().clearProgressBar();
-                    CheckFilesThread.this.plugin.getToolWindowPanel().setProgressText(null);
+                    getPlugin().getToolWindowPanel().displayResults(fileResults);
+                    getPlugin().getToolWindowPanel().expandTree();
+                    getPlugin().getToolWindowPanel().clearProgressBar();
+                    getPlugin().getToolWindowPanel().setProgressText(null);
 
-                    CheckFilesThread.this.plugin.setThreadComplete(CheckFilesThread.this);
+                    getPlugin().setThreadComplete(CheckFilesThread.this);
                 }
             });
 
@@ -77,11 +78,11 @@ class CheckFilesThread extends AbstractCheckerThread {
 
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        CheckFilesThread.this.plugin.getToolWindowPanel().displayErrorResult(processedError);
-                        CheckFilesThread.this.plugin.getToolWindowPanel().clearProgressBar();
-                        CheckFilesThread.this.plugin.getToolWindowPanel().setProgressText(null);
+                        getPlugin().getToolWindowPanel().displayErrorResult(processedError);
+                        getPlugin().getToolWindowPanel().clearProgressBar();
+                        getPlugin().getToolWindowPanel().setProgressText(null);
 
-                        CheckFilesThread.this.plugin.setThreadComplete(CheckFilesThread.this);
+                        getPlugin().setThreadComplete(CheckFilesThread.this);
                     }
                 });
             }

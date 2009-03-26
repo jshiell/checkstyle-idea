@@ -22,6 +22,8 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.CheckStyleAuditListener;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -81,9 +83,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     = checkStylePlugin.buildModuleClassLoader(module);
 
             LOG.info("Loading configuration from " + configurationLocation);
-            checker = CheckerFactory.getInstance().getChecker(
-                    configurationLocation.resolve(), moduleClassLoader,
-                    configurationLocation.getProperties());
+            checker = CheckerFactory.getInstance().getChecker(configurationLocation, moduleClassLoader);
 
             return checker;
 
