@@ -86,7 +86,25 @@ public class LocationTableModel extends AbstractTableModel {
             throw new IllegalArgumentException("Active location is not in location list");
         }
 
+        updateActiveLocation(activeLocation, locations.indexOf(activeLocation));
+    }
+
+    private void updateActiveLocation(final ConfigurationLocation activeLocation, final int rowIndex) {
+        int oldColumn = -1;
+        for (int i = 0; i < locations.size(); ++i) {
+            if (i != rowIndex && ObjectUtils.equals(locations.get(i), this.activeLocation)) {
+                oldColumn = i;
+                break;
+            }
+        }
+
         this.activeLocation = activeLocation;
+
+        fireTableCellUpdated(rowIndex, COLUMN_ACTIVE);
+
+        if (oldColumn != -1) {
+            fireTableCellUpdated(oldColumn, COLUMN_ACTIVE);
+        }
     }
 
     public ConfigurationLocation getActiveLocation() {
@@ -158,21 +176,7 @@ public class LocationTableModel extends AbstractTableModel {
 
         switch (columnIndex) {
             case COLUMN_ACTIVE:
-                int oldColumn = -1;
-                for (int i = 0; i < locations.size(); ++i) {
-                    if (i != rowIndex && ObjectUtils.equals(locations.get(i), activeLocation)) {
-                        oldColumn = i;
-                        break;
-                    }
-                }
-
-                activeLocation = rowLocation;
-                fireTableCellUpdated(rowIndex, columnIndex);
-
-                if (oldColumn != -1) {
-                    fireTableCellUpdated(oldColumn, columnIndex);
-                }
-
+                updateActiveLocation(rowLocation, rowIndex);
                 break;
 
             default:

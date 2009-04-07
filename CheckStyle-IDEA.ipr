@@ -340,7 +340,11 @@
   <component name="ProjectDetails">
     <option name="projectName" value="CheckStyle-IDEA" />
   </component>
-  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectFileVersion" converted="true">
+    <converter id="javaee-modules" />
+    <converter id="ror-modules" />
+    <converter id="SelenaRunConfToDiana" />
+  </component>
   <component name="ProjectKey">
     <option name="state" value="https://checkstyle-idea.googlecode.com/svn/trunk/CheckStyle-IDEA.ipr" />
   </component>

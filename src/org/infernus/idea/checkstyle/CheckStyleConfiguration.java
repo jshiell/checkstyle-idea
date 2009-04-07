@@ -82,7 +82,7 @@ public final class CheckStyleConfiguration extends Properties {
     public ConfigurationLocation getActiveConfiguration() {
         final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
 
-        if (!contains(ACTIVE_CONFIG)) {
+        if (!containsKey(ACTIVE_CONFIG)) {
             return defaultLocation;
         }
 

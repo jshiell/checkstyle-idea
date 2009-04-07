@@ -385,8 +385,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        configPanel.setDefaultLocation(configuration.getDefaultLocation());
         configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
+        configPanel.setDefaultLocation(configuration.getDefaultLocation());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
         configPanel.setScanTestClasses(configuration.isScanningTestClasses());
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
