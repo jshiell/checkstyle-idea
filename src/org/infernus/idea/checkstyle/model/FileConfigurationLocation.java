@@ -44,6 +44,22 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * {@inheritDoc}
      */
     @Override
+    public File getBaseDir() {
+        final String location = getLocation();
+        if (location != null) {
+            final File locationFile = new File(getLocation());
+            if (locationFile.exists()) {
+                return locationFile.getParentFile();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getLocation() {
         return untokenisePath(super.getLocation());
     }

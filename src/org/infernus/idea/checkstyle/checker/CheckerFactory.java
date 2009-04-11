@@ -64,10 +64,12 @@ public class CheckerFactory {
      * @param location    the location of the CheckStyle file.
      * @param classLoader class loader for CheckStyle use, or null to use
      *                    the default.
+     * @param baseDir the project's base directory.
      * @return a checker.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final ConfigurationLocation location,
+                              final File baseDir,
                               final ClassLoader classLoader)
             throws CheckstyleException {
         if (location == null) {
@@ -81,7 +83,7 @@ public class CheckerFactory {
             }
         }
 
-        final Checker checker = createChecker(location, null,
+        final Checker checker = createChecker(location, baseDir,
                 new ListPropertyResolver(location.getProperties()), classLoader);
         cache.put(location, new CachedChecker(checker));
         return checker;

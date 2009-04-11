@@ -437,7 +437,12 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 return null;
             }
 
-            return CheckerFactory.getInstance().getChecker(location, classLoader);
+            File baseDir = location.getBaseDir();
+            if (baseDir == null) {
+                baseDir = new File(project.getBaseDir().getPath());
+            }
+
+            return CheckerFactory.getInstance().getChecker(location, baseDir, classLoader);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);

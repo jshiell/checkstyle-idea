@@ -11,6 +11,7 @@ import org.jdom.input.SAXBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -45,6 +46,15 @@ public abstract class ConfigurationLocation {
         } else {
             this.description = description;
         }
+    }
+
+    /**
+     * Get the base directory for this checkstyle file. If null then the project directory is assumed.
+     *
+     * @return the base directory for the file, or null if not applicable to the location type.
+     */
+    public File getBaseDir() {
+        return null;
     }
 
     public ConfigurationType getType() {

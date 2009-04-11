@@ -82,8 +82,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final ClassLoader moduleClassLoader
                     = checkStylePlugin.buildModuleClassLoader(module);
 
+            File baseDir = configurationLocation.getBaseDir();
+            if (baseDir == null) {
+                baseDir = new File(project.getBaseDir().getPath());
+            }
+
             LOG.info("Loading configuration from " + configurationLocation);
-            checker = CheckerFactory.getInstance().getChecker(configurationLocation, moduleClassLoader);
+            checker = CheckerFactory.getInstance().getChecker(configurationLocation, baseDir, moduleClassLoader);
 
             return checker;
 
