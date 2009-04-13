@@ -32,7 +32,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
     public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
                             final List<VirtualFile> virtualFiles) {
         super(checkStylePlugin, virtualFiles);
-        this.fileResults = new HashMap<PsiFile, List<ProblemDescriptor>>();
+        this.setFileResults(new HashMap<PsiFile, List<ProblemDescriptor>>());
     }
 
     public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
@@ -49,7 +49,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // set progress bar
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    getPlugin().getToolWindowPanel().setProgressBarMax(files.size());
+                    getPlugin().getToolWindowPanel().setProgressBarMax(getFiles().size());
                     getPlugin().getToolWindowPanel().displayInProgress();
                 }
             });
@@ -59,7 +59,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // invoke Swing fun in Swing thread.
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    getPlugin().getToolWindowPanel().displayResults(fileResults);
+                    getPlugin().getToolWindowPanel().displayResults(getFileResults());
                     getPlugin().getToolWindowPanel().expandTree();
                     getPlugin().getToolWindowPanel().clearProgressBar();
                     getPlugin().getToolWindowPanel().setProgressText(null);

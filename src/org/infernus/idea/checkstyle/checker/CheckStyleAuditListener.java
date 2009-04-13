@@ -3,10 +3,10 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
@@ -32,8 +32,8 @@ public class CheckStyleAuditListener implements AuditListener {
     private final PsiFile psiFile;
     private final InspectionManager manager;
 
-    private List<AuditEvent> errors = new ArrayList<AuditEvent>();
-    private List<ProblemDescriptor> problems = new ArrayList<ProblemDescriptor>();
+    private final List<AuditEvent> errors = new ArrayList<AuditEvent>();
+    private final List<ProblemDescriptor> problems = new ArrayList<ProblemDescriptor>();
 
     /**
      * Create a new listener.
@@ -70,8 +70,10 @@ public class CheckStyleAuditListener implements AuditListener {
      * {@inheritDoc}
      */
     public void auditStarted(final AuditEvent auditEvent) {
-        errors.clear();
-        problems.clear();
+        synchronized (errors) {
+            errors.clear();
+            problems.clear();
+        }
     }
 
     /**
@@ -106,7 +108,9 @@ public class CheckStyleAuditListener implements AuditListener {
      * {@inheritDoc}
      */
     public void addError(final AuditEvent auditEvent) {
-        errors.add(auditEvent);
+        synchronized (errors) {
+            errors.add(auditEvent);
+        }
     }
 
     /**
@@ -115,7 +119,9 @@ public class CheckStyleAuditListener implements AuditListener {
     public void addException(final AuditEvent auditEvent,
                              final Throwable throwable) {
         LOG.error("Exception during CheckStyle execution", throwable);
-        errors.add(auditEvent);
+        synchronized (errors) {
+            errors.add(auditEvent);
+        }
     }
 
     /**
@@ -146,100 +152,106 @@ public class CheckStyleAuditListener implements AuditListener {
             final List<Integer> lineLengthCache = new ArrayList<Integer>();
             lineLengthCache.add(0); // line 1 is offset 0
 
-            AuditLoop:
-            for (final AuditEvent event : errors) {
-                // check for package HTML siblings, as our scan can't find these
-                // if we're using a temporary file
+            synchronized (errors) {
+                for (final AuditEvent event : errors) {
+                    processEvent(text, lineLengthCache, event);
+                }
+            }
+        }
 
-                if (PACKAGE_HTML_CHECK.equals(event.getSourceName())) {
-                    // find the first sibling
-                    PsiElement currentSibling = psiFile;
-                    while (currentSibling.getPrevSibling() != null) {
-                        currentSibling = currentSibling.getPrevSibling();
-                    }
+        private void processEvent(final char[] text, final List<Integer> lineLengthCache,
+                                  final AuditEvent event) {
+            // check for package HTML siblings, as our scan can't find these
+            // if we're using a temporary file
 
-                    while (currentSibling != null) {
-                        if (currentSibling.isPhysical() && currentSibling.isValid()
-                                && currentSibling instanceof PsiFile
-                                && PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
-                            continue AuditLoop;
-                        }
-
-                        currentSibling = currentSibling.getNextSibling();
-                    }
+            if (PACKAGE_HTML_CHECK.equals(event.getSourceName())) {
+                // find the first sibling
+                PsiElement currentSibling = psiFile;
+                while (currentSibling.getPrevSibling() != null) {
+                    currentSibling = currentSibling.getPrevSibling();
                 }
 
-                int offset;
-                boolean endOfLine = false;
-
-                // start of file
-                if (event.getLine() == 0) { // start of file errors
-                    offset = event.getColumn();
-
-                    // line offset is cached...
-                } else if (event.getLine() <= lineLengthCache.size()) {
-                    offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
-
-                    // further search required
-                } else {
-                    // start from end of cached data
-                    offset = lineLengthCache.get(lineLengthCache.size() - 1);
-                    int line = lineLengthCache.size();
-
-                    int column = 0;
-                    for (int i = offset; i < text.length; ++i) {
-                        final char character = text[i];
-
-                        // for linefeeds we need to handle CR, LF and CRLF,
-                        // hence we accept either and only trigger a new
-                        // line on the LF of CRLF.
-                        final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
-                        if (character == '\n' || character == '\r' && nextChar != '\n') {
-                            ++line;
-                            ++offset;
-                            lineLengthCache.add(offset);
-                            column = 0;
-                        } else {
-                            ++column;
-                            ++offset;
-                        }
-
-                        // need to go to end of line though
-                        if (event.getLine() == line && event.getColumn() == column) {
-                            if (column == 0 && Character.isWhitespace(nextChar)) {
-                                // move line errors to after EOL
-                                endOfLine = true;
-                            }
-                            break;
-                        }
+                while (currentSibling != null) {
+                    if (currentSibling.isPhysical() && currentSibling.isValid()
+                            && currentSibling instanceof PsiFile
+                            && PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
+                        return;
                     }
+
+                    currentSibling = currentSibling.getNextSibling();
                 }
+            }
 
+            int offset;
+            boolean endOfLine = false;
 
-                final PsiElement victim;
-                victim = psiFile.findElementAt(offset);
+            // start of file
+            if (event.getLine() == 0) { // start of file errors
+                offset = event.getColumn();
 
-                if (victim == null) {
-                    LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
-                            + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
-                } else {
-                    final String message = event.getLocalizedMessage() != null
-                            ? event.getLocalizedMessage().getMessage()
-                            : event.getMessage();
-                    final ProblemHighlightType problemType
-                            = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-                    final ProblemDescriptor problem = manager.createProblemDescriptor(
-                            victim, message, null, problemType, endOfLine);
+                // line offset is cached...
+            } else if (event.getLine() <= lineLengthCache.size()) {
+                offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
 
-                    if (usingExtendedDescriptors) {
-                        final ProblemDescriptor delegate
-                                = new ExtendedProblemDescriptor(
-                                problem, event.getSeverityLevel(),
-                                event.getLine(), event.getColumn());
-                        problems.add(delegate);
+                // further search required
+            } else {
+                // start from end of cached data
+                offset = lineLengthCache.get(lineLengthCache.size() - 1);
+                int line = lineLengthCache.size();
+
+                int column = 0;
+                for (int i = offset; i < text.length; ++i) {
+                    final char character = text[i];
+
+                    // for linefeeds we need to handle CR, LF and CRLF,
+                    // hence we accept either and only trigger a new
+                    // line on the LF of CRLF.
+                    final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
+                    if (character == '\n' || character == '\r' && nextChar != '\n') {
+                        ++line;
+                        ++offset;
+                        lineLengthCache.add(offset);
+                        column = 0;
                     } else {
-                        problems.add(problem);
+                        ++column;
+                        ++offset;
                     }
+
+                    // need to go to end of line though
+                    if (event.getLine() == line && event.getColumn() == column) {
+                        if (column == 0 && Character.isWhitespace(nextChar)) {
+                            // move line errors to after EOL
+                            endOfLine = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+
+            final PsiElement victim;
+            victim = psiFile.findElementAt(offset);
+
+            if (victim == null) {
+                LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
+                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
+            } else {
+                final String message = event.getLocalizedMessage() != null
+                        ? event.getLocalizedMessage().getMessage()
+                        : event.getMessage();
+                final ProblemHighlightType problemType
+                        = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+                final ProblemDescriptor problem = manager.createProblemDescriptor(
+                        victim, message, null, problemType, endOfLine);
+
+                if (usingExtendedDescriptors) {
+                    final ProblemDescriptor delegate
+                            = new ExtendedProblemDescriptor(
+                            problem, event.getSeverityLevel(),
+                            event.getLine(), event.getColumn());
+                    problems.add(delegate);
+                } else {
+                    problems.add(problem);
                 }
             }
         }

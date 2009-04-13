@@ -35,10 +35,6 @@ public final class CheckStyleConstants {
     public static final String ID_TOOLWINDOW = "CheckStyle";
 
     /**
-     * The action group for the plug-in tool window.
-     */
-    public static final String ACTION_GROUP = "CheckStylePluginActions";
-    /**
      * Constant used to represent project directory.
      */
     public static final String PROJECT_DIR = "$PROJECT_DIR$";

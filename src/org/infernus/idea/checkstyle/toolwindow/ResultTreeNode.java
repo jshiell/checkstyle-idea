@@ -2,13 +2,14 @@ package org.infernus.idea.checkstyle.toolwindow;
 
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
-
-import javax.swing.*;
-import java.util.ResourceBundle;
-import java.text.MessageFormat;
-
+import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
+
+import javax.swing.*;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -16,32 +17,58 @@ import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
  * @author James Shiell
  * @version 1.0
  */
-public class ToolWindowTreeNode {
+public class ResultTreeNode {
 
     private PsiFile file;
     private ProblemDescriptor problem;
-    private Icon expandedIcon;
-    private Icon collapsedIcon;
+    private Icon icon;
     private String text;
     private String tooltip;
     private String description;
+    private SeverityLevel severity;
 
     /**
-     * Construct a node with the given display text.
+     * Construct a informational node.
      *
-     * @param text the text of the node.
+     * @param text the information text.
      */
-    public ToolWindowTreeNode(final String text) {
+    public ResultTreeNode(final String text) {
+        if (text == null) {
+            throw new IllegalArgumentException("Text may not be null");
+        }
+
         this.text = text;
+        icon = IDEAUtilities.getIcon("/compiler/information.png");
+    }
+
+
+    /**
+     * Construct a file node.
+     *
+     * @param fileName     the name of the file.
+     * @param problemCount the number of problems in the file.
+     */
+    public ResultTreeNode(final String fileName, final int problemCount) {
+        if (fileName == null) {
+            throw new IllegalArgumentException("Filename may not be null");
+        }
+
+        final ResourceBundle resources = ResourceBundle.getBundle(
+                CheckStyleConstants.RESOURCE_BUNDLE);
+        final MessageFormat fileResultMessage = new MessageFormat(
+                resources.getString("plugin.results.scan-file-result"));
+
+        this.text = fileResultMessage.format(new Object[]{fileName, problemCount});
+        icon = IDEAUtilities.getIcon("/fileTypes/java.png");
     }
 
     /**
      * Construct a node for a given problem.
      *
-     * @param file the file the problem exists in.
+     * @param file    the file the problem exists in.
      * @param problem the problem.
      */
-    public ToolWindowTreeNode(final PsiFile file, final ProblemDescriptor problem) {
+    public ResultTreeNode(final PsiFile file, final ProblemDescriptor problem) {
         if (file == null) {
             throw new IllegalArgumentException("File may not be null");
         }
@@ -51,6 +78,33 @@ public class ToolWindowTreeNode {
 
         this.file = file;
         this.problem = problem;
+
+        if (problem instanceof ExtendedProblemDescriptor) {
+            severity = ((ExtendedProblemDescriptor) problem).getSeverity();
+        }
+
+        updateIconsForProblem();
+    }
+
+    private void updateIconsForProblem() {
+        if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
+            icon = IDEAUtilities.getIcon("/compiler/hideWarnings.png");
+        } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
+            icon = IDEAUtilities.getIcon("/compiler/warning.png");
+        } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
+            icon = IDEAUtilities.getIcon("/compiler/information.png");
+        } else {
+            icon = IDEAUtilities.getIcon("/compiler/error.png");
+        }
+    }
+
+    /**
+     * Get the severity of the problem.
+     *
+     * @return the severity, or null if not applicable.
+     */
+    public SeverityLevel getSeverity() {
+        return severity;
     }
 
     /**
@@ -61,23 +115,14 @@ public class ToolWindowTreeNode {
     public ProblemDescriptor getProblem() {
         return problem;
     }
-    
+
     /**
      * Get the node's icon when in an expanded state.
      *
      * @return the node's icon when in an expanded state.
      */
     public Icon getExpandedIcon() {
-        return expandedIcon;
-    }
-
-    /**
-     * Set the node's icon when in an expanded state.
-     *
-     * @param expandedIcon the node's icon when in an expanded state.
-     */
-    public void setExpandedIcon(final Icon expandedIcon) {
-        this.expandedIcon = expandedIcon;
+        return icon;
     }
 
     /**
@@ -86,16 +131,7 @@ public class ToolWindowTreeNode {
      * @return the node's icon when in an collapsed state.
      */
     public Icon getCollapsedIcon() {
-        return collapsedIcon;
-    }
-
-    /**
-     * Set the node's icon when in an collapsed state.
-     *
-     * @param collapsedIcon the node's icon when in an collapsed state.
-     */
-    public void setCollapsedIcon(Icon collapsedIcon) {
-        this.collapsedIcon = collapsedIcon;
+        return icon;
     }
 
     /**
@@ -105,6 +141,14 @@ public class ToolWindowTreeNode {
      */
     public String getText() {
         return text;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(final Icon icon) {
+        this.icon = icon;
     }
 
     /**

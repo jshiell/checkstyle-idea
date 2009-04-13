@@ -8,17 +8,14 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.content.Content;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Action to execute a CheckStyle scan on the current project.
@@ -57,7 +54,7 @@ public class ScanProject extends BaseAction {
             setProgressText(toolWindow, "plugin.status.in-progress.project");
 
             // find project files
-            ProjectRootManager projectRootManager
+            final ProjectRootManager projectRootManager
                     = ProjectRootManager.getInstance(project);
             final VirtualFile[] sourceRoots
                     = projectRootManager.getContentSourceRoots();
@@ -120,7 +117,7 @@ public class ScanProject extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            ProjectRootManager projectRootManager
+            final ProjectRootManager projectRootManager
                     = ProjectRootManager.getInstance(project);
             final VirtualFile[] sourceRoots
                     = projectRootManager.getContentSourceRoots();

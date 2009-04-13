@@ -11,7 +11,7 @@ import java.awt.*;
  * @author James Shiell
  * @version 1.0
  */
-public class ToolWindowCellRenderer extends JLabel
+public class ResultTreeRenderer extends JLabel
         implements TreeCellRenderer {
 
     private boolean selected;
@@ -19,7 +19,7 @@ public class ToolWindowCellRenderer extends JLabel
     /**
      * Create a new cell renderer.
      */
-    public ToolWindowCellRenderer() {
+    public ResultTreeRenderer() {
         super();
         setOpaque(false);
     }
@@ -60,9 +60,9 @@ public class ToolWindowCellRenderer extends JLabel
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         if (node != null) {
             final Object userObject = node.getUserObject();
-            if (userObject != null && userObject instanceof ToolWindowTreeNode) {
-                final ToolWindowTreeNode treeNode 
-                        = (ToolWindowTreeNode) userObject;
+            if (userObject != null && userObject instanceof ResultTreeNode) {
+                final ResultTreeNode treeNode
+                        = (ResultTreeNode) userObject;
 
                 if (expanded) {
                     setIcon(treeNode.getExpandedIcon());

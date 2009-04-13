@@ -3,9 +3,9 @@ package org.infernus.idea.checkstyle.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.EntityResolver;
 
 import java.io.IOException;
 import java.net.URL;
@@ -97,13 +97,21 @@ public class CheckStyleEntityResolver implements EntityResolver {
          * {@inheritDoc}
          */
         public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             final DTDKey that = (DTDKey) o;
 
-            if (!publicId.equals(that.publicId)) return false;
-            if (!systemId.equals(that.systemId)) return false;
+            if (!publicId.equals(that.publicId)) {
+                return false;
+            }
+            if (!systemId.equals(that.systemId)) {
+                return false;
+            }
 
             return true;
         }

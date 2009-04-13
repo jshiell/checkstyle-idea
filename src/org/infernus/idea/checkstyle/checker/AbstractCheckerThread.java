@@ -23,21 +23,33 @@ public abstract class AbstractCheckerThread extends Thread {
     /**
      * Files to scan.
      */
-    protected final List<PsiFile> files = new ArrayList<PsiFile>();
+    private final List<PsiFile> files = new ArrayList<PsiFile>();
 
     /**
      * Map files to modules.
      */
-    protected final Map<PsiFile, Module> fileToModuleMap = new HashMap<PsiFile, Module>();
+    private final Map<PsiFile, Module> fileToModuleMap = new HashMap<PsiFile, Module>();
 
     /**
      * Scan results.
      */
-    protected Map<PsiFile, List<ProblemDescriptor>> fileResults;
+    private Map<PsiFile, List<ProblemDescriptor>> fileResults;
 
     private boolean running = true;
 
     private CheckStylePlugin plugin;
+
+    protected Map<PsiFile, List<ProblemDescriptor>> getFileResults() {
+        return fileResults;
+    }
+
+    protected void setFileResults(final Map<PsiFile, List<ProblemDescriptor>> fileResults) {
+        this.fileResults = fileResults;
+    }
+
+    protected List<PsiFile> getFiles() {
+        return files;
+    }
 
     protected CheckStylePlugin getPlugin() {
         return plugin;
@@ -129,7 +141,7 @@ public abstract class AbstractCheckerThread extends Thread {
             // add results if necessary
             if (fileScanner.getResults() != null
                     && fileScanner.getResults().size() > 0) {
-                fileResults.put(psiFile, fileScanner.getResults());
+                getFileResults().put(psiFile, fileScanner.getResults());
             }
         }
     }

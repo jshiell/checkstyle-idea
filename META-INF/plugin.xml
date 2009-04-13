@@ -92,6 +92,46 @@
     </project-components>
 
     <actions>
+        <group id="CheckStylePluginTreeActions" text="Filter" popup="true">
+            <action id="CheckStyleScrollToSourceAction"
+                    class="org.infernus.idea.checkstyle.actions.ScrollToSource"
+                    text="Autoscroll to Source"
+                    description="Auto-scroll to the source location of errors and warnings."
+                    icon="/general/autoscrollToSource.png"/>
+
+            <action id="CheckStyleExpandAllAction"
+                    class="org.infernus.idea.checkstyle.actions.ExpandAll"
+                    text="Expand All"
+                    description="Expand all elements in the tool window."
+                    icon="/actions/expandall.png"/>
+
+            <action id="CheckStyleCollapseAllAction"
+                    class="org.infernus.idea.checkstyle.actions.CollapseAll"
+                    text="Collapse All"
+                    description="Collapse all elements in the tool window."
+                    icon="/actions/collapseall.png"/>
+
+            <separator/>
+
+            <action id="CheckStyleDisplayErrorsAction"
+                    class="org.infernus.idea.checkstyle.actions.DisplayErrors"
+                    text="Display Errors"
+                    description="Display error results."
+                    icon="/compiler/error.png"/>
+
+            <action id="CheckStyleDisplayWarningsAction"
+                    class="org.infernus.idea.checkstyle.actions.DisplayWarnings"
+                    text="Display Warnings"
+                    description="Display warning results."
+                    icon="/compiler/warning.png"/>
+
+            <action id="CheckStyleDisplayInfoAction"
+                    class="org.infernus.idea.checkstyle.actions.DisplayInfo"
+                    text="Display Information Results"
+                    description="Display information results."
+                    icon="/compiler/information.png"/>
+        </group>
+
         <group id="CheckStylePluginActions" text="CheckStyle" popup="true">
             <action id="CheckStyleCloseAction"
                     class="org.infernus.idea.checkstyle.actions.Close"
@@ -145,26 +185,6 @@
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
-
-            <separator/>
-
-            <action id="CheckStyleScrollToSourceAction"
-                    class="org.infernus.idea.checkstyle.actions.ScrollToSource"
-                    text="Autoscroll to Source"
-                    description="Auto-scroll to the source location of errors and warnings."
-                    icon="/general/autoscrollToSource.png"/>
-
-            <action id="CheckStyleExpandAllAction"
-                    class="org.infernus.idea.checkstyle.actions.ExpandAll"
-                    text="Expand All"
-                    description="Expand all elements in the tool window."
-                    icon="/actions/expandall.png"/>
-
-            <action id="CheckStyleCollapseAllAction"
-                    class="org.infernus.idea.checkstyle.actions.CollapseAll"
-                    text="Collapse All"
-                    description="Collapse all elements in the tool window."
-                    icon="/actions/collapseall.png"/>
         </group>
 
     </actions>

@@ -1,8 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
-import com.intellij.util.ObjectUtils;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.wm.WindowManager;
+import com.intellij.util.ObjectUtils;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -400,7 +399,6 @@ public final class CheckStyleConfigPanel extends JPanel {
 
             } else {
                 final ConfigurationLocation location = locationModel.getLocationAt(selectedItem);
-                ;
 
                 editLocationPropertiesButton.setEnabled(!ObjectUtils.equals(location, defaultLocation));
                 removeLocationButton.setEnabled(!ObjectUtils.equals(location, defaultLocation));

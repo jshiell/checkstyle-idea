@@ -13,19 +13,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -33,10 +32,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,24 +50,25 @@ public class ToolWindowPanel extends JPanel {
     /**
      * Logger for this class.
      */
-    private static final Log LOG = LogFactory.getLog(
-            ToolWindowPanel.class);
+    private static final Log LOG = LogFactory.getLog(ToolWindowPanel.class);
+
+    private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
+    private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
 
     private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
             = new HashMap<Pattern, String>();
-
-    private final MouseListener treeMouseListener = new ToolWindowMouseListener();
-    private final TreeSelectionListener treeSelectionListener
-            = new ToolWindowSelectionListener();
 
     private final Project project;
     private final JTree resultsTree;
     private final JToolBar progressPanel;
     private final JProgressBar progressBar;
     private final JLabel progressLabel;
-    private final DefaultMutableTreeNode visibleRootNode;
 
-    private DefaultTreeModel treeModel;
+    private boolean displayingErrors = true;
+    private boolean displayingWarnings = true;
+    private boolean displayingInfo = true;
+
+    private ResultTreeModel treeModel;
     private boolean scrollToSource;
 
     static {
@@ -95,9 +95,6 @@ public class ToolWindowPanel extends JPanel {
 
         this.project = project;
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
         setBorder(new EmptyBorder(1, 1, 1, 1));
 
         final CheckStylePlugin checkStylePlugin
@@ -107,21 +104,33 @@ public class ToolWindowPanel extends JPanel {
         }
 
         // Create the toolbar
-        final ActionGroup actionGroup = (ActionGroup)
-                ActionManager.getInstance().getAction(CheckStyleConstants.ACTION_GROUP);
-        final ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar(
-                CheckStyleConstants.ID_TOOLWINDOW, actionGroup, false);
-        add(toolbar.getComponent(), BorderLayout.WEST);
+        final ActionGroup mainActionGroup = (ActionGroup)
+                ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
+        final ActionToolbar mainToolbar = ActionManager.getInstance().createActionToolbar(
+                CheckStyleConstants.ID_TOOLWINDOW, mainActionGroup, false);
+
+        final ActionGroup treeActionGroup = (ActionGroup)
+                ActionManager.getInstance().getAction(TREE_ACTION_GROUP);
+        final ActionToolbar treeToolbar = ActionManager.getInstance().createActionToolbar(
+                CheckStyleConstants.ID_TOOLWINDOW, treeActionGroup, false);
+
+        final Box toolBarBox = Box.createHorizontalBox();
+        toolBarBox.add(mainToolbar.getComponent());
+        toolBarBox.add(treeToolbar.getComponent());
+
+        add(toolBarBox, BorderLayout.WEST);
 
         // Create the tree
-        visibleRootNode = new DefaultMutableTreeNode(new ToolWindowTreeNode(
-                resources.getString("plugin.results.no-scan")));
-        treeModel = new DefaultTreeModel(visibleRootNode);
+        treeModel = new ResultTreeModel();
 
         resultsTree = new JTree(treeModel);
+        resultsTree.setRootVisible(false);
+
+        final TreeSelectionListener treeSelectionListener = new ToolWindowSelectionListener();
         resultsTree.addTreeSelectionListener(treeSelectionListener);
+        final MouseListener treeMouseListener = new ToolWindowMouseListener();
         resultsTree.addMouseListener(treeMouseListener);
-        resultsTree.setCellRenderer(new ToolWindowCellRenderer());
+        resultsTree.setCellRenderer(new ResultTreeRenderer());
 
         progressLabel = new JLabel(" ");
         progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
@@ -133,6 +142,7 @@ public class ToolWindowPanel extends JPanel {
         progressBar.setMaximumSize(progressBarSize);
 
         progressPanel = new JToolBar(JToolBar.HORIZONTAL);
+        progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(progressLabel);
         progressPanel.add(Box.createHorizontalGlue());
         progressPanel.setFloatable(false);
@@ -149,7 +159,7 @@ public class ToolWindowPanel extends JPanel {
         expandTree();
 
         ToolTipManager.sharedInstance().registerComponent(resultsTree);
-        toolbar.getComponent().setVisible(true);
+        mainToolbar.getComponent().setVisible(true);
     }
 
     /**
@@ -222,11 +232,11 @@ public class ToolWindowPanel extends JPanel {
      */
     private void scrollToError(final TreePath treePath) {
         final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-        if (treeNode == null) {
+        if (treeNode == null || !(treeNode.getUserObject() instanceof ResultTreeNode)) {
             return;
         }
 
-        final ToolWindowTreeNode nodeInfo = (ToolWindowTreeNode) treeNode.getUserObject();
+        final ResultTreeNode nodeInfo = (ResultTreeNode) treeNode.getUserObject();
         if (nodeInfo.getFile() == null || nodeInfo.getProblem() == null) {
             return; // no problem here :-)
         }
@@ -237,9 +247,9 @@ public class ToolWindowPanel extends JPanel {
 
         if (editor != null && editor.length > 0 && editor[0] instanceof TextEditor) {
             final int column = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
-                ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
+                    ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
             final int line = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
-                ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine()
+                    ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine()
                     : nodeInfo.getProblem().getLineNumber();
             final LogicalPosition problemPos = new LogicalPosition(
                     line - 1, column);
@@ -358,24 +368,17 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param level The level to expand to
      */
-    private void expandTree(int level) {
-        expandNode(resultsTree, (TreeNode) resultsTree.getModel().getRoot(),
-                new TreePath(visibleRootNode), level);
+    private void expandTree(final int level) {
+        expandNode(resultsTree, treeModel.getVisibleRoot(),
+                new TreePath(treeModel.getPathToRoot(treeModel.getVisibleRoot())), level);
     }
 
     /**
      * Clear the results and display a 'scan in progress' notice.
      */
     public void displayInProgress() {
-        visibleRootNode.removeAllChildren();
-
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
-                resources.getString("plugin.results.in-progress"));
-
-        treeModel.reload();
+        treeModel.clear();
+        treeModel.setRootMessage("plugin.results.in-progress");
     }
 
     /**
@@ -384,11 +387,6 @@ public class ToolWindowPanel extends JPanel {
      * @param error the error that occurred.
      */
     public void displayErrorResult(final Throwable error) {
-        visibleRootNode.removeAllChildren();
-
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
         // match some friendly error messages.
         String errorText = null;
         if (error.getCause() != null
@@ -401,7 +399,7 @@ public class ToolWindowPanel extends JPanel {
                 if (errorMatcher.find()) {
                     final Object[] args = new Object[errorMatcher.groupCount()];
 
-                    for (int i = 0; i <  errorMatcher.groupCount(); ++i) {
+                    for (int i = 0; i < errorMatcher.groupCount(); ++i) {
                         args[i] = errorMatcher.group(i + 1);
                     }
 
@@ -417,10 +415,35 @@ public class ToolWindowPanel extends JPanel {
                     "An error occurred during the scan.");
         }
 
-        ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
-                errorText);
+        treeModel.clear();
+        treeModel.setRootText(errorText);
+    }
 
-        treeModel.reload();
+    private SeverityLevel[] getDisplayedSeverities() {
+        final List<SeverityLevel> severityLevels = new ArrayList<SeverityLevel>();
+
+        if (displayingErrors) {
+            severityLevels.add(SeverityLevel.ERROR);
+        }
+
+        if (displayingWarnings) {
+            severityLevels.add(SeverityLevel.WARNING);
+        }
+
+        if (displayingInfo) {
+            severityLevels.add(SeverityLevel.INFO);
+        }
+
+        return severityLevels.toArray(new SeverityLevel[severityLevels.size()]);
+    }
+
+    /**
+     * Refresh the displayed results based on the current filter settings.
+     */
+    public void filterDisplayedResults() {
+        // TODO be a little nicer here, maintain display state
+
+        treeModel.filter(getDisplayedSeverities());
     }
 
     /**
@@ -429,71 +452,33 @@ public class ToolWindowPanel extends JPanel {
      * @param results the map of checked files to problem descriptors.
      */
     public void displayResults(final Map<PsiFile, List<ProblemDescriptor>> results) {
-        visibleRootNode.removeAllChildren();
+        treeModel.setModel(results, getDisplayedSeverities());
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        if (results == null || results.size() == 0) {
-            ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
-                    resources.getString("plugin.results.scan-no-results"));
-
-        } else {
-            final MessageFormat fileResultMessage = new MessageFormat(
-                    resources.getString("plugin.results.scan-file-result"));
-
-            int itemCount = 0;
-            for (final PsiFile file : results.keySet()) {
-                final DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode();
-                final List<ProblemDescriptor> problems = results.get(file);
-                if (problems != null) {
-                    for (final ProblemDescriptor problem : problems) {
-                        final ToolWindowTreeNode problemObj = new ToolWindowTreeNode(file, problem);
-
-                        final SeverityLevel severity = problem instanceof ExtendedProblemDescriptor
-                                ? ((ExtendedProblemDescriptor) problem).getSeverity() : null;
-                        final Icon problemIcon;
-                        if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
-                            problemIcon = IDEAUtilities.getIcon("/compiler/hideWarnings.png");
-                        } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
-                            problemIcon = IDEAUtilities.getIcon("/compiler/warning.png");
-                        } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
-                            problemIcon = IDEAUtilities.getIcon("/compiler/information.png");
-                        } else {
-                            problemIcon = IDEAUtilities.getIcon("/compiler/error.png");
-                        }
-
-                        problemObj.setExpandedIcon(problemIcon);
-                        problemObj.setCollapsedIcon(problemIcon);
-
-                        final DefaultMutableTreeNode problemNode = new DefaultMutableTreeNode(
-                                problemObj);
-                        fileNode.add(problemNode);
-                    }
-                }
-
-                final int problemCount = problems != null ? problems.size() : 0;
-                itemCount += problemCount;
-
-                final ToolWindowTreeNode nodeObject = new ToolWindowTreeNode(
-                        fileResultMessage.format(new Object[]{file.getName(), problemCount}));
-
-                final Icon fileIcon = IDEAUtilities.getIcon("/fileTypes/java.png");
-                nodeObject.setExpandedIcon(fileIcon);
-                nodeObject.setCollapsedIcon(fileIcon);
-
-                fileNode.setUserObject(nodeObject);
-
-                visibleRootNode.add(fileNode);
-            }
-
-            final MessageFormat resultsMessage = new MessageFormat(
-                    resources.getString("plugin.results.scan-results"));
-            ((ToolWindowTreeNode) visibleRootNode.getUserObject()).setText(
-                    resultsMessage.format(new Object[]{itemCount, results.size()}));
-        }
-
-        treeModel.reload();
+        invalidate();
+        repaint();
     }
 
+    public boolean isDisplayingErrors() {
+        return displayingErrors;
+    }
+
+    public void setDisplayingErrors(final boolean displayingErrors) {
+        this.displayingErrors = displayingErrors;
+    }
+
+    public boolean isDisplayingWarnings() {
+        return displayingWarnings;
+    }
+
+    public void setDisplayingWarnings(final boolean displayingWarnings) {
+        this.displayingWarnings = displayingWarnings;
+    }
+
+    public boolean isDisplayingInfo() {
+        return displayingInfo;
+    }
+
+    public void setDisplayingInfo(final boolean displayingInfo) {
+        this.displayingInfo = displayingInfo;
+    }
 }
