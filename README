@@ -33,15 +33,15 @@ configuration for both the inspection and static scanning.
 
 - Configuration File tab -
 
-The main configuration option is that of the CheckStyle file. If
-this field is left empty, or the appropriate radio button is selected,
-then the Sun checks, as supplied with CheckStyle, will be used.
+The main configuration option is that of the CheckStyle file. Multiple
+CheckStyle file may be added, and swapped between by using the checkbox.
+Files may be added using the 'Add' button.
 
 The 'Scan Test Classes' checkbox will enable scanning of Java files
 under test source roots. If disabled, these files will be ignored.
 
 If a custom file is being used and properties are available for definition
-then these will be displayed in the table below the file name.
+then these will accessible using the 'Edit Properties' button.
 
 - Third Party Checks tab -
 
@@ -139,6 +139,9 @@ LICENCE file.
 Version History
 ---------------
 
+2.5   - New: Result list may be filtered on severity.
+2.5   - New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration
+             once again I'm afraid.
 2.4   - New: Default CheckStyle file now has generics patch applied.
 2.4   - New: Scans in progress may be aborted.
 2.4   - Fixed: Null Pointer Exception with package HTML check.

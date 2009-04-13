@@ -18,6 +18,8 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.5: New: Result list may be filtered on severity.</li>
+    <li>2.5: New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
     <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>
     <li>2.4: New: Scans in progress may be aborted.</li>
     <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
