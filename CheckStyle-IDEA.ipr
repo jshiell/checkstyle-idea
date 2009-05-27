@@ -415,6 +415,15 @@
         <root url="file:///Developer/Java/Libraries/checkstyle-4.4/src/checkstyle" />
       </SOURCES>
     </library>
+    <library name="CheckStyle 5.0">
+      <CLASSES>
+        <root url="jar:///Developer/Java/Libraries/checkstyle-5.0/checkstyle-all-5.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file:///Developer/Java/Libraries/checkstyle-5.0/docs/api" />
+      </JAVADOC>
+      <SOURCES />
+    </library>
   </component>
 </project>
 

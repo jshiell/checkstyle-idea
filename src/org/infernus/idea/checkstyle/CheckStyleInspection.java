@@ -33,6 +33,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -204,7 +205,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final CheckStyleAuditListener listener
                     = new CheckStyleAuditListener(psiFile, manager);
             checker.addListener(listener);
-            checker.process(new File[]{tempFile});
+            checker.process(Arrays.asList(tempFile));
             checker.destroy();
 
             final List<ProblemDescriptor> problems = listener.getProblems();

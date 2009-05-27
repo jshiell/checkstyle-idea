@@ -166,6 +166,8 @@ public class CheckerFactory {
 
                             replaceSupressionFilterPath(config, baseDir);
 
+                            ((Checker) threadReturn[0]).setModuleClassLoader(
+                                    Thread.currentThread().getContextClassLoader());
                             ((Checker) threadReturn[0]).configure(config);
 
                         } finally {

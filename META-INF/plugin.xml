@@ -18,6 +18,8 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>2.5: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
+             can be found in the <a href="http://checkstyle.sourceforge.net/releasenotes.html">release notes</a>.</i></li>
     <li>2.5: New: Result list may be filtered on severity.</li>
     <li>2.5: New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
     <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>

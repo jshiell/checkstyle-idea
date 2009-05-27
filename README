@@ -115,7 +115,8 @@ real-time scan support available for Eclipse.
 
 Thanks to those who have contributed work and effort directly to this project:
 
-*  J. G. Christopher
+* J. G. Christopher
+* jicken
 
 And also thanks are due to the authors and contributors of:
 
@@ -139,6 +140,9 @@ LICENCE file.
 Version History
 ---------------
 
+2.5   - New: CheckStyle 5.0 support. Thanks to jicken.
+             Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
+             can be found here: http://checkstyle.sourceforge.net/releasenotes.html
 2.5   - New: Result list may be filtered on severity.
 2.5   - New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration
              once again I'm afraid.

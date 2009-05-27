@@ -9,7 +9,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="CheckStyle 4.4" level="project" />
+    <orderEntry type="library" name="CheckStyle 5.0" level="project" />
   </component>
 </module>
 

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NonNls;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Runnable for scanning an individual file.
@@ -44,7 +45,8 @@ final class FileScanner implements Runnable {
      * @param fileToScan        the file to scan.
      * @param moduleClassLoader the class loader for the file's module
      */
-    public FileScanner(CheckStylePlugin checkStylePlugin, final PsiFile fileToScan,
+    public FileScanner(final CheckStylePlugin checkStylePlugin,
+                       final PsiFile fileToScan,
                        final ClassLoader moduleClassLoader) {
         this.plugin = checkStylePlugin;
         this.fileToScan = fileToScan;
@@ -144,7 +146,7 @@ final class FileScanner implements Runnable {
             final CheckStyleAuditListener listener
                     = new CheckStyleAuditListener(psiFile, manager, true);
             checker.addListener(listener);
-            checker.process(new File[]{tempFile});
+            checker.process(Arrays.asList(tempFile));
             checker.destroy();
 
             return listener.getProblems();
