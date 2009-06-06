@@ -75,6 +75,8 @@ public class LocationTableModel extends AbstractTableModel {
 
     public void removeLocationAt(final int index) {
         locations.remove(index);
+
+        fireTableRowsDeleted(index, index);
     }
 
     public ConfigurationLocation getLocationAt(final int index) {
