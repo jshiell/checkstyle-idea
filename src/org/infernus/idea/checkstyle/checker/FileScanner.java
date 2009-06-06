@@ -12,14 +12,17 @@ import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Runnable for scanning an individual file.
@@ -125,7 +128,7 @@ final class FileScanner implements Runnable {
 
         File tempFile = null;
         try {
-            final Checker checker = this.plugin.getChecker(moduleClassLoader);
+            final Checker checker = getChecker(psiFile, moduleClassLoader);
 
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...
@@ -159,6 +162,50 @@ final class FileScanner implements Runnable {
             if (tempFile != null && tempFile.exists()) {
                 tempFile.delete();
             }
+        }
+    }
+
+
+    /**
+     * Produce a CheckStyle checker.
+     *
+     * @param psiFile     the file to be checked.
+     * @param classLoader CheckStyle classloader or null if default
+     *                    should be used.
+     * @return a checker.
+     */
+    private Checker getChecker(final PsiFile psiFile,
+                               final ClassLoader classLoader) {
+        LOG.debug("Getting CheckStyle checker.");
+
+        try {
+            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+
+            final ConfigurationLocation location;
+            if (module != null) {
+                final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
+                if (checkStyleModulePlugin == null) {
+                    throw new IllegalStateException("Couldn't get checkstyle module plugin");
+                }
+                location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+
+            } else {
+                location = plugin.getConfiguration().getActiveConfiguration();
+            }
+
+            if (location == null) {
+                return null;
+            }
+
+            File baseDir = location.getBaseDir();
+            if (baseDir == null) {
+                baseDir = new File(plugin.getProject().getBaseDir().getPath());
+            }
+
+            return CheckerFactory.getInstance().getChecker(location, baseDir, classLoader);
+
+        } catch (Throwable e) {
+            throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
 

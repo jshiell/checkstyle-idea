@@ -73,7 +73,7 @@ public final class CheckStyleConfiguration extends Properties {
         }
 
         if (configurationLocation != null) {
-            setProperty(ACTIVE_CONFIG, Integer.toString(configurationLocations.indexOf(configurationLocation)));
+            setProperty(ACTIVE_CONFIG, configurationLocation.getDescriptor());
         } else {
             remove(ACTIVE_CONFIG);
         }
@@ -86,13 +86,19 @@ public final class CheckStyleConfiguration extends Properties {
             return defaultLocation;
         }
 
-        final int activeIndex = Integer.parseInt(getProperty(ACTIVE_CONFIG));
-        if (activeIndex < 0 || activeIndex >= configurationLocations.size()) {
+        ConfigurationLocation activeLocation = null;
+        try {
+            activeLocation = ConfigurationLocationFactory.create(project, getProperty(ACTIVE_CONFIG));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not load active configuration", e);
+        }
+
+        if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
             LOG.info("Active configuration is invalid, returning default");
             return defaultLocation;
         }
 
-        return configurationLocations.get(activeIndex);
+        return activeLocation;
     }
 
     public List<ConfigurationLocation> getConfigurationLocations() {
@@ -103,24 +109,29 @@ public final class CheckStyleConfiguration extends Properties {
                 continue;
             }
 
-            final ConfigurationLocation location = ConfigurationLocationFactory.create(
-                    project, getProperty(configProperty.toString()));
+            try {
+                final ConfigurationLocation location = ConfigurationLocationFactory.create(
+                        project, getProperty(configProperty.toString()));
 
-            final Map<String, String> properties = new HashMap<String, String>();
+                final Map<String, String> properties = new HashMap<String, String>();
 
-            final int index = Integer.parseInt(configProperty.toString().substring(LOCATION_PREFIX.length()));
-            final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
-            for (Object innerConfigProperty : keySet()) {
-                if (!innerConfigProperty.toString().startsWith(propertyPrefix)) {
-                    continue;
+                final int index = Integer.parseInt(configProperty.toString().substring(LOCATION_PREFIX.length()));
+                final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
+                for (Object innerConfigProperty : keySet()) {
+                    if (!innerConfigProperty.toString().startsWith(propertyPrefix)) {
+                        continue;
+                    }
+
+                    final String propertyName = innerConfigProperty.toString().substring(propertyPrefix.length());
+                    properties.put(propertyName, getProperty(innerConfigProperty.toString()));
                 }
 
-                final String propertyName = innerConfigProperty.toString().substring(propertyPrefix.length());
-                properties.put(propertyName, getProperty(innerConfigProperty.toString()));
-            }
+                location.setProperties(properties);
+                locations.add(location);
 
-            location.setProperties(properties);
-            locations.add(location);
+            } catch (IllegalArgumentException e) {
+                LOG.error("Could not parse location: " + getProperty(configProperty.toString()), e);
+            }
         }
 
         if (!locations.contains(defaultLocation)) {
@@ -144,7 +155,7 @@ public final class CheckStyleConfiguration extends Properties {
 
         int index = 0;
         for (ConfigurationLocation configurationLocation : configurationLocations) {
-            setProperty(LOCATION_PREFIX + index, configurationLocation.toString());
+            setProperty(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
 
             final Map<String, String> properties = configurationLocation.getProperties();
             if (properties != null) {

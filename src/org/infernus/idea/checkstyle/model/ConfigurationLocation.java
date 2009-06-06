@@ -242,15 +242,21 @@ public abstract class ConfigurationLocation {
                 .toHashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
+    public String getDescriptor() {
         assert type != null;
         assert location != null;
         assert description != null;
 
         return type + ":" + location + ":" + description;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        assert description != null;
+
+        return description;
     }
 }

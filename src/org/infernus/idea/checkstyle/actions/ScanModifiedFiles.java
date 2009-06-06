@@ -39,7 +39,7 @@ public class ScanModifiedFiles extends BaseAction {
                 return;
             }
             ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(CheckStylePlugin.class).checkFiles(changeListManager.getAffectedFiles(), event);
+            project.getComponent(CheckStylePlugin.class).checkFiles(changeListManager.getAffectedFiles());
         } catch (Throwable e) {
             final CheckStylePluginException processed = CheckStylePlugin.processError(null, e);
             if (processed != null) {

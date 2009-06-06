@@ -1,11 +1,6 @@
-Things to do before the next release:
+Things to do:
 
-Basics:
-
-1) Finish refactoring, cleanup, debug
-2) Write model tests
-
-Features:
-
-1) Tree filtering
-2) Notification of file load failure
+* Write tests
+* Summary of errors/warnings/info per file 
+* Notification of file load failure
+* GoogleCode recorded issues

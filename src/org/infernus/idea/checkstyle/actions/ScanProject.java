@@ -61,7 +61,7 @@ public class ScanProject extends BaseAction {
 
             if (sourceRoots != null && sourceRoots.length > 0) {
                 project.getComponent(CheckStylePlugin.class).checkFiles(
-                        flattenFiles(sourceRoots), event);
+                        flattenFiles(sourceRoots));
             }
 
         } catch (Throwable e) {

@@ -10,7 +10,6 @@ profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
-
 Use
 ---
 
@@ -140,11 +139,12 @@ LICENCE file.
 Version History
 ---------------
 
-2.5   - New: CheckStyle 5.0 support. Thanks to jicken.
+3.0   - New: Module-specific configuration support.
+3.0   - New: CheckStyle 5.0 support. Thanks to jicken.
              Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
              can be found here: http://checkstyle.sourceforge.net/releasenotes.html
-2.5   - New: Result list may be filtered on severity.
-2.5   - New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration
+3.0   - New: Result list may be filtered on severity.
+3.0   - New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration
              once again I'm afraid.
 2.4   - New: Default CheckStyle file now has generics patch applied.
 2.4   - New: Scans in progress may be aborted.

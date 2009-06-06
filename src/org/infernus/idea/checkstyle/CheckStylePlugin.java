@@ -23,20 +23,17 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ToolWindowType;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.content.Content;
-import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
+import org.infernus.idea.checkstyle.checker.CheckFilesThread;
+import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.checker.ScanFilesThread;
-import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
-import org.infernus.idea.checkstyle.checker.CheckerFactory;
-import org.infernus.idea.checkstyle.checker.CheckFilesThread;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,6 +100,30 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     private CheckStyleConfiguration configuration;
 
     /**
+     * Construct a plug-in instance for the given project.
+     *
+     * @param project the current project.
+     */
+    public CheckStylePlugin(final Project project) {
+        this.project = project;
+        this.configuration = new CheckStyleConfiguration(project);
+
+        try {
+            if (project != null) {
+                LOG.info("CheckStyle Plugin loaded with project base dir: \""
+                        + getProjectPath() + "\"");
+            } else {
+                LOG.info("CheckStyle Plugin loaded with no project.");
+            }
+
+            this.configPanel = new CheckStyleConfigPanel(this);
+
+        } catch (Throwable t) {
+            LOG.error("Project initialisation failed.", t);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public CheckStylePlugin.ConfigurationBean getState() {
@@ -153,30 +174,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         return new File(baseDir.getPath());
-    }
-
-    /**
-     * Construct a plug-in instance for the given project.
-     *
-     * @param project the current project.
-     */
-    public CheckStylePlugin(final Project project) {
-        this.project = project;
-        this.configuration = new CheckStyleConfiguration(project);
-
-        try {
-            if (project != null) {
-                LOG.info("CheckStyle Plugin loaded with project base dir: \""
-                        + getProjectPath() + "\"");
-            } else {
-                LOG.info("CheckStyle Plugin loaded with no project.");
-            }
-
-            this.configPanel = new CheckStyleConfigPanel(this);
-
-        } catch (Throwable t) {
-            LOG.error("Project initialisation failed.", t);
-        }
     }
 
     /**
@@ -422,41 +419,11 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
 
     /**
-     * Produce a CheckStyle checker.
-     *
-     * @param classLoader CheckStyle classloader or null if default
-     *                    should be used.
-     * @return a checker.
-     */
-    public Checker getChecker(final ClassLoader classLoader) {
-        LOG.debug("Getting CheckStyle checker.");
-
-        try {
-            final ConfigurationLocation location = configuration.getActiveConfiguration();
-            if (location == null) {
-                return null;
-            }
-
-            File baseDir = location.getBaseDir();
-            if (baseDir == null) {
-                baseDir = new File(project.getBaseDir().getPath());
-            }
-
-            return CheckerFactory.getInstance().getChecker(location, baseDir, classLoader);
-
-        } catch (Throwable e) {
-            throw new CheckStylePluginException("Couldn't create Checker", e);
-        }
-    }
-
-    /**
      * Run a scan on the currently selected file.
      *
      * @param files the files to check.
-     * @param event the event that triggered this action.
      */
-    public void checkFiles(final List<VirtualFile> files,
-                           final AnActionEvent event) {
+    public void checkFiles(final List<VirtualFile> files) {
         LOG.info("Scanning current file(s).");
 
         if (files == null) {

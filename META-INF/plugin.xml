@@ -11,17 +11,19 @@
 </p>
         ]]>
     </description>
-    <version>2.5</version>
+    <version>2.990</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
-    <li>2.5: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
+    <li>3.0: WARNING: YOU WILL NEED TO RECONFIGURE THE PLUGIN. Apologies.</li>
+    <li>3.0: Module-specific configuration support.</li>
+    <li>3.0: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
              can be found in the <a href="http://checkstyle.sourceforge.net/releasenotes.html">release notes</a>.</i></li>
-    <li>2.5: New: Result list may be filtered on severity.</li>
-    <li>2.5: New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
+    <li>3.0: New: Result list may be filtered on severity.</li>
+    <li>3.0: New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
     <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>
     <li>2.4: New: Scans in progress may be aborted.</li>
     <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
@@ -94,6 +96,13 @@
             <interface-class>org.infernus.idea.checkstyle.CheckStylePlugin</interface-class>
         </component>
     </project-components>
+
+    <module-components>
+        <component>
+            <implementation-class>org.infernus.idea.checkstyle.CheckStyleModulePlugin</implementation-class>
+            <interface-class>org.infernus.idea.checkstyle.CheckStyleModulePlugin</interface-class>
+        </component>
+    </module-components>
 
     <actions>
         <group id="CheckStylePluginTreeActions" text="Filter" popup="true">

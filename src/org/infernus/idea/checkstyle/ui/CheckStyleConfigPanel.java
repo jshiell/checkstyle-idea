@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Provides an input box and browse button for CheckStyle file selection.
+ * Provides a configuration panel for project-level configuration.
  *
  * @author James Shiell
  * @version 1.0
@@ -72,7 +72,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     /**
      * Initialise the view.
      */
-    protected void initialise() {
+    private void initialise() {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 

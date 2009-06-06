@@ -17,13 +17,13 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checker.CheckStyleAuditListener;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.checker.CheckerFactory;
-import org.infernus.idea.checkstyle.checker.CheckStyleAuditListener;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +32,8 @@ import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -59,29 +59,34 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Produce a CheckStyle checker.
      *
      * @param project the currently open project.
-     * @param psiFile the psiFile being scanned.
+     * @param module  the current module. May be null.
      * @return a checker.
      */
     private Checker getChecker(final Project project,
-                              final PsiFile psiFile) {
+                               final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
         try {
             final Checker checker;
 
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
+            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
             if (checkStylePlugin == null) {
-                throw new IllegalStateException(
-                        "Couldn't get checkstyle plugin");
+                throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            final ConfigurationLocation configurationLocation
-                    = checkStylePlugin.getConfiguration().getActiveConfiguration();
+            final ConfigurationLocation configurationLocation;
+            if (module != null) {
+                final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
+                if (checkStyleModulePlugin == null) {
+                    throw new IllegalStateException("Couldn't get checkstyle module plugin");
+                }
+                configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
 
-            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
-            final ClassLoader moduleClassLoader
-                    = checkStylePlugin.buildModuleClassLoader(module);
+            } else {
+                configurationLocation = checkStylePlugin.getConfiguration().getActiveConfiguration();
+            }
+
+            final ClassLoader moduleClassLoader = checkStylePlugin.buildModuleClassLoader(module);
 
             File baseDir = configurationLocation.getBaseDir();
             if (baseDir == null) {
@@ -155,25 +160,24 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     "Couldn't get checkstyle plugin");
         }
 
+        final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+
         final boolean checkTestClasses = checkStylePlugin.getConfiguration().isScanningTestClasses();
-        if (!checkTestClasses) {
+        if (!checkTestClasses && module != null) {
             final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
             if (elementFile != null) {
-                final Module module = ModuleUtil.findModuleForFile(elementFile, manager.getProject());
-                if (module != null) {
-                    final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
-                    if (moduleRootManager != null && moduleRootManager.getFileIndex() != null
-                            && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
-                        LOG.debug("Skipping test class " + psiFile.getName());
-                        return null;
-                    }
+                final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
+                if (moduleRootManager != null && moduleRootManager.getFileIndex() != null
+                        && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
+                    LOG.debug("Skipping test class " + psiFile.getName());
+                    return null;
                 }
             }
         }
 
         File tempFile = null;
         try {
-            final Checker checker = getChecker(manager.getProject(), psiFile);
+            final Checker checker = getChecker(manager.getProject(), module);
 
             // we need to copy to a file as IntelliJ may not have saved the
             // file recently (or the file may even be being edited at this moment)
