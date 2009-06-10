@@ -2,10 +2,21 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 /**
- *
+ * Factory for configuration location objects.
  */
 public class ConfigurationLocationFactory {
+
+    /**
+     * We maintain a map of all current locations, to avoid recreating identical objects.
+     * This allows us to ensure that updates to one location (e.g. a URL change) are visible
+     * to other modules with a reference to the given location.
+     */
+    private static final Map<ConfigurationLocation, ConfigurationLocation> INSTANCE_CACHE =
+            new WeakHashMap<ConfigurationLocation, ConfigurationLocation>();
 
     /**
      * Create a new location.
@@ -24,19 +35,35 @@ public class ConfigurationLocationFactory {
             throw new IllegalArgumentException("Type is required");
         }
 
+        ConfigurationLocation configurationLocation;
+
         switch (type) {
             case FILE:
-                return new FileConfigurationLocation(project, location, description);
+                configurationLocation = new FileConfigurationLocation(project, location, description);
+                break;
 
             case HTTP_URL:
-                return new HTTPURLConfigurationLocation(location, description);
+                configurationLocation = new HTTPURLConfigurationLocation(location, description);
+                break;
 
             case CLASSPATH:
-                return new ClassPathConfigurationLocation(location, description);
+                configurationLocation = new ClassPathConfigurationLocation(location, description);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
+
+        synchronized (INSTANCE_CACHE) {
+            if (INSTANCE_CACHE.containsKey(configurationLocation)) {
+                return INSTANCE_CACHE.get(configurationLocation);
+
+            } else {
+                INSTANCE_CACHE.put(configurationLocation, configurationLocation);
+            }
+        }
+
+        return configurationLocation;
     }
 
     /**
@@ -70,21 +97,8 @@ public class ConfigurationLocationFactory {
         final String location = stringRepresentation.substring(typeSplitIndex + 1, descriptionSplitIndex);
         final String description = stringRepresentation.substring(descriptionSplitIndex + 1);
 
-
         final ConfigurationType type = ConfigurationType.parse(typeString);
 
-        switch (type) {
-            case FILE:
-                return new FileConfigurationLocation(project, location, description);
-
-            case HTTP_URL:
-                return new HTTPURLConfigurationLocation(location, description);
-
-            case CLASSPATH:
-                return new ClassPathConfigurationLocation(location, description);
-
-            default:
-                throw new IllegalArgumentException("Unknown type: " + type);
-        }
+        return create(project, type, location, description);
     }
 }
