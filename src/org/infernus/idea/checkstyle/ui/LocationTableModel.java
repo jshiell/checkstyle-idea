@@ -135,7 +135,7 @@ public class LocationTableModel extends AbstractTableModel {
      * {@inheritDoc}
      */
     public int getColumnCount() {
-        return 2;
+        return 3;
     }
 
     /**
