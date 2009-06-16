@@ -14,6 +14,7 @@
         <entry key="config-file" value="$PROJECT_DIR$/src/sun_checks.xml" />
         <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
         <entry key="location-1" value="file:$PROJECT_DIR$/sun_checks.xml:Sun Checks" />
+        <entry key="location-2" value="FILE:/Users/jshiell/Downloads/checkstyle-5.0.p-project.xml:" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>

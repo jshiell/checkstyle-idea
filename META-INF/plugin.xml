@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.0</version>
+    <version>3.0.1</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.0.1: Fixed: Rule files added with no description cause an exception.</li>
     <li>3.0: WARNING: YOU WILL NEED TO RECONFIGURE THE PLUGIN. Apologies.</li>
     <li>3.0: Module-specific configuration support.</li>
     <li>3.0: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes

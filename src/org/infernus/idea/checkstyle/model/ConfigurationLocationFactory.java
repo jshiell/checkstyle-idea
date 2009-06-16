@@ -90,12 +90,15 @@ public class ConfigurationLocationFactory {
 
 
         final int descriptionSplitIndex = stringRepresentation.lastIndexOf(":");
-        if (descriptionSplitIndex <= 0 || descriptionSplitIndex >= stringRepresentation.length() - 1) {
+        if (descriptionSplitIndex <= 0) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
 
         final String location = stringRepresentation.substring(typeSplitIndex + 1, descriptionSplitIndex);
-        final String description = stringRepresentation.substring(descriptionSplitIndex + 1);
+        String description = "";
+        if (descriptionSplitIndex < (stringRepresentation.length() - 1)) {
+            description = stringRepresentation.substring(descriptionSplitIndex + 1);
+        }
 
         final ConfigurationType type = ConfigurationType.parse(typeString);
 

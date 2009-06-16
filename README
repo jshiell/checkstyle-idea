@@ -139,6 +139,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.0.1 - Fixed: Rule files added with no description cause an exception.
 3.0   - New: Module-specific configuration support.
 3.0   - New: CheckStyle 5.0 support. Thanks to jicken.
              Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
