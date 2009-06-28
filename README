@@ -139,6 +139,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.0.3 - Fixed: Removed dependency on Apache commons-lang to restore compatibility with IDEA 7.0.x/Linux.
 3.0.2 - Fixed: File configuration column headings were incorrect.
 3.0.1 - Fixed: Rule files added with no description cause an exception.
 3.0   - New: Module-specific configuration support.

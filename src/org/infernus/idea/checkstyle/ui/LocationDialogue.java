@@ -8,7 +8,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -165,19 +164,36 @@ public class LocationDialogue extends JDialog {
      */
     public ConfigurationLocation getConfigurationLocation() {
         if (fileLocationField.isEnabled()) {
-            if (StringUtils.isNotBlank(fileLocationField.getText())) {
+            if (isNotBlank(fileLocationField.getText())) {
                 return ConfigurationLocationFactory.create(project, ConfigurationType.FILE,
                         fileLocationField.getText(), descriptionField.getText());
             }
 
         } else if (urlLocationField.isEnabled()) {
-            if (StringUtils.isNotBlank(urlLocationField.getText())) {
+            if (isNotBlank(urlLocationField.getText())) {
                 return ConfigurationLocationFactory.create(project, ConfigurationType.HTTP_URL,
                         urlLocationField.getText(), descriptionField.getText());
             }
         }
 
         return null;
+    }
+
+    /*
+     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
+     * some packages of IDEA 7.x.
+     */
+    private boolean isNotBlank(final String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return false;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if ((!Character.isWhitespace(str.charAt(i)))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
@@ -154,8 +153,22 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      * @return true if modified.
      */
     public boolean isModified() {
-        return !ObjectUtils.equals(activeLocation, getActiveLocation())
-                || !ObjectUtils.equals(configurationLocations, getConfigurationLocations());
+        return !equals(activeLocation, getActiveLocation())
+                || !equals(configurationLocations, getConfigurationLocations());
+    }
+
+    /*
+     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
+     * some packages of IDEA 7.x.
+     */
+    private boolean equals(final Object object1, final Object object2) {
+        if (object1 == object2) {
+            return true;
+        }
+        if ((object1 == null) || (object2 == null)) {
+            return false;
+        }
+        return object1.equals(object2);
     }
 
     /**

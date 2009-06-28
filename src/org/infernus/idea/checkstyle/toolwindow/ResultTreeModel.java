@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
-import org.apache.commons.lang.ArrayUtils;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -118,7 +117,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                 final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
 
                 final boolean currentVisible = problemNode.isVisible();
-                final boolean desiredVisible = levels != null && ArrayUtils.contains(levels, result.getSeverity());
+                final boolean desiredVisible = levels != null && contains(levels, result.getSeverity());
                 if (currentVisible != desiredVisible) {
                     problemNode.setVisible(desiredVisible);
 
@@ -132,6 +131,30 @@ public class ResultTreeModel extends DefaultTreeModel {
                 nodeStructureChanged(node);
             }
         }
+    }
+
+    /*
+     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
+     * some packages of IDEA 7.x.
+     */
+    private boolean contains(final Object[] array, final Object objectToFind) {
+        if (array == null) {
+            return false;
+        }
+        if (objectToFind == null) {
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] == null) {
+                    return true;
+                }
+            }
+        } else {
+            for (int i = 0; i < array.length; i++) {
+                if (objectToFind.equals(array[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

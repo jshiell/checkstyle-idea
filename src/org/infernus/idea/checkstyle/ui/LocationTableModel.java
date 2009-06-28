@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
@@ -94,7 +93,7 @@ public class LocationTableModel extends AbstractTableModel {
     private void updateActiveLocation(final ConfigurationLocation activeLocation, final int rowIndex) {
         int oldColumn = -1;
         for (int i = 0; i < locations.size(); ++i) {
-            if (i != rowIndex && ObjectUtils.equals(locations.get(i), this.activeLocation)) {
+            if (i != rowIndex && equals(locations.get(i), this.activeLocation)) {
                 oldColumn = i;
                 break;
             }
@@ -107,6 +106,20 @@ public class LocationTableModel extends AbstractTableModel {
         if (oldColumn != -1) {
             fireTableCellUpdated(oldColumn, COLUMN_ACTIVE);
         }
+    }
+
+    /*
+     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
+     * some packages of IDEA 7.x.
+     */
+    private boolean equals(final Object object1, final Object object2) {
+        if (object1 == object2) {
+            return true;
+        }
+        if ((object1 == null) || (object2 == null)) {
+            return false;
+        }
+        return object1.equals(object2);
     }
 
     public ConfigurationLocation getActiveLocation() {
@@ -199,7 +212,7 @@ public class LocationTableModel extends AbstractTableModel {
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:
-                return ObjectUtils.equals(locations.get(rowIndex), activeLocation);
+                return equals(locations.get(rowIndex), activeLocation);
 
             case COLUMN_DESCRIPTION:
                 return locations.get(rowIndex).getDescription();
