@@ -42,6 +42,10 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 "-//Puppy Crawl//DTD Check Configuration 1.2//EN",
                 "http://www.puppycrawl.com/dtds/configuration_1_2.dtd"),
                 "/dtd/configuration_1_2.dtd");
+        DTD_MAP.put(new DTDKey(
+                "-//Puppy Crawl//DTD Check Configuration 1.3//EN",
+                "http://www.puppycrawl.com/dtds/configuration_1_3.dtd"),
+                "/dtd/configuration_1_3.dtd");
         DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Import Control 1.0//EN",
                 "http://www.puppycrawl.com/dtds/import_control_1_0.dtd"),
                 "/dtd/import_control_1_0.dtd");
