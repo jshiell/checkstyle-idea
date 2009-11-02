@@ -11,6 +11,7 @@ import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 
 import java.util.ArrayList;
@@ -28,23 +29,13 @@ public class CheckStyleAuditListener implements AuditListener {
             CheckStyleAuditListener.class);
 
     private final boolean usingExtendedDescriptors;
+    private final List<Check> checks;
 
     private final PsiFile psiFile;
     private final InspectionManager manager;
 
     private final List<AuditEvent> errors = new ArrayList<AuditEvent>();
     private final List<ProblemDescriptor> problems = new ArrayList<ProblemDescriptor>();
-
-    /**
-     * Create a new listener.
-     *
-     * @param psiFile the file being checked.
-     * @param manager the current inspection manager.
-     */
-    public CheckStyleAuditListener(final PsiFile psiFile,
-                                   final InspectionManager manager) {
-        this(psiFile, manager, false);
-    }
 
     /**
      * Create a new listener.
@@ -57,13 +48,16 @@ public class CheckStyleAuditListener implements AuditListener {
      * @param manager                the current inspection manager.
      * @param useExtendedDescriptors should we return standard IntelliJ
      *                               problem descriptors or extended ones with severity information?
+     * @param checks                 the check modifications to use.
      */
     public CheckStyleAuditListener(final PsiFile psiFile,
                                    final InspectionManager manager,
-                                   final boolean useExtendedDescriptors) {
+                                   final boolean useExtendedDescriptors,
+                                   final List<Check> checks) {
         this.psiFile = psiFile;
         this.manager = manager;
         this.usingExtendedDescriptors = useExtendedDescriptors;
+        this.checks = checks;
     }
 
     /**
@@ -81,7 +75,7 @@ public class CheckStyleAuditListener implements AuditListener {
      */
     public void auditFinished(final AuditEvent auditEvent) {
         final ProcessResultsThread findThread = new ProcessResultsThread();
-        
+
         final Application application = ApplicationManager.getApplication();
         if (application.isDispatchThread()) {
             findThread.run();
@@ -137,9 +131,6 @@ public class CheckStyleAuditListener implements AuditListener {
      * Runnable to process an audit event.
      */
     private class ProcessResultsThread implements Runnable {
-        private static final String PACKAGE_HTML_CHECK
-                = "com.puppycrawl.tools.checkstyle.checks.javadoc.PackageHtmlCheck";
-        private static final String PACKAGE_HTML_FILE = "package.html";
 
         /**
          * {@inheritDoc}
@@ -164,21 +155,11 @@ public class CheckStyleAuditListener implements AuditListener {
             // check for package HTML siblings, as our scan can't find these
             // if we're using a temporary file
 
-            if (PACKAGE_HTML_CHECK.equals(event.getSourceName())) {
-                // find the first sibling
-                PsiElement currentSibling = psiFile;
-                while (currentSibling.getPrevSibling() != null) {
-                    currentSibling = currentSibling.getPrevSibling();
-                }
-
-                while (currentSibling != null) {
-                    if (currentSibling.isPhysical() && currentSibling.isValid()
-                            && currentSibling instanceof PsiFile
-                            && PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
+            if (checks != null) {
+                for (final Check check : checks) {
+                    if (!check.process(psiFile, event)) {
                         return;
                     }
-
-                    currentSibling = currentSibling.getNextSibling();
                 }
             }
 

@@ -10,10 +10,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
+import com.puppycrawl.tools.checkstyle.api.Configuration;
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.checks.CheckFactory;
+import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
@@ -129,6 +133,7 @@ final class FileScanner implements Runnable {
         File tempFile = null;
         try {
             final Checker checker = getChecker(psiFile, moduleClassLoader);
+            final List<Check> checks = CheckFactory.getChecks(getConfig(psiFile));
 
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...
@@ -147,7 +152,7 @@ final class FileScanner implements Runnable {
             }
 
             final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(psiFile, manager, true);
+                    = new CheckStyleAuditListener(psiFile, manager, true, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
             checker.destroy();
@@ -181,18 +186,7 @@ final class FileScanner implements Runnable {
         try {
             final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
 
-            final ConfigurationLocation location;
-            if (module != null) {
-                final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
-                if (checkStyleModulePlugin == null) {
-                    throw new IllegalStateException("Couldn't get checkstyle module plugin");
-                }
-                location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
-
-            } else {
-                location = plugin.getConfiguration().getActiveConfiguration();
-            }
-
+            final ConfigurationLocation location = getConfigurationLocation(module);
             if (location == null) {
                 return null;
             }
@@ -203,6 +197,45 @@ final class FileScanner implements Runnable {
             }
 
             return CheckerFactory.getInstance().getChecker(location, baseDir, classLoader);
+
+        } catch (Throwable e) {
+            throw new CheckStylePluginException("Couldn't create Checker", e);
+        }
+    }
+
+    private ConfigurationLocation getConfigurationLocation(final Module module) {
+        final ConfigurationLocation location;
+        if (module != null) {
+            final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
+            if (checkStyleModulePlugin == null) {
+                throw new IllegalStateException("Couldn't get checkstyle module plugin");
+            }
+            location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+
+        } else {
+            location = plugin.getConfiguration().getActiveConfiguration();
+        }
+        return location;
+    }
+
+    /**
+     * Retrieve a CheckStyle configuration.
+     *
+     * @param psiFile     the file to be checked.
+     * @return a checkstyle configuration.
+     */
+    private Configuration getConfig(final PsiFile psiFile) {
+        LOG.debug("Getting CheckStyle checker.");
+
+        try {
+            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+
+            final ConfigurationLocation location = getConfigurationLocation(module);
+            if (location == null) {
+                return null;
+            }
+
+            return CheckerFactory.getInstance().getConfig(location);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);

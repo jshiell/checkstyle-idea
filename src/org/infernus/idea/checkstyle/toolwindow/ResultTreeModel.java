@@ -73,8 +73,6 @@ public class ResultTreeModel extends DefaultTreeModel {
             visibleRootNode.setUserObject(new ResultTreeNode(messageText));
         }
 
-        System.err.println("Visible node test is " + visibleRootNode.getUserObject());
-
         nodeChanged(visibleRootNode);
     }
 

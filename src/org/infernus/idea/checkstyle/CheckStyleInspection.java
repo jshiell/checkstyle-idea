@@ -15,10 +15,13 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.Checker;
+import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckStyleAuditListener;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checks.Check;
+import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
@@ -58,33 +61,17 @@ public class CheckStyleInspection extends LocalInspectionTool {
     /**
      * Produce a CheckStyle checker.
      *
-     * @param project the currently open project.
-     * @param module  the current module. May be null.
-     * @return a checker.
+     * @param checkStylePlugin the plugin.
+     * @param project          the currently open project.
+     * @param module           the current module. May be null.   @return a checker.
      */
-    private Checker getChecker(final Project project,
+    private Checker getChecker(final CheckStylePlugin checkStylePlugin,
+                               final Project project,
                                final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
         try {
-            final Checker checker;
-
-            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-
-            final ConfigurationLocation configurationLocation;
-            if (module != null) {
-                final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
-                if (checkStyleModulePlugin == null) {
-                    throw new IllegalStateException("Couldn't get checkstyle module plugin");
-                }
-                configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
-
-            } else {
-                configurationLocation = checkStylePlugin.getConfiguration().getActiveConfiguration();
-            }
+            final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
 
             final ClassLoader moduleClassLoader = checkStylePlugin.buildModuleClassLoader(module);
 
@@ -94,9 +81,52 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            checker = CheckerFactory.getInstance().getChecker(configurationLocation, baseDir, moduleClassLoader);
+            return CheckerFactory.getInstance().getChecker(configurationLocation, baseDir, moduleClassLoader);
 
-            return checker;
+        } catch (Exception e) {
+            LOG.error("Checker could not be created.", e);
+            throw new CheckStylePluginException("Couldn't create Checker", e);
+        }
+    }
+
+    private CheckStylePlugin getPlugin(final Project project) {
+        final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+        return checkStylePlugin;
+    }
+
+    private ConfigurationLocation getConfigurationLocation(final Module module, final CheckStylePlugin checkStylePlugin) {
+        final ConfigurationLocation configurationLocation;
+        if (module != null) {
+            final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
+            if (checkStyleModulePlugin == null) {
+                throw new IllegalStateException("Couldn't get checkstyle module plugin");
+            }
+            configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+
+        } else {
+            configurationLocation = checkStylePlugin.getConfiguration().getActiveConfiguration();
+        }
+        return configurationLocation;
+    }
+
+    /**
+     * Retrieve a CheckStyle configuration.
+     *
+     * @param checkStylePlugin the plugin.
+     * @param module           the current module. May be null.   @return a checkstyle configuration.
+     */
+    private Configuration getConfig(final CheckStylePlugin checkStylePlugin,
+                                    final Module module) {
+        LOG.debug("Getting CheckStyle checker for inspection.");
+
+        try {
+            final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
+
+            LOG.info("Loading configuration from " + configurationLocation);
+            return CheckerFactory.getInstance().getConfig(configurationLocation);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
@@ -153,12 +183,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return null;
         }
 
-        final CheckStylePlugin checkStylePlugin
-                = manager.getProject().getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException(
-                    "Couldn't get checkstyle plugin");
-        }
+        final CheckStylePlugin checkStylePlugin = getPlugin(manager.getProject());
 
         final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
 
@@ -177,7 +202,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         File tempFile = null;
         try {
-            final Checker checker = getChecker(manager.getProject(), module);
+            final Checker checker = getChecker(checkStylePlugin, manager.getProject(), module);
+            final Configuration config = getConfig(checkStylePlugin, module);
+            final List<Check> checks = CheckFactory.getChecks(config);
 
             // we need to copy to a file as IntelliJ may not have saved the
             // file recently (or the file may even be being edited at this moment)
@@ -207,7 +234,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             tempFileOut.close();
 
             final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(psiFile, manager);
+                    = new CheckStyleAuditListener(psiFile, manager, false, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
             checker.destroy();
@@ -232,5 +259,4 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
         }
     }
-
 }

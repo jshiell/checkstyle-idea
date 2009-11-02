@@ -83,10 +83,30 @@ public class CheckerFactory {
             }
         }
 
-        final Checker checker = createChecker(location, baseDir,
+        final CachedChecker checker = createChecker(location, baseDir,
                 new ListPropertyResolver(location.getProperties()), classLoader);
-        cache.put(location, new CachedChecker(checker));
-        return checker;
+        cache.put(location, checker);
+        return checker.getChecker();
+    }
+
+    /**
+     * Get the checker configuration for a given configuration.
+     *
+     * @param location    the location of the CheckStyle file.
+     * @return a configuration.
+     */
+    public Configuration getConfig(final ConfigurationLocation location) {
+        if (location == null) {
+            throw new IllegalArgumentException("Location is required");
+        }
+
+        if (cache.containsKey(location)) {
+            CachedChecker cachedChecker = cache.get(location);
+            if (cachedChecker.isValid()) {
+                return cachedChecker.getConfig();
+            }
+        }
+        throw new IllegalArgumentException("Failed to find a configured checker.");
     }
 
     /**
@@ -99,7 +119,7 @@ public class CheckerFactory {
      * @return loaded Configuration object
      * @throws CheckstyleException If there was any error loading the configuration file.
      */
-    private Checker createChecker(final ConfigurationLocation location,
+    private CachedChecker createChecker(final ConfigurationLocation location,
                                   final File baseDir,
                                   final PropertyResolver resolver,
                                   final ClassLoader contextClassLoader)
@@ -154,21 +174,21 @@ public class CheckerFactory {
         Thread worker = new Thread() {
             public void run() {
                 try {
-                    threadReturn[0] = new Checker();
+                    final Checker checker = new Checker();
+                    final Configuration config;
 
                     if (location != null) {
                         InputStream configurationInputStream = null;
 
                         try {
                             configurationInputStream = location.resolve();
-                            final Configuration config = ConfigurationLoader.loadConfiguration(
+                            config = ConfigurationLoader.loadConfiguration(
                                     configurationInputStream, resolver, true);
 
                             replaceSupressionFilterPath(config, baseDir);
 
-                            ((Checker) threadReturn[0]).setModuleClassLoader(
-                                    Thread.currentThread().getContextClassLoader());
-                            ((Checker) threadReturn[0]).configure(config);
+                            checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
+                            checker.configure(config);
 
                         } finally {
                             if (configurationInputStream != null) {
@@ -179,7 +199,10 @@ public class CheckerFactory {
                                 }
                             }
                         }
+                    } else {
+                        config = new DefaultConfiguration("checker");
                     }
+                    threadReturn[0] = new CachedChecker(checker, config);
 
                 } catch (Exception e) {
                     threadReturn[0] = e;
@@ -214,7 +237,7 @@ public class CheckerFactory {
             throw new CheckstyleException("Could not load configuration", (Throwable) threadReturn[0]);
         }
 
-        return (Checker) threadReturn[0];
+        return (CachedChecker) threadReturn[0];
     }
 
     /**

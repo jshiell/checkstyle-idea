@@ -53,11 +53,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" readonly="true" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/CheckFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/META-INF/plugin.xml" afterPath="$PROJECT_DIR$/META-INF/plugin.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/dtd/configuration_1_3.dtd" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/Check.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CheckStyle-IDEA.iws" afterPath="$PROJECT_DIR$/CheckStyle-IDEA.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/util/CheckStyleEntityResolver.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/util/CheckStyleEntityResolver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README" afterPath="$PROJECT_DIR$/README" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CheckStyle-IDEA.ipr" afterPath="$PROJECT_DIR$/CheckStyle-IDEA.ipr" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CachedChecker.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CachedChecker.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/PackageHtmlCheck.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CheckStyle-IDEA.iml" afterPath="$PROJECT_DIR$/CheckStyle-IDEA.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckerFactory.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckerFactory.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ResultTreeModel.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ResultTreeModel.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/JavadocPackageCheck.java" />
     </list>
   </component>
   <component name="ChangesViewManager" flattened_view="false" show_ignored="false" />
@@ -184,10 +195,82 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="DisplayWarnings.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/DisplayWarnings.java">
+      <file leaf-file-name="JavadocPackageCheck.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/JavadocPackageCheck.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="8" selection-start="821" selection-end="821" vertical-scroll-proportion="0.3321739">
+            <state line="19" column="111" selection-start="820" selection-end="820" vertical-scroll-proportion="0.30215827">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ResultTreeModel.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ResultTreeModel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="200" column="95" selection-start="6442" selection-end="6442" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CachedChecker.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CachedChecker.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="8" column="6" selection-start="194" selection-end="194" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CheckerFactory.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckerFactory.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="268" column="19" selection-start="10019" selection-end="10019" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sun_checks.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sun_checks.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="45" column="51" selection-start="1538" selection-end="1538" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Check.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/Check.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="0" selection-start="504" selection-end="504" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sun_checks.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/sun_checks.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="53" column="30" selection-start="1874" selection-end="1874" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PackageHtmlCheck.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/PackageHtmlCheck.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="11" column="13" selection-start="339" selection-end="339" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CheckFactory.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/CheckFactory.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="26" column="18" selection-start="866" selection-end="866" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -330,7 +413,7 @@
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
         <PATH_ELEMENT>
-          <option name="myItemId" value="ui" />
+          <option name="myItemId" value="checks" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
       </PATH>
@@ -356,103 +439,7 @@
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
         <PATH_ELEMENT>
-          <option name="myItemId" value="model" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-      </PATH>
-      <PATH>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle-idea" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="src" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="images" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-      </PATH>
-      <PATH>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle-idea" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="src" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="actions" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-      </PATH>
-      <PATH>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle-idea" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="src" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="inspectionDescriptions" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-      </PATH>
-      <PATH>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="CheckStyle-IDEA" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="checkstyle-idea" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="src" />
-          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-        </PATH_ELEMENT>
-        <PATH_ELEMENT>
-          <option name="myItemId" value="dtd" />
+          <option name="myItemId" value="checker" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
         </PATH_ELEMENT>
       </PATH>
@@ -519,16 +506,16 @@
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeWidth4" value="106" />
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeWidth3" value="106" />
     <property name="cvs_file_history_flatWidth2" value="277" />
-    <property name="cvs_file_history_treeOrder0" value="0" />
     <property name="cvs_file_history_flatWidth3" value="276" />
+    <property name="cvs_file_history_treeOrder0" value="0" />
     <property name="cvs_file_history_flatWidth0" value="276" />
-    <property name="cvs_file_history_flatWidth1" value="276" />
     <property name="GoToClass.includeLibraries" value="false" />
+    <property name="cvs_file_history_flatWidth1" value="276" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="RunManagerConfig.compileBeforeRunning" value="true" />
+    <property name="options.lastSelected" value="org.infernus.idea.checkstyle.CheckStylePlugin" />
     <property name="ChangesBrowser.SHOW_FLATTEN" value="false" />
-    <property name="options.lastSelected" value="preferences.pluginManager" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_flatWidth1" value="148" />
@@ -554,20 +541,17 @@
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder5" value="5" />
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder3" value="3" />
     <property name="cvs_file_history_flatOrder2" value="2" />
-    <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder4" value="4" />
     <property name="cvs_file_history_flatOrder3" value="3" />
-    <property name="cvs_file_history_flatOrder0" value="0" />
+    <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder4" value="4" />
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder1" value="1" />
-    <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder2" value="2" />
+    <property name="cvs_file_history_flatOrder0" value="0" />
     <property name="cvs_file_history_flatOrder1" value="1" />
+    <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder2" value="2" />
     <property name="FileHistory.org.jetbrains.idea.svn.history.SvnHistoryProvider_treeOrder0" value="0" />
-    <property name="options.searchVisible" value="true" />
     <property name="dynamic.classpath" value="false" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveMembersDialog.RECENTS_KEY">
-      <recent name="org.infernus.idea.checkstyle.CheckStyleConstants" />
-    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.infernus.idea.checkstyle" />
       <recent name="org.infernus.idea.checkstyle.actions" />
@@ -576,7 +560,11 @@
       <recent name="org.infernus.idea.checkstyle.util" />
     </key>
     <key name="IntroduceConstantDialog.RECENTS_KEY">
+      <recent name="org.infernus.idea.checkstyle.CheckStyleInspection" />
       <recent name="" />
+      <recent name="org.infernus.idea.checkstyle.CheckStyleConstants" />
+    </key>
+    <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="org.infernus.idea.checkstyle.CheckStyleConstants" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -663,6 +651,12 @@
       <RTEST_RUN_CONFIG_SETTINGS_ID NAME="TEST_TEST_TYPE" VALUE="TEST_SCRIPT" />
       <RTEST_RUN_CONFIG_SETTINGS_ID NAME="INHERITANCE_CHECK_DISABLED" VALUE="false" />
     </configuration>
+    <configuration default="true" type="SpecsRunConfiguration" factoryName="Specs">
+      <module name="" />
+      <setting name="path" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+    </configuration>
     <configuration default="true" type="Applet" factoryName="Applet">
       <module name="" />
       <option name="MAIN_CLASS_NAME" />
@@ -730,6 +724,13 @@
       <method>
         <option name="Make" value="true" />
       </method>
+    </configuration>
+    <configuration default="true" type="ScalaTestRunConfiguration" factoryName="ScalaTest">
+      <module name="" />
+      <setting name="path" value="" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
     </configuration>
     <list size="1">
       <item index="0" class="java.lang.String" itemvalue="Application.PropertiesDialogue" />
@@ -869,25 +870,27 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="4" y="22" width="1676" height="1028" extended-state="0" />
+    <frame x="4" y="22" width="1676" height="1028" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32079646" sideWeight="0.5" order="15" side_tool="false" />
-      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32522124" sideWeight="0.0" order="17" side_tool="false" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
+      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32522124" sideWeight="0.0" order="17" side_tool="false" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32964602" sideWeight="0.0" order="1" side_tool="false" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" />
       <window_info id="TeamCity" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
       <window_info id="Dataflow to this" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32613635" sideWeight="0.5" order="9" side_tool="false" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3071823" sideWeight="0.5" order="11" side_tool="false" />
+      <window_info id="Clojure REPL" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30641592" sideWeight="0.5" order="11" side_tool="false" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3249715" sideWeight="0.5" order="7" side_tool="false" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24932432" sideWeight="0.5" order="3" side_tool="false" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24754299" sideWeight="0.6670354" order="0" side_tool="false" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19041769" sideWeight="0.6670354" order="0" side_tool="false" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" />
+      <window_info id="Web Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295325" sideWeight="0.5" order="8" side_tool="false" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39933258" sideWeight="0.5" order="6" side_tool="false" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3284091" sideWeight="0.5" order="2" side_tool="false" />
       <window_info id="Regex" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.327252" sideWeight="0.5" order="8" side_tool="false" />
@@ -895,8 +898,8 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" />
       <window_info id="CheckStyle-IDEA-ToolWindow" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32971507" sideWeight="0.5" order="8" side_tool="false" />
-      <window_info id="IDE talk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="16" side_tool="false" />
+      <window_info id="IDE talk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962328" sideWeight="0.5" order="10" side_tool="false" />
       <window_info id="SVN Repositories" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32873562" sideWeight="0.5" order="10" side_tool="false" />
       <window_info id="Maven projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" />
@@ -910,9 +913,8 @@
       <window_info id="Slice" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" />
       <window_info id="EJB" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" />
-      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" />
       <window_info id="CVS" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
-      <window_info id="Web Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295325" sideWeight="0.5" order="8" side_tool="false" />
+      <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" />
       <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
     </layout>
   </component>
@@ -932,7 +934,7 @@
     <option name="PERFORM_CHECKOUT_IN_BACKGROUND" value="true" />
     <option name="PERFORM_ADD_REMOVE_IN_BACKGROUND" value="true" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix for #44 - removed dep on commons-lang." />
+    <option name="LAST_COMMIT_MESSAGE" value="3.0.4 release, including fix for #47" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="REFORMAT_BEFORE_FILE_COMMIT" value="false" />
@@ -943,7 +945,6 @@
     <option name="UPDATE_GROUP_BY_CHANGELIST" value="false" />
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="false" />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.6" />
-    <MESSAGE value="Bug-fixes (22, 24, 25, 28)" />
     <MESSAGE value="Bug fixes (30)" />
     <MESSAGE value="Updated release notes." />
     <MESSAGE value="More work on #24 - removed event thread wait." />
@@ -968,6 +969,7 @@
     <MESSAGE value="Fix for issue #40 - files with no description cause an exception." />
     <MESSAGE value="Fix for issue #41 - table headers fubar." />
     <MESSAGE value="Fix for #44 - removed dep on commons-lang." />
+    <MESSAGE value="3.0.4 release, including fix for #47" />
   </component>
   <component name="VssConfiguration">
     <option name="CLIENT_PATH" value="" />
@@ -1076,116 +1078,111 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/ScanModifiedFiles.java">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/DisplayWarnings.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="30" selection-start="1061" selection-end="1061" vertical-scroll-proportion="0.0">
+        <state line="25" column="8" selection-start="821" selection-end="821" vertical-scroll-proportion="0.3316062">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/TogglableTreeNode.java">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="45" column="117" selection-start="1088" selection-end="1088" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/model/ConfigurationLocationFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="68" selection-start="2169" selection-end="2169" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/resource.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="69" selection-start="2042" selection-end="2042" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$APPLICATION_HOME_DIR$/lib/commons-lang-2.4.jar!/org/apache/commons/lang/ArrayUtils.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/model/ConfigurationLocation.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="226" column="28" selection-start="5489" selection-end="5489" vertical-scroll-proportion="0.0">
+        <state line="97" column="63" selection-start="3838" selection-end="3838" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/ui/LocationDialogue.java">
+    <entry file="file://$PROJECT_DIR$/README">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="143" column="82" selection-start="4862" selection-end="4936" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="191" column="84" selection-start="6589" selection-end="6668" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/ui/CheckStyleModuleConfigPanel.java">
+    <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="157" column="14" selection-start="6568" selection-end="6995" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/ui/LocationTableModel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="13" selection-start="445" selection-end="445" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleModuleConfiguration.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///System/Library/Frameworks/JavaVM.framework/Versions/1.5.0/Home/src.jar!/src/java/lang/Object.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="22" selection-start="3210" selection-end="3210" vertical-scroll-proportion="0.0">
+        <state line="32" column="31" selection-start="1866" selection-end="1866" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ResultTreeModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="177" column="11" selection-start="5448" selection-end="5448" vertical-scroll-proportion="0.0">
+        <state line="200" column="95" selection-start="6442" selection-end="6442" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dtd/configuration_1_3.dtd">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CachedChecker.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="8" column="6" selection-start="194" selection-end="194" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckerFactory.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="113" column="43" selection-start="4102" selection-end="4102" vertical-scroll-proportion="0.19178082">
+        <state line="268" column="19" selection-start="10019" selection-end="10019" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/Check.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="18" selection-start="514" selection-end="514" vertical-scroll-proportion="0.0">
+        <state line="19" column="0" selection-start="504" selection-end="504" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/DisplayWarnings.java">
+    <entry file="file://$PROJECT_DIR$/src/sun_checks.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="8" selection-start="821" selection-end="821" vertical-scroll-proportion="0.3321739">
+        <state line="53" column="30" selection-start="1874" selection-end="1874" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/CheckFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="18" selection-start="866" selection-end="866" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/PackageHtmlCheck.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="13" selection-start="339" selection-end="339" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sun_checks.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="45" column="51" selection-start="1538" selection-end="1538" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/JavadocPackageCheck.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="111" selection-start="820" selection-end="820" vertical-scroll-proportion="0.30215827">
           <folding />
         </state>
       </provider>
