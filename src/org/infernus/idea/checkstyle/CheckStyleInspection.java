@@ -237,7 +237,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     = new CheckStyleAuditListener(psiFile, manager, false, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
-            checker.destroy();
 
             final List<ProblemDescriptor> problems = listener.getProblems();
             return problems.toArray(new ProblemDescriptor[problems.size()]);

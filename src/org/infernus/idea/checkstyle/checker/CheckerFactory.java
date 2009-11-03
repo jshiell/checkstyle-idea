@@ -80,6 +80,9 @@ public class CheckerFactory {
             CachedChecker cachedChecker = cache.get(location);
             if (cachedChecker.isValid()) {
                 return cachedChecker.getChecker();
+            } else {
+                cachedChecker.getChecker().destroy();
+                cache.remove(location);
             }
         }
 

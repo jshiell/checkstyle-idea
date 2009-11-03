@@ -155,7 +155,6 @@ final class FileScanner implements Runnable {
                     = new CheckStyleAuditListener(psiFile, manager, true, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
-            checker.destroy();
 
             return listener.getProblems();
 
