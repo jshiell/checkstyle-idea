@@ -223,7 +223,7 @@ public class CheckStyleAuditListener implements AuditListener {
                 final ProblemHighlightType problemType
                         = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, message, (LocalQuickFix) null, problemType, endOfLine);
+                        victim, message, (LocalQuickFix[]) null, problemType, endOfLine);
 
                 if (usingExtendedDescriptors) {
                     final ProblemDescriptor delegate
