@@ -141,7 +141,7 @@ public abstract class AbstractCheckerThread extends Thread {
             // add results if necessary
             if (fileScanner.getResults() != null
                     && fileScanner.getResults().size() > 0) {
-                getFileResults().put(psiFile, fileScanner.getResults());
+                getFileResults().put(psiFile, new ArrayList<ProblemDescriptor>(fileScanner.getResults()));
             }
         }
     }

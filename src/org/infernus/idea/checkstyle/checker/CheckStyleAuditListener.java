@@ -16,6 +16,7 @@ import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -125,7 +126,7 @@ public class CheckStyleAuditListener implements AuditListener {
      * @return the problems found by this scan.
      */
     public List<ProblemDescriptor> getProblems() {
-        return problems;
+        return Collections.unmodifiableList(problems);
     }
 
     /**

@@ -103,11 +103,6 @@
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
-  <component name="FindManager">
-    <FindUsagesManager>
-      <setting name="OPEN_NEW_TAB" value="false" />
-    </FindUsagesManager>
-  </component>
   <component name="InspectionPassRegistrar">
     <option name="LOAD_NEW_PROBLEMS" value="true" />
   </component>
@@ -180,6 +175,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CheckStyle-IDEA.iml" filepath="$PROJECT_DIR$/CheckStyle-IDEA.iml" />
+      <module fileurl="file://$PROJECT_DIR$/test-module/test-module.iml" filepath="$PROJECT_DIR$/test-module/test-module.iml" />
     </modules>
   </component>
   <component name="ProjectReloadState">
