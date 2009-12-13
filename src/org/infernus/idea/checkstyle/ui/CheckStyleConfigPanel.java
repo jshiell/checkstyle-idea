@@ -1,10 +1,10 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.Messages;
-import com.intellij.util.ObjectUtils;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

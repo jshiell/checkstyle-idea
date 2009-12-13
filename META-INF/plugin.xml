@@ -11,16 +11,17 @@
 </p>
         ]]>
     </description>
-    <version>3.0.5</version>
+    <version>3.0.6</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.0.6: Fixed: IDEA 9 compatibility.</li>
     <li>3.0.5: Fixed: Filters (e.g. SuppressionCommentFilter) now work correctly.</li>
     <li>3.0.5: Fixed: JavadocPackage now respects allowLegacy. Thanks to Edward Campbell.</li>
-	<li>3.0.4: Fixed: Checkstyle DTD 1.3 added. Thanks to Jonas Bergvall.</li>
+	<li>3.0.4: Fixed: CheckStyle DTD 1.3 added. Thanks to Jonas Bergvall.</li>
     <li>3.0.3: Fixed: Removed dependency on Apache commons-lang to restore compatibility with IDEA 7.0.x/Linux.</li>
     <li>3.0.2: Fixed: File configuration column headings were incorrect.</li>
     <li>3.0.1: Fixed: Rule files added with no description cause an exception.</li>
@@ -29,7 +30,7 @@
     <li>3.0: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
              can be found in the <a href="http://checkstyle.sourceforge.net/releasenotes.html">release notes</a>.</i></li>
     <li>3.0: New: Result list may be filtered on severity.</li>
-    <li>3.0: New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
+    <li>3.0: New: Backend re-written to support multiple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
     <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>
     <li>2.4: New: Scans in progress may be aborted.</li>
     <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
@@ -46,11 +47,11 @@
     <li>2.1: New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.</li>
-    <li>2.1: New: Ability to supress checks on test classes.</li>
+    <li>2.1: New: Ability to suppress checks on test classes.</li>
     <li>2.1: New: Updated CheckStyle to 4.4.</li>
     <li>2.1: Fixed: NewlineAtEndOfFile now works on Windows.</li>
     <li>2.1: Fixed: PackageHtml test will now work.</li>
-    <li>2.1: Fixed: Supression filters with relative paths now load correctly.</li>
+    <li>2.1: Fixed: Suppression filters with relative paths now load correctly.</li>
     <li>2.0.1: WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.</li>
     <li>2.0.1: Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.</li>
@@ -66,7 +67,7 @@
         processing.</li>
     <li>1.0.2: Fixed: Exception if configuration panel opened while puppycrawl.com 
         could not be accessed.</li>
-    <li>1.0.1: Fixed: Potenially IllegalState if project path cannot be retrieved
+    <li>1.0.1: Fixed: Potentially IllegalState if project path cannot be retrieved
         within IDEA 7M1.</li>
     <li>1.0: New: Static scanning for current module implemented.</li>
     <li>1.0: New: Ability to add third-party checks.</li>

@@ -9,6 +9,7 @@ import java.util.List;
  * Tree node with togglable visibility.
  */
 public class TogglableTreeNode extends DefaultMutableTreeNode {
+    private static final long serialVersionUID = -4490734768175672868L;
 
     private boolean visible = true;
 
@@ -27,6 +28,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
+    @SuppressWarnings({"unchecked"})
     List<TogglableTreeNode> getAllChildren() {
         return Collections.unmodifiableList(children);
     }

@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.util;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.QuickFix;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.PsiElement;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
@@ -123,5 +124,19 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
      */
     public QuickFix[] getFixes() {
         return delegate.getFixes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setTextAttributes(final TextAttributesKey textAttributesKey) {
+        delegate.setTextAttributes(textAttributesKey);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean showTooltip() {
+        return delegate.showTooltip();
     }
 }

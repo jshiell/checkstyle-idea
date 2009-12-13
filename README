@@ -141,6 +141,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.0.6 - Fixed: IDEA 9 compatibility.
 3.0.5 - Fixed: Filters (e.g. SuppressionCommentFilter) now work correctly.
 3.0.5 - Fixed: JavadocPackage now respects allowLegacy. Thanks to Edward Campbell.
 3.0.4 - Fixed: Checkstyle DTD 1.3 added. Thanks to Jonas Bergvall.

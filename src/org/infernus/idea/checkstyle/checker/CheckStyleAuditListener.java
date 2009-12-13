@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.openapi.application.Application;
@@ -209,7 +210,6 @@ public class CheckStyleAuditListener implements AuditListener {
                 }
             }
 
-
             final PsiElement victim;
             victim = psiFile.findElementAt(offset);
 
@@ -223,7 +223,7 @@ public class CheckStyleAuditListener implements AuditListener {
                 final ProblemHighlightType problemType
                         = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, message, null, problemType, endOfLine);
+                        victim, message, (LocalQuickFix) null, problemType, endOfLine);
 
                 if (usingExtendedDescriptors) {
                     final ProblemDescriptor delegate
