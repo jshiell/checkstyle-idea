@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.0.7</version>
+    <version>3.0.8</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.0.8: Fixed: Null property in configuration hashtable resulting in NPE.</li>
     <li>3.0.7: Fixed: Module scan results are no longer shared between files.</li>
     <li>3.0.6: Fixed: IDEA 9 compatibility.</li>
     <li>3.0.5: Fixed: Filters (e.g. SuppressionCommentFilter) now work correctly.</li>

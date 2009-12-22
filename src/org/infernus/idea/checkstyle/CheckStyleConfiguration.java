@@ -160,7 +160,10 @@ public final class CheckStyleConfiguration extends Properties {
             final Map<String, String> properties = configurationLocation.getProperties();
             if (properties != null) {
                 for (final String property : properties.keySet()) {
-                    setProperty(PROPERTIES_PREFIX + index + "." + property, properties.get(property));
+                    final String propertyValue = properties.get(property);
+                    if (propertyValue != null) {
+                        setProperty(PROPERTIES_PREFIX + index + "." + property, propertyValue);
+                    }
                 }
             }
 
