@@ -64,7 +64,7 @@ public class CheckerFactory {
      * @param location    the location of the CheckStyle file.
      * @param classLoader class loader for CheckStyle use, or null to use
      *                    the default.
-     * @param baseDir the project's base directory.
+     * @param baseDir     the project's base directory.
      * @return a checker.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
@@ -76,26 +76,31 @@ public class CheckerFactory {
             throw new IllegalArgumentException("Location is required");
         }
 
-        if (cache.containsKey(location)) {
-            CachedChecker cachedChecker = cache.get(location);
-            if (cachedChecker.isValid()) {
-                return cachedChecker.getChecker();
-            } else {
-                cachedChecker.getChecker().destroy();
-                cache.remove(location);
+        synchronized (cache) {
+            if (cache.containsKey(location)) {
+                CachedChecker cachedChecker = cache.get(location);
+                if (cachedChecker != null && cachedChecker.isValid()) {
+                    return cachedChecker.getChecker();
+                } else {
+                    if (cachedChecker != null) {
+                        cachedChecker.getChecker().destroy();
+                    }
+                    cache.remove(location);
+                }
             }
-        }
 
-        final CachedChecker checker = createChecker(location, baseDir,
-                new ListPropertyResolver(location.getProperties()), classLoader);
-        cache.put(location, checker);
-        return checker.getChecker();
+            final CachedChecker checker = createChecker(location, baseDir,
+                    new ListPropertyResolver(location.getProperties()), classLoader);
+            cache.put(location, checker);
+
+            return checker.getChecker();
+        }
     }
 
     /**
      * Get the checker configuration for a given configuration.
      *
-     * @param location    the location of the CheckStyle file.
+     * @param location the location of the CheckStyle file.
      * @return a configuration.
      */
     public Configuration getConfig(final ConfigurationLocation location) {
@@ -103,12 +108,15 @@ public class CheckerFactory {
             throw new IllegalArgumentException("Location is required");
         }
 
-        if (cache.containsKey(location)) {
-            CachedChecker cachedChecker = cache.get(location);
-            if (cachedChecker.isValid()) {
-                return cachedChecker.getConfig();
+        synchronized (cache) {
+            if (cache.containsKey(location)) {
+                CachedChecker cachedChecker = cache.get(location);
+                if (cachedChecker != null && cachedChecker.isValid()) {
+                    return cachedChecker.getConfig();
+                }
             }
         }
+
         throw new IllegalArgumentException("Failed to find a configured checker.");
     }
 
@@ -123,9 +131,9 @@ public class CheckerFactory {
      * @throws CheckstyleException If there was any error loading the configuration file.
      */
     private CachedChecker createChecker(final ConfigurationLocation location,
-                                  final File baseDir,
-                                  final PropertyResolver resolver,
-                                  final ClassLoader contextClassLoader)
+                                        final File baseDir,
+                                        final PropertyResolver resolver,
+                                        final ClassLoader contextClassLoader)
             throws CheckstyleException {
 
         if (LOG.isDebugEnabled()) {

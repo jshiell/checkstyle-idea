@@ -160,6 +160,13 @@
   <component name="ProjectDetails">
     <option name="projectName" value="CheckStyle-IDEA" />
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="jshiell">
+      <words>
+        <w>sychronisation</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectKey">
     <option name="state" value="project://default" />
   </component>
