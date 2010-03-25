@@ -208,7 +208,28 @@ public class ToolWindowPanel extends JPanel {
      */
     public void incrementProgressBar() {
         if (progressBar.getValue() < progressBar.getMaximum()) {
-            progressBar.setValue(progressBar.getValue() + 1);
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    progressBar.setValue(progressBar.getValue() + 1);
+                }
+            });
+        }
+    }
+
+    /**
+     * Increment the progress of the progress bar by a given number.
+     * <p/>
+     * You should call {@link #setProgressBarMax(int)} first for useful semantics.
+     */
+    public void incrementProgressBarBy( final int size) {
+        if (progressBar.getValue() < progressBar.getMaximum()) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    progressBar.setValue(progressBar.getValue() + size);
+                }
+            });
         }
     }
 

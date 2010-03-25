@@ -119,8 +119,9 @@ public class CheckStyleAuditListener implements AuditListener {
     }
 
     /**
-     * Get the problems found by this scan.
+     * Get the problems for a given file as found by this scan.
      *
+     * @param psiFile the file to check for results.
      * @return the problems found by this scan.
      */
     public List<ProblemDescriptor> getProblems(final PsiFile psiFile) {
@@ -129,6 +130,10 @@ public class CheckStyleAuditListener implements AuditListener {
             return Collections.unmodifiableList(problemsForFile);
         }
         return Collections.emptyList();
+    }
+
+    public Map<PsiFile, List<ProblemDescriptor>> getAllProblems() {
+        return Collections.unmodifiableMap(problems);
     }
 
     private void addProblem(final PsiFile psiFile, final ProblemDescriptor problemDescriptor) {
@@ -156,7 +161,10 @@ public class CheckStyleAuditListener implements AuditListener {
                 for (final AuditEvent event : errors) {
                     final PsiFile psiFile = fileNamesToPsiFiles.get(event.getFileName());
                     if (psiFile == null) {
-                        LOG.error("Could not find mapping for file: " + event.getFileName());
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Could not find mapping for file: " + event.getFileName()
+                                    + " in " + fileNamesToPsiFiles);
+                        }
                         return;
                     }
 

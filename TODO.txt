@@ -1,8 +1,7 @@
 Things to do:
 
-* Fix multiple file scans
- - change FileScanner to handle multiple files, group by modules & then scan in groups
 * Write tests
 * Summary of errors/warnings/info per file 
 * Notification of file load failure
 * GoogleCode recorded issues
+

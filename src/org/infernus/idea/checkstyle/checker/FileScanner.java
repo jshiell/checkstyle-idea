@@ -24,10 +24,7 @@ import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Runnable for scanning an individual file.
@@ -35,8 +32,8 @@ import java.util.Map;
 final class FileScanner implements Runnable {
 
     private CheckStylePlugin plugin;
-    private List<ProblemDescriptor> results;
-    private PsiFile fileToScan;
+    private Map<PsiFile, List<ProblemDescriptor>> results;
+    private List<PsiFile> filesToScan;
     private ClassLoader moduleClassLoader;
     private Throwable error;
 
@@ -56,8 +53,21 @@ final class FileScanner implements Runnable {
     public FileScanner(final CheckStylePlugin checkStylePlugin,
                        final PsiFile fileToScan,
                        final ClassLoader moduleClassLoader) {
+        this(checkStylePlugin, Arrays.asList(fileToScan), moduleClassLoader);
+    }
+
+    /**
+     * Create a new file scanner.
+     *
+     * @param checkStylePlugin  CheckStylePlugin.
+     * @param filesToScan       the files to scan.
+     * @param moduleClassLoader the class loader for the file's module
+     */
+    public FileScanner(final CheckStylePlugin checkStylePlugin,
+                       final List<PsiFile> filesToScan,
+                       final ClassLoader moduleClassLoader) {
         this.plugin = checkStylePlugin;
-        this.fileToScan = fileToScan;
+        this.filesToScan = filesToScan;
         this.moduleClassLoader = moduleClassLoader;
     }
 
@@ -66,9 +76,9 @@ final class FileScanner implements Runnable {
      */
     public void run() {
         try {
-            results = checkPsiFile(fileToScan, moduleClassLoader);
+            results = checkPsiFile(filesToScan, moduleClassLoader);
 
-            this.plugin.getToolWindowPanel().incrementProgressBar();
+            this.plugin.getToolWindowPanel().incrementProgressBarBy(filesToScan.size());
         } catch (Throwable e) {
             error = e;
         }
@@ -79,8 +89,12 @@ final class FileScanner implements Runnable {
      *
      * @return the results of the scan.
      */
-    public List<ProblemDescriptor> getResults() {
-        return results;
+    public Map<PsiFile, List<ProblemDescriptor>> getResults() {
+        if (results != null) {
+            return Collections.unmodifiableMap(results);
+        }
+
+        return Collections.emptyMap();
     }
 
     /**
@@ -95,47 +109,102 @@ final class FileScanner implements Runnable {
     /**
      * Scan a PSI file with CheckStyle.
      *
-     * @param element           the PSI element to scan. This will be
-     *                          ignored if not a java file.
+     * @param psiFilesToScan    the PSI psiFilesToScan to scan. Thezse will be
+     *                          ignored if not a java file and not from the same module.
      * @param moduleClassLoader the class loader for the current module.
      * @return a list of tree nodes representing the result tree for this
      *         file, an empty list or null if this file is invalid or
      *         has no errors.
      * @throws Throwable if the
      */
-    private List<ProblemDescriptor> checkPsiFile(final PsiElement element,
-                                                 final ClassLoader moduleClassLoader)
+    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final List<PsiFile> psiFilesToScan,
+                                                               final ClassLoader moduleClassLoader)
             throws Throwable {
-        if (element == null || !element.isValid() || !element.isPhysical()
-                || !PsiFile.class.isAssignableFrom(element.getClass())) {
-            final String elementString = (element != null
-                    ? element.toString() : null);
-            LOG.debug("Skipping as invalid type: " + elementString);
-
+        if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {
+            LOG.debug("No elements were specified");
             return null;
         }
 
-        final PsiFile psiFile = (PsiFile) element;
-        LOG.debug("Scanning " + psiFile.getName());
+        Module module = null;
+
+        final List<File> tempFiles = new ArrayList<File>();
+        final Map<String, PsiFile> filesToElements = new HashMap<String, PsiFile>();
 
         final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
-        if (!checkTestClasses && isTestClass(element)) {
-            LOG.debug("Skipping test class " + psiFile.getName());
-            return null;
+
+        try {
+            for (final PsiFile psiFile : psiFilesToScan) {
+                final String fileDescription = (psiFile != null ? psiFile.getName() : null);
+                LOG.debug("Processing " + fileDescription);
+
+                if (psiFile == null || !psiFile.isValid() || !psiFile.isPhysical()) {
+                    LOG.debug("Skipping as invalid type: " + fileDescription);
+                    continue;
+                }
+
+                if (module == null) {
+                    module = ModuleUtil.findModuleForPsiElement(psiFile);
+                } else {
+                    final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);
+                    if (!elementModule.equals(module)) {
+                        LOG.debug("Skipping as modules do not match: " + fileDescription + " : " + elementModule
+                                + " does not match " + module);
+                        continue;
+                    }
+                }
+
+                if (!checkTestClasses && isTestClass(psiFile)) {
+                    LOG.debug("Skipping test class " + psiFile.getName());
+                    continue;
+                }
+
+                if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
+                    LOG.debug("Skipping invalid file type " + psiFile.getName());
+                    continue;
+                }
+
+                final File tempFile = createTemporaryFile(psiFile);
+                if (tempFile != null) {
+                    tempFiles.add(tempFile);
+                    filesToElements.put(tempFile.getAbsolutePath(), psiFile);
+                }
+            }
+
+            if (module == null || filesToElements.size() == 0) {
+                LOG.debug("No valid files were supplied");
+                return null;
+            }
+
+            return performCheckStyleScan(moduleClassLoader, module, tempFiles, filesToElements);
+
+        } finally {
+            for (final File tempFile : tempFiles) {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
+            }
         }
+    }
 
-        final InspectionManager manager
-                = InspectionManager.getInstance(psiFile.getProject());
+    private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
+                                                                        final Module module,
+                                                                        final List<File> tempFiles,
+                                                                        final Map<String, PsiFile> filesToElements) {
+        final InspectionManager manager = InspectionManager.getInstance(module.getProject());
+        final Checker checker = getChecker(module, moduleClassLoader);
+        final List<Check> checks = CheckFactory.getChecks(getConfig(module));
 
-        if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
-            return null;
-        }
+        final CheckStyleAuditListener listener
+                = new CheckStyleAuditListener(filesToElements, manager, true, checks);
+        checker.addListener(listener);
+        checker.process(tempFiles);
 
+        return listener.getAllProblems();
+    }
+
+    private File createTemporaryFile(final PsiFile psiFile) {
         File tempFile = null;
         try {
-            final Checker checker = getChecker(psiFile, moduleClassLoader);
-            final List<Check> checks = CheckFactory.getChecks(getConfig(psiFile));
-
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...
             final CreateTempFileThread fileThread
@@ -152,41 +221,28 @@ final class FileScanner implements Runnable {
                 throw new IllegalStateException("Failed to create temporary file.");
             }
 
-            final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
-            final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(filesToScan, manager, true, checks);
-            checker.addListener(listener);
-            checker.process(Arrays.asList(tempFile));
-
-            return listener.getProblems(psiFile);
-
         } catch (IOException e) {
             LOG.error("Failure when creating temp file", e);
-            throw new IllegalStateException("Couldn't create temp file", e);
-
-        } finally {
-            if (tempFile != null && tempFile.exists()) {
-                tempFile.delete();
-            }
         }
+
+        return tempFile;
     }
 
 
     /**
      * Produce a CheckStyle checker.
      *
-     * @param psiFile     the file to be checked.
+     * @param module      the module the checked file(s) belong to.
      * @param classLoader CheckStyle classloader or null if default
      *                    should be used.
      * @return a checker.
      */
-    private Checker getChecker(final PsiFile psiFile,
+
+    private Checker getChecker(final Module module,
                                final ClassLoader classLoader) {
         LOG.debug("Getting CheckStyle checker.");
 
         try {
-            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
-
             final ConfigurationLocation location = getConfigurationLocation(module);
             if (location == null) {
                 return null;
@@ -222,15 +278,13 @@ final class FileScanner implements Runnable {
     /**
      * Retrieve a CheckStyle configuration.
      *
-     * @param psiFile the file to be checked.
+     * @param module the module to fetch configuration for.
      * @return a checkstyle configuration.
      */
-    private Configuration getConfig(final PsiFile psiFile) {
+    private Configuration getConfig(final Module module) {
         LOG.debug("Getting CheckStyle checker.");
 
         try {
-            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
-
             final ConfigurationLocation location = getConfigurationLocation(module);
             if (location == null) {
                 return null;
