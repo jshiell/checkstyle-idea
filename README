@@ -1,10 +1,10 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2009 CheckStyle-IDEA Contributors
+(c) Copyright 2006-2010 CheckStyle-IDEA Contributors
 
 http://code.google.com/p/checkstyle-idea/
 
-A plug-in for JetBrains' IntelliJ IDEA 8 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 9 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -118,6 +118,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * jicken
 * Jonas Bergvall
 * Edward Campbell
+* LightGuard.JP
 
 And also thanks are due to the authors and contributors of:
 
@@ -141,6 +142,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.0.10- Fixed: Partial property detection. Thanks to LightGuard.JP.
 3.0.9 - Fixed: Cache sychronisation problem.
 3.0.8 - Fixed: Null property in configuration hashtable resulting in NPE.
 3.0.7 - Fixed: Module scan results are no longer shared between files.
