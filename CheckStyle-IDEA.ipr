@@ -145,8 +145,9 @@
       <profile version="1.0" is_locked="false">
         <option name="myName" value="Project Default" />
         <option name="myLocal" value="false" />
-        <inspection_tool class="CheckStyle-IDEA" enabled="true" level="WARNING" enabled_by_default="true" />
+        <inspection_tool class="CheckStyle-IDEA" enabled="true" level="CHECKSTYLE" enabled_by_default="true" />
         <inspection_tool class="ComparatorNotSerializable" enabled="true" level="WARNING" enabled_by_default="true" />
+        <inspection_tool class="Fix shebang" enabled="true" level="WARNING" enabled_by_default="true">/bin/sh#/bin/bash</inspection_tool>
         <inspection_tool class="NonSerializableWithSerialVersionUIDField" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="SerialVersionUIDNotStaticFinal" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="SerializableHasSerialVersionUIDField" enabled="true" level="WARNING" enabled_by_default="true">
@@ -158,12 +159,34 @@
     <option name="PROJECT_PROFILE" value="Project Default" />
     <option name="USE_PROJECT_PROFILE" value="true" />
     <version value="1.0" />
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="SERVER PROBLEM" />
-      <item index="1" class="java.lang.String" itemvalue="INFO" />
-      <item index="2" class="java.lang.String" itemvalue="TYPO" />
-      <item index="3" class="java.lang.String" itemvalue="WARNING" />
-      <item index="4" class="java.lang.String" itemvalue="ERROR" />
+    <info color="800080">
+      <option name="FOREGROUND" />
+      <option name="BACKGROUND" />
+      <option name="FONT_TYPE" value="0" />
+      <option name="EFFECT_COLOR" value="800080" />
+      <option name="EFFECT_TYPE" value="1" />
+      <option name="ERROR_STRIPE_COLOR" value="800080" />
+      <option name="myName" value="CHECKSTYLE" />
+      <option name="myVal" value="50" />
+      <option name="myExternalName" value="CHECKSTYLE" />
+      <option name="myDefaultAttributes">
+        <value>
+          <option name="FOREGROUND" />
+          <option name="BACKGROUND" />
+          <option name="FONT_TYPE" value="0" />
+          <option name="EFFECT_COLOR" />
+          <option name="EFFECT_TYPE" value="0" />
+          <option name="ERROR_STRIPE_COLOR" />
+        </value>
+      </option>
+    </info>
+    <list size="6">
+      <item index="0" class="java.lang.String" itemvalue="CHECKSTYLE" />
+      <item index="1" class="java.lang.String" itemvalue="SERVER PROBLEM" />
+      <item index="2" class="java.lang.String" itemvalue="INFO" />
+      <item index="3" class="java.lang.String" itemvalue="TYPO" />
+      <item index="4" class="java.lang.String" itemvalue="WARNING" />
+      <item index="5" class="java.lang.String" itemvalue="ERROR" />
     </list>
   </component>
   <component name="JavacSettings">

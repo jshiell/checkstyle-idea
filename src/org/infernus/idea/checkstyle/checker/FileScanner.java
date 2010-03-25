@@ -11,13 +11,12 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.checks.Check;
+import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
@@ -26,7 +25,9 @@ import org.jetbrains.annotations.NonNls;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Runnable for scanning an individual file.
@@ -151,12 +152,13 @@ final class FileScanner implements Runnable {
                 throw new IllegalStateException("Failed to create temporary file.");
             }
 
+            final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
             final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(psiFile, manager, true, checks);
+                    = new CheckStyleAuditListener(filesToScan, manager, true, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
 
-            return listener.getProblems();
+            return listener.getProblems(psiFile);
 
         } catch (IOException e) {
             LOG.error("Failure when creating temp file", e);
@@ -220,7 +222,7 @@ final class FileScanner implements Runnable {
     /**
      * Retrieve a CheckStyle configuration.
      *
-     * @param psiFile     the file to be checked.
+     * @param psiFile the file to be checked.
      * @return a checkstyle configuration.
      */
     private Configuration getConfig(final PsiFile psiFile) {

@@ -36,7 +36,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -63,7 +65,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
      *
      * @param checkStylePlugin the plugin.
      * @param project          the currently open project.
-     * @param module           the current module. May be null.   @return a checker.
+     * @param module           the current module. May be null.
+     * @return a checker.
      */
     private Checker getChecker(final CheckStylePlugin checkStylePlugin,
                                final Project project,
@@ -233,12 +236,14 @@ public class CheckStyleInspection extends LocalInspectionTool {
             tempFileOut.flush();
             tempFileOut.close();
 
+            final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
+
             final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(psiFile, manager, false, checks);
+                    = new CheckStyleAuditListener(filesToScan, manager, false, checks);
             checker.addListener(listener);
             checker.process(Arrays.asList(tempFile));
 
-            final List<ProblemDescriptor> problems = listener.getProblems();
+            final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
             return problems.toArray(new ProblemDescriptor[problems.size()]);
 
         } catch (ProcessCanceledException e) {

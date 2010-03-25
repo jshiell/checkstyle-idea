@@ -15,9 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Listener for the CheckStyle process.
@@ -33,11 +31,11 @@ public class CheckStyleAuditListener implements AuditListener {
     private final boolean usingExtendedDescriptors;
     private final List<Check> checks;
 
-    private final PsiFile psiFile;
+    private final Map<String, PsiFile> fileNamesToPsiFiles;
     private final InspectionManager manager;
 
     private final List<AuditEvent> errors = new ArrayList<AuditEvent>();
-    private final List<ProblemDescriptor> problems = new ArrayList<ProblemDescriptor>();
+    private final Map<PsiFile, List<ProblemDescriptor>> problems = new HashMap<PsiFile, List<ProblemDescriptor>>();
 
     /**
      * Create a new listener.
@@ -46,17 +44,17 @@ public class CheckStyleAuditListener implements AuditListener {
      * descriptors. This is provided to avoid problems with downstream code
      * that may be interested in the implementation type.
      *
-     * @param psiFile                the file being checked.
+     * @param fileNamesToPsiFiles    a map of files name to PSI files for the files being scanned.
      * @param manager                the current inspection manager.
      * @param useExtendedDescriptors should we return standard IntelliJ
      *                               problem descriptors or extended ones with severity information?
      * @param checks                 the check modifications to use.
      */
-    public CheckStyleAuditListener(final PsiFile psiFile,
+    public CheckStyleAuditListener(final Map<String, PsiFile> fileNamesToPsiFiles,
                                    final InspectionManager manager,
                                    final boolean useExtendedDescriptors,
                                    final List<Check> checks) {
-        this.psiFile = psiFile;
+        this.fileNamesToPsiFiles = new HashMap<String, PsiFile>(fileNamesToPsiFiles);
         this.manager = manager;
         this.usingExtendedDescriptors = useExtendedDescriptors;
         this.checks = checks;
@@ -125,8 +123,22 @@ public class CheckStyleAuditListener implements AuditListener {
      *
      * @return the problems found by this scan.
      */
-    public List<ProblemDescriptor> getProblems() {
-        return Collections.unmodifiableList(problems);
+    public List<ProblemDescriptor> getProblems(final PsiFile psiFile) {
+        final List<ProblemDescriptor> problemsForFile = problems.get(psiFile);
+        if (problemsForFile != null) {
+            return Collections.unmodifiableList(problemsForFile);
+        }
+        return Collections.emptyList();
+    }
+
+    private void addProblem(final PsiFile psiFile, final ProblemDescriptor problemDescriptor) {
+        List<ProblemDescriptor> problemsForFile = problems.get(psiFile);
+        if (problemsForFile == null) {
+            problemsForFile = new ArrayList<ProblemDescriptor>();
+            problems.put(psiFile, problemsForFile);
+        }
+
+        problemsForFile.add(problemDescriptor);
     }
 
     /**
@@ -138,22 +150,36 @@ public class CheckStyleAuditListener implements AuditListener {
          * {@inheritDoc}
          */
         public void run() {
-            final char[] text = psiFile.textToCharArray();
-
-            // we cache the offset of each line as it is created, so as to
-            // avoid retreating ground we've already covered.
-            final List<Integer> lineLengthCache = new ArrayList<Integer>();
-            lineLengthCache.add(0); // line 1 is offset 0
+            final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<PsiFile, List<Integer>>();
 
             synchronized (errors) {
                 for (final AuditEvent event : errors) {
-                    processEvent(text, lineLengthCache, event);
+                    final PsiFile psiFile = fileNamesToPsiFiles.get(event.getFileName());
+                    if (psiFile == null) {
+                        LOG.error("Could not find mapping for file: " + event.getFileName());
+                        return;
+                    }
+
+                    List<Integer> lineLengthCache = lineLengthCachesByFile.get(psiFile);
+                    if (lineLengthCache == null) {
+                        // we cache the offset of each line as it is created, so as to
+                        // avoid retreating ground we've already covered.
+                        lineLengthCache = new ArrayList<Integer>();
+                        lineLengthCache.add(0); // line 1 is offset 0
+
+                        lineLengthCachesByFile.put(psiFile, lineLengthCache);
+                    }
+
+                    processEvent(psiFile, lineLengthCache, event);
                 }
             }
         }
 
-        private void processEvent(final char[] text, final List<Integer> lineLengthCache,
+        private void processEvent(final PsiFile psiFile,
+                                  final List<Integer> lineLengthCache,
                                   final AuditEvent event) {
+            final char[] text = psiFile.textToCharArray();
+
             // check for package HTML siblings, as our scan can't find these
             // if we're using a temporary file
 
@@ -215,7 +241,7 @@ public class CheckStyleAuditListener implements AuditListener {
             victim = psiFile.findElementAt(offset);
 
             if (victim == null) {
-                LOG.error("Couldn't find victim for error: " + event.getFileName() + "("
+                LOG.warn("Couldn't find victim for error: " + event.getFileName() + "("
                         + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
             } else {
                 final String message = event.getLocalizedMessage() != null
@@ -231,9 +257,9 @@ public class CheckStyleAuditListener implements AuditListener {
                             = new ExtendedProblemDescriptor(
                             problem, event.getSeverityLevel(),
                             event.getLine(), event.getColumn());
-                    problems.add(delegate);
+                    addProblem(psiFile, delegate);
                 } else {
-                    problems.add(problem);
+                    addProblem(psiFile, problem);
                 }
             }
         }
