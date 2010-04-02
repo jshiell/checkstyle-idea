@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.0.11</version>
+    <version>3.0.12</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.0.12: Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.</li>
     <li>3.0.11: Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.</li>
     <li>3.0.10: Fixed: Partial property detection. Thanks to LightGuard.JP.</li>
     <li>3.0.9: Fixed: Cache sychronisation problem.</li>

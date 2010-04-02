@@ -30,6 +30,11 @@ public final class CheckStyleConstants {
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
     /**
+     * Inspection identifier.
+     */
+    public static final String ID_INSPECTION = "CheckStyleIDEAInspection";
+
+    /**
      * Plug-in module identifier.
      */
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";

@@ -67,17 +67,16 @@
     <option name="USE_USER_FILTER" value="false" />
     <option name="USER" value="" />
   </component>
-  <component name="ChangeListManager" verified="true">
+  <component name="ChangeListManager">
     <list default="true" readonly="true" id="6cf626fd-7744-4b79-a2ea-ae10316dbc0d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ToolWindowPanel.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ToolWindowPanel.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/META-INF/plugin.xml" afterPath="$PROJECT_DIR$/META-INF/plugin.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/AbstractCheckerThread.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/AbstractCheckerThread.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TODO.txt" afterPath="$PROJECT_DIR$/TODO.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConstants.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConstants.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CheckStyle-IDEA.iws" afterPath="$PROJECT_DIR$/CheckStyle-IDEA.iws" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README" afterPath="$PROJECT_DIR$/README" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" afterPath="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" />
     </list>
+    <ignored path="$USER_HOME_GRAILS$/" />
+    <ignored path="$USER_HOME_GRIFFON$/" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -209,64 +208,10 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ScanFilesThread.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/ScanFilesThread.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="8" selection-start="1150" selection-end="1150" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AbstractCheckerThread.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/AbstractCheckerThread.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="126" column="75" selection-start="3852" selection-end="3852" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FileScanner.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="224" column="21" selection-start="8513" selection-end="8522" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="CheckStyleAuditListener.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="165" column="36" selection-start="5668" selection-end="5668" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="plugin.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="134" selection-start="695" selection-end="830" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="README" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="144" column="121" selection-start="4991" selection-end="4991" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TODO.txt" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/TODO.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="0" selection-start="139" selection-end="139" vertical-scroll-proportion="0.06619386">
+            <state line="135" column="75" selection-start="4552" selection-end="4552" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -275,25 +220,79 @@
       <file leaf-file-name="CheckStyleInspection.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="212" column="13" selection-start="8026" selection-end="8026" vertical-scroll-proportion="0.0">
+            <state line="147" column="64" selection-start="5727" selection-end="5727" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Check.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/Check.java">
+      <file leaf-file-name="LocalInspectionTool.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/codeInspection/LocalInspectionTool.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="12" selection-start="742" selection-end="742" vertical-scroll-proportion="0.0">
+            <state line="5" column="22" selection-start="174" selection-end="174" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AuditEvent.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///Developer/Java/Libraries/checkstyle-5.0/checkstyle-all-5.0.jar!/com/puppycrawl/tools/checkstyle/api/AuditEvent.class">
+      <file leaf-file-name="CheckStyleProvider.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleProvider.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="19" selection-start="179" selection-end="179" vertical-scroll-proportion="0.0">
+            <state line="19" column="28" selection-start="565" selection-end="565" vertical-scroll-proportion="0.15141957">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="plugin.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="19" selection-start="515" selection-end="515" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="138" column="13" selection-start="4834" selection-end="4834" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="InspectionProfileEntry.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/codeInspection/InspectionProfileEntry.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="23" column="37" selection-start="838" selection-end="838" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CheckStyleConstants.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConstants.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="34" column="72" selection-start="830" selection-end="830" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CheckStylePlugin.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStylePlugin.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="54" column="35" selection-start="2304" selection-end="2304" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BaseComponent.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/openapi/components/BaseComponent.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="9" column="21" selection-start="300" selection-end="300" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -309,22 +308,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/util/ExtendedProblemDescriptor.java" />
-        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/util/ObjectUtils.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/TogglableTreeNode.java" />
         <option value="$PROJECT_DIR$/test-module/src/package1/Class2.java" />
         <option value="$PROJECT_DIR$/test-module/src/package1/Class1.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConfiguration.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckerFactory.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/model/ConfigurationLocation.java" />
-        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ToolWindowPanel.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/AbstractCheckerThread.java" />
         <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java" />
+        <option value="$PROJECT_DIR$/TODO.txt" />
+        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStylePlugin.java" />
+        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConstants.java" />
         <option value="$PROJECT_DIR$/META-INF/plugin.xml" />
         <option value="$PROJECT_DIR$/README" />
-        <option value="$PROJECT_DIR$/TODO.txt" />
+        <option value="$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java" />
       </list>
     </option>
   </component>
@@ -368,6 +367,9 @@
           </State>
           <State>
             <id>Inspections</id>
+          </State>
+          <State>
+            <id>Plugin DevKit</id>
           </State>
         </expanded-state>
         <selected-state>
@@ -584,7 +586,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -673,6 +674,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Favorites" />
       <pane id="Scope" />
     </panes>
@@ -680,11 +682,12 @@
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="project.structure.last.edited" value="Project" />
+    <property name="OverrideImplement.combined" value="true" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="options.lastSelected" value="com.intellij.profile.codeInspection.ui.ProjectInspectionToolsConfigurable" />
+    <property name="options.lastSelected" value="preferences.pluginManager" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -751,20 +754,9 @@
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
-    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" break_at_first_line="false" browser="DEFAULT" class_file="" class="" config_file="" directory="" file="" is_config_by_xml="false" is_groups_set="false" method_class="" method_file="" method="" open_page_automatically="false" scope="Class" stop_session_after_first_page="true" web_path="">
-      <option name="excludedGroups">
-        <set />
-      </option>
-      <option name="includedGroups">
-        <set />
-      </option>
-      <option name="mappings">
-        <list />
-      </option>
-      <option name="sessionId" value="" />
+    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
       <method>
         <option name="BuildArtifacts" enabled="false" />
-        <option name="FtpUpload" enabled="false" />
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
@@ -911,7 +903,7 @@
     <option name="USE_PROJECT_SETTINGS" value="true" />
     <option name="USE_ALTERNATE_LOCATION" value="false" />
   </component>
-  <component name="SvnConfiguration">
+  <component name="SvnConfiguration" maxAnnotateRevisions="500">
     <option name="USER" value="" />
     <option name="PASSWORD" value="" />
     <option name="LAST_MERGED_REVISION" />
@@ -976,28 +968,27 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="22" width="2556" height="1418" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31765613" sideWeight="0.5" order="25" side_tool="false" content_ui="tabs" />
-      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3230532" sideWeight="0.0" order="26" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32613635" sideWeight="0.5" order="18" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30454895" sideWeight="0.5" order="20" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3249715" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3230532" sideWeight="0.0" order="26" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24932432" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22058237" sideWeight="0.690054" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="22" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22058237" sideWeight="0.66615266" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3284091" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32613635" sideWeight="0.5" order="18" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="CheckStyle-IDEA-ToolWindow" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32971507" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="IDE talk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="24" side_tool="false" content_ui="tabs" />
       <window_info id="Dataflow to this" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="24" side_tool="false" content_ui="tabs" />
+      <window_info id="IDE talk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962328" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Clojure REPL" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="SVN Repositories" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32873562" sideWeight="0.5" order="19" side_tool="false" content_ui="tabs" />
@@ -1009,10 +1000,11 @@
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Atlassian " active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295325" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32845026" sideWeight="0.0" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32845026" sideWeight="0.0" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="TeamCity" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Checkstyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32908458" sideWeight="0.5" order="23" side_tool="false" content_ui="tabs" />
       <window_info id="Slice" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30454895" sideWeight="0.5" order="20" side_tool="false" content_ui="tabs" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="EJB" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="CVS" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
@@ -1040,8 +1032,10 @@
     <option name="PERFORM_ADD_REMOVE_IN_BACKGROUND" value="true" />
     <option name="PERFORM_ROLLBACK_IN_BACKGROUND" value="false" />
     <option name="CHECK_LOCALLY_CHANGED_CONFLICTS_IN_BACKGROUND" value="true" />
+    <option name="ENABLE_BACKGROUND_PROCESSES" value="false" />
+    <option name="CHANGED_ON_SERVER_INTERVAL" value="60" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed audit listener to handle multiple files. This is a preliminary step to changing the file scanner to handle groups of files." />
+    <option name="LAST_COMMIT_MESSAGE" value="Reworked file scanner to batch files. Makes scanning modules/projects a *lot* faster, at the cost of losing granular progress updates." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1061,6 +1055,7 @@
     <MESSAGE value="Fixed #63, apparent thread synchronisation problem." />
     <MESSAGE value="Merged in patch from LightGuard.JP for #69." />
     <MESSAGE value="Changed audit listener to handle multiple files. This is a preliminary step to changing the file scanner to handle groups of files." />
+    <MESSAGE value="Reworked file scanner to batch files. Makes scanning modules/projects a *lot* faster, at the cost of losing granular progress updates." />
   </component>
   <component name="VssConfiguration">
     <option name="CLIENT_PATH" value="" />
@@ -1169,71 +1164,24 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/model/ConfigurationLocation.java">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/ui/CheckStyleConfigPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="109" column="25" selection-start="2944" selection-end="2944" vertical-scroll-proportion="0.0" />
+        <state line="44" column="5" selection-start="1806" selection-end="1806" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/ScanProject.java">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/util/ExtendedProblemDescriptor.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="62" column="64" selection-start="2260" selection-end="2260" vertical-scroll-proportion="0.0" />
+        <state line="95" column="5" selection-start="2455" selection-end="2455" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/toolwindow/ToolWindowPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="229" column="70" selection-start="8104" selection-end="8104" vertical-scroll-proportion="0.0" />
+        <state line="61" column="5" selection-start="2227" selection-end="2227" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckFilesThread.java">
+    <entry file="file://$PROJECT_DIR$/TODO.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="21" selection-start="1010" selection-end="1010" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStylePlugin.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="469" column="28" selection-start="13740" selection-end="13740" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/actions/ScanModule.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="65" selection-start="2891" selection-end="2891" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/ScanFilesThread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="8" selection-start="1150" selection-end="1150" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/AbstractCheckerThread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="126" column="75" selection-start="3852" selection-end="3852" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/FileScanner.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="224" column="21" selection-start="8513" selection-end="8522" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="36" selection-start="5668" selection-end="5668" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="134" selection-start="695" selection-end="830" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="144" column="121" selection-start="4991" selection-end="4991" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="212" column="13" selection-start="8026" selection-end="8026" vertical-scroll-proportion="0.0" />
+        <state line="7" column="0" selection-start="139" selection-end="139" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checks/Check.java">
@@ -1246,9 +1194,60 @@
         <state line="5" column="19" selection-start="179" selection-end="179" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/TODO.txt">
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/checker/CheckStyleAuditListener.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="139" selection-end="139" vertical-scroll-proportion="0.06619386">
+        <state line="135" column="75" selection-start="4552" selection-end="4552" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/codeInspection/LocalInspectionTool.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="22" selection-start="174" selection-end="174" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/META-INF/plugin.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="19" selection-start="515" selection-end="515" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="138" column="13" selection-start="4834" selection-end="4834" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/codeInspection/InspectionProfileEntry.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="37" selection-start="838" selection-end="838" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleConstants.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="72" selection-start="830" selection-end="830" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStylePlugin.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="54" column="35" selection-start="2304" selection-end="2304" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/lib/openapi.jar!/com/intellij/openapi/components/BaseComponent.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="21" selection-start="300" selection-end="300" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleInspection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="147" column="64" selection-start="5727" selection-end="5727" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/infernus/idea/checkstyle/CheckStyleProvider.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="28" selection-start="565" selection-end="565" vertical-scroll-proportion="0.15141957">
           <folding />
         </state>
       </provider>
