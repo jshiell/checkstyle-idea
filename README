@@ -119,6 +119,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Jonas Bergvall
 * Edward Campbell
 * LightGuard.JP
+* Gerhard Radatz
 
 And also thanks are due to the authors and contributors of:
 
@@ -142,6 +143,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.0.13- Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
 3.0.12- Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.
 3.0.11- Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.
 3.0.10- Fixed: Partial property detection. Thanks to LightGuard.JP.
