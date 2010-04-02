@@ -10,12 +10,9 @@ public class ClassPathConfigurationLocation extends ConfigurationLocation {
 
     /**
      * Create a new classpath configuration.
-     *
-     * @param location    the location on the classpath.
-     * @param description the optional description of the file.
      */
-    ClassPathConfigurationLocation(final String location, final String description) {
-        super(ConfigurationType.CLASSPATH, location, description);
+    ClassPathConfigurationLocation() {
+        super(ConfigurationType.CLASSPATH);
     }
 
     /**

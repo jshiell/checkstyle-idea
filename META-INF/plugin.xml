@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.0.13: Fixed: File location fixes galore! Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.</li>
     <li>3.0.12: Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.</li>
     <li>3.0.11: Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.</li>

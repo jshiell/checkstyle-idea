@@ -18,12 +18,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     /**
      * Create a new URL configuration.
-     *
-     * @param location    the URL.
-     * @param description the optional description of the file.
      */
-    HTTPURLConfigurationLocation(final String location, final String description) {
-        super(ConfigurationType.HTTP_URL, location, description);
+    HTTPURLConfigurationLocation() {
+        super(ConfigurationType.HTTP_URL);
     }
 
     /**

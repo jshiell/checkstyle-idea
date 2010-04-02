@@ -26,12 +26,10 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     /**
      * Create a new file configuration.
      *
-     * @param project     the project.
-     * @param location    the location on disc.
-     * @param description the optional description of the file.
+     * @param project the project.
      */
-    FileConfigurationLocation(final Project project, final String location, final String description) {
-        super(ConfigurationType.FILE, location, description);
+    FileConfigurationLocation(final Project project) {
+        super(ConfigurationType.FILE);
 
         if (project == null) {
             throw new IllegalArgumentException("A project is required");
@@ -47,7 +45,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     public File getBaseDir() {
         final String location = getLocation();
         if (location != null) {
-            final File locationFile = new File(getLocation());
+            final File locationFile = new File(location);
             if (locationFile.exists()) {
                 return locationFile.getParentFile();
             }
@@ -108,53 +106,69 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     /**
-     * Process a stored file path for any tokens.
+     * Process a stored file path for any tokens, and resolve the platform independent URI syntax
+     * to the local filesystem path encoding.
      *
-     * @param path the path to process.
-     * @return the processed path.
+     * @param path the path to process, in (tokenised) URI syntax.
+     * @return the processed path, in local file path syntax.
      */
-    private String untokenisePath(final String path) {
+    private String untokenisePath(String path) {
         if (path == null) {
             return null;
         }
 
         LOG.debug("Processing file: " + path);
 
+        // replace URI style slashes with the platform slash
+        path = path.replace('/', File.separatorChar);
+
+        String untokenisedPath = null;
+
         if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
+            // path is relative to project dir
             final File projectPath = getProjectPath();
             if (projectPath != null) {
-                final File fullConfigFile = new File(projectPath,
-                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
-                return fullConfigFile.getAbsolutePath();
+                final String filename = path.substring(CheckStyleConstants.PROJECT_DIR.length());
+                untokenisedPath = new File(projectPath, filename).getAbsolutePath();
             } else {
                 LOG.warn("Could not untokenise path as project dir is unset: "
                         + path);
             }
+
+        } else {
+            // absolute path: turn the URI into a File path
+            untokenisedPath = path;
         }
 
-        return path;
+        return untokenisedPath;
     }
 
     /**
-     * Process a path and add tokens as necessary.
+     * Process a path, add tokens as necessary and encode it in platform independent URI syntax.
      *
-     * @param path the path to processed.
-     * @return the tokenised path.
+     * @param path the path to process, in local file path syntax.
+     * @return the tokenised path in URI syntax.
      */
     private String tokenisePath(final String path) {
         if (path == null) {
             return null;
         }
 
+        String tokenisedPath = toURI(path);
+
         final File projectPath = getProjectPath();
         if (projectPath != null) {
             final String projectPathAbs = projectPath.getAbsolutePath();
             if (path.startsWith(projectPathAbs)) {
-                return CheckStyleConstants.PROJECT_DIR + path.substring(
-                        projectPathAbs.length());
+                tokenisedPath = CheckStyleConstants.PROJECT_DIR
+                        + toURI(path.substring(projectPathAbs.length()));
             }
         }
 
-        return path;
+        return tokenisedPath;
+    }
+
+    private String toURI(final String s) {
+        return s.replace(File.separatorChar, '/');
     }
 }

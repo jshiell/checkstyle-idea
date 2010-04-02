@@ -39,20 +39,22 @@ public class ConfigurationLocationFactory {
 
         switch (type) {
             case FILE:
-                configurationLocation = new FileConfigurationLocation(project, location, description);
+                configurationLocation = new FileConfigurationLocation(project);
                 break;
 
             case HTTP_URL:
-                configurationLocation = new HTTPURLConfigurationLocation(location, description);
+                configurationLocation = new HTTPURLConfigurationLocation();
                 break;
 
             case CLASSPATH:
-                configurationLocation = new ClassPathConfigurationLocation(location, description);
+                configurationLocation = new ClassPathConfigurationLocation();
                 break;
 
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
+        configurationLocation.setLocation(location);
+        configurationLocation.setDescription(description);
 
         synchronized (INSTANCE_CACHE) {
             if (INSTANCE_CACHE.containsKey(configurationLocation)) {
@@ -71,6 +73,7 @@ public class ConfigurationLocationFactory {
      *
      * @param project              the project this location is associated with.
      * @param stringRepresentation the toString of another ConfigurationLocation.
+     * @return the location.
      */
     public static ConfigurationLocation create(final Project project, final String stringRepresentation) {
         if (project == null) {

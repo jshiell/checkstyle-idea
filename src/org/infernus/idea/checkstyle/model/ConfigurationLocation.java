@@ -19,7 +19,7 @@ public abstract class ConfigurationLocation {
 
     private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
 
-    private ConfigurationType type;
+    private final ConfigurationType type;
     private String location;
     private String description;
     private Map<String, String> properties = new HashMap<String, String>();
@@ -30,20 +30,13 @@ public abstract class ConfigurationLocation {
      * Create a new location.
      *
      * @param type        the type.
-     * @param location    the location.
-     * @param description an optional description of the file.
      */
-    public ConfigurationLocation(final ConfigurationType type,
-                                 final String location,
-                                 final String description) {
-        setType(type);
-        setLocation(location);
-
-        if (description == null) {
-            this.description = location;
-        } else {
-            this.description = description;
+    public ConfigurationLocation(final ConfigurationType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("A type is required");
         }
+
+        this.type = type;
     }
 
     /**
@@ -57,14 +50,6 @@ public abstract class ConfigurationLocation {
 
     public ConfigurationType getType() {
         return type;
-    }
-
-    public void setType(final ConfigurationType type) {
-        if (type == null) {
-            throw new IllegalArgumentException("A type is required");
-        }
-
-        this.type = type;
     }
 
     public String getLocation() {

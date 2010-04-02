@@ -98,6 +98,10 @@ public final class CheckStyleConfiguration extends Properties {
             return defaultLocation;
         }
 
+        // immediately re-set the activeConfiguration
+        // see #getConfigurationLocations() for an explanation why we must do this
+        setActiveConfiguration(activeLocation);
+
         return activeLocation;
     }
 
@@ -137,6 +141,14 @@ public final class CheckStyleConfiguration extends Properties {
         if (!locations.contains(defaultLocation)) {
             locations.add(0, defaultLocation);
         }
+
+        // now immediately re-set the configurationLocations:
+        // since tokenised file paths are automatically resolved by the IDEA core during
+        // settings loading, we must store them again - otherwise we would loose the token and
+        // save the full file path instead (at least if the user did not change our settings, but
+        // only some other settings editors, because our setConfigurationLocations is not called
+        // from outside then)
+        setConfigurationLocations(locations);
 
         return locations;
     }
