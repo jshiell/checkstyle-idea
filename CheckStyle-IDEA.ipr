@@ -394,9 +394,9 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="CheckStyle 5.0">
+    <library name="CheckStyle 5.1">
       <CLASSES>
-        <root url="jar:///Developer/Java/Libraries/checkstyle-5.0/checkstyle-all-5.0.jar!/" />
+        <root url="jar:///Developer/Java/Libraries/checkstyle-5.1/checkstyle-all-5.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

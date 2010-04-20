@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.1: New: Upgraded to CheckStyle 5.1.</li>
     <li>3.1: Fixed: Concurrency issues. Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: File location fixes galore! Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.</li>
