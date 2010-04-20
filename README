@@ -75,14 +75,18 @@ Limitations
   affect Mac users with the pre-release of JDK6. The solution is to target
   class files at the version of the IDEA JRE (i.e. 1.5 for Mac users). Thanks
   to J. G. Christopher.
+
 * If you change the configuration options the real-time scan will not be updated
   until the file is either changed or reopened.
+
 * We do not check if a property definition is required for a given file.
   Hence you can exit configuration without setting required properties. Given,
   however, that CheckStyle files can change without the plug-in being aware
   this is something we'll always have to live with to some degree.
+
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
+  
 * Loading a file from a URL is current experimental and not guaranteed to do
   anything at all.
 
@@ -144,6 +148,7 @@ Version History
 ---------------
 
 3.1   - New: Upgraded to CheckStyle 5.1.
+3.1   - Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.
 3.1   - Fixed: Concurrency issues. Thanks to Gerhard Radatz.
 3.0.13- Fixed: File location fixes galore! Thanks to Gerhard Radatz.
 3.0.13- Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
@@ -151,12 +156,12 @@ Version History
 3.0.11- Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.
 3.0.10- Fixed: Partial property detection. Thanks to LightGuard.JP.
 3.0.9 - Fixed: Cache sychronisation problem.
-3.0.8 - Fixed: Null property in configuration hashtable resulting in NPE.
+3.0.8 - Fixed: Null property in configuration hash-table resulting in NPE.
 3.0.7 - Fixed: Module scan results are no longer shared between files.
 3.0.6 - Fixed: IDEA 9 compatibility.
 3.0.5 - Fixed: Filters (e.g. SuppressionCommentFilter) now work correctly.
 3.0.5 - Fixed: JavadocPackage now respects allowLegacy. Thanks to Edward Campbell.
-3.0.4 - Fixed: Checkstyle DTD 1.3 added. Thanks to Jonas Bergvall.
+3.0.4 - Fixed: CheckStyle DTD 1.3 added. Thanks to Jonas Bergvall.
 3.0.3 - Fixed: Removed dependency on Apache commons-lang to restore compatibility with IDEA 7.0.x/Linux.
 3.0.2 - Fixed: File configuration column headings were incorrect.
 3.0.1 - Fixed: Rule files added with no description cause an exception.
@@ -165,8 +170,9 @@ Version History
              Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
              can be found here: http://checkstyle.sourceforge.net/releasenotes.html
 3.0   - New: Result list may be filtered on severity.
-3.0   - New: Backend re-written to support mutliple CheckStyle files. You will need to set your configuration
+3.0   - New: Back-end re-written to support multiple CheckStyle files. You will need to set your configuration
              once again I'm afraid.
+             
 2.4   - New: Default CheckStyle file now has generics patch applied.
 2.4   - New: Scans in progress may be aborted.
 2.4   - Fixed: Null Pointer Exception with package HTML check.
@@ -178,17 +184,16 @@ Version History
 2.3   - Fixed: Background scan thread is now lower priority.
 2.3   - Fixed: Module scan now works again.
 2.2   - Fixed: Now works with IDEA8.0.
-2.2   - New: Ability to scan on checkin. Thanks to J. G. Christopher.
-2.2   - Experimental: Ability to load Checkstyle configuration from a URL. This is NOT robust at present.
+2.2   - New: Ability to scan on check-in. Thanks to J. G. Christopher.
+2.2   - Experimental: Ability to load CheckStyle configuration from a URL. This is NOT robust at present.
 2.1   - New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.
-2.1   - New: Ability to supress checks on test classes.
+2.1   - New: Ability to suppress checks on test classes.
 2.1   - New: Updated CheckStyle to 4.4.
-2.1   - Fixed: Supression filters with relative paths now load correctly.
+2.1   - Fixed: Suppression filters with relative paths now load correctly.
 2.1   - Fixed: NewlineAtEndOfFile now works on Windows.
 2.1   - Fixed: PackageHtml test will now work.
-
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.
@@ -203,7 +208,7 @@ Version History
 1.0.2 - Fixed: Exception if inspection cancelled during results processing.
 1.0.2 - Fixed: Exception if configuration panel opened while puppycrawl.com
         could not be accessed.
-1.0.1 - Fixed: Potenially IllegalState if project path cannot be retrieved
+1.0.1 - Fixed: Potentially IllegalState if project path cannot be retrieved
         within IDEA 7M1.
 1.0   - New: Static scanning for current module implemented.
       - New: Ability to add third-party checks.
@@ -213,22 +218,15 @@ Version History
         a CheckStyle error once they have been compiled.
 
 0.5.2 - New: Settings are now stored in project, not workspace.
-
 0.5.1 - Fixed: NullPointer when a null PSI element is encountered
         during scanning.
-        
 0.5   - Improved: Localisation support.
       - Improved: Config file locations under the project root are now
         stored as relative rather than the system-specific absolute path.
       - New: CheckStyle icons added.
-
 0.4   - New: Added static scanning support.
       - New: Updated CheckStyle to 4.3.
-
 0.3   - Improved: CheckStyle caching improved.
       - Improved: Temporary file deletion.
-
 0.2   - Fix: File browser for configuration file filters out directories.
-
 0.1   - Initial release.
-

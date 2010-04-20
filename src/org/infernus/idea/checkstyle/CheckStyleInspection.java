@@ -79,13 +79,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             final ClassLoader moduleClassLoader = checkStylePlugin.buildModuleClassLoader(module);
 
-            File baseDir = configurationLocation.getBaseDir();
-            if (baseDir == null) {
-                baseDir = new File(project.getBaseDir().getPath());
-            }
-
             LOG.info("Loading configuration from " + configurationLocation);
-            return CheckerFactory.getInstance().getChecker(configurationLocation, baseDir, moduleClassLoader);
+            return CheckerFactory.getInstance().getChecker(configurationLocation, module, moduleClassLoader);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);

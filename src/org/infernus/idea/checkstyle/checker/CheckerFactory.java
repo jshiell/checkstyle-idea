@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ContentEntry;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
@@ -62,14 +65,14 @@ public class CheckerFactory {
      * Get a checker for a given configuration.
      *
      * @param location    the location of the CheckStyle file.
+     * @param module      the current module.
      * @param classLoader class loader for CheckStyle use, or null to use
-     *                    the default.
-     * @param baseDir     the project's base directory.
-     * @return a checker.
+     *                    the default.  @return a checker.
+     * @return the checker for the module.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final ConfigurationLocation location,
-                              final File baseDir,
+                              final Module module,
                               final ClassLoader classLoader)
             throws CheckstyleException {
         if (location == null) {
@@ -89,8 +92,8 @@ public class CheckerFactory {
                 }
             }
 
-            final CachedChecker checker = createChecker(location, baseDir,
-                    new ListPropertyResolver(location.getProperties()), classLoader);
+            final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
+            final CachedChecker checker = createChecker(location, module, propertyResolver, classLoader);
             cache.put(location, checker);
 
             return checker.getChecker();
@@ -124,14 +127,14 @@ public class CheckerFactory {
      * Load the Checkstyle configuration in a separate thread.
      *
      * @param location           The location of the Checkstyle configuration file.
-     * @param baseDir            the base directory of the configuration file, if available.
+     * @param module             the current module.
      * @param resolver           the resolver.
      * @param contextClassLoader the context class loader, or null for default.
      * @return loaded Configuration object
      * @throws CheckstyleException If there was any error loading the configuration file.
      */
     private CachedChecker createChecker(final ConfigurationLocation location,
-                                        final File baseDir,
+                                        final Module module,
                                         final PropertyResolver resolver,
                                         final ClassLoader contextClassLoader)
             throws CheckstyleException {
@@ -146,7 +149,7 @@ public class CheckerFactory {
         }
 
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(
-                location, resolver, baseDir, contextClassLoader);
+                location, resolver, module, contextClassLoader);
 
         // Begin reading the configuration
         worker.start();
@@ -211,48 +214,23 @@ public class CheckerFactory {
         }
     }
 
-    /**
-     * Scans the configurtion for supression filters and replaces relative paths with absolute ones.
-     *
-     * @param config  the current configuration.
-     * @param baseDir the base directory of the configuration file.
-     * @throws CheckstyleException if configuration fails.
-     */
-    private void replaceSupressionFilterPath(final Configuration config,
-                                             final File baseDir)
-            throws CheckstyleException {
-        if (baseDir == null) {
-            return;
-        }
-
-        for (final Configuration configurationElement : config.getChildren()) {
-            if (!"SuppressionFilter".equals(configurationElement.getName())) {
-                continue;
-            }
-
-            final String suppressionFile = configurationElement.getAttribute("file");
-            if (suppressionFile != null && !new File(suppressionFile).exists()
-                    && configurationElement instanceof DefaultConfiguration) {
-                ((DefaultConfiguration) configurationElement).addAttribute(
-                        "file", new File(baseDir, suppressionFile).getAbsolutePath());
-            }
-        }
-    }
-
     private class CheckerFactoryWorker extends Thread {
+        private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
+        private static final String FILE_ATTRIBUTE = "file";
+
         private final Object[] threadReturn = new Object[1];
 
         private final ConfigurationLocation location;
         private final PropertyResolver resolver;
-        private final File baseDir;
+        private final Module module;
 
         public CheckerFactoryWorker(final ConfigurationLocation location,
                                     final PropertyResolver resolver,
-                                    final File baseDir,
+                                    final Module module,
                                     final ClassLoader contextClassLoader) {
             this.location = location;
             this.resolver = resolver;
-            this.baseDir = baseDir;
+            this.module = module;
 
 
             if (contextClassLoader != null) {
@@ -280,7 +258,7 @@ public class CheckerFactory {
                         config = ConfigurationLoader.loadConfiguration(
                                 configurationInputStream, resolver, true);
 
-                        replaceSupressionFilterPath(config, baseDir);
+                        replaceSuppressionFilterPath(config);
 
                         checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
                         checker.configure(config);
@@ -302,6 +280,75 @@ public class CheckerFactory {
             } catch (Exception e) {
                 threadReturn[0] = e;
             }
+        }
+
+        /**
+         * Scans the configuration for suppression filters and
+         * replaces relative paths with absolute ones.
+         *
+         * @param config the current configuration.
+         * @throws CheckstyleException if configuration fails.
+         */
+        private void replaceSuppressionFilterPath(final Configuration config)
+                throws CheckstyleException {
+
+            for (final Configuration configurationElement : config.getChildren()) {
+                if (!SUPPRESSION_FILTER_ELEMENT.equals(configurationElement.getName())) {
+                    continue;
+                }
+
+                final String fileName = configurationElement.getAttribute(FILE_ATTRIBUTE);
+                if (fileName != null && !new File(fileName).exists()
+                        && configurationElement instanceof DefaultConfiguration) {
+                    final File suppressionFile = getSuppressionFile(fileName);
+                    if (suppressionFile != null) {
+                        ((DefaultConfiguration) configurationElement).addAttribute(
+                                FILE_ATTRIBUTE, suppressionFile.getAbsolutePath());
+                    }
+                }
+            }
+        }
+
+        private File getSuppressionFile(final String fileName) {
+            File suppressionFile = null;
+
+            // check relative to config
+            if (location.getBaseDir() != null) {
+                final File configFileRelativePath = new File(location.getBaseDir(), fileName);
+                if (configFileRelativePath.exists()) {
+                    suppressionFile = configFileRelativePath;
+                }
+            }
+
+            // check module content roots
+            final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
+            if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
+                for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
+                    final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
+                    if (contentEntryPath.exists()) {
+                        suppressionFile = contentEntryPath;
+                        break;
+                    }
+                }
+            }
+
+            // check module file
+            if (suppressionFile == null && module.getModuleFile() != null) {
+                final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
+                if (moduleRelativePath.exists()) {
+                    suppressionFile = moduleRelativePath;
+                }
+            }
+
+            // check project base dir
+            if (suppressionFile == null && module.getProject().getBaseDir() != null) {
+                final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
+                if (projectRelativePath.exists()) {
+                    suppressionFile = projectRelativePath;
+                }
+            }
+
+            return suppressionFile;
         }
     }
 }

@@ -248,12 +248,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            File baseDir = location.getBaseDir();
-            if (baseDir == null) {
-                baseDir = new File(plugin.getProject().getBaseDir().getPath());
-            }
-
-            return CheckerFactory.getInstance().getChecker(location, baseDir, classLoader);
+            return CheckerFactory.getInstance().getChecker(location, module, classLoader);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);

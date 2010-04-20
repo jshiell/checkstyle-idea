@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.1: Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.</li>
     <li>3.1: New: Upgraded to CheckStyle 5.1.</li>
     <li>3.1: Fixed: Concurrency issues. Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: File location fixes galore! Thanks to Gerhard Radatz.</li>
@@ -26,7 +27,7 @@
     <li>3.0.11: Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.</li>
     <li>3.0.10: Fixed: Partial property detection. Thanks to LightGuard.JP.</li>
     <li>3.0.9: Fixed: Cache sychronisation problem.</li>
-    <li>3.0.8: Fixed: Null property in configuration hashtable resulting in NPE.</li>
+    <li>3.0.8: Fixed: Null property in configuration hash-table resulting in NPE.</li>
     <li>3.0.7: Fixed: Module scan results are no longer shared between files.</li>
     <li>3.0.6: Fixed: IDEA 9 compatibility.</li>
     <li>3.0.5: Fixed: Filters (e.g. SuppressionCommentFilter) now work correctly.</li>
@@ -40,7 +41,7 @@
     <li>3.0: New: CheckStyle 5.0 support. <i>Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes
              can be found in the <a href="http://checkstyle.sourceforge.net/releasenotes.html">release notes</a>.</i></li>
     <li>3.0: New: Result list may be filtered on severity.</li>
-    <li>3.0: New: Backend re-written to support multiple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
+    <li>3.0: New: Back-end re-written to support multiple CheckStyle files. You will need to set your configuration once again I'm afraid.</li>
     <li>2.4: New: Default CheckStyle file now has generics patch applied.</li>
     <li>2.4: New: Scans in progress may be aborted.</li>
     <li>2.4: Fixed: Null Pointer Exception with package HTML check.</li>
@@ -52,8 +53,8 @@
     <li>2.3: Fixed: Background scan thread is now lower priority.</li>
     <li>2.3: Fixed: Module scan now works again.</li>
 	<li>2.2: Fixed: Now works with IDEA8.0.</li>
-	<li>2.2: New: Ability to scan on checkin. Thanks to J. G. Christopher.</li>
-	<li>2.2: Experimental: Ability to load Checkstyle configuration from a URL. This is NOT robust at present.</li>
+	<li>2.2: New: Ability to scan on check-in. Thanks to J. G. Christopher.</li>
+	<li>2.2: Experimental: Ability to load CheckStyle configuration from a URL. This is NOT robust at present.</li>
     <li>2.1: New: Ability to scan only modified files if project uses VCS. If the project
         does not use VCS then this action will have no effect. Thanks to J. G. Christopher
         for this patch.</li>
