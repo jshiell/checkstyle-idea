@@ -127,25 +127,18 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * {@inheritDoc}
      */
     public CheckStylePlugin.ConfigurationBean getState() {
-        final ConfigurationBean configBean = new ConfigurationBean();
-        for (final Enumeration confNames = configuration.propertyNames(); confNames.hasMoreElements();) {
-            final String elementName = (String) confNames.nextElement();
-            configBean.configuration.put(elementName, configuration.getProperty(elementName));
-        }
-        return configBean;
+        return new ConfigurationBean(configuration.getState());
     }
 
     /**
      * {@inheritDoc}
      */
     public void loadState(final CheckStylePlugin.ConfigurationBean newConfiguration) {
-        configuration.clear();
-
-        if (newConfiguration != null && newConfiguration.configuration != null) {
-            for (final String key : newConfiguration.configuration.keySet()) {
-                configuration.setProperty(key, newConfiguration.configuration.get(key));
-            }
+        Map<String, String> bean = null;
+        if (newConfiguration != null) {
+            bean = newConfiguration.configuration;
         }
+        configuration.loadState(bean);
     }
 
     /**
@@ -562,6 +555,15 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * Wrapper class for IDEA state serialisation.
      */
     public static class ConfigurationBean {
-        public Map<String, String> configuration = new HashMap<String, String>();
+
+        public Map<String, String> configuration;
+
+        public ConfigurationBean(Map<String, String> configuration) {
+            this.configuration = configuration;
+        }
+
+        public ConfigurationBean() {
+            this.configuration = new HashMap<String, String>();
+        }
     }
 }

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A manager for CheckStyle plug-in configuration.
@@ -20,12 +21,10 @@ import java.util.*;
  * @author James Shiell
  * @version 1.0
  */
-public final class CheckStyleConfiguration extends Properties {
+public final class CheckStyleConfiguration {
 
     @NonNls
     private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
-
-    private static final long serialVersionUID = 2804470793153612480L;
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
@@ -37,6 +36,8 @@ public final class CheckStyleConfiguration extends Properties {
 
     private final Project project;
     private final ConfigurationLocation defaultLocation;
+
+    private final ConcurrentHashMap<String,String> storage = new ConcurrentHashMap<String,String>();
 
     /**
      * Scan files before vcs checkin.
@@ -73,22 +74,22 @@ public final class CheckStyleConfiguration extends Properties {
         }
 
         if (configurationLocation != null) {
-            setProperty(ACTIVE_CONFIG, configurationLocation.getDescriptor());
+            storage.put(ACTIVE_CONFIG, configurationLocation.getDescriptor());
         } else {
-            remove(ACTIVE_CONFIG);
+            storage.remove(ACTIVE_CONFIG);
         }
     }
 
     public ConfigurationLocation getActiveConfiguration() {
         final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
 
-        if (!containsKey(ACTIVE_CONFIG)) {
+        if (!storage.containsKey(ACTIVE_CONFIG)) {
             return defaultLocation;
         }
 
         ConfigurationLocation activeLocation = null;
         try {
-            activeLocation = ConfigurationLocationFactory.create(project, getProperty(ACTIVE_CONFIG));
+            activeLocation = ConfigurationLocationFactory.create(project, storage.get(ACTIVE_CONFIG));
         } catch (IllegalArgumentException e) {
             LOG.warn("Could not load active configuration", e);
         }
@@ -108,33 +109,36 @@ public final class CheckStyleConfiguration extends Properties {
     public List<ConfigurationLocation> getConfigurationLocations() {
         final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
 
-        for (Object configProperty : keySet()) {
-            if (!configProperty.toString().startsWith(LOCATION_PREFIX)) {
+        for (Map.Entry<String, String> entry : storage.entrySet()) {
+            if (!entry.getKey().startsWith(LOCATION_PREFIX)) {
                 continue;
             }
 
+            final String value = entry.getValue();
             try {
                 final ConfigurationLocation location = ConfigurationLocationFactory.create(
-                        project, getProperty(configProperty.toString()));
+                    project, value);
 
                 final Map<String, String> properties = new HashMap<String, String>();
 
-                final int index = Integer.parseInt(configProperty.toString().substring(LOCATION_PREFIX.length()));
+                final int index = Integer.parseInt(entry.getKey().substring(LOCATION_PREFIX.length()));
                 final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
-                for (Object innerConfigProperty : keySet()) {
-                    if (!innerConfigProperty.toString().startsWith(propertyPrefix)) {
-                        continue;
-                    }
 
-                    final String propertyName = innerConfigProperty.toString().substring(propertyPrefix.length());
-                    properties.put(propertyName, getProperty(innerConfigProperty.toString()));
+                // loop again over all settings to find the properties belonging to this configuration
+                // not the best solution, but since there are only few items it doesn't hurt too much...
+                for (Map.Entry<String, String> innerEntry : storage.entrySet()) {
+                    if (innerEntry.getKey().startsWith(propertyPrefix)) {
+
+                        final String propertyName = innerEntry.getKey().substring(propertyPrefix.length());
+                        properties.put(propertyName, innerEntry.getValue());
+                    }
                 }
 
                 location.setProperties(properties);
                 locations.add(location);
 
             } catch (IllegalArgumentException e) {
-                LOG.error("Could not parse location: " + getProperty(configProperty.toString()), e);
+                LOG.error("Could not parse location: " + value, e);
             }
         }
 
@@ -154,7 +158,7 @@ public final class CheckStyleConfiguration extends Properties {
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
-        for (Iterator i = keySet().iterator(); i.hasNext();) {
+        for (Iterator i = storage.keySet().iterator(); i.hasNext();) {
             final String propertyName = i.next().toString();
             if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
                 i.remove();
@@ -167,15 +171,12 @@ public final class CheckStyleConfiguration extends Properties {
 
         int index = 0;
         for (ConfigurationLocation configurationLocation : configurationLocations) {
-            setProperty(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
+            storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
 
             final Map<String, String> properties = configurationLocation.getProperties();
             if (properties != null) {
-                for (final String property : properties.keySet()) {
-                    final String propertyValue = properties.get(property);
-                    if (propertyValue != null) {
-                        setProperty(PROPERTIES_PREFIX + index + "." + property, propertyValue);
-                    }
+                for (Map.Entry<String,String> entry : properties.entrySet()) {
+                    storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), entry.getValue());
                 }
             }
 
@@ -187,7 +188,7 @@ public final class CheckStyleConfiguration extends Properties {
     public List<String> getThirdPartyClassPath() {
         final List<String> thirdPartyClasspath = new ArrayList<String>();
 
-        final String value = getProperty(THIRDPARTY_CLASSPATH);
+        final String value = storage.get(THIRDPARTY_CLASSPATH);
         if (value != null) {
             final String[] parts = value.split(";");
             for (final String part : parts) {
@@ -200,7 +201,7 @@ public final class CheckStyleConfiguration extends Properties {
 
     public void setThirdPartyClassPath(final List<String> value) {
         if (value == null) {
-            remove(THIRDPARTY_CLASSPATH);
+            storage.remove(THIRDPARTY_CLASSPATH);
             return;
         }
 
@@ -212,16 +213,16 @@ public final class CheckStyleConfiguration extends Properties {
             valueString.append(tokenisePath(part));
         }
 
-        setProperty(THIRDPARTY_CLASSPATH, valueString.toString());
+        storage.put(THIRDPARTY_CLASSPATH, valueString.toString());
     }
 
     public boolean isScanningTestClasses() {
-        return Boolean.valueOf(getProperty(CHECK_TEST_CLASSES,
-                Boolean.toString(false)));
+        final String p = storage.get(CHECK_TEST_CLASSES);
+        return p != null && Boolean.valueOf(p);
     }
 
     public void setScanningTestClasses(final boolean scanTestFles) {
-        setProperty(CHECK_TEST_CLASSES, Boolean.toString(scanTestFles));
+        storage.put(CHECK_TEST_CLASSES, Boolean.toString(scanTestFles));
     }
 
     public boolean isScanFilesBeforeCheckin() {
@@ -300,5 +301,26 @@ public final class CheckStyleConfiguration extends Properties {
         }
 
         return new File(baseDir.getPath());
+    }
+
+
+    /** Create a copy of the current configuration.
+     *
+     * @return a copy of the current configuration settings
+     */
+    public Map<String,String> getState() {
+        return new HashMap<String, String>(storage);
+    }
+
+
+    /**
+     * Load the state from the given stateBean.
+     * @param stateBean where to load the state from
+     */
+    public void loadState(Map<String, String> stateBean) {
+        storage.clear();
+        if (stateBean != null) {
+            storage.putAll(stateBean);
+        }
     }
 }

@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.0.13</version>
+    <version>3.1</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.1: Fixed: Concurrency issues. Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: File location fixes galore! Thanks to Gerhard Radatz.</li>
     <li>3.0.13: Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.</li>
     <li>3.0.12: Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.</li>
