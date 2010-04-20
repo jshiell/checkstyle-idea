@@ -141,92 +141,12 @@ public class CheckerFactory {
 
             LOG.debug("Call to create new checker.");
 
-            // Log properties if known
-            if (resolver != null && resolver instanceof ListPropertyResolver) {
-                final ListPropertyResolver listResolver = (ListPropertyResolver)
-                        resolver;
-                final Map<String, String> propertiesToValues
-                        = listResolver.getPropertyNamesToValues();
-                for (final String propertyName : propertiesToValues.keySet()) {
-                    final String propertyValue
-                            = propertiesToValues.get(propertyName);
-                    LOG.debug("- Property: " + propertyName + "="
-                            + propertyValue);
-                }
-            }
-
-            // Log classloaders, if known
-            if (contextClassLoader != null) {
-                ClassLoader currentLoader = contextClassLoader;
-                while (currentLoader != null) {
-                    if (currentLoader instanceof URLClassLoader) {
-                        LOG.debug("+ URLClassLoader: "
-                                + currentLoader.getClass().getName());
-                        final URLClassLoader urlLoader = (URLClassLoader)
-                                currentLoader;
-                        for (final URL url : urlLoader.getURLs()) {
-                            LOG.debug(" + URL: " + url);
-                        }
-                    } else {
-                        LOG.debug("+ ClassLoader: "
-                                + currentLoader.getClass().getName());
-                    }
-
-                    currentLoader = currentLoader.getParent();
-                }
-            }
+            logProperties(resolver);
+            logClassLoaders(contextClassLoader);
         }
 
-        // This variable needs to be final so that it can be accessed from the
-        // inner class, but at the same time we have to be able to set its
-        // value. Therefor we use a final array.
-        final Object[] threadReturn = new Object[1];
-
-        Thread worker = new Thread() {
-            public void run() {
-                try {
-                    final Checker checker = new Checker();
-                    final Configuration config;
-
-                    if (location != null) {
-                        InputStream configurationInputStream = null;
-
-                        try {
-                            configurationInputStream = location.resolve();
-                            config = ConfigurationLoader.loadConfiguration(
-                                    configurationInputStream, resolver, true);
-
-                            replaceSupressionFilterPath(config, baseDir);
-
-                            checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
-                            checker.configure(config);
-
-                        } finally {
-                            if (configurationInputStream != null) {
-                                try {
-                                    configurationInputStream.close();
-                                } catch (IOException e) {
-                                    // ignored
-                                }
-                            }
-                        }
-                    } else {
-                        config = new DefaultConfiguration("checker");
-                    }
-                    threadReturn[0] = new CachedChecker(checker, config);
-
-                } catch (Exception e) {
-                    threadReturn[0] = e;
-                }
-            }
-        };
-
-        if (contextClassLoader != null) {
-            worker.setContextClassLoader(contextClassLoader);
-        } else {
-            final ClassLoader loader = getClass().getClassLoader();
-            worker.setContextClassLoader(loader);
-        }
+        final CheckerFactoryWorker worker = new CheckerFactoryWorker(
+                location, resolver, baseDir, contextClassLoader);
 
         // Begin reading the configuration
         worker.start();
@@ -241,14 +161,54 @@ public class CheckerFactory {
         }
 
         // Did the process of reading the configuration fail?
-        if (threadReturn[0] instanceof CheckstyleException) {
-            throw (CheckstyleException) threadReturn[0];
+        if (worker.getResult() instanceof CheckstyleException) {
+            throw (CheckstyleException) worker.getResult();
 
-        } else if (threadReturn[0] instanceof Throwable) {
-            throw new CheckstyleException("Could not load configuration", (Throwable) threadReturn[0]);
+        } else if (worker.getResult() instanceof Throwable) {
+            throw new CheckstyleException("Could not load configuration",
+                    (Throwable) worker.getResult());
         }
 
-        return (CachedChecker) threadReturn[0];
+        return (CachedChecker) worker.getResult();
+    }
+
+    private void logClassLoaders(final ClassLoader contextClassLoader) {
+        // Log classloaders, if known
+        if (contextClassLoader != null) {
+            ClassLoader currentLoader = contextClassLoader;
+            while (currentLoader != null) {
+                if (currentLoader instanceof URLClassLoader) {
+                    LOG.debug("+ URLClassLoader: "
+                            + currentLoader.getClass().getName());
+                    final URLClassLoader urlLoader = (URLClassLoader)
+                            currentLoader;
+                    for (final URL url : urlLoader.getURLs()) {
+                        LOG.debug(" + URL: " + url);
+                    }
+                } else {
+                    LOG.debug("+ ClassLoader: "
+                            + currentLoader.getClass().getName());
+                }
+
+                currentLoader = currentLoader.getParent();
+            }
+        }
+    }
+
+    private void logProperties(final PropertyResolver resolver) {
+        // Log properties if known
+        if (resolver != null && resolver instanceof ListPropertyResolver) {
+            final ListPropertyResolver listResolver = (ListPropertyResolver)
+                    resolver;
+            final Map<String, String> propertiesToValues
+                    = listResolver.getPropertyNamesToValues();
+            for (final String propertyName : propertiesToValues.keySet()) {
+                final String propertyValue
+                        = propertiesToValues.get(propertyName);
+                LOG.debug("- Property: " + propertyName + "="
+                        + propertyValue);
+            }
+        }
     }
 
     /**
@@ -275,6 +235,72 @@ public class CheckerFactory {
                     && configurationElement instanceof DefaultConfiguration) {
                 ((DefaultConfiguration) configurationElement).addAttribute(
                         "file", new File(baseDir, suppressionFile).getAbsolutePath());
+            }
+        }
+    }
+
+    private class CheckerFactoryWorker extends Thread {
+        private final Object[] threadReturn = new Object[1];
+
+        private final ConfigurationLocation location;
+        private final PropertyResolver resolver;
+        private final File baseDir;
+
+        public CheckerFactoryWorker(final ConfigurationLocation location,
+                                    final PropertyResolver resolver,
+                                    final File baseDir,
+                                    final ClassLoader contextClassLoader) {
+            this.location = location;
+            this.resolver = resolver;
+            this.baseDir = baseDir;
+
+
+            if (contextClassLoader != null) {
+                setContextClassLoader(contextClassLoader);
+            } else {
+                final ClassLoader loader = CheckerFactory.this.getClass().getClassLoader();
+                setContextClassLoader(loader);
+            }
+        }
+
+        public Object getResult() {
+            return threadReturn[0];
+        }
+
+        public void run() {
+            try {
+                final Checker checker = new Checker();
+                final Configuration config;
+
+                if (location != null) {
+                    InputStream configurationInputStream = null;
+
+                    try {
+                        configurationInputStream = location.resolve();
+                        config = ConfigurationLoader.loadConfiguration(
+                                configurationInputStream, resolver, true);
+
+                        replaceSupressionFilterPath(config, baseDir);
+
+                        checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
+                        checker.configure(config);
+
+                    } finally {
+                        if (configurationInputStream != null) {
+                            try {
+                                configurationInputStream.close();
+                            } catch (IOException e) {
+                                // ignored
+                            }
+                        }
+                    }
+                } else {
+                    config = new DefaultConfiguration("checker");
+                }
+                threadReturn[0] = new CachedChecker(checker, config);
+
+            } catch (Exception e) {
+                threadReturn[0] = e;
             }
         }
     }
