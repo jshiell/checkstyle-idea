@@ -12,6 +12,7 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -304,6 +305,10 @@ public class CheckerFactory {
                     if (suppressionFile != null) {
                         ((DefaultConfiguration) configurationElement).addAttribute(
                                 FILE_ATTRIBUTE, suppressionFile.getAbsolutePath());
+                    } else {
+                        ((DefaultConfiguration) config).removeChild(configurationElement);
+
+                        IDEAUtilities.showWarning(module.getProject(), "checkstyle.suppressions-not-found");
                     }
                 }
             }

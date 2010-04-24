@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.State;
@@ -558,7 +557,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
         public Map<String, String> configuration;
 
-        public ConfigurationBean(Map<String, String> configuration) {
+        public ConfigurationBean(final Map<String, String> configuration) {
             this.configuration = configuration;
         }
 

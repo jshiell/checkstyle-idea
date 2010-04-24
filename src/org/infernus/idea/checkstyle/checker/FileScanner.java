@@ -186,6 +186,7 @@ final class FileScanner implements Runnable {
         }
     }
 
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
                                                                         final Module module,
                                                                         final List<File> tempFiles,
@@ -194,10 +195,12 @@ final class FileScanner implements Runnable {
         final Checker checker = getChecker(module, moduleClassLoader);
         final List<Check> checks = CheckFactory.getChecks(getConfig(module));
 
-        final CheckStyleAuditListener listener
-                = new CheckStyleAuditListener(filesToElements, manager, true, checks);
-        checker.addListener(listener);
-        checker.process(tempFiles);
+        final CheckStyleAuditListener listener;
+        synchronized (checker) {
+            listener = new CheckStyleAuditListener(filesToElements, manager, true, checks);
+            checker.addListener(listener);
+            checker.process(tempFiles);
+        }
 
         return listener.getAllProblems();
     }

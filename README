@@ -149,6 +149,7 @@ Version History
 
 3.1   - New: Upgraded to CheckStyle 5.1.
 3.1   - Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.
+3.1   - Improved: If a suppression file is not found then it will be ignored and the user will be warned.
 3.1   - Fixed: Concurrency issues. Thanks to Gerhard Radatz.
 3.0.13- Fixed: File location fixes galore! Thanks to Gerhard Radatz.
 3.0.13- Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
