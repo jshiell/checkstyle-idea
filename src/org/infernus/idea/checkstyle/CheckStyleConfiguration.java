@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.*;
 
 /**
  * A manager for CheckStyle plug-in configuration.
@@ -37,7 +38,11 @@ public final class CheckStyleConfiguration {
     private final Project project;
     private final ConfigurationLocation defaultLocation;
 
-    private final ConcurrentHashMap<String,String> storage = new ConcurrentHashMap<String,String>();
+    private final Map<String,String> storage = new ConcurrentHashMap<String,String>();
+
+    // lock used for sequentially accessing the storage
+    private final ReentrantLock storageLock = new ReentrantLock();
+
 
     /**
      * Scan files before vcs checkin.
@@ -73,114 +78,134 @@ public final class CheckStyleConfiguration {
             throw new IllegalArgumentException("Location is not valid: " + configurationLocation);
         }
 
-        if (configurationLocation != null) {
-            storage.put(ACTIVE_CONFIG, configurationLocation.getDescriptor());
-        } else {
-            storage.remove(ACTIVE_CONFIG);
+        storageLock.lock();
+        try {
+            if (configurationLocation != null) {
+                storage.put(ACTIVE_CONFIG, configurationLocation.getDescriptor());
+            } else {
+                storage.remove(ACTIVE_CONFIG);
+            }
+        } finally {
+            storageLock.unlock();
         }
     }
 
     public ConfigurationLocation getActiveConfiguration() {
-        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
-
-        if (!storage.containsKey(ACTIVE_CONFIG)) {
-            return defaultLocation;
-        }
-
-        ConfigurationLocation activeLocation = null;
+        storageLock.lock();
         try {
-            activeLocation = ConfigurationLocationFactory.create(project, storage.get(ACTIVE_CONFIG));
-        } catch (IllegalArgumentException e) {
-            LOG.warn("Could not load active configuration", e);
+            final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
+
+            if (!storage.containsKey(ACTIVE_CONFIG)) {
+                return defaultLocation;
+            }
+
+            ConfigurationLocation activeLocation = null;
+            try {
+                activeLocation = ConfigurationLocationFactory.create(project, storage.get(ACTIVE_CONFIG));
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Could not load active configuration", e);
+            }
+
+            if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
+                LOG.info("Active configuration is invalid, returning default");
+                return defaultLocation;
+            }
+
+            // immediately re-set the activeConfiguration
+            // see #getConfigurationLocations() for an explanation why we must do this
+            setActiveConfiguration(activeLocation);
+
+            return activeLocation;
+        } finally {
+            storageLock.unlock();
         }
-
-        if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
-            LOG.info("Active configuration is invalid, returning default");
-            return defaultLocation;
-        }
-
-        // immediately re-set the activeConfiguration
-        // see #getConfigurationLocations() for an explanation why we must do this
-        setActiveConfiguration(activeLocation);
-
-        return activeLocation;
     }
 
     public List<ConfigurationLocation> getConfigurationLocations() {
-        final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
+        storageLock.lock();
+        try {
+            final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
 
-        for (Map.Entry<String, String> entry : storage.entrySet()) {
-            if (!entry.getKey().startsWith(LOCATION_PREFIX)) {
-                continue;
-            }
-
-            final String value = entry.getValue();
-            try {
-                final ConfigurationLocation location = ConfigurationLocationFactory.create(
-                    project, value);
-
-                final Map<String, String> properties = new HashMap<String, String>();
-
-                final int index = Integer.parseInt(entry.getKey().substring(LOCATION_PREFIX.length()));
-                final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
-
-                // loop again over all settings to find the properties belonging to this configuration
-                // not the best solution, but since there are only few items it doesn't hurt too much...
-                for (Map.Entry<String, String> innerEntry : storage.entrySet()) {
-                    if (innerEntry.getKey().startsWith(propertyPrefix)) {
-
-                        final String propertyName = innerEntry.getKey().substring(propertyPrefix.length());
-                        properties.put(propertyName, innerEntry.getValue());
-                    }
+            for (Map.Entry<String, String> entry : storage.entrySet()) {
+                if (!entry.getKey().startsWith(LOCATION_PREFIX)) {
+                    continue;
                 }
 
-                location.setProperties(properties);
-                locations.add(location);
+                final String value = entry.getValue();
+                try {
+                    final ConfigurationLocation location = ConfigurationLocationFactory.create(
+                        project, value);
 
-            } catch (IllegalArgumentException e) {
-                LOG.error("Could not parse location: " + value, e);
+                    final Map<String, String> properties = new HashMap<String, String>();
+
+                    final int index = Integer.parseInt(entry.getKey().substring(LOCATION_PREFIX.length()));
+                    final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
+
+                    // loop again over all settings to find the properties belonging to this configuration
+                    // not the best solution, but since there are only few items it doesn't hurt too much...
+                    for (Map.Entry<String, String> innerEntry : storage.entrySet()) {
+                        if (innerEntry.getKey().startsWith(propertyPrefix)) {
+
+                            final String propertyName = innerEntry.getKey().substring(propertyPrefix.length());
+                            properties.put(propertyName, innerEntry.getValue());
+                        }
+                    }
+
+                    location.setProperties(properties);
+                    locations.add(location);
+
+                } catch (IllegalArgumentException e) {
+                    LOG.error("Could not parse location: " + value, e);
+                }
             }
+
+            if (!locations.contains(defaultLocation)) {
+                locations.add(0, defaultLocation);
+            }
+
+            // now immediately re-set the configurationLocations:
+            // since tokenised file paths are automatically resolved by the IDEA core during
+            // settings loading, we must store them again - otherwise we would loose the token and
+            // save the full file path instead (at least if the user did not change our settings, but
+            // only some other settings editors, because our setConfigurationLocations is not called
+            // from outside then)
+            setConfigurationLocations(locations);
+
+            return locations;
+        } finally {
+            storageLock.unlock();
         }
-
-        if (!locations.contains(defaultLocation)) {
-            locations.add(0, defaultLocation);
-        }
-
-        // now immediately re-set the configurationLocations:
-        // since tokenised file paths are automatically resolved by the IDEA core during
-        // settings loading, we must store them again - otherwise we would loose the token and
-        // save the full file path instead (at least if the user did not change our settings, but
-        // only some other settings editors, because our setConfigurationLocations is not called
-        // from outside then)
-        setConfigurationLocations(locations);
-
-        return locations;
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
-        for (Iterator i = storage.keySet().iterator(); i.hasNext();) {
-            final String propertyName = i.next().toString();
-            if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
-                i.remove();
-            }
-        }
-
-        if (configurationLocations == null) {
-            return;
-        }
-
-        int index = 0;
-        for (ConfigurationLocation configurationLocation : configurationLocations) {
-            storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
-
-            final Map<String, String> properties = configurationLocation.getProperties();
-            if (properties != null) {
-                for (Map.Entry<String,String> entry : properties.entrySet()) {
-                    storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), entry.getValue());
+        storageLock.lock();
+        try {
+            for (Iterator i = storage.keySet().iterator(); i.hasNext();) {
+                final String propertyName = i.next().toString();
+                if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
+                    i.remove();
                 }
             }
 
-            ++index;
+            if (configurationLocations == null) {
+                return;
+            }
+
+            int index = 0;
+            for (ConfigurationLocation configurationLocation : configurationLocations) {
+                storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
+
+                final Map<String, String> properties = configurationLocation.getProperties();
+                if (properties != null) {
+                    for (Map.Entry<String,String> entry : properties.entrySet()) {
+                        storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), entry.getValue());
+                    }
+                }
+
+                ++index;
+            }
+        } finally {
+            storageLock.unlock();
         }
     }
 
@@ -309,7 +334,12 @@ public final class CheckStyleConfiguration {
      * @return a copy of the current configuration settings
      */
     public Map<String,String> getState() {
-        return new HashMap<String, String>(storage);
+        storageLock.lock();
+        try {
+            return new HashMap<String, String>(storage);
+        } finally {
+            storageLock.unlock();
+        }
     }
 
 
@@ -318,9 +348,14 @@ public final class CheckStyleConfiguration {
      * @param stateBean where to load the state from
      */
     public void loadState(Map<String, String> stateBean) {
-        storage.clear();
-        if (stateBean != null) {
-            storage.putAll(stateBean);
+        storageLock.lock();
+        try {
+            storage.clear();
+            if (stateBean != null) {
+                storage.putAll(stateBean);
+            }
+        } finally {
+            storageLock.unlock();
         }
     }
 }
