@@ -245,7 +245,7 @@
     <option name="STATE" value="0" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="IDEA 9757" project-jdk-type="IDEA JDK">
-    <output url="file://$PROJECT_DIR$/out" />
+    <output url="file://$PROJECT_DIR$/target" />
   </component>
   <component name="Regex">
     <option name="pos1" value="218" />
