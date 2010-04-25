@@ -395,7 +395,7 @@
   <component name="libraryTable">
     <library name="CheckStyle 5.1">
       <CLASSES>
-        <root url="jar:///Developer/Java/Libraries/checkstyle-5.1/checkstyle-all-5.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/checkstyle-all-5.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
