@@ -29,12 +29,11 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/man-checkstyle.xml:Man" />
+        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="FILE:$PROJECT_DIR$/man-checkstyle.xml:Man" />
-        <entry key="location-1" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
-        <entry key="location-2" value="FILE:$PROJECT_DIR$/checkstyle_checks.xml:dfsfsd" />
-        <entry key="location-3" value="FILE:$PROJECT_DIR$/sun_checks.xml:" />
+        <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
+        <entry key="location-1" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
+        <entry key="location-2" value="FILE:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>
@@ -240,7 +239,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CheckStyle-IDEA.iml" filepath="$PROJECT_DIR$/CheckStyle-IDEA.iml" />
-      <module fileurl="file://$PROJECT_DIR$/test-module/test-module.iml" filepath="$PROJECT_DIR$/test-module/test-module.iml" />
     </modules>
   </component>
   <component name="ProjectReloadState">

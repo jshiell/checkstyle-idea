@@ -193,6 +193,10 @@ final class FileScanner implements Runnable {
                                                                         final Map<String, PsiFile> filesToElements) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());
         final Checker checker = getChecker(module, moduleClassLoader);
+        if (checker == null) {
+            return Collections.emptyMap();
+        }
+
         final List<Check> checks = CheckFactory.getChecks(getConfig(module));
 
         final CheckStyleAuditListener listener;

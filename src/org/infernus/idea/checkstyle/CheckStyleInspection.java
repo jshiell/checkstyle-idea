@@ -36,6 +36,7 @@ import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,12 +66,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Produce a CheckStyle checker.
      *
      * @param checkStylePlugin the plugin.
-     * @param project          the currently open project.
      * @param module           the current module. May be null.
      * @return a checker.
      */
     private Checker getChecker(final CheckStylePlugin checkStylePlugin,
-                               final Project project,
                                final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
@@ -209,7 +208,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         File tempFile = null;
         try {
-            final Checker checker = getChecker(checkStylePlugin, manager.getProject(), module);
+            final Checker checker = getChecker(checkStylePlugin, module);
+            if (checker == null) {
+                return new ProblemDescriptor[0];
+            }
+
             final Configuration config = getConfig(checkStylePlugin, module);
             final List<Check> checks = CheckFactory.getChecks(config);
 
@@ -223,22 +226,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            final CodeStyleSettings codeStyleSettings
-                    = CodeStyleSettingsManager.getSettings(psiFile.getProject());
-
-            tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
-                    CheckStyleConstants.TEMPFILE_EXTENSION);
-            final BufferedWriter tempFileOut = new BufferedWriter(
-                    new FileWriter(tempFile));
-            for (final char character : psiFile.getText().toCharArray()) {
-                if (character == '\n') { // IDEA uses \n internally
-                    tempFileOut.write(codeStyleSettings.getLineSeparator());
-                } else {
-                    tempFileOut.write(character);
-                }
-            }
-            tempFileOut.flush();
-            tempFileOut.close();
+            tempFile = writeToTemporaryFile(psiFile);
 
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
 
@@ -266,5 +254,26 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 tempFile.delete();
             }
         }
+    }
+
+    private File writeToTemporaryFile(final PsiFile psiFile)
+            throws IOException {
+        final CodeStyleSettings codeStyleSettings
+                = CodeStyleSettingsManager.getSettings(psiFile.getProject());
+
+        final File tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
+                CheckStyleConstants.TEMPFILE_EXTENSION);
+        final BufferedWriter tempFileOut = new BufferedWriter(
+                new FileWriter(tempFile));
+        for (final char character : psiFile.getText().toCharArray()) {
+            if (character == '\n') { // IDEA uses \n internally
+                tempFileOut.write(codeStyleSettings.getLineSeparator());
+            } else {
+                tempFileOut.write(character);
+            }
+        }
+        tempFileOut.flush();
+        tempFileOut.close();
+        return tempFile;
     }
 }

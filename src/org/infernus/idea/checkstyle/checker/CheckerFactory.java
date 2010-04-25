@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,8 +69,8 @@ public class CheckerFactory {
      * @param location    the location of the CheckStyle file.
      * @param module      the current module.
      * @param classLoader class loader for CheckStyle use, or null to use
-     *                    the default.  @return a checker.
-     * @return the checker for the module.
+     *                    the default.
+     * @return the checker for the module or null if it cannot be created.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final ConfigurationLocation location,
@@ -95,9 +96,12 @@ public class CheckerFactory {
 
             final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
             final CachedChecker checker = createChecker(location, module, propertyResolver, classLoader);
-            cache.put(location, checker);
+            if (checker != null) {
+                cache.put(location, checker);
+                return checker.getChecker();
+            }
 
-            return checker.getChecker();
+            return null;
         }
     }
 
@@ -167,6 +171,15 @@ public class CheckerFactory {
         // Did the process of reading the configuration fail?
         if (worker.getResult() instanceof CheckstyleException) {
             throw (CheckstyleException) worker.getResult();
+
+        } else if (worker.getResult() instanceof IOException) {
+            LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
+                    (IOException) worker.getResult());
+
+            final MessageFormat notFoundFormat = new MessageFormat(
+                    IDEAUtilities.getResource("checkstyle.file-not-found", "Not found: {0}"));
+            IDEAUtilities.showError(module.getProject(), notFoundFormat.format(new Object[]{location.getLocation()}));
+            return null;
 
         } else if (worker.getResult() instanceof Throwable) {
             throw new CheckstyleException("Could not load configuration",
@@ -308,7 +321,8 @@ public class CheckerFactory {
                     } else {
                         ((DefaultConfiguration) config).removeChild(configurationElement);
 
-                        IDEAUtilities.showWarning(module.getProject(), "checkstyle.suppressions-not-found");
+                        IDEAUtilities.showWarning(module.getProject(),
+                                IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
                     }
                 }
             }

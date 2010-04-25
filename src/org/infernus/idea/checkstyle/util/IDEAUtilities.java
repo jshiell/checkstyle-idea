@@ -9,8 +9,10 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.*;
+import java.awt.*;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -61,23 +63,44 @@ public final class IDEAUtilities {
     /**
      * Alert the user to a warning.
      *
-     * @param project the current project.
-     * @param warning the text of the warning.
+     * @param project     the current project.
+     * @param warningText the text of the warning.
      */
     public static void showWarning(final Project project,
-                                   final String warning) {
+                                   final String warningText) {
+        showMessage(project, warningText, LightColors.YELLOW);
+    }
+
+    /**
+     * Alert the user to an error.
+     *
+     * @param project   the current project.
+     * @param errorText the text of the error.
+     */
+    public static void showError(final Project project,
+                                 final String errorText) {
+        showMessage(project, errorText, LightColors.RED);
+    }
+
+    /**
+     * Alert the user to a warning.
+     *
+     * @param project     the current project.
+     * @param messageText the text of the warning.
+     * @param colour      the background colour to use.
+     */
+    private static void showMessage(final Project project,
+                                    final String messageText,
+                                    final Color colour) {
         final Runnable showMessage = new Runnable() {
             public void run() {
-                final MessageFormat notificationFormat = new MessageFormat(
-                        getResource("plugin.notification.format", "<b>CheckStyle:</b> {0}"));
-                final String warningText = getResource(warning, warning);
-
-                final JLabel warningComponent = new JLabel("<html>" +
-                        notificationFormat.format(new Object[]{warningText}) + "</html>");
+                final JTextArea messageTextArea = new JTextArea(messageText);
+                messageTextArea.setOpaque(false);
+                messageTextArea.setEditable(false);
 
                 final StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
                 if (statusBar != null) {
-                    statusBar.fireNotificationPopup(warningComponent, LightColors.YELLOW);
+                    statusBar.fireNotificationPopup(messageTextArea, colour);
                 }
             }
         };
@@ -103,10 +126,15 @@ public final class IDEAUtilities {
                     + CheckStyleConstants.RESOURCE_BUNDLE);
 
         } else {
-            resourceValue = resources.getString(resourceKey);
+            try {
+                resourceValue = resources.getString(resourceKey);
+
+            } catch (MissingResourceException e) {
+                resourceValue = null;
+            }
 
             if (resourceValue == null) {
-                LOG.warn(resourceKey + " was not defined in resource bundle.");
+                LOG.debug(resourceKey + " was not defined in resource bundle.");
             }
         }
 
