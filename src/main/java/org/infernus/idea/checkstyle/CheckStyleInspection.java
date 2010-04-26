@@ -178,6 +178,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * {@inheritDoc}
      */
     @Nullable
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
@@ -230,10 +231,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
 
-            final CheckStyleAuditListener listener
-                    = new CheckStyleAuditListener(filesToScan, manager, false, checks);
-            checker.addListener(listener);
-            checker.process(Arrays.asList(tempFile));
+            final CheckStyleAuditListener listener;
+            synchronized (checker) {
+                listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
+                checker.addListener(listener);
+                checker.process(Arrays.asList(tempFile));
+            }
 
             final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
             return problems.toArray(new ProblemDescriptor[problems.size()]);
