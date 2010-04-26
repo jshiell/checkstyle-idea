@@ -11,7 +11,6 @@ import org.infernus.idea.checkstyle.CheckStyleConstants;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -68,7 +67,7 @@ public final class IDEAUtilities {
      */
     public static void showWarning(final Project project,
                                    final String warningText) {
-        showMessage(project, warningText, LightColors.YELLOW);
+        showMessage(project, warningText, LightColors.YELLOW, IDEAUtilities.getIcon("/compiler/warning.png"));
     }
 
     /**
@@ -79,7 +78,7 @@ public final class IDEAUtilities {
      */
     public static void showError(final Project project,
                                  final String errorText) {
-        showMessage(project, errorText, LightColors.RED);
+        showMessage(project, errorText, LightColors.RED, IDEAUtilities.getIcon("/compiler/error.png"));
     }
 
     /**
@@ -88,19 +87,24 @@ public final class IDEAUtilities {
      * @param project     the current project.
      * @param messageText the text of the warning.
      * @param colour      the background colour to use.
+     * @param icon        the icon to display. May be null.
      */
     private static void showMessage(final Project project,
                                     final String messageText,
-                                    final Color colour) {
+                                    final Color colour,
+                                    final Icon icon) {
         final Runnable showMessage = new Runnable() {
             public void run() {
-                final JTextArea messageTextArea = new JTextArea(messageText);
-                messageTextArea.setOpaque(false);
-                messageTextArea.setEditable(false);
+                final JLabel messageLabel = new JLabel(messageText);
+                if (icon != null) {
+                    messageLabel.setIcon(icon);
+                    messageLabel.setIconTextGap(8);
+                    messageLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+                }
 
                 final StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
                 if (statusBar != null) {
-                    statusBar.fireNotificationPopup(messageTextArea, colour);
+                    statusBar.fireNotificationPopup(messageLabel, colour);
                 }
             }
         };
