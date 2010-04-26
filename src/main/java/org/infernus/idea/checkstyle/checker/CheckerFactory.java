@@ -339,31 +339,34 @@ public class CheckerFactory {
                 }
             }
 
-            // check module content roots
-            final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
-            if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
-                for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
-                    final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
-                    if (contentEntryPath.exists()) {
-                        suppressionFile = contentEntryPath;
-                        break;
+            if (module != null) {
+                final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
+
+                // check module content roots                
+                if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
+                    for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
+                        final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
+                        if (contentEntryPath.exists()) {
+                            suppressionFile = contentEntryPath;
+                            break;
+                        }
                     }
                 }
-            }
 
-            // check module file
-            if (suppressionFile == null && module.getModuleFile() != null) {
-                final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
-                if (moduleRelativePath.exists()) {
-                    suppressionFile = moduleRelativePath;
+                // check module file
+                if (suppressionFile == null && module.getModuleFile() != null) {
+                    final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
+                    if (moduleRelativePath.exists()) {
+                        suppressionFile = moduleRelativePath;
+                    }
                 }
-            }
 
-            // check project base dir
-            if (suppressionFile == null && module.getProject().getBaseDir() != null) {
-                final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
-                if (projectRelativePath.exists()) {
-                    suppressionFile = projectRelativePath;
+                // check project base dir
+                if (suppressionFile == null && module.getProject().getBaseDir() != null) {
+                    final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
+                    if (projectRelativePath.exists()) {
+                        suppressionFile = projectRelativePath;
+                    }
                 }
             }
 
