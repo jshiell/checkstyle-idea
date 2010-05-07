@@ -321,8 +321,10 @@ public class CheckerFactory {
                     } else {
                         ((DefaultConfiguration) config).removeChild(configurationElement);
 
-                        IDEAUtilities.showWarning(module.getProject(),
-                                IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
+                        if (module != null) {
+                            IDEAUtilities.showWarning(module.getProject(),
+                                    IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
+                        }
                     }
                 }
             }

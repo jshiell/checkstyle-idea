@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.1</version>
+    <version>3.1.1</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.1.1: Fixed: NPE on notifications.</li>
     <li>3.1: Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.</li>
     <li>3.1: Improved: If a suppression file is not found then it will be ignored and the user will be warned.</li>
     <li>3.1: New: Upgraded to CheckStyle 5.1.</li>
