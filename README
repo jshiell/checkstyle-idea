@@ -147,6 +147,9 @@ LICENCE file.
 Version History
 ---------------
 
+3.1.2 - Fixed: Property names trimmed.
+3.1.2 - Fixed: Cache is now invalidated when settings are changed.
+3.1.2 - Fixed: Files downloaded via HTTP are now scheduled for deletion of JVM termination.
 3.1.1 - Fixed: NPE on notifications.
 3.1   - New: Upgraded to CheckStyle 5.1.
 3.1   - Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.

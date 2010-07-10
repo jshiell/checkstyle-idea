@@ -124,17 +124,7 @@ public abstract class ConfigurationLocation {
         final List<String> propertyNames = new ArrayList<String>();
 
         if (element != null) {
-            if ("property".equals(element.getName())) {
-                final String value
-                        = element.getAttributeValue("value");
-                // check is value is a token
-                if (value != null && value.startsWith("${")
-                        && value.contains("}")) {
-                    final String propertyName = value.substring(2,
-                            value.indexOf("}") - 1);
-                    propertyNames.add(propertyName);
-                }
-            }
+            extractPropertyNames(element, propertyNames);
 
             for (final Element child : (List<Element>) element.getChildren()) {
                 propertyNames.addAll(extractProperties(child));
@@ -142,6 +132,25 @@ public abstract class ConfigurationLocation {
         }
 
         return propertyNames;
+    }
+
+    private void extractPropertyNames(final Element element, final List<String> propertyNames) {
+        if (!"property".equals(element.getName())) {
+            return;
+        }
+
+        final String value = element.getAttributeValue("value");
+        if (value == null) {
+            return;
+        }
+
+        final int propertyStart = value.indexOf("${");
+        final int propertyEnd = value.indexOf("}");
+        if (propertyStart >= 0 && propertyEnd >= 0) {
+            final String propertyName = value.substring(
+                    propertyStart + 2, propertyEnd);
+            propertyNames.add(propertyName);
+        }
     }
 
     /**

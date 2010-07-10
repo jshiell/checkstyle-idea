@@ -29,7 +29,6 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
         <entry key="check-test-classes" value="false" />
         <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
         <entry key="location-1" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
@@ -154,6 +153,21 @@
           <option name="superClassString" value="java.awt.Component" />
         </inspection_tool>
         <inspection_tool class="TransientFieldInNonSerializableClass" enabled="true" level="WARNING" enabled_by_default="true" />
+        <inspection_tool class="UNUSED_SYMBOL" enabled="true" level="WARNING" enabled_by_default="true">
+          <option name="LOCAL_VARIABLE" value="true" />
+          <option name="FIELD" value="true" />
+          <option name="METHOD" value="true" />
+          <option name="CLASS" value="true" />
+          <option name="PARAMETER" value="true" />
+          <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="true" />
+          <option name="INJECTION_ANNOS">
+            <value>
+              <list size="1">
+                <item index="0" class="java.lang.String" itemvalue="org.mockito.Mock" />
+              </list>
+            </value>
+          </option>
+        </inspection_tool>
       </profile>
     </profiles>
     <option name="PROJECT_PROFILE" value="Project Default" />
