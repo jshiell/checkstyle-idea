@@ -106,6 +106,15 @@ public class CheckerFactory {
     }
 
     /**
+     * Invalidate any cached checkers.
+     */
+    public void invalidateCache() {
+        synchronized (cache) {
+            cache.clear();
+        }
+    }
+
+    /**
      * Get the checker configuration for a given configuration.
      *
      * @param location the location of the CheckStyle file.

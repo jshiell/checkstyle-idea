@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
 import org.infernus.idea.checkstyle.checker.CheckFilesThread;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
@@ -363,6 +364,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
         reset(); // save current data as unmodified
 
+        CheckerFactory.getInstance().invalidateCache();
         thirdPartyClassloader = null; // reset to force reload
     }
 
