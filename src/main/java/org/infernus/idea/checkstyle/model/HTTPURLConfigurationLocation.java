@@ -35,6 +35,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             urlConnection.setDoOutput(false);
 
             final File tempFile = File.createTempFile("checkStyle", ".xml");
+            tempFile.deleteOnExit();
             writer = new BufferedWriter(new FileWriter(tempFile));
 
             urlConnection.connect();
