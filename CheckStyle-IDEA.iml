@@ -12,9 +12,33 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="CheckStyle 5.1" level="project" />
-    <orderEntry type="library" name="Hamcrest" level="application" />
-    <orderEntry type="library" scope="TEST" name="JUnit" level="application" />
-    <orderEntry type="library" scope="TEST" name="Mockito" level="application" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="Hamcrest">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/hamcrest-all-1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="JUnit">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/junit-4.8.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="Mockito">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/mockito-all-1.8.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 
