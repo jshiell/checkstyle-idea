@@ -148,10 +148,11 @@ LICENCE file.
 Version History
 ---------------
 
-3.2   - Improved: Temporary files now use original filename. Thanks to Benjy W.
 3.2   - New: Updated CheckStyle to 5.3.
+3.2   - Improved: Temporary files now use original filename. Thanks to Benjy W.
 3.2   - Improved: Removed deprecated calls to IDEA SDK. This may break compatibility with older versions,
         but as the SDK isn't annotated with @since, who knows?
+3.2   - Improved: Introduced setup thread to project scans to improve responsiveness.
 3.1.2 - Fixed: Property names trimmed.
 3.1.2 - Fixed: Cache is now invalidated when settings are changed.
 3.1.2 - Fixed: Files downloaded via HTTP are now scheduled for deletion of JVM termination.

@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +62,8 @@ public class ScanProject extends BaseAction {
                     = projectRootManager.getContentSourceRoots();
 
             if (sourceRoots != null && sourceRoots.length > 0) {
-                project.getComponent(CheckStylePlugin.class).checkFiles(
-                        flattenFiles(sourceRoots));
+                ApplicationManager.getApplication().runReadAction(
+                        new ScanProjectAction(project, sourceRoots));
             }
 
         } catch (Throwable e) {
@@ -71,28 +73,6 @@ public class ScanProject extends BaseAction {
                 LOG.error("Current project scan failed", processed);
             }
         }
-    }
-
-    /**
-     * Flatten a nested list of files, returning all files in the array.
-     *
-     * @param files the top level of files.
-     * @return the flattened list of files.
-     */
-    private List<VirtualFile> flattenFiles(final VirtualFile[] files) {
-        final List<VirtualFile> flattened = new ArrayList<VirtualFile>();
-
-        if (files != null) {
-            for (final VirtualFile file : files) {
-                flattened.add(file);
-
-                if (file.getChildren() != null) {
-                    flattened.addAll(flattenFiles(file.getChildren()));
-                }
-            }
-        }
-
-        return flattened;
     }
 
     /**
@@ -135,6 +115,44 @@ public class ScanProject extends BaseAction {
             if (processed != null) {
                 LOG.error("Button update failed", processed);
             }
+        }
+    }
+
+    private static class ScanProjectAction implements Runnable {
+        private final Project project;
+        private final VirtualFile[] sourceRoots;
+
+        public ScanProjectAction(@NotNull final Project project,
+                                 @NotNull final VirtualFile[] sourceRoots) {
+            this.project = project;
+            this.sourceRoots = sourceRoots;
+        }
+
+        public void run() {
+            project.getComponent(CheckStylePlugin.class).checkFiles(
+                    flattenFiles(sourceRoots));
+        }
+
+        /**
+         * Flatten a nested list of files, returning all files in the array.
+         *
+         * @param files the top level of files.
+         * @return the flattened list of files.
+         */
+        private List<VirtualFile> flattenFiles(final VirtualFile[] files) {
+            final List<VirtualFile> flattened = new ArrayList<VirtualFile>();
+
+            if (files != null) {
+                for (final VirtualFile file : files) {
+                    flattened.add(file);
+
+                    if (file.getChildren() != null) {
+                        flattened.addAll(flattenFiles(file.getChildren()));
+                    }
+                }
+            }
+
+            return flattened;
         }
     }
 }
