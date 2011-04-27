@@ -31,8 +31,8 @@
       <map>
         <entry key="check-test-classes" value="false" />
         <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
-        <entry key="location-1" value="file:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
-        <entry key="location-2" value="file:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="location-1" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
+        <entry key="location-2" value="FILE:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>
@@ -250,6 +250,9 @@
   <component name="ProjectReloadState">
     <option name="STATE" value="0" />
   </component>
+  <component name="ProjectResources">
+    <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="IDEA 9757" project-jdk-type="IDEA JDK">
     <output url="file://$PROJECT_DIR$/target" />
   </component>
@@ -399,9 +402,9 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="CheckStyle 5.1">
+    <library name="CheckStyle 5.3">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/checkstyle-all-5.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/checkstyle-5.3-all.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

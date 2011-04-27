@@ -9,9 +9,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="IDEA 9757" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="CheckStyle 5.1" level="project" />
+    <orderEntry type="library" name="CheckStyle 5.3" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="Hamcrest">
         <CLASSES>
