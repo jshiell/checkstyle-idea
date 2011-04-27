@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.UUID;
 
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+
+import static org.infernus.idea.checkstyle.CheckStyleConstants.TEMPFILE_DIRECTORY_PREFIX;
 
 /**
  * Thread to read the file to a temporary file.
@@ -63,8 +66,12 @@ class CreateTempFileThread implements Runnable {
          */
         public void run() {
             try {
-                file = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
-                        CheckStyleConstants.TEMPFILE_EXTENSION);
+                // Some checks require the original filename, so we create a new
+                // directory for each file.
+                final File tmpDir = new File(System.getProperty("java.io.tmpdir"),
+                        TEMPFILE_DIRECTORY_PREFIX + UUID.randomUUID().toString());
+                tmpDir.mkdirs();
+                file = new File(tmpDir, psiFile.getName());
 
                 final CodeStyleSettings codeStyleSettings
                         = CodeStyleSettingsManager.getSettings(psiFile.getProject());

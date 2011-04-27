@@ -13,6 +13,7 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checks.Check;
@@ -25,6 +26,8 @@ import org.jetbrains.annotations.NonNls;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import static org.infernus.idea.checkstyle.CheckStyleConstants.TEMPFILE_DIRECTORY_PREFIX;
 
 /**
  * Runnable for scanning an individual file.
@@ -181,6 +184,9 @@ final class FileScanner implements Runnable {
             for (final File tempFile : tempFiles) {
                 if (tempFile != null && tempFile.exists()) {
                     tempFile.delete();
+                    if (tempFile.getParentFile().getName().startsWith(TEMPFILE_DIRECTORY_PREFIX)) {
+                        tempFile.getParentFile().delete();  // Remove the per-file tmpdir.
+                    }
                 }
             }
         }
