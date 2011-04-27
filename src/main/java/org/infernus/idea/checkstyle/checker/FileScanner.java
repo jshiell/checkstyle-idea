@@ -13,7 +13,6 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checks.Check;
@@ -21,13 +20,12 @@ import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.util.TemporaryFile;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
-import static org.infernus.idea.checkstyle.CheckStyleConstants.TEMPFILE_DIRECTORY_PREFIX;
 
 /**
  * Runnable for scanning an individual file.
@@ -130,7 +128,7 @@ final class FileScanner implements Runnable {
 
         Module module = null;
 
-        final List<File> tempFiles = new ArrayList<File>();
+        final List<TemporaryFile> tempFiles = new ArrayList<TemporaryFile>();
         final Map<String, PsiFile> filesToElements = new HashMap<String, PsiFile>();
 
         final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
@@ -166,7 +164,7 @@ final class FileScanner implements Runnable {
                     continue;
                 }
 
-                final File tempFile = createTemporaryFile(psiFile);
+                final TemporaryFile tempFile = createTemporaryFile(psiFile);
                 if (tempFile != null) {
                     tempFiles.add(tempFile);
                     filesToElements.put(tempFile.getAbsolutePath(), psiFile);
@@ -181,12 +179,9 @@ final class FileScanner implements Runnable {
             return performCheckStyleScan(moduleClassLoader, module, tempFiles, filesToElements);
 
         } finally {
-            for (final File tempFile : tempFiles) {
-                if (tempFile != null && tempFile.exists()) {
+            for (final TemporaryFile tempFile : tempFiles) {
+                if (tempFile != null) {
                     tempFile.delete();
-                    if (tempFile.getParentFile().getName().startsWith(TEMPFILE_DIRECTORY_PREFIX)) {
-                        tempFile.getParentFile().delete();  // Remove the per-file tmpdir.
-                    }
                 }
             }
         }
@@ -195,7 +190,7 @@ final class FileScanner implements Runnable {
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
                                                                         final Module module,
-                                                                        final List<File> tempFiles,
+                                                                        final List<TemporaryFile> tempFiles,
                                                                         final Map<String, PsiFile> filesToElements) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());
         final Checker checker = getChecker(module, moduleClassLoader);
@@ -209,14 +204,22 @@ final class FileScanner implements Runnable {
         synchronized (checker) {
             listener = new CheckStyleAuditListener(filesToElements, manager, true, checks);
             checker.addListener(listener);
-            checker.process(tempFiles);
+            checker.process(asListOfFiles(tempFiles));
         }
 
         return listener.getAllProblems();
     }
 
-    private File createTemporaryFile(final PsiFile psiFile) {
-        File tempFile = null;
+    private List<File> asListOfFiles(final List<TemporaryFile> tempFiles) {
+        final List<File> listOfFiles = new ArrayList<File>();
+        for (TemporaryFile tempFile : tempFiles) {
+            listOfFiles.add(tempFile.getFile());
+        }
+        return listOfFiles;
+    }
+
+    private TemporaryFile createTemporaryFile(final PsiFile psiFile) {
+        TemporaryFile tempFile = null;
         try {
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...

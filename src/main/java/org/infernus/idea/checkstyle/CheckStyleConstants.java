@@ -15,11 +15,6 @@ public final class CheckStyleConstants {
             = "org.infernus.idea.checkstyle.resource";
 
     /**
-     * Prefix for temporary scanner directories.
-     */
-    public static final String TEMPFILE_DIRECTORY_PREFIX = "csi-";
-
-    /**
      * The extension of temporary files.
      */
     public static final String TEMPFILE_EXTENSION = ".java";

@@ -3,16 +3,11 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import org.infernus.idea.checkstyle.util.TemporaryFile;
 
-import java.io.IOException;
-import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.UUID;
-
-import org.infernus.idea.checkstyle.CheckStyleConstants;
-
-import static org.infernus.idea.checkstyle.CheckStyleConstants.TEMPFILE_DIRECTORY_PREFIX;
+import java.io.IOException;
 
 /**
  * Thread to read the file to a temporary file.
@@ -32,7 +27,7 @@ class CreateTempFileThread implements Runnable {
     /**
      * The created temporary file.
      */
-    private File file;
+    private TemporaryFile file;
 
     /**
      * Create a thread to read the given file to a temporary file.
@@ -57,7 +52,7 @@ class CreateTempFileThread implements Runnable {
          *
          * @return the temporary file.
          */
-        public File getFile() {
+        public TemporaryFile getFile() {
             return file;
         }
 
@@ -66,18 +61,13 @@ class CreateTempFileThread implements Runnable {
          */
         public void run() {
             try {
-                // Some checks require the original filename, so we create a new
-                // directory for each file.
-                final File tmpDir = new File(System.getProperty("java.io.tmpdir"),
-                        TEMPFILE_DIRECTORY_PREFIX + UUID.randomUUID().toString());
-                tmpDir.mkdirs();
-                file = new File(tmpDir, psiFile.getName());
+                file = new TemporaryFile(psiFile);
 
                 final CodeStyleSettings codeStyleSettings
                         = CodeStyleSettingsManager.getSettings(psiFile.getProject());
 
                 final BufferedWriter tempFileOut = new BufferedWriter(
-                        new FileWriter(file));
+                        new FileWriter(file.getFile()));
                 for (final char character : psiFile.getText().toCharArray()) {
                     if (character == '\n') { // IDEA uses \n internally
                         tempFileOut.write(codeStyleSettings.getLineSeparator());

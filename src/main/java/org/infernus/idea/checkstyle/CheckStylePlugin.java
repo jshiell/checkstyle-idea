@@ -9,8 +9,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
@@ -535,12 +535,15 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         final List<URL> outputPaths = new ArrayList<URL>();
-        for (final VirtualFile outputPath : rootManager.getFiles(OrderRootType.COMPILATION_CLASSES)) {
-            String filePath = outputPath.getPath();
-            if (filePath.endsWith("!/")) { // filter JAR suffix
-                filePath = filePath.substring(0, filePath.length() - 2);
+        final CompilerModuleExtension compilerModule = CompilerModuleExtension.getInstance(module);
+        if (compilerModule != null) {
+            for (final VirtualFile outputPath : compilerModule.getOutputRoots(true)) {
+                String filePath = outputPath.getPath();
+                if (filePath.endsWith("!/")) { // filter JAR suffix
+                    filePath = filePath.substring(0, filePath.length() - 2);
+                }
+                outputPaths.add(new File(filePath).toURL());
             }
-            outputPaths.add(new File(filePath).toURL());
         }
 
         return new URLClassLoader(outputPaths.toArray(

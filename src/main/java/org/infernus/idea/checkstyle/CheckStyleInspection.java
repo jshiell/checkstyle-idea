@@ -27,6 +27,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.TemporaryFile;
 import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -207,7 +207,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
         }
 
-        File tempFile = null;
+        TemporaryFile tempFile = null;
         try {
             final Checker checker = getChecker(checkStylePlugin, module);
             if (checker == null) {
@@ -235,7 +235,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             synchronized (checker) {
                 listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
                 checker.addListener(listener);
-                checker.process(Arrays.asList(tempFile));
+                checker.process(Arrays.asList(tempFile.getFile()));
             }
 
             final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
@@ -253,21 +253,21 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return null;
 
         } finally {
-            if (tempFile != null && tempFile.exists()) {
+            if (tempFile != null) {
                 tempFile.delete();
             }
         }
     }
 
-    private File writeToTemporaryFile(final PsiFile psiFile)
+    private TemporaryFile writeToTemporaryFile(final PsiFile psiFile)
             throws IOException {
         final CodeStyleSettings codeStyleSettings
                 = CodeStyleSettingsManager.getSettings(psiFile.getProject());
 
-        final File tempFile = File.createTempFile(CheckStyleConstants.TEMPFILE_NAME,
-                CheckStyleConstants.TEMPFILE_EXTENSION);
+        final TemporaryFile tempFile = new TemporaryFile(psiFile);
+
         final BufferedWriter tempFileOut = new BufferedWriter(
-                new FileWriter(tempFile));
+                new FileWriter(tempFile.getFile()));
         for (final char character : psiFile.getText().toCharArray()) {
             if (character == '\n') { // IDEA uses \n internally
                 tempFileOut.write(codeStyleSettings.getLineSeparator());

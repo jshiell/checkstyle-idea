@@ -1,10 +1,10 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2010 CheckStyle-IDEA Contributors
+(c) Copyright 2006-2011 CheckStyle-IDEA Contributors
 
 http://code.google.com/p/checkstyle-idea/
 
-A plug-in for JetBrains' IntelliJ IDEA 9 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 10 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -124,8 +124,9 @@ Thanks to those who have contributed work and effort directly to this project:
 * Edward Campbell
 * LightGuard.JP
 * Gerhard Radatz
+* Benjy W
 
-And also thanks are due to the authors and contributors of:
+ And also thanks are due to the authors and contributors of:
 
 * Eclispe-CS, for inspiration and solutions to coding problems.
 * JetStyle, for filling the area of static scanning and also giving me
@@ -147,6 +148,10 @@ LICENCE file.
 Version History
 ---------------
 
+3.2   - Improved: Temporary files now use original filename. Thanks to Benjy W.
+3.2   - New: Updated CheckStyle to 5.3.
+3.2   - Improved: Removed deprecated calls to IDEA SDK. This may break compatibility with older versions,
+        but as the SDK isn't annotated with @since, who knows?
 3.1.2 - Fixed: Property names trimmed.
 3.1.2 - Fixed: Cache is now invalidated when settings are changed.
 3.1.2 - Fixed: Files downloaded via HTTP are now scheduled for deletion of JVM termination.
