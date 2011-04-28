@@ -1,8 +1,13 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,21 +17,32 @@ import java.util.UUID;
 
 /**
  * A representation of a file able to be scanned.
- * <p/>
- * At present all files are copied to a temporary file to allow for unsaved data
- * or ongoing editing; this should ideally be optimised so that unmodified files
- * are not copied.
  */
 public class ScannableFile {
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
 
     private final File realFile;
+    private final boolean temporaryFile;
 
-    public ScannableFile(final PsiFile psiFile) throws IOException {
-        realFile = createTemporaryFileFor(psiFile);
+    public ScannableFile(@NotNull final PsiFile psiFile) throws IOException {
+        if (!existsOnFilesystem(psiFile) || fileOpenOrUnsaved(psiFile)) {
+            realFile = createTemporaryFileFor(psiFile);
+            temporaryFile = true;
+
+        } else {
+            realFile = new File(pathOf(psiFile));
+            temporaryFile = false;
+        }
     }
 
-    private File createTemporaryFileFor(final PsiFile psiFile) throws IOException {
+    private String pathOf(@NotNull final PsiFile psiFile) {
+        if (psiFile.getVirtualFile() != null) {
+            return psiFile.getVirtualFile().getPath();
+        }
+        throw new IllegalStateException("PSIFile does not have associated virtual file: " + psiFile);
+    }
+
+    private File createTemporaryFileFor(@NotNull final PsiFile psiFile) throws IOException {
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"),
                 TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
         tmpDir.mkdirs();
@@ -38,6 +54,22 @@ public class ScannableFile {
         writeContentsToFile(psiFile, temporaryFile);
 
         return temporaryFile;
+    }
+
+    private boolean existsOnFilesystem(@NotNull final PsiFile psiFile) {
+        final VirtualFile virtualFile = psiFile.getVirtualFile();
+        return virtualFile != null
+                && LocalFileSystem.getInstance().exists(psiFile.getVirtualFile());
+    }
+
+    @SuppressWarnings({"SimplifiableIfStatement"})
+    private boolean fileOpenOrUnsaved(@NotNull final PsiFile psiFile) {
+        final VirtualFile virtualFile = psiFile.getVirtualFile();
+        if (virtualFile != null) {
+            return FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
+                    || FileDocumentManager.getInstance().isFileModifiedAndDocumentUnsaved(virtualFile);
+        }
+        return false;
     }
 
     private void writeContentsToFile(final PsiFile psiFile,
@@ -64,10 +96,9 @@ public class ScannableFile {
     }
 
     public void delete() {
-        if (realFile.exists()) {
-            realFile.delete();
-
-            if (realFile.getParentFile().getName().startsWith(TEMPFILE_DIR_PREFIX)) {
+        if (temporaryFile) {
+            if (realFile.exists() && realFile.getParentFile().getName().startsWith(TEMPFILE_DIR_PREFIX)) {
+                realFile.delete();
                 realFile.getParentFile().delete();
             }
         }
@@ -79,6 +110,6 @@ public class ScannableFile {
 
     @Override
     public String toString() {
-        return realFile.toString();
+        return String.format("[ScannableFile: file=%s; temporary=%s]", realFile.toString(), temporaryFile);
     }
 }

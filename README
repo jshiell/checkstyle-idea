@@ -148,6 +148,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.3   - Improved: Closed and saved files are no longer copied to temporary files.
 3.2   - New: Updated CheckStyle to 5.3.
 3.2   - Improved: Temporary files now use original filename. Thanks to Benjy W.
 3.2   - Improved: Removed deprecated calls to IDEA SDK. This may break compatibility with older versions,
