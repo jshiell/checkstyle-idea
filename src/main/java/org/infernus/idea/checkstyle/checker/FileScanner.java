@@ -20,7 +20,7 @@ import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
-import org.infernus.idea.checkstyle.util.TemporaryFile;
+import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
@@ -128,7 +128,7 @@ final class FileScanner implements Runnable {
 
         Module module = null;
 
-        final List<TemporaryFile> tempFiles = new ArrayList<TemporaryFile>();
+        final List<ScannableFile> tempFiles = new ArrayList<ScannableFile>();
         final Map<String, PsiFile> filesToElements = new HashMap<String, PsiFile>();
 
         final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
@@ -164,7 +164,7 @@ final class FileScanner implements Runnable {
                     continue;
                 }
 
-                final TemporaryFile tempFile = createTemporaryFile(psiFile);
+                final ScannableFile tempFile = createTemporaryFile(psiFile);
                 if (tempFile != null) {
                     tempFiles.add(tempFile);
                     filesToElements.put(tempFile.getAbsolutePath(), psiFile);
@@ -179,7 +179,7 @@ final class FileScanner implements Runnable {
             return performCheckStyleScan(moduleClassLoader, module, tempFiles, filesToElements);
 
         } finally {
-            for (final TemporaryFile tempFile : tempFiles) {
+            for (final ScannableFile tempFile : tempFiles) {
                 if (tempFile != null) {
                     tempFile.delete();
                 }
@@ -190,7 +190,7 @@ final class FileScanner implements Runnable {
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
                                                                         final Module module,
-                                                                        final List<TemporaryFile> tempFiles,
+                                                                        final List<ScannableFile> tempFiles,
                                                                         final Map<String, PsiFile> filesToElements) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());
         final Checker checker = getChecker(module, moduleClassLoader);
@@ -210,29 +210,29 @@ final class FileScanner implements Runnable {
         return listener.getAllProblems();
     }
 
-    private List<File> asListOfFiles(final List<TemporaryFile> tempFiles) {
+    private List<File> asListOfFiles(final List<ScannableFile> tempFiles) {
         final List<File> listOfFiles = new ArrayList<File>();
-        for (TemporaryFile tempFile : tempFiles) {
+        for (ScannableFile tempFile : tempFiles) {
             listOfFiles.add(tempFile.getFile());
         }
         return listOfFiles;
     }
 
-    private TemporaryFile createTemporaryFile(final PsiFile psiFile) {
-        TemporaryFile tempFile = null;
+    private ScannableFile createTemporaryFile(final PsiFile psiFile) {
+        ScannableFile tempFile = null;
         try {
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...
-            final CreateTempFileThread fileThread
-                    = new CreateTempFileThread(psiFile);
-            ApplicationManager.getApplication().runReadAction(fileThread);
+            final CreateScannableFileAction fileAction
+                    = new CreateScannableFileAction(psiFile);
+            ApplicationManager.getApplication().runReadAction(fileAction);
 
             // rethrow any error from the thread.
-            if (fileThread.getFailure() != null) {
-                throw fileThread.getFailure();
+            if (fileAction.getFailure() != null) {
+                throw fileAction.getFailure();
             }
 
-            tempFile = fileThread.getFile();
+            tempFile = fileAction.getFile();
             if (tempFile == null) {
                 throw new IllegalStateException("Failed to create temporary file.");
             }

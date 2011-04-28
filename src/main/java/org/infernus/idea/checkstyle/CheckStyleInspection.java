@@ -27,7 +27,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.util.TemporaryFile;
+import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -207,7 +207,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
         }
 
-        TemporaryFile tempFile = null;
+        ScannableFile scannableFile = null;
         try {
             final Checker checker = getChecker(checkStylePlugin, module);
             if (checker == null) {
@@ -217,8 +217,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final Configuration config = getConfig(checkStylePlugin, module);
             final List<Check> checks = CheckFactory.getChecks(config);
 
-            // we need to copy to a file as IntelliJ may not have saved the
-            // file recently (or the file may even be being edited at this moment)
             final Document fileDocument = PsiDocumentManager.getInstance(
                     manager.getProject()).getDocument(psiFile);
             if (fileDocument == null) {
@@ -227,15 +225,15 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            tempFile = writeToTemporaryFile(psiFile);
+            scannableFile = new ScannableFile(psiFile);
 
-            final Map<String, PsiFile> filesToScan = Collections.singletonMap(tempFile.getAbsolutePath(), psiFile);
+            final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 
             final CheckStyleAuditListener listener;
             synchronized (checker) {
                 listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
                 checker.addListener(listener);
-                checker.process(Arrays.asList(tempFile.getFile()));
+                checker.process(Arrays.asList(scannableFile.getFile()));
             }
 
             final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
@@ -253,30 +251,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return null;
 
         } finally {
-            if (tempFile != null) {
-                tempFile.delete();
+            if (scannableFile != null) {
+                scannableFile.delete();
             }
         }
     }
 
-    private TemporaryFile writeToTemporaryFile(final PsiFile psiFile)
-            throws IOException {
-        final CodeStyleSettings codeStyleSettings
-                = CodeStyleSettingsManager.getSettings(psiFile.getProject());
-
-        final TemporaryFile tempFile = new TemporaryFile(psiFile);
-
-        final BufferedWriter tempFileOut = new BufferedWriter(
-                new FileWriter(tempFile.getFile()));
-        for (final char character : psiFile.getText().toCharArray()) {
-            if (character == '\n') { // IDEA uses \n internally
-                tempFileOut.write(codeStyleSettings.getLineSeparator());
-            } else {
-                tempFileOut.write(character);
-            }
-        }
-        tempFileOut.flush();
-        tempFileOut.close();
-        return tempFile;
-    }
 }
