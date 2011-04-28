@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.3: Improved: Suppression filters now work on package paths.</li>
     <li>3.3: Improved: Closed and saved files are no longer copied to temporary files.</li>
     <li>3.2: New: Updated CheckStyle to 5.3.</li>
     <li>3.2: Improved: Temporary files now use original filename. Thanks to Benjy W.</li>

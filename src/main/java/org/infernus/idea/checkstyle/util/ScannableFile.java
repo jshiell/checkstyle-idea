@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.jetbrains.annotations.NotNull;
@@ -43,17 +44,33 @@ public class ScannableFile {
     }
 
     private File createTemporaryFileFor(@NotNull final PsiFile psiFile) throws IOException {
-        final File tmpDir = new File(System.getProperty("java.io.tmpdir"),
-                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
-        tmpDir.mkdirs();
-        tmpDir.deleteOnExit();
-
-        final File temporaryFile = new File(tmpDir, psiFile.getName());
+        final File temporaryFile = new File(baseDirectoryFor(psiFile), psiFile.getName());
         temporaryFile.deleteOnExit();
 
         writeContentsToFile(psiFile, temporaryFile);
 
         return temporaryFile;
+    }
+
+    private File baseDirectoryFor(@NotNull final PsiFile psiFile) {
+        final File baseTmpDir = new File(System.getProperty("java.io.tmpdir"),
+                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
+        baseTmpDir.deleteOnExit();
+
+        final File tempDir;
+        if (psiFile instanceof PsiJavaFile) {
+            final String packageName = ((PsiJavaFile) psiFile).getPackageName();
+            final String packagePath = packageName.replaceAll("\\.", File.separator);
+
+            tempDir = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+
+        } else {
+            tempDir = baseTmpDir;
+        }
+
+        tempDir.mkdirs();
+
+        return tempDir;
     }
 
     private boolean existsOnFilesystem(@NotNull final PsiFile psiFile) {

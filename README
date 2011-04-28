@@ -148,6 +148,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.3   - Improved: Suppression filters now work on package paths.
 3.3   - Improved: Closed and saved files are no longer copied to temporary files.
 3.2   - New: Updated CheckStyle to 5.3.
 3.2   - Improved: Temporary files now use original filename. Thanks to Benjy W.
