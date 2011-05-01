@@ -181,7 +181,7 @@ final class FileScanner implements Runnable {
         } finally {
             for (final ScannableFile tempFile : tempFiles) {
                 if (tempFile != null) {
-                    tempFile.delete();
+                    tempFile.deleteIfRequired();
                 }
             }
         }

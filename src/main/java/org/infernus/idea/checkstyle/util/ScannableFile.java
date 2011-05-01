@@ -23,16 +23,25 @@ public class ScannableFile {
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
 
     private final File realFile;
-    private final boolean temporaryFile;
+    private final File baseTempDir;
 
-    public ScannableFile(@NotNull final PsiFile psiFile) throws IOException {
+    /**
+     * Create a new scannable file from a PSI file.
+     * <p/>
+     * If required this will create a temporary copy of the file.
+     *
+     * @param psiFile the psiFile to create the file from.
+     * @throws IOException if file creation is required and fails.
+     */
+    public ScannableFile(@NotNull final PsiFile psiFile)
+            throws IOException {
         if (!existsOnFilesystem(psiFile) || fileOpenOrUnsaved(psiFile)) {
-            realFile = createTemporaryFileFor(psiFile);
-            temporaryFile = true;
+            baseTempDir = prepareBaseTmpDir();
+            realFile = createTemporaryFileFor(psiFile, baseTempDir);
 
         } else {
+            baseTempDir = null;
             realFile = new File(pathOf(psiFile));
-            temporaryFile = false;
         }
     }
 
@@ -43,8 +52,10 @@ public class ScannableFile {
         throw new IllegalStateException("PSIFile does not have associated virtual file: " + psiFile);
     }
 
-    private File createTemporaryFileFor(@NotNull final PsiFile psiFile) throws IOException {
-        final File temporaryFile = new File(baseDirectoryFor(psiFile), psiFile.getName());
+    private File createTemporaryFileFor(@NotNull final PsiFile psiFile,
+                                        @NotNull final File tempDir)
+            throws IOException {
+        final File temporaryFile = new File(parentDirFor(psiFile, tempDir), psiFile.getName());
         temporaryFile.deleteOnExit();
 
         writeContentsToFile(psiFile, temporaryFile);
@@ -52,25 +63,31 @@ public class ScannableFile {
         return temporaryFile;
     }
 
-    private File baseDirectoryFor(@NotNull final PsiFile psiFile) {
-        final File baseTmpDir = new File(System.getProperty("java.io.tmpdir"),
-                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
-        baseTmpDir.deleteOnExit();
+    private File parentDirFor(@NotNull final PsiFile psiFile,
+                              @NotNull final File baseTmpDir) {
+        final File tmpDirForFile;
 
-        final File tempDir;
         if (psiFile instanceof PsiJavaFile) {
             final String packageName = ((PsiJavaFile) psiFile).getPackageName();
             final String packagePath = packageName.replaceAll("\\.", File.separator);
 
-            tempDir = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+            tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
 
         } else {
-            tempDir = baseTmpDir;
+            tmpDirForFile = baseTmpDir;
         }
 
-        tempDir.mkdirs();
+        //noinspection ResultOfMethodCallIgnored
+        tmpDirForFile.mkdirs();
 
-        return tempDir;
+        return tmpDirForFile;
+    }
+
+    private File prepareBaseTmpDir() {
+        final File baseTmpDir = new File(System.getProperty("java.io.tmpdir"),
+                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
+        baseTmpDir.deleteOnExit();
+        return baseTmpDir;
     }
 
     private boolean existsOnFilesystem(@NotNull final PsiFile psiFile) {
@@ -79,9 +96,9 @@ public class ScannableFile {
                 && LocalFileSystem.getInstance().exists(psiFile.getVirtualFile());
     }
 
-    @SuppressWarnings({"SimplifiableIfStatement"})
     private boolean fileOpenOrUnsaved(@NotNull final PsiFile psiFile) {
         final VirtualFile virtualFile = psiFile.getVirtualFile();
+        //noinspection SimplifiableIfStatement
         if (virtualFile != null) {
             return FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
                     || FileDocumentManager.getInstance().isFileModifiedAndDocumentUnsaved(virtualFile);
@@ -112,13 +129,29 @@ public class ScannableFile {
         return realFile;
     }
 
-    public void delete() {
-        if (temporaryFile) {
-            if (realFile.exists() && realFile.getParentFile().getName().startsWith(TEMPFILE_DIR_PREFIX)) {
-                realFile.delete();
-                realFile.getParentFile().delete();
+    /**
+     * Delete the file if appropriate.
+     */
+    public void deleteIfRequired() {
+        if (baseTempDir != null
+                && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
+            delete(baseTempDir);
+        }
+    }
+
+    private void delete(@NotNull final File file) {
+        if (!file.exists()) {
+            return;
+        }
+
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                delete(child);
             }
         }
+
+        //noinspection ResultOfMethodCallIgnored
+        file.delete();
     }
 
     public String getAbsolutePath() {
@@ -127,6 +160,6 @@ public class ScannableFile {
 
     @Override
     public String toString() {
-        return String.format("[ScannableFile: file=%s; temporary=%s]", realFile.toString(), temporaryFile);
+        return String.format("[ScannableFile: file=%s; temporary=%s]", realFile.toString(), baseTempDir != null);
     }
 }
