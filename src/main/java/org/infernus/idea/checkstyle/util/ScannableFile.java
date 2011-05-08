@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 /**
  * A representation of a file able to be scanned.
@@ -69,7 +70,8 @@ public class ScannableFile {
 
         if (psiFile instanceof PsiJavaFile) {
             final String packageName = ((PsiJavaFile) psiFile).getPackageName();
-            final String packagePath = packageName.replaceAll("\\.", File.separator);
+            final String packagePath = packageName.replaceAll(
+                    "\\.", Matcher.quoteReplacement(File.separator));
 
             tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
 
