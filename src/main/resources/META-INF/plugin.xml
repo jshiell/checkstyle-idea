@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.3</version>
+    <version>3.3.1</version>
     <idea-version since-build="7126"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.3.1: Fixed: StringIndexOutOfBoundsException when creating temporary files under Windows.</li>
     <li>3.3: Improved: Suppression filters now work on package paths.</li>
     <li>3.3: Improved: Closed and saved files are no longer copied to temporary files.</li>
     <li>3.2: New: Updated CheckStyle to 5.3.</li>
