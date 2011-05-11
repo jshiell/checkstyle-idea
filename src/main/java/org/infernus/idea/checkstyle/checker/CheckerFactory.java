@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -309,34 +310,75 @@ public class CheckerFactory {
          * Scans the configuration for suppression filters and
          * replaces relative paths with absolute ones.
          *
-         * @param config the current configuration.
+         * @param rootElement the current configuration.
          * @throws CheckstyleException if configuration fails.
          */
-        private void replaceSuppressionFilterPath(final Configuration config)
+        private void replaceSuppressionFilterPath(final Configuration rootElement)
                 throws CheckstyleException {
 
-            for (final Configuration configurationElement : config.getChildren()) {
-                if (!SUPPRESSION_FILTER_ELEMENT.equals(configurationElement.getName())) {
+            if (!(rootElement instanceof DefaultConfiguration)) {
+                LOG.warn("Root element is of unknown class: " + rootElement.getClass().getName());
+                return;
+            }
+
+            for (final Configuration currentChild : rootElement.getChildren()) {
+                if (!SUPPRESSION_FILTER_ELEMENT.equals(currentChild.getName())) {
                     continue;
                 }
 
-                final String fileName = configurationElement.getAttribute(FILE_ATTRIBUTE);
-                if (fileName != null && !new File(fileName).exists()
-                        && configurationElement instanceof DefaultConfiguration) {
+                final String fileName = currentChild.getAttribute(FILE_ATTRIBUTE);
+                if (fileName != null && !new File(fileName).exists()) {
                     final File suppressionFile = getSuppressionFile(fileName);
-                    if (suppressionFile != null) {
-                        ((DefaultConfiguration) configurationElement).addAttribute(
-                                FILE_ATTRIBUTE, suppressionFile.getAbsolutePath());
-                    } else {
-                        ((DefaultConfiguration) config).removeChild(configurationElement);
 
-                        if (module != null) {
-                            IDEAUtilities.showWarning(module.getProject(),
-                                    IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
-                        }
+                    ((DefaultConfiguration) rootElement).removeChild(currentChild);
+
+                    if (suppressionFile != null) {
+                        ((DefaultConfiguration) rootElement).addChild(suppressionFilterWithFilename(
+                                suppressionFile.getAbsolutePath(), currentChild));
+
+                    } else if (module != null) {
+                        IDEAUtilities.showWarning(module.getProject(),
+                                IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
                     }
                 }
             }
+        }
+
+        private DefaultConfiguration suppressionFilterWithFilename(@NotNull final String filename,
+                                                                   @NotNull final Configuration originalFilter) {
+            // The CheckStyle API won't allow attribute values to be changed, only appended to,
+            // hence we must recreate the node.
+
+            final DefaultConfiguration newFilter
+                    = new DefaultConfiguration(SUPPRESSION_FILTER_ELEMENT);
+
+            if (originalFilter.getChildren() != null) {
+                for (Configuration child : originalFilter.getChildren()) {
+                    newFilter.addChild(child);
+                }
+            }
+            if (originalFilter.getMessages() != null) {
+                for (String messageKey : originalFilter.getMessages().keySet()) {
+                    newFilter.addMessage(messageKey, originalFilter.getMessages().get(messageKey));
+                }
+            }
+            if (originalFilter.getAttributeNames() != null) {
+                for (String attributeName : originalFilter.getAttributeNames()) {
+                    if (attributeName.equals(FILE_ATTRIBUTE)) {
+                        continue;
+                    }
+                    try {
+                        newFilter.addAttribute(attributeName, originalFilter.getAttribute(attributeName));
+                    } catch (CheckstyleException e) {
+                        LOG.error("Unable to copy attribute for " + SUPPRESSION_FILTER_ELEMENT
+                                + ": " + attributeName, e);
+                    }
+                }
+            }
+
+            newFilter.addAttribute(FILE_ATTRIBUTE, filename);
+
+            return newFilter;
         }
 
         private File getSuppressionFile(final String fileName) {
