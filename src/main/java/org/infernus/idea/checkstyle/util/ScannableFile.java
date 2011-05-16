@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -103,7 +104,18 @@ public class ScannableFile {
         //noinspection SimplifiableIfStatement
         if (virtualFile != null) {
             return FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
-                    || FileDocumentManager.getInstance().isFileModifiedAndDocumentUnsaved(virtualFile);
+                    || documentIsModifiedAndUnsaved(virtualFile);
+        }
+        return false;
+    }
+
+    private boolean documentIsModifiedAndUnsaved(@NotNull final VirtualFile virtualFile) {
+        final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+        if (fileDocumentManager.isFileModified(virtualFile)) {
+            final Document document = fileDocumentManager.getDocument(virtualFile);
+            if (document != null) {
+                return fileDocumentManager.isDocumentUnsaved(document);
+            }
         }
         return false;
     }

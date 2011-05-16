@@ -12,9 +12,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
-import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
+import com.intellij.openapi.vcs.impl.CheckinHandlersManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
@@ -292,14 +292,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * {@inheritDoc}
      */
     public void initComponent() {
-        ProjectLevelVcsManager.getInstance(this.project).registerCheckinHandlerFactory(this);
+        CheckinHandlersManager.getInstance(this.project).registerCheckinHandlerFactory(this);
     }
 
     /**
      * {@inheritDoc}
      */
     public void disposeComponent() {
-        ProjectLevelVcsManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
+        CheckinHandlersManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
     }
 
     /**

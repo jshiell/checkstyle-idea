@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.3.2</version>
-    <idea-version since-build="7126"/>
+    <version>3.3</version>
+    <idea-version since-build="107.105"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.3: New: Support for IDEA 10.5. Older versions are no longer supported.</li>
     <li>3.3.2: Fixed: Relative paths for suppression filters were not working.</li>
     <li>3.3.1: Fixed: StringIndexOutOfBoundsException when creating temporary files under Windows.</li>
     <li>3.3: Improved: Suppression filters now work on package paths.</li>

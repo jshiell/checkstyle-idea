@@ -4,7 +4,7 @@ CheckStyle-IDEA
 
 http://code.google.com/p/checkstyle-idea/
 
-A plug-in for JetBrains' IntelliJ IDEA 10 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 10.5 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -148,6 +148,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.3   - New: Support for IDEA 10.5. Older versions are no longer supported.
 3.3.2 - Fixed: Relative paths for suppression filters were not working.
 3.3.1 - Fixed: StringIndexOutOfBoundsException when creating temporary files under Windows.
 3.3   - Improved: Suppression filters now work on package paths.
