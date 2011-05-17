@@ -148,7 +148,7 @@ LICENCE file.
 Version History
 ---------------
 
-3.3   - New: Support for IDEA 10.5. Older versions are no longer supported.
+3.4   - New: Support for IDEA 10.5. Older versions are no longer supported.
 3.3.2 - Fixed: Relative paths for suppression filters were not working.
 3.3.1 - Fixed: StringIndexOutOfBoundsException when creating temporary files under Windows.
 3.3   - Improved: Suppression filters now work on package paths.
