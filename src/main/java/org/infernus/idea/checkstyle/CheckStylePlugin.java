@@ -268,6 +268,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     public void projectOpened() {
         LOG.debug("Project opened.");
 
+        registerCheckInHandler();
         registerToolWindow();
     }
 
@@ -278,6 +279,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         LOG.debug("Project closed.");
 
         unregisterToolWindow();
+        unregisterCheckInHandler();
     }
 
     /**
@@ -292,14 +294,29 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * {@inheritDoc}
      */
     public void initComponent() {
-        CheckinHandlersManager.getInstance(this.project).registerCheckinHandlerFactory(this);
     }
 
     /**
      * {@inheritDoc}
      */
     public void disposeComponent() {
-        CheckinHandlersManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
+    }
+
+    private void registerCheckInHandler() {
+        try {
+            CheckinHandlersManager.getInstance(this.project).registerCheckinHandlerFactory(this);
+
+        } catch (Exception e) {
+            LOG.error("Unable to register check-in handler", e);
+        }
+    }
+    private void unregisterCheckInHandler() {
+        try {
+            CheckinHandlersManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
+
+        } catch (Exception e) {
+            LOG.error("Unable to unregister check-in handler", e);
+        }
     }
 
     /**
