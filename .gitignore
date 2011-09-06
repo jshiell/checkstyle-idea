@@ -1,2 +1,5 @@
+CheckStyle-IDEA.zip
+.DS_Store
 *.iws
+target
 test-configs

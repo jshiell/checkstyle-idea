@@ -62,6 +62,8 @@ public abstract class ConfigurationLocation {
         }
 
         this.location = location;
+
+        this.propertiesCheckedThisSession = false;
     }
 
     public String getDescription() {
@@ -88,6 +90,8 @@ public abstract class ConfigurationLocation {
         }
 
         properties.putAll(newProperties);
+
+        this.propertiesCheckedThisSession = false;
     }
 
     /**
@@ -105,8 +109,7 @@ public abstract class ConfigurationLocation {
                 return extractProperties(configDoc.getRootElement());
 
             } catch (Exception e) {
-                LOG.error("CheckStyle file could not be parsed for properties.",
-                        e);
+                LOG.error("CheckStyle file could not be parsed for properties.", e);
             }
         }
 
@@ -175,8 +178,7 @@ public abstract class ConfigurationLocation {
             }
 
             // remove redundant properties
-            for (Iterator<String> i = properties.keySet().iterator();
-                 i.hasNext();) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -185,7 +187,7 @@ public abstract class ConfigurationLocation {
             try {
                 is.reset();
             } catch (IOException e) {
-                is = resolveFile(); // JAR IS don't support this, for instance
+                is = resolveFile(); // JAR IS doesn't support this, for instance
             }
 
             propertiesCheckedThisSession = true;
@@ -231,6 +233,11 @@ public abstract class ConfigurationLocation {
         }
 
         return true;
+    }
+
+    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
+        return !this.equals(configurationLocation)
+                || this.properties.equals(configurationLocation.getProperties());
     }
 
     /**

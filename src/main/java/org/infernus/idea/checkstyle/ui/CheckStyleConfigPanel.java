@@ -236,13 +236,26 @@ public final class CheckStyleConfigPanel extends JPanel {
     /**
      * Have the settings been modified?
      *
-     * @return true if the settngs have been modified.
+     * @return true if the settings have been modified.
      */
     public boolean isModified() {
-        return !ObjectUtils.equals(locations, locationModel.getLocations())
-                || !ObjectUtils.equals(activeLocation, locationModel.getActiveLocation())
+        return haveLocationsChanged()
+                || activeLocation.hasChangedFrom(locationModel.getActiveLocation())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || testClassesCheckbox.isSelected() != scanTestClasses;
+    }
+
+    private boolean haveLocationsChanged() {
+        if (!ObjectUtils.equals(locations, locationModel.getLocations())) {
+            return true;
+        }
+
+        for (int i = 0; i < locations.size(); ++i) {
+            if (locations.get(i).hasChangedFrom(locationModel.getLocationAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<ConfigurationLocation> getConfigurationLocations() {
