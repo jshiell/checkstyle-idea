@@ -170,7 +170,7 @@ public abstract class ConfigurationLocation {
             // merge properties from files
             for (final String propertyName : propertiesInFile) {
                 if (!properties.containsKey(propertyName)) {
-                    properties.put(propertyName, null);
+                    properties.put(propertyName, "");
                 }
             }
 

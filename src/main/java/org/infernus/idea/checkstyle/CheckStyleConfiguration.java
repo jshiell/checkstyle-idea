@@ -145,7 +145,6 @@ public final class CheckStyleConfiguration {
                     // not the best solution, but since there are only few items it doesn't hurt too much...
                     for (Map.Entry<String, String> innerEntry : storage.entrySet()) {
                         if (innerEntry.getKey().startsWith(propertyPrefix)) {
-
                             final String propertyName = innerEntry.getKey().substring(propertyPrefix.length());
                             properties.put(propertyName, innerEntry.getValue());
                         }
@@ -198,7 +197,11 @@ public final class CheckStyleConfiguration {
                 final Map<String, String> properties = configurationLocation.getProperties();
                 if (properties != null) {
                     for (Map.Entry<String,String> entry : properties.entrySet()) {
-                        storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), entry.getValue());
+                        String value = entry.getValue();
+                        if (value == null) {
+                            value = "";
+                        }
+                        storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), value);
                     }
                 }
 

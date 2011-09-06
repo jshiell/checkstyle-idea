@@ -2,7 +2,7 @@ CheckStyle-IDEA
 ---------------
 (c) Copyright 2006-2011 CheckStyle-IDEA Contributors
 
-http://code.google.com/p/checkstyle-idea/
+https://github.com/jshiell/checkstyle-idea
 
 A plug-in for JetBrains' IntelliJ IDEA 10.5 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
@@ -17,7 +17,7 @@ Once installed, a new inspection will be available in the group 'CheckStyle'.
 The 'Errors' item in the preferences panel will allow you to turn this on
 and to configure it.
 
-Project exception are treated a little oddly. Because CheckStyle demands these
+Project exceptions are treated a little oddly. Because CheckStyle demands these
 to be on the current classpath errors will appear if these have not as yet
 been compiled. Further, because we cache the real-time checkers for performance
 reasons, real-time scans may continue to show the errors after a compilation.
@@ -112,7 +112,7 @@ Acknowledgements
 ----------------
 
 This plug-in owes its existence to both the style-overlords at work mandating
-compliance with a CheckStyle configuration, and the Eclispe-CS
+compliance with a CheckStyle configuration, and the Eclipse-CS
 (http://eclipse-cs.sourceforge.net/) authors for making me jealous of the
 real-time scan support available for Eclipse.
 
@@ -128,7 +128,7 @@ Thanks to those who have contributed work and effort directly to this project:
 
  And also thanks are due to the authors and contributors of:
 
-* Eclispe-CS, for inspiration and solutions to coding problems.
+* Eclipse-CS, for inspiration and solutions to coding problems.
 * JetStyle, for filling the area of static scanning and also giving me
   inspirations on coding solutions.
 * CheckStyle, for without them we'd have merely void and chaos.
@@ -148,7 +148,8 @@ LICENCE file.
 Version History
 ---------------
 
-3.4.1 - Fixed: Intermittent NPE on checkin handler registration.
+3.4.2 - Fixed: NPE during property handling.
+3.4.1 - Fixed: Intermittent NPE on check-in handler registration.
 3.4   - New: Support for IDEA 10.5. Older versions are no longer supported.
 3.3.2 - Fixed: Relative paths for suppression filters were not working.
 3.3.1 - Fixed: StringIndexOutOfBoundsException when creating temporary files under Windows.

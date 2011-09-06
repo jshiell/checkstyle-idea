@@ -1,5 +1,5 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
-<idea-plugin version="2" url="http://code.google.com/p/checkstyle-idea/">
+<idea-plugin version="2" url="https://github.com/jshiell/checkstyle-idea">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
     <resource-bundle>org.infernus.idea.checkstyle.resource</resource-bundle>
@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.4.1</version>
+    <version>3.4.2</version>
     <idea-version since-build="107.105"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.4.2: Fixed: NPE during property handling.</li>
     <li>3.4.1: Fixed: Intermittent NPE on checkin handler registration.</li>
     <li>3.4: New: Support for IDEA 10.5. Older versions are no longer supported.</li>
     <li>3.3.2: Fixed: Relative paths for suppression filters were not working.</li>

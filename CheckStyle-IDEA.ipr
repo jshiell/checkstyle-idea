@@ -29,11 +29,14 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="active-configuration" value="file:$PROJECT_DIR$/../Yazino/strata/strata/strata.server/strata.server.build/strata.server.build.checkstyle/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
-        <entry key="location-1" value="FILE:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="location-0" value="file:$PROJECT_DIR$/../Yazino/strata/strata/strata.server/strata.server.build/strata.server.build.checkstyle/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-1" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
         <entry key="location-2" value="FILE:$PROJECT_DIR$/checkstyle-configs/man-checkstyle.xml:Man" />
+        <entry key="location-3" value="FILE:$PROJECT_DIR$/checkstyle-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="property-0.cacheFile" value="$PROJECT_DIR$/../Yazino/strata/strata/strata.server/strata.server.build/strata.server.build.checkstyle/target/checkstylecCache" />
+        <entry key="property-0.checkstyle.suppressions.file" value="$PROJECT_DIR$/../Yazino/strata/strata/strata.server/strata.server.build/strata.server.build.checkstyle/src/main/resources/yazino-checkstyle-suppressions.xml" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>
