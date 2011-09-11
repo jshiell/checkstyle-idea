@@ -105,8 +105,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 } else {
                     return ReturnResult.COMMIT;
                 }
-            }
-            catch (ProcessCanceledException e) {
+            } catch (ProcessCanceledException e) {
                 return ReturnResult.CANCEL;
             }
 

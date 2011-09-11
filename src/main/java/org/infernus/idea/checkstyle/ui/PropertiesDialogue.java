@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -66,7 +67,7 @@ public class PropertiesDialogue extends JDialog {
         propertiesTable.setToolTipText(resources.getString(
                 "config.file.properties.tooltip"));
 
-        final JScrollPane propertiesScrollPane = new JScrollPane(propertiesTable,
+        final JScrollPane propertiesScrollPane = new JBScrollPane(propertiesTable,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         propertiesScrollPane.setBorder(new EmptyBorder(8, 8, 4, 8));
         propertiesScrollPane.setPreferredSize(new Dimension(500, 400));
@@ -103,10 +104,6 @@ public class PropertiesDialogue extends JDialog {
                 (toolkit.getScreenSize().height - getSize().height) / 2);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setVisible(final boolean visible) {
         if (visible) {
@@ -136,6 +133,8 @@ public class PropertiesDialogue extends JDialog {
         // get latest properties from file
         try {
             configurationLocation.resolve();
+            propertiesModel.setProperties(configurationLocation.getProperties());
+
         } catch (IOException e) {
             LOG.error("Couldn't resolve properties file", e);
 
@@ -147,8 +146,6 @@ public class PropertiesDialogue extends JDialog {
             Messages.showErrorDialog(project, formattedMessage,
                     resources.getString("config.file.error.title"));
         }
-
-        propertiesModel.setProperties(configurationLocation.getProperties());
     }
 
     /**

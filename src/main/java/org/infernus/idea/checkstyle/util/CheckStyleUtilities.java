@@ -5,9 +5,6 @@ import com.intellij.openapi.fileTypes.StdFileTypes;
 
 /**
  * General utilities to make life easier with regards to CheckStyle.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class CheckStyleUtilities {
 

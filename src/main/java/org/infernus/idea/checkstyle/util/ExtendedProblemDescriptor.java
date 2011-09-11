@@ -11,9 +11,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * This is a delegate class used to escape IntelliJ's lack
  * of interest in the severity level or column numbers.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ExtendedProblemDescriptor implements ProblemDescriptor {
 
@@ -69,73 +66,43 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
         return line;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public PsiElement getEndElement() {
         return delegate.getEndElement();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public ProblemHighlightType getHighlightType() {
         return delegate.getHighlightType();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getLineNumber() {
         return delegate.getLineNumber();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public PsiElement getPsiElement() {
         return delegate.getPsiElement();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public PsiElement getStartElement() {
         return delegate.getStartElement();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isAfterEndOfLine() {
         return delegate.isAfterEndOfLine();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getDescriptionTemplate() {
         return delegate.getDescriptionTemplate();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public QuickFix[] getFixes() {
         return delegate.getFixes();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setTextAttributes(final TextAttributesKey textAttributesKey) {
         delegate.setTextAttributes(textAttributesKey);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean showTooltip() {
         return delegate.showTooltip();
     }

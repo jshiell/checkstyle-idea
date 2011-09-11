@@ -13,22 +13,13 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 
 /**
- * Action to stop a check in progress..
- *
- * @author James Shiell
- * @version 1.0
+ * Action to stop a check in progress.
  */
 public class StopCheck extends BaseAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             StopCheck.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -59,9 +50,6 @@ public class StopCheck extends BaseAction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);

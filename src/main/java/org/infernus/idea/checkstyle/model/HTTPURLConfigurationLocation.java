@@ -23,9 +23,6 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         super(ConfigurationType.HTTP_URL);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected InputStream resolveFile() throws IOException {
         Reader reader = null;
         Writer writer = null;

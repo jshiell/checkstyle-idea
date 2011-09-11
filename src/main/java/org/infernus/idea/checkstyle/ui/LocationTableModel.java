@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.ui;
 
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -11,15 +12,14 @@ import java.util.ResourceBundle;
 
 /**
  * A table model for editing CheckStyle file locations.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class LocationTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = -7914774770821623832L;
 
     protected static final int COLUMN_ACTIVE = 0;
     protected static final int COLUMN_DESCRIPTION = 1;
     protected static final int COLUMN_FILE = 2;
+    private static final int NUMBER_OF_COLUMNS = 3;
 
     private final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
     private ConfigurationLocation activeLocation;
@@ -85,7 +85,7 @@ public class LocationTableModel extends AbstractTableModel {
         return locations.get(index);
     }
 
-    public void setActiveLocation(final ConfigurationLocation activeLocation) {
+    public void setActiveLocation(@Nullable final ConfigurationLocation activeLocation) {
         if (activeLocation != null && !locations.contains(activeLocation)) {
             throw new IllegalArgumentException("Active location is not in location list");
         }
@@ -147,16 +147,10 @@ public class LocationTableModel extends AbstractTableModel {
         return Collections.unmodifiableList(locations);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getColumnCount() {
-        return 3;
+        return NUMBER_OF_COLUMNS;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Class<?> getColumnClass(final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:
@@ -167,9 +161,6 @@ public class LocationTableModel extends AbstractTableModel {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getColumnName(final int column) {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
@@ -177,17 +168,10 @@ public class LocationTableModel extends AbstractTableModel {
         return resources.getString("config.file.locations.table." + column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         return columnIndex == COLUMN_ACTIVE;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
         final ConfigurationLocation rowLocation = locations.get(rowIndex);
@@ -202,16 +186,10 @@ public class LocationTableModel extends AbstractTableModel {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getRowCount() {
         return locations.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:

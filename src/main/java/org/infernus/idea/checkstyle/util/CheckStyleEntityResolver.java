@@ -14,9 +14,6 @@ import java.util.Map;
 
 /**
  * Entity resolver for CheckStyle DTDs.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class CheckStyleEntityResolver implements EntityResolver {
 
@@ -57,9 +54,6 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 "/dtd/suppressions_1_0.dtd");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public InputSource resolveEntity(final String publicId,
                                      final String systemId)
             throws SAXException, IOException {
@@ -97,9 +91,6 @@ public class CheckStyleEntityResolver implements EntityResolver {
             this.systemId = systemId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public boolean equals(final Object o) {
             if (this == o) {
                 return true;
@@ -120,9 +111,6 @@ public class CheckStyleEntityResolver implements EntityResolver {
             return true;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public int hashCode() {
             return 31 * publicId.hashCode() + systemId.hashCode();
         }

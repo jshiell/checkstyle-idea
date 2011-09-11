@@ -20,8 +20,6 @@ public final class JavadocPackageCheck implements Check {
     private boolean usingLegacyPackage;
 
     /**
-     * {@inheritDoc}
-     * <p/>
      * Retrieve the allowLegacy flag for handling javadoc package info from a CheckStyle configuration.
      */
     public void configure(@NotNull final Configuration config) {
@@ -55,7 +53,7 @@ public final class JavadocPackageCheck implements Check {
 
     private PsiElement findFirstSibling(@NotNull final PsiFile psiFile) {
         PsiElement currentSibling = psiFile;
-        while (currentSibling.getPrevSibling() != null) {
+        while (currentSibling != null && currentSibling.getPrevSibling() != null) {
             currentSibling = currentSibling.getPrevSibling();
         }
         return currentSibling;

@@ -12,9 +12,6 @@ import java.util.Properties;
 
 /**
  * A manager for CheckStyle module configuration.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class CheckStyleModuleConfiguration extends Properties {
 

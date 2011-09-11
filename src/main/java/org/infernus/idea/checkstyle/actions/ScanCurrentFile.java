@@ -19,21 +19,12 @@ import java.util.Arrays;
 
 /**
  * Action to execute a CheckStyle scan on the current editor file.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ScanCurrentFile extends BaseAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             ScanCurrentFile.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -69,9 +60,6 @@ public class ScanCurrentFile extends BaseAction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);

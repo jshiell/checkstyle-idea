@@ -16,6 +16,9 @@ public final class CheckFactory {
 
     private static final Class[] CHECK_CLASSES = {JavadocPackageCheck.class, PackageHtmlCheck.class};
 
+    private CheckFactory() {
+    }
+
     public static List<Check> getChecks(final Configuration config) {
         final List<Check> checks = new ArrayList<Check>();
 

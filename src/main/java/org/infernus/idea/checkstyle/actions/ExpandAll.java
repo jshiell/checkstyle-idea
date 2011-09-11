@@ -12,15 +12,9 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
  * Action to expand all nodes in the results window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ExpandAll extends BaseAction {
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

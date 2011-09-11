@@ -6,6 +6,7 @@ import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +27,6 @@ public abstract class ConfigurationLocation {
 
     private boolean propertiesCheckedThisSession;
 
-    /**
-     * Create a new location.
-     *
-     * @param type        the type.
-     */
     public ConfigurationLocation(final ConfigurationType type) {
         if (type == null) {
             throw new IllegalArgumentException("A type is required");
@@ -70,7 +66,7 @@ public abstract class ConfigurationLocation {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(@Nullable final String description) {
         if (description == null) {
             this.description = location;
         } else {
@@ -78,7 +74,11 @@ public abstract class ConfigurationLocation {
         }
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, String> getProperties() throws IOException {
+        if (!propertiesCheckedThisSession) {
+            resolveFile();
+        }
+
         return Collections.unmodifiableMap(properties);
     }
 
@@ -158,7 +158,6 @@ public abstract class ConfigurationLocation {
 
     /**
      * Resolve this location to a file.
-     * <p/>
      *
      * @return the file to load.
      * @throws IOException if the file cannot be loaded.
@@ -178,7 +177,7 @@ public abstract class ConfigurationLocation {
             }
 
             // remove redundant properties
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -196,58 +195,9 @@ public abstract class ConfigurationLocation {
         return is;
     }
 
-    /**
-     * Resolve this location to a file.
-     * <p/>
-     *
-     * @return the file to load.
-     * @throws IOException if the file cannot be loaded.
-     */
-    protected abstract InputStream resolveFile() throws IOException;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        final ConfigurationLocation that = (ConfigurationLocation) o;
-
-        if (location != null) {
-            if (!location.equals(that.location)) {
-                return false;
-            }
-        } else {
-            if (that.location != null) {
-                return false;
-            }
-        }
-        if (type != that.type) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
-        return !this.equals(configurationLocation)
-                || this.properties.equals(configurationLocation.getProperties());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        return result;
+    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
+        return !equals(configurationLocation)
+                || !getProperties().equals(configurationLocation.getProperties());
     }
 
     public String getDescriptor() {
@@ -259,12 +209,49 @@ public abstract class ConfigurationLocation {
     }
 
     /**
-     * {@inheritDoc}
+     * Resolve this location to a file.
+     *
+     * @return the file to load.
+     * @throws IOException if the file cannot be loaded.
      */
+    protected abstract InputStream resolveFile() throws IOException;
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final ConfigurationLocation that = (ConfigurationLocation) o;
+
+        if (description != null ? !description.equals(that.description) : that.description != null) {
+            return false;
+        }
+        if (location != null ? !location.equals(that.location) : that.location != null) {
+            return false;
+        }
+        if (type != that.type) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public final int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
+    }
+
     @Override
     public String toString() {
         assert description != null;
 
         return description;
-	}
+    }
 }

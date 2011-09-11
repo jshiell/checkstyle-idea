@@ -51,9 +51,6 @@ class ListPropertyResolver implements PropertyResolver {
         return propertyNamesToValues;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String resolve(final String propertyName) throws CheckstyleException {
         // collect properties that are referenced in the config file
         if (!propertyNames.contains(propertyName)) {

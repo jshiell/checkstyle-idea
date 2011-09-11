@@ -2,11 +2,9 @@ package org.infernus.idea.checkstyle.exception;
 
 /**
  * Exception thrown on a plug-in error.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class CheckStylePluginException extends RuntimeException {
+    private static final long serialVersionUID = -2138216104879078592L;
 
     /**
      * Create a new exception with no cause.

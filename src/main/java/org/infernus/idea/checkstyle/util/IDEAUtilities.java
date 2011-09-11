@@ -16,9 +16,6 @@ import java.util.ResourceBundle;
 
 /**
  * General utilities to make life easier with regards to IDEA.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class IDEAUtilities {
 

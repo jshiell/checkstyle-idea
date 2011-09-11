@@ -13,15 +13,9 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
  * Toggle the scroll to source setting.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class ScrollToSource extends ToggleAction {
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isSelected(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -37,7 +31,6 @@ public final class ScrollToSource extends ToggleAction {
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
-        // toggle value
         final Content content = toolWindow.getContentManager().getContent(0);
         if (content != null) {
             final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
@@ -47,9 +40,6 @@ public final class ScrollToSource extends ToggleAction {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setSelected(final AnActionEvent event, final boolean selected) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -65,7 +55,6 @@ public final class ScrollToSource extends ToggleAction {
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
-        // toggle value
         final Content content = toolWindow.getContentManager().getContent(0);
         if (content != null) {
             final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();

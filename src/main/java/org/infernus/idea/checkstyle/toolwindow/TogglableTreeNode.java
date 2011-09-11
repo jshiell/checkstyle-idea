@@ -33,9 +33,6 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         return Collections.unmodifiableList(children);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TreeNode getChildAt(final int index) {
         int realIndex = -1;
@@ -55,9 +52,6 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         throw new ArrayIndexOutOfBoundsException("Invalid index: " + index);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getChildCount() {
         if (children == null) {

@@ -10,7 +10,10 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.treeStructure.Tree;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.apache.commons.logging.Log;
@@ -19,6 +22,7 @@ import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -41,9 +45,6 @@ import java.util.regex.Pattern;
 
 /**
  * The tool window for CheckStyle scans.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ToolWindowPanel extends JPanel {
 
@@ -123,7 +124,7 @@ public class ToolWindowPanel extends JPanel {
         // Create the tree
         treeModel = new ResultTreeModel();
 
-        resultsTree = new JTree(treeModel);
+        resultsTree = new Tree(treeModel);
         resultsTree.setRootVisible(false);
 
         final TreeSelectionListener treeSelectionListener = new ToolWindowSelectionListener();
@@ -151,7 +152,7 @@ public class ToolWindowPanel extends JPanel {
 
         final JPanel toolPanel = new JPanel(new BorderLayout());
 
-        toolPanel.add(new JScrollPane(resultsTree), BorderLayout.CENTER);
+        toolPanel.add(new JBScrollPane(resultsTree), BorderLayout.CENTER);
         toolPanel.add(progressPanel, BorderLayout.NORTH);
 
         add(toolPanel, BorderLayout.CENTER);
@@ -167,7 +168,7 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param text the new progress text, or null to clear.
      */
-    public void setProgressText(final String text) {
+    public void setProgressText(@Nullable final String text) {
         if (text == null || text.trim().length() == 0) {
             progressLabel.setText(" ");
         } else {
@@ -221,8 +222,10 @@ public class ToolWindowPanel extends JPanel {
      * Increment the progress of the progress bar by a given number.
      * <p/>
      * You should call {@link #setProgressBarMax(int)} first for useful semantics.
+     *
+     * @param size the size to increment by.
      */
-    public void incrementProgressBarBy( final int size) {
+    public void incrementProgressBarBy(final int size) {
         if (progressBar.getValue() < progressBar.getMaximum()) {
 
             SwingUtilities.invokeLater(new Runnable() {
@@ -262,11 +265,16 @@ public class ToolWindowPanel extends JPanel {
             return; // no problem here :-)
         }
 
+        final VirtualFile virtualFile = nodeInfo.getFile().getVirtualFile();
+        if (virtualFile == null || !virtualFile.exists()) {
+            return;
+        }
+
         final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         final FileEditor[] editor = fileEditorManager.openFile(
-                nodeInfo.getFile().getVirtualFile(), true);
+                virtualFile, true);
 
-        if (editor != null && editor.length > 0 && editor[0] instanceof TextEditor) {
+        if (editor.length > 0 && editor[0] instanceof TextEditor) {
             final int column = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
                     ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
             final int line = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
@@ -304,9 +312,6 @@ public class ToolWindowPanel extends JPanel {
      */
     protected class ToolWindowMouseListener extends MouseAdapter {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void mouseClicked(final MouseEvent e) {
             if (!scrollToSource && e.getClickCount() < 2) {
@@ -328,9 +333,6 @@ public class ToolWindowPanel extends JPanel {
      */
     protected class ToolWindowSelectionListener implements TreeSelectionListener {
 
-        /**
-         * {@inheritDoc}
-         */
         public void valueChanged(final TreeSelectionEvent e) {
             if (!scrollToSource) {
                 return;

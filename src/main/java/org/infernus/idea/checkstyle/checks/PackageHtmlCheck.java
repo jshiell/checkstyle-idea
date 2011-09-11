@@ -40,7 +40,7 @@ public class PackageHtmlCheck implements Check {
 
     private PsiElement findFirstSibling(@NotNull final PsiFile psiFile) {
         PsiElement currentSibling = psiFile;
-        while (currentSibling.getPrevSibling() != null) {
+        while (currentSibling != null && currentSibling.getPrevSibling() != null) {
             currentSibling = currentSibling.getPrevSibling();
         }
         return currentSibling;

@@ -72,9 +72,6 @@ final class FileScanner implements Runnable {
         this.moduleClassLoader = moduleClassLoader;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         try {
             results = checkPsiFile(filesToScan, moduleClassLoader);
@@ -228,6 +225,7 @@ final class FileScanner implements Runnable {
             ApplicationManager.getApplication().runReadAction(fileAction);
 
             // rethrow any error from the thread.
+            //noinspection ThrowableResultOfMethodCallIgnored
             if (fileAction.getFailure() != null) {
                 throw fileAction.getFailure();
             }
@@ -266,7 +264,7 @@ final class FileScanner implements Runnable {
 
             return CheckerFactory.getInstance().getChecker(location, module, classLoader);
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }

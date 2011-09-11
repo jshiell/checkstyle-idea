@@ -7,20 +7,19 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A manager for CheckStyle plug-in configuration.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class CheckStyleConfiguration {
 
@@ -38,7 +37,7 @@ public final class CheckStyleConfiguration {
     private final Project project;
     private final ConfigurationLocation defaultLocation;
 
-    private final Map<String,String> storage = new ConcurrentHashMap<String,String>();
+    private final Map<String, String> storage = new ConcurrentHashMap<String, String>();
 
     // lock used for sequentially accessing the storage
     private final ReentrantLock storageLock = new ReentrantLock();
@@ -134,7 +133,7 @@ public final class CheckStyleConfiguration {
                 final String value = entry.getValue();
                 try {
                     final ConfigurationLocation location = ConfigurationLocationFactory.create(
-                        project, value);
+                            project, value);
 
                     final Map<String, String> properties = new HashMap<String, String>();
 
@@ -179,7 +178,7 @@ public final class CheckStyleConfiguration {
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
         storageLock.lock();
         try {
-            for (Iterator i = storage.keySet().iterator(); i.hasNext();) {
+            for (Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
                 final String propertyName = i.next().toString();
                 if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
                     i.remove();
@@ -194,15 +193,20 @@ public final class CheckStyleConfiguration {
             for (ConfigurationLocation configurationLocation : configurationLocations) {
                 storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
 
-                final Map<String, String> properties = configurationLocation.getProperties();
-                if (properties != null) {
-                    for (Map.Entry<String,String> entry : properties.entrySet()) {
-                        String value = entry.getValue();
-                        if (value == null) {
-                            value = "";
+                try {
+                    final Map<String, String> properties = configurationLocation.getProperties();
+                    if (properties != null) {
+                        for (Map.Entry<String, String> entry : properties.entrySet()) {
+                            String value = entry.getValue();
+                            if (value == null) {
+                                value = "";
+                            }
+                            storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), value);
                         }
-                        storage.put(PROPERTIES_PREFIX + index + "." + entry.getKey(), value);
                     }
+                } catch (IOException e) {
+                    IDEAUtilities.showError(project, IDEAUtilities.getResource("checkstyle.could-not-read-properties",
+                            "Properties could not be read from the CheckStyle configuration file."));
                 }
 
                 ++index;
@@ -332,11 +336,12 @@ public final class CheckStyleConfiguration {
     }
 
 
-    /** Create a copy of the current configuration.
+    /**
+     * Create a copy of the current configuration.
      *
      * @return a copy of the current configuration settings
      */
-    public Map<String,String> getState() {
+    public Map<String, String> getState() {
         storageLock.lock();
         try {
             return new HashMap<String, String>(storage);
@@ -348,6 +353,7 @@ public final class CheckStyleConfiguration {
 
     /**
      * Load the state from the given stateBean.
+     *
      * @param stateBean where to load the state from
      */
     public void loadState(Map<String, String> stateBean) {

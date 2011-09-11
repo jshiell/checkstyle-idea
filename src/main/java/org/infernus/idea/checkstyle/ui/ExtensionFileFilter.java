@@ -23,9 +23,6 @@ public class ExtensionFileFilter extends FileFilter {
         this.extension = extension;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean accept(final File f) {
         if (f.isDirectory()) {
             return true;
@@ -35,9 +32,6 @@ public class ExtensionFileFilter extends FileFilter {
         return fileName.toLowerCase().endsWith("." + extension);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getDescription() {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);

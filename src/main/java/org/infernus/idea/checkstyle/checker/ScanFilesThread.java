@@ -1,18 +1,17 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.codeInspection.ProblemDescriptor;
-
-import java.util.List;
-import java.util.Map;
-import java.lang.reflect.InvocationTargetException;
-
-import org.jetbrains.annotations.NonNls;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.jetbrains.annotations.NonNls;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
 
 public class ScanFilesThread extends AbstractCheckerThread {
 
@@ -24,12 +23,13 @@ public class ScanFilesThread extends AbstractCheckerThread {
 
     /**
      * Scan Files and store results.
+     *
      * @param checkStylePlugin reference to the CheckStylePlugin
-     * @param vFiles files to scan 
-     * @param results Map to store scan results
+     * @param vFiles           files to scan
+     * @param results          Map to store scan results
      */
     public ScanFilesThread(final CheckStylePlugin checkStylePlugin,
-                           final List<VirtualFile> vFiles, 
+                           final List<VirtualFile> vFiles,
                            final Map<PsiFile, List<ProblemDescriptor>> results) {
         super(checkStylePlugin, vFiles);
         this.setFileResults(results);
@@ -56,7 +56,7 @@ public class ScanFilesThread extends AbstractCheckerThread {
     }
 
 
-    public void runFileScanner(FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
+    public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
         fileScanner.run();
     }
 

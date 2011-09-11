@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.openapi.application.Application;
@@ -19,9 +18,6 @@ import java.util.*;
 
 /**
  * Listener for the CheckStyle process.
- *
- * @author James Shiell
- * @version 1.1
  */
 public class CheckStyleAuditListener implements AuditListener {
 
@@ -60,9 +56,6 @@ public class CheckStyleAuditListener implements AuditListener {
         this.checks = checks;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void auditStarted(final AuditEvent auditEvent) {
         synchronized (errors) {
             errors.clear();
@@ -70,9 +63,6 @@ public class CheckStyleAuditListener implements AuditListener {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void auditFinished(final AuditEvent auditEvent) {
         final ProcessResultsThread findThread = new ProcessResultsThread();
 
@@ -84,32 +74,20 @@ public class CheckStyleAuditListener implements AuditListener {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void fileStarted(final AuditEvent auditEvent) {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void fileFinished(final AuditEvent auditEvent) {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void addError(final AuditEvent auditEvent) {
         synchronized (errors) {
             errors.add(auditEvent);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void addException(final AuditEvent auditEvent,
                              final Throwable throwable) {
         LOG.error("Exception during CheckStyle execution", throwable);
@@ -151,9 +129,6 @@ public class CheckStyleAuditListener implements AuditListener {
      */
     private class ProcessResultsThread implements Runnable {
 
-        /**
-         * {@inheritDoc}
-         */
         public void run() {
             final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<PsiFile, List<Integer>>();
 
@@ -258,7 +233,7 @@ public class CheckStyleAuditListener implements AuditListener {
                 final ProblemHighlightType problemType
                         = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, message, (LocalQuickFix[]) null, problemType, false, endOfLine);
+                        victim, message, null, problemType, false, endOfLine);
 
                 if (usingExtendedDescriptors) {
                     final ProblemDescriptor delegate

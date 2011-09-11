@@ -132,6 +132,7 @@ public abstract class AbstractCheckerThread extends Thread {
             this.runFileScanner(fileScanner);
 
             // check for errors
+            //noinspection ThrowableResultOfMethodCallIgnored
             if (fileScanner.getError() != null) {
                 // throw any exceptions from the thread
                 throw fileScanner.getError();

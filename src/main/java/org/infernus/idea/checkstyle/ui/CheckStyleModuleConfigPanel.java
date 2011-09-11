@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.ui;
 
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -116,7 +117,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      *
      * @param activeLocation the configuration, or null to use the project configuration.
      */
-    public void setActiveLocation(final ConfigurationLocation activeLocation) {
+    public void setActiveLocation(@Nullable final ConfigurationLocation activeLocation) {
         this.activeLocation = activeLocation;
 
         if (activeLocation != null) {

@@ -10,15 +10,9 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 /**
  * Action to close the tool window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class Close extends BaseAction {
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

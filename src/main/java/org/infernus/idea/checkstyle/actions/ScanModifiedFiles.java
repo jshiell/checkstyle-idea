@@ -17,21 +17,12 @@ import java.util.List;
  * Scan modified files.
  * <p/>
  * If the project is not setup to use VCS then no files will be scanned.
- *
- * @author jgchristopher
- * @version 1.0
  */
 public class ScanModifiedFiles extends BaseAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             ScanModifiedFiles.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public final void actionPerformed(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());
@@ -48,9 +39,6 @@ public class ScanModifiedFiles extends BaseAction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);

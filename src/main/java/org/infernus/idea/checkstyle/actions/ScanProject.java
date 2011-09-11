@@ -21,21 +21,12 @@ import java.util.List;
 
 /**
  * Action to execute a CheckStyle scan on the current project.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ScanProject extends BaseAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             ScanProject.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());
@@ -75,9 +66,6 @@ public class ScanProject extends BaseAction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);

@@ -1,6 +1,9 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.components.JBList;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -14,6 +17,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,13 +25,10 @@ import java.util.ResourceBundle;
 
 /**
  * Provides a configuration panel for project-level configuration.
- *
- * @author James Shiell
- * @version 1.0
  */
 public final class CheckStyleConfigPanel extends JPanel {
 
-    private final JList pathList = new JList(new DefaultListModel());
+    private final JList pathList = new JBList(new DefaultListModel());
     private final JButton editPathButton = new JButton(new EditPathAction());
     private final JButton removePathButton = new JButton(new RemovePathAction());
     private final JButton moveUpPathButton = new JButton(new MoveUpPathAction());
@@ -36,7 +37,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final JCheckBox testClassesCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
-    private final JTable locationTable = new JTable(locationModel);
+    private final JTable locationTable = new JBTable(locationModel);
     private final JButton addLocationButton = new JButton(new AddLocationAction());
     private final JButton removeLocationButton = new JButton(new RemoveLocationAction());
     private final JButton editLocationPropertiesButton = new JButton(new EditPropertiesAction());
@@ -47,16 +48,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     private ConfigurationLocation activeLocation;
     private ConfigurationLocation defaultLocation;
 
-    /**
-     * Plug-in reference.
-     */
     private CheckStylePlugin plugin;
 
-    /**
-     * Create a new panel.
-     *
-     * @param plugin the plugin that owns this panel.
-     */
     public CheckStyleConfigPanel(final CheckStylePlugin plugin) {
         super(new BorderLayout());
 
@@ -69,9 +62,6 @@ public final class CheckStyleConfigPanel extends JPanel {
         initialise();
     }
 
-    /**
-     * Initialise the view.
-     */
     private void initialise() {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
@@ -106,7 +96,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         locationToolBar.add(removeLocationButton);
 
         locationTable.getSelectionModel().addListSelectionListener(new LocationTableSelectionListener());
-        final JScrollPane locationScrollPane = new JScrollPane(locationTable,
+        final JScrollPane locationScrollPane = new JBScrollPane(locationTable,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
@@ -137,7 +127,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         moveDownPathButton.setEnabled(false);
 
         pathList.addListSelectionListener(new PathListSelectionListener());
-        final JScrollPane pathListScroll = new JScrollPane(pathList);
+        final JScrollPane pathListScroll = new JBScrollPane(pathList);
         pathListScroll.setHorizontalScrollBarPolicy(
                 JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         pathListScroll.setVerticalScrollBarPolicy(
@@ -237,15 +227,16 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Have the settings been modified?
      *
      * @return true if the settings have been modified.
+     * @throws IOException if the properties cannot be read.
      */
-    public boolean isModified() {
+    public boolean isModified() throws IOException {
         return haveLocationsChanged()
                 || activeLocation.hasChangedFrom(locationModel.getActiveLocation())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || testClassesCheckbox.isSelected() != scanTestClasses;
     }
 
-    private boolean haveLocationsChanged() {
+    private boolean haveLocationsChanged() throws IOException {
         if (!ObjectUtils.equals(locations, locationModel.getLocations())) {
             return true;
         }
@@ -297,9 +288,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.file.add.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final LocationDialogue dialogue = new LocationDialogue(plugin.getProject());
 
@@ -339,9 +327,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.file.remove.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
@@ -369,9 +354,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.file.properties.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
@@ -397,9 +379,6 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     protected final class LocationTableSelectionListener
             implements ListSelectionListener {
-        /**
-         * {@inheritDoc}
-         */
         public void valueChanged(final ListSelectionEvent e) {
             if (e.getValueIsAdjusting()) {
                 return;
@@ -424,9 +403,6 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     protected final class PathListSelectionListener
             implements ListSelectionListener {
-        /**
-         * {@inheritDoc}
-         */
         public void valueChanged(final ListSelectionEvent e) {
             if (e.getValueIsAdjusting()) {
                 return;
@@ -454,6 +430,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Process the addition of a path element.
      */
     protected final class AddPathAction extends AbstractAction {
+        private static final long serialVersionUID = -1389576037231727360L;
 
         /**
          * Create a new add path action.
@@ -471,9 +448,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.path.add.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new ExtensionFileFilter("jar"));
@@ -493,6 +467,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Process the editing of a path element.
      */
     protected final class EditPathAction extends AbstractAction {
+        private static final long serialVersionUID = -1455378231580505750L;
 
         /**
          * Create a new edit path action.
@@ -510,9 +485,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.path.edit.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 1) {
@@ -544,6 +516,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Process the removal of a path element.
      */
     protected final class RemovePathAction extends AbstractAction {
+        private static final long serialVersionUID = 7339136485307147623L;
 
         /**
          * Create a new add path action.
@@ -562,9 +535,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.path.remove.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final int[] selected = pathList.getSelectedIndices();
             if (selected == null || selected.length == 0) {
@@ -581,6 +551,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * Process the move up of a path element.
      */
     protected final class MoveUpPathAction extends AbstractAction {
+        private static final long serialVersionUID = -1230778908605654344L;
 
         /**
          * Create a new move-up path action.
@@ -599,9 +570,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.path.move-up.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 1) {
@@ -618,12 +586,10 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
-     * Process a click on the browse button.
-     */
-    /**
      * Process the move down of a path element.
      */
     protected final class MoveDownPathAction extends AbstractAction {
+        private static final long serialVersionUID = 1222511743014969175L;
 
         /**
          * Create a new move-down path action.
@@ -642,9 +608,6 @@ public final class CheckStyleConfigPanel extends JPanel {
                     resources.getString("config.path.move-down.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final DefaultListModel listModel = (DefaultListModel)
                     pathList.getModel();

@@ -2,9 +2,6 @@ package org.infernus.idea.checkstyle;
 
 /**
  * Cross-application constants for the CheckStyle plug-in.
- *
- * @author James Shiell
- * @version 1.1
  */
 public final class CheckStyleConstants {
 

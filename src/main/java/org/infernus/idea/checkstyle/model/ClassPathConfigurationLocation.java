@@ -15,9 +15,6 @@ public class ClassPathConfigurationLocation extends ConfigurationLocation {
         super(ConfigurationType.CLASSPATH);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected InputStream resolveFile() throws IOException {
         final InputStream in = ClassPathConfigurationLocation.class.getResourceAsStream(getLocation());
         if (in == null) {

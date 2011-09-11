@@ -39,9 +39,6 @@ import java.util.Map;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
- *
- * @author James Shiell
- * @version 1.1
  */
 public class CheckStyleInspection extends LocalInspectionTool {
 
@@ -128,25 +125,16 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Nullable
     public JComponent createOptionsPanel() {
         return configPanel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getGroupDisplayName() {
         return IDEAUtilities.getResource("plugin.group", "CheckStyle");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getDisplayName() {
         return IDEAUtilities.getResource("plugin.display-name",
@@ -160,18 +148,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return CheckStyleConstants.ID_INSPECTION;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     @NonNls
     public String getShortName() {
         return CheckStyleConstants.ID_PLUGIN;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Nullable
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,

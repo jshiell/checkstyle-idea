@@ -21,21 +21,12 @@ import java.util.Arrays;
 
 /**
  * Action to execute a CheckStyle scan on the current module.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ScanModule extends BaseAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             ScanModule.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public final void actionPerformed(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());
@@ -89,9 +80,6 @@ public class ScanModule extends BaseAction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void update(final AnActionEvent event) {
         super.update(event);
@@ -123,7 +111,7 @@ public class ScanModule extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            ModuleRootManager moduleRootManager
+            final ModuleRootManager moduleRootManager
                     = ModuleRootManager.getInstance(module);
             final VirtualFile[] moduleFiles = moduleRootManager.getSourceRoots();
 

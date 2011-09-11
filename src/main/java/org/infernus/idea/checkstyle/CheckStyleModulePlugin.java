@@ -69,9 +69,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         return configuration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CheckStyleModulePlugin.ConfigurationBean getState() {
         final ConfigurationBean configBean = new ConfigurationBean();
         for (final Enumeration confNames = configuration.propertyNames(); confNames.hasMoreElements();) {
@@ -81,9 +78,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         return configBean;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void loadState(final CheckStyleModulePlugin.ConfigurationBean newConfiguration) {
         configuration.clear();
 
@@ -94,73 +88,43 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void projectOpened() {
         LOG.debug("Project opened.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void projectClosed() {
         LOG.debug("Project closed.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void moduleAdded() {
         LOG.debug("Moduled added: " + module.getName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getComponentName() {
         return CheckStyleConstants.ID_MODULE_PLUGIN;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void initComponent() {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void disposeComponent() {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getDisplayName() {
         return IDEAUtilities.getResource("plugin.configuration-name",
                 "CheckStyle Plugin");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Icon getIcon() {
         return IDEAUtilities.getIcon(
                 "/org/infernus/idea/checkstyle/images/checkstyle16.png");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getHelpTopic() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public JComponent createComponent() {
         if (configPanel == null) {
             configPanel = new CheckStyleModuleConfigPanel();
@@ -171,9 +135,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         return configPanel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isModified() {
         if (configPanel == null) {
             return false;
@@ -182,9 +143,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         return configPanel.isModified();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void apply() throws ConfigurationException {
         if (configPanel == null) {
             return;
@@ -195,9 +153,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         reset(); // reset modification state
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void reset() {
         if (configPanel == null) {
             return;
@@ -212,9 +167,6 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void disposeUIResources() {
         configPanel = null;
     }

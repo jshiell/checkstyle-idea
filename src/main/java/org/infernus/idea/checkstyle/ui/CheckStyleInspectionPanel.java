@@ -7,10 +7,7 @@ import java.awt.*;
 import java.util.ResourceBundle;
 
 /**
- * Provides a dummy panel for the inspection configuraiton.
- *
- * @author James Shiell
- * @version 1.0
+ * Provides a dummy panel for the inspection configuration.
  */
 public final class CheckStyleInspectionPanel extends JPanel {
 

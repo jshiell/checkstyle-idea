@@ -7,9 +7,6 @@ import java.awt.*;
 
 /**
  * The cell renderer for tree nodes in the tool window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ResultTreeRenderer extends JLabel
         implements TreeCellRenderer {
@@ -24,9 +21,6 @@ public class ResultTreeRenderer extends JLabel
         setOpaque(false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void paintComponent(final Graphics g) {
         g.setColor(getBackground());
 
@@ -45,9 +39,6 @@ public class ResultTreeRenderer extends JLabel
         super.paintComponent(g);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Component getTreeCellRendererComponent(final JTree tree,
                                                   final Object value,
                                                   final boolean selected,
@@ -82,7 +73,7 @@ public class ResultTreeRenderer extends JLabel
         setFont(tree.getFont());
 
         setForeground(UIManager.getColor(selected
-                ? "Tree.selectionForeground" : "Tree.textForegound"));
+                ? "Tree.selectionForeground" : "Tree.textForeground"));
         setBackground(UIManager.getColor(selected
                 ? "Tree.selectionBackground" : "Tree.textBackground"));
 

@@ -4,6 +4,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -63,7 +64,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      *
      * @param messageText the text to display.
      */
-    public void setRootText(final String messageText) {
+    public void setRootText(@Nullable final String messageText) {
         if (messageText == null) {
             final ResourceBundle resources = ResourceBundle.getBundle(
                     CheckStyleConstants.RESOURCE_BUNDLE);
@@ -84,7 +85,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      *
      * @param messageKey the message key to display.
      */
-    public void setRootMessage(final String messageKey) {
+    public void setRootMessage(@Nullable final String messageKey) {
         if (messageKey == null) {
             setRootText(null);
 
@@ -140,14 +141,14 @@ public class ResultTreeModel extends DefaultTreeModel {
             return false;
         }
         if (objectToFind == null) {
-            for (int i = 0; i < array.length; i++) {
-                if (array[i] == null) {
+            for (final Object anArray : array) {
+                if (anArray == null) {
                     return true;
                 }
             }
         } else {
-            for (int i = 0; i < array.length; i++) {
-                if (objectToFind.equals(array[i])) {
+            for (final Object anArray : array) {
+                if (objectToFind.equals(anArray)) {
                     return true;
                 }
             }

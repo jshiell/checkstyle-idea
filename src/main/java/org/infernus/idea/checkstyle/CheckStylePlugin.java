@@ -31,7 +31,6 @@ import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
@@ -41,16 +40,14 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
 /**
- * Main class for the CheckStyle static scanning plug-n.
- *
- * @author James Shiell
- * @version 1.0
+ * Main class for the CheckStyle static scanning plug-in.
  */
 @State(
         name = CheckStyleConstants.ID_PLUGIN,
@@ -124,16 +121,10 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CheckStylePlugin.ConfigurationBean getState() {
         return new ConfigurationBean(configuration.getState());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void loadState(final CheckStylePlugin.ConfigurationBean newConfiguration) {
         Map<String, String> bean = null;
         if (newConfiguration != null) {
@@ -142,11 +133,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         configuration.loadState(bean);
     }
 
-    /**
-     * Project getter.
-     *
-     * @return Project
-     */
     public Project getProject() {
         return project;
     }
@@ -263,9 +249,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         toolWindowManager.unregisterToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void projectOpened() {
         LOG.debug("Project opened.");
 
@@ -273,9 +256,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         registerToolWindow();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void projectClosed() {
         LOG.debug("Project closed.");
 
@@ -283,23 +263,14 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         unregisterCheckInHandler();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     public String getComponentName() {
         return CheckStyleConstants.ID_PLUGIN;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void initComponent() {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void disposeComponent() {
     }
 
@@ -320,32 +291,20 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getDisplayName() {
         return IDEAUtilities.getResource("plugin.configuration-name",
                 "CheckStyle Plugin");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Icon getIcon() {
         return IDEAUtilities.getIcon(
                 "/org/infernus/idea/checkstyle/images/checkstyle32.png");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getHelpTopic() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public JComponent createComponent() {
         if (configPanel == null) {
             return null;
@@ -356,16 +315,17 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         return configPanel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isModified() {
-        return configPanel != null && configPanel.isModified();
+        try {
+            return configPanel != null && configPanel.isModified();
+
+        } catch (IOException e) {
+            IDEAUtilities.showError(project,
+                    IDEAUtilities.getResource("checkstyle.file-not-found", "The CheckStyle file could not be read."));
+            return true;
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void apply() throws ConfigurationException {
         if (configPanel == null) {
             return;
@@ -386,9 +346,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         thirdPartyClassloader = null; // reset to force reload
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void reset() {
         if (configPanel == null) {
             return;
@@ -401,9 +358,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void disposeUIResources() {
 
     }
@@ -415,7 +369,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      * @param error   the exception.
      * @return any exception to be passed upwards.
      */
-    public static CheckStylePluginException processError(final String message,
+    public static CheckStylePluginException processError(@Nullable final String message,
                                                          @NotNull final Throwable error) {
         Throwable root = error;
         while (root.getCause() != null
@@ -560,7 +514,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 if (filePath.endsWith("!/")) { // filter JAR suffix
                     filePath = filePath.substring(0, filePath.length() - 2);
                 }
-                outputPaths.add(new File(filePath).toURL());
+                outputPaths.add(new File(filePath).toURI().toURL());
             }
         }
 
@@ -569,7 +523,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
 
     @NotNull
-    public CheckinHandler createHandler(CheckinProjectPanel checkinProjectPanel) {
+    public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel) {
         return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
     }
 

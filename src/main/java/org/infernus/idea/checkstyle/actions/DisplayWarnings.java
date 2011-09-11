@@ -13,15 +13,9 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
  * Action to toggle error display in tool window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class DisplayWarnings extends ToggleAction {
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isSelected(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -46,9 +40,6 @@ public class DisplayWarnings extends ToggleAction {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setSelected(final AnActionEvent event, final boolean selected) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

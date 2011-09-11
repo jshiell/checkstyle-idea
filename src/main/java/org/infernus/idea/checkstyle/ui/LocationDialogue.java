@@ -146,9 +146,6 @@ public class LocationDialogue extends JDialog {
         return contentPanel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setVisible(final boolean visible) {
         if (visible) {
@@ -342,9 +339,6 @@ public class LocationDialogue extends JDialog {
                     resources.getString("config.file.browse.tooltip"));
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new ExtensionFileFilter("xml"));

@@ -7,14 +7,13 @@ import java.util.*;
 
 /**
  * A table model for editing CheckStyle properties.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class PropertiesTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = -5666606037841678795L;
 
     protected static final int COLUMN_NAME = 0;
     protected static final int COLUMN_VALUE = 1;
+    private static final int NUMBER_OF_COLUMNS = 2;
 
     private final List<String> orderedNames = new ArrayList<String>();
     private final Map<String, String> properties
@@ -73,23 +72,14 @@ public class PropertiesTableModel extends AbstractTableModel {
         return new HashMap<String, String>(properties);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getColumnCount() {
-        return 2;
+        return NUMBER_OF_COLUMNS;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Class<?> getColumnClass(final int columnIndex) {
         return String.class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getColumnName(final int column) {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
@@ -97,16 +87,10 @@ public class PropertiesTableModel extends AbstractTableModel {
         return resources.getString("config.file.properties.table." + column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         return columnIndex == COLUMN_VALUE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setValueAt(final Object aValue, final int rowIndex,
                            final int columnIndex) {
         switch (columnIndex) {
@@ -122,16 +106,10 @@ public class PropertiesTableModel extends AbstractTableModel {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getRowCount() {
         return orderedNames.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_NAME:

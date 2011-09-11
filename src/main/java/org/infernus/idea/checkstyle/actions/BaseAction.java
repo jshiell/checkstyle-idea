@@ -19,21 +19,12 @@ import java.util.ResourceBundle;
 
 /**
  * Base class for plug-in actions.
- *
- * @author James Shiell
- * @version 1.0
  */
 public abstract class BaseAction extends AnAction {
 
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(
             BaseAction.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public void update(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());

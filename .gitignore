@@ -3,3 +3,4 @@ CheckStyle-IDEA.zip
 *.iws
 target
 test-configs
+META-INF

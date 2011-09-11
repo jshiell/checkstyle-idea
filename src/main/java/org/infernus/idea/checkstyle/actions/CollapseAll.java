@@ -11,15 +11,9 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 
 /**
  * Action to collapse all nodes in the results window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class CollapseAll extends BaseAction {
 
-    /**
-     * {@inheritDoc}
-     */
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

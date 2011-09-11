@@ -13,9 +13,6 @@ import java.util.ResourceBundle;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
- *
- * @author James Shiell
- * @version 1.0
  */
 public class ResultTreeNode {
 
@@ -208,9 +205,6 @@ public class ResultTreeNode {
         this.description = description;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String toString() {
         if (text != null) {
             return text;

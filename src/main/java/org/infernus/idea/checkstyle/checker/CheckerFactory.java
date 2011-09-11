@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.InputSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,6 @@ import java.util.Map;
 
 /**
  * A configuration factory and resolver for CheckStyle.
- *
- * @author James Shiell
- * @version 1.1
  */
 public class CheckerFactory {
 
@@ -72,12 +70,13 @@ public class CheckerFactory {
      * @param classLoader class loader for CheckStyle use, or null to use
      *                    the default.
      * @return the checker for the module or null if it cannot be created.
+     * @throws IOException if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final ConfigurationLocation location,
                               final Module module,
                               final ClassLoader classLoader)
-            throws CheckstyleException {
+            throws CheckstyleException, IOException {
         if (location == null) {
             throw new IllegalArgumentException("Location is required");
         }
@@ -280,7 +279,7 @@ public class CheckerFactory {
                     try {
                         configurationInputStream = location.resolve();
                         config = ConfigurationLoader.loadConfiguration(
-                                configurationInputStream, resolver, true);
+                                new InputSource(configurationInputStream), resolver, true);
 
                         replaceSuppressionFilterPath(config);
 

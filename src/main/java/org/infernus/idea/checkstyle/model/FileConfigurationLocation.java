@@ -8,10 +8,7 @@ import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * A configuration file on disc.
@@ -38,9 +35,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         this.project = project;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public File getBaseDir() {
         final String location = getLocation();
@@ -54,17 +48,11 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getLocation() {
         return untokenisePath(super.getLocation());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setLocation(final String location) {
         if (location == null || location.trim().length() == 0) {
@@ -74,13 +62,10 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         super.setLocation(tokenisePath(location));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected InputStream resolveFile() throws IOException {
         final File locationFile = new File(getLocation());
         if (!locationFile.exists()) {
-            throw new IOException("File does not exist: " + locationFile.getAbsolutePath());
+            throw new FileNotFoundException("File does not exist: " + locationFile.getAbsolutePath());
         }
 
         return new FileInputStream(locationFile);

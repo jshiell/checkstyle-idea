@@ -52,9 +52,6 @@ class CreateScannableFileAction implements Runnable {
         return file;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         try {
             file = new ScannableFile(psiFile);
