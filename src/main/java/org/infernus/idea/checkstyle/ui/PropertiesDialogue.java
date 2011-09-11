@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.table.JBTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -32,7 +33,7 @@ public class PropertiesDialogue extends JDialog {
     /**
      * Properties table, hacked for enable/disable support.
      */
-    private final JTable propertiesTable = new JTable(propertiesModel) {
+    private final JBTable propertiesTable = new JBTable(propertiesModel) {
         public Component prepareRenderer(final TableCellRenderer renderer,
                                          final int row, final int column) {
             final Component comp = super.prepareRenderer(renderer, row, column);
@@ -67,10 +68,13 @@ public class PropertiesDialogue extends JDialog {
         propertiesTable.setToolTipText(resources.getString(
                 "config.file.properties.tooltip"));
 
+        final JPanel scrollPaneContainer = new JPanel(new BorderLayout());
+        scrollPaneContainer.setBorder(new EmptyBorder(8, 8, 4, 8));
+        scrollPaneContainer.setPreferredSize(new Dimension(500, 400));
+
         final JScrollPane propertiesScrollPane = new JBScrollPane(propertiesTable,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        propertiesScrollPane.setBorder(new EmptyBorder(8, 8, 4, 8));
-        propertiesScrollPane.setPreferredSize(new Dimension(500, 400));
+        scrollPaneContainer.add(propertiesScrollPane, BorderLayout.CENTER);
 
         final JButton okayButton = new JButton(new OkayAction());
         final JButton cancelButton = new JButton(new CancelAction());
@@ -92,7 +96,7 @@ public class PropertiesDialogue extends JDialog {
                     GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         }
 
-        add(propertiesScrollPane, BorderLayout.CENTER);
+        add(scrollPaneContainer, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(okayButton);

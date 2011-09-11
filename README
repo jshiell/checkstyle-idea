@@ -150,6 +150,8 @@ Version History
 
 3.5   - New: Updated CheckStyle to 5.4.
 3.5   - Fixed: NPE during property handling.
+3.5   - Fixed: Property change detection improved.
+3.5   - Improved: General cleanup and deprecation removals.
 3.4.1 - Fixed: Intermittent NPE on check-in handler registration.
 3.4   - New: Support for IDEA 10.5. Older versions are no longer supported.
 3.3.2 - Fixed: Relative paths for suppression filters were not working.
