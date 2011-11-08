@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
+import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
 import com.intellij.openapi.vcs.impl.CheckinHandlersManager;
@@ -276,7 +277,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
     private void registerCheckInHandler() {
         try {
-            CheckinHandlersManager.getInstance(this.project).registerCheckinHandlerFactory(this);
+            CheckinHandlersManager.getInstance().registerCheckinHandlerFactory(this);
 
         } catch (Exception e) {
             LOG.error("Unable to register check-in handler", e);
@@ -284,7 +285,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
     private void unregisterCheckInHandler() {
         try {
-            CheckinHandlersManager.getInstance(this.project).unregisterCheckinHandlerFactory(this);
+            CheckinHandlersManager.getInstance().unregisterCheckinHandlerFactory(this);
 
         } catch (Exception e) {
             LOG.error("Unable to unregister check-in handler", e);
@@ -523,7 +524,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
 
     @NotNull
-    public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel) {
+    @Override
+    public CheckinHandler createHandler(CheckinProjectPanel checkinProjectPanel, CommitContext commitContext) {
         return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
     }
 
