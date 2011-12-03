@@ -4,7 +4,7 @@ CheckStyle-IDEA
 
 https://github.com/jshiell/checkstyle-idea
 
-A plug-in for JetBrains' IntelliJ IDEA 10.5 which provides real-time feedback
+A plug-in for JetBrains' IntelliJ IDEA 11 which provides real-time feedback
 against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -125,6 +125,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * LightGuard.JP
 * Gerhard Radatz
 * Benjy W
+* Yuri
 
  And also thanks are due to the authors and contributors of:
 
@@ -148,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.6   - New: Changed to work with IDEA 11. Thanks to Yuri.
 3.5   - New: Updated CheckStyle to 5.4.
 3.5   - Fixed: NPE during property handling.
 3.5   - Fixed: Property change detection improved.
