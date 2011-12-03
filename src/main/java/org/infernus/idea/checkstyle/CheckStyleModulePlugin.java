@@ -136,11 +136,7 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
     }
 
     public boolean isModified() {
-        if (configPanel == null) {
-            return false;
-        }
-
-        return configPanel.isModified();
+        return configPanel != null && configPanel.isModified();
     }
 
     public void apply() throws ConfigurationException {

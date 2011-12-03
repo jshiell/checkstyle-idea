@@ -11,11 +11,13 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 /**
@@ -96,16 +98,26 @@ public class ScannableFile {
     private boolean existsOnFilesystem(@NotNull final PsiFile psiFile) {
         final VirtualFile virtualFile = psiFile.getVirtualFile();
         return virtualFile != null
-                && LocalFileSystem.getInstance().exists(psiFile.getVirtualFile());
+                && LocalFileSystem.getInstance().exists(virtualFile);
     }
 
     private boolean fileOpenOrUnsaved(@NotNull final PsiFile psiFile) {
         final VirtualFile virtualFile = psiFile.getVirtualFile();
-        //noinspection SimplifiableIfStatement
         if (virtualFile != null) {
-            return FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
-                    || documentIsModifiedAndUnsaved(virtualFile);
+            final AtomicBoolean result = new AtomicBoolean();
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    public void run() {
+                        result.set(FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
+                                || documentIsModifiedAndUnsaved(virtualFile));
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException("File status check failed", e);
+            }
+            return result.get();
         }
+
         return false;
     }
 

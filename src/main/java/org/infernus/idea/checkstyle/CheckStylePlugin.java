@@ -525,7 +525,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
     @NotNull
     @Override
-    public CheckinHandler createHandler(CheckinProjectPanel checkinProjectPanel, CommitContext commitContext) {
+    public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel,
+                                        final CommitContext commitContext) {
         return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
     }
 

@@ -87,7 +87,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return checkStylePlugin;
     }
 
-    private ConfigurationLocation getConfigurationLocation(final Module module, final CheckStylePlugin checkStylePlugin) {
+    private ConfigurationLocation getConfigurationLocation(final Module module,
+                                                           final CheckStylePlugin checkStylePlugin) {
         final ConfigurationLocation configurationLocation;
         if (module != null) {
             final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
@@ -155,7 +156,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     @Nullable
-    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {

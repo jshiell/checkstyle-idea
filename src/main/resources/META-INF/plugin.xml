@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.5</version>
-    <idea-version since-build="107.105"/>
+    <version>3.6</version>
+    <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.6: New: Changed to work with IDEA 11. Thanks to Yuri.</li>
     <li>3.5: New: Updated CheckStyle to 5.4.</li>
     <li>3.5: Fixed: NPE during property handling.</li>
     <li>3.5: Fixed: Property change detection improved.</li>

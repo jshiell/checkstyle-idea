@@ -12,11 +12,6 @@ public final class CheckStyleConstants {
             = "org.infernus.idea.checkstyle.resource";
 
     /**
-     * The extension of temporary files.
-     */
-    public static final String TEMPFILE_EXTENSION = ".java";
-
-    /**
      * Plug-in identifier.
      */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";

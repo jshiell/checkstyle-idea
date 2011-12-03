@@ -178,7 +178,7 @@ public final class CheckStyleConfiguration {
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
         storageLock.lock();
         try {
-            for (Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
+            for (final Iterator i = storage.keySet().iterator(); i.hasNext();) {
                 final String propertyName = i.next().toString();
                 if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
                     i.remove();
@@ -356,7 +356,7 @@ public final class CheckStyleConfiguration {
      *
      * @param stateBean where to load the state from
      */
-    public void loadState(Map<String, String> stateBean) {
+    public void loadState(final Map<String, String> stateBean) {
         storageLock.lock();
         try {
             storage.clear();
