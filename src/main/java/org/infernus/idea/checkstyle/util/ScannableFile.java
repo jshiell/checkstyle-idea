@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -11,13 +10,11 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 /**
@@ -39,7 +36,8 @@ public class ScannableFile {
      */
     public ScannableFile(@NotNull final PsiFile psiFile)
             throws IOException {
-        if (!existsOnFilesystem(psiFile) || fileOpenOrUnsaved(psiFile)) {
+        if (!existsOnFilesystem(psiFile)
+                || documentIsModifiedAndUnsaved(psiFile.getVirtualFile())) {
             baseTempDir = prepareBaseTmpDir();
             realFile = createTemporaryFileFor(psiFile, baseTempDir);
 
@@ -101,27 +99,10 @@ public class ScannableFile {
                 && LocalFileSystem.getInstance().exists(virtualFile);
     }
 
-    private boolean fileOpenOrUnsaved(@NotNull final PsiFile psiFile) {
-        final VirtualFile virtualFile = psiFile.getVirtualFile();
-        if (virtualFile != null) {
-            final AtomicBoolean result = new AtomicBoolean();
-            try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    public void run() {
-                        result.set(FileEditorManager.getInstance(psiFile.getProject()).isFileOpen(virtualFile)
-                                || documentIsModifiedAndUnsaved(virtualFile));
-                    }
-                });
-            } catch (Exception e) {
-                throw new RuntimeException("File status check failed", e);
-            }
-            return result.get();
+    private boolean documentIsModifiedAndUnsaved(final VirtualFile virtualFile) {
+        if (virtualFile == null) {
+            return false;
         }
-
-        return false;
-    }
-
-    private boolean documentIsModifiedAndUnsaved(@NotNull final VirtualFile virtualFile) {
         final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
         if (fileDocumentManager.isFileModified(virtualFile)) {
             final Document document = fileDocumentManager.getDocument(virtualFile);

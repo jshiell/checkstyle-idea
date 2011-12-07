@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.6.1 - Fixed: Deadlock when trying to access editor information with IDEA 11.
 3.6   - New: Changed to work with IDEA 11. Thanks to Yuri.
 3.5   - New: Updated CheckStyle to 5.4.
 3.5   - Fixed: NPE during property handling.
