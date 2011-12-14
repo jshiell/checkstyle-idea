@@ -14,7 +14,7 @@ Use
 ---
 
 Once installed, a new inspection will be available in the group 'CheckStyle'.
-The 'Errors' item in the preferences panel will allow you to turn this on
+The 'Inspections' item in the preferences panel will allow you to turn this on
 and to configure it.
 
 Project exceptions are treated a little oddly. Because CheckStyle demands these
