@@ -321,6 +321,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return configPanel != null && configPanel.isModified();
 
         } catch (IOException e) {
+            LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
             IDEAUtilities.showError(project,
                     IDEAUtilities.getResource("checkstyle.file-not-found", "The CheckStyle file could not be read."));
             return true;

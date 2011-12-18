@@ -149,6 +149,9 @@ LICENCE file.
 Version History
 ---------------
 
+3.6.2 - Improved: Scan results are now sorted alphabetically.
+3.6.2 - Fixed: Duplicate errors reported during project scans (#16).
+3.6.2 - Fixed: Edited rule file properties are now properly saved.
 3.6.1 - Fixed: Deadlock when trying to access editor information with IDEA 11.
 3.6   - New: Changed to work with IDEA 11. Thanks to Yuri.
 3.5   - New: Updated CheckStyle to 5.4.

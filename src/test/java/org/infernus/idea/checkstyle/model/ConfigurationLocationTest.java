@@ -137,6 +137,11 @@ public class ConfigurationLocationTest {
             protected InputStream resolveFile() throws IOException {
                 return null;
             }
+
+            @Override
+            public Object clone() {
+                return this;
+            }
         };
     }
 
@@ -193,6 +198,11 @@ public class ConfigurationLocationTest {
         @Override
         protected InputStream resolveFile() throws IOException {
             return new ByteArrayInputStream(getLocation().getBytes());
+        }
+
+        @Override
+        public Object clone() {
+            return new TestConfigurationLocation(getLocation());
         }
     }
 

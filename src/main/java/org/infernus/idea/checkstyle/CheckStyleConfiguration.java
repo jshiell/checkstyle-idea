@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -178,7 +179,7 @@ public final class CheckStyleConfiguration {
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
         storageLock.lock();
         try {
-            for (final Iterator i = storage.keySet().iterator(); i.hasNext();) {
+            for (final Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
                 final String propertyName = i.next().toString();
                 if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
                     i.remove();
@@ -205,8 +206,11 @@ public final class CheckStyleConfiguration {
                         }
                     }
                 } catch (IOException e) {
-                    IDEAUtilities.showError(project, IDEAUtilities.getResource("checkstyle.could-not-read-properties",
-                            "Properties could not be read from the CheckStyle configuration file."));
+                    LOG.error("Failed to read properties from " + configurationLocation, e);
+                    final MessageFormat message = new MessageFormat(
+                            IDEAUtilities.getResource("checkstyle.could-not-read-properties",
+                                    "Properties could not be read from the CheckStyle configuration file from {0}."));
+                    IDEAUtilities.showError(project, message.format(new Object[]{configurationLocation.getLocation()}));
                 }
 
                 ++index;

@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -183,7 +184,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
         } else {
             int itemCount = 0;
-            for (final PsiFile file : results.keySet()) {
+            for (final PsiFile file : sortedFileNames(results)) {
                 final TogglableTreeNode fileNode = new TogglableTreeNode();
                 final List<ProblemDescriptor> problems = results.get(file);
                 if (problems != null) {
@@ -214,5 +215,15 @@ public class ResultTreeModel extends DefaultTreeModel {
 
         filter(false, levels);
         nodeStructureChanged(visibleRootNode);
+    }
+
+    private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<ProblemDescriptor>> results) {
+        final List<PsiFile> sortedFiles = new ArrayList<PsiFile>(results.keySet());
+        Collections.sort(sortedFiles, new Comparator<PsiFile>() {
+            public int compare(final PsiFile file1, final PsiFile file2) {
+                return file1.getName().compareTo(file2.getName());
+            }
+        });
+        return sortedFiles;
     }
 }

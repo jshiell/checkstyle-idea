@@ -66,4 +66,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             }
         }
     }
+
+    @Override
+    public Object clone() {
+        return cloneCommonPropertiesTo(new HTTPURLConfigurationLocation());
+    }
 }

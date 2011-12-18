@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Bean encapsulating a configuration source.
  */
-public abstract class ConfigurationLocation {
+public abstract class ConfigurationLocation implements Cloneable {
 
     private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
 
@@ -215,6 +215,20 @@ public abstract class ConfigurationLocation {
      * @throws IOException if the file cannot be loaded.
      */
     protected abstract InputStream resolveFile() throws IOException;
+
+    @Override
+    public abstract Object clone();
+
+    ConfigurationLocation cloneCommonPropertiesTo(final ConfigurationLocation cloned) {
+        cloned.setDescription(getDescription());
+        cloned.setLocation(getLocation());
+        try {
+            cloned.setProperties(new HashMap<String, String>(getProperties()));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to resolve properties for " + this);
+        }
+        return cloned;
+    }
 
     @Override
     public boolean equals(final Object o) {

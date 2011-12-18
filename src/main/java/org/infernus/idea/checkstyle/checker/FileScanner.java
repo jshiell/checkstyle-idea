@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.Collections.singleton;
+
 /**
  * Runnable for scanning an individual file.
  */
@@ -34,7 +36,7 @@ final class FileScanner implements Runnable {
 
     private CheckStylePlugin plugin;
     private Map<PsiFile, List<ProblemDescriptor>> results;
-    private List<PsiFile> filesToScan;
+    private Set<PsiFile> filesToScan;
     private ClassLoader moduleClassLoader;
     private Throwable error;
 
@@ -54,7 +56,7 @@ final class FileScanner implements Runnable {
     public FileScanner(final CheckStylePlugin checkStylePlugin,
                        final PsiFile fileToScan,
                        final ClassLoader moduleClassLoader) {
-        this(checkStylePlugin, Arrays.asList(fileToScan), moduleClassLoader);
+        this(checkStylePlugin, singleton(fileToScan), moduleClassLoader);
     }
 
     /**
@@ -65,7 +67,7 @@ final class FileScanner implements Runnable {
      * @param moduleClassLoader the class loader for the file's module
      */
     public FileScanner(final CheckStylePlugin checkStylePlugin,
-                       final List<PsiFile> filesToScan,
+                       final Set<PsiFile> filesToScan,
                        final ClassLoader moduleClassLoader) {
         this.plugin = checkStylePlugin;
         this.filesToScan = filesToScan;
@@ -115,7 +117,7 @@ final class FileScanner implements Runnable {
      *         has no errors.
      * @throws Throwable if the
      */
-    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final List<PsiFile> psiFilesToScan,
+    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
                                                                final ClassLoader moduleClassLoader)
             throws Throwable {
         if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {

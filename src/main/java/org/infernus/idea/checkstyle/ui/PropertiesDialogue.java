@@ -132,7 +132,7 @@ public class PropertiesDialogue extends JDialog {
      * @param configurationLocation the location.
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
-        this.configurationLocation = configurationLocation;
+        this.configurationLocation = (ConfigurationLocation) configurationLocation.clone();
 
         // get latest properties from file
         try {

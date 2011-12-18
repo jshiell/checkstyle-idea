@@ -170,4 +170,9 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     private String toURI(final String s) {
         return s.replace(File.separatorChar, '/');
     }
+
+    @Override
+    public Object clone() {
+        return cloneCommonPropertiesTo(new FileConfigurationLocation(project));
+    }
 }

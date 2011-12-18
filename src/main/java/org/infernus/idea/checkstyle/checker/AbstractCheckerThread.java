@@ -11,10 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Abstract CheckerThread.
@@ -31,7 +28,7 @@ public abstract class AbstractCheckerThread extends Thread {
     /**
      * Map modules to files.
      */
-    private final Map<Module, List<PsiFile>> moduleToFiles = new HashMap<Module, List<PsiFile>>();
+    private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<Module, Set<PsiFile>>();
 
     /**
      * Scan results.
@@ -57,9 +54,9 @@ public abstract class AbstractCheckerThread extends Thread {
 
         for (final PsiFile file : files) {
             final Module module = ModuleUtil.findModuleForPsiElement(file);
-            List<PsiFile> filesForModule = moduleToFiles.get(module);
+            Set<PsiFile> filesForModule = moduleToFiles.get(module);
             if (filesForModule == null) {
-                filesForModule = new ArrayList<PsiFile>();
+                filesForModule = new HashSet<PsiFile>();
                 moduleToFiles.put(module, filesForModule);
             }
             filesForModule.add(file);
@@ -124,11 +121,12 @@ public abstract class AbstractCheckerThread extends Thread {
                 continue;
             }
 
-            final List<PsiFile> filesForModule = moduleToFiles.get(module);
+            final Set<PsiFile> filesForModule = moduleToFiles.get(module);
 
             final ClassLoader moduleClassLoader = plugin.buildModuleClassLoader(module);
 
-            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassLoader);
+            final FileScanner fileScanner = new FileScanner(
+                    plugin, filesForModule, moduleClassLoader);
             this.runFileScanner(fileScanner);
 
             // check for errors

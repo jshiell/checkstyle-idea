@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * A configuration file accessible via the IDE classpath.
@@ -22,5 +23,10 @@ public class ClassPathConfigurationLocation extends ConfigurationLocation {
         }
 
         return in;
+    }
+
+    @Override
+    public Object clone() {
+        return cloneCommonPropertiesTo(new ClassPathConfigurationLocation());
     }
 }
