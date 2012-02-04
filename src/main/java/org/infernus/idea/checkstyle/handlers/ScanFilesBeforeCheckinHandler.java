@@ -12,6 +12,7 @@ import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
@@ -34,7 +35,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private final CheckinProjectPanel checkinPanel;
 
     /**
-     * Checkstyle before checkin handler.
+     * Checkstyle before check-in handler.
      *
      * @param plugin         Checkstyle plugin reference
      * @param myCheckinPanel checkin project panel
@@ -59,7 +60,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         final JCheckBox checkBox = new JCheckBox(resources.getString("handler.before.checkin.checkbox"));
         return new RefreshableOnComponent() {
             public JComponent getComponent() {
-                JPanel panel = new JPanel(new BorderLayout());
+                final JPanel panel = new JPanel(new BorderLayout());
                 panel.add(checkBox);
                 return panel;
             }
@@ -77,13 +78,9 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         };
     }
 
-    /**
-     * Run Check if selected.
-     *
-     * @param commitExecutor commit executor
-     * @return ReturnResult
-     */
-    public ReturnResult beforeCheckin(@Nullable final CommitExecutor commitExecutor) {
+    @Override
+    public ReturnResult beforeCheckin(@Nullable final CommitExecutor executor,
+                                      final PairConsumer<Object, Object> additionalDataConsumer) {
         if (getSettings().isScanFilesBeforeCheckin()) {
             final ResourceBundle resources = ResourceBundle.getBundle(
                     CheckStyleConstants.RESOURCE_BUNDLE);
@@ -91,7 +88,8 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             try {
                 final Map<PsiFile, List<ProblemDescriptor>> scanResults
                         = new HashMap<PsiFile, List<ProblemDescriptor>>();
-                new Task.Modal(this.plugin.getProject(), resources.getString("handler.before.checkin.scan.text"), false) {
+                new Task.Modal(this.plugin.getProject(),
+                        resources.getString("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(resources.getString("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
@@ -101,7 +99,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 }.queue();
 
                 if (!scanResults.isEmpty()) {
-                    return processScanResults(scanResults, commitExecutor);
+                    return processScanResults(scanResults, executor);
                 } else {
                     return ReturnResult.COMMIT;
                 }
@@ -132,7 +130,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
      */
     private ReturnResult processScanResults(final Map<PsiFile, List<ProblemDescriptor>> results,
                                             final CommitExecutor executor) {
-        int errorCount = results.keySet().size();
+        final int errorCount = results.keySet().size();
 
         String commitButtonText;
         if (executor != null) {
@@ -142,7 +140,8 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         }
 
         if (commitButtonText.endsWith("...")) {
-            commitButtonText = commitButtonText.substring(0, commitButtonText.length() - 3);
+            commitButtonText = commitButtonText.substring(
+                    0, commitButtonText.length() - 3);
         }
 
         final ResourceBundle resources = ResourceBundle.getBundle(

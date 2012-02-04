@@ -20,6 +20,7 @@
 <ul>
     <li>3.7: New: Updated CheckStyle to 5.5.</li>
     <li>3.7: Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).</li>
+    <li>3.7: Fixed: Scan on check-in broken in IDEA 11 (#24).</li>
     <li>3.6.2: Improved: Scan results are now sorted alphabetically.</li>
     <li>3.6.2: Fixed: Duplicate errors reported during project scans (#16).</li>
     <li>3.6.2: Fixed: Edited rule file properties are now properly saved.</li>
