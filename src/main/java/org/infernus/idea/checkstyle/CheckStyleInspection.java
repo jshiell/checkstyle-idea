@@ -221,6 +221,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
             LOG.warn("Process cancelled when scanning: " + psiFile.getName());
             return null;
 
+        } catch (AssertionError e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Assertion error caught, exiting quietly", e);
+            }
+            return null;
+
         } catch (Throwable e) {
             final CheckStylePluginException processed = CheckStylePlugin.processError(
                     "The inspection could not be executed.", e);

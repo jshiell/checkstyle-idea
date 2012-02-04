@@ -4,3 +4,4 @@ CheckStyle-IDEA.zip
 target
 test-configs
 META-INF
+!src/main/resources/META-INF
