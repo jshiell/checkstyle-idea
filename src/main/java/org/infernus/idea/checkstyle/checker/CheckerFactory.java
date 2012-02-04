@@ -110,6 +110,9 @@ public class CheckerFactory {
      */
     public void invalidateCache() {
         synchronized (cache) {
+            for (CachedChecker cachedChecker : cache.values()) {
+                cachedChecker.getChecker().destroy();
+            }
             cache.clear();
         }
     }

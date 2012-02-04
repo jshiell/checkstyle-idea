@@ -7,7 +7,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle from within the IDEA IDE.
+    of Java files with CheckStyle 5.5 from within IDEA.
 </p>
         ]]>
     </description>
@@ -19,6 +19,7 @@
         <![CDATA[
 <ul>
     <li>3.7: New: Updated CheckStyle to 5.5.</li>
+    <li>3.7: New: Added button to trigger rules refresh.</li>
     <li>3.7: Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).</li>
     <li>3.7: Fixed: Scan on check-in broken in IDEA 11 (#24).</li>
     <li>3.6.2: Improved: Scan results are now sorted alphabetically.</li>
@@ -241,6 +242,17 @@
                     text="Check All Modified Files."
                     description="Run Checkstyle on all modified files."
                     icon="/general/toolWindowChanges.png">
+
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
+
+            <separator/>
+
+            <action id="CheckStyleClearCheckCacheAction"
+                    class="org.infernus.idea.checkstyle.actions.ClearCheckerCache"
+                    text="Reload Rules files."
+                    description="Clear the rules file cache, forcing a reload of changed rules."
+                    icon="/actions/sync.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>

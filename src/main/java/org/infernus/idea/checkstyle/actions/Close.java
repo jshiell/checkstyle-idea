@@ -13,6 +13,7 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
  */
 public class Close extends BaseAction {
 
+    @Override
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

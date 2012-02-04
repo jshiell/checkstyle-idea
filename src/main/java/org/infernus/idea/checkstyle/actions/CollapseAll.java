@@ -14,6 +14,7 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
  */
 public class CollapseAll extends BaseAction {
 
+    @Override
     public void actionPerformed(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

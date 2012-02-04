@@ -35,6 +35,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
         this.setFileResults(new HashMap<PsiFile, List<ProblemDescriptor>>());
     }
 
+    @Override
     public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
         ApplicationManager.getApplication().runReadAction(fileScanner);
     }
@@ -42,6 +43,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
     /**
      * Execute the file check.
      */
+    @Override
     public void run() {
         setRunning(true);
 

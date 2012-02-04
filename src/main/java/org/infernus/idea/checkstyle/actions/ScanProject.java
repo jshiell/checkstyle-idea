@@ -26,6 +26,7 @@ public class ScanProject extends BaseAction {
     private static final Log LOG = LogFactory.getLog(
             ScanProject.class);
 
+    @Override
     public void actionPerformed(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());

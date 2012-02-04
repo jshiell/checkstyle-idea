@@ -1,6 +1,6 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2011 CheckStyle-IDEA Contributors
+(c) Copyright 2006-2012 CheckStyle-IDEA Contributors
 
 https://github.com/jshiell/checkstyle-idea
 
@@ -150,6 +150,7 @@ Version History
 ---------------
 
 3.7   - New: Updated CheckStyle to 5.5.
+3.7   - New: Added button to trigger rules refresh (#25).
 3.7   - Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).
 3.7   - Fixed: Scan on check-in broken in IDEA 11 (#24).
 3.6.2 - Improved: Scan results are now sorted alphabetically.

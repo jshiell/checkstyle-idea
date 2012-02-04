@@ -25,6 +25,7 @@ public abstract class BaseAction extends AnAction {
     private static final Log LOG = LogFactory.getLog(
             BaseAction.class);
 
+    @Override
     public void update(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());

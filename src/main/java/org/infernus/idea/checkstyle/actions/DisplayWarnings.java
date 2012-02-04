@@ -16,6 +16,7 @@ import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
  */
 public class DisplayWarnings extends ToggleAction {
 
+    @Override
     public boolean isSelected(final AnActionEvent event) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {
@@ -40,6 +41,7 @@ public class DisplayWarnings extends ToggleAction {
         return false;
     }
 
+    @Override
     public void setSelected(final AnActionEvent event, final boolean selected) {
         final Project project = DataKeys.PROJECT.getData(event.getDataContext());
         if (project == null) {

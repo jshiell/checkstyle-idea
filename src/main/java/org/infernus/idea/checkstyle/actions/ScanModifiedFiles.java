@@ -23,13 +23,14 @@ public class ScanModifiedFiles extends BaseAction {
     private static final Log LOG = LogFactory.getLog(
             ScanModifiedFiles.class);
 
+    @Override
     public final void actionPerformed(final AnActionEvent event) {
         try {
             final Project project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) {
                 return;
             }
-            ChangeListManager changeListManager = ChangeListManager.getInstance(project);
+            final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
             project.getComponent(CheckStylePlugin.class).checkFiles(changeListManager.getAffectedFiles());
         } catch (Throwable e) {
             final CheckStylePluginException processed = CheckStylePlugin.processError(null, e);
