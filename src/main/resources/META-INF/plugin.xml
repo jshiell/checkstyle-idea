@@ -11,17 +11,18 @@
 </p>
         ]]>
     </description>
-    <version>3.7.1</version>
+    <version>3.8</version>
     <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
-    <li>3.7.1: New: Modules can now be excluded from scans.</li>
-    <li>3.7.1: New: Add file dialogue now sets the base directory to the project directory.</li>
-    <li>3.7.1: Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.</li>
-    <li>3.7.1: Improved: Rewrote file tokenisation to hopefully help with #9.</li>
+    <li>3.8: New: A button has been added to scan the current change list.</li>
+    <li>3.8: New: Modules can now be excluded from scans.</li>
+    <li>3.8: New: Add file dialogue now sets the base directory to the project directory.</li>
+    <li>3.8: Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.</li>
+    <li>3.8: Improved: Rewrote file tokenisation to hopefully help with #9.</li>
     <li>3.7: New: Updated CheckStyle to 5.5.</li>
     <li>3.7: New: Added button to trigger rules refresh.</li>
     <li>3.7: Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).</li>
@@ -142,11 +143,20 @@
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
-            <action id="CheckStyleDefaultChangeListAction"
+            <action id="CheckStyleModifiedFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanModifiedFiles"
                     text="Check All Modified Files."
                     description="Run Checkstyle on all modified files."
                     icon="/general/toolWindowChanges.png">
+
+                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            </action>
+
+            <action id="CheckStyleDefaultChangeListAction"
+                    class="org.infernus.idea.checkstyle.actions.ScanCurrentChangeList"
+                    text="Check Files in the Current Change List."
+                    description="Run Checkstyle on the current change list."
+                    icon="/general/smallConfigurableVcs.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>

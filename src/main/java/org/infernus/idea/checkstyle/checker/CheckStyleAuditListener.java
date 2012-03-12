@@ -7,6 +7,7 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiInvalidElementAccessException;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
@@ -232,17 +233,22 @@ public class CheckStyleAuditListener implements AuditListener {
                         : event.getMessage();
                 final ProblemHighlightType problemType
                         = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-                final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, message, null, problemType, false, endOfLine);
+                try {
+                    final ProblemDescriptor problem = manager.createProblemDescriptor(
+                            victim, message, null, problemType, false, endOfLine);
 
-                if (usingExtendedDescriptors) {
-                    final ProblemDescriptor delegate
-                            = new ExtendedProblemDescriptor(
-                            problem, event.getSeverityLevel(),
-                            event.getLine(), event.getColumn());
-                    addProblem(psiFile, delegate);
-                } else {
-                    addProblem(psiFile, problem);
+                    if (usingExtendedDescriptors) {
+                        final ProblemDescriptor delegate
+                                = new ExtendedProblemDescriptor(
+                                problem, event.getSeverityLevel(),
+                                event.getLine(), event.getColumn());
+                        addProblem(psiFile, delegate);
+                    } else {
+                        addProblem(psiFile, problem);
+                    }
+
+                } catch (PsiInvalidElementAccessException e) {
+                    LOG.error("Element access failed", e);
                 }
             }
         }

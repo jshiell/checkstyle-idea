@@ -149,10 +149,11 @@ LICENCE file.
 Version History
 ---------------
 
-3.7.1 - New: Modules can now be excluded from scans.
-3.7.1 - New: Add File dialogue now sets the base directory to the project directory.
-3.7.1 - Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.
-3.7.1 - Improved: Rewrote file tokenisation to hopefully help with #9.
+3.8   - New: A button has been added to scan the current change list.
+3.8   - New: Modules can now be excluded from scans.
+3.8   - New: Add File dialogue now sets the base directory to the project directory.
+3.8   - Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.
+3.8   - Improved: Rewrote file tokenisation to hopefully help with #9.
 3.7   - New: Updated CheckStyle to 5.5.
 3.7   - New: Added button to trigger rules refresh (#25).
 3.7   - Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).
