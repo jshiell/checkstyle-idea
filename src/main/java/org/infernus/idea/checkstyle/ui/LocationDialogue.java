@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -23,7 +24,6 @@ import java.util.ResourceBundle;
  * Allows selection of the location of the CheckStyle file.
  */
 public class LocationDialogue extends JDialog {
-
     private final JButton browseButton = new JButton(new BrowseAction());
     private final JTextField fileLocationField = new JTextField(20);
     private final JTextField urlLocationField = new JTextField(20);
@@ -344,8 +344,16 @@ public class LocationDialogue extends JDialog {
             fileChooser.setFileFilter(new ExtensionFileFilter("xml"));
 
             final String configFilePath = fileLocationField.getText();
-            if (configFilePath != null) {
+            if (configFilePath != null && configFilePath.trim().length() > 0) {
                 fileChooser.setSelectedFile(new File(configFilePath));
+            } else {
+                final VirtualFile projectBaseDir = project.getBaseDir();
+                if (projectBaseDir != null) {
+                    final File baseDir = new File(projectBaseDir.getPath());
+                    if (baseDir.exists()) {
+                        fileChooser.setCurrentDirectory(baseDir);
+                    }
+                }
             }
 
             final int result = fileChooser.showOpenDialog(LocationDialogue.this);

@@ -453,6 +453,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             fileChooser.setFileFilter(new ExtensionFileFilter("jar"));
             fileChooser.setFileSelectionMode(
                     JFileChooser.FILES_AND_DIRECTORIES);
+            fileChooser.setCurrentDirectory(plugin.getProjectPath());
 
             final int result = fileChooser.showOpenDialog(
                     CheckStyleConfigPanel.this);

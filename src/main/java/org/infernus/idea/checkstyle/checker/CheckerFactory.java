@@ -70,7 +70,7 @@ public class CheckerFactory {
      * @param classLoader class loader for CheckStyle use, or null to use
      *                    the default.
      * @return the checker for the module or null if it cannot be created.
-     * @throws IOException if the CheckStyle file cannot be resolved.
+     * @throws IOException         if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public Checker getChecker(final ConfigurationLocation location,
@@ -242,7 +242,9 @@ public class CheckerFactory {
 
     private class CheckerFactoryWorker extends Thread {
         private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
-        private static final String FILE_ATTRIBUTE = "file";
+        private static final String SUPPRESSION_FILTER_FILE = "file";
+        private static final String REGEXP_HEADER_ELEMENT = "RegexpHeader";
+        private static final String REGEXP_HEADER_HEADERFILE = "headerFile";
 
         private final Object[] threadReturn = new Object[1];
 
@@ -324,66 +326,78 @@ public class CheckerFactory {
             }
 
             for (final Configuration currentChild : rootElement.getChildren()) {
-                if (!SUPPRESSION_FILTER_ELEMENT.equals(currentChild.getName())) {
-                    continue;
-                }
+                if (SUPPRESSION_FILTER_ELEMENT.equals(currentChild.getName())) {
+                    checkFilenameForProperty((DefaultConfiguration) rootElement,
+                            currentChild, SUPPRESSION_FILTER_ELEMENT, SUPPRESSION_FILTER_FILE);
 
-                final String fileName = currentChild.getAttribute(FILE_ATTRIBUTE);
-                if (fileName != null && !new File(fileName).exists()) {
-                    final File suppressionFile = getSuppressionFile(fileName);
-
-                    ((DefaultConfiguration) rootElement).removeChild(currentChild);
-
-                    if (suppressionFile != null) {
-                        ((DefaultConfiguration) rootElement).addChild(suppressionFilterWithFilename(
-                                suppressionFile.getAbsolutePath(), currentChild));
-
-                    } else if (module != null) {
-                        IDEAUtilities.showWarning(module.getProject(),
-                                IDEAUtilities.getResource("checkstyle.suppressions-not-found", "CheckStyle Suppression file not found"));
-                    }
+                } else if (REGEXP_HEADER_ELEMENT.equals(currentChild.getName())) {
+                    checkFilenameForProperty((DefaultConfiguration) rootElement,
+                            currentChild, REGEXP_HEADER_ELEMENT, REGEXP_HEADER_HEADERFILE);
                 }
             }
         }
 
-        private DefaultConfiguration suppressionFilterWithFilename(@NotNull final String filename,
-                                                                   @NotNull final Configuration originalFilter) {
+        private void checkFilenameForProperty(final DefaultConfiguration rootElement,
+                                              final Configuration currentChild,
+                                              final String elementName,
+                                              final String propertyName)
+                throws CheckstyleException {
+            final String fileName = currentChild.getAttribute(propertyName);
+            if (fileName != null && !new File(fileName).exists()) {
+                final File resolvedFile = findFile(fileName);
+
+                rootElement.removeChild(currentChild);
+
+                if (resolvedFile != null) {
+                    rootElement.addChild(elementWithUpdatedFile(
+                            resolvedFile.getAbsolutePath(), currentChild, elementName, propertyName));
+
+                } else if (module != null) {
+                    IDEAUtilities.showWarning(module.getProject(),
+                            IDEAUtilities.getResource(String.format("checkstyle.not-found.%s", elementName),
+                                    String.format("CheckStyle %s %s not found", elementName, propertyName)));
+                }
+            }
+        }
+
+        private DefaultConfiguration elementWithUpdatedFile(@NotNull final String filename,
+                                                            @NotNull final Configuration originalElement,
+                                                            @NotNull final String elementName,
+                                                            @NotNull final String propertyName) {
             // The CheckStyle API won't allow attribute values to be changed, only appended to,
             // hence we must recreate the node.
 
-            final DefaultConfiguration newFilter
-                    = new DefaultConfiguration(SUPPRESSION_FILTER_ELEMENT);
+            final DefaultConfiguration newFilter = new DefaultConfiguration(elementName);
 
-            if (originalFilter.getChildren() != null) {
-                for (Configuration child : originalFilter.getChildren()) {
+            if (originalElement.getChildren() != null) {
+                for (Configuration child : originalElement.getChildren()) {
                     newFilter.addChild(child);
                 }
             }
-            if (originalFilter.getMessages() != null) {
-                for (String messageKey : originalFilter.getMessages().keySet()) {
-                    newFilter.addMessage(messageKey, originalFilter.getMessages().get(messageKey));
+            if (originalElement.getMessages() != null) {
+                for (String messageKey : originalElement.getMessages().keySet()) {
+                    newFilter.addMessage(messageKey, originalElement.getMessages().get(messageKey));
                 }
             }
-            if (originalFilter.getAttributeNames() != null) {
-                for (String attributeName : originalFilter.getAttributeNames()) {
-                    if (attributeName.equals(FILE_ATTRIBUTE)) {
+            if (originalElement.getAttributeNames() != null) {
+                for (String attributeName : originalElement.getAttributeNames()) {
+                    if (attributeName.equals(propertyName)) {
                         continue;
                     }
                     try {
-                        newFilter.addAttribute(attributeName, originalFilter.getAttribute(attributeName));
+                        newFilter.addAttribute(attributeName, originalElement.getAttribute(attributeName));
                     } catch (CheckstyleException e) {
-                        LOG.error("Unable to copy attribute for " + SUPPRESSION_FILTER_ELEMENT
-                                + ": " + attributeName, e);
+                        LOG.error("Unable to copy attribute for " + elementName + ": " + attributeName, e);
                     }
                 }
             }
 
-            newFilter.addAttribute(FILE_ATTRIBUTE, filename);
+            newFilter.addAttribute(propertyName, filename);
 
             return newFilter;
         }
 
-        private File getSuppressionFile(final String fileName) {
+        private File findFile(final String fileName) {
             File suppressionFile = null;
 
             // check relative to config

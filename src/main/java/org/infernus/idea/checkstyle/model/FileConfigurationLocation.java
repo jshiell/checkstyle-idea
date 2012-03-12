@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 
 /**
- * A configuration file on disc.
+ * A configuration file on a mounted file system.
  */
 public class FileConfigurationLocation extends ConfigurationLocation {
 
@@ -105,45 +105,38 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     /**
-     * Process a stored file path for any tokens, and resolve the platform independent URI syntax
+     * Process a stored file path for any tokens, and resolve the *nix style path
      * to the local filesystem path encoding.
      *
      * @param path the path to process, in (tokenised) URI syntax.
      * @return the processed path, in local file path syntax.
      */
-    private String untokenisePath(String path) {
+    private String untokenisePath(final String path) {
         if (path == null) {
             return null;
         }
 
         LOG.debug("Processing file: " + path);
 
-        // replace URI style slashes with the platform slash
-        path = path.replace('/', File.separatorChar);
-
-        String untokenisedPath = null;
-
         if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
             // path is relative to project dir
             final File projectPath = getProjectPath();
             if (projectPath != null) {
-                final String filename = path.substring(CheckStyleConstants.PROJECT_DIR.length());
-                untokenisedPath = new File(projectPath, filename).getAbsolutePath();
-            } else {
-                LOG.warn("Could not untokenise path as project dir is unset: "
-                        + path);
-            }
+                final String projectRelativePath = fromUnixPath(
+                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
+                final String completePath = projectPath + File.separator + projectRelativePath;
+                return new File(completePath).getAbsolutePath();
 
-        } else {
-            // absolute path: turn the URI into a File path
-            untokenisedPath = path;
+            } else {
+                LOG.warn("Could not untokenise path as project dir is unset: " + path);
+            }
         }
 
-        return untokenisedPath;
+        return fromUnixPath(path);
     }
 
     /**
-     * Process a path, add tokens as necessary and encode it in platform independent URI syntax.
+     * Process a path, add tokens as necessary and encode it a *nix-style path.
      *
      * @param path the path to process, in local file path syntax.
      * @return the tokenised path in URI syntax.
@@ -153,22 +146,26 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             return null;
         }
 
-        String tokenisedPath = toURI(path);
-
         final File projectPath = getProjectPath();
-        if (projectPath != null) {
-            final String projectPathAbs = projectPath.getAbsolutePath();
-            if (path.startsWith(projectPathAbs)) {
-                tokenisedPath = CheckStyleConstants.PROJECT_DIR
-                        + toURI(path.substring(projectPathAbs.length()));
-            }
+        if (projectPath != null && path.startsWith(projectPath.getAbsolutePath())) {
+            return CheckStyleConstants.PROJECT_DIR
+                    + toUnixPath(path.substring(projectPath.getAbsolutePath().length()));
         }
-
-        return tokenisedPath;
+        return toUnixPath(path);
     }
 
-    private String toURI(final String s) {
-        return s.replace(File.separatorChar, '/');
+    private String toUnixPath(final String path) {
+        if (File.separatorChar == '/') {
+            return path;
+        }
+        return path.replace(File.separatorChar, '/');
+    }
+
+    private String fromUnixPath(final String path) {
+        if (File.separatorChar == '/') {
+            return path;
+        }
+        return path.replace('/', File.separatorChar);
     }
 
     @Override
