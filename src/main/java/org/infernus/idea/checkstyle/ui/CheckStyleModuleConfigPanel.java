@@ -20,12 +20,14 @@ public class CheckStyleModuleConfigPanel extends JPanel {
 
     private final JRadioButton useProjectConfigurationRadio = new JRadioButton();
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
+    private final JRadioButton excludeRadio = new JRadioButton();
     private final JComboBox configurationFilesCombo = new JComboBox();
     private final DefaultComboBoxModel configurationFilesModel = new DefaultComboBoxModel();
     private final JLabel configurationFilesLabel = new JLabel();
 
     private List<ConfigurationLocation> configurationLocations;
     private ConfigurationLocation activeLocation;
+    private boolean excluded;
 
     /**
      * Create a new panel.
@@ -58,9 +60,14 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         useModuleConfigurationRadio.setToolTipText(resources.getString("config.module.module-configuration.tooltip"));
         useModuleConfigurationRadio.addActionListener(new RadioListener());
 
+        excludeRadio.setText(resources.getString("config.module.exclude.text"));
+        excludeRadio.setToolTipText(resources.getString("config.module.exclude.tooltip"));
+        excludeRadio.addActionListener(new RadioListener());
+
         final ButtonGroup radioGroup = new ButtonGroup();
         radioGroup.add(useProjectConfigurationRadio);
         radioGroup.add(useModuleConfigurationRadio);
+        radioGroup.add(excludeRadio);
 
         configPanel.add(useProjectConfigurationRadio, new GridBagConstraints(0, 1, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
@@ -76,7 +83,10 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         configPanel.add(configurationFilesCombo, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
 
-        configPanel.add(Box.createGlue(), new GridBagConstraints(0, 4, 2, 1, 1.0, 1.0,
+        configPanel.add(excludeRadio, new GridBagConstraints(0, 4, 2, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
+
+        configPanel.add(Box.createGlue(), new GridBagConstraints(0, 5, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         useProjectConfigurationRadio.setSelected(true);
@@ -128,7 +138,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
 
         if (activeLocation != null) {
             useModuleConfigurationRadio.setSelected(true);
-        } else {
+        } else if (!excluded) {
             useProjectConfigurationRadio.setSelected(true);
         }
 
@@ -141,11 +151,23 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      * @return the configuration, or null to use the project configuration.
      */
     public ConfigurationLocation getActiveLocation() {
-        if (useProjectConfigurationRadio.isSelected()) {
+        if (useProjectConfigurationRadio.isSelected() || excludeRadio.isSelected()) {
             return null;
         }
 
         return (ConfigurationLocation) configurationFilesModel.getSelectedItem();
+    }
+
+    public void setExcluded(final boolean excluded) {
+        this.excluded = excluded;
+
+        if (excluded) {
+            excludeRadio.setSelected(true);
+        }
+    }
+
+    public boolean isExcluded() {
+        return excludeRadio.isSelected();
     }
 
     /**
@@ -155,7 +177,8 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      */
     public boolean isModified() {
         return !equals(activeLocation, getActiveLocation())
-                || !equals(configurationLocations, getConfigurationLocations());
+                || !equals(configurationLocations, getConfigurationLocations())
+                || excluded != isExcluded();
     }
 
     /*

@@ -21,6 +21,7 @@ public final class CheckStyleModuleConfiguration extends Properties {
     private static final long serialVersionUID = 2804470793153632480L;
 
     private static final String ACTIVE_CONFIG = "active-configuration";
+    private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
 
     private final Module module;
 
@@ -49,6 +50,19 @@ public final class CheckStyleModuleConfiguration extends Properties {
         } else {
             remove(ACTIVE_CONFIG);
         }
+    }
+
+    public void setExcluded(final boolean excluded) {
+        if (excluded) {
+            setProperty(EXCLUDE_FROM_SCAN, "true");
+        } else {
+            remove(EXCLUDE_FROM_SCAN);
+        }
+    }
+
+    public boolean isExcluded() {
+        return containsKey(EXCLUDE_FROM_SCAN)
+                && getProperty(EXCLUDE_FROM_SCAN, "false").equalsIgnoreCase("true");
     }
 
     public boolean isUsingModuleConfiguration() {

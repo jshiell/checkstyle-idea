@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.7.1: New: Modules can now be excluded from scans.</li>
     <li>3.7.1: New: Add file dialogue now sets the base directory to the project directory.</li>
     <li>3.7.1: Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.</li>
     <li>3.7.1: Improved: Rewrote file tokenisation to hopefully help with #9.</li>

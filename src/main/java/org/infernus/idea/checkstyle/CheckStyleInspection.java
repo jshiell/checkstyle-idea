@@ -67,6 +67,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         try {
             final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
+            if (configurationLocation == null) {
+                return null;
+            }
 
             final ClassLoader moduleClassLoader = checkStylePlugin.buildModuleClassLoader(module);
 
@@ -95,7 +98,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
             if (checkStyleModulePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle module plugin");
             }
-            configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+            
+            if (checkStyleModulePlugin.getConfiguration().isExcluded()) {
+                configurationLocation = null;
+            } else {
+                configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+            }
 
         } else {
             configurationLocation = checkStylePlugin.getConfiguration().getActiveConfiguration();
@@ -116,6 +124,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         try {
             final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
+            if (configurationLocation == null) {
+                return null;
+            }
 
             LOG.info("Loading configuration from " + configurationLocation);
             return CheckerFactory.getInstance().getConfig(configurationLocation);
@@ -188,11 +199,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
         ScannableFile scannableFile = null;
         try {
             final Checker checker = getChecker(checkStylePlugin, module);
-            if (checker == null) {
+            final Configuration config = getConfig(checkStylePlugin, module);
+            if (checker == null || config == null) {
                 return new ProblemDescriptor[0];
             }
 
-            final Configuration config = getConfig(checkStylePlugin, module);
             final List<Check> checks = CheckFactory.getChecks(config);
 
             final Document fileDocument = PsiDocumentManager.getInstance(

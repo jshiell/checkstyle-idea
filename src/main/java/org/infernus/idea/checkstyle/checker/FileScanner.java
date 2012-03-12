@@ -186,18 +186,19 @@ final class FileScanner implements Runnable {
         }
     }
 
-    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
                                                                         final Module module,
                                                                         final List<ScannableFile> tempFiles,
                                                                         final Map<String, PsiFile> filesToElements) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());
         final Checker checker = getChecker(module, moduleClassLoader);
-        if (checker == null) {
+        final Configuration config = getConfig(module);
+        if (checker == null || config == null) {
             return Collections.emptyMap();
         }
 
-        final List<Check> checks = CheckFactory.getChecks(getConfig(module));
+        final List<Check> checks = CheckFactory.getChecks(config);
 
         final CheckStyleAuditListener listener;
         synchronized (checker) {
@@ -278,7 +279,12 @@ final class FileScanner implements Runnable {
             if (checkStyleModulePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle module plugin");
             }
-            location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+
+            if (checkStyleModulePlugin.getConfiguration().isExcluded()) {
+                location = null;
+            } else {
+                location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+            }
 
         } else {
             location = plugin.getConfiguration().getActiveConfiguration();

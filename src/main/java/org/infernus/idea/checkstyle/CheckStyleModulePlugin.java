@@ -145,6 +145,7 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
         }
 
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
+        configuration.setExcluded(configPanel.isExcluded());
 
         reset(); // reset modification state
     }
@@ -156,7 +157,9 @@ public class CheckStyleModulePlugin implements ModuleComponent, Configurable,
 
         configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
 
-        if (configuration.isUsingModuleConfiguration()) {
+        if (configuration.isExcluded()) {
+            configPanel.setExcluded(true);
+        } else if (configuration.isUsingModuleConfiguration()) {
             configPanel.setActiveLocation(configuration.getActiveConfiguration());
         } else {
             configPanel.setActiveLocation(null);
