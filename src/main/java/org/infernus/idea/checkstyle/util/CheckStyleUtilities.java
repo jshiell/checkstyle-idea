@@ -21,7 +21,7 @@ public final class CheckStyleUtilities {
      * @param fileType the file type to test.
      * @return true if this file is supported by CheckStyle.
      */
-    public static boolean isValidFileType(final FileType fileType) {
+    public static boolean isJavaFile(final FileType fileType) {
         return fileType != null && StdFileTypes.JAVA.equals(fileType);
     }
 }

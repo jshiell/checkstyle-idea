@@ -35,6 +35,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final JButton moveDownPathButton = new JButton(new MoveDownPathAction());
 
     private final JCheckBox testClassesCheckbox = new JCheckBox();
+    private final JCheckBox scanNonJavaFilesCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JTable locationTable = new JBTable(locationModel);
@@ -43,6 +44,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final JButton editLocationPropertiesButton = new JButton(new EditPropertiesAction());
 
     private boolean scanTestClasses;
+    private boolean scanNonJavaFiles;
     private List<String> thirdPartyClasspath;
     private List<ConfigurationLocation> locations;
     private ConfigurationLocation activeLocation;
@@ -86,6 +88,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         testClassesCheckbox.setToolTipText(resources.getString(
                 "config.test-classes.checkbox.tooltip"));
 
+        scanNonJavaFilesCheckbox.setText(resources.getString(
+                "config.scan-nonjava-files.checkbox.text"));
+        scanNonJavaFilesCheckbox.setToolTipText(resources.getString(
+                "config.scan-nonjava-files.checkbox.tooltip"));
+
         editLocationPropertiesButton.setEnabled(false);
         removeLocationButton.setEnabled(false);
 
@@ -111,8 +118,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
                 0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
+                0, 1, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(locationPanel, new GridBagConstraints(
-                0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
         return configFilePanel;
@@ -184,6 +194,26 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
+     * Should we scan non-Java files?
+     *
+     * @param scanNonJavaFiles true to scan all files types, false to scan only Java files.
+     */
+    public void setScanNonJavaFiles(final boolean scanNonJavaFiles) {
+        this.scanNonJavaFiles = scanNonJavaFiles;
+        scanNonJavaFilesCheckbox.setSelected(scanNonJavaFiles);
+    }
+
+    /**
+     * Determine if we should scan non-Java files.
+     *
+     * @return true if non-Java classes should be scanned.
+     */
+    public boolean isScanNonJavaFiles() {
+        this.scanNonJavaFiles = scanNonJavaFilesCheckbox.isSelected();
+        return scanNonJavaFiles;
+    }
+
+    /**
      * Set the third party classpath.
      *
      * @param classpath the third party classpath.
@@ -233,7 +263,8 @@ public final class CheckStyleConfigPanel extends JPanel {
         return haveLocationsChanged()
                 || activeLocation.hasChangedFrom(locationModel.getActiveLocation())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
-                || testClassesCheckbox.isSelected() != scanTestClasses;
+                || testClassesCheckbox.isSelected() != scanTestClasses
+                || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles;
     }
 
     private boolean haveLocationsChanged() throws IOException {

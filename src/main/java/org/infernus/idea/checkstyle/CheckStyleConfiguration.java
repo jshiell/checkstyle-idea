@@ -29,6 +29,7 @@ public final class CheckStyleConfiguration {
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
+    private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
@@ -259,6 +260,15 @@ public final class CheckStyleConfiguration {
 
     public void setScanningTestClasses(final boolean scanTestFles) {
         storage.put(CHECK_TEST_CLASSES, Boolean.toString(scanTestFles));
+    }
+
+    public boolean isScanningNonJavaFiles() {
+        final String propertyValue = storage.get(CHECK_NONJAVA_FILES);
+        return propertyValue != null && Boolean.valueOf(propertyValue);
+    }
+
+    public void setScanningNonJavaFiles(final boolean scanNonJavaFiles) {
+        storage.put(CHECK_NONJAVA_FILES, Boolean.toString(scanNonJavaFiles));
     }
 
     public boolean isScanFilesBeforeCheckin() {

@@ -337,6 +337,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
 
         configuration.setScanningTestClasses(configPanel.isScanTestClasses());
+        configuration.setScanningNonJavaFiles(configPanel.isScanNonJavaFiles());
 
         final List<String> thirdPartyClasspath
                 = configPanel.getThirdPartyClasspath();
@@ -357,6 +358,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         configPanel.setDefaultLocation(configuration.getDefaultLocation());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
         configPanel.setScanTestClasses(configuration.isScanningTestClasses());
+        configPanel.setScanNonJavaFiles(configuration.isScanningNonJavaFiles());
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
     }
 

@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8: New: An option has been added to scan all (i.e. non-Java) files.</li>
     <li>3.8: New: A button has been added to scan the current change list.</li>
     <li>3.8: New: Modules can now be excluded from scans.</li>
     <li>3.8: New: Add file dialogue now sets the base directory to the project directory.</li>

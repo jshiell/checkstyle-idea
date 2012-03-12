@@ -98,7 +98,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             if (checkStyleModulePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle module plugin");
             }
-            
+
             if (checkStyleModulePlugin.getConfiguration().isExcluded()) {
                 configurationLocation = null;
             } else {
@@ -173,13 +173,18 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                          final boolean isOnTheFly) {
         LOG.debug("Inspection has been invoked.");
 
-        if (!psiFile.isValid() || !psiFile.isPhysical()
-                || !CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
+        if (!psiFile.isValid() || !psiFile.isPhysical()) {
             LOG.debug("Skipping file as invalid: " + psiFile.getName());
             return null;
         }
 
         final CheckStylePlugin checkStylePlugin = getPlugin(manager.getProject());
+
+        if (!checkStylePlugin.getConfiguration().isScanningNonJavaFiles()
+                && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+            LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
+            return null;
+        }
 
         final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
 

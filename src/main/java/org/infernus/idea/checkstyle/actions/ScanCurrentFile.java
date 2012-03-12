@@ -77,6 +77,7 @@ public class ScanCurrentFile extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
+            final boolean scanOnlyJavaFiles = !checkStylePlugin.getConfiguration().isScanningNonJavaFiles();
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();
 
@@ -85,10 +86,10 @@ public class ScanCurrentFile extends BaseAction {
             if (selectedFiles == null || selectedFiles.length == 0) {
                 presentation.setEnabled(false);
 
-            } else {
+            } else if (scanOnlyJavaFiles) {
                 // check files are valid
                 for (final VirtualFile file : selectedFiles) {
-                    if (!CheckStyleUtilities.isValidFileType(file.getFileType())) {
+                    if (!CheckStyleUtilities.isJavaFile(file.getFileType())) {
                         presentation.setEnabled(false);
                         return;
                     }

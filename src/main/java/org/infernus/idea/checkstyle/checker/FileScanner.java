@@ -131,6 +131,7 @@ final class FileScanner implements Runnable {
         final Map<String, PsiFile> filesToElements = new HashMap<String, PsiFile>();
 
         final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
+        final boolean scanOnlyJavaFiles = !plugin.getConfiguration().isScanningNonJavaFiles();
 
         try {
             for (final PsiFile psiFile : psiFilesToScan) {
@@ -158,8 +159,8 @@ final class FileScanner implements Runnable {
                     continue;
                 }
 
-                if (!CheckStyleUtilities.isValidFileType(psiFile.getFileType())) {
-                    LOG.debug("Skipping invalid file type " + psiFile.getName());
+                if (scanOnlyJavaFiles && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+                    LOG.debug("Skipping non-Java file " + psiFile.getName());
                     continue;
                 }
 

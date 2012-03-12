@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.8   - New: An option has been added to scan all (i.e. non-Java) files.
 3.8   - New: A button has been added to scan the current change list.
 3.8   - New: Modules can now be excluded from scans.
 3.8   - New: Add File dialogue now sets the base directory to the project directory.
