@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.8</version>
+    <version>3.8.1</version>
     <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8.1: Fixed: Inline regexp header defs no longer cause an exception (#29).</li>
     <li>3.8: New: An option has been added to scan all (i.e. non-Java) files.</li>
     <li>3.8: New: A button has been added to scan the current change list.</li>
     <li>3.8: New: Modules can now be excluded from scans.</li>

@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -342,6 +343,11 @@ public class CheckerFactory {
                                               final String elementName,
                                               final String propertyName)
                 throws CheckstyleException {
+            final String[] attributeNames = currentChild.getAttributeNames();
+            if (attributeNames == null || Arrays.binarySearch(attributeNames, propertyName) < 0) {
+                return;
+            }
+
             final String fileName = currentChild.getAttribute(propertyName);
             if (fileName != null && !new File(fileName).exists()) {
                 final File resolvedFile = findFile(fileName);
