@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.8.2 - Fixed: Changed text to match IDEA by removing full-stops (#30).
 3.8.1 - Fixed: Inline regexp header defs no longer cause an exception (#29).
 3.8   - New: An option has been added to scan all (i.e. non-Java) files.
 3.8   - New: A button has been added to scan the current change list.

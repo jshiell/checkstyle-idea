@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.8.1</version>
+    <version>3.8.2</version>
     <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8.2: Fixed: Changed text to match IDEA by removing full-stops (#30).</li>
     <li>3.8.1: Fixed: Inline regexp header defs no longer cause an exception (#29).</li>
     <li>3.8: New: An option has been added to scan all (i.e. non-Java) files.</li>
     <li>3.8: New: A button has been added to scan the current change list.</li>
@@ -64,19 +65,19 @@
             <action id="CheckStyleScrollToSourceAction"
                     class="org.infernus.idea.checkstyle.actions.ScrollToSource"
                     text="Autoscroll to Source"
-                    description="Auto-scroll to the source location of errors and warnings."
+                    description="Auto-scroll to the source location of errors and warnings"
                     icon="/general/autoscrollToSource.png"/>
 
             <action id="CheckStyleExpandAllAction"
                     class="org.infernus.idea.checkstyle.actions.ExpandAll"
                     text="Expand All"
-                    description="Expand all elements in the tool window."
+                    description="Expand all elements in the tool window"
                     icon="/actions/expandall.png"/>
 
             <action id="CheckStyleCollapseAllAction"
                     class="org.infernus.idea.checkstyle.actions.CollapseAll"
                     text="Collapse All"
-                    description="Collapse all elements in the tool window."
+                    description="Collapse all elements in the tool window"
                     icon="/actions/collapseall.png"/>
 
             <separator/>
@@ -84,19 +85,19 @@
             <action id="CheckStyleDisplayErrorsAction"
                     class="org.infernus.idea.checkstyle.actions.DisplayErrors"
                     text="Display Errors"
-                    description="Display error results."
+                    description="Display error results"
                     icon="/compiler/error.png"/>
 
             <action id="CheckStyleDisplayWarningsAction"
                     class="org.infernus.idea.checkstyle.actions.DisplayWarnings"
                     text="Display Warnings"
-                    description="Display warning results."
+                    description="Display warning results"
                     icon="/compiler/warning.png"/>
 
             <action id="CheckStyleDisplayInfoAction"
                     class="org.infernus.idea.checkstyle.actions.DisplayInfo"
                     text="Display Information Results"
-                    description="Display information results."
+                    description="Display information results"
                     icon="/compiler/information.png"/>
         </group>
 
@@ -104,13 +105,13 @@
             <action id="CheckStyleCloseAction"
                     class="org.infernus.idea.checkstyle.actions.Close"
                     text="Close CheckStyle Window"
-                    description="Close the CheckStyle tool window."
+                    description="Close the CheckStyle tool window"
                     icon="/actions/cancel.png"/>
 
             <action id="CheckStyleStopCheck"
                     class="org.infernus.idea.checkstyle.actions.StopCheck"
-                    text="Stop the running scan."
-                    description="Stop the scan currently being run."
+                    text="Stop the running scan"
+                    description="Stop the scan currently being run"
                     icon="/actions/suspend.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -121,7 +122,7 @@
             <action id="CheckStyleCurrentFileAction"
                     class="org.infernus.idea.checkstyle.actions.ScanCurrentFile"
                     text="Check Current File"
-                    description="Run Checkstyle on the current file in the editor."
+                    description="Run Checkstyle on the current file in the editor"
                     icon="/actions/execute.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -130,7 +131,7 @@
             <action id="CheckStyleModuleFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanModule"
                     text="Check Module"
-                    description="Run Checkstyle on all files in the current module."
+                    description="Run Checkstyle on all files in the current module"
                     icon="/modules/modulesNode.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -139,7 +140,7 @@
             <action id="CheckStyleProjectFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanProject"
                     text="Check Project"
-                    description="Run Checkstyle on all files in the current project."
+                    description="Run Checkstyle on all files in the current project"
                     icon="/general/projectTab.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -147,8 +148,8 @@
 
             <action id="CheckStyleModifiedFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanModifiedFiles"
-                    text="Check All Modified Files."
-                    description="Run Checkstyle on all modified files."
+                    text="Check All Modified Files"
+                    description="Run Checkstyle on all modified files"
                     icon="/general/toolWindowChanges.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -156,8 +157,8 @@
 
             <action id="CheckStyleDefaultChangeListAction"
                     class="org.infernus.idea.checkstyle.actions.ScanCurrentChangeList"
-                    text="Check Files in the Current Change List."
-                    description="Run Checkstyle on the current change list."
+                    text="Check Files in the Current Change List"
+                    description="Run Checkstyle on the current change list"
                     icon="/general/smallConfigurableVcs.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -167,8 +168,8 @@
 
             <action id="CheckStyleClearCheckCacheAction"
                     class="org.infernus.idea.checkstyle.actions.ClearCheckerCache"
-                    text="Reload Rules files."
-                    description="Clear the rules file cache, forcing a reload of changed rules."
+                    text="Reload Rules files"
+                    description="Clear the rules file cache, forcing a reload of changed rules"
                     icon="/actions/sync.png">
 
                 <add-to-group group-id="EditorPopupMenu" anchor="last"/>
