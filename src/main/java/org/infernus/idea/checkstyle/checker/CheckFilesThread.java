@@ -6,9 +6,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.jetbrains.annotations.NonNls;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -20,18 +20,19 @@ public class CheckFilesThread extends AbstractCheckerThread {
     /**
      * Logger for this class.
      */
-    @NonNls
     private static final Log LOG = LogFactory.getLog(CheckFilesThread.class);
 
     /**
      * Create a thread to check the given files.
      *
-     * @param checkStylePlugin CheckStylePlugin.
-     * @param virtualFiles     the files to check.
+     * @param checkStylePlugin       CheckStylePlugin.
+     * @param moduleClassPathBuilder the class path builder.
+     * @param virtualFiles           the files to check.
      */
     public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
+                            final ModuleClassPathBuilder moduleClassPathBuilder,
                             final List<VirtualFile> virtualFiles) {
-        super(checkStylePlugin, virtualFiles);
+        super(checkStylePlugin, moduleClassPathBuilder, virtualFiles);
         this.setFileResults(new HashMap<PsiFile, List<ProblemDescriptor>>());
     }
 

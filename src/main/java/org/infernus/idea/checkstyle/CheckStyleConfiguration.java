@@ -8,7 +8,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +23,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class CheckStyleConfiguration {
 
-    @NonNls
     private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
 
     private static final String ACTIVE_CONFIG = "active-configuration";

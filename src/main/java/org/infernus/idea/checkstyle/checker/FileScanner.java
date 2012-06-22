@@ -21,7 +21,6 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.ScannableFile;
-import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +42,6 @@ final class FileScanner implements Runnable {
     /**
      * Logger for this class.
      */
-    @NonNls
     private static final Log LOG = LogFactory.getLog(FileScanner.class);
 
     /**

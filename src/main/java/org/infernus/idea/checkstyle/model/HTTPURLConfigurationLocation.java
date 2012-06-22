@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.model;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NonNls;
 
 import java.io.*;
 import java.net.URL;
@@ -13,7 +12,6 @@ import java.net.URLConnection;
  */
 public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
-    @NonNls
     private static final Log LOG = LogFactory.getLog(HTTPURLConfigurationLocation.class);
 
     /**

@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.jetbrains.annotations.NonNls;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -18,20 +18,21 @@ public class ScanFilesThread extends AbstractCheckerThread {
     /**
      * Logger for this class.
      */
-    @NonNls
     private static final Log LOG = LogFactory.getLog(ScanFilesThread.class);
 
     /**
      * Scan Files and store results.
      *
-     * @param checkStylePlugin reference to the CheckStylePlugin
-     * @param vFiles           files to scan
-     * @param results          Map to store scan results
+     * @param checkStylePlugin       reference to the CheckStylePlugin
+     * @param moduleClassPathBuilder the class path builder.
+     * @param vFiles                 files to scan
+     * @param results                Map to store scan results
      */
     public ScanFilesThread(final CheckStylePlugin checkStylePlugin,
+                           final ModuleClassPathBuilder moduleClassPathBuilder,
                            final List<VirtualFile> vFiles,
                            final Map<PsiFile, List<ProblemDescriptor>> results) {
-        super(checkStylePlugin, vFiles);
+        super(checkStylePlugin, moduleClassPathBuilder, vFiles);
         this.setFileResults(results);
     }
 

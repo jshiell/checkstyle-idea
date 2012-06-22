@@ -9,6 +9,8 @@ import com.intellij.psi.PsiManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -37,16 +39,15 @@ public abstract class AbstractCheckerThread extends Thread {
 
     private boolean running = true;
 
-    private CheckStylePlugin plugin;
+    private final CheckStylePlugin plugin;
+    private final ModuleClassPathBuilder moduleClassPathBuilder;
 
-    public AbstractCheckerThread(final CheckStylePlugin checkStylePlugin,
-                                 final List<VirtualFile> virtualFiles) {
+    public AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
+                                 @NotNull final ModuleClassPathBuilder moduleClassPathBuilder,
+                                 @NotNull final List<VirtualFile> virtualFiles) {
         this.plugin = checkStylePlugin;
+        this.moduleClassPathBuilder = moduleClassPathBuilder;
 
-        if (files == null) {
-            throw new IllegalArgumentException("Files may not be null.");
-        }
-        // this needs to be done on the main thread.
         final PsiManager psiManager = PsiManager.getInstance(this.plugin.getProject());
         for (final VirtualFile virtualFile : virtualFiles) {
             buildFilesList(psiManager, virtualFile);
@@ -123,13 +124,12 @@ public abstract class AbstractCheckerThread extends Thread {
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
 
-            final ClassLoader moduleClassLoader = plugin.buildModuleClassLoader(module);
+            final ClassLoader moduleClassLoader = moduleClassPathBuilder.build(module);
 
             final FileScanner fileScanner = new FileScanner(
                     plugin, filesForModule, moduleClassLoader);
             this.runFileScanner(fileScanner);
 
-            // check for errors
             //noinspection ThrowableResultOfMethodCallIgnored
             if (fileScanner.getError() != null) {
                 // throw any exceptions from the thread

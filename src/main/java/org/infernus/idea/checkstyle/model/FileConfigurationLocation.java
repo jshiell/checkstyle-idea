@@ -5,7 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -15,7 +14,6 @@ import java.io.*;
  */
 public class FileConfigurationLocation extends ConfigurationLocation {
 
-    @NonNls
     private static final Log LOG = LogFactory.getLog(FileConfigurationLocation.class);
 
     private final Project project;

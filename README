@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.8.2 - Fixed: Library classes are now included in the Checkstyle classpath (#34).
 3.8.2 - Fixed: Removed actions not specific to the current editor from the popup menu (#31).
 3.8.2 - Fixed: Changed text to match IDEA by removing full-stops (#30).
 3.8.1 - Fixed: Inline regexp header defs no longer cause an exception (#29).

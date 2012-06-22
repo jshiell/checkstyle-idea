@@ -71,7 +71,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            final ClassLoader moduleClassLoader = checkStylePlugin.buildModuleClassLoader(module);
+            final ClassLoader moduleClassLoader = checkStylePlugin.getModuleClassPathBuilder().build(module);
 
             LOG.info("Loading configuration from " + configurationLocation);
             return CheckerFactory.getInstance().getChecker(configurationLocation, module, moduleClassLoader);
@@ -174,7 +174,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
         LOG.debug("Inspection has been invoked.");
 
         if (!psiFile.isValid() || !psiFile.isPhysical()) {
-            LOG.debug("Skipping file as invalid: " + psiFile.getName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Skipping file as invalid: " + psiFile.getName());
+            }
             return null;
         }
 
@@ -182,7 +184,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         if (!checkStylePlugin.getConfiguration().isScanningNonJavaFiles()
                 && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
-            LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
+            }
             return null;
         }
 
@@ -193,14 +197,22 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
             if (elementFile != null) {
                 final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
-                if (moduleRootManager != null && moduleRootManager.getFileIndex() != null
-                        && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
-                    LOG.debug("Skipping test class " + psiFile.getName());
+                if (moduleRootManager != null && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Skipping test class " + psiFile.getName());
+                    }
                     return null;
                 }
             }
         }
 
+        return scanFile(psiFile, manager, checkStylePlugin, module);
+    }
+
+    private ProblemDescriptor[] scanFile(final PsiFile psiFile,
+                                         final InspectionManager manager,
+                                         final CheckStylePlugin checkStylePlugin,
+                                         final Module module) {
         ScannableFile scannableFile = null;
         try {
             final Checker checker = getChecker(checkStylePlugin, module);
@@ -223,12 +235,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 
-            final CheckStyleAuditListener listener;
-            synchronized (checker) {
-                listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
-                checker.addListener(listener);
-                checker.process(Arrays.asList(scannableFile.getFile()));
-            }
+            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
+            checker.addListener(listener);
+            checker.process(Arrays.asList(scannableFile.getFile()));
 
             final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
             return problems.toArray(new ProblemDescriptor[problems.size()]);

@@ -5,12 +5,9 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.CompilerModuleExtension;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
@@ -35,16 +32,13 @@ import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.jetbrains.annotations.NonNls;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -61,10 +55,6 @@ import java.util.*;
 public final class CheckStylePlugin extends CheckinHandlerFactory implements ProjectComponent, Configurable,
         PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
 
-    /**
-     * Logger for this class.
-     */
-    @NonNls
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
     /**
@@ -88,15 +78,12 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      */
     private ToolWindow toolWindow;
 
-    /**
-     * Classloader for third party libraries.
-     */
-    private ClassLoader thirdPartyClassloader;
+    private final ModuleClassPathBuilder moduleClassPathBuilder;
 
     /**
      * Configuration store.
      */
-    private CheckStyleConfiguration configuration;
+    private final CheckStyleConfiguration configuration;
 
     /**
      * Construct a plug-in instance for the given project.
@@ -106,6 +93,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     public CheckStylePlugin(final Project project) {
         this.project = project;
         this.configuration = new CheckStyleConfiguration(project);
+
+        this.moduleClassPathBuilder = new ModuleClassPathBuilder(configuration);
 
         try {
             if (project != null) {
@@ -158,41 +147,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     }
 
     /**
-     * Get classloader for third party libraries.
-     *
-     * @return the classloader for third party libraries.
-     */
-    public synchronized ClassLoader getThirdPartyClassloader() {
-        if (thirdPartyClassloader == null) {
-            final List<String> thirdPartyClasses
-                    = configuration.getThirdPartyClassPath();
-            if (thirdPartyClasses.size() > 0) {
-                final URL[] urlList = new URL[thirdPartyClasses.size()];
-                int index = 0;
-                for (final String pathElement : thirdPartyClasses) {
-                    try {
-                        // toURI().toURL() escapes, whereas toURL() doesn't.
-                        urlList[index] = new File(pathElement).toURI().toURL();
-                        ++index;
-
-                    } catch (MalformedURLException e) {
-                        LOG.error("Third party classpath element is malformed: "
-                                + pathElement, e);
-                    }
-                }
-
-                thirdPartyClassloader = new URLClassLoader(urlList,
-                        getClass().getClassLoader());
-
-            } else {
-                thirdPartyClassloader = getClass().getClassLoader();
-            }
-        }
-
-        return thirdPartyClassloader;
-    }
-
-    /**
      * Get the plugin configuration.
      *
      * @return the plug-in configuration.
@@ -228,7 +182,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
 
         final Content toolContent = toolWindow.getContentManager().getFactory().createContent(
                 new ToolWindowPanel(project), IDEAUtilities.getResource("plugin.toolwindow.action",
-                        "Scan"), false);
+                "Scan"), false);
         toolWindow.getContentManager().addContent(toolContent);
 
         toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name",
@@ -283,6 +237,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             LOG.error("Unable to register check-in handler", e);
         }
     }
+
     private void unregisterCheckInHandler() {
         try {
             CheckinHandlersManager.getInstance().unregisterCheckinHandlerFactory(this);
@@ -346,7 +301,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         reset(); // save current data as unmodified
 
         CheckerFactory.getInstance().invalidateCache();
-        thirdPartyClassloader = null; // reset to force reload
+        moduleClassPathBuilder.reset();
     }
 
     public void reset() {
@@ -401,7 +356,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files);
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder, files);
         checkFilesThread.setPriority(Thread.MIN_PRIORITY);
 
         synchronized (checksInProgress) {
@@ -446,7 +401,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             LOG.debug("No files provided.");
             return results;
         }
-        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
+        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, moduleClassPathBuilder, files, results);
 
         synchronized (checksInProgress) {
             checksInProgress.add(scanFilesThread);
@@ -480,7 +435,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         return null;
     }
 
-    public void activeToolWindow(boolean activate) {
+    public void activeToolWindow(final boolean activate) {
         if (activate) {
             this.toolWindow.show(null);
         } else {
@@ -488,49 +443,16 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
     }
 
-    /**
-     * Build a class loader for the compilation path of the module.
-     *
-     * @param module the module in question.
-     * @return the class loader to use, or null if none applicable.
-     * @throws MalformedURLException if the URL conversion fails.
-     */
-    public ClassLoader buildModuleClassLoader(final Module module)
-            throws MalformedURLException {
-
-        if (module == null) {
-            return null;
-        }
-
-        final ModuleRootManager rootManager
-                = ModuleRootManager.getInstance(module);
-        if (rootManager == null) {
-            LOG.debug("Could not find root manager for module: "
-                    + module.getName());
-            return null;
-        }
-
-        final List<URL> outputPaths = new ArrayList<URL>();
-        final CompilerModuleExtension compilerModule = CompilerModuleExtension.getInstance(module);
-        if (compilerModule != null) {
-            for (final VirtualFile outputPath : compilerModule.getOutputRoots(true)) {
-                String filePath = outputPath.getPath();
-                if (filePath.endsWith("!/")) { // filter JAR suffix
-                    filePath = filePath.substring(0, filePath.length() - 2);
-                }
-                outputPaths.add(new File(filePath).toURI().toURL());
-            }
-        }
-
-        return new URLClassLoader(outputPaths.toArray(
-                new URL[outputPaths.size()]), getThirdPartyClassloader());
-    }
-
     @NotNull
     @Override
     public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel,
                                         final CommitContext commitContext) {
         return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
+    }
+
+    @NotNull
+    public ModuleClassPathBuilder getModuleClassPathBuilder() {
+        return moduleClassPathBuilder;
     }
 
     /**

@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8.2: Fixed: Library classes are now included in the Checkstyle classpath (#34).</li>
     <li>3.8.2: Fixed: Removed actions not specific to the current editor from the popup menu (#31).</li>
     <li>3.8.2: Fixed: Changed text to match IDEA by removing full-stops (#30).</li>
     <li>3.8.1: Fixed: Inline regexp header defs no longer cause an exception (#29).</li>
