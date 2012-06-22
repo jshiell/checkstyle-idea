@@ -26,36 +26,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static java.util.Collections.singleton;
-
 /**
  * Runnable for scanning an individual file.
  */
 final class FileScanner implements Runnable {
+
+    private static final Log LOG = LogFactory.getLog(FileScanner.class);
 
     private CheckStylePlugin plugin;
     private Map<PsiFile, List<ProblemDescriptor>> results;
     private Set<PsiFile> filesToScan;
     private ClassLoader moduleClassLoader;
     private Throwable error;
-
-    /**
-     * Logger for this class.
-     */
-    private static final Log LOG = LogFactory.getLog(FileScanner.class);
-
-    /**
-     * Create a new file scanner.
-     *
-     * @param checkStylePlugin  CheckStylePlugin.
-     * @param fileToScan        the file to scan.
-     * @param moduleClassLoader the class loader for the file's module
-     */
-    public FileScanner(final CheckStylePlugin checkStylePlugin,
-                       final PsiFile fileToScan,
-                       final ClassLoader moduleClassLoader) {
-        this(checkStylePlugin, singleton(fileToScan), moduleClassLoader);
-    }
 
     /**
      * Create a new file scanner.
@@ -74,7 +56,7 @@ final class FileScanner implements Runnable {
 
     public void run() {
         try {
-            results = checkPsiFile(filesToScan, moduleClassLoader);
+            results = checkPsiFile(filesToScan);
 
             this.plugin.getToolWindowPanel().incrementProgressBarBy(filesToScan.size());
         } catch (Throwable e) {
@@ -107,16 +89,14 @@ final class FileScanner implements Runnable {
     /**
      * Scan a PSI file with CheckStyle.
      *
-     * @param psiFilesToScan    the PSI psiFilesToScan to scan. Thezse will be
+     * @param psiFilesToScan    the PSI psiFilesToScan to scan. These will be
      *                          ignored if not a java file and not from the same module.
-     * @param moduleClassLoader the class loader for the current module.
      * @return a list of tree nodes representing the result tree for this
      *         file, an empty list or null if this file is invalid or
      *         has no errors.
      * @throws Throwable if the
      */
-    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
-                                                               final ClassLoader moduleClassLoader)
+    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan)
             throws Throwable {
         if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {
             LOG.debug("No elements were specified");
@@ -133,11 +113,14 @@ final class FileScanner implements Runnable {
 
         try {
             for (final PsiFile psiFile : psiFilesToScan) {
-                final String fileDescription = (psiFile != null ? psiFile.getName() : null);
-                LOG.debug("Processing " + fileDescription);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Processing " + describe(psiFile));
+                }
 
                 if (psiFile == null || !psiFile.isValid() || !psiFile.isPhysical()) {
-                    LOG.debug("Skipping as invalid type: " + fileDescription);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Skipping as invalid type: " + describe(psiFile));
+                    }
                     continue;
                 }
 
@@ -146,19 +129,25 @@ final class FileScanner implements Runnable {
                 } else {
                     final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);
                     if (!elementModule.equals(module)) {
-                        LOG.debug("Skipping as modules do not match: " + fileDescription + " : " + elementModule
-                                + " does not match " + module);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Skipping as modules do not match: " + describe(psiFile)
+                                    + " : " + elementModule + " does not match " + module);
+                        }
                         continue;
                     }
                 }
 
                 if (!checkTestClasses && isTestClass(psiFile)) {
-                    LOG.debug("Skipping test class " + psiFile.getName());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Skipping test class " + psiFile.getName());
+                    }
                     continue;
                 }
 
                 if (scanOnlyJavaFiles && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
-                    LOG.debug("Skipping non-Java file " + psiFile.getName());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Skipping non-Java file " + psiFile.getName());
+                    }
                     continue;
                 }
 
@@ -169,12 +158,14 @@ final class FileScanner implements Runnable {
                 }
             }
 
-            if (module == null || filesToElements.size() == 0) {
-                LOG.debug("No valid files were supplied");
+            if (module == null || filesToElements.isEmpty()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No valid files were supplied");
+                }
                 return null;
             }
 
-            return performCheckStyleScan(moduleClassLoader, module, tempFiles, filesToElements);
+            return performCheckStyleScan(module, tempFiles, filesToElements);
 
         } finally {
             for (final ScannableFile tempFile : tempFiles) {
@@ -185,9 +176,15 @@ final class FileScanner implements Runnable {
         }
     }
 
+    private String describe(final PsiFile psiFile) {
+        if (psiFile != null) {
+            return psiFile.getName();
+        }
+        return null;
+    }
+
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final ClassLoader moduleClassLoader,
-                                                                        final Module module,
+    private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final Module module,
                                                                         final List<ScannableFile> tempFiles,
                                                                         final Map<String, PsiFile> filesToElements) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());

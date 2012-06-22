@@ -167,7 +167,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     @Nullable
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
