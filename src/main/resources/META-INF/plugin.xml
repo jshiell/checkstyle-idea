@@ -18,6 +18,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8.2: Fixed: Removed actions not specific to the current editor from the popup menu (#31).</li>
     <li>3.8.2: Fixed: Changed text to match IDEA by removing full-stops (#30).</li>
     <li>3.8.1: Fixed: Inline regexp header defs no longer cause an exception (#29).</li>
     <li>3.8: New: An option has been added to scan all (i.e. non-Java) files.</li>
@@ -113,8 +114,6 @@
                     text="Stop the running scan"
                     description="Stop the scan currently being run"
                     icon="/actions/suspend.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
             <separator/>
@@ -133,8 +132,6 @@
                     text="Check Module"
                     description="Run Checkstyle on all files in the current module"
                     icon="/modules/modulesNode.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
             <action id="CheckStyleProjectFilesAction"
@@ -142,8 +139,6 @@
                     text="Check Project"
                     description="Run Checkstyle on all files in the current project"
                     icon="/general/projectTab.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
             <action id="CheckStyleModifiedFilesAction"
@@ -151,8 +146,6 @@
                     text="Check All Modified Files"
                     description="Run Checkstyle on all modified files"
                     icon="/general/toolWindowChanges.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
             <action id="CheckStyleDefaultChangeListAction"
@@ -160,8 +153,6 @@
                     text="Check Files in the Current Change List"
                     description="Run Checkstyle on the current change list"
                     icon="/general/smallConfigurableVcs.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
 
             <separator/>
@@ -171,8 +162,6 @@
                     text="Reload Rules files"
                     description="Clear the rules file cache, forcing a reload of changed rules"
                     icon="/actions/sync.png">
-
-                <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             </action>
         </group>
 
