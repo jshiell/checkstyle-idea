@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -274,8 +275,9 @@ public class LocationDialogue extends JDialog {
                 return;
             }
 
+            InputStream configInputStream = null;
             try {
-                location.resolve();
+                configInputStream = location.resolve();
 
             } catch (IOException e) {
                 final String message = resources.getString("config.file.resolve-failed");
@@ -283,6 +285,15 @@ public class LocationDialogue extends JDialog {
                 Messages.showErrorDialog(project, formattedMessage, resources.getString("config.file.error.title"));
 
                 return;
+
+            } finally {
+                if (configInputStream != null) {
+                    try {
+                        configInputStream.close();
+                    } catch (IOException e) {
+                        // ignored
+                    }
+                }
             }
 
             committed = true;

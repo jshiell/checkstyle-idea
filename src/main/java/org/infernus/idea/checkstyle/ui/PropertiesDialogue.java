@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -135,8 +136,9 @@ public class PropertiesDialogue extends JDialog {
         this.configurationLocation = (ConfigurationLocation) configurationLocation.clone();
 
         // get latest properties from file
+        InputStream configInputStream = null;
         try {
-            configurationLocation.resolve();
+            configInputStream = configurationLocation.resolve();
             propertiesModel.setProperties(configurationLocation.getProperties());
 
         } catch (IOException e) {
@@ -149,6 +151,15 @@ public class PropertiesDialogue extends JDialog {
             final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
             Messages.showErrorDialog(project, formattedMessage,
                     resources.getString("config.file.error.title"));
+
+        } finally {
+            if (configInputStream != null) {
+                try {
+                    configInputStream.close();
+                } catch (IOException e) {
+                    // ignored
+                }
+            }
         }
     }
 
