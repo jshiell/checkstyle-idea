@@ -286,7 +286,9 @@
         <root url="jar://$PROJECT_DIR$/lib/checkstyle-5.5-all.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/checkstyle-5.5/src/checkstyle" />
+      </SOURCES>
     </library>
   </component>
 </project>

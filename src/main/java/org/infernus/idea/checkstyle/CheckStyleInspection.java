@@ -235,8 +235,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 
             final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
-            checker.addListener(listener);
-            checker.process(Arrays.asList(scannableFile.getFile()));
+            synchronized (checker) {
+                checker.addListener(listener);
+                checker.process(Arrays.asList(scannableFile.getFile()));
+                checker.removeListener(listener);
+            }
 
             final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
             return problems.toArray(new ProblemDescriptor[problems.size()]);

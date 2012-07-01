@@ -84,7 +84,7 @@ public class CheckerFactory {
 
         synchronized (cache) {
             if (cache.containsKey(location)) {
-                CachedChecker cachedChecker = cache.get(location);
+                final CachedChecker cachedChecker = cache.get(location);
                 if (cachedChecker != null && cachedChecker.isValid()) {
                     return cachedChecker.getChecker();
                 } else {
