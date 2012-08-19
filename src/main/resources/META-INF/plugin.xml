@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.8.3</version>
+    <version>3.8.4</version>
     <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.8.4: Fixed: IDE error on pre-check-in scan (#39).</li>
     <li>3.8.3: Fixed: Synchronisation issue introduced by earlier fix (#36).</li>
     <li>3.8.2: Fixed: Library classes are now included in the Checkstyle classpath (#34).</li>
     <li>3.8.2: Fixed: Removed actions not specific to the current editor from the popup menu (#31).</li>

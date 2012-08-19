@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.8.4 - Fixed: IDE error on pre-check-in scan (#39).
 3.8.3 - Fixed: Synchronisation issue introduced by earlier fix (#36).
 3.8.2 - Fixed: Library classes are now included in the Checkstyle classpath (#34).
 3.8.2 - Fixed: Removed actions not specific to the current editor from the popup menu (#31).

@@ -117,7 +117,7 @@ final class FileScanner implements Runnable {
                     LOG.debug("Processing " + describe(psiFile));
                 }
 
-                if (psiFile == null || !psiFile.isValid() || !psiFile.isPhysical()) {
+                if (psiFile == null || !psiFile.getVirtualFile().isValid() || !psiFile.isPhysical()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Skipping as invalid type: " + describe(psiFile));
                     }
