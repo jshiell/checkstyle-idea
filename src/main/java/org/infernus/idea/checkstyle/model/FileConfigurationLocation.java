@@ -145,7 +145,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         final File projectPath = getProjectPath();
-        if (projectPath != null && path.startsWith(absolutePathOf(projectPath))) {
+        if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
             return CheckStyleConstants.PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }

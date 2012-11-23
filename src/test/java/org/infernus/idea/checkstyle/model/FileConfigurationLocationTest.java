@@ -77,6 +77,15 @@ public class FileConfigurationLocationTest {
     }
 
     @Test
+    public void aUnixLocationShouldBeStoredAndRetrievedCorrectlyWhenTheProjectPathIsNotUsedAndTheFileExistsInAPartiallyMatchingSiblingDirectory() {
+        // Issue #9
+
+        underTest.setLocation(PROJECT_PATH + "-sibling/a-path/to/checkstyle.xml");
+
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "-sibling/a-path/to/checkstyle.xml")));
+    }
+
+    @Test
     public void aWindowsLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
         underTest = new TestFileConfigurationLocation(project, '\\');
         reset(project);
@@ -115,7 +124,7 @@ public class FileConfigurationLocationTest {
         String absolutePathOf(final File file) {
             // a nasty hack to pretend we're on a Windows box when required...
             if (file.getPath().startsWith("c:")) {
-                return file.getPath().replace('/', '\\');
+                return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
             }
             return file.getAbsolutePath();
         }
