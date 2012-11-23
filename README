@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+3.9   - Fixed: Match on leading project path causes tokenisation silliness (#9).
 3.9   - New: Updated CheckStyle to 5.6.
 3.8.4 - Fixed: IDE error on pre-check-in scan (#39).
 3.8.3 - Fixed: Synchronisation issue introduced by earlier fix (#36).
