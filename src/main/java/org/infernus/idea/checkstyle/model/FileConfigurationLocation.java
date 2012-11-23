@@ -65,7 +65,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     protected InputStream resolveFile() throws IOException {
         final File locationFile = new File(getLocation());
         if (!locationFile.exists()) {
-            throw new FileNotFoundException("File does not exist: " + locationFile.getAbsolutePath());
+            throw new FileNotFoundException("File does not exist: " + absolutePathOf(locationFile));
         }
 
         return new FileInputStream(locationFile);
@@ -123,7 +123,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
                 final String projectRelativePath = fromUnixPath(
                         path.substring(CheckStyleConstants.PROJECT_DIR.length()));
                 final String completePath = projectPath + File.separator + projectRelativePath;
-                return new File(completePath).getAbsolutePath();
+                return absolutePathOf(new File(completePath));
 
             } else {
                 LOG.warn("Could not untokenise path as project dir is unset: " + path);
@@ -145,25 +145,33 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         final File projectPath = getProjectPath();
-        if (projectPath != null && path.startsWith(projectPath.getAbsolutePath())) {
+        if (projectPath != null && path.startsWith(absolutePathOf(projectPath))) {
             return CheckStyleConstants.PROJECT_DIR
-                    + toUnixPath(path.substring(projectPath.getAbsolutePath().length()));
+                    + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
         return toUnixPath(path);
     }
 
+    String absolutePathOf(final File file) {
+        return file.getAbsolutePath();
+    }
+
     private String toUnixPath(final String path) {
-        if (File.separatorChar == '/') {
+        if (separatorChar() == '/') {
             return path;
         }
-        return path.replace(File.separatorChar, '/');
+        return path.replace(separatorChar(), '/');
+    }
+
+    char separatorChar() {
+        return File.separatorChar;
     }
 
     private String fromUnixPath(final String path) {
-        if (File.separatorChar == '/') {
+        if (separatorChar() == '/') {
             return path;
         }
-        return path.replace('/', File.separatorChar);
+        return path.replace('/', separatorChar());
     }
 
     @Override

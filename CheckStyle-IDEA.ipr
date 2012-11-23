@@ -29,13 +29,14 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/test-configs/checkstyle-with-header.xml:Header 2" />
+        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/test-configs/test-item/sun_checks.xml:Test1" />
         <entry key="check-nonjava-files" value="false" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
+        <entry key="location-0" value="FILE:$PROJECT_DIR$/test-configs/test-item/sun_checks.xml:Test1" />
         <entry key="location-1" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules." />
         <entry key="location-2" value="FILE:$PROJECT_DIR$/test-configs/checkstyle-with-header.xml:Header test" />
-        <entry key="location-3" value="FILE:$PROJECT_DIR$/test-configs/checkstyle-with-header.xml:Header 2" />
+        <entry key="location-3" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
+        <entry key="location-4" value="FILE:$PROJECT_DIR$/test-configs/checkstyle-with-header.xml:Header 2" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>
@@ -281,14 +282,12 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="CheckStyle 5.5">
+    <library name="CheckStyle 5.6">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/checkstyle-5.5-all.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/checkstyle-5.6-all.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="file://$PROJECT_DIR$/checkstyle-5.5/src/checkstyle" />
-      </SOURCES>
+      <SOURCES />
     </library>
   </component>
 </project>
