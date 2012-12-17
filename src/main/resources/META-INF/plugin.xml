@@ -11,13 +11,14 @@
 </p>
         ]]>
     </description>
-    <version>3.9</version>
+    <version>3.9.1</version>
     <idea-version since-build="111.41"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>3.9.1: Fixed: Default rules are invalid with CS5.6.</li>
     <li>3.9: Fixed: Match on leading project path causes tokenisation silliness (#9).</li>
     <li>3.9: New: Updated CheckStyle to 5.6.</li>
     <li>3.8.4: Fixed: IDE error on pre-check-in scan (#39).</li>
