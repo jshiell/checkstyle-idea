@@ -5,6 +5,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -14,7 +15,7 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleModulePlugin;
+import org.infernus.idea.checkstyle.CheckStyleModuleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
@@ -272,15 +273,16 @@ final class FileScanner implements Runnable {
     private ConfigurationLocation getConfigurationLocation(final Module module) {
         final ConfigurationLocation location;
         if (module != null) {
-            final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
-            if (checkStyleModulePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle module plugin");
+            final CheckStyleModuleConfiguration moduleConfiguration
+                    = ModuleServiceManager.getService(module, CheckStyleModuleConfiguration.class);
+            if (moduleConfiguration == null) {
+                throw new IllegalStateException("Couldn't get checkstyle module configuration");
             }
 
-            if (checkStyleModulePlugin.getConfiguration().isExcluded()) {
+            if (moduleConfiguration.isExcluded()) {
                 location = null;
             } else {
-                location = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+                location = moduleConfiguration.getActiveConfiguration();
             }
 
         } else {
@@ -290,7 +292,7 @@ final class FileScanner implements Runnable {
     }
 
     private CheckerFactory getCheckerFactory() {
-        return ServiceManager.getService(plugin.getProject(), CheckerFactory.class);
+        return ServiceManager.getService(CheckerFactory.class);
     }
 
     /**

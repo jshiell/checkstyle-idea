@@ -59,8 +59,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      */
     private ToolWindow toolWindow;
 
-    private final ModuleClassPathBuilder moduleClassPathBuilder;
-
     /**
      * Configuration store.
      */
@@ -75,17 +73,11 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         this.project = project;
         this.configuration = ServiceManager.getService(project, CheckStyleConfiguration.class);
 
-        this.moduleClassPathBuilder = new ModuleClassPathBuilder(configuration);
-
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
     }
 
     public Project getProject() {
         return project;
-    }
-
-    public void resetModuleClassBuilder() {
-        moduleClassPathBuilder.reset();
     }
 
     @Nullable
@@ -235,7 +227,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder, files);
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder(), files);
         checkFilesThread.setPriority(Thread.MIN_PRIORITY);
 
         synchronized (checksInProgress) {
@@ -243,6 +235,10 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
 
         checkFilesThread.start();
+    }
+
+    private ModuleClassPathBuilder moduleClassPathBuilder() {
+        return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
 
     /**
@@ -280,7 +276,7 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
             LOG.debug("No files provided.");
             return results;
         }
-        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, moduleClassPathBuilder, files, results);
+        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, moduleClassPathBuilder(), files, results);
 
         synchronized (checksInProgress) {
             checksInProgress.add(scanFilesThread);
@@ -327,11 +323,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
     public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel,
                                         final CommitContext commitContext) {
         return new ScanFilesBeforeCheckinHandler(this, checkinProjectPanel);
-    }
-
-    @NotNull
-    public ModuleClassPathBuilder getModuleClassPathBuilder() {
-        return moduleClassPathBuilder;
     }
 
 }

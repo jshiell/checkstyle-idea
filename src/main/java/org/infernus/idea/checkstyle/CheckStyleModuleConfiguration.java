@@ -1,18 +1,25 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.module.Module;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * A manager for CheckStyle module configuration.
  */
-public final class CheckStyleModuleConfiguration extends Properties {
+@State(
+        name = CheckStyleConstants.ID_MODULE_PLUGIN,
+        storages = {@Storage(id = "other", file = "$MODULE_FILE$")}
+)
+public final class CheckStyleModuleConfiguration extends Properties
+    implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleModuleConfiguration.class);
 
@@ -107,5 +114,45 @@ public final class CheckStyleModuleConfiguration extends Properties {
         }
 
         return checkStylePlugin.getConfiguration().getConfigurationLocations();
+    }
+
+    public ModuleSettings getState() {
+        final ModuleSettings moduleSettings = new ModuleSettings();
+        for (String configurationKey : stringPropertyNames()) {
+            moduleSettings.configuration.put(configurationKey, getProperty(configurationKey));
+        }
+        return moduleSettings;
+    }
+
+    public void loadState(final ModuleSettings moduleSettings) {
+        clear();
+
+        if (moduleSettings != null && moduleSettings.configuration != null) {
+            for (final String key : moduleSettings.configuration.keySet()) {
+                setProperty(key, moduleSettings.configuration.get(key));
+            }
+        }
+    }
+
+    /**
+     * Wrapper class for IDEA state serialisation.
+     */
+    public static class ModuleSettings {
+        public Map<String, String> configuration = new HashMap<String, String>();
+
+        public ModuleSettings() {
+            this.configuration = new HashMap<String, String>();
+        }
+
+        public ModuleSettings(final Map<String, String> configuration) {
+            this.configuration = configuration;
+        }
+
+        public Map<String, String> configurationAsMap() {
+            if (configuration == null) {
+                return Collections.emptyMap();
+            }
+            return configuration;
+        }
     }
 }

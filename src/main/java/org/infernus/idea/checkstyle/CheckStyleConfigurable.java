@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -82,9 +83,9 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     private void resetModuleClassBuilder() {
-        final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin != null) { // the plugin isn't loaded for the default project
-            checkStylePlugin.resetModuleClassBuilder();
+        final ModuleClassPathBuilder moduleClassPathBuilder = ServiceManager.getService(project, ModuleClassPathBuilder.class);
+        if (moduleClassPathBuilder != null) {
+            moduleClassPathBuilder.reset();
         }
     }
 
@@ -93,7 +94,7 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     private CheckerFactory getCheckerFactory() {
-        return ServiceManager.getService(project, CheckerFactory.class);
+        return ServiceManager.getService(CheckerFactory.class);
     }
 
     public void reset() {

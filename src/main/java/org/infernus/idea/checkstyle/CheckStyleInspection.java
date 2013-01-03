@@ -6,6 +6,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
@@ -26,6 +27,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NonNls;
@@ -64,15 +66,19 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            final ClassLoader moduleClassLoader = checkStylePlugin.getModuleClassPathBuilder().build(module);
+            final ClassLoader moduleClassLoader = moduleClassPathBuilder(module).build(module);
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory(module.getProject()).getChecker(configurationLocation, module, moduleClassLoader);
+            return getCheckerFactory().getChecker(configurationLocation, module, moduleClassLoader);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
+    }
+
+    private ModuleClassPathBuilder moduleClassPathBuilder(final Module module) {
+        return ServiceManager.getService(module.getProject(), ModuleClassPathBuilder.class);
     }
 
     private CheckStylePlugin getPlugin(final Project project) {
@@ -83,23 +89,24 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return checkStylePlugin;
     }
 
-    private CheckerFactory getCheckerFactory(final Project project) {
-        return ServiceManager.getService(project, CheckerFactory.class);
+    private CheckerFactory getCheckerFactory() {
+        return ServiceManager.getService(CheckerFactory.class);
     }
 
     private ConfigurationLocation getConfigurationLocation(final Module module,
                                                            final CheckStylePlugin checkStylePlugin) {
         final ConfigurationLocation configurationLocation;
         if (module != null) {
-            final CheckStyleModulePlugin checkStyleModulePlugin = module.getComponent(CheckStyleModulePlugin.class);
-            if (checkStyleModulePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle module plugin");
+            final CheckStyleModuleConfiguration moduleConfiguration
+                    = ModuleServiceManager.getService(module, CheckStyleModuleConfiguration.class);
+            if (moduleConfiguration == null) {
+                throw new IllegalStateException("Couldn't get checkstyle module configuration");
             }
 
-            if (checkStyleModulePlugin.getConfiguration().isExcluded()) {
+            if (moduleConfiguration.isExcluded()) {
                 configurationLocation = null;
             } else {
-                configurationLocation = checkStyleModulePlugin.getConfiguration().getActiveConfiguration();
+                configurationLocation = moduleConfiguration.getActiveConfiguration();
             }
 
         } else {
@@ -126,7 +133,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory(module.getProject()).getConfig(configurationLocation);
+            return getCheckerFactory().getConfig(configurationLocation);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);

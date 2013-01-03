@@ -67,16 +67,24 @@
     </module-components>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
+                            serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
+
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckStyleConfiguration"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckStyleConfiguration"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
-                        serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"
+                        serviceImplementation="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"/>
+
+        <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
+
+        <moduleService serviceInterface="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"
+                       serviceImplementation="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"/>
+
+        <moduleConfigurable instance="org.infernus.idea.checkstyle.CheckStyleModuleConfigurable"/>
 
         <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
                          displayName="Real-time scan" groupName="CheckStyle" shortName="CheckStyle-IDEA"
                          id="CheckStyleIDEAInspection" level="WARNING" enabledByDefault="true"/>
-
-        <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
     </extensions>
 
     <actions>
