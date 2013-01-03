@@ -10,10 +10,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiInvalidElementAccessException;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
+import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -231,18 +233,13 @@ public class CheckStyleAuditListener implements AuditListener {
                 final String message = event.getLocalizedMessage() != null
                         ? event.getLocalizedMessage().getMessage()
                         : event.getMessage();
-                final ProblemHighlightType problemType
-                        = ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 try {
                     final ProblemDescriptor problem = manager.createProblemDescriptor(
-                            victim, message, null, problemType, false, endOfLine);
+                            victim, message, null, problemHighlightTypeFor(event.getSeverityLevel()),
+                            false, endOfLine);
 
                     if (usingExtendedDescriptors) {
-                        final ProblemDescriptor delegate
-                                = new ExtendedProblemDescriptor(
-                                problem, event.getSeverityLevel(),
-                                event.getLine(), event.getColumn());
-                        addProblem(psiFile, delegate);
+                        addProblem(psiFile, extendDescriptor(event, problem));
                     } else {
                         addProblem(psiFile, problem);
                     }
@@ -251,6 +248,32 @@ public class CheckStyleAuditListener implements AuditListener {
                     LOG.error("Element access failed", e);
                 }
             }
+        }
+
+        private ProblemDescriptor extendDescriptor(final AuditEvent event,
+                                                   final ProblemDescriptor problem) {
+            return new ExtendedProblemDescriptor(problem, event.getSeverityLevel(),
+                    event.getLine(), event.getColumn());
+        }
+
+
+        @NotNull
+        private ProblemHighlightType problemHighlightTypeFor(final SeverityLevel severityLevel) {
+            if (severityLevel != null) {
+                switch (severityLevel) {
+                    case ERROR:
+                        return ProblemHighlightType.ERROR;
+                    case WARNING:
+                        return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+                    case INFO:
+                        return ProblemHighlightType.WEAK_WARNING;
+                    case IGNORE:
+                        return ProblemHighlightType.INFORMATION;
+                    default:
+                        return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+                }
+            }
+            return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
         }
     }
 

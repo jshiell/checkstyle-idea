@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.PsiElement;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This is a delegate class used to escape IntelliJ's lack
@@ -105,5 +106,14 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
 
     public boolean showTooltip() {
         return delegate.showTooltip();
+    }
+
+    @Nullable
+    public String getProblemGroup() {
+        return delegate.getProblemGroup();
+    }
+
+    public void setProblemGroup(@Nullable final String problemGroup) {
+        delegate.setProblemGroup(problemGroup);
     }
 }

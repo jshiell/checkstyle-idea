@@ -7,17 +7,19 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 5.5 from within IDEA.
+    of Java files with CheckStyle 5.6 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>3.9.1</version>
-    <idea-version since-build="111.41"/>
+    <version>4.0</version>
+    <idea-version since-build="123.94"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.0: New: CheckStyle errors will now be marked as errors by the inspection.</li>
+    <li>4.0: New: Updated to IDEA 12 API.</li>
     <li>3.9.1: Fixed: Default rules are invalid with CS5.6.</li>
     <li>3.9: Fixed: Match on leading project path causes tokenisation silliness (#9).</li>
     <li>3.9: New: Updated CheckStyle to 5.6.</li>
