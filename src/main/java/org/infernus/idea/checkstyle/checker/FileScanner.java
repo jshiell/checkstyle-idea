@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -261,7 +262,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            return CheckerFactory.getInstance().getChecker(location, module, classLoader);
+            return getCheckerFactory().getChecker(location, module, classLoader);
 
         } catch (Exception e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
@@ -288,6 +289,10 @@ final class FileScanner implements Runnable {
         return location;
     }
 
+    private CheckerFactory getCheckerFactory() {
+        return ServiceManager.getService(plugin.getProject(), CheckerFactory.class);
+    }
+
     /**
      * Retrieve a CheckStyle configuration.
      *
@@ -303,7 +308,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            return CheckerFactory.getInstance().getConfig(location);
+            return getCheckerFactory().getConfig(location);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);

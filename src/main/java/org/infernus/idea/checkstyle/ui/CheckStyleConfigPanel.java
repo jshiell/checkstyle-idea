@@ -1,11 +1,12 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -43,23 +44,20 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final JButton removeLocationButton = new JButton(new RemoveLocationAction());
     private final JButton editLocationPropertiesButton = new JButton(new EditPropertiesAction());
 
+    private final Project project;
+
     private boolean scanTestClasses;
     private boolean scanNonJavaFiles;
     private List<String> thirdPartyClasspath;
     private List<ConfigurationLocation> locations;
     private ConfigurationLocation activeLocation;
+
     private ConfigurationLocation defaultLocation;
 
-    private CheckStylePlugin plugin;
-
-    public CheckStyleConfigPanel(final CheckStylePlugin plugin) {
+    public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
 
-        if (plugin == null) {
-            throw new IllegalArgumentException("Plugin may not be null.");
-        }
-
-        this.plugin = plugin;
+        this.project = project;
 
         initialise();
     }
@@ -320,7 +318,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         public void actionPerformed(final ActionEvent e) {
-            final LocationDialogue dialogue = new LocationDialogue(plugin.getProject());
+            final LocationDialogue dialogue = new LocationDialogue(project);
 
             dialogue.setVisible(true);
 
@@ -330,7 +328,7 @@ public final class CheckStyleConfigPanel extends JPanel {
                     final ResourceBundle resources = ResourceBundle.getBundle(
                             CheckStyleConstants.RESOURCE_BUNDLE);
 
-                    Messages.showWarningDialog(plugin.getProject(),
+                    Messages.showWarningDialog(project,
                             resources.getString("config.file.error.duplicate.text"),
                             resources.getString("config.file.error.duplicate.title"));
 
@@ -393,7 +391,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
             final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
 
-            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(plugin.getProject());
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project);
             propertiesDialogue.setConfigurationLocation(location);
 
             propertiesDialogue.setVisible(true);
@@ -484,7 +482,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             fileChooser.setFileFilter(new ExtensionFileFilter("jar"));
             fileChooser.setFileSelectionMode(
                     JFileChooser.FILES_AND_DIRECTORIES);
-            fileChooser.setCurrentDirectory(plugin.getProjectPath());
+            fileChooser.setCurrentDirectory(getProjectPath());
 
             final int result = fileChooser.showOpenDialog(
                     CheckStyleConfigPanel.this);
@@ -493,6 +491,15 @@ public final class CheckStyleConfigPanel extends JPanel {
                         fileChooser.getSelectedFile().getAbsolutePath());
             }
         }
+    }
+
+    private File getProjectPath() {
+        final VirtualFile baseDir = project.getBaseDir();
+        if (baseDir == null) {
+            return null;
+        }
+
+        return new File(baseDir.getPath());
     }
 
     /**

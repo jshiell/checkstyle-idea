@@ -1,12 +1,8 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitContext;
@@ -25,35 +21,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
 import org.infernus.idea.checkstyle.checker.CheckFilesThread;
-import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandler;
 import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
-import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Main class for the CheckStyle static scanning plug-in.
+ * Main class for the CheckStyle scanning plug-in.
  */
-@State(
-        name = CheckStyleConstants.ID_PLUGIN,
-        storages = {
-                @Storage(
-                        id = "other",
-                        file = "$PROJECT_FILE$"
-                )}
-)
-public final class CheckStylePlugin extends CheckinHandlerFactory implements ProjectComponent, Configurable,
-        PersistentStateComponent<CheckStylePlugin.ConfigurationBean> {
+public final class CheckStylePlugin extends CheckinHandlerFactory implements ProjectComponent {
 
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
@@ -62,11 +48,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      */
     private final Set<AbstractCheckerThread> checksInProgress
             = new HashSet<AbstractCheckerThread>();
-
-    /**
-     * The configuration panel for the plug-in.
-     */
-    private CheckStyleConfigPanel configPanel;
 
     /**
      * A reference to the current project.
@@ -90,54 +71,25 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
      *
      * @param project the current project.
      */
-    public CheckStylePlugin(final Project project) {
+    public CheckStylePlugin(@NotNull final Project project) {
         this.project = project;
-        this.configuration = new CheckStyleConfiguration(project);
+        this.configuration = ServiceManager.getService(project, CheckStyleConfiguration.class);
 
         this.moduleClassPathBuilder = new ModuleClassPathBuilder(configuration);
 
-        try {
-            if (project != null) {
-                LOG.info("CheckStyle Plugin loaded with project base dir: \""
-                        + getProjectPath() + "\"");
-            } else {
-                LOG.info("CheckStyle Plugin loaded with no project.");
-            }
-
-            this.configPanel = new CheckStyleConfigPanel(this);
-
-        } catch (Throwable t) {
-            LOG.error("Project initialisation failed.", t);
-        }
-    }
-
-    public CheckStylePlugin.ConfigurationBean getState() {
-        return new ConfigurationBean(configuration.getState());
-    }
-
-    public void loadState(final CheckStylePlugin.ConfigurationBean newConfiguration) {
-        Map<String, String> bean = null;
-        if (newConfiguration != null) {
-            bean = newConfiguration.configuration;
-        }
-        configuration.loadState(bean);
+        LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
     }
 
     public Project getProject() {
         return project;
     }
 
-    /**
-     * Get the base path of the project.
-     *
-     * @return the base path of the project.
-     */
-    @Nullable
-    public File getProjectPath() {
-        if (project == null) {
-            return null;
-        }
+    public void resetModuleClassBuilder() {
+        moduleClassPathBuilder.reset();
+    }
 
+    @Nullable
+    private File getProjectPath() {
         final VirtualFile baseDir = project.getBaseDir();
         if (baseDir == null) {
             return null;
@@ -247,79 +199,6 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         }
     }
 
-    public String getDisplayName() {
-        return IDEAUtilities.getResource("plugin.configuration-name",
-                "CheckStyle Plugin");
-    }
-
-    public Icon getIcon() {
-        return IDEAUtilities.getIcon(
-                "/org/infernus/idea/checkstyle/images/checkstyle32.png");
-    }
-
-    public String getHelpTopic() {
-        return null;
-    }
-
-    public JComponent createComponent() {
-        if (configPanel == null) {
-            return null;
-        }
-
-        reset();
-
-        return configPanel;
-    }
-
-    public boolean isModified() {
-        try {
-            return configPanel != null && configPanel.isModified();
-
-        } catch (IOException e) {
-            LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
-            IDEAUtilities.showError(project,
-                    IDEAUtilities.getResource("checkstyle.file-not-found", "The CheckStyle file could not be read."));
-            return true;
-        }
-    }
-
-    public void apply() throws ConfigurationException {
-        if (configPanel == null) {
-            return;
-        }
-
-        configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
-        configuration.setActiveConfiguration(configPanel.getActiveLocation());
-
-        configuration.setScanningTestClasses(configPanel.isScanTestClasses());
-        configuration.setScanningNonJavaFiles(configPanel.isScanNonJavaFiles());
-
-        final List<String> thirdPartyClasspath
-                = configPanel.getThirdPartyClasspath();
-        configuration.setThirdPartyClassPath(thirdPartyClasspath);
-
-        reset(); // save current data as unmodified
-
-        CheckerFactory.getInstance().invalidateCache();
-        moduleClassPathBuilder.reset();
-    }
-
-    public void reset() {
-        if (configPanel == null) {
-            return;
-        }
-
-        configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
-        configPanel.setDefaultLocation(configuration.getDefaultLocation());
-        configPanel.setActiveLocation(configuration.getActiveConfiguration());
-        configPanel.setScanTestClasses(configuration.isScanningTestClasses());
-        configPanel.setScanNonJavaFiles(configuration.isScanningNonJavaFiles());
-        configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
-    }
-
-    public void disposeUIResources() {
-
-    }
 
     /**
      * Process an error.
@@ -455,19 +334,4 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
         return moduleClassPathBuilder;
     }
 
-    /**
-     * Wrapper class for IDEA state serialisation.
-     */
-    public static class ConfigurationBean {
-
-        public Map<String, String> configuration;
-
-        public ConfigurationBean(final Map<String, String> configuration) {
-            this.configuration = configuration;
-        }
-
-        public ConfigurationBean() {
-            this.configuration = new HashMap<String, String>();
-        }
-    }
 }

@@ -31,37 +31,9 @@ import java.util.Map;
  */
 public class CheckerFactory {
 
-    /**
-     * Logger for this class.
-     */
-    private static final Log LOG = LogFactory.getLog(
-            CheckerFactory.class);
+    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
-    /**
-     * A singleton instance.
-     */
-    private static final CheckerFactory INSTANCE = new CheckerFactory();
-
-    /**
-     * Cached checkers for the factory.
-     * <p/>
-     */
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
-
-    /**
-     * Create a new factory.
-     */
-    protected CheckerFactory() {
-    }
-
-    /**
-     * Get an instance of the checker factory.
-     *
-     * @return a checker factory.
-     */
-    public static CheckerFactory getInstance() {
-        return INSTANCE;
-    }
 
     /**
      * Get a checker for a given configuration.

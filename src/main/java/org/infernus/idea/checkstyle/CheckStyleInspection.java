@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -42,17 +43,9 @@ import java.util.Map;
  */
 public class CheckStyleInspection extends LocalInspectionTool {
 
-    /**
-     * Logger for this class.
-     */
-    private static final Log LOG = LogFactory.getLog(
-            CheckStyleInspection.class);
+    private static final Log LOG = LogFactory.getLog(CheckStyleInspection.class);
 
-    /**
-     * The configuration panel.
-     */
-    private final CheckStyleInspectionPanel configPanel
-            = new CheckStyleInspectionPanel();
+    private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
 
     /**
      * Produce a CheckStyle checker.
@@ -74,7 +67,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final ClassLoader moduleClassLoader = checkStylePlugin.getModuleClassPathBuilder().build(module);
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return CheckerFactory.getInstance().getChecker(configurationLocation, module, moduleClassLoader);
+            return getCheckerFactory(module.getProject()).getChecker(configurationLocation, module, moduleClassLoader);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
@@ -88,6 +81,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }
         return checkStylePlugin;
+    }
+
+    private CheckerFactory getCheckerFactory(final Project project) {
+        return ServiceManager.getService(project, CheckerFactory.class);
     }
 
     private ConfigurationLocation getConfigurationLocation(final Module module,
@@ -129,7 +126,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return CheckerFactory.getInstance().getConfig(configurationLocation);
+            return getCheckerFactory(module.getProject()).getConfig(configurationLocation);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);

@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
@@ -21,7 +23,15 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A manager for CheckStyle plug-in configuration.
  */
-public final class CheckStyleConfiguration {
+@State(
+        name = CheckStyleConstants.ID_PLUGIN,
+        storages = {
+                @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
+                @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme = StorageScheme.DIRECTORY_BASED)
+        }
+)
+public final class CheckStyleConfiguration implements ExportableComponent,
+        PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
 
@@ -38,10 +48,7 @@ public final class CheckStyleConfiguration {
     private final ConfigurationLocation defaultLocation;
 
     private final Map<String, String> storage = new ConcurrentHashMap<String, String>();
-
-    // lock used for sequentially accessing the storage
     private final ReentrantLock storageLock = new ReentrantLock();
-
 
     /**
      * Scan files before vcs checkin.
@@ -64,6 +71,16 @@ public final class CheckStyleConfiguration {
                 CheckStyleConstants.RESOURCE_BUNDLE);
         defaultLocation = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
                 DEFAULT_CONFIG, resources.getString("file.default.description"));
+    }
+
+    @NotNull
+    public File[] getExportFiles() {
+        return new File[]{PathManager.getOptionsFile("checkstyle-idea_project_settings")};
+    }
+
+    @NotNull
+    public String getPresentableName() {
+        return "CheckStyle-IDEA Project Settings";
     }
 
     public ConfigurationLocation getDefaultLocation() {
@@ -353,10 +370,10 @@ public final class CheckStyleConfiguration {
      *
      * @return a copy of the current configuration settings
      */
-    public Map<String, String> getState() {
+    public ProjectSettings getState() {
         storageLock.lock();
         try {
-            return new HashMap<String, String>(storage);
+            return new ProjectSettings(storage);
         } finally {
             storageLock.unlock();
         }
@@ -364,19 +381,41 @@ public final class CheckStyleConfiguration {
 
 
     /**
-     * Load the state from the given stateBean.
+     * Load the state from the given settings beans.
      *
-     * @param stateBean where to load the state from
+     * @param projectSettings the project settings to load.
      */
-    public void loadState(final Map<String, String> stateBean) {
+    public void loadState(final ProjectSettings projectSettings) {
         storageLock.lock();
         try {
             storage.clear();
-            if (stateBean != null) {
-                storage.putAll(stateBean);
+            if (projectSettings != null) {
+                storage.putAll(projectSettings.configurationAsMap());
             }
         } finally {
             storageLock.unlock();
+        }
+    }
+
+    /**
+     * Wrapper class for IDEA state serialisation.
+     */
+    public static class ProjectSettings {
+        public Map<String, String> configuration;
+
+        public ProjectSettings() {
+            this.configuration = new HashMap<String, String>();
+        }
+
+        public ProjectSettings(final Map<String, String> configuration) {
+            this.configuration = configuration;
+        }
+
+        public Map<String, String> configurationAsMap() {
+            if (configuration == null) {
+                return Collections.emptyMap();
+            }
+            return configuration;
         }
     }
 }

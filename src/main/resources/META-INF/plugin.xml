@@ -1,4 +1,3 @@
-<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin version="2" url="https://github.com/jshiell/checkstyle-idea">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
@@ -15,11 +14,15 @@
     <idea-version since-build="123.94"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
+    <depends>com.intellij.modules.java</depends>
+
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.0: New: You can now specify template CheckStyle configuration in the Default Project (#33).</li>
+    <li>4.0: Improved: Updated plugin structure to something a little more modern, allowing goodies such as #33.</li>
     <li>4.0: New: CheckStyle errors will now be marked as errors by the inspection.</li>
-    <li>4.0: New: Updated to IDEA 12 API.</li>
+    <li>4.0: New: Updated to IDEA 12 API. This means we now require IDEA 12.0.1 or above.</li>
     <li>3.9.1: Fixed: Default rules are invalid with CS5.6.</li>
     <li>3.9: Fixed: Match on leading project path causes tokenisation silliness (#9).</li>
     <li>3.9: New: Updated CheckStyle to 5.6.</li>
@@ -49,12 +52,6 @@
         ]]>
     </change-notes>
 
-    <application-components>
-        <component>
-            <implementation-class>org.infernus.idea.checkstyle.CheckStyleProvider</implementation-class>
-        </component>
-    </application-components>
-
     <project-components>
         <component>
             <implementation-class>org.infernus.idea.checkstyle.CheckStylePlugin</implementation-class>
@@ -68,6 +65,19 @@
             <interface-class>org.infernus.idea.checkstyle.CheckStyleModulePlugin</interface-class>
         </component>
     </module-components>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceInterface="org.infernus.idea.checkstyle.CheckStyleConfiguration"
+                        serviceImplementation="org.infernus.idea.checkstyle.CheckStyleConfiguration"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
+                        serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
+
+        <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
+                         displayName="Real-time scan" groupName="CheckStyle" shortName="CheckStyle-IDEA"
+                         id="CheckStyleIDEAInspection" level="WARNING" enabledByDefault="true"/>
+
+        <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
+    </extensions>
 
     <actions>
         <group id="CheckStylePluginTreeActions" text="Filter" popup="true">
