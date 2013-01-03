@@ -64,7 +64,7 @@ public final class IDEAUtilities {
      */
     public static void showWarning(final Project project,
                                    final String warningText) {
-        showMessage(project, warningText, LightColors.YELLOW, IDEAUtilities.getIcon("/compiler/warning.png"));
+        showMessage(project, warningText, LightColors.YELLOW, IDEAUtilities.getIcon("/general/warning.png"));
     }
 
     /**
@@ -75,7 +75,7 @@ public final class IDEAUtilities {
      */
     public static void showError(final Project project,
                                  final String errorText) {
-        showMessage(project, errorText, LightColors.RED, IDEAUtilities.getIcon("/compiler/error.png"));
+        showMessage(project, errorText, LightColors.RED, IDEAUtilities.getIcon("/general/error.png"));
     }
 
     /**

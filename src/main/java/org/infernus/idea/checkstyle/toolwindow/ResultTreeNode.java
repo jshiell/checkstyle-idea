@@ -35,7 +35,7 @@ public class ResultTreeNode {
         }
 
         this.text = text;
-        icon = IDEAUtilities.getIcon("/compiler/information.png");
+        icon = IDEAUtilities.getIcon("/general/information.png");
     }
 
 
@@ -85,13 +85,13 @@ public class ResultTreeNode {
 
     private void updateIconsForProblem() {
         if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/compiler/hideWarnings.png");
+            icon = IDEAUtilities.getIcon("/general/hideWarnings.png");
         } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/compiler/warning.png");
+            icon = IDEAUtilities.getIcon("/general/warning.png");
         } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/compiler/information.png");
+            icon = IDEAUtilities.getIcon("/general/information.png");
         } else {
-            icon = IDEAUtilities.getIcon("/compiler/error.png");
+            icon = IDEAUtilities.getIcon("/general/error.png");
         }
     }
 
