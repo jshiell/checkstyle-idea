@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.libraries.LibraryUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,9 +14,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -35,19 +34,25 @@ public class ModuleClassPathBuilder {
     /**
      * Build a class loader for the compilation path of the module.
      *
-     * @param module the module in question.
+     * @param baseModule the module in question.
      * @return the class loader to use, or null if the module was null.
      * @throws java.net.MalformedURLException if the URL conversion fails.
      */
-    public ClassLoader build(final Module module)
+    public ClassLoader build(final Module baseModule)
             throws MalformedURLException {
 
-        if (module == null) {
+        if (baseModule == null) {
             return null;
         }
 
-        final List<URL> outputPaths = getCompilerOutputPaths(module);
-        outputPaths.addAll(pathsOf(libraryRootsFor(module)));
+        final Set<URL> outputPaths = new HashSet<URL>();
+
+        final Set<Module> transitiveDependencies = new HashSet<Module>();
+        ModuleUtil.getDependencies(baseModule, transitiveDependencies);
+        for (Module moduleInScope : transitiveDependencies) {
+            outputPaths.addAll(compilerOutputPathsFor(moduleInScope));
+            outputPaths.addAll(pathsOf(libraryRootsFor(moduleInScope)));
+        }
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Creating class-loader with URLs: " + outputPaths);
@@ -120,7 +125,7 @@ public class ModuleClassPathBuilder {
         return LibraryUtil.getLibraryRoots(new Module[]{module}, false, false);
     }
 
-    private List<URL> getCompilerOutputPaths(final Module module) throws MalformedURLException {
+    private List<URL> compilerOutputPathsFor(final Module module) throws MalformedURLException {
         final CompilerModuleExtension compilerModule = CompilerModuleExtension.getInstance(module);
         if (compilerModule != null) {
             final VirtualFile[] roots = compilerModule.getOutputRoots(true);
