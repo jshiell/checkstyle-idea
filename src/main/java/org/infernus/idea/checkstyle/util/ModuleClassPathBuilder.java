@@ -50,6 +50,9 @@ public class ModuleClassPathBuilder {
         final Set<Module> transitiveDependencies = new HashSet<Module>();
         ModuleUtil.getDependencies(baseModule, transitiveDependencies);
         for (Module moduleInScope : transitiveDependencies) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Adding module to classpath: " + moduleInScope.getName());
+            }
             outputPaths.addAll(compilerOutputPathsFor(moduleInScope));
             outputPaths.addAll(pathsOf(libraryRootsFor(moduleInScope)));
         }
