@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.0.1 - Fixed: Read Access error (#39).
 4.0   - New: You can now specify template CheckStyle configuration in the Default Project (#33).
 4.0   - New: CheckStyle errors will now be marked as errors by the inspection.
 4.0   - New: Updated to IDEA 12 API. . This means we now require IDEA 12.0.1 or above.

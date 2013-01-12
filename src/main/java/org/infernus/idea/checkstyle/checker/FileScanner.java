@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
@@ -91,8 +92,8 @@ final class FileScanner implements Runnable {
     /**
      * Scan a PSI file with CheckStyle.
      *
-     * @param psiFilesToScan    the PSI psiFilesToScan to scan. These will be
-     *                          ignored if not a java file and not from the same module.
+     * @param psiFilesToScan the PSI psiFilesToScan to scan. These will be
+     *                       ignored if not a java file and not from the same module.
      * @return a list of tree nodes representing the result tree for this
      *         file, an empty list or null if this file is invalid or
      *         has no errors.
@@ -114,50 +115,55 @@ final class FileScanner implements Runnable {
         final boolean scanOnlyJavaFiles = !plugin.getConfiguration().isScanningNonJavaFiles();
 
         try {
-            for (final PsiFile psiFile : psiFilesToScan) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Processing " + describe(psiFile));
-                }
-
-                if (psiFile == null || !psiFile.getVirtualFile().isValid() || !psiFile.isPhysical()) {
+            final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
+            try {
+                for (final PsiFile psiFile : psiFilesToScan) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Skipping as invalid type: " + describe(psiFile));
+                        LOG.debug("Processing " + describe(psiFile));
                     }
-                    continue;
-                }
 
-                if (module == null) {
-                    module = ModuleUtil.findModuleForPsiElement(psiFile);
-                } else {
-                    final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);
-                    if (!elementModule.equals(module)) {
+                    if (psiFile == null || !psiFile.getVirtualFile().isValid() || !psiFile.isPhysical()) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Skipping as modules do not match: " + describe(psiFile)
-                                    + " : " + elementModule + " does not match " + module);
+                            LOG.debug("Skipping as invalid type: " + describe(psiFile));
                         }
                         continue;
                     }
-                }
 
-                if (!checkTestClasses && isTestClass(psiFile)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Skipping test class " + psiFile.getName());
+                    if (module == null) {
+                        module = ModuleUtil.findModuleForPsiElement(psiFile);
+                    } else {
+                        final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);
+                        if (!elementModule.equals(module)) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Skipping as modules do not match: " + describe(psiFile)
+                                        + " : " + elementModule + " does not match " + module);
+                            }
+                            continue;
+                        }
                     }
-                    continue;
-                }
 
-                if (scanOnlyJavaFiles && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Skipping non-Java file " + psiFile.getName());
+                    if (!checkTestClasses && isTestClass(psiFile)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Skipping test class " + psiFile.getName());
+                        }
+                        continue;
                     }
-                    continue;
-                }
 
-                final ScannableFile tempFile = createTemporaryFile(psiFile);
-                if (tempFile != null) {
-                    tempFiles.add(tempFile);
-                    filesToElements.put(tempFile.getAbsolutePath(), psiFile);
+                    if (scanOnlyJavaFiles && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Skipping non-Java file " + psiFile.getName());
+                        }
+                        continue;
+                    }
+
+                    final ScannableFile tempFile = createTemporaryFile(psiFile);
+                    if (tempFile != null) {
+                        tempFiles.add(tempFile);
+                        filesToElements.put(tempFile.getAbsolutePath(), psiFile);
+                    }
                 }
+            } finally {
+                readAccessToken.finish();
             }
 
             if (module == null || filesToElements.isEmpty()) {
