@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.0.1: Fixed: NPE on Checker lookup (#49).</li>
     <li>4.0.1: Fixed: Read Access error (#39).</li>
     <li>4.0: New: You can now specify template CheckStyle configuration in the Default Project (#33).</li>
     <li>4.0: New: CheckStyle errors will now be marked as errors by the inspection.</li>

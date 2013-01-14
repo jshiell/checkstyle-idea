@@ -57,8 +57,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * @return a checker.
      */
     private Checker getChecker(final CheckStylePlugin checkStylePlugin,
-                               final Module module) {
+                               @Nullable final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
+
+        if (module == null) {
+            return null;
+        }
 
         try {
             final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
@@ -77,7 +81,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
-    private ModuleClassPathBuilder moduleClassPathBuilder(final Module module) {
+    private ModuleClassPathBuilder moduleClassPathBuilder(@NotNull final Module module) {
         return ServiceManager.getService(module.getProject(), ModuleClassPathBuilder.class);
     }
 
