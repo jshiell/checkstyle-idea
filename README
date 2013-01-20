@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.0.2 - Fixed: ToolWindow icon is now 13x13 pixels (#52).
 4.0.1 - Fixed: NPE on Checker lookup (#49).
 4.0.1 - Fixed: Read Access error (#39).
 4.0   - New: You can now specify template CheckStyle configuration in the Default Project (#33).

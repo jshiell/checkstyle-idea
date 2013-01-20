@@ -129,10 +129,8 @@ public final class CheckStylePlugin extends CheckinHandlerFactory implements Pro
                 "Scan"), false);
         toolWindow.getContentManager().addContent(toolContent);
 
-        toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name",
-                "Scan"));
-        toolWindow.setIcon(IDEAUtilities.getIcon(
-                "/org/infernus/idea/checkstyle/images/checkstyle16.png"));
+        toolWindow.setTitle(IDEAUtilities.getResource("plugin.toolwindow.name", "Scan"));
+        toolWindow.setIcon(IDEAUtilities.getIcon("/org/infernus/idea/checkstyle/images/checkstyle13.png"));
         toolWindow.setType(ToolWindowType.DOCKED, null);
     }
 
