@@ -61,7 +61,7 @@ public class ModuleClassPathBuilder {
             LOG.debug("Creating class-loader with URLs: " + outputPaths);
         }
 
-        return new URLClassLoader(outputPaths.toArray(new URL[outputPaths.size()]), getThirdPartyClassLoader());
+        return new ClassOnlyClassLoader(outputPaths.toArray(new URL[outputPaths.size()]), thirdPartyClassLoader());
     }
 
     /**
@@ -76,7 +76,7 @@ public class ModuleClassPathBuilder {
         }
     }
 
-    private ClassLoader getThirdPartyClassLoader() {
+    private ClassLoader thirdPartyClassLoader() {
         thirdPartyClassLoaderLock.readLock().lock();
         try {
             if (thirdPartyClassLoader == null) {
