@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -13,12 +14,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.InputSource;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
@@ -36,29 +40,50 @@ public class CheckerFactory {
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
 
     /**
-     * Get a checker for a given configuration.
+     * Get a checker for a given configuration, with the default module classloader.
      *
-     * @param location    the location of the CheckStyle file.
-     * @param module      the current module.
-     * @param classLoader class loader for CheckStyle use, or null to use
-     *                    the default.
+     * @param location the location of the CheckStyle file.
+     * @param module   the current module.
      * @return the checker for the module or null if it cannot be created.
      * @throws IOException         if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
-    public Checker getChecker(final ConfigurationLocation location,
-                              final Module module,
-                              final ClassLoader classLoader)
+    public Checker getChecker(@NotNull final ConfigurationLocation location,
+                              @Nullable final Module module)
             throws CheckstyleException, IOException {
-        if (location == null) {
-            throw new IllegalArgumentException("Location is required");
-        }
+        return getChecker(location, module, null);
+    }
 
+    /**
+     * Get a checker for a given configuration.
+     *
+     * @param location    the location of the CheckStyle file.
+     * @param module      the current module.
+     * @param classLoader class loader for CheckStyle use, or null to create a module class-loader if required.
+     * @return the checker for the module or null if it cannot be created.
+     * @throws IOException         if the CheckStyle file cannot be resolved.
+     * @throws CheckstyleException if CheckStyle initialisation fails.
+     */
+    public Checker getChecker(@NotNull final ConfigurationLocation location,
+                              @Nullable final Module module,
+                              @Nullable final ClassLoader classLoader)
+            throws CheckstyleException, IOException {
+        final CachedChecker cachedChecker = getOrCreateCachedChecker(location, module, classLoader);
+        if (cachedChecker != null) {
+            return cachedChecker.getChecker();
+        }
+        return null;
+    }
+
+    private CachedChecker getOrCreateCachedChecker(final ConfigurationLocation location,
+                                                   final Module module,
+                                                   final ClassLoader classLoader)
+            throws IOException, CheckstyleException {
         synchronized (cache) {
             if (cache.containsKey(location)) {
                 final CachedChecker cachedChecker = cache.get(location);
                 if (cachedChecker != null && cachedChecker.isValid()) {
-                    return cachedChecker.getChecker();
+                    return cachedChecker;
                 } else {
                     if (cachedChecker != null) {
                         cachedChecker.getChecker().destroy();
@@ -68,14 +93,27 @@ public class CheckerFactory {
             }
 
             final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
-            final CachedChecker checker = createChecker(location, module, propertyResolver, classLoader);
+            final CachedChecker checker = createChecker(location, module, propertyResolver,
+                    moduleClassLoaderFrom(module, classLoader));
             if (checker != null) {
                 cache.put(location, checker);
-                return checker.getChecker();
+                return checker;
             }
 
             return null;
         }
+    }
+
+    private ClassLoader moduleClassLoaderFrom(final Module module, final ClassLoader classLoader)
+            throws MalformedURLException {
+        if (classLoader == null && module != null) {
+            return moduleClassPathBuilder(module).build(module);
+        }
+        return classLoader;
+    }
+
+    private ModuleClassPathBuilder moduleClassPathBuilder(@NotNull final Module module) {
+        return ServiceManager.getService(module.getProject(), ModuleClassPathBuilder.class);
     }
 
     /**
@@ -94,23 +132,22 @@ public class CheckerFactory {
      * Get the checker configuration for a given configuration.
      *
      * @param location the location of the CheckStyle file.
+     * @param module   the current module.
      * @return a configuration.
+     * @throws IllegalArgumentException if no checker with the given location exists and it cannot be created.
      */
-    public Configuration getConfig(final ConfigurationLocation location) {
-        if (location == null) {
-            throw new IllegalArgumentException("Location is required");
-        }
-
-        synchronized (cache) {
-            if (cache.containsKey(location)) {
-                CachedChecker cachedChecker = cache.get(location);
-                if (cachedChecker != null && cachedChecker.isValid()) {
-                    return cachedChecker.getConfig();
-                }
+    public Configuration getConfig(@NotNull final ConfigurationLocation location,
+                                   @Nullable final Module module) {
+        try {
+            final CachedChecker checker = getOrCreateCachedChecker(location, module, null);
+            if (checker != null) {
+                return checker.getConfig();
             }
-        }
+            throw new IllegalArgumentException("Failed to find a checker from " + location);
 
-        throw new IllegalArgumentException("Failed to find a configured checker.");
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to find or create a checker from " + location, e);
+        }
     }
 
     /**
@@ -389,7 +426,7 @@ public class CheckerFactory {
             if (module != null) {
                 final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
 
-                // check module content roots                
+                // check module content roots
                 if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
                     for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
                         final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);

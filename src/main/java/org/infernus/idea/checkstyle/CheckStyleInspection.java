@@ -27,7 +27,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NonNls;
@@ -70,19 +69,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            final ClassLoader moduleClassLoader = moduleClassPathBuilder(module).build(module);
-
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory().getChecker(configurationLocation, module, moduleClassLoader);
+            return getCheckerFactory().getChecker(configurationLocation, module);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
-    }
-
-    private ModuleClassPathBuilder moduleClassPathBuilder(@NotNull final Module module) {
-        return ServiceManager.getService(module.getProject(), ModuleClassPathBuilder.class);
     }
 
     private CheckStylePlugin getPlugin(final Project project) {
@@ -137,7 +130,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory().getConfig(configurationLocation);
+            return getCheckerFactory().getConfig(configurationLocation, module);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);

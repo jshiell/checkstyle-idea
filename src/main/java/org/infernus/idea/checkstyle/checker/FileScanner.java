@@ -316,7 +316,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            return getCheckerFactory().getConfig(location);
+            return getCheckerFactory().getConfig(location, module);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
