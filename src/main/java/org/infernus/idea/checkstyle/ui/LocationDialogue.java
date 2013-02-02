@@ -163,7 +163,7 @@ public class LocationDialogue extends JDialog {
     public ConfigurationLocation getConfigurationLocation() {
         if (fileLocationField.isEnabled()) {
             if (isNotBlank(fileLocationField.getText())) {
-                return ConfigurationLocationFactory.create(project, ConfigurationType.FILE,
+                return ConfigurationLocationFactory.create(project, ConfigurationType.LOCAL_FILE,
                         fileLocationField.getText(), descriptionField.getText());
             }
 
@@ -204,7 +204,7 @@ public class LocationDialogue extends JDialog {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(null);
 
-        } else if (configurationLocation.getType() == ConfigurationType.FILE) {
+        } else if (configurationLocation.getType() == ConfigurationType.LOCAL_FILE) {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(configurationLocation.getLocation());
 

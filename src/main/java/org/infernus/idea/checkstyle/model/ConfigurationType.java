@@ -18,7 +18,7 @@ public enum ConfigurationType {
     /**
      * Located in a local file.
      */
-    FILE;
+    LOCAL_FILE;
 
     /**
      * Parse a case-insensitive type string.
@@ -32,6 +32,10 @@ public enum ConfigurationType {
         }
 
         final String processedType = typeAsString.toUpperCase().replace(' ', '_');
+        if (processedType.equals("FILE")) {
+            return LOCAL_FILE;
+        }
+
         return valueOf(processedType);
     }
 

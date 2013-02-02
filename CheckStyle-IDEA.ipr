@@ -29,22 +29,23 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="FILE:$PROJECT_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="active-configuration" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
         <entry key="check-nonjava-files" value="false" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="FILE:$PROJECT_DIR$/test-configs/issue-53.xml:Issue 53" />
-        <entry key="location-1" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
-        <entry key="location-2" value="FILE:$PROJECT_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
-        <entry key="location-3" value="file:$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino2" />
-        <entry key="location-4" value="FILE:$PROJECT_DIR$/test-configs/checkstyle_checks.xml:Test2" />
-        <entry key="location-5" value="file:$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="property-0.basedir" value="/" />
-        <entry key="property-3.checkstyle.suppressions.file" value="" />
-        <entry key="property-4.checkstyle.header.file" value="etew" />
-        <entry key="property-4.checkstyle.importcontrol.file" value="ds" />
-        <entry key="property-4.checkstyle.suppressions.file" value="dfsd" />
-        <entry key="property-4.translation.severity" value="dsf" />
-        <entry key="property-5.checkstyle.suppressions.file" value="$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
+        <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
+        <entry key="location-1" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-2" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="location-3" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-53.xml:Issue 53" />
+        <entry key="location-4" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino2" />
+        <entry key="location-5" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/checkstyle_checks.xml:Test2" />
+        <entry key="location-6" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-23.xml:Boo" />
+        <entry key="property-1.checkstyle.suppressions.file" value="$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-3.basedir" value="/" />
+        <entry key="property-4.checkstyle.suppressions.file" value="" />
+        <entry key="property-5.checkstyle.header.file" value="etew" />
+        <entry key="property-5.checkstyle.importcontrol.file" value="ds" />
+        <entry key="property-5.checkstyle.suppressions.file" value="dfsd" />
+        <entry key="property-5.translation.severity" value="dsf" />
         <entry key="thirdparty-classpath" value="" />
       </map>
     </option>

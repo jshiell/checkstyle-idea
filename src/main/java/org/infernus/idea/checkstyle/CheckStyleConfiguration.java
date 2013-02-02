@@ -127,8 +127,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 return defaultLocation;
             }
 
-            // immediately re-set the activeConfiguration
-            // see #getConfigurationLocations() for an explanation why we must do this
+            // ensure we update the map with any parsing/tokenisation changes
             setActiveConfiguration(activeLocation);
 
             return activeLocation;
@@ -178,12 +177,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 locations.add(0, defaultLocation);
             }
 
-            // now immediately re-set the configurationLocations:
-            // since tokenised file paths are automatically resolved by the IDEA core during
-            // settings loading, we must store them again - otherwise we would loose the token and
-            // save the full file path instead (at least if the user did not change our settings, but
-            // only some other settings editors, because our setConfigurationLocations is not called
-            // from outside then)
+            // ensure we update the map with any parsing/tokenisation changes
             setConfigurationLocations(locations);
 
             return locations;
@@ -404,11 +398,11 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         public Map<String, String> configuration;
 
         public ProjectSettings() {
-            this.configuration = new HashMap<String, String>();
+            this.configuration = new TreeMap<String, String>();
         }
 
         public ProjectSettings(final Map<String, String> configuration) {
-            this.configuration = configuration;
+            this.configuration = new TreeMap<String, String>(configuration);
         }
 
         public Map<String, String> configurationAsMap() {

@@ -38,7 +38,7 @@ public class ConfigurationLocationFactory {
         ConfigurationLocation configurationLocation;
 
         switch (type) {
-            case FILE:
+            case LOCAL_FILE:
                 configurationLocation = new FileConfigurationLocation(project);
                 break;
 

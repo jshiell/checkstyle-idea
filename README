@@ -149,6 +149,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.0.3 - Fixed: Case of file prefix should now no longer randomly change (#59).
 4.0.2 - Fixed: Module classpath should only expose classes, not resources (#56).
 4.0.2 - Fixed: IllegalArgumentException sometimes thrown by CheckerFactory.getConfig (#55).
 4.0.2 - Fixed: ToolWindow icon is now 13x13 pixels (#52).

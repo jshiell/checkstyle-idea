@@ -26,7 +26,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * @param project the project.
      */
     FileConfigurationLocation(final Project project) {
-        super(ConfigurationType.FILE);
+        super(ConfigurationType.LOCAL_FILE);
 
         if (project == null) {
             throw new IllegalArgumentException("A project is required");

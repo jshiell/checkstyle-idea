@@ -190,7 +190,7 @@ public class ConfigurationLocationTest {
 
     private class TestConfigurationLocation extends ConfigurationLocation {
         public TestConfigurationLocation(final String content) {
-            super(ConfigurationType.FILE);
+            super(ConfigurationType.LOCAL_FILE);
 
             setLocation(content);
         }
