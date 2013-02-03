@@ -37,6 +37,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
     private final JCheckBox testClassesCheckbox = new JCheckBox();
     private final JCheckBox scanNonJavaFilesCheckbox = new JCheckBox();
+    private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JTable locationTable = new JBTable(locationModel);
@@ -48,6 +49,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
     private boolean scanTestClasses;
     private boolean scanNonJavaFiles;
+    private boolean suppressingErrors;
     private List<String> thirdPartyClasspath;
     private List<ConfigurationLocation> locations;
     private ConfigurationLocation activeLocation;
@@ -81,15 +83,14 @@ public final class CheckStyleConfigPanel extends JPanel {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 
-        testClassesCheckbox.setText(resources.getString(
-                "config.test-classes.checkbox.text"));
-        testClassesCheckbox.setToolTipText(resources.getString(
-                "config.test-classes.checkbox.tooltip"));
+        testClassesCheckbox.setText(resources.getString("config.test-classes.checkbox.text"));
+        testClassesCheckbox.setToolTipText(resources.getString("config.test-classes.checkbox.tooltip"));
 
-        scanNonJavaFilesCheckbox.setText(resources.getString(
-                "config.scan-nonjava-files.checkbox.text"));
-        scanNonJavaFilesCheckbox.setToolTipText(resources.getString(
-                "config.scan-nonjava-files.checkbox.tooltip"));
+        scanNonJavaFilesCheckbox.setText(resources.getString("config.scan-nonjava-files.checkbox.text"));
+        scanNonJavaFilesCheckbox.setToolTipText(resources.getString("config.scan-nonjava-files.checkbox.tooltip"));
+
+        suppressErrorsCheckbox.setText(resources.getString("config.suppress-errors.checkbox.text"));
+        suppressErrorsCheckbox.setToolTipText(resources.getString("config.suppress-errors.checkbox.tooltip"));
 
         editLocationPropertiesButton.setEnabled(false);
         removeLocationButton.setEnabled(false);
@@ -119,8 +120,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
                 0, 1, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
+                0, 2, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         configFilePanel.add(locationPanel, new GridBagConstraints(
-                0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
         return configFilePanel;
@@ -187,7 +191,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return true if test classes should be scanned.
      */
     public boolean isScanTestClasses() {
-        this.scanTestClasses = testClassesCheckbox.isSelected();
+        scanTestClasses = testClassesCheckbox.isSelected();
         return scanTestClasses;
     }
 
@@ -207,8 +211,18 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @return true if non-Java classes should be scanned.
      */
     public boolean isScanNonJavaFiles() {
-        this.scanNonJavaFiles = scanNonJavaFilesCheckbox.isSelected();
+        scanNonJavaFiles = scanNonJavaFilesCheckbox.isSelected();
         return scanNonJavaFiles;
+    }
+
+    public void setSuppressingErrors(final boolean suppressingErrors) {
+        this.suppressingErrors = suppressingErrors;
+        suppressErrorsCheckbox.setSelected(suppressingErrors);
+    }
+
+    public boolean isSuppressingErrors() {
+        suppressingErrors = suppressErrorsCheckbox.isSelected();
+        return suppressingErrors;
     }
 
     /**
@@ -262,7 +276,8 @@ public final class CheckStyleConfigPanel extends JPanel {
                 || activeLocation.hasChangedFrom(locationModel.getActiveLocation())
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || testClassesCheckbox.isSelected() != scanTestClasses
-                || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles;
+                || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles
+                || suppressErrorsCheckbox.isSelected() != suppressingErrors;
     }
 
     private boolean haveLocationsChanged() throws IOException {

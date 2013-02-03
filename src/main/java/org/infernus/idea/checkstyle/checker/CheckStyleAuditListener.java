@@ -28,6 +28,7 @@ public class CheckStyleAuditListener implements AuditListener {
             CheckStyleAuditListener.class);
 
     private final boolean usingExtendedDescriptors;
+    private final boolean suppressErrors;
     private final List<Check> checks;
 
     private final Map<String, PsiFile> fileNamesToPsiFiles;
@@ -47,16 +48,19 @@ public class CheckStyleAuditListener implements AuditListener {
      * @param manager                the current inspection manager.
      * @param useExtendedDescriptors should we return standard IntelliJ
      *                               problem descriptors or extended ones with severity information?
+     * @param suppressErrors         pass CheckStyle errors to IDEA as warnings.
      * @param checks                 the check modifications to use.
      */
     public CheckStyleAuditListener(final Map<String, PsiFile> fileNamesToPsiFiles,
                                    final InspectionManager manager,
                                    final boolean useExtendedDescriptors,
+                                   final boolean suppressErrors,
                                    final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<String, PsiFile>(fileNamesToPsiFiles);
         this.manager = manager;
         this.usingExtendedDescriptors = useExtendedDescriptors;
         this.checks = checks;
+        this.suppressErrors = suppressErrors;
     }
 
     public void auditStarted(final AuditEvent auditEvent) {
@@ -259,7 +263,7 @@ public class CheckStyleAuditListener implements AuditListener {
 
         @NotNull
         private ProblemHighlightType problemHighlightTypeFor(final SeverityLevel severityLevel) {
-            if (severityLevel != null) {
+            if (severityLevel != null && !suppressErrors) {
                 switch (severityLevel) {
                     case ERROR:
                         return ProblemHighlightType.ERROR;

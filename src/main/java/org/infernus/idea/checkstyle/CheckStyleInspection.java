@@ -235,7 +235,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 
-            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, checks);
+            final boolean suppressingErrors = checkStylePlugin.getConfiguration().isSuppressingErrors();
+            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, suppressingErrors, checks);
             synchronized (checker) {
                 checker.addListener(listener);
                 checker.process(Arrays.asList(scannableFile.getFile()));

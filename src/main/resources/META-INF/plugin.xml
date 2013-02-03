@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.0.3</version>
+    <version>4.1</version>
     <idea-version since-build="123.94"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,7 +19,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>4.0.3: Fixed: Case of file prefix should now no longer randomly change (#59).</li>
+    <li>4.1: New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).</li>
+    <li>4.1: Fixed: Case of file prefix should now no longer randomly change (#59).</li>
     <li>4.0.2: Fixed: Module classpath should only expose classes, not resources (#56).</li>
     <li>4.0.2: Fixed: IllegalArgumentException sometimes thrown by CheckerFactory.getConfig (#55).</li>
     <li>4.0.2: Fixed: ToolWindow icon is now 13x13 pixels (#52).</li>

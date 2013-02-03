@@ -38,6 +38,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
+    private static final String SUPPRESS_ERRORS = "suppress-errors";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
@@ -278,6 +279,15 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
     public void setScanningNonJavaFiles(final boolean scanNonJavaFiles) {
         storage.put(CHECK_NONJAVA_FILES, Boolean.toString(scanNonJavaFiles));
+    }
+
+    public boolean isSuppressingErrors() {
+        final String propertyValue = storage.get(SUPPRESS_ERRORS);
+        return propertyValue != null && Boolean.valueOf(propertyValue);
+    }
+
+    public void setSuppressingErrors(final boolean suppressingErrors) {
+        storage.put(SUPPRESS_ERRORS, Boolean.toString(suppressingErrors));
     }
 
     public boolean isScanFilesBeforeCheckin() {

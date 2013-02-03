@@ -203,10 +203,11 @@ final class FileScanner implements Runnable {
         }
 
         final List<Check> checks = CheckFactory.getChecks(config);
+        final boolean suppressingErrors = plugin.getConfiguration().isSuppressingErrors();
 
         final CheckStyleAuditListener listener;
         synchronized (checker) {
-            listener = new CheckStyleAuditListener(filesToElements, manager, true, checks);
+            listener = new CheckStyleAuditListener(filesToElements, manager, true, suppressingErrors, checks);
             checker.addListener(listener);
             checker.process(asListOfFiles(tempFiles));
         }
