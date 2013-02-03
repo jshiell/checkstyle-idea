@@ -192,23 +192,33 @@ public class CheckerFactory {
 
         // Did the process of reading the configuration fail?
         if (worker.getResult() instanceof CheckstyleException) {
-            throw (CheckstyleException) worker.getResult();
+            final CheckstyleException checkstyleException = (CheckstyleException) worker.getResult();
+            if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
+                return showMessage(location, module, "checkstyle.double-checked-locking",
+                        "Not compatible with CheckStyle 5.6. Remove DoubleCheckedLocking.");
+            }
+
+            throw checkstyleException;
 
         } else if (worker.getResult() instanceof IOException) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
                     (IOException) worker.getResult());
-
-            final MessageFormat notFoundFormat = new MessageFormat(
-                    IDEAUtilities.getResource("checkstyle.file-not-found", "Not found: {0}"));
-            IDEAUtilities.showError(module.getProject(), notFoundFormat.format(new Object[]{location.getLocation()}));
-            return null;
+            return showMessage(location, module, "checkstyle.file-not-found", "Not found: {0}");
 
         } else if (worker.getResult() instanceof Throwable) {
-            throw new CheckstyleException("Could not load configuration",
-                    (Throwable) worker.getResult());
+            throw new CheckstyleException("Could not load configuration", (Throwable) worker.getResult());
         }
 
         return (CachedChecker) worker.getResult();
+    }
+
+    private CachedChecker showMessage(final ConfigurationLocation location,
+                                      final Module module,
+                                      final String messageKey,
+                                      final String messageFallback) {
+        final MessageFormat notFoundFormat = new MessageFormat(IDEAUtilities.getResource(messageKey, messageFallback));
+        IDEAUtilities.showError(module.getProject(), notFoundFormat.format(new Object[]{location.getLocation()}));
+        return null;
     }
 
     private void logClassLoaders(final ClassLoader contextClassLoader) {

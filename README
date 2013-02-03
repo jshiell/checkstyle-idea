@@ -150,6 +150,7 @@ Version History
 ---------------
 
 4.1   - New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).
+4.1   - New: A warning is now displayed for rules files using DoubleCheckedLocking.
 4.1   - Fixed: Case of file prefix should now no longer randomly change (#59).
 4.0.2 - Fixed: Module classpath should only expose classes, not resources (#56).
 4.0.2 - Fixed: IllegalArgumentException sometimes thrown by CheckerFactory.getConfig (#55).
