@@ -369,13 +369,13 @@ public class CheckerFactory {
 
             final String fileName = currentChild.getAttribute(propertyName);
             if (fileName != null && !new File(fileName).exists()) {
-                final File resolvedFile = findFile(fileName);
+                final String resolvedFile = findFile(fileName);
 
                 rootElement.removeChild(currentChild);
 
                 if (resolvedFile != null) {
                     rootElement.addChild(elementWithUpdatedFile(
-                            resolvedFile.getAbsolutePath(), currentChild, elementName, propertyName));
+                            resolvedFile, currentChild, elementName, propertyName));
 
                 } else if (module != null) {
                     IDEAUtilities.showWarning(module.getProject(),
@@ -422,8 +422,13 @@ public class CheckerFactory {
             return newFilter;
         }
 
-        private File findFile(final String fileName) {
+        private String findFile(final String fileName) {
             File suppressionFile = null;
+
+            if (fileName != null && (fileName.toLowerCase().startsWith("http://")
+                    || fileName.toLowerCase().startsWith("https://"))) {
+                return fileName;
+            }
 
             // check relative to config
             if (location.getBaseDir() != null) {
@@ -464,7 +469,10 @@ public class CheckerFactory {
                 }
             }
 
-            return suppressionFile;
+            if (suppressionFile != null) {
+                return suppressionFile.getAbsolutePath();
+            }
+            return null;
         }
     }
 }

@@ -126,6 +126,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Gerhard Radatz
 * Benjy W
 * Yuri
+* Kristin Young
 
  And also thanks are due to the authors and contributors of:
 
@@ -149,6 +150,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.1.1 - Fixed: Supressions files accessed via HTTP(S) now work again; thanks to Kristin Young (#61).
 4.1   - New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).
 4.1   - New: A warning is now displayed for rules files using DoubleCheckedLocking.
 4.1   - Fixed: Case of file prefix should now no longer randomly change (#59).
