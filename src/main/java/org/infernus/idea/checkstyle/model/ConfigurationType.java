@@ -18,7 +18,12 @@ public enum ConfigurationType {
     /**
      * Located in a local file.
      */
-    LOCAL_FILE;
+    LOCAL_FILE,
+
+    /**
+     * Located in a local file where the path is project relative.
+     */
+    PROJECT_RELATIVE;
 
     /**
      * Parse a case-insensitive type string.

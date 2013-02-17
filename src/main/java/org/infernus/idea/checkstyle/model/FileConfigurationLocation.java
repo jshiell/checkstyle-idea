@@ -26,7 +26,11 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * @param project the project.
      */
     FileConfigurationLocation(final Project project) {
-        super(ConfigurationType.LOCAL_FILE);
+        this(project, ConfigurationType.LOCAL_FILE);
+    }
+
+    FileConfigurationLocation(final Project project, final ConfigurationType configurationType) {
+        super(configurationType);
 
         if (project == null) {
             throw new IllegalArgumentException("A project is required");
@@ -77,7 +81,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * @return the base path of the project.
      */
     @Nullable
-    private File getProjectPath() {
+    File getProjectPath() {
         if (cachedProjectBase != null) {
             return cachedProjectBase;
         }
@@ -139,7 +143,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * @param path the path to process, in local file path syntax.
      * @return the tokenised path in URI syntax.
      */
-    private String tokenisePath(final String path) {
+    String tokenisePath(final String path) {
         if (path == null) {
             return null;
         }
@@ -172,6 +176,10 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             return path;
         }
         return path.replace('/', separatorChar());
+    }
+
+    Project getProject() {
+        return project;
     }
 
     @Override

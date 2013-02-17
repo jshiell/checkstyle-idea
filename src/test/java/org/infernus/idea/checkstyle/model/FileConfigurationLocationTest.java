@@ -29,12 +29,12 @@ public class FileConfigurationLocationTest {
 
     @Before
     public void setUp() {
+        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectBase.getPath()).thenReturn(PROJECT_PATH);
+
         underTest = new TestFileConfigurationLocation(project, '/');
         underTest.setLocation("aLocation");
         underTest.setDescription("aDescription");
-
-        when(project.getBaseDir()).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn(PROJECT_PATH);
     }
 
     @Test

@@ -31,6 +31,7 @@ public class LocationDialogue extends JDialog {
     private final JRadioButton fileLocationRadio = new JRadioButton();
     private final JRadioButton urlLocationRadio = new JRadioButton();
     private final JTextField descriptionField = new JTextField();
+    private final JCheckBox relativeFileCheckbox = new JCheckBox();
 
     private final Project project;
 
@@ -96,6 +97,9 @@ public class LocationDialogue extends JDialog {
         final ResourceBundle resources = ResourceBundle.getBundle(
                 CheckStyleConstants.RESOURCE_BUNDLE);
 
+        relativeFileCheckbox.setText(resources.getString("config.file.relative-file.text"));
+        relativeFileCheckbox.setToolTipText(resources.getString("config.file.relative-file.tooltip"));
+
         fileLocationRadio.setText(resources.getString("config.file.file.text"));
         fileLocationRadio.addActionListener(new RadioButtonActionListener());
         urlLocationRadio.setText(resources.getString("config.file.url.text"));
@@ -133,15 +137,18 @@ public class LocationDialogue extends JDialog {
         contentPanel.add(browseButton, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
 
-        contentPanel.add(urlLocationRadio, new GridBagConstraints(0, 3, 3, 1, 0.0, 0.0,
+        contentPanel.add(relativeFileCheckbox, new GridBagConstraints(1, 3, 2, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+
+        contentPanel.add(urlLocationRadio, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 4, 4, 4), 0, 0));
 
-        contentPanel.add(urlLocationlabel, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+        contentPanel.add(urlLocationlabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        contentPanel.add(urlLocationField, new GridBagConstraints(1, 4, 2, 1, 1.0, 0.0,
+        contentPanel.add(urlLocationField, new GridBagConstraints(1, 5, 2, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
 
-        contentPanel.add(Box.createVerticalGlue(), new GridBagConstraints(0, 5, 3, 1, 0.0, 1.0,
+        contentPanel.add(Box.createVerticalGlue(), new GridBagConstraints(0, 6, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
 
         return contentPanel;
@@ -163,7 +170,7 @@ public class LocationDialogue extends JDialog {
     public ConfigurationLocation getConfigurationLocation() {
         if (fileLocationField.isEnabled()) {
             if (isNotBlank(fileLocationField.getText())) {
-                return ConfigurationLocationFactory.create(project, ConfigurationType.LOCAL_FILE,
+                return ConfigurationLocationFactory.create(project, typeOfFile(),
                         fileLocationField.getText(), descriptionField.getText());
             }
 
@@ -175,6 +182,13 @@ public class LocationDialogue extends JDialog {
         }
 
         return null;
+    }
+
+    private ConfigurationType typeOfFile() {
+        if (relativeFileCheckbox.isSelected()) {
+            return ConfigurationType.PROJECT_RELATIVE;
+        }
+        return ConfigurationType.LOCAL_FILE;
     }
 
     /*
@@ -200,19 +214,21 @@ public class LocationDialogue extends JDialog {
      * @param configurationLocation the location.
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
+        relativeFileCheckbox.setSelected(false);
+
         if (configurationLocation == null) {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(null);
 
-        } else if (configurationLocation.getType() == ConfigurationType.LOCAL_FILE) {
+        } else if (configurationLocation.getType() == ConfigurationType.LOCAL_FILE
+                || configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE) {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(configurationLocation.getLocation());
-
+            relativeFileCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE);
 
         } else if (configurationLocation.getType() == ConfigurationType.HTTP_URL) {
             urlLocationRadio.setEnabled(true);
             urlLocationField.setText(configurationLocation.getLocation());
-
 
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());

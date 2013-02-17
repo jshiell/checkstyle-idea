@@ -42,6 +42,10 @@ public class ConfigurationLocationFactory {
                 configurationLocation = new FileConfigurationLocation(project);
                 break;
 
+            case PROJECT_RELATIVE:
+                configurationLocation = new RelativeFileConfigurationLocation(project);
+                break;
+
             case HTTP_URL:
                 configurationLocation = new HTTPURLConfigurationLocation();
                 break;

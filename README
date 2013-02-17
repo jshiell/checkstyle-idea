@@ -150,7 +150,8 @@ LICENCE file.
 Version History
 ---------------
 
-4.1.1 - Fixed: Supressions files accessed via HTTP(S) now work again; thanks to Kristin Young (#61).
+4.2   - New: There is now a specific option to make rules files project relative (#60).
+4.2   - Fixed: Suppression files accessed via HTTP(S) now work again; thanks to Kristin Young (#61).
 4.1   - New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).
 4.1   - New: A warning is now displayed for rules files using DoubleCheckedLocking.
 4.1   - Fixed: Case of file prefix should now no longer randomly change (#59).
