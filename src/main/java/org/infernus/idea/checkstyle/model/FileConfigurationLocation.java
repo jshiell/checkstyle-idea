@@ -54,7 +54,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public String getLocation() {
-        return untokenisePath(super.getLocation());
+        return detokenisePath(super.getLocation());
     }
 
     @Override
@@ -113,7 +113,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      * @param path the path to process, in (tokenised) URI syntax.
      * @return the processed path, in local file path syntax.
      */
-    private String untokenisePath(final String path) {
+    String detokenisePath(final String path) {
         if (path == null) {
             return null;
         }

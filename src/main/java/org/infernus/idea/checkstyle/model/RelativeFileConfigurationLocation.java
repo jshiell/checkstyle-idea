@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
@@ -25,10 +26,10 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
             throw new IllegalArgumentException("A non-blank location is required");
         }
 
-        super.setLocation(tokenisePath(makeProjectRelative(location)));
+        super.setLocation(tokenisePath(makeProjectRelative(detokenisePath(location))));
     }
 
-    private String makeProjectRelative(final String path) {
+    private String makeProjectRelative(@NotNull final String path) {
         final File projectPath = getProjectPath();
         if (projectPath == null) {
             LOG.debug("Couldn't find project path, returning full path: " + path);
@@ -42,6 +43,9 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
         } catch (FileUtils.PathResolutionException e) {
             LOG.debug("No common path was found between " + path + " and " + projectPath.getAbsolutePath());
             return path;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to make relative: " + path, e);
         }
     }
 

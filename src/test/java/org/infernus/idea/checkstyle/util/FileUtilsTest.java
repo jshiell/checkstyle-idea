@@ -72,4 +72,12 @@ public class FileUtilsTest {
 
         assertEquals(".", FileUtils.getRelativePath(target, base, "\\"));
     }
+
+    @Test
+    public void testTargetAndBaseAreIdentical2() {
+        String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
+        String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
+
+        assertEquals(".", FileUtils.getRelativePath(null, base, "\\"));
+    }
 }
