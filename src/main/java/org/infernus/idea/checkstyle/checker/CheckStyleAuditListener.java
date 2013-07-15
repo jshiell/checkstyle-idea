@@ -234,12 +234,9 @@ public class CheckStyleAuditListener implements AuditListener {
                 LOG.warn("Couldn't find victim for error: " + event.getFileName() + "("
                         + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
             } else {
-                final String message = event.getLocalizedMessage() != null
-                        ? event.getLocalizedMessage().getMessage()
-                        : event.getMessage();
                 try {
                     final ProblemDescriptor problem = manager.createProblemDescriptor(
-                            victim, message, null, problemHighlightTypeFor(event.getSeverityLevel()),
+                            victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
                             false, endOfLine);
 
                     if (usingExtendedDescriptors) {
@@ -252,6 +249,13 @@ public class CheckStyleAuditListener implements AuditListener {
                     LOG.error("Element access failed", e);
                 }
             }
+        }
+
+        private String messageFor(final AuditEvent event) {
+            if (event.getLocalizedMessage() != null) {
+                return event.getLocalizedMessage().getMessage();
+            }
+            return event.getMessage();
         }
 
         private ProblemDescriptor extendDescriptor(final AuditEvent event,

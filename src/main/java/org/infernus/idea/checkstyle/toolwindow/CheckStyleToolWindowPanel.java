@@ -4,6 +4,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -285,17 +286,26 @@ public class CheckStyleToolWindowPanel extends JPanel {
                 virtualFile, true);
 
         if (editor.length > 0 && editor[0] instanceof TextEditor) {
-            final int column = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
-                    ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn() : 0;
-            final int line = nodeInfo.getProblem() instanceof ExtendedProblemDescriptor
-                    ? ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine()
-                    : nodeInfo.getProblem().getLineNumber();
-            final LogicalPosition problemPos = new LogicalPosition(
-                    line - 1, column);
+            final LogicalPosition problemPos = new LogicalPosition(lineFor(nodeInfo) - 1, columnFor(nodeInfo));
 
-            ((TextEditor) editor[0]).getEditor().getCaretModel().moveToLogicalPosition(problemPos);
-            ((TextEditor) editor[0]).getEditor().getScrollingModel().scrollToCaret(ScrollType.CENTER);
+            final Editor textEditor = ((TextEditor) editor[0]).getEditor();
+            textEditor.getCaretModel().moveToLogicalPosition(problemPos);
+            textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
         }
+    }
+
+    private int lineFor(final ResultTreeNode nodeInfo) {
+        if (nodeInfo.getProblem() instanceof ExtendedProblemDescriptor) {
+            return ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine();
+        }
+        return nodeInfo.getProblem().getLineNumber();
+    }
+
+    private int columnFor(final ResultTreeNode nodeInfo) {
+        if (nodeInfo.getProblem() instanceof ExtendedProblemDescriptor) {
+            return ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn();
+        }
+        return 0;
     }
 
     /**
