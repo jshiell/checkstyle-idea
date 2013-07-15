@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 
 import java.util.ResourceBundle;
@@ -74,7 +74,7 @@ public abstract class BaseAction extends AnAction {
         if (content != null) {
             final ResourceBundle resources = ResourceBundle.getBundle(
                     CheckStyleConstants.RESOURCE_BUNDLE);
-            final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setProgressText(resources.getString(progressTextKey));
         }
     }

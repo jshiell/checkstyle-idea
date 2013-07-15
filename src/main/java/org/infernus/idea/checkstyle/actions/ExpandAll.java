@@ -8,7 +8,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 /**
  * Action to expand all nodes in the results window.
@@ -33,7 +33,7 @@ public class ExpandAll extends BaseAction {
 
         final Content content = toolWindow.getContentManager().getContent(0);
         if (content != null) {
-            final ToolWindowPanel panel = (ToolWindowPanel) content.getComponent();
+            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.expandTree();
         }
     }

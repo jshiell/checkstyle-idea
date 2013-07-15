@@ -9,6 +9,7 @@ import com.intellij.psi.PsiManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,8 +77,12 @@ public abstract class AbstractCheckerThread extends Thread {
         return files;
     }
 
-    protected CheckStylePlugin getPlugin() {
-        return plugin;
+    protected CheckStyleToolWindowPanel toolWindowPanel() {
+        return CheckStyleToolWindowPanel.panelFor(plugin.getProject());
+    }
+
+    protected void markThreadComplete() {
+        plugin.setThreadComplete(this);
     }
 
     protected synchronized boolean isRunning() {

@@ -22,6 +22,7 @@ import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 
@@ -61,7 +62,10 @@ final class FileScanner implements Runnable {
         try {
             results = checkPsiFile(filesToScan);
 
-            this.plugin.getToolWindowPanel().incrementProgressBarBy(filesToScan.size());
+            final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
+            if (toolWindowPanel != null) {
+                toolWindowPanel.incrementProgressBarBy(filesToScan.size());
+            }
         } catch (Throwable e) {
             error = e;
         }

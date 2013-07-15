@@ -16,10 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CheckFilesThread extends AbstractCheckerThread {
-
-    /**
-     * Logger for this class.
-     */
     private static final Log LOG = LogFactory.getLog(CheckFilesThread.class);
 
     /**
@@ -52,8 +48,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // set progress bar
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    getPlugin().getToolWindowPanel().setProgressBarMax(getFiles().size());
-                    getPlugin().getToolWindowPanel().displayInProgress();
+                    toolWindowPanel().displayInProgress(getFiles().size());
                 }
             });
 
@@ -62,12 +57,8 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // invoke Swing fun in Swing thread.
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    getPlugin().getToolWindowPanel().displayResults(getFileResults());
-                    getPlugin().getToolWindowPanel().expandTree();
-                    getPlugin().getToolWindowPanel().clearProgressBar();
-                    getPlugin().getToolWindowPanel().setProgressText(null);
-
-                    getPlugin().setThreadComplete(CheckFilesThread.this);
+                    toolWindowPanel().displayResults(getFileResults());
+                    markThreadComplete();
                 }
             });
 
@@ -76,16 +67,12 @@ public class CheckFilesThread extends AbstractCheckerThread {
                     "An error occurred during a file scan.", e);
 
             if (processedError != null) {
-                LOG.error("An error occurred while scanning a file.",
-                        processedError);
+                LOG.error("An error occurred while scanning a file.", processedError);
 
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        getPlugin().getToolWindowPanel().displayErrorResult(processedError);
-                        getPlugin().getToolWindowPanel().clearProgressBar();
-                        getPlugin().getToolWindowPanel().setProgressText(null);
-
-                        getPlugin().setThreadComplete(CheckFilesThread.this);
+                        toolWindowPanel().displayErrorResult(processedError);
+                        markThreadComplete();
                     }
                 });
             }

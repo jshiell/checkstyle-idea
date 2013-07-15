@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -173,78 +174,41 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                          final boolean isOnTheFly) {
         LOG.debug("Inspection has been invoked.");
 
-        if (!psiFile.isValid() || !psiFile.isPhysical()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Skipping file as invalid: " + psiFile.getName());
-            }
-            return null;
-        }
-
-        final CheckStylePlugin checkStylePlugin = getPlugin(manager.getProject());
-
-        if (!checkStylePlugin.getConfiguration().isScanningNonJavaFiles()
-                && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
-            }
-            return null;
-        }
-
-        final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
-
-        final boolean checkTestClasses = checkStylePlugin.getConfiguration().isScanningTestClasses();
-        if (!checkTestClasses && module != null) {
-            final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
-            if (elementFile != null) {
-                final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
-                if (moduleRootManager != null && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Skipping test class " + psiFile.getName());
-                    }
-                    return null;
-                }
-            }
-        }
-
-        return scanFile(psiFile, manager, checkStylePlugin, module);
-    }
-
-    private ProblemDescriptor[] scanFile(final PsiFile psiFile,
-                                         final InspectionManager manager,
-                                         final CheckStylePlugin checkStylePlugin,
-                                         final Module module) {
-        ScannableFile scannableFile = null;
         try {
-            final Checker checker = getChecker(checkStylePlugin, module);
-            final Configuration config = getConfig(checkStylePlugin, module);
-            if (checker == null || config == null) {
-                return new ProblemDescriptor[0];
-            }
-
-            final List<Check> checks = CheckFactory.getChecks(config);
-
-            final Document fileDocument = PsiDocumentManager.getInstance(
-                    manager.getProject()).getDocument(psiFile);
-            if (fileDocument == null) {
-                LOG.debug("Skipping check - file is binary or has no document: "
-                        + psiFile.getName());
+            if (!psiFile.isValid() || !psiFile.isPhysical()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipping file as invalid: " + psiFile.getName());
+                }
                 return null;
             }
 
-            scannableFile = new ScannableFile(psiFile);
+            final CheckStylePlugin checkStylePlugin = getPlugin(manager.getProject());
 
-            final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
-
-            final boolean suppressingErrors = checkStylePlugin.getConfiguration().isSuppressingErrors();
-            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, suppressingErrors, checks);
-            synchronized (checker) {
-                checker.addListener(listener);
-                checker.process(Arrays.asList(scannableFile.getFile()));
-                checker.removeListener(listener);
+            if (!checkStylePlugin.getConfiguration().isScanningNonJavaFiles()
+                    && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
+                }
+                return null;
             }
 
-            final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
-            return problems.toArray(new ProblemDescriptor[problems.size()]);
+            final Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+
+            final boolean checkTestClasses = checkStylePlugin.getConfiguration().isScanningTestClasses();
+            if (!checkTestClasses && module != null) {
+                final VirtualFile elementFile = psiFile.getContainingFile().getVirtualFile();
+                if (elementFile != null) {
+                    final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
+                    if (moduleRootManager != null && moduleRootManager.getFileIndex().isInTestSourceContent(elementFile)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Skipping test class " + psiFile.getName());
+                        }
+                        return null;
+                    }
+                }
+            }
+
+            return scanFile(psiFile, manager, checkStylePlugin, module);
 
         } catch (ProcessCanceledException e) {
             LOG.warn("Process cancelled when scanning: " + psiFile.getName());
@@ -262,6 +226,45 @@ public class CheckStyleInspection extends LocalInspectionTool {
             LOG.error("The inspection could not be executed.", processed);
 
             return null;
+        }
+    }
+
+    private ProblemDescriptor[] scanFile(final PsiFile psiFile,
+                                         final InspectionManager manager,
+                                         final CheckStylePlugin checkStylePlugin,
+                                         final Module module)
+            throws IOException {
+        ScannableFile scannableFile = null;
+        try {
+            final Checker checker = getChecker(checkStylePlugin, module);
+            final Configuration config = getConfig(checkStylePlugin, module);
+            if (checker == null || config == null) {
+                return new ProblemDescriptor[0];
+            }
+
+            final List<Check> checks = CheckFactory.getChecks(config);
+
+            final Document fileDocument = PsiDocumentManager.getInstance(
+                    manager.getProject()).getDocument(psiFile);
+            if (fileDocument == null) {
+                LOG.debug("Skipping check - file is binary or has no document: " + psiFile.getName());
+                return null;
+            }
+
+            scannableFile = new ScannableFile(psiFile);
+
+            final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
+
+            final boolean suppressingErrors = checkStylePlugin.getConfiguration().isSuppressingErrors();
+            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, suppressingErrors, checks);
+            synchronized (checker) {
+                checker.addListener(listener);
+                checker.process(Arrays.asList(scannableFile.getFile()));
+                checker.removeListener(listener);
+            }
+
+            final List<ProblemDescriptor> problems = listener.getProblems(psiFile);
+            return problems.toArray(new ProblemDescriptor[problems.size()]);
 
         } finally {
             if (scannableFile != null) {

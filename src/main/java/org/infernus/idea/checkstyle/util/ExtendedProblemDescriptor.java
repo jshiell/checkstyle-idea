@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.util;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.QuickFix;
+import com.intellij.lang.annotation.ProblemGroup;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.PsiElement;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
@@ -109,11 +110,11 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
     }
 
     @Nullable
-    public String getProblemGroup() {
+    public ProblemGroup getProblemGroup() {
         return delegate.getProblemGroup();
     }
 
-    public void setProblemGroup(@Nullable final String problemGroup) {
+    public void setProblemGroup(@Nullable final ProblemGroup problemGroup) {
         delegate.setProblemGroup(problemGroup);
     }
 }

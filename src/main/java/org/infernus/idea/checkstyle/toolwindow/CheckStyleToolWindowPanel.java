@@ -11,8 +11,11 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
@@ -46,12 +49,12 @@ import java.util.regex.Pattern;
 /**
  * The tool window for CheckStyle scans.
  */
-public class ToolWindowPanel extends JPanel {
+public class CheckStyleToolWindowPanel extends JPanel {
 
     /**
      * Logger for this class.
      */
-    private static final Log LOG = LogFactory.getLog(ToolWindowPanel.class);
+    private static final Log LOG = LogFactory.getLog(CheckStyleToolWindowPanel.class);
 
     private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
     private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
@@ -60,6 +63,7 @@ public class ToolWindowPanel extends JPanel {
             = new HashMap<Pattern, String>();
 
     private final Project project;
+    private final ToolWindow toolWindow;
     private final JTree resultsTree;
     private final JToolBar progressPanel;
     private final JProgressBar progressBar;
@@ -91,9 +95,10 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param project the project.
      */
-    public ToolWindowPanel(final Project project) {
+    public CheckStyleToolWindowPanel(final ToolWindow toolWindow, final Project project) {
         super(new BorderLayout());
 
+        this.toolWindow = toolWindow;
         this.project = project;
 
         setBorder(new EmptyBorder(1, 1, 1, 1));
@@ -163,6 +168,31 @@ public class ToolWindowPanel extends JPanel {
         mainToolbar.getComponent().setVisible(true);
     }
 
+    public static CheckStyleToolWindowPanel panelFor(final Project project) {
+        final ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+        if (toolWindowManager == null) {
+            LOG.debug("Couldn't get tool window manager for project " + project);
+            return null;
+        }
+
+        final ToolWindow toolWindow = toolWindowManager.getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+        if (toolWindow == null) {
+            LOG.debug("Couldn't get tool window for ID " + CheckStyleConstants.ID_TOOLWINDOW);
+            return null;
+        }
+
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            return ((CheckStyleToolWindowPanel) content.getComponent());
+        }
+
+        return null;
+    }
+
+    public void showToolWindow() {
+        toolWindow.show(null);
+    }
+
     /**
      * Update the progress text.
      *
@@ -180,7 +210,7 @@ public class ToolWindowPanel extends JPanel {
     /**
      * Show and reset the progress bar.
      */
-    public void resetProgressBar() {
+    private void resetProgressBar() {
         progressBar.setValue(0);
 
         // show if necessary
@@ -196,38 +226,20 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param max the maximum limit of the progress bar.
      */
-    public void setProgressBarMax(final int max) {
+    private void setProgressBarMax(final int max) {
         progressBar.setMaximum(max);
-
         resetProgressBar();
-    }
-
-    /**
-     * Increment the progress of the progress bar.
-     * <p/>
-     * You should call {@link #setProgressBarMax(int)} first for useful semantics.
-     */
-    public void incrementProgressBar() {
-        if (progressBar.getValue() < progressBar.getMaximum()) {
-
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    progressBar.setValue(progressBar.getValue() + 1);
-                }
-            });
-        }
     }
 
     /**
      * Increment the progress of the progress bar by a given number.
      * <p/>
-     * You should call {@link #setProgressBarMax(int)} first for useful semantics.
+     * You should call {@link #displayInProgress(int)} first for useful semantics.
      *
      * @param size the size to increment by.
      */
     public void incrementProgressBarBy(final int size) {
         if (progressBar.getValue() < progressBar.getMaximum()) {
-
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     progressBar.setValue(progressBar.getValue() + size);
@@ -236,16 +248,14 @@ public class ToolWindowPanel extends JPanel {
         }
     }
 
-    /**
-     * Hides the progress bar.
-     */
-    public void clearProgressBar() {
+    private void clearProgress() {
         final int progressIndex = progressPanel.getComponentIndex(progressBar);
         if (progressIndex != -1) {
             progressPanel.remove(progressIndex);
             progressPanel.revalidate();
             progressPanel.repaint();
         }
+        setProgressText(null);
     }
 
     /**
@@ -357,8 +367,10 @@ public class ToolWindowPanel extends JPanel {
     /**
      * Expand the error tree to the fullest.
      */
-    public void expandTree() {
+    public CheckStyleToolWindowPanel expandTree() {
         expandTree(3);
+
+        return this;
     }
 
     /**
@@ -398,8 +410,12 @@ public class ToolWindowPanel extends JPanel {
 
     /**
      * Clear the results and display a 'scan in progress' notice.
+     *
+     * @param size the number of files being scanned.
      */
-    public void displayInProgress() {
+    public void displayInProgress(final int size) {
+        setProgressBarMax(size);
+
         treeModel.clear();
         treeModel.setRootMessage("plugin.results.in-progress");
     }
@@ -440,6 +456,8 @@ public class ToolWindowPanel extends JPanel {
 
         treeModel.clear();
         treeModel.setRootText(errorText);
+
+        clearProgress();
     }
 
     private SeverityLevel[] getDisplayedSeverities() {
@@ -474,11 +492,16 @@ public class ToolWindowPanel extends JPanel {
      *
      * @param results the map of checked files to problem descriptors.
      */
-    public void displayResults(final Map<PsiFile, List<ProblemDescriptor>> results) {
+    public CheckStyleToolWindowPanel displayResults(final Map<PsiFile, List<ProblemDescriptor>> results) {
         treeModel.setModel(results, getDisplayedSeverities());
 
         invalidate();
         repaint();
+
+        expandTree();
+        clearProgress();
+
+        return this;
     }
 
     public boolean isDisplayingErrors() {

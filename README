@@ -150,6 +150,10 @@ LICENCE file.
 Version History
 ---------------
 
+4.3   - New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in 99b786ddb if you're nosy).
+4.3   - Fixed: Scan option should now appear but once in the check-in dialogue (#68).
+4.3   - Fixed: Better handling of IDEA exceptions during background scanning (#62).
+4.3   - Plug-in modernisation work.
 4.2   - New: There is now a specific option to make rules files project relative (#60).
 4.2   - Fixed: Suppression files accessed via HTTP(S) now work again; thanks to Kristin Young (#61).
 4.1   - New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).

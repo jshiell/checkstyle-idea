@@ -7,7 +7,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.ToolWindowPanel;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 /**
  * Action to collapse all nodes in the results window.
@@ -30,7 +30,7 @@ public class CollapseAll extends BaseAction {
         final ToolWindow toolWindow = ToolWindowManager.getInstance(
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
-        final ToolWindowPanel panel = (ToolWindowPanel)
+        final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel)
                 toolWindow.getContentManager().getContent(0).getComponent();
         panel.collapseTree();
     }

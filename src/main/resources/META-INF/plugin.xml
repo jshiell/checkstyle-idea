@@ -10,8 +10,8 @@
 </p>
         ]]>
     </description>
-    <version>4.2</version>
-    <idea-version since-build="123.94"/>
+    <version>4.3</version>
+    <idea-version since-build="129.677"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -19,6 +19,10 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.3: New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in 99b786ddb if you're nosy).</li>
+    <li>4.3: Fixed: Scan option should now appear but once in the check-in dialogue (#68).</li>
+    <li>4.3: Fixed: Better handling of IDEA exceptions during background scanning (#62).</li>
+    <li>4.3: Improved: Plug-in modernisation work.</li>
     <li>4.2: New: There is now a specific option to make rules files project relative (#60).</li>
     <li>4.2: Fixed: Suppression files accessed via HTTP(S) now work again; thanks to Kristin Young (#61).</li>
     <li>4.1: New: There is now a configuration option to stop CheckStyle errors being display as IDEA errors (#50).</li>
@@ -77,6 +81,7 @@
         </component>
     </module-components>
 
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
                             serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
@@ -93,9 +98,22 @@
 
         <moduleConfigurable instance="org.infernus.idea.checkstyle.CheckStyleModuleConfigurable"/>
 
-        <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
-                         displayName="Real-time scan" groupName="CheckStyle" shortName="CheckStyle-IDEA"
-                         id="CheckStyleIDEAInspection" level="WARNING" enabledByDefault="true"/>
+        <localInspection id="CheckStyleIDEAInspection"
+                         implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
+                         displayName="Real-time scan"
+                         groupName="CheckStyle"
+                         shortName="CheckStyle-IDEA"
+                         level="WARNING"
+                         enabledByDefault="true"/>
+
+        <checkinHandlerFactory id="CheckStyleIDEACheckInHandlerFactory"
+                               implementation="org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandlerFactory"/>
+
+        <toolWindow id="CheckStyle"
+                    anchor="bottom"
+                    canCloseContents="false"
+                    factoryClass="org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowFactory"
+                    icon="/org/infernus/idea/checkstyle/images/checkstyle13.png"/>
     </extensions>
 
     <actions>
