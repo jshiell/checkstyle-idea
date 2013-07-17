@@ -150,6 +150,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.3.1 - Fixed: Error with ToolWindows on project load.
 4.3   - New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in 99b786ddb if you're nosy).
 4.3   - Fixed: Scan option should now appear but once in the check-in dialogue (#68).
 4.3   - Fixed: Better handling of IDEA exceptions during background scanning (#62).

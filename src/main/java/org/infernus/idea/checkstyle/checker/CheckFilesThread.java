@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
 import javax.swing.*;
@@ -48,7 +49,10 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // set progress bar
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    toolWindowPanel().displayInProgress(getFiles().size());
+                    final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+                    if (toolWindowPanel != null) {
+                        toolWindowPanel.displayInProgress(getFiles().size());
+                    }
                 }
             });
 
@@ -57,7 +61,10 @@ public class CheckFilesThread extends AbstractCheckerThread {
             // invoke Swing fun in Swing thread.
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    toolWindowPanel().displayResults(getFileResults());
+                    final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+                    if (toolWindowPanel != null) {
+                        toolWindowPanel.displayResults(getFileResults());
+                    }
                     markThreadComplete();
                 }
             });
@@ -71,7 +78,10 @@ public class CheckFilesThread extends AbstractCheckerThread {
 
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        toolWindowPanel().displayErrorResult(processedError);
+                        final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+                        if (toolWindowPanel != null) {
+                            toolWindowPanel.displayErrorResult(processedError);
+                        }
                         markThreadComplete();
                     }
                 });

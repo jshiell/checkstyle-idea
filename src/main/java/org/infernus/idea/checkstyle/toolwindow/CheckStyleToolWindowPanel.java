@@ -169,6 +169,7 @@ public class CheckStyleToolWindowPanel extends JPanel {
         mainToolbar.getComponent().setVisible(true);
     }
 
+    @Nullable
     public static CheckStyleToolWindowPanel panelFor(final Project project) {
         final ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
         if (toolWindowManager == null) {
@@ -182,11 +183,13 @@ public class CheckStyleToolWindowPanel extends JPanel {
             return null;
         }
 
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            return ((CheckStyleToolWindowPanel) content.getComponent());
+        for (Content currentContent : toolWindow.getContentManager().getContents()) {
+            if (currentContent.getComponent() instanceof CheckStyleToolWindowPanel) {
+                return ((CheckStyleToolWindowPanel) currentContent.getComponent());
+            }
         }
 
+        LOG.debug("Could not find tool window panel on tool window with ID " + CheckStyleConstants.ID_TOOLWINDOW);
         return null;
     }
 

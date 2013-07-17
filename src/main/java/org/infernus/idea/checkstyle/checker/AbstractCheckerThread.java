@@ -12,6 +12,7 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -77,6 +78,7 @@ public abstract class AbstractCheckerThread extends Thread {
         return files;
     }
 
+    @Nullable
     protected CheckStyleToolWindowPanel toolWindowPanel() {
         return CheckStyleToolWindowPanel.panelFor(plugin.getProject());
     }
