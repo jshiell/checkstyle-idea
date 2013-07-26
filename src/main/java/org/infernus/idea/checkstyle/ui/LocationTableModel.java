@@ -1,10 +1,15 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.SortableColumnModel;
+import com.intellij.util.xml.ui.BooleanColumnInfo;
+import com.intellij.util.xml.ui.StringColumnInfo;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -209,4 +214,5 @@ public class LocationTableModel extends AbstractTableModel {
                         + columnIndex);
         }
     }
+
 }

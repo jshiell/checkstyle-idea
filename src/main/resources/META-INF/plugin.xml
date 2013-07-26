@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.3.1</version>
+    <version>4.4</version>
     <idea-version since-build="129.677"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.4: Improved: Preferences UI touched up.</li>
     <li>4.3.1: Fixed: Error with ToolWindows on project load.</li>
     <li>4.3: New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in 99b786ddb if you're nosy).</li>
     <li>4.3: Fixed: Scan option should now appear but once in the check-in dialogue (#68).</li>

@@ -32,19 +32,18 @@
         <entry key="active-configuration" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
         <entry key="check-nonjava-files" value="false" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-64.xml:Issue 64" />
+        <entry key="location-0" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/sonar.xml:Sonar" />
         <entry key="location-1" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-53.xml:Issue 53" />
         <entry key="location-2" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-23.xml:Boo" />
-        <entry key="location-3" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Non-relative" />
-        <entry key="location-4" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
-        <entry key="location-5" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
-        <entry key="location-6" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/sonar.xml:Sonar" />
-        <entry key="location-7" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="location-8" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/ke-checkfile.xml:ke-checkfile" />
-        <entry key="property-0.checkstyle.default.severity" value="ERROR" />
+        <entry key="location-3" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
+        <entry key="location-4" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
+        <entry key="location-5" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-6" value="LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-64.xml:Issue 64" />
+        <entry key="location-7" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Non-relative" />
         <entry key="property-1.basedir" value="/" />
-        <entry key="property-3.checkstyle.suppressions.file" value="" />
-        <entry key="property-7.checkstyle.suppressions.file" value="$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-5.checkstyle.suppressions.file" value="$PROJECT_DIR$/../Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-6.checkstyle.default.severity" value="ERROR" />
+        <entry key="property-7.checkstyle.suppressions.file" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="" />
       </map>
