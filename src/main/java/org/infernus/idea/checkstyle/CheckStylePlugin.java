@@ -13,6 +13,7 @@ import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
 import org.infernus.idea.checkstyle.checker.CheckFilesThread;
 import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -123,19 +124,21 @@ public final class CheckStylePlugin implements ProjectComponent {
     }
 
     /**
-     * Run a scan on the currently selected file.
+     * Run a scan on the passed files.
      *
      * @param files the files to check.
+     * @param overrideConfigLocation if non-null this configuration will be used in preference to the normal configuration.
      */
-    public void checkFiles(final List<VirtualFile> files) {
+    public void checkFiles(final List<VirtualFile> files,
+                           final ConfigurationLocation overrideConfigLocation) {
         LOG.info("Scanning current file(s).");
 
-        if (files == null) {
+        if (files == null || files.isEmpty()) {
             LOG.debug("No files provided.");
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder(), files);
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder(), files, overrideConfigLocation);
         checkFilesThread.setPriority(Thread.MIN_PRIORITY);
 
         synchronized (checksInProgress) {

@@ -8,8 +8,11 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 
@@ -30,8 +33,13 @@ public class ScanCurrentChangeList extends BaseAction {
             if (project == null) {
                 return;
             }
+
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(
+                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(CheckStylePlugin.class).checkFiles(filesFor(changeListManager.getDefaultChangeList()));
+            project.getComponent(CheckStylePlugin.class).checkFiles(filesFor(changeListManager.getDefaultChangeList()), getSelectedOverride(toolWindow));
+
         } catch (Throwable e) {
             final CheckStylePluginException processed = CheckStylePlugin.processError(null, e);
             if (processed != null) {

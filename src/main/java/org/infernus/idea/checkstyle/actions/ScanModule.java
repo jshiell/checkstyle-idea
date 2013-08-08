@@ -69,7 +69,7 @@ public class ScanModule extends BaseAction {
 
             if (moduleFiles.length > 0) {
                 project.getComponent(CheckStylePlugin.class).checkFiles(
-                        Arrays.asList(moduleFiles));
+                        Arrays.asList(moduleFiles), getSelectedOverride(toolWindow));
             }
 
         } catch (Throwable e) {

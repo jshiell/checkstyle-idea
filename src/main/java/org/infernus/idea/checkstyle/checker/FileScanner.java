@@ -37,30 +37,34 @@ final class FileScanner implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(FileScanner.class);
 
-    private CheckStylePlugin plugin;
-    private Map<PsiFile, List<ProblemDescriptor>> results;
-    private Set<PsiFile> filesToScan;
-    private ClassLoader moduleClassLoader;
-    private Throwable error;
+    private final CheckStylePlugin plugin;
+    private final Set<PsiFile> filesToScan;
+    private final ClassLoader moduleClassLoader;
+    private final ConfigurationLocation overrideConfigLocation;
 
+    private Map<PsiFile, List<ProblemDescriptor>> results;
+    private Throwable error;
     /**
      * Create a new file scanner.
      *
-     * @param checkStylePlugin  CheckStylePlugin.
-     * @param filesToScan       the files to scan.
-     * @param moduleClassLoader the class loader for the file's module
+     * @param checkStylePlugin       CheckStylePlugin.
+     * @param filesToScan            the files to scan.
+     * @param moduleClassLoader      the class loader for the file's module
+     * @param overrideConfigLocation if non-null this configuration will be used in preference to the normal configuration.
      */
     public FileScanner(final CheckStylePlugin checkStylePlugin,
                        final Set<PsiFile> filesToScan,
-                       final ClassLoader moduleClassLoader) {
+                       final ClassLoader moduleClassLoader,
+                       final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.filesToScan = filesToScan;
         this.moduleClassLoader = moduleClassLoader;
+        this.overrideConfigLocation = overrideConfigLocation;
     }
 
     public void run() {
         try {
-            results = checkPsiFile(filesToScan);
+            results = checkPsiFile(filesToScan, overrideConfigLocation);
 
             final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
             if (toolWindowPanel != null) {
@@ -98,12 +102,14 @@ final class FileScanner implements Runnable {
      *
      * @param psiFilesToScan the PSI psiFilesToScan to scan. These will be
      *                       ignored if not a java file and not from the same module.
+     * @param override       if non-null this location will be used in preference to the configured rules file.
      * @return a list of tree nodes representing the result tree for this
      *         file, an empty list or null if this file is invalid or
      *         has no errors.
      * @throws Throwable if the
      */
-    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan)
+    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
+                                                               final ConfigurationLocation override)
             throws Throwable {
         if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {
             LOG.debug("No elements were specified");
@@ -177,7 +183,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            return performCheckStyleScan(module, tempFiles, filesToElements);
+            return performCheckStyleScan(module, tempFiles, filesToElements, override);
 
         } finally {
             for (final ScannableFile tempFile : tempFiles) {
@@ -198,10 +204,17 @@ final class FileScanner implements Runnable {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final Module module,
                                                                         final List<ScannableFile> tempFiles,
-                                                                        final Map<String, PsiFile> filesToElements) {
+                                                                        final Map<String, PsiFile> filesToElements,
+                                                                        final ConfigurationLocation override) {
         final InspectionManager manager = InspectionManager.getInstance(module.getProject());
-        final Checker checker = getChecker(module, moduleClassLoader);
-        final Configuration config = getConfig(module);
+
+        final ConfigurationLocation location = getConfigurationLocation(module, override);
+        if (location == null) {
+            return null;
+        }
+
+        final Checker checker = getChecker(module, moduleClassLoader, location);
+        final Configuration config = getConfig(module, location);
         if (checker == null || config == null) {
             return Collections.emptyMap();
         }
@@ -254,26 +267,12 @@ final class FileScanner implements Runnable {
         return tempFile;
     }
 
-
-    /**
-     * Produce a CheckStyle checker.
-     *
-     * @param module      the module the checked file(s) belong to.
-     * @param classLoader CheckStyle classloader or null if default
-     *                    should be used.
-     * @return a checker.
-     */
-
     private Checker getChecker(final Module module,
-                               final ClassLoader classLoader) {
-        LOG.debug("Getting CheckStyle checker.");
+                               final ClassLoader classLoader,
+                               final ConfigurationLocation location) {
+        LOG.debug("Getting CheckStyle checker with location " + location);
 
         try {
-            final ConfigurationLocation location = getConfigurationLocation(module);
-            if (location == null) {
-                return null;
-            }
-
             return getCheckerFactory().getChecker(location, module, classLoader);
 
         } catch (Exception e) {
@@ -281,8 +280,12 @@ final class FileScanner implements Runnable {
         }
     }
 
-    private ConfigurationLocation getConfigurationLocation(final Module module) {
-        final ConfigurationLocation location;
+    private ConfigurationLocation getConfigurationLocation(final Module module,
+                                                           final ConfigurationLocation override) {
+        if (override != null) {
+            return override;
+        }
+
         if (module != null) {
             final CheckStyleModuleConfiguration moduleConfiguration
                     = ModuleServiceManager.getService(module, CheckStyleModuleConfiguration.class);
@@ -291,36 +294,22 @@ final class FileScanner implements Runnable {
             }
 
             if (moduleConfiguration.isExcluded()) {
-                location = null;
-            } else {
-                location = moduleConfiguration.getActiveConfiguration();
+                return null;
             }
+            return moduleConfiguration.getActiveConfiguration();
 
-        } else {
-            location = plugin.getConfiguration().getActiveConfiguration();
         }
-        return location;
+        return plugin.getConfiguration().getActiveConfiguration();
     }
 
     private CheckerFactory getCheckerFactory() {
         return ServiceManager.getService(CheckerFactory.class);
     }
 
-    /**
-     * Retrieve a CheckStyle configuration.
-     *
-     * @param module the module to fetch configuration for.
-     * @return a checkstyle configuration.
-     */
-    private Configuration getConfig(final Module module) {
-        LOG.debug("Getting CheckStyle checker.");
+    private Configuration getConfig(final Module module, final ConfigurationLocation location) {
+        LOG.debug("Getting CheckStyle config for location " + location);
 
         try {
-            final ConfigurationLocation location = getConfigurationLocation(module);
-            if (location == null) {
-                return null;
-            }
-
             return getCheckerFactory().getConfig(location, module);
 
         } catch (Throwable e) {

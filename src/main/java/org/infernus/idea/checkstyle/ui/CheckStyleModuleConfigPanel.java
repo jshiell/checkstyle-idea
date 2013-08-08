@@ -6,7 +6,6 @@ import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

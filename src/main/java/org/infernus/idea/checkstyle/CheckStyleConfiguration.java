@@ -50,6 +50,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
     private final Map<String, String> storage = new ConcurrentHashMap<String, String>();
     private final ReentrantLock storageLock = new ReentrantLock();
+    private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<ConfigurationListener>());
 
     /**
      * Scan files before vcs checkin.
@@ -72,6 +73,18 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 CheckStyleConstants.RESOURCE_BUNDLE);
         defaultLocation = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
                 DEFAULT_CONFIG, resources.getString("file.default.description"));
+    }
+
+    public void addConfigurationListener(final ConfigurationListener configurationListener) {
+        if (configurationListener != null) {
+            configurationListeners.add(configurationListener);
+        }
+    }
+
+    private void fireConfigurationChanged() {
+        for (ConfigurationListener configurationListener : configurationListeners) {
+            configurationListener.configurationChanged();
+        }
     }
 
     @NotNull
@@ -179,7 +192,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
             }
 
             // ensure we update the map with any parsing/tokenisation changes
-            setConfigurationLocations(locations);
+            setConfigurationLocations(locations, false);
 
             return locations;
         } finally {
@@ -188,6 +201,11 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
+        setConfigurationLocations(configurationLocations, true);
+    }
+
+    private void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations,
+                                          final boolean fireEvents) {
         storageLock.lock();
         try {
             for (final Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
@@ -226,6 +244,11 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
                 ++index;
             }
+
+            if (fireEvents) {
+                fireConfigurationChanged();
+            }
+
         } finally {
             storageLock.unlock();
         }

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -46,15 +47,12 @@ public class ScanProject extends BaseAction {
 
             setProgressText(toolWindow, "plugin.status.in-progress.project");
 
-            // find project files
-            final ProjectRootManager projectRootManager
-                    = ProjectRootManager.getInstance(project);
-            final VirtualFile[] sourceRoots
-                    = projectRootManager.getContentSourceRoots();
+            final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+            final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
 
             if (sourceRoots != null && sourceRoots.length > 0) {
                 ApplicationManager.getApplication().runReadAction(
-                        new ScanProjectAction(project, sourceRoots));
+                        new ScanProjectAction(project, sourceRoots, getSelectedOverride(toolWindow)));
             }
 
         } catch (Throwable e) {
@@ -109,16 +107,19 @@ public class ScanProject extends BaseAction {
     private static class ScanProjectAction implements Runnable {
         private final Project project;
         private final VirtualFile[] sourceRoots;
+        private final ConfigurationLocation selectedOverride;
 
         public ScanProjectAction(@NotNull final Project project,
-                                 @NotNull final VirtualFile[] sourceRoots) {
+                                 @NotNull final VirtualFile[] sourceRoots,
+                                 final ConfigurationLocation selectedOverride) {
             this.project = project;
             this.sourceRoots = sourceRoots;
+            this.selectedOverride = selectedOverride;
         }
 
         public void run() {
             project.getComponent(CheckStylePlugin.class).checkFiles(
-                    flattenFiles(sourceRoots));
+                    flattenFiles(sourceRoots), selectedOverride);
         }
 
         /**

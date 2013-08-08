@@ -3,12 +3,15 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -17,38 +20,26 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-/**
- * Abstract CheckerThread.
- */
 public abstract class AbstractCheckerThread extends Thread {
 
     private static final Log LOG = LogFactory.getLog(AbstractCheckerThread.class);
 
-    /**
-     * Files to scan.
-     */
     private final List<PsiFile> files = new ArrayList<PsiFile>();
-
-    /**
-     * Map modules to files.
-     */
     private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<Module, Set<PsiFile>>();
-
-    /**
-     * Scan results.
-     */
-    private Map<PsiFile, List<ProblemDescriptor>> fileResults;
-
-    private boolean running = true;
-
     private final CheckStylePlugin plugin;
     private final ModuleClassPathBuilder moduleClassPathBuilder;
+    private final ConfigurationLocation overrideConfigLocation;
+
+    private Map<PsiFile, List<ProblemDescriptor>> fileResults;
+    private boolean running = true;
 
     public AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
                                  @NotNull final ModuleClassPathBuilder moduleClassPathBuilder,
-                                 @NotNull final List<VirtualFile> virtualFiles) {
+                                 @NotNull final List<VirtualFile> virtualFiles,
+                                 @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.moduleClassPathBuilder = moduleClassPathBuilder;
+        this.overrideConfigLocation = overrideConfigLocation;
 
         final PsiManager psiManager = PsiManager.getInstance(this.plugin.getProject());
         for (final VirtualFile virtualFile : virtualFiles) {
@@ -106,17 +97,18 @@ public abstract class AbstractCheckerThread extends Thread {
      * @param virtualFile the file to process.
      */
     private void buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
-        if (virtualFile.isDirectory()) {
-            for (final VirtualFile child : virtualFile.getChildren()) {
-                buildFilesList(psiManager, child);
+        VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor() {
+            @Override
+            public boolean visitFile(@NotNull final VirtualFile file) {
+                if (!file.isDirectory()) {
+                    final PsiFile psiFile = psiManager.findFile(virtualFile);
+                    if (psiFile != null) {
+                        files.add(psiFile);
+                    }
+                }
+                return true;
             }
-
-        } else {
-            final PsiFile psiFile = psiManager.findFile(virtualFile);
-            if (psiFile != null) {
-                files.add(psiFile);
-            }
-        }
+        });
     }
 
     protected void processFilesForModuleInfoAndScan() throws Throwable {
@@ -133,8 +125,7 @@ public abstract class AbstractCheckerThread extends Thread {
 
             final ClassLoader moduleClassLoader = moduleClassPathBuilder.build(module);
 
-            final FileScanner fileScanner = new FileScanner(
-                    plugin, filesForModule, moduleClassLoader);
+            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassLoader, overrideConfigLocation);
             this.runFileScanner(fileScanner);
 
             //noinspection ThrowableResultOfMethodCallIgnored

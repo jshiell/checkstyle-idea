@@ -19,7 +19,7 @@ import java.util.*;
         storages = {@Storage(id = "other", file = "$MODULE_FILE$")}
 )
 public final class CheckStyleModuleConfiguration extends Properties
-    implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {
+        implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleModuleConfiguration.class);
 

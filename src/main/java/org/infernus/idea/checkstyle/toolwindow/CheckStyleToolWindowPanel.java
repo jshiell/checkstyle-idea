@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.ConfigurationListener;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +52,7 @@ import java.util.regex.Pattern;
 /**
  * The tool window for CheckStyle scans.
  */
-public class CheckStyleToolWindowPanel extends JPanel {
+public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener {
 
     /**
      * Logger for this class.
@@ -59,21 +61,25 @@ public class CheckStyleToolWindowPanel extends JPanel {
 
     private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
     private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
+    private static final String DEFAULT_OVERRIDE = IDEAUtilities.getResource("plugin.toolwindow.default-file", "<As configured>");
 
     private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
             = new HashMap<Pattern, String>();
 
+    private final CheckStylePlugin checkStylePlugin;
     private final Project project;
     private final ToolWindow toolWindow;
-    private final JTree resultsTree;
-    private final JToolBar progressPanel;
-    private final JProgressBar progressBar;
-    private final JLabel progressLabel;
+    private final JComboBox configurationOverrideCombo = new JComboBox();
+    private final DefaultComboBoxModel configurationOverrideModel = new DefaultComboBoxModel();
 
     private boolean displayingErrors = true;
     private boolean displayingWarnings = true;
     private boolean displayingInfo = true;
 
+    private JTree resultsTree;
+    private JToolBar progressPanel;
+    private JProgressBar progressBar;
+    private JLabel progressLabel;
     private ResultTreeModel treeModel;
     private boolean scrollToSource;
 
@@ -102,15 +108,14 @@ public class CheckStyleToolWindowPanel extends JPanel {
         this.toolWindow = toolWindow;
         this.project = project;
 
-        setBorder(new EmptyBorder(1, 1, 1, 1));
-
-        final CheckStylePlugin checkStylePlugin
-                = project.getComponent(CheckStylePlugin.class);
+        checkStylePlugin = project.getComponent(CheckStylePlugin.class);
         if (checkStylePlugin == null) {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }
 
-        // Create the toolbar
+        configurationChanged();
+        checkStylePlugin.getConfiguration().addConfigurationListener(this);
+
         final ActionGroup mainActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
         final ActionToolbar mainToolbar = ActionManager.getInstance().createActionToolbar(
@@ -125,9 +130,29 @@ public class CheckStyleToolWindowPanel extends JPanel {
         toolBarBox.add(mainToolbar.getComponent());
         toolBarBox.add(treeToolbar.getComponent());
 
+        setBorder(new EmptyBorder(1, 1, 1, 1));
         add(toolBarBox, BorderLayout.WEST);
+        add(createToolPanel(), BorderLayout.CENTER);
 
-        // Create the tree
+        expandTree();
+
+        mainToolbar.getComponent().setVisible(true);
+    }
+
+    public ConfigurationLocation getSelectedOverride() {
+        final Object selectedItem = configurationOverrideModel.getSelectedItem();
+        if (DEFAULT_OVERRIDE.equals(selectedItem)) {
+            return null;
+        }
+        return (ConfigurationLocation) selectedItem;
+    }
+
+    private JPanel createToolPanel() {
+        configurationOverrideCombo.setModel(configurationOverrideModel);
+        final int preferredHeight = configurationOverrideCombo.getPreferredSize().height;
+        configurationOverrideCombo.setPreferredSize(new Dimension(250, preferredHeight));
+        configurationOverrideCombo.setMaximumSize(new Dimension(350, preferredHeight));
+
         treeModel = new ResultTreeModel();
 
         resultsTree = new Tree(treeModel);
@@ -142,13 +167,18 @@ public class CheckStyleToolWindowPanel extends JPanel {
         progressLabel = new JLabel(" ");
         progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
         progressBar.setMinimum(0);
-        final Dimension progressBarSize = new Dimension(
-                100, progressBar.getPreferredSize().height);
+        final Dimension progressBarSize = new Dimension(100, progressBar.getPreferredSize().height);
         progressBar.setMinimumSize(progressBarSize);
         progressBar.setPreferredSize(progressBarSize);
         progressBar.setMaximumSize(progressBarSize);
 
         progressPanel = new JToolBar(JToolBar.HORIZONTAL);
+        progressPanel.add(Box.createHorizontalStrut(4));
+        progressPanel.add(new JLabel(IDEAUtilities.getResource("plugin.toolwindow.override", "Use rules file:")));
+        progressPanel.add(Box.createHorizontalStrut(4));
+        progressPanel.add(configurationOverrideCombo);
+        progressPanel.add(Box.createHorizontalStrut(4));
+        progressPanel.addSeparator();
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(progressLabel);
         progressPanel.add(Box.createHorizontalGlue());
@@ -157,16 +187,12 @@ public class CheckStyleToolWindowPanel extends JPanel {
         progressPanel.setBorder(null);
 
         final JPanel toolPanel = new JPanel(new BorderLayout());
-
         toolPanel.add(new JBScrollPane(resultsTree), BorderLayout.CENTER);
         toolPanel.add(progressPanel, BorderLayout.NORTH);
 
-        add(toolPanel, BorderLayout.CENTER);
-
-        expandTree();
-
         ToolTipManager.sharedInstance().registerComponent(resultsTree);
-        mainToolbar.getComponent().setVisible(true);
+
+        return toolPanel;
     }
 
     @Nullable
@@ -191,6 +217,17 @@ public class CheckStyleToolWindowPanel extends JPanel {
 
         LOG.debug("Could not find tool window panel on tool window with ID " + CheckStyleConstants.ID_TOOLWINDOW);
         return null;
+    }
+
+    @Override
+    public void configurationChanged() {
+        configurationOverrideModel.removeAllElements();
+
+        configurationOverrideModel.addElement(DEFAULT_OVERRIDE);
+        for (ConfigurationLocation configurationLocation : checkStylePlugin.getConfiguration().getConfigurationLocations()) {
+            configurationOverrideModel.addElement(configurationLocation);
+        }
+        configurationOverrideModel.setSelectedItem(DEFAULT_OVERRIDE);
     }
 
     public void showToolWindow() {

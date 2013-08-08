@@ -12,8 +12,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 import java.util.ResourceBundle;
 
@@ -77,5 +78,13 @@ public abstract class BaseAction extends AnAction {
             final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setProgressText(resources.getString(progressTextKey));
         }
+    }
+
+    protected ConfigurationLocation getSelectedOverride(final ToolWindow toolWindow) {
+        final Content content = toolWindow.getContentManager().getContent(0);
+        if (content != null) {
+            return ((CheckStyleToolWindowPanel) content.getComponent()).getSelectedOverride();
+        }
+        return null;
     }
 }

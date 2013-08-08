@@ -50,7 +50,7 @@ public class ScanCurrentFile extends BaseAction {
                     = FileEditorManager.getInstance(project).getSelectedFiles();
             if (selectedFiles.length > 0) {
                 project.getComponent(CheckStylePlugin.class).checkFiles(
-                        Arrays.asList(selectedFiles));
+                        Arrays.asList(selectedFiles), getSelectedOverride(toolWindow));
             }
         } catch (Throwable e) {
             final CheckStylePluginException processed

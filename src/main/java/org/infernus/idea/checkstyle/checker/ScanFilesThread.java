@@ -32,7 +32,7 @@ public class ScanFilesThread extends AbstractCheckerThread {
                            final ModuleClassPathBuilder moduleClassPathBuilder,
                            final List<VirtualFile> vFiles,
                            final Map<PsiFile, List<ProblemDescriptor>> results) {
-        super(checkStylePlugin, moduleClassPathBuilder, vFiles);
+        super(checkStylePlugin, moduleClassPathBuilder, vFiles, null);
         this.setFileResults(results);
     }
 

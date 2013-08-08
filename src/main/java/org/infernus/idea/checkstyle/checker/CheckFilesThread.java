@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
@@ -25,11 +26,13 @@ public class CheckFilesThread extends AbstractCheckerThread {
      * @param checkStylePlugin       CheckStylePlugin.
      * @param moduleClassPathBuilder the class path builder.
      * @param virtualFiles           the files to check.
+     * @param overrideConfigLocation if non-null this configuration will be used in preference to the normal configuration.
      */
     public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
                             final ModuleClassPathBuilder moduleClassPathBuilder,
-                            final List<VirtualFile> virtualFiles) {
-        super(checkStylePlugin, moduleClassPathBuilder, virtualFiles);
+                            final List<VirtualFile> virtualFiles,
+                            final ConfigurationLocation overrideConfigLocation) {
+        super(checkStylePlugin, moduleClassPathBuilder, virtualFiles, overrideConfigLocation);
         this.setFileResults(new HashMap<PsiFile, List<ProblemDescriptor>>());
     }
 
