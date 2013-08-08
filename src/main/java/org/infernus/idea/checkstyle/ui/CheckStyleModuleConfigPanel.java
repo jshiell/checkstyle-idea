@@ -2,9 +2,11 @@ package org.infernus.idea.checkstyle.ui;
 
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,9 +50,10 @@ public class CheckStyleModuleConfigPanel extends JPanel {
 
         final JPanel configPanel = new JPanel(new GridBagLayout());
 
-        final JLabel informationLabel = new JLabel(resources.getString("config.module.information"));
+        final JLabel informationLabel = new JLabel(resources.getString("config.module.information"),
+                IDEAUtilities.getIcon("/general/information.png"), SwingConstants.LEFT);
         configPanel.add(informationLabel, new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 16, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(16, 8, 16, 8), 0, 0));
 
         useProjectConfigurationRadio.setText(resources.getString("config.module.project-configuration.text"));
         useProjectConfigurationRadio.setToolTipText(resources.getString("config.module.project-configuration.tooltip"));

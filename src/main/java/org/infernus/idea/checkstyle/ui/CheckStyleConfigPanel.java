@@ -4,14 +4,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.AnActionButton;
-import com.intellij.ui.AnActionButtonRunnable;
-import com.intellij.ui.AnActionButtonUpdater;
-import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,14 +58,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     private void initialise() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        final JTabbedPane rootTabPane = new JTabbedPane();
-        rootTabPane.add(buildConfigPanel(), resources.getString("config.file.tab"));
-        rootTabPane.add(buildPathPanel(), resources.getString("config.path.tab"));
-
-        add(rootTabPane, BorderLayout.CENTER);
+        add(buildConfigPanel(), BorderLayout.CENTER);
     }
 
     private JPanel buildConfigPanel() {
@@ -83,6 +74,29 @@ public final class CheckStyleConfigPanel extends JPanel {
         suppressErrorsCheckbox.setText(resources.getString("config.suppress-errors.checkbox.text"));
         suppressErrorsCheckbox.setToolTipText(resources.getString("config.suppress-errors.checkbox.tooltip"));
 
+        final JPanel configFilePanel = new JPanel(new GridBagLayout());
+        configFilePanel.setOpaque(false);
+
+        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
+                0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
+                1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
+                2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(buildRuleFilePanel(resources), new GridBagConstraints(
+                0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+        configFilePanel.add(buildClassPathPanel(resources), new GridBagConstraints(
+                0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+
+        return configFilePanel;
+    }
+
+    private JPanel buildRuleFilePanel(final ResourceBundle resources) {
         setColumnWith(locationTable, 0, 40, 50, 50);
         setColumnWith(locationTable, 1, 100, 200, 200);
         locationTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -95,25 +109,31 @@ public final class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setRemoveAction(new RemoveLocationAction());
         tableDecorator.setEditActionUpdater(new DisableForDefaultUpdater());
         tableDecorator.setRemoveActionUpdater(new DisableForDefaultUpdater());
+        tableDecorator.setPreferredSize(new Dimension(300, 50));
 
-        final JPanel configFilePanel = new JPanel(new GridBagLayout());
-        configFilePanel.setBorder(new EmptyBorder(4, 4, 4, 4));
-        configFilePanel.setOpaque(false);
+        final JPanel container = new JPanel(new BorderLayout());
+        container.add(new TitledSeparator(resources.getString("config.file.tab")), BorderLayout.NORTH);
+        container.add(tableDecorator.createPanel(), BorderLayout.CENTER);
+        final JLabel infoLabel = new JLabel(resources.getString("config.file.description"),
+                IDEAUtilities.getIcon("/general/information.png"), SwingConstants.LEFT);
+        infoLabel.setBorder(new EmptyBorder(8, 0, 4, 0));
+        container.add(infoLabel, BorderLayout.SOUTH);
+        return container;
+    }
 
-        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
-                0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
-                0, 1, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
-                0, 2, 3, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(tableDecorator.createPanel(), new GridBagConstraints(
-                0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
-                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+    private JPanel buildClassPathPanel(final ResourceBundle resources) {
+        final ToolbarDecorator pathListDecorator = ToolbarDecorator.createDecorator(pathList);
+        pathListDecorator.setAddAction(new AddPathAction());
+        pathListDecorator.setEditAction(new EditPathAction());
+        pathListDecorator.setRemoveAction(new RemovePathAction());
+        pathListDecorator.setMoveUpAction(new MoveUpPathAction());
+        pathListDecorator.setMoveDownAction(new MoveDownPathAction());
+        pathListDecorator.setPreferredSize(new Dimension(300, 50));
 
-        return configFilePanel;
+        final JPanel container = new JPanel(new BorderLayout());
+        container.add(new TitledSeparator(resources.getString("config.path.tab")), BorderLayout.NORTH);
+        container.add(pathListDecorator.createPanel(), BorderLayout.CENTER);
+        return container;
     }
 
     private void setColumnWith(final JTable table,
@@ -128,20 +148,6 @@ public final class CheckStyleConfigPanel extends JPanel {
         if (maxSize != null) {
             column.setMaxWidth(maxSize);
         }
-    }
-
-    private JPanel buildPathPanel() {
-        final ToolbarDecorator pathListDecorator = ToolbarDecorator.createDecorator(pathList);
-        pathListDecorator.setAddAction(new AddPathAction());
-        pathListDecorator.setEditAction(new EditPathAction());
-        pathListDecorator.setRemoveAction(new RemovePathAction());
-        pathListDecorator.setMoveUpAction(new MoveUpPathAction());
-        pathListDecorator.setMoveDownAction(new MoveDownPathAction());
-
-        final JPanel paddingPanel = new JPanel(new BorderLayout());
-        paddingPanel.setBorder(new EmptyBorder(0, 8, 8, 8));
-        paddingPanel.add(pathListDecorator.createPanel(), BorderLayout.CENTER);
-        return paddingPanel;
     }
 
     /**
@@ -387,6 +393,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             actionPerformed(null);
         }
     }
+
     /**
      * Process the addition of a path element.
      */
