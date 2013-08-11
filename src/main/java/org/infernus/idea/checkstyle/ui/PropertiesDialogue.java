@@ -1,50 +1,24 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.table.JBTable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
  * Allows setting of file properties.
  */
 public class PropertiesDialogue extends JDialog {
-
-    private static final Log LOG = LogFactory.getLog(PropertiesDialogue.class);
-
-    private final PropertiesTableModel propertiesModel = new PropertiesTableModel();
-    private final Project project;
-
-    /**
-     * Properties table, hacked for enable/disable support.
-     */
-    private final JBTable propertiesTable = new JBTable(propertiesModel) {
-        public Component prepareRenderer(final TableCellRenderer renderer,
-                                         final int row, final int column) {
-            final Component comp = super.prepareRenderer(renderer, row, column);
-            comp.setEnabled(isEnabled());
-            return comp;
-        }
-    };
+    private final PropertiesPanel propertiesPanel;
 
     private boolean committed = true;
-    private ConfigurationLocation configurationLocation;
 
     public PropertiesDialogue(final Project project) {
         super(WindowManager.getInstance().getFrame(project));
@@ -53,7 +27,7 @@ public class PropertiesDialogue extends JDialog {
             throw new IllegalArgumentException("Project is required");
         }
 
-        this.project = project;
+        this.propertiesPanel = new PropertiesPanel(project);
 
         initialise();
     }
@@ -63,20 +37,6 @@ public class PropertiesDialogue extends JDialog {
         setMinimumSize(new Dimension(300, 200));
         setModal(true);
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        propertiesTable.setToolTipText(resources.getString(
-                "config.file.properties.tooltip"));
-
-        final JPanel scrollPaneContainer = new JPanel(new BorderLayout());
-        scrollPaneContainer.setBorder(new EmptyBorder(8, 8, 4, 8));
-        scrollPaneContainer.setPreferredSize(new Dimension(500, 400));
-
-        final JScrollPane propertiesScrollPane = new JBScrollPane(propertiesTable,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPaneContainer.add(propertiesScrollPane, BorderLayout.CENTER);
-
         final JButton okayButton = new JButton(new OkayAction());
         final JButton cancelButton = new JButton(new CancelAction());
 
@@ -85,7 +45,8 @@ public class PropertiesDialogue extends JDialog {
 
         bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-        if (IDEAUtilities.isMacOSX()) {
+
+        if (SystemInfo.isMac) {
             bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
             bottomPanel.add(okayButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
@@ -97,7 +58,7 @@ public class PropertiesDialogue extends JDialog {
                     GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         }
 
-        add(scrollPaneContainer, BorderLayout.CENTER);
+        add(propertiesPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(okayButton);
@@ -123,8 +84,7 @@ public class PropertiesDialogue extends JDialog {
      * @return the location or null if no valid location entered.
      */
     public ConfigurationLocation getConfigurationLocation() {
-        configurationLocation.setProperties(propertiesModel.getProperties());
-        return configurationLocation;
+        return propertiesPanel.getConfigurationLocation();
     }
 
     /**
@@ -133,34 +93,7 @@ public class PropertiesDialogue extends JDialog {
      * @param configurationLocation the location.
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
-        this.configurationLocation = (ConfigurationLocation) configurationLocation.clone();
-
-        // get latest properties from file
-        InputStream configInputStream = null;
-        try {
-            configInputStream = configurationLocation.resolve();
-            propertiesModel.setProperties(configurationLocation.getProperties());
-
-        } catch (IOException e) {
-            LOG.error("Couldn't resolve properties file", e);
-
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            final String message = resources.getString("config.file.resolve-failed");
-            final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-            Messages.showErrorDialog(project, formattedMessage,
-                    resources.getString("config.file.error.title"));
-
-        } finally {
-            if (configInputStream != null) {
-                try {
-                    configInputStream.close();
-                } catch (IOException e) {
-                    // ignored
-                }
-            }
-        }
+        propertiesPanel.setConfigurationLocation(configurationLocation);
     }
 
     /**

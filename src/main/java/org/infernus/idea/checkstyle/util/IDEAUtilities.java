@@ -19,26 +19,13 @@ import java.util.ResourceBundle;
  */
 public final class IDEAUtilities {
 
-    /**
-     * Logger for this class.
-     */
-    private static final Log LOG = LogFactory.getLog(
-            IDEAUtilities.class);
+    private static final Log LOG = LogFactory.getLog(IDEAUtilities.class);
 
     /**
      * This is a utility class and cannot be instantiated.
      */
     private IDEAUtilities() {
 
-    }
-
-    /**
-     * Are we running on Mac OS X?
-     *
-     * @return true if this is a Mac OS.
-     */
-    public static boolean isMacOSX() {
-        return System.getProperty("os.name").toLowerCase().contains("mac os x");
     }
 
     /**

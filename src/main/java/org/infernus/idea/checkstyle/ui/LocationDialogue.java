@@ -2,40 +2,66 @@ package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
-import org.infernus.idea.checkstyle.model.ConfigurationType;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
  * Allows selection of the location of the CheckStyle file.
  */
 public class LocationDialogue extends JDialog {
-    private final JButton browseButton = new JButton(new BrowseAction());
-    private final JTextField fileLocationField = new JTextField(20);
-    private final JTextField urlLocationField = new JTextField(20);
-    private final JRadioButton fileLocationRadio = new JRadioButton();
-    private final JRadioButton urlLocationRadio = new JRadioButton();
-    private final JTextField descriptionField = new JTextField();
-    private final JCheckBox relativeFileCheckbox = new JCheckBox();
+    private enum CurrentStep {
+        SELECT(false, true, false),
+        PROPERTIES(true, true, false),
+        ERROR(true, false, false),
+        COMPLETE(true, false, true);
+
+        private boolean allowPrevious;
+        private boolean allowNext;
+        private boolean allowCommit;
+
+        private CurrentStep(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
+            this.allowPrevious = allowPrevious;
+            this.allowNext = allowNext;
+            this.allowCommit = allowCommit;
+        }
+
+        private boolean isAllowPrevious() {
+            return allowPrevious;
+        }
+
+        private boolean isAllowNext() {
+            return allowNext;
+        }
+
+        private boolean isAllowCommit() {
+            return allowCommit;
+        }
+    }
+
+    private final LocationPanel locationPanel;
+    private final PropertiesPanel propertiesPanel;
+    private final ErrorPanel errorPanel;
+    private final CompletePanel completePanel;
 
     private final Project project;
 
+    private JButton commitButton;
+    private JButton previousButton;
+    private CurrentStep currentStep = CurrentStep.SELECT;
     private boolean committed = true;
+    private ConfigurationLocation configurationLocation;
 
     /**
      * Create a dialogue.
@@ -48,43 +74,49 @@ public class LocationDialogue extends JDialog {
         if (project == null) {
             throw new IllegalArgumentException("Project may not be null");
         }
+
         this.project = project;
+        this.locationPanel = new LocationPanel(project);
+        this.propertiesPanel = new PropertiesPanel(project);
+        this.errorPanel = new ErrorPanel();
+        this.completePanel = new CompletePanel();
 
         initialise();
     }
 
     public void initialise() {
         setLayout(new BorderLayout());
-        setMinimumSize(new Dimension(300, 200));
+        setMinimumSize(new Dimension(500, 400));
         setModal(true);
 
-        final JPanel contentPanel = buildContentPanel();
-
-        final JButton okayButton = new JButton(new OkayAction());
+        commitButton = new JButton(new NextAction());
+        previousButton = new JButton(new PreviousAction());
         final JButton cancelButton = new JButton(new CancelAction());
 
         final JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setBorder(new EmptyBorder(4, 8, 8, 8));
 
-        bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-
-        if (IDEAUtilities.isMacOSX()) {
-            bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-            bottomPanel.add(okayButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        if (SystemInfo.isMac) {
+            bottomPanel.add(cancelButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+            bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
         } else {
-            bottomPanel.add(okayButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-            bottomPanel.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+            bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+            bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
         }
+        bottomPanel.add(previousButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+        bottomPanel.add(commitButton, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
 
-        add(contentPanel, BorderLayout.CENTER);
+        add(panelForCurrentStep(), BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        getRootPane().setDefaultButton(okayButton);
+        getRootPane().setDefaultButton(commitButton);
+        moveToStep(CurrentStep.SELECT);
 
         pack();
 
@@ -93,65 +125,19 @@ public class LocationDialogue extends JDialog {
                 (toolkit.getScreenSize().height - getSize().height) / 2);
     }
 
-    private JPanel buildContentPanel() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        relativeFileCheckbox.setText(resources.getString("config.file.relative-file.text"));
-        relativeFileCheckbox.setToolTipText(resources.getString("config.file.relative-file.tooltip"));
-
-        fileLocationRadio.setText(resources.getString("config.file.file.text"));
-        fileLocationRadio.addActionListener(new RadioButtonActionListener());
-        urlLocationRadio.setText(resources.getString("config.file.url.text"));
-        urlLocationRadio.addActionListener(new RadioButtonActionListener());
-
-        final ButtonGroup locationGroup = new ButtonGroup();
-        locationGroup.add(fileLocationRadio);
-        locationGroup.add(urlLocationRadio);
-
-        fileLocationRadio.setSelected(true);
-        enabledFileLocation();
-
-        final JLabel descriptionLabel = new JLabel(resources.getString("config.file.description.text"));
-        descriptionField.setToolTipText(resources.getString("config.file.description.tooltip"));
-
-        final JLabel fileLocationLabel = new JLabel(resources.getString("config.file.file.label"));
-
-        final JLabel urlLocationlabel = new JLabel(resources.getString("config.file.url.label"));
-
-        final JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBorder(new EmptyBorder(8, 8, 4, 8));
-
-        contentPanel.add(descriptionLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        contentPanel.add(descriptionField, new GridBagConstraints(1, 0, 2, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-
-        contentPanel.add(fileLocationRadio, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-
-        contentPanel.add(fileLocationLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        contentPanel.add(fileLocationField, new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-        contentPanel.add(browseButton, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-
-        contentPanel.add(relativeFileCheckbox, new GridBagConstraints(1, 3, 2, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-
-        contentPanel.add(urlLocationRadio, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 4, 4, 4), 0, 0));
-
-        contentPanel.add(urlLocationlabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
-        contentPanel.add(urlLocationField, new GridBagConstraints(1, 5, 2, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-
-        contentPanel.add(Box.createVerticalGlue(), new GridBagConstraints(0, 6, 3, 1, 0.0, 1.0,
-                GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
-
-        return contentPanel;
+    private JPanel panelForCurrentStep() {
+        switch (currentStep) {
+            case SELECT:
+                return locationPanel;
+            case PROPERTIES:
+                return propertiesPanel;
+            case ERROR:
+                return errorPanel;
+            case COMPLETE:
+                return completePanel;
+            default:
+                throw new IllegalStateException("Unknown step: " + currentStep);
+        }
     }
 
     @Override
@@ -168,71 +154,29 @@ public class LocationDialogue extends JDialog {
      * @return the location or null if no valid location entered.
      */
     public ConfigurationLocation getConfigurationLocation() {
-        if (fileLocationField.isEnabled()) {
-            if (isNotBlank(fileLocationField.getText())) {
-                return ConfigurationLocationFactory.create(project, typeOfFile(),
-                        fileLocationField.getText(), descriptionField.getText());
-            }
-
-        } else if (urlLocationField.isEnabled()) {
-            if (isNotBlank(urlLocationField.getText())) {
-                return ConfigurationLocationFactory.create(project, ConfigurationType.HTTP_URL,
-                        urlLocationField.getText(), descriptionField.getText());
-            }
-        }
-
-        return null;
+        return configurationLocation;
     }
 
-    private ConfigurationType typeOfFile() {
-        if (relativeFileCheckbox.isSelected()) {
-            return ConfigurationType.PROJECT_RELATIVE;
-        }
-        return ConfigurationType.LOCAL_FILE;
-    }
+    private void moveToStep(final CurrentStep newStep) {
+        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
 
-    /*
-     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
-     * some packages of IDEA 7.x.
-     */
-    private boolean isNotBlank(final String str) {
-        int strLen;
-        if (str == null || (strLen = str.length()) == 0) {
-            return false;
-        }
-        for (int i = 0; i < strLen; i++) {
-            if ((!Character.isWhitespace(str.charAt(i)))) {
-                return true;
-            }
-        }
-        return false;
-    }
+        remove(panelForCurrentStep());
+        currentStep = newStep;
 
-    /**
-     * Set the configuration location.
-     *
-     * @param configurationLocation the location.
-     */
-    public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
-        relativeFileCheckbox.setSelected(false);
-
-        if (configurationLocation == null) {
-            fileLocationRadio.setEnabled(true);
-            fileLocationField.setText(null);
-
-        } else if (configurationLocation.getType() == ConfigurationType.LOCAL_FILE
-                || configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE) {
-            fileLocationRadio.setEnabled(true);
-            fileLocationField.setText(configurationLocation.getLocation());
-            relativeFileCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE);
-
-        } else if (configurationLocation.getType() == ConfigurationType.HTTP_URL) {
-            urlLocationRadio.setEnabled(true);
-            urlLocationField.setText(configurationLocation.getLocation());
-
+        if (currentStep.isAllowCommit()) {
+            commitButton.setText(resources.getString("config.file.okay.text"));
+            commitButton.setToolTipText(resources.getString("config.file.okay.text"));
         } else {
-            throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());
+            commitButton.setText(resources.getString("config.file.next.text"));
+            commitButton.setToolTipText(resources.getString("config.file.next.text"));
         }
+
+        previousButton.setEnabled(currentStep.isAllowPrevious());
+        commitButton.setEnabled(currentStep.isAllowNext() || currentStep.isAllowCommit());
+
+        getContentPane().add(panelForCurrentStep(), BorderLayout.CENTER);
+        getContentPane().validate();
+        getContentPane().repaint();
     }
 
     /**
@@ -244,76 +188,120 @@ public class LocationDialogue extends JDialog {
         return committed;
     }
 
-    private void enabledFileLocation() {
-        fileLocationField.setEnabled(true);
-        browseButton.setEnabled(true);
+    private void testLoadOfFile(final ConfigurationLocation location) {
+        configurationLocation = location;
 
-        urlLocationField.setEnabled(false);
-    }
-
-    private void enabledURLLocation() {
-        fileLocationField.setEnabled(false);
-        browseButton.setEnabled(false);
-
-        urlLocationField.setEnabled(true);
-    }
-
-    /**
-     * Respond to an okay action.
-     */
-    private class OkayAction extends AbstractAction {
-        private static final long serialVersionUID = 3800521701284308642L;
-
-        /**
-         * Create a new action.
-         */
-        public OkayAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
-                    "config.file.okay.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.okay.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.okay.tooltip"));
+        try {
+            new CheckerFactory().getChecker(location, null);
+        } catch (Exception e) {
+            errorPanel.setError(e);
+            moveToStep(CurrentStep.ERROR);
+            return;
         }
 
+        moveToStep(CurrentStep.COMPLETE);
+    }
+
+    private class NextAction extends AbstractAction {
+        private static final long serialVersionUID = 3800521701284308642L;
+
         public void actionPerformed(final ActionEvent event) {
-            final ConfigurationLocation location = getConfigurationLocation();
+            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
 
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
+            commitButton.setEnabled(false);
 
-            if (location == null) {
-                Messages.showErrorDialog(project, resources.getString("config.file.no-file"),
-                        resources.getString("config.file.error.title"));
-                return;
-            }
-
-            InputStream configInputStream = null;
-            try {
-                configInputStream = location.resolve();
-
-            } catch (IOException e) {
-                final String message = resources.getString("config.file.resolve-failed");
-                final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-                Messages.showErrorDialog(project, formattedMessage, resources.getString("config.file.error.title"));
-
-                return;
-
-            } finally {
-                if (configInputStream != null) {
-                    try {
-                        configInputStream.close();
-                    } catch (IOException e) {
-                        // ignored
+            final ConfigurationLocation location;
+            switch (currentStep) {
+                case SELECT:
+                    location = locationPanel.getConfigurationLocation();
+                    if (location == null) {
+                        showError(resources, resources.getString("config.file.no-file"));
+                        return;
                     }
-                }
-            }
 
-            committed = true;
-            setVisible(false);
+                    if (location.getDescription() == null || location.getDescription().isEmpty()) {
+                        showError(resources, resources.getString("config.file.no-description"));
+                        return;
+                    }
+
+                    Map<String, String> properties;
+                    try {
+                        location.resolve();
+                        properties = location.getProperties();
+
+                    } catch (IOException e) {
+                        final String message = resources.getString("config.file.resolve-failed");
+                        final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
+                        showError(resources, formattedMessage);
+                        return;
+                    }
+
+                    if (properties == null || properties.isEmpty()) {
+                        testLoadOfFile(location);
+                    } else {
+                        propertiesPanel.setConfigurationLocation(location);
+                        moveToStep(CurrentStep.PROPERTIES);
+                    }
+                    return;
+
+                case PROPERTIES:
+                    location = propertiesPanel.getConfigurationLocation();
+                    testLoadOfFile(location);
+                    return;
+
+                case COMPLETE:
+                    committed = true;
+                    setVisible(false);
+                    return;
+
+                default:
+                    throw new IllegalStateException("Unexpected next call for step " + currentStep);
+            }
+        }
+    }
+
+    private void showError(final ResourceBundle resources, final String formattedMessage) {
+        Messages.showErrorDialog(this, formattedMessage, resources.getString("config.file.error.title"));
+        commitButton.setEnabled(true);
+    }
+
+    private class PreviousAction extends AbstractAction {
+        private static final long serialVersionUID = 3800521701284308642L;
+
+        public PreviousAction() {
+            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
+
+            putValue(Action.NAME, resources.getString("config.file.previous.text"));
+            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.previous.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.previous.tooltip"));
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            previousButton.setEnabled(false);
+
+            switch (currentStep) {
+                case PROPERTIES:
+                    moveToStep(CurrentStep.SELECT);
+                    return;
+
+                case COMPLETE:
+                case ERROR:
+                    try {
+                        final Map<String, String> properties = configurationLocation.getProperties();
+                        if (properties == null || properties.isEmpty()) {
+                            moveToStep(CurrentStep.SELECT);
+                        } else {
+                            moveToStep(CurrentStep.PROPERTIES);
+                        }
+                    } catch (IOException e1) {
+                        moveToStep(CurrentStep.SELECT);
+                    }
+                    return;
+
+                default:
+                    throw new IllegalStateException("Unexpected previous call for step " + currentStep);
+            }
         }
     }
 
@@ -323,88 +311,19 @@ public class LocationDialogue extends JDialog {
     private class CancelAction extends AbstractAction {
         private static final long serialVersionUID = -994620715558602656L;
 
-        /**
-         * Create a new action.
-         */
         public CancelAction() {
             final ResourceBundle resources = ResourceBundle.getBundle(
                     CheckStyleConstants.RESOURCE_BUNDLE);
 
-            putValue(Action.NAME, resources.getString(
-                    "config.file.cancel.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.cancel.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.cancel.tooltip"));
+            putValue(Action.NAME, resources.getString("config.file.cancel.text"));
+            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.cancel.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.cancel.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
             committed = false;
 
             setVisible(false);
-        }
-    }
-
-    /**
-     * Process a click on the browse button.
-     */
-    protected final class BrowseAction extends AbstractAction {
-        private static final long serialVersionUID = -992858528081327052L;
-
-        /**
-         * Create a new browse action.
-         */
-        public BrowseAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
-                    "config.file.browse.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
-        }
-
-        public void actionPerformed(final ActionEvent e) {
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new ExtensionFileFilter("xml"));
-
-            final String configFilePath = fileLocationField.getText();
-            if (configFilePath != null && configFilePath.trim().length() > 0) {
-                fileChooser.setSelectedFile(new File(configFilePath));
-            } else {
-                final VirtualFile projectBaseDir = project.getBaseDir();
-                if (projectBaseDir != null) {
-                    final File baseDir = new File(projectBaseDir.getPath());
-                    if (baseDir.exists()) {
-                        fileChooser.setCurrentDirectory(baseDir);
-                    }
-                }
-            }
-
-            final int result = fileChooser.showOpenDialog(LocationDialogue.this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                final File newConfigFile = fileChooser.getSelectedFile();
-                fileLocationField.setText(newConfigFile.getAbsolutePath());
-            }
-        }
-    }
-
-    /**
-     * Handles radio button selections.
-     */
-    protected final class RadioButtonActionListener implements ActionListener {
-        public void actionPerformed(final ActionEvent e) {
-            if (urlLocationRadio.isSelected()) {
-                enabledURLLocation();
-
-            } else if (fileLocationRadio.isSelected()) {
-                enabledFileLocation();
-
-            } else {
-                throw new IllegalStateException("Unknown radio button state");
-            }
         }
     }
 }
