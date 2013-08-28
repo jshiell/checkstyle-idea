@@ -26,8 +26,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +40,16 @@ public class CheckerFactory {
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
+    private List<URL> thirdPartyClassPath = null;
+
+    public Checker getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
+            throws CheckstyleException, IOException {
+        thirdPartyClassPath = new ArrayList<URL>();
+        for (String path : thirdPartyJars) {
+            thirdPartyClassPath.add(new File(path).toURI().toURL());
+        }
+        return getChecker(location, null, null);
+    }
 
     /**
      * Get a checker for a given configuration, with the default module classloader.
@@ -108,6 +120,9 @@ public class CheckerFactory {
             throws MalformedURLException {
         if (classLoader == null && module != null) {
             return moduleClassPathBuilder(module).build(module);
+        } else if (classLoader == null && module == null && thirdPartyClassPath != null) {
+            URL[] urls = new URL[thirdPartyClassPath.size()];
+            return new URLClassLoader(thirdPartyClassPath.toArray(urls), this.getClass().getClassLoader());
         }
         return classLoader;
     }

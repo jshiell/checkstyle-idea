@@ -306,7 +306,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         public void actionPerformed(final ActionEvent e) {
-            final LocationDialogue dialogue = new LocationDialogue(project);
+            final LocationDialogue dialogue = new LocationDialogue(project, getThirdPartyClasspath());
 
             dialogue.setVisible(true);
 
