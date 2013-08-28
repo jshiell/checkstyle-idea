@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.4</version>
+    <version>4.4.1</version>
     <idea-version since-build="129.677"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.4.1: Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to sishbi (#79).</li>
     <li>4.4: Improved: Adding rules files now validates the file before committing.</li>
     <li>4.4: Improved: Preferences UI improved.</li>
     <li>4.4: New: Scan toolwindow now allows quick selection of a configured rules file.</li>

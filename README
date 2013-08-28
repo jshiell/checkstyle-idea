@@ -127,6 +127,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Benjy W
 * Yuri
 * Kristin Young
+* sishbi
 
  And also thanks are due to the authors and contributors of:
 
@@ -150,6 +151,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.4.1 - Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to sishbi (#79).
 4.4   - Improved: Adding rules files now validates the file before committing.
 4.4   - Improved: Preferences UI improved.
 4.4   - New: Scan toolwindow now allows quick selection of a configured rules file.
