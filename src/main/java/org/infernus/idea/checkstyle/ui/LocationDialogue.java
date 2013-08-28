@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -56,6 +57,7 @@ public class LocationDialogue extends JDialog {
     private final CompletePanel completePanel;
 
     private final Project project;
+    private final List<String> thirdPartyClasspath;
 
     private JButton commitButton;
     private JButton previousButton;
@@ -67,8 +69,9 @@ public class LocationDialogue extends JDialog {
      * Create a dialogue.
      *
      * @param project the current project.
+     * @param thirdPartyClasspath the third-party classpath.
      */
-    public LocationDialogue(final Project project) {
+    public LocationDialogue(final Project project, final List<String> thirdPartyClasspath) {
         super(WindowManager.getInstance().getFrame(project));
 
         if (project == null) {
@@ -76,6 +79,7 @@ public class LocationDialogue extends JDialog {
         }
 
         this.project = project;
+        this.thirdPartyClasspath = thirdPartyClasspath;
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project);
         this.errorPanel = new ErrorPanel();
@@ -192,7 +196,7 @@ public class LocationDialogue extends JDialog {
         configurationLocation = location;
 
         try {
-            new CheckerFactory().getChecker(location, null);
+            new CheckerFactory().getChecker(location, thirdPartyClasspath);
         } catch (Exception e) {
             errorPanel.setError(e);
             moveToStep(CurrentStep.ERROR);
