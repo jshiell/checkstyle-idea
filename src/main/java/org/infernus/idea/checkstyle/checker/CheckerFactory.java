@@ -276,8 +276,11 @@ public class CheckerFactory {
     }
 
     private class CheckerFactoryWorker extends Thread {
+        private static final String TREE_WALKER_ELEMENT = "TreeWalker";
         private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
         private static final String SUPPRESSION_FILTER_FILE = "file";
+        private static final String IMPORT_CONTROL_ELEMENT = "ImportControl";
+        private static final String IMPORT_CONTROL_FILE = "file";
         private static final String REGEXP_HEADER_ELEMENT = "RegexpHeader";
         private static final String REGEXP_HEADER_HEADERFILE = "headerFile";
 
@@ -321,7 +324,7 @@ public class CheckerFactory {
                         config = ConfigurationLoader.loadConfiguration(
                                 new InputSource(configurationInputStream), resolver, true);
 
-                        replaceSuppressionFilterPath(config);
+                        replaceFilePaths(config);
 
                         checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
                         checker.configure(config);
@@ -346,13 +349,13 @@ public class CheckerFactory {
         }
 
         /**
-         * Scans the configuration for suppression filters and
+         * Scans the configuration for elements with filenames and
          * replaces relative paths with absolute ones.
          *
          * @param rootElement the current configuration.
          * @throws CheckstyleException if configuration fails.
          */
-        private void replaceSuppressionFilterPath(final Configuration rootElement)
+        private void replaceFilePaths(final Configuration rootElement)
                 throws CheckstyleException {
 
             if (!(rootElement instanceof DefaultConfiguration)) {
@@ -368,6 +371,13 @@ public class CheckerFactory {
                 } else if (REGEXP_HEADER_ELEMENT.equals(currentChild.getName())) {
                     checkFilenameForProperty((DefaultConfiguration) rootElement,
                             currentChild, REGEXP_HEADER_ELEMENT, REGEXP_HEADER_HEADERFILE);
+
+                } else if (IMPORT_CONTROL_ELEMENT.equals(currentChild.getName())) {
+                    checkFilenameForProperty((DefaultConfiguration) rootElement,
+                            currentChild, IMPORT_CONTROL_ELEMENT, IMPORT_CONTROL_FILE);
+
+                } else if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
+                    replaceFilePaths(currentChild);
                 }
             }
         }

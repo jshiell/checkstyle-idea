@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.4.1: Fixed: File paths in ImportControl statements are now filtered (#77).</li>
     <li>4.4.1: Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to sishbi (#79).</li>
     <li>4.4: Improved: Adding rules files now validates the file before committing.</li>
     <li>4.4: Improved: Preferences UI improved.</li>
