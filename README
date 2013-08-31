@@ -127,7 +127,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Benjy W
 * Yuri
 * Kristin Young
-* sishbi
+* Simon Billingsley
 
  And also thanks are due to the authors and contributors of:
 
@@ -152,7 +152,8 @@ Version History
 ---------------
 
 4.4.1 - Fixed: File paths in ImportControl statements are now filtered (#77).
-4.4.1 - Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to sishbi (#79).
+4.4.1 - Fixed: File choosers now work with Darcula; thanks to Simon Billingsley (#74).
+4.4.1 - Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to Simon Billingsley (#79).
 4.4   - Improved: Adding rules files now validates the file before committing.
 4.4   - Improved: Preferences UI improved.
 4.4   - New: Scan toolwindow now allows quick selection of a configured rules file.
