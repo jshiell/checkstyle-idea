@@ -1,11 +1,16 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -198,25 +203,21 @@ public class LocationPanel extends JPanel {
         }
 
         public void actionPerformed(final ActionEvent e) {
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new ExtensionFileFilter("xml"));
-
+            final VirtualFile toSelect;
             final String configFilePath = fileLocationField.getText();
             if (configFilePath != null && configFilePath.trim().length() > 0) {
-                fileChooser.setSelectedFile(new File(configFilePath));
+                toSelect = LocalFileSystem.getInstance().findFileByPath(configFilePath);
             } else {
-                final VirtualFile projectBaseDir = project.getBaseDir();
-                if (projectBaseDir != null) {
-                    final File baseDir = new File(projectBaseDir.getPath());
-                    if (baseDir.exists()) {
-                        fileChooser.setCurrentDirectory(baseDir);
-                    }
-                }
+                toSelect = project.getBaseDir();
             }
 
-            final int result = fileChooser.showOpenDialog(LocationPanel.this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                final File newConfigFile = fileChooser.getSelectedFile();
+            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
+                    (String)getValue(Action.NAME),
+                    (String)getValue(Action.SHORT_DESCRIPTION),
+                    "xml");
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
+            if (chosen != null) {
+                final File newConfigFile = VfsUtilCore.virtualToIoFile(chosen);
                 fileLocationField.setText(newConfigFile.getAbsolutePath());
             }
         }
