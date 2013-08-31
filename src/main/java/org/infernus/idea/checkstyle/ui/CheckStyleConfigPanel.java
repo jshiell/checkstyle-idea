@@ -1,14 +1,19 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -413,26 +418,16 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         public void actionPerformed(final ActionEvent e) {
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new ExtensionFileFilter("jar"));
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-            fileChooser.setCurrentDirectory(getProjectPath());
-
-            final int result = fileChooser.showOpenDialog(CheckStyleConfigPanel.this);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
+                    (String)getValue(Action.NAME),
+                    (String)getValue(Action.SHORT_DESCRIPTION),
+                    "jar");
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, project.getBaseDir());
+            if (chosen != null) {
                 ((DefaultListModel) pathList.getModel()).addElement(
-                        fileChooser.getSelectedFile().getAbsolutePath());
+                        VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
             }
         }
-    }
-
-    private File getProjectPath() {
-        final VirtualFile baseDir = project.getBaseDir();
-        if (baseDir == null) {
-            return null;
-        }
-
-        return new File(baseDir.getPath());
     }
 
     /**
@@ -461,15 +456,15 @@ public final class CheckStyleConfigPanel extends JPanel {
             final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
             final String selectedFile = (String) listModel.get(selected);
 
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new ExtensionFileFilter("jar"));
-            fileChooser.setSelectedFile(new File(selectedFile));
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-            final int result = fileChooser.showOpenDialog(CheckStyleConfigPanel.this);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
+                    (String)getValue(Action.NAME),
+                    (String)getValue(Action.SHORT_DESCRIPTION),
+                    "jar");
+            final VirtualFile toSelect = LocalFileSystem.getInstance().findFileByPath(selectedFile);
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
+            if (chosen != null) {
                 listModel.remove(selected);
-                listModel.add(selected, fileChooser.getSelectedFile().getAbsolutePath());
+                listModel.add(selected, VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
                 pathList.setSelectedIndex(selected);
             }
         }
