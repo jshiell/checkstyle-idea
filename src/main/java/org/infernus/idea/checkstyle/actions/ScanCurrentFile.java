@@ -8,11 +8,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
 import java.util.Arrays;
@@ -21,9 +18,6 @@ import java.util.Arrays;
  * Action to execute a CheckStyle scan on the current editor file.
  */
 public class ScanCurrentFile extends BaseAction {
-
-    private static final Log LOG = LogFactory.getLog(
-            ScanCurrentFile.class);
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
@@ -41,23 +35,28 @@ public class ScanCurrentFile extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
-            toolWindow.activate(null);
+            toolWindow.activate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-            setProgressText(toolWindow, "plugin.status.in-progress.current");
+                        // read select file
+                        final VirtualFile[] selectedFiles
+                                = FileEditorManager.getInstance(project).getSelectedFiles();
+                        if (selectedFiles.length > 0) {
+                            project.getComponent(CheckStylePlugin.class).checkFiles(
+                                    Arrays.asList(selectedFiles), getSelectedOverride(toolWindow));
+                        }
 
-            // read select file
-            final VirtualFile[] selectedFiles
-                    = FileEditorManager.getInstance(project).getSelectedFiles();
-            if (selectedFiles.length > 0) {
-                project.getComponent(CheckStylePlugin.class).checkFiles(
-                        Arrays.asList(selectedFiles), getSelectedOverride(toolWindow));
-            }
+                    } catch (Throwable e) {
+                        CheckStylePlugin.processErrorAndLog("Current File scan", e);
+                    }
+                }
+            });
+
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Current file scan failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Current File scan", e);
         }
     }
 
@@ -98,11 +97,7 @@ public class ScanCurrentFile extends BaseAction {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
             }
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Button update failed.", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Current File button update", e);
         }
     }
 }

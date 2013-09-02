@@ -9,23 +9,13 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 /**
  * Action to execute a CheckStyle scan on the current project.
  */
 public class ScanProject extends BaseAction {
-
-    private static final Log LOG = LogFactory.getLog(
-            ScanProject.class);
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
@@ -43,24 +33,28 @@ public class ScanProject extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
-            toolWindow.activate(null);
+            toolWindow.activate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-            setProgressText(toolWindow, "plugin.status.in-progress.project");
+                        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+                        final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
 
-            final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-            final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
+                        if (sourceRoots != null && sourceRoots.length > 0) {
+                            ApplicationManager.getApplication().runReadAction(
+                                    new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow)));
+                        }
 
-            if (sourceRoots != null && sourceRoots.length > 0) {
-                ApplicationManager.getApplication().runReadAction(
-                        new ScanProjectAction(project, sourceRoots, getSelectedOverride(toolWindow)));
-            }
+                    } catch (Throwable e) {
+                        CheckStylePlugin.processErrorAndLog("Project scan", e);
+                    }
+                }
+            });
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Current project scan failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Project scan", e);
         }
     }
 
@@ -96,52 +90,8 @@ public class ScanProject extends BaseAction {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
             }
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Button update failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Project button update", e);
         }
     }
 
-    private static class ScanProjectAction implements Runnable {
-        private final Project project;
-        private final VirtualFile[] sourceRoots;
-        private final ConfigurationLocation selectedOverride;
-
-        public ScanProjectAction(@NotNull final Project project,
-                                 @NotNull final VirtualFile[] sourceRoots,
-                                 final ConfigurationLocation selectedOverride) {
-            this.project = project;
-            this.sourceRoots = sourceRoots;
-            this.selectedOverride = selectedOverride;
-        }
-
-        public void run() {
-            project.getComponent(CheckStylePlugin.class).checkFiles(
-                    flattenFiles(sourceRoots), selectedOverride);
-        }
-
-        /**
-         * Flatten a nested list of files, returning all files in the array.
-         *
-         * @param files the top level of files.
-         * @return the flattened list of files.
-         */
-        private List<VirtualFile> flattenFiles(final VirtualFile[] files) {
-            final List<VirtualFile> flattened = new ArrayList<VirtualFile>();
-
-            if (files != null) {
-                for (final VirtualFile file : files) {
-                    flattened.add(file);
-
-                    if (file.getChildren() != null) {
-                        flattened.addAll(flattenFiles(file.getChildren()));
-                    }
-                }
-            }
-
-            return flattened;
-        }
-    }
 }

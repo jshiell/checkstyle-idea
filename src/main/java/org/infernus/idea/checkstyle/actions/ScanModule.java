@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -11,21 +12,13 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-
-import java.util.Arrays;
 
 /**
  * Action to execute a CheckStyle scan on the current module.
  */
 public class ScanModule extends BaseAction {
-
-    private static final Log LOG = LogFactory.getLog(
-            ScanModule.class);
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
@@ -58,26 +51,26 @@ public class ScanModule extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            toolWindow.activate(null);
+            toolWindow.activate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-            setProgressText(toolWindow, "plugin.status.in-progress.module");
+                        final VirtualFile[] moduleSourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
+                        if (moduleSourceRoots.length > 0) {
+                            ApplicationManager.getApplication().runReadAction(
+                                    new ScanSourceRootsAction(project, moduleSourceRoots, getSelectedOverride(toolWindow)));
+                        }
 
-            // find module files
-            final ModuleRootManager moduleRootManager
-                    = ModuleRootManager.getInstance(module);
-            final VirtualFile[] moduleFiles = moduleRootManager.getSourceRoots();
-
-            if (moduleFiles.length > 0) {
-                project.getComponent(CheckStylePlugin.class).checkFiles(
-                        Arrays.asList(moduleFiles), getSelectedOverride(toolWindow));
-            }
+                    } catch (Throwable e) {
+                        CheckStylePlugin.processErrorAndLog("Current Module scan", e);
+                    }
+                }
+            });
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Current module scan failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Current Module scan", e);
         }
     }
 
@@ -124,11 +117,7 @@ public class ScanModule extends BaseAction {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
             }
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Button update failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Current Module button update", e);
         }
     }
 }

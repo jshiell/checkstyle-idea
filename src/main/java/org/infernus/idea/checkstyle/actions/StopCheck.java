@@ -6,19 +6,13 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 
 /**
  * Action to stop a check in progress.
  */
 public class StopCheck extends BaseAction {
-
-    private static final Log LOG = LogFactory.getLog(
-            StopCheck.class);
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
@@ -36,18 +30,19 @@ public class StopCheck extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
-            toolWindow.activate(null);
+            toolWindow.activate(new Runnable() {
+                @Override
+                public void run() {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-            checkStylePlugin.stopChecks();
+                    checkStylePlugin.stopChecks();
 
-            setProgressText(toolWindow, "plugin.status.aborted");
+                    setProgressText(toolWindow, "plugin.status.aborted");
+                }
+            });
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Scan abort failed", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Abort Scan", e);
         }
     }
 
@@ -71,11 +66,7 @@ public class StopCheck extends BaseAction {
             presentation.setEnabled(checkStylePlugin.isScanInProgress());
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
-            if (processed != null) {
-                LOG.error("Button update failed.", processed);
-            }
+            CheckStylePlugin.processErrorAndLog("Abort button update", e);
         }
     }
 }

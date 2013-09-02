@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.4.1: Fixed: ScanCurrentFile now works from the editor if the tool window has not yet been shown (#82).</li>
     <li>4.4.1: Fixed: File paths in ImportControl statements are now filtered (#77).</li>
     <li>4.4.1: Fixed: File choosers now work with Darcula; thanks to Simon Billingsley (#74).</li>
     <li>4.4.1: Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to Simon Billingsley (#79).</li>
@@ -45,30 +46,6 @@
     <li>4.0: New: Updated to IDEA 12 API. This means we now require IDEA 12.0.1 or above.</li>
     <li>4.0: Improved: Updated plugin structure to something a little more modern, allowing goodies such as #33.</li>
     <li>4.0: Fixed: Dependent modules are now probably included when searching for custom exceptions (#42).</li>
-    <li>3.9.1: Fixed: Default rules are invalid with CS5.6.</li>
-    <li>3.9: Fixed: Match on leading project path causes tokenisation silliness (#9).</li>
-    <li>3.9: New: Updated CheckStyle to 5.6.</li>
-    <li>3.8.4: Fixed: IDE error on pre-check-in scan (#39).</li>
-    <li>3.8.3: Fixed: Synchronisation issue introduced by earlier fix (#36).</li>
-    <li>3.8.2: Fixed: Library classes are now included in the Checkstyle classpath (#34).</li>
-    <li>3.8.2: Fixed: Removed actions not specific to the current editor from the popup menu (#31).</li>
-    <li>3.8.2: Fixed: Changed text to match IDEA by removing full-stops (#30).</li>
-    <li>3.8.1: Fixed: Inline regexp header defs no longer cause an exception (#29).</li>
-    <li>3.8: New: An option has been added to scan all (i.e. non-Java) files.</li>
-    <li>3.8: New: A button has been added to scan the current change list.</li>
-    <li>3.8: New: Modules can now be excluded from scans.</li>
-    <li>3.8: New: Add file dialogue now sets the base directory to the project directory.</li>
-    <li>3.8: Improved: RegexpHeader.headerFile is now resolved in the same manner as the suppression file.</li>
-    <li>3.8: Improved: Rewrote file tokenisation to hopefully help with #9.</li>
-    <li>3.7: New: Updated CheckStyle to 5.5.</li>
-    <li>3.7: New: Added button to trigger rules refresh.</li>
-    <li>3.7: Fixed: Assertion errors from IDEA are now ignored during Inspections executions (#22).</li>
-    <li>3.7: Fixed: Scan on check-in broken in IDEA 11 (#24).</li>
-    <li>3.6.2: Improved: Scan results are now sorted alphabetically.</li>
-    <li>3.6.2: Fixed: Duplicate errors reported during project scans (#16).</li>
-    <li>3.6.2: Fixed: Edited rule file properties are now properly saved.</li>
-    <li>3.6.1: Fixed: Deadlock when trying to access editor information with IDEA 11.</li>
-    <li>3.6: New: Changed to work with IDEA 11. Thanks to Yuri.</li>
     <li><em>For older changes please see the README.</em></li>
 </ul>
         ]]>

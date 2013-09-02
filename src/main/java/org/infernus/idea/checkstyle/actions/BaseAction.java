@@ -72,9 +72,9 @@ public abstract class BaseAction extends AnAction {
 
     protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
+        // the content instance will be a JLabel while the component initialises
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
             final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setProgressText(resources.getString(progressTextKey));
         }
@@ -82,7 +82,8 @@ public abstract class BaseAction extends AnAction {
 
     protected ConfigurationLocation getSelectedOverride(final ToolWindow toolWindow) {
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
+        // the content instance will be a JLabel while the component initialises
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
             return ((CheckStyleToolWindowPanel) content.getComponent()).getSelectedOverride();
         }
         return null;

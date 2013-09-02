@@ -123,10 +123,18 @@ public final class CheckStylePlugin implements ProjectComponent {
         return new CheckStylePluginException(root.getMessage(), root);
     }
 
+    public static void processErrorAndLog(@NotNull final String action,
+                                          @NotNull final Throwable e) {
+        final CheckStylePluginException processed = processError(null, e);
+        if (processed != null) {
+            LOG.error(action + " failed", processed);
+        }
+    }
+
     /**
      * Run a scan on the passed files.
      *
-     * @param files the files to check.
+     * @param files                  the files to check.
      * @param overrideConfigLocation if non-null this configuration will be used in preference to the normal configuration.
      */
     public void checkFiles(final List<VirtualFile> files,
