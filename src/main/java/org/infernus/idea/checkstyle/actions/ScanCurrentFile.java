@@ -1,8 +1,8 @@
 package org.infernus.idea.checkstyle.actions;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
-import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -41,12 +41,10 @@ public class ScanCurrentFile extends BaseAction {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        // read select file
-                        final VirtualFile[] selectedFiles
-                                = FileEditorManager.getInstance(project).getSelectedFiles();
-                        if (selectedFiles.length > 0) {
+                        final VirtualFile selectedFile = getSelectedFile(project);
+                        if (selectedFile != null) {
                             project.getComponent(CheckStylePlugin.class).checkFiles(
-                                    Arrays.asList(selectedFiles), getSelectedOverride(toolWindow));
+                                    Arrays.asList(selectedFile), getSelectedOverride(toolWindow));
                         }
 
                     } catch (Throwable e) {
@@ -58,6 +56,24 @@ public class ScanCurrentFile extends BaseAction {
         } catch (Throwable e) {
             CheckStylePlugin.processErrorAndLog("Current File scan", e);
         }
+    }
+
+    private VirtualFile getSelectedFile(final Project project) {
+        final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+        if (selectedTextEditor != null) {
+            final VirtualFile selectedFile = FileDocumentManager.getInstance().getFile(selectedTextEditor.getDocument());
+            if (selectedFile != null) {
+                return selectedFile;
+            }
+        }
+
+        // this is the preferred solution, but it doesn't respect the focus of split editors at present
+        final VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
+        if (selectedFiles != null && selectedFiles.length > 0) {
+            return selectedFiles[0];
+        }
+
+        return null;
     }
 
     @Override
@@ -77,21 +93,18 @@ public class ScanCurrentFile extends BaseAction {
             }
 
             final boolean scanOnlyJavaFiles = !checkStylePlugin.getConfiguration().isScanningNonJavaFiles();
-            final VirtualFile[] selectedFiles
-                    = FileEditorManager.getInstance(project).getSelectedFiles();
+            final VirtualFile selectedFile = getSelectedFile(project);
 
             // disable if no files are selected
             final Presentation presentation = event.getPresentation();
-            if (selectedFiles == null || selectedFiles.length == 0) {
+            if (selectedFile == null) {
                 presentation.setEnabled(false);
 
             } else if (scanOnlyJavaFiles) {
                 // check files are valid
-                for (final VirtualFile file : selectedFiles) {
-                    if (!CheckStyleUtilities.isJavaFile(file.getFileType())) {
-                        presentation.setEnabled(false);
-                        return;
-                    }
+                if (!CheckStyleUtilities.isJavaFile(selectedFile.getFileType())) {
+                    presentation.setEnabled(false);
+                    return;
                 }
 
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());

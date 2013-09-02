@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.4.1: Fixed: Added a work-around for the API not respecting focus for split editors (#78).</li>
     <li>4.4.1: Fixed: ScanCurrentFile now works from the editor if the tool window has not yet been shown (#82).</li>
     <li>4.4.1: Fixed: File paths in ImportControl statements are now filtered (#77).</li>
     <li>4.4.1: Fixed: File choosers now work with Darcula; thanks to Simon Billingsley (#74).</li>
