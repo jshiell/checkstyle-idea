@@ -31,6 +31,7 @@ public abstract class AbstractCheckerThread extends Thread {
     private final ConfigurationLocation overrideConfigLocation;
 
     private Map<PsiFile, List<ProblemDescriptor>> fileResults;
+    private boolean didRulesFileExists;
     private boolean running = true;
 
     public AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
@@ -86,6 +87,10 @@ public abstract class AbstractCheckerThread extends Thread {
         this.running = running;
     }
 
+    protected boolean didRulesFileExists() {
+        return didRulesFileExists;
+    }
+
     public void stopCheck() {
         setRunning(false);
     }
@@ -127,6 +132,8 @@ public abstract class AbstractCheckerThread extends Thread {
 
             final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassLoader, overrideConfigLocation);
             this.runFileScanner(fileScanner);
+
+            didRulesFileExists = fileScanner.didRulesFileExists();
 
             //noinspection ThrowableResultOfMethodCallIgnored
             if (fileScanner.getError() != null) {

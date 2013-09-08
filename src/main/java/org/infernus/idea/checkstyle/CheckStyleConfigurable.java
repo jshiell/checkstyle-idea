@@ -105,7 +105,7 @@ public class CheckStyleConfigurable implements Configurable {
 
         final CheckStyleConfiguration configuration = getConfiguration();
         configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
-        configPanel.setDefaultLocation(configuration.getDefaultLocation());
+        configPanel.setPresetLocations(configuration.getPresetLocations());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
         configPanel.setScanTestClasses(configuration.isScanningTestClasses());
         configPanel.setScanNonJavaFiles(configuration.isScanningNonJavaFiles());

@@ -24,10 +24,8 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Provides a configuration panel for project-level configuration.
@@ -42,6 +40,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
 
+    private final Set<ConfigurationLocation> presetLocations = new HashSet<ConfigurationLocation>();
+
     private final Project project;
 
     private boolean scanTestClasses;
@@ -50,8 +50,6 @@ public final class CheckStyleConfigPanel extends JPanel {
     private List<String> thirdPartyClasspath;
     private List<ConfigurationLocation> locations;
     private ConfigurationLocation activeLocation;
-
-    private ConfigurationLocation defaultLocation;
 
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
@@ -252,11 +250,18 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public boolean isModified() throws IOException {
         return haveLocationsChanged()
-                || activeLocation.hasChangedFrom(locationModel.getActiveLocation())
+                || hasActiveLocationChanged()
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
                 || testClassesCheckbox.isSelected() != scanTestClasses
                 || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles
                 || suppressErrorsCheckbox.isSelected() != suppressingErrors;
+    }
+
+    private boolean hasActiveLocationChanged() throws IOException {
+        if (activeLocation == null) {
+            return locationModel.getActiveLocation() != null;
+        }
+        return activeLocation.hasChangedFrom(locationModel.getActiveLocation());
     }
 
     private boolean haveLocationsChanged() throws IOException {
@@ -290,8 +295,11 @@ public final class CheckStyleConfigPanel extends JPanel {
         return locationModel.getActiveLocation();
     }
 
-    public void setDefaultLocation(final ConfigurationLocation defaultLocation) {
-        this.defaultLocation = defaultLocation;
+    public void setPresetLocations(final Set<ConfigurationLocation> presetLocations) {
+        this.presetLocations.clear();
+        if (presetLocations != null) {
+            this.presetLocations.addAll(presetLocations);
+        }
     }
 
     /**
@@ -418,8 +426,8 @@ public final class CheckStyleConfigPanel extends JPanel {
 
         public void actionPerformed(final ActionEvent e) {
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
-                    (String)getValue(Action.NAME),
-                    (String)getValue(Action.SHORT_DESCRIPTION),
+                    (String) getValue(Action.NAME),
+                    (String) getValue(Action.SHORT_DESCRIPTION),
                     "jar");
             final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, project.getBaseDir());
             if (chosen != null) {
@@ -456,8 +464,8 @@ public final class CheckStyleConfigPanel extends JPanel {
             final String selectedFile = (String) listModel.get(selected);
 
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
-                    (String)getValue(Action.NAME),
-                    (String)getValue(Action.SHORT_DESCRIPTION),
+                    (String) getValue(Action.NAME),
+                    (String) getValue(Action.SHORT_DESCRIPTION),
                     "jar");
             final VirtualFile toSelect = LocalFileSystem.getInstance().findFileByPath(selectedFile);
             final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
@@ -565,7 +573,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         @Override
         public boolean isEnabled(final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem == -1 || !ObjectUtils.equals(locationModel.getLocationAt(selectedItem), defaultLocation);
+            return selectedItem == -1 || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
         }
     }
 }

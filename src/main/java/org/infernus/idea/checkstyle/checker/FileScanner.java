@@ -42,8 +42,10 @@ final class FileScanner implements Runnable {
     private final ClassLoader moduleClassLoader;
     private final ConfigurationLocation overrideConfigLocation;
 
+    private boolean rulesFileExists = true;
     private Map<PsiFile, List<ProblemDescriptor>> results;
     private Throwable error;
+
     /**
      * Create a new file scanner.
      *
@@ -95,6 +97,10 @@ final class FileScanner implements Runnable {
      */
     public Throwable getError() {
         return error;
+    }
+
+    boolean didRulesFileExists() {
+        return rulesFileExists;
     }
 
     /**
@@ -210,6 +216,7 @@ final class FileScanner implements Runnable {
 
         final ConfigurationLocation location = getConfigurationLocation(module, override);
         if (location == null) {
+            rulesFileExists = false;
             return null;
         }
 

@@ -470,6 +470,13 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         treeModel.setRootMessage("plugin.results.in-progress");
     }
 
+    public void displayWarningResult(final String messageKey) {
+        clearProgress();
+
+        treeModel.clear();
+        treeModel.setRootMessage(messageKey);
+    }
+
     /**
      * Clear the results and display notice to say an error occurred.
      *

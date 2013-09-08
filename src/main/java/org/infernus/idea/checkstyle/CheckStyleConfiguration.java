@@ -43,14 +43,14 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
 
-    private static final String DEFAULT_CONFIG = "/sun_checks.xml";
+    private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
 
-    private final Project project;
-    private final ConfigurationLocation defaultLocation;
-
+    private final Set<ConfigurationLocation> presetLocations = new HashSet<ConfigurationLocation>();
     private final Map<String, String> storage = new ConcurrentHashMap<String, String>();
     private final ReentrantLock storageLock = new ReentrantLock();
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<ConfigurationListener>());
+
+    private final Project project;
 
     /**
      * Scan files before vcs checkin.
@@ -69,10 +69,10 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
         this.project = project;
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        defaultLocation = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
-                DEFAULT_CONFIG, resources.getString("file.default.description"));
+        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
+        final ConfigurationLocation checkStyleSunChecks = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
+                SUN_CHECKS_CONFIG, resources.getString("file.default.description"));
+        presetLocations.add(checkStyleSunChecks);
     }
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
@@ -97,8 +97,8 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         return "CheckStyle-IDEA Project Settings";
     }
 
-    public ConfigurationLocation getDefaultLocation() {
-        return defaultLocation;
+    public Set<ConfigurationLocation> getPresetLocations() {
+        return Collections.unmodifiableSet(presetLocations);
     }
 
     public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
@@ -126,7 +126,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
             final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
 
             if (!storage.containsKey(ACTIVE_CONFIG)) {
-                return defaultLocation;
+                return null;
             }
 
             ConfigurationLocation activeLocation = null;
@@ -137,8 +137,8 @@ public final class CheckStyleConfiguration implements ExportableComponent,
             }
 
             if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
-                LOG.info("Active configuration is invalid, returning default");
-                return defaultLocation;
+                LOG.info("Active configuration is invalid, returning null");
+                return null;
             }
 
             // ensure we update the map with any parsing/tokenisation changes
@@ -187,8 +187,10 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 }
             }
 
-            if (!locations.contains(defaultLocation)) {
-                locations.add(0, defaultLocation);
+            for (ConfigurationLocation presetLocation : presetLocations) {
+                if (!locations.contains(presetLocation)) {
+                    locations.add(0, presetLocation);
+                }
             }
 
             // ensure we update the map with any parsing/tokenisation changes
@@ -205,7 +207,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     }
 
     private void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations,
-                                          final boolean fireEvents) {
+                                           final boolean fireEvents) {
         storageLock.lock();
         try {
             for (final Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
@@ -337,8 +339,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
             final File projectPath = getProjectPath();
             if (projectPath != null) {
-                final File fullConfigFile = new File(projectPath,
-                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
+                final File fullConfigFile = new File(projectPath, path.substring(CheckStyleConstants.PROJECT_DIR.length()));
                 return fullConfigFile.getAbsolutePath();
             } else {
                 LOG.warn("Could not untokenise path as project dir is unset: "

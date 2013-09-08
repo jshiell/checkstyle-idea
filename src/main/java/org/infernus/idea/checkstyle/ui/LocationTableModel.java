@@ -1,15 +1,9 @@
 package org.infernus.idea.checkstyle.ui;
 
-import com.intellij.util.ui.ColumnInfo;
-import com.intellij.util.ui.SortableColumnModel;
-import com.intellij.util.xml.ui.BooleanColumnInfo;
-import com.intellij.util.xml.ui.StringColumnInfo;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,18 +37,11 @@ public class LocationTableModel extends AbstractTableModel {
             locations.addAll(newLocations);
         }
 
-        if (activeLocation == null || !locations.contains(activeLocation)) {
-            activeLocation = defaultLocation();
+        if (activeLocation != null && !locations.contains(activeLocation)) {
+            activeLocation = null;
         }
 
         fireTableDataChanged();
-    }
-
-    private ConfigurationLocation defaultLocation() {
-        if (locations.size() > 0) {
-            return locations.get(0);
-        }
-        return null;
     }
 
     public void addLocation(final ConfigurationLocation location) {
@@ -94,28 +81,34 @@ public class LocationTableModel extends AbstractTableModel {
         }
 
         if (activeLocation != null) {
-            updateActiveLocation(activeLocation, locations.indexOf(activeLocation));
+            updateActiveLocation(activeLocation, locations.indexOf(activeLocation), false);
         } else {
-            updateActiveLocation(defaultLocation(), locations.indexOf(activeLocation));
+            updateActiveLocation(null, -1, false);
         }
     }
 
-    private void updateActiveLocation(@NotNull final ConfigurationLocation newLocation, final int rowIndex) {
-        int oldColumn = -1;
-        for (int i = 0; i < locations.size(); ++i) {
-            if (i != rowIndex && equals(locations.get(i), this.activeLocation)) {
-                oldColumn = i;
+    private void updateActiveLocation(@Nullable final ConfigurationLocation newLocation,
+                                      final int newRow,
+                                      final boolean allowToggle) {
+        int oldRow = -1;
+        for (int currentRow = 0; currentRow < locations.size(); ++currentRow) {
+            if (equals(locations.get(currentRow), this.activeLocation)) {
+                oldRow = currentRow;
                 break;
             }
         }
 
-        this.activeLocation = newLocation;
-
-        if (rowIndex >= 0) {
-            fireTableCellUpdated(rowIndex, COLUMN_ACTIVE);
+        if (oldRow == newRow && allowToggle) {
+            this.activeLocation = null;
+        } else {
+            this.activeLocation = newLocation;
         }
-        if (oldColumn != -1) {
-            fireTableCellUpdated(oldColumn, COLUMN_ACTIVE);
+
+        if (newRow >= 0) {
+            fireTableCellUpdated(newRow, COLUMN_ACTIVE);
+        }
+        if (oldRow >= 0) {
+            fireTableCellUpdated(oldRow, COLUMN_ACTIVE);
         }
     }
 
@@ -186,7 +179,7 @@ public class LocationTableModel extends AbstractTableModel {
 
         switch (columnIndex) {
             case COLUMN_ACTIVE:
-                updateActiveLocation(rowLocation, rowIndex);
+                updateActiveLocation(rowLocation, rowIndex, true);
                 break;
 
             default:

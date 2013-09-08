@@ -177,7 +177,7 @@ public abstract class ConfigurationLocation implements Cloneable {
             }
 
             // remove redundant properties
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -196,8 +196,10 @@ public abstract class ConfigurationLocation implements Cloneable {
     }
 
     public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
-        return !equals(configurationLocation)
+        return configurationLocation == null
+                || !equals(configurationLocation)
                 || !getProperties().equals(configurationLocation.getProperties());
+
     }
 
     public String getDescriptor() {
