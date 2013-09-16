@@ -26,11 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A configuration factory and resolver for CheckStyle.
@@ -158,7 +154,7 @@ public class CheckerFactory {
             if (checker != null) {
                 return checker.getConfig();
             }
-            throw new IllegalArgumentException("Failed to find a checker from " + location);
+            return null;
 
         } catch (Exception e) {
             throw new IllegalStateException("Unable to find or create a checker from " + location, e);
@@ -209,30 +205,35 @@ public class CheckerFactory {
         if (worker.getResult() instanceof CheckstyleException) {
             final CheckstyleException checkstyleException = (CheckstyleException) worker.getResult();
             if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
-                return showMessage(location, module, "checkstyle.double-checked-locking",
+                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking",
                         "Not compatible with CheckStyle 5.6. Remove DoubleCheckedLocking.");
             }
-
-            throw checkstyleException;
+            return blacklistAndShowMessage(location, module, "checkstyle.checker-failed", "Load failed due to {0}",
+                    checkstyleException.getMessage());
 
         } else if (worker.getResult() instanceof IOException) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
                     (IOException) worker.getResult());
-            return showMessage(location, module, "checkstyle.file-not-found", "Not found: {0}");
+            return blacklistAndShowMessage(location, module, "checkstyle.file-not-found", "Not found: {0}", location.getLocation());
 
         } else if (worker.getResult() instanceof Throwable) {
+            location.blacklist();
             throw new CheckstyleException("Could not load configuration", (Throwable) worker.getResult());
         }
 
         return (CachedChecker) worker.getResult();
     }
 
-    private CachedChecker showMessage(final ConfigurationLocation location,
-                                      final Module module,
-                                      final String messageKey,
-                                      final String messageFallback) {
-        final MessageFormat notFoundFormat = new MessageFormat(IDEAUtilities.getResource(messageKey, messageFallback));
-        IDEAUtilities.showError(module.getProject(), notFoundFormat.format(new Object[]{location.getLocation()}));
+    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
+                                                  final Module module,
+                                                  final String messageKey,
+                                                  final String messageFallback,
+                                                  final Object... messageArgs) {
+        if (!location.isBlacklisted()) {
+            location.blacklist();
+            final MessageFormat messageFormat = new MessageFormat(IDEAUtilities.getResource(messageKey, messageFallback));
+            IDEAUtilities.showError(module.getProject(), messageFormat.format(messageArgs));
+        }
         return null;
     }
 
@@ -250,8 +251,7 @@ public class CheckerFactory {
                         LOG.debug(" + URL: " + url);
                     }
                 } else {
-                    LOG.debug("+ ClassLoader: "
-                            + currentLoader.getClass().getName());
+                    LOG.debug("+ ClassLoader: " + currentLoader.getClass().getName());
                 }
 
                 currentLoader = currentLoader.getParent();

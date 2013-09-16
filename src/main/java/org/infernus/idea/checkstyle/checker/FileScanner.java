@@ -42,7 +42,7 @@ final class FileScanner implements Runnable {
     private final ClassLoader moduleClassLoader;
     private final ConfigurationLocation overrideConfigLocation;
 
-    private boolean rulesFileExists = true;
+    private ConfigurationLocationStatus configurationLocationStatus = ConfigurationLocationStatus.PRESENT;
     private Map<PsiFile, List<ProblemDescriptor>> results;
     private Throwable error;
 
@@ -99,8 +99,8 @@ final class FileScanner implements Runnable {
         return error;
     }
 
-    boolean didRulesFileExists() {
-        return rulesFileExists;
+    ConfigurationLocationStatus getConfigurationLocationStatus() {
+        return configurationLocationStatus;
     }
 
     /**
@@ -216,7 +216,12 @@ final class FileScanner implements Runnable {
 
         final ConfigurationLocation location = getConfigurationLocation(module, override);
         if (location == null) {
-            rulesFileExists = false;
+            configurationLocationStatus = ConfigurationLocationStatus.NOT_PRESENT;
+            return null;
+        }
+
+        if (location.isBlacklisted()) {
+            configurationLocationStatus = ConfigurationLocationStatus.BLACKLISTED;
             return null;
         }
 

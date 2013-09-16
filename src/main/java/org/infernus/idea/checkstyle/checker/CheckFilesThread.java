@@ -66,10 +66,15 @@ public class CheckFilesThread extends AbstractCheckerThread {
                 public void run() {
                     final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
                     if (toolWindowPanel != null) {
-                        if (didRulesFileExists()) {
-                            toolWindowPanel.displayResults(getFileResults());
-                        } else {
-                            toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
+                        switch (getConfigurationLocationStatus()) {
+                            case NOT_PRESENT:
+                                toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
+                                break;
+                            case BLACKLISTED:
+                                toolWindowPanel.displayWarningResult("plugin.results.rules-blacklist");
+                                break;
+                            default:
+                                toolWindowPanel.displayResults(getFileResults());
                         }
                     }
                     markThreadComplete();

@@ -151,6 +151,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.4.2 - Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).
 4.4.2 - New: No default rules file is applied by default (#83).
 4.4.1 - Fixed: Added a work-around for the API not respecting focus for split editors (#78).
 4.4.1 - Fixed: ScanCurrentFile now works from the editor if the tool window has not yet been shown (#82).

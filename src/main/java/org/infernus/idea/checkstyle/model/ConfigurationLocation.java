@@ -20,12 +20,15 @@ public abstract class ConfigurationLocation implements Cloneable {
 
     private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
 
+    private static final long BLACKLIST_TIME_MS = 1000 * 60;
+
     private final ConfigurationType type;
     private String location;
     private String description;
     private Map<String, String> properties = new HashMap<String, String>();
 
     private boolean propertiesCheckedThisSession;
+    private long blacklistedUntil;
 
     public ConfigurationLocation(final ConfigurationType type) {
         if (type == null) {
@@ -269,5 +272,17 @@ public abstract class ConfigurationLocation implements Cloneable {
         assert description != null;
 
         return description;
+    }
+
+    public boolean isBlacklisted() {
+        return blacklistedUntil > System.currentTimeMillis();
+    }
+
+    public void blacklist() {
+        blacklistedUntil = System.currentTimeMillis() + BLACKLIST_TIME_MS;
+    }
+
+    public void removeFromBlacklist() {
+        blacklistedUntil = 0L;
     }
 }

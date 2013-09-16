@@ -64,9 +64,17 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return null;
         }
 
+        ConfigurationLocation configurationLocation = null;
         try {
-            final ConfigurationLocation configurationLocation = getConfigurationLocation(module, checkStylePlugin);
+            configurationLocation = getConfigurationLocation(module, checkStylePlugin);
             if (configurationLocation == null) {
+                return null;
+            }
+
+            if (configurationLocation.isBlacklisted()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Configuration is blacklisted, skipping: " + configurationLocation);
+                }
                 return null;
             }
 
@@ -75,6 +83,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
+
+            if (configurationLocation != null) {
+                configurationLocation.blacklist();
+            }
+
             throw new CheckStylePluginException("Couldn't create Checker", e);
         }
     }
