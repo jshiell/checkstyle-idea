@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicHTML;
+import javax.swing.text.View;
 import java.awt.*;
 import java.net.URL;
 import java.util.MissingResourceException;
@@ -20,12 +22,9 @@ import java.util.ResourceBundle;
 public final class IDEAUtilities {
 
     private static final Log LOG = LogFactory.getLog(IDEAUtilities.class);
+    private static final int PREFERRED_ALERT_WIDTH = 400;
 
-    /**
-     * This is a utility class and cannot be instantiated.
-     */
     private IDEAUtilities() {
-
     }
 
     /**
@@ -80,6 +79,7 @@ public final class IDEAUtilities {
         final Runnable showMessage = new Runnable() {
             public void run() {
                 final JLabel messageLabel = new JLabel(messageText);
+                messageLabel.setPreferredSize(getPreferredSize(messageLabel, PREFERRED_ALERT_WIDTH));
                 if (icon != null) {
                     messageLabel.setIcon(icon);
                     messageLabel.setIconTextGap(8);
@@ -90,6 +90,15 @@ public final class IDEAUtilities {
                 if (statusBar != null) {
                     statusBar.fireNotificationPopup(messageLabel, colour);
                 }
+            }
+
+            private Dimension getPreferredSize(final JLabel label,
+                                               final int preferredWidth) {
+                final View view = (View) label.getClientProperty(BasicHTML.propertyKey);
+                view.setSize(preferredWidth, 0);
+
+                return new Dimension((int) Math.ceil(view.getPreferredSpan(View.X_AXIS)),
+                        (int) Math.ceil(view.getPreferredSpan(View.Y_AXIS)));
             }
         };
 
