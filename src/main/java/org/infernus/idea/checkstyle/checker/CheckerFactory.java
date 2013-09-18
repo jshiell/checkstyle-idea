@@ -12,6 +12,7 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
@@ -231,8 +232,13 @@ public class CheckerFactory {
                                                   final Object... messageArgs) {
         if (!location.isBlacklisted()) {
             location.blacklist();
+
             final MessageFormat messageFormat = new MessageFormat(IDEAUtilities.getResource(messageKey, messageFallback));
-            IDEAUtilities.showError(module.getProject(), messageFormat.format(messageArgs));
+            if (module != null) {
+                IDEAUtilities.showError(module.getProject(), messageFormat.format(messageArgs));
+            } else {
+                throw new CheckStylePluginException(messageFormat.format(messageArgs));
+            }
         }
         return null;
     }
