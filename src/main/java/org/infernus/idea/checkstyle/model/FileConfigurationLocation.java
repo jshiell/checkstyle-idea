@@ -120,17 +120,18 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
         LOG.debug("Processing file: " + path);
 
-        if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            // path is relative to project dir
-            final File projectPath = getProjectPath();
-            if (projectPath != null) {
-                final String projectRelativePath = fromUnixPath(
-                        path.substring(CheckStyleConstants.PROJECT_DIR.length()));
-                final String completePath = projectPath + File.separator + projectRelativePath;
-                return absolutePathOf(new File(completePath));
+        for (String prefix : new String[]{CheckStyleConstants.PROJECT_DIR, CheckStyleConstants.LEGACY_PROJECT_DIR}) {
+            if (path.startsWith(prefix)) {
+                // path is relative to project dir
+                final File projectPath = getProjectPath();
+                if (projectPath != null) {
+                    final String projectRelativePath = fromUnixPath(path.substring(prefix.length()));
+                    final String completePath = projectPath + File.separator + projectRelativePath;
+                    return absolutePathOf(new File(completePath));
 
-            } else {
-                LOG.warn("Could not untokenise path as project dir is unset: " + path);
+                } else {
+                    LOG.warn("Could not untokenise path as project dir is unset: " + path);
+                }
             }
         }
 

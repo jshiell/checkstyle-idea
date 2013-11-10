@@ -34,7 +34,12 @@ public final class CheckStyleConstants {
     /**
      * Constant used to represent project directory.
      */
-    public static final String PROJECT_DIR = "$PROJECT_DIR$";
+    public static final String PROJECT_DIR = "$PRJ_DIR$";
+
+    /**
+     * Constant used to represent legacy project directory.
+     */
+    public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
 
     /**
      * This is a constants class and cannot be instantiated.

@@ -151,6 +151,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.4.3 - Fixed: Clash with IDEA's project path encoding (#88).
 4.4.2 - Fixed: NPE when DoubleCheckedLocking file is added via config panel (#86).
 4.4.2 - Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).
 4.4.2 - New: No default rules file is applied by default (#83).

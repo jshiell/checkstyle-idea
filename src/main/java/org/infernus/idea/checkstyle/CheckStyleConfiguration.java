@@ -336,17 +336,22 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
         LOG.debug("Processing file: " + path);
 
-        if (path.startsWith(CheckStyleConstants.PROJECT_DIR)) {
-            final File projectPath = getProjectPath();
-            if (projectPath != null) {
-                final File fullConfigFile = new File(projectPath, path.substring(CheckStyleConstants.PROJECT_DIR.length()));
-                return fullConfigFile.getAbsolutePath();
-            } else {
-                LOG.warn("Could not untokenise path as project dir is unset: "
-                        + path);
+        for (String prefix : new String[]{CheckStyleConstants.PROJECT_DIR, CheckStyleConstants.LEGACY_PROJECT_DIR}) {
+            if (path.startsWith(prefix)) {
+                return untokeniseForPrefix(path, prefix, getProjectPath());
             }
         }
 
+        return path;
+    }
+
+    private String untokeniseForPrefix(final String path, final String prefix, final File projectPath) {
+        if (projectPath != null) {
+            final File fullConfigFile = new File(projectPath, path.substring(prefix.length()));
+            return fullConfigFile.getAbsolutePath();
+        }
+
+        LOG.warn("Could not untokenise path as project dir is unset: " + path);
         return path;
     }
 
