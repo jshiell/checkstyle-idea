@@ -10,6 +10,7 @@ profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
+
 Use
 ---
 
@@ -56,6 +57,15 @@ If an error occurs during the check an exception will be thrown, which
 IDEA will then catch and display in the standard exceptions dialogue. If
 you're unsure as to why things are awry this would be your best bet - chances
 are it's a missing property or classpath pre-requisite.
+
+
+Notable Extensions
+------------------
+
+* sevntu.checkstyle - http://sevntu-checkstyle.github.io/sevntu.checkstyle/
+
+  sevntu.checkstyle offers a number of useful checks written by students of the Sevastopol National Technical
+  University (SevNTU). They're also kind enough to offer instructions on setting them up with this plugin.
 
 
 Frequently Asked Questions
