@@ -83,8 +83,9 @@ Limitations
 
 * The plugin will throw exceptions if used with class files targeted at a
   later version than that of the JDK used by IDEA. In particular, this will
-  affect Mac users with the pre-release of JDK6. The solution is to target
-  class files at the version of the IDEA JRE (i.e. 1.5 for Mac users). Thanks
+  affect Mac users with JDK7 project (as IDEA runs on JDK6 by default). The
+  solution is to target class files at the version of the IDEA JRE
+  (i.e. 1.6 for Mac users) or to switch IDEA to use JDK7. Thanks
   to J. G. Christopher.
 
 * If you change the configuration options the real-time scan will not be updated
@@ -162,6 +163,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.5.0: New: Updated to CheckStyle 5.7 (#95).
 4.4.3 - Fixed: Clash with IDEA's project path encoding (#88).
 4.4.2 - Fixed: NPE when DoubleCheckedLocking file is added via config panel (#86).
 4.4.2 - Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).

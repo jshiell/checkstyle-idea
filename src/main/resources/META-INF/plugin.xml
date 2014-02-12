@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.4.3</version>
+    <version>4.5.0</version>
     <idea-version since-build="129.677"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.5.0: New: Updated to CheckStyle 5.7 (#95).</li>
     <li>4.4.3: Fixed: Clash with IDEA's project path encoding (#88).</li>
     <li>4.4.2: Fixed: NPE when DoubleCheckedLocking file is added via config panel (#86).</li>
     <li>4.4.2: Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).</li>
