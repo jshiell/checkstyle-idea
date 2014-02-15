@@ -168,7 +168,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 "Real-time scan");
     }
 
-    @Pattern("[a-zA-Z_0-9.]+")
+    @Pattern("[a-zA-Z_0-9.-]+")
     @NotNull
     @Override
     public String getID() {
