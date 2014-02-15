@@ -61,6 +61,9 @@ public abstract class ConfigurationLocation implements Cloneable {
         }
 
         this.location = location;
+        if (description == null) {
+            description = location;
+        }
 
         this.propertiesCheckedThisSession = false;
     }

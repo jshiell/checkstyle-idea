@@ -2,8 +2,10 @@ CheckStyle-IDEA.zip
 .DS_Store
 *.iws
 target
+build
 test-configs
 META-INF
 checkstyle-5.5
 checkstyle-5.6
 !src/main/resources/META-INF
+.gradle

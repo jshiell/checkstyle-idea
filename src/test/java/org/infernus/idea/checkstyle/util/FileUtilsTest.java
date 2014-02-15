@@ -78,6 +78,6 @@ public class FileUtilsTest {
         String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
         String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
 
-        assertEquals(".", FileUtils.getRelativePath(null, base, "\\"));
+        assertEquals(".", FileUtils.getRelativePath(target, base, "\\"));
     }
 }
