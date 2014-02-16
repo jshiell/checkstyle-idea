@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -32,14 +34,16 @@ public class ScannableFile {
      * If required this will create a temporary copy of the file.
      *
      * @param psiFile the psiFile to create the file from.
+     * @param module  the module the file belongs to.
      * @throws IOException if file creation is required and fails.
      */
-    public ScannableFile(@NotNull final PsiFile psiFile)
+    public ScannableFile(@NotNull final PsiFile psiFile,
+                         @NotNull final Module module)
             throws IOException {
         if (!existsOnFilesystem(psiFile)
                 || documentIsModifiedAndUnsaved(psiFile.getVirtualFile())) {
             baseTempDir = prepareBaseTmpDir();
-            realFile = createTemporaryFileFor(psiFile, baseTempDir);
+            realFile = createTemporaryFileFor(psiFile, module, baseTempDir);
 
         } else {
             baseTempDir = null;
@@ -55,9 +59,10 @@ public class ScannableFile {
     }
 
     private File createTemporaryFileFor(@NotNull final PsiFile psiFile,
+                                        @NotNull final Module module,
                                         @NotNull final File tempDir)
             throws IOException {
-        final File temporaryFile = new File(parentDirFor(psiFile, tempDir), psiFile.getName());
+        final File temporaryFile = new File(parentDirFor(psiFile, module, tempDir), psiFile.getName());
         temporaryFile.deleteOnExit();
 
         writeContentsToFile(psiFile, temporaryFile);
@@ -66,18 +71,30 @@ public class ScannableFile {
     }
 
     private File parentDirFor(@NotNull final PsiFile psiFile,
+                              @NotNull final Module module,
                               @NotNull final File baseTmpDir) {
-        final File tmpDirForFile;
+        File tmpDirForFile = null;
 
-        if (psiFile instanceof PsiJavaFile) {
-            final String packageName = ((PsiJavaFile) psiFile).getPackageName();
-            final String packagePath = packageName.replaceAll(
-                    "\\.", Matcher.quoteReplacement(File.separator));
+        if (psiFile.getParent() != null) {
+            final String parentUrl = psiFile.getParent().getVirtualFile().getUrl();
+            for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
+                if (parentUrl.startsWith(moduleSourceRoot)) {
+                    tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
+                    break;
+                }
+            }
+        }
 
-            tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+        if (tmpDirForFile == null) {
+            if (psiFile instanceof PsiJavaFile) {
+                final String packageName = ((PsiJavaFile) psiFile).getPackageName();
+                final String packagePath = packageName.replaceAll(
+                        "\\.", Matcher.quoteReplacement(File.separator));
 
-        } else {
-            tmpDirForFile = baseTmpDir;
+                tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+            } else {
+                tmpDirForFile = baseTmpDir;
+            }
         }
 
         //noinspection ResultOfMethodCallIgnored
@@ -152,8 +169,11 @@ public class ScannableFile {
         }
 
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                delete(child);
+            final File[] files = file.listFiles();
+            if (files != null) {
+                for (File child : files) {
+                    delete(child);
+                }
             }
         }
 

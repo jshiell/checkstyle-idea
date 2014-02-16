@@ -172,7 +172,7 @@ final class FileScanner implements Runnable {
                         continue;
                     }
 
-                    final ScannableFile tempFile = createTemporaryFile(psiFile);
+                    final ScannableFile tempFile = createTemporaryFile(psiFile, module);
                     if (tempFile != null) {
                         tempFiles.add(tempFile);
                         filesToElements.put(tempFile.getAbsolutePath(), psiFile);
@@ -252,13 +252,13 @@ final class FileScanner implements Runnable {
         return listOfFiles;
     }
 
-    private ScannableFile createTemporaryFile(final PsiFile psiFile) {
+    private ScannableFile createTemporaryFile(final PsiFile psiFile, final Module module) {
         ScannableFile tempFile = null;
         try {
             // we need to copy to a file as IntelliJ may not have
             // saved the file recently...
             final CreateScannableFileAction fileAction
-                    = new CreateScannableFileAction(psiFile);
+                    = new CreateScannableFileAction(psiFile, module);
             ApplicationManager.getApplication().runReadAction(fileAction);
 
             // rethrow any error from the thread.

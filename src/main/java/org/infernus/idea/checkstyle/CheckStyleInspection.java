@@ -264,7 +264,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return null;
             }
 
-            scannableFile = new ScannableFile(psiFile);
+            scannableFile = new ScannableFile(psiFile, module);
 
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 

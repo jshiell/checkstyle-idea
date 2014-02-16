@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 
@@ -15,10 +16,8 @@ class CreateScannableFileAction implements Runnable {
      */
     private IOException failure;
 
-    /**
-     * The file we are creating a temporary file from.
-     */
     private PsiFile psiFile;
+    private Module module;
 
     /**
      * The created temporary file.
@@ -29,9 +28,11 @@ class CreateScannableFileAction implements Runnable {
      * Create a thread to read the given file to a temporary file.
      *
      * @param psiFile the file to read.
+     * @param module the module the file belongs to.
      */
-    public CreateScannableFileAction(final PsiFile psiFile) {
+    public CreateScannableFileAction(final PsiFile psiFile, final Module module) {
         this.psiFile = psiFile;
+        this.module = module;
     }
 
     /**
@@ -54,7 +55,7 @@ class CreateScannableFileAction implements Runnable {
 
     public void run() {
         try {
-            file = new ScannableFile(psiFile);
+            file = new ScannableFile(psiFile, module);
 
         } catch (IOException e) {
             failure = e;

@@ -18,9 +18,10 @@
 
     <change-notes>
         <![CDATA[
-<ul>
+<ul>x
     <li>4.5.0: New: Updated to CheckStyle 5.7 (#95).</li>
     <li>4.5.0: New: Build is now performed via Gradle and hence should be consistent.</li>
+    <li>4.5.0: Improved: Temporary file paths are now built relative to the module rather than just the package (#92).</li>
     <li>4.4.3: Fixed: Clash with IDEA's project path encoding (#88).</li>
     <li>4.4.2: Fixed: NPE when DoubleCheckedLocking file is added via config panel (#86).</li>
     <li>4.4.2: Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).</li>
