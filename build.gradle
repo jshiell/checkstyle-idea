@@ -36,3 +36,8 @@ task zip(type: Zip) {
         from configurations.runtime.allArtifacts.files
     }
 }
+
+task installPlugin(type: Copy, dependsOn: zip) {
+    from zipTree("${project.buildDir}/${project.distsDirName}/${project.name}-${project.version}.zip")
+    into file("${System.properties['user.home']}/$pluginDir")
+}
