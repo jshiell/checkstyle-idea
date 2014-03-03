@@ -320,7 +320,7 @@ public class CheckerFactory {
         public void run() {
             try {
                 final Checker checker = new Checker();
-                final Configuration config;
+                Configuration config = null;
 
                 if (location != null) {
                     InputStream configurationInputStream = null;
@@ -330,10 +330,11 @@ public class CheckerFactory {
                         config = ConfigurationLoader.loadConfiguration(
                                 new InputSource(configurationInputStream), resolver, true);
 
-                        replaceFilePaths(config);
-
-                        checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
-                        checker.configure(config);
+                        if (config != null) {
+                            replaceFilePaths(config);
+                            checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
+                            checker.configure(config);
+                        }
 
                     } finally {
                         if (configurationInputStream != null) {
@@ -344,9 +345,12 @@ public class CheckerFactory {
                             }
                         }
                     }
-                } else {
+                }
+
+                if (config == null) {
                     config = new DefaultConfiguration("checker");
                 }
+
                 threadReturn[0] = new CachedChecker(checker, config);
 
             } catch (Exception e) {

@@ -163,6 +163,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.5.1 - Fixed: NPE on new project (#97).
 4.5.0 - New: Updated to CheckStyle 5.7 (#95).
 4.5.0 - New: Build is now performed via Gradle and hence should be consistent.
 4.5.0 - Improved: Temporary file paths are now built relative to the module rather than just the package (#92).
