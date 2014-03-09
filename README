@@ -163,6 +163,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.5.2 - Fixed: HTTP basic auth is now supported for URLs with a username/password (#93).
 4.5.2 - Fixed: Better handling of NPE case (#97).
 4.5.1 - Fixed: NPE on new project (#97).
 4.5.0 - New: Updated to CheckStyle 5.7 (#95).

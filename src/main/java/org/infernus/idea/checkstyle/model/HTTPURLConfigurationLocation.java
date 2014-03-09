@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -27,9 +28,16 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         Reader reader = null;
         Writer writer = null;
         try {
-            final URLConnection urlConnection = new URL(getLocation()).openConnection();
+            final URL url = new URL(getLocation());
+            final URLConnection urlConnection = url.openConnection();
             urlConnection.setDoInput(true);
             urlConnection.setDoOutput(false);
+            urlConnection.setAllowUserInteraction(false);
+
+            if (url.getUserInfo() != null) {
+                final String basicAuth = "Basic " + DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes());
+                urlConnection.setRequestProperty("Authorization", basicAuth);
+            }
 
             final File tempFile = File.createTempFile("checkStyle", ".xml");
             tempFile.deleteOnExit();
