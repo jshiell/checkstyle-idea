@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
-version = '4.5.1'
+version = '4.5.2'
 
 repositories {
     mavenCentral()
@@ -39,7 +39,10 @@ task zip(type: Zip, dependsOn: test) {
     }
 }
 
-task installPlugin(type: Copy, dependsOn: zip) {
-    from zipTree("${project.buildDir}/${project.distsDirName}/${project.name}-${project.version}.zip")
-    into file("${System.properties['user.home']}/$pluginDir")
+task installPlugin(dependsOn: zip) << {
+    delete "${System.properties['user.home']}/$pluginDir/CheckStyle-IDEA"
+    copy {
+        from zipTree("${project.buildDir}/${project.distsDirName}/${project.name}-${project.version}.zip")
+        into file("${System.properties['user.home']}/$pluginDir")
+    }
 }
