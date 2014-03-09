@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 
 /**
@@ -14,51 +13,37 @@ class CachedChecker {
      */
     private static final int CACHE_VALID_TIME = 60000;
 
-    private Checker checker;
+    private final CheckerContainer checkerContainer;
+    private final Configuration config;
+
     private long timeStamp;
-    private Configuration config;
 
     /**
      * Create a new checker value.
      *
-     * @param checker the checker instance.
-     * @param config the checker configuration.
+     * @param checkerContainer the checker instance.
+     * @param config           the checker configuration.
      */
-    public CachedChecker(final Checker checker, final Configuration config) {
-        if (checker == null) {
-            throw new IllegalArgumentException(
-                    "Checker may not be null");
+    public CachedChecker(final CheckerContainer checkerContainer,
+                         final Configuration config) {
+        if (checkerContainer == null) {
+            throw new IllegalArgumentException("Checker may not be null");
         }
 
-        this.checker = checker;
+        this.checkerContainer = checkerContainer;
         this.timeStamp = System.currentTimeMillis();
         this.config = config;
     }
 
-    /**
-     * Get the checker.
-     *
-     * @return the checker.
-     */
-    public Checker getChecker() {
+    public CheckerContainer getCheckerContainer() {
         this.timeStamp = System.currentTimeMillis();
-        return checker;
+        return checkerContainer;
     }
 
-    /**
-     * Get the config.
-     *
-     * @return the config.
-     */
     public Configuration getConfig() {
         return config;
     }
 
-    /**
-     * Get the timestamp of the config file.
-     *
-     * @return the timestamp of the config file.
-     */
     public long getTimeStamp() {
         return timeStamp;
     }

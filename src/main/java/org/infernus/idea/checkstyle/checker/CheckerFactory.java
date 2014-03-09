@@ -39,7 +39,7 @@ public class CheckerFactory {
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
     private List<URL> thirdPartyClassPath = null;
 
-    public Checker getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
+    public CheckerContainer getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
         thirdPartyClassPath = new ArrayList<URL>();
         for (String path : thirdPartyJars) {
@@ -57,8 +57,8 @@ public class CheckerFactory {
      * @throws IOException         if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
-    public Checker getChecker(@NotNull final ConfigurationLocation location,
-                              @Nullable final Module module)
+    public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
+                                       @Nullable final Module module)
             throws CheckstyleException, IOException {
         return getChecker(location, module, null);
     }
@@ -73,13 +73,13 @@ public class CheckerFactory {
      * @throws IOException         if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
-    public Checker getChecker(@NotNull final ConfigurationLocation location,
-                              @Nullable final Module module,
-                              @Nullable final ClassLoader classLoader)
+    public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
+                                       @Nullable final Module module,
+                                       @Nullable final ClassLoader classLoader)
             throws CheckstyleException, IOException {
         final CachedChecker cachedChecker = getOrCreateCachedChecker(location, module, classLoader);
         if (cachedChecker != null) {
-            return cachedChecker.getChecker();
+            return cachedChecker.getCheckerContainer();
         }
         return null;
     }
@@ -95,7 +95,7 @@ public class CheckerFactory {
                     return cachedChecker;
                 } else {
                     if (cachedChecker != null) {
-                        cachedChecker.getChecker().destroy();
+                        cachedChecker.getCheckerContainer().destroy();
                     }
                     cache.remove(location);
                 }
@@ -134,7 +134,7 @@ public class CheckerFactory {
     public void invalidateCache() {
         synchronized (cache) {
             for (CachedChecker cachedChecker : cache.values()) {
-                cachedChecker.getChecker().destroy();
+                cachedChecker.getCheckerContainer().destroy();
             }
             cache.clear();
         }
@@ -289,6 +289,8 @@ public class CheckerFactory {
         private static final String IMPORT_CONTROL_FILE = "file";
         private static final String REGEXP_HEADER_ELEMENT = "RegexpHeader";
         private static final String REGEXP_HEADER_HEADERFILE = "headerFile";
+        private static final String PROPERTY_ELEMENT = "property";
+        private static final int DEFAULT_TAB_WIDTH = 8;
 
         private final Object[] threadReturn = new Object[1];
 
@@ -319,6 +321,7 @@ public class CheckerFactory {
 
         public void run() {
             try {
+                int tabWidth = DEFAULT_TAB_WIDTH;
                 final Checker checker = new Checker();
                 Configuration config = null;
 
@@ -336,6 +339,7 @@ public class CheckerFactory {
                         }
 
                         replaceFilePaths(config);
+                        tabWidth = findTabWidthFrom(config);
                         checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
                         checker.configure(config);
 
@@ -354,11 +358,29 @@ public class CheckerFactory {
                     config = new DefaultConfiguration("checker");
                 }
 
-                threadReturn[0] = new CachedChecker(checker, config);
+                threadReturn[0] = new CachedChecker(new CheckerContainer(checker, tabWidth), config);
 
             } catch (Exception e) {
                 threadReturn[0] = e;
             }
+        }
+
+        private int findTabWidthFrom(final Configuration rootElement) {
+            for (final Configuration currentChild : rootElement.getChildren()) {
+                if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
+                    for (Configuration configuration : currentChild.getChildren()) {
+                        try {
+                            if (PROPERTY_ELEMENT.equals(configuration.getName())
+                                    && "tabWidth".equals(configuration.getAttribute("name"))) {
+                                return Integer.parseInt(configuration.getAttribute("value"));
+                            }
+                        } catch (Exception ignored) {
+                            // every property is required to have a name and value element
+                        }
+                    }
+                }
+            }
+            return DEFAULT_TAB_WIDTH;
         }
 
         /**

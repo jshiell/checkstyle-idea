@@ -19,6 +19,7 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckStyleAuditListener;
+import org.infernus.idea.checkstyle.checker.CheckerContainer;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
@@ -56,8 +57,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * @param module           the current module. May be null.
      * @return a checker.
      */
-    private Checker getChecker(final CheckStylePlugin checkStylePlugin,
-                               @Nullable final Module module) {
+    private CheckerContainer getChecker(final CheckStylePlugin checkStylePlugin,
+                                        @Nullable final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
         if (module == null) {
@@ -249,9 +250,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
             throws IOException {
         ScannableFile scannableFile = null;
         try {
-            final Checker checker = getChecker(checkStylePlugin, module);
+            final CheckerContainer checkerContainer = getChecker(checkStylePlugin, module);
             final Configuration config = getConfig(checkStylePlugin, module);
-            if (checker == null || config == null) {
+            if (checkerContainer == null || config == null) {
                 return new ProblemDescriptor[0];
             }
 
@@ -269,7 +270,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final Map<String, PsiFile> filesToScan = Collections.singletonMap(scannableFile.getAbsolutePath(), psiFile);
 
             final boolean suppressingErrors = checkStylePlugin.getConfiguration().isSuppressingErrors();
-            final CheckStyleAuditListener listener = new CheckStyleAuditListener(filesToScan, manager, false, suppressingErrors, checks);
+            final CheckStyleAuditListener listener = new CheckStyleAuditListener(
+                    filesToScan, manager, false, suppressingErrors, checkerContainer.getTabWidth(), checks);
+            final Checker checker = checkerContainer.getChecker();
             synchronized (checker) {
                 checker.addListener(listener);
                 checker.process(Arrays.asList(scannableFile.getFile()));

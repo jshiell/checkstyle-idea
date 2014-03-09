@@ -110,8 +110,8 @@ final class FileScanner implements Runnable {
      *                       ignored if not a java file and not from the same module.
      * @param override       if non-null this location will be used in preference to the configured rules file.
      * @return a list of tree nodes representing the result tree for this
-     *         file, an empty list or null if this file is invalid or
-     *         has no errors.
+     * file, an empty list or null if this file is invalid or
+     * has no errors.
      * @throws Throwable if the
      */
     private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
@@ -225,9 +225,9 @@ final class FileScanner implements Runnable {
             return null;
         }
 
-        final Checker checker = getChecker(module, moduleClassLoader, location);
+        final CheckerContainer checkerContainer = getChecker(module, moduleClassLoader, location);
         final Configuration config = getConfig(module, location);
-        if (checker == null || config == null) {
+        if (checkerContainer == null || config == null) {
             return Collections.emptyMap();
         }
 
@@ -235,8 +235,10 @@ final class FileScanner implements Runnable {
         final boolean suppressingErrors = plugin.getConfiguration().isSuppressingErrors();
 
         final CheckStyleAuditListener listener;
+        final Checker checker = checkerContainer.getChecker();
         synchronized (checker) {
-            listener = new CheckStyleAuditListener(filesToElements, manager, true, suppressingErrors, checks);
+            listener = new CheckStyleAuditListener(
+                    filesToElements, manager, true, suppressingErrors, checkerContainer.getTabWidth(), checks);
             checker.addListener(listener);
             checker.process(asListOfFiles(tempFiles));
         }
@@ -279,9 +281,9 @@ final class FileScanner implements Runnable {
         return tempFile;
     }
 
-    private Checker getChecker(final Module module,
-                               final ClassLoader classLoader,
-                               final ConfigurationLocation location) {
+    private CheckerContainer getChecker(final Module module,
+                                        final ClassLoader classLoader,
+                                        final ConfigurationLocation location) {
         LOG.debug("Getting CheckStyle checker with location " + location);
 
         try {

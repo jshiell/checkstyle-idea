@@ -24,13 +24,12 @@ import java.util.*;
  */
 public class CheckStyleAuditListener implements AuditListener {
 
-    private static final Log LOG = LogFactory.getLog(
-            CheckStyleAuditListener.class);
+    private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
 
     private final boolean usingExtendedDescriptors;
     private final boolean suppressErrors;
     private final List<Check> checks;
-
+    private final int tabWidth;
     private final Map<String, PsiFile> fileNamesToPsiFiles;
     private final InspectionManager manager;
 
@@ -47,20 +46,22 @@ public class CheckStyleAuditListener implements AuditListener {
      * @param fileNamesToPsiFiles    a map of files name to PSI files for the files being scanned.
      * @param manager                the current inspection manager.
      * @param useExtendedDescriptors should we return standard IntelliJ
-     *                               problem descriptors or extended ones with severity information?
+ *                               problem descriptors or extended ones with severity information?
      * @param suppressErrors         pass CheckStyle errors to IDEA as warnings.
+     * @param tabWidth               the tab width for the given rules file.
      * @param checks                 the check modifications to use.
      */
     public CheckStyleAuditListener(final Map<String, PsiFile> fileNamesToPsiFiles,
                                    final InspectionManager manager,
                                    final boolean useExtendedDescriptors,
                                    final boolean suppressErrors,
-                                   final List<Check> checks) {
+                                   final int tabWidth, final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<String, PsiFile>(fileNamesToPsiFiles);
         this.manager = manager;
         this.usingExtendedDescriptors = useExtendedDescriptors;
         this.checks = checks;
         this.suppressErrors = suppressErrors;
+        this.tabWidth = tabWidth;
     }
 
     public void auditStarted(final AuditEvent auditEvent) {
@@ -182,17 +183,14 @@ public class CheckStyleAuditListener implements AuditListener {
             }
 
             int offset;
-            boolean endOfLine = false;
+            boolean afterEndOfLine = false;
 
-            // start of file
-            if (event.getLine() == 0) { // start of file errors
+            if (event.getLine() == 0) {
                 offset = event.getColumn();
 
-                // line offset is cached...
             } else if (event.getLine() <= lineLengthCache.size()) {
                 offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
 
-                // further search required
             } else {
                 // start from end of cached data
                 offset = lineLengthCache.get(lineLengthCache.size() - 1);
@@ -211,16 +209,17 @@ public class CheckStyleAuditListener implements AuditListener {
                         ++offset;
                         lineLengthCache.add(offset);
                         column = 0;
+                    } else if (character == '\t') {
+                        column += tabWidth;
+                        offset += tabWidth;
                     } else {
                         ++column;
                         ++offset;
                     }
 
-                    // need to go to end of line though
                     if (event.getLine() == line && event.getColumn() == column) {
                         if (column == 0 && Character.isWhitespace(nextChar)) {
-                            // move line errors to after EOL
-                            endOfLine = true;
+                            afterEndOfLine = true;
                         }
                         break;
                     }
@@ -237,7 +236,7 @@ public class CheckStyleAuditListener implements AuditListener {
                 try {
                     final ProblemDescriptor problem = manager.createProblemDescriptor(
                             victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
-                            false, endOfLine);
+                            false, afterEndOfLine);
 
                     if (usingExtendedDescriptors) {
                         addProblem(psiFile, extendDescriptor(event, problem));
