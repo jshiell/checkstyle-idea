@@ -50,6 +50,10 @@ public class ConfigurationLocationFactory {
                 configurationLocation = new HTTPURLConfigurationLocation();
                 break;
 
+            case INSECURE_HTTP_URL:
+                configurationLocation = new InsecureHTTPURLConfigurationLocation();
+                break;
+
             case CLASSPATH:
                 configurationLocation = new ClassPathConfigurationLocation();
                 break;

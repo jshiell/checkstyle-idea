@@ -23,6 +23,10 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         super(ConfigurationType.HTTP_URL);
     }
 
+    HTTPURLConfigurationLocation(final ConfigurationType configurationType) {
+        super(configurationType);
+    }
+
     @NotNull
     protected InputStream resolveFile() throws IOException {
         Reader reader = null;

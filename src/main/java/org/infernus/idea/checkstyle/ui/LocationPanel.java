@@ -29,6 +29,7 @@ public class LocationPanel extends JPanel {
     private final JRadioButton urlLocationRadio = new JRadioButton();
     private final JTextField descriptionField = new JTextField();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
+    private final JCheckBox insecureHttpCheckbox = new JCheckBox();
 
     private final Project project;
 
@@ -48,6 +49,8 @@ public class LocationPanel extends JPanel {
 
         relativeFileCheckbox.setText(resources.getString("config.file.relative-file.text"));
         relativeFileCheckbox.setToolTipText(resources.getString("config.file.relative-file.tooltip"));
+        insecureHttpCheckbox.setText(resources.getString("config.file.insecure-http.text"));
+        insecureHttpCheckbox.setToolTipText(resources.getString("config.file.insecure-http.tooltip"));
 
         fileLocationRadio.setText(resources.getString("config.file.file.text"));
         fileLocationRadio.addActionListener(new RadioButtonActionListener());
@@ -95,7 +98,10 @@ public class LocationPanel extends JPanel {
         add(urlLocationField, new GridBagConstraints(1, 5, 2, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
 
-        add(Box.createVerticalGlue(), new GridBagConstraints(0, 6, 3, 1, 0.0, 1.0,
+        add(insecureHttpCheckbox, new GridBagConstraints(1, 6, 2, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+
+        add(Box.createVerticalGlue(), new GridBagConstraints(0, 7, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
     }
 
@@ -120,6 +126,13 @@ public class LocationPanel extends JPanel {
         return ConfigurationType.LOCAL_FILE;
     }
 
+    private ConfigurationType typeOfUrl() {
+        if (insecureHttpCheckbox.isSelected()) {
+            return ConfigurationType.INSECURE_HTTP_URL;
+        }
+        return ConfigurationType.HTTP_URL;
+    }
+
     /**
      * Get the configuration location entered in the dialogue, or null if no valid location was entered.
      *
@@ -134,7 +147,7 @@ public class LocationPanel extends JPanel {
 
         } else if (urlLocationField.isEnabled()) {
             if (isNotBlank(urlLocationField.getText())) {
-                return ConfigurationLocationFactory.create(project, ConfigurationType.HTTP_URL,
+                return ConfigurationLocationFactory.create(project, typeOfUrl(),
                         urlLocationField.getText(), descriptionField.getText());
             }
         }
@@ -167,6 +180,7 @@ public class LocationPanel extends JPanel {
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
         relativeFileCheckbox.setSelected(false);
+        insecureHttpCheckbox.setSelected(false);
 
         if (configurationLocation == null) {
             fileLocationRadio.setEnabled(true);
@@ -178,9 +192,11 @@ public class LocationPanel extends JPanel {
             fileLocationField.setText(configurationLocation.getLocation());
             relativeFileCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE);
 
-        } else if (configurationLocation.getType() == ConfigurationType.HTTP_URL) {
+        } else if (configurationLocation.getType() == ConfigurationType.HTTP_URL
+                || configurationLocation.getType() == ConfigurationType.INSECURE_HTTP_URL) {
             urlLocationRadio.setEnabled(true);
             urlLocationField.setText(configurationLocation.getLocation());
+            insecureHttpCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.INSECURE_HTTP_URL);
 
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());

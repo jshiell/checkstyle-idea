@@ -16,6 +16,11 @@ public enum ConfigurationType {
     HTTP_URL,
 
     /**
+     * Located on a HTTP URL where the SSL context is naughtily ignored.
+     */
+    INSECURE_HTTP_URL,
+
+    /**
      * Located in a local file.
      */
     LOCAL_FILE,
