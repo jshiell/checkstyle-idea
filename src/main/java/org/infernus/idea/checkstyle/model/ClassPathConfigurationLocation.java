@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ public class ClassPathConfigurationLocation extends ConfigurationLocation {
         super(ConfigurationType.CLASSPATH);
     }
 
+    @NotNull
     protected InputStream resolveFile() throws IOException {
         final InputStream in = ClassPathConfigurationLocation.class.getResourceAsStream(getLocation());
         if (in == null) {

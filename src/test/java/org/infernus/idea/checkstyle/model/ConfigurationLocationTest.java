@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -133,6 +134,7 @@ public class ConfigurationLocationTest {
     @Test(expected = IllegalArgumentException.class)
     public void aLocationCannotBeCreatedWithANullType() {
         new ConfigurationLocation(null) {
+            @NotNull
             @Override
             protected InputStream resolveFile() throws IOException {
                 return null;
@@ -195,6 +197,7 @@ public class ConfigurationLocationTest {
             setLocation(content);
         }
 
+        @NotNull
         @Override
         protected InputStream resolveFile() throws IOException {
             return new ByteArrayInputStream(getLocation().getBytes());

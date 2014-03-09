@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URL;
@@ -21,6 +22,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         super(ConfigurationType.HTTP_URL);
     }
 
+    @NotNull
     protected InputStream resolveFile() throws IOException {
         Reader reader = null;
         Writer writer = null;

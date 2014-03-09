@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -66,6 +67,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         super.setLocation(tokenisePath(location));
     }
 
+    @NotNull
     protected InputStream resolveFile() throws IOException {
         final File locationFile = new File(getLocation());
         if (!locationFile.exists()) {

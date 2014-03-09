@@ -6,6 +6,7 @@ import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -222,6 +223,7 @@ public abstract class ConfigurationLocation implements Cloneable {
      * @return the file to load.
      * @throws IOException if the file cannot be loaded.
      */
+    @NotNull
     protected abstract InputStream resolveFile() throws IOException;
 
     @Override

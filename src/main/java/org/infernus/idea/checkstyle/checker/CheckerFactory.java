@@ -207,7 +207,7 @@ public class CheckerFactory {
             final CheckstyleException checkstyleException = (CheckstyleException) worker.getResult();
             if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
                 return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking",
-                        "Not compatible with CheckStyle 5.6. Remove DoubleCheckedLocking.");
+                        "Not compatible with CheckStyle 5.6+. Remove DoubleCheckedLocking.");
             }
             return blacklistAndShowMessage(location, module, "checkstyle.checker-failed", "Load failed due to {0}",
                     checkstyleException.getMessage());
@@ -329,18 +329,21 @@ public class CheckerFactory {
                         configurationInputStream = location.resolve();
                         config = ConfigurationLoader.loadConfiguration(
                                 new InputSource(configurationInputStream), resolver, true);
-
-                        if (config != null) {
-                            replaceFilePaths(config);
-                            checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
-                            checker.configure(config);
+                        if (config == null) {
+                            // from the CS code this state appears to occur when there's no <module> element found
+                            // in the input stream
+                            throw new CheckstyleException("Couldn't find root module in " + location.getLocation());
                         }
+
+                        replaceFilePaths(config);
+                        checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
+                        checker.configure(config);
 
                     } finally {
                         if (configurationInputStream != null) {
                             try {
                                 configurationInputStream.close();
-                            } catch (IOException e) {
+                            } catch (Exception ignored) {
                                 // ignored
                             }
                         }
