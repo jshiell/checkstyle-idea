@@ -211,7 +211,7 @@ public class CheckStyleAuditListener implements AuditListener {
                         column = 0;
                     } else if (character == '\t') {
                         column += tabWidth;
-                        offset += tabWidth;
+                        ++offset;
                     } else {
                         ++column;
                         ++offset;
