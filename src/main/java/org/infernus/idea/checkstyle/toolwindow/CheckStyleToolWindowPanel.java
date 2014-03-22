@@ -326,7 +326,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                 virtualFile, true);
 
         if (editor.length > 0 && editor[0] instanceof TextEditor) {
-            final LogicalPosition problemPos = new LogicalPosition(lineFor(nodeInfo) - 1, columnFor(nodeInfo));
+            final LogicalPosition problemPos = new LogicalPosition(
+                    Math.max(lineFor(nodeInfo) - 1, 0), Math.max(columnFor(nodeInfo), 0));
 
             final Editor textEditor = ((TextEditor) editor[0]).getEditor();
             textEditor.getCaretModel().moveToLogicalPosition(problemPos);
