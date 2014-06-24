@@ -79,7 +79,10 @@ public final class IDEAUtilities {
         final Runnable showMessage = new Runnable() {
             public void run() {
                 final JLabel messageLabel = new JLabel(messageText);
-                messageLabel.setPreferredSize(getPreferredSize(messageLabel, PREFERRED_ALERT_WIDTH));
+                final Dimension messageDimension = getPreferredSize(messageLabel, PREFERRED_ALERT_WIDTH);
+                if (messageDimension != null) {
+                    messageLabel.setPreferredSize(messageDimension);
+                }
                 if (icon != null) {
                     messageLabel.setIcon(icon);
                     messageLabel.setIconTextGap(8);
@@ -95,10 +98,13 @@ public final class IDEAUtilities {
             private Dimension getPreferredSize(final JLabel label,
                                                final int preferredWidth) {
                 final View view = (View) label.getClientProperty(BasicHTML.propertyKey);
-                view.setSize(preferredWidth, 0);
 
-                return new Dimension((int) Math.ceil(view.getPreferredSpan(View.X_AXIS)),
-                        (int) Math.ceil(view.getPreferredSpan(View.Y_AXIS)));
+                if (view != null) {
+                    view.setSize(preferredWidth, 0);
+                    return new Dimension((int) Math.ceil(view.getPreferredSpan(View.X_AXIS)),
+                            (int) Math.ceil(view.getPreferredSpan(View.Y_AXIS)));
+                }
+                return null;
             }
         };
 
