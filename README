@@ -140,6 +140,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Yuri
 * Kristin Young
 * Simon Billingsley
+* Miel Donkers
 
  And also thanks are due to the authors and contributors of:
 
@@ -163,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.5.4 - Fixed: Null check for view; thanks to Miel Donkers (#104).
 4.5.3 - Fixed: Added range check for line numbers (#100).
 4.5.2 - New: When adding a HTTPS location you can now choose to ignore certificate errors (#99).
 4.5.2 - Fixed: HTTP basic auth is now supported for URLs with a username/password (#93).

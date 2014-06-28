@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.5.3</version>
+    <version>4.5.4</version>
     <idea-version since-build="129.677"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.5.4: Fixed: Null check for view; thanks to Miel Donkers (#104).</li>
     <li>4.5.3: Fixed: Added range check for line numbers (#100).</li>
     <li>4.5.2: New: When adding a HTTPS location you can now choose to ignore certificate errors (#99).</li>
     <li>4.5.2: Fixed: HTTP basic auth is now supported for URLs with a username/password (#93).</li>
