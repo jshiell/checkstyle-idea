@@ -19,8 +19,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     private final Project project;
 
-    private File cachedProjectBase;
-
     /**
      * Create a new file configuration.
      *
@@ -84,10 +82,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      */
     @Nullable
     File getProjectPath() {
-        if (cachedProjectBase != null) {
-            return cachedProjectBase;
-        }
-
         if (project == null) {
             return null;
         }
@@ -98,8 +92,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
                 return null;
             }
 
-            cachedProjectBase = new File(baseDir.getPath());
-            return cachedProjectBase;
+            return new File(baseDir.getPath());
 
         } catch (Exception e) {
             // IDEA 10.5.2 sometimes throws an AssertionException in project.getBaseDir()

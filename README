@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.5.5 - Fixed: Project base directory is no longer permanently cached (#106).
 4.5.4 - Fixed: Null check for view; thanks to Miel Donkers (#104).
 4.5.3 - Fixed: Added range check for line numbers (#100).
 4.5.2 - New: When adding a HTTPS location you can now choose to ignore certificate errors (#99).
