@@ -15,8 +15,8 @@ public class ConfigurationLocationFactory {
      * This allows us to ensure that updates to one location (e.g. a URL change) are visible
      * to other modules with a reference to the given location.
      */
-    private static final Map<ConfigurationLocation, ConfigurationLocation> INSTANCE_CACHE =
-            new WeakHashMap<ConfigurationLocation, ConfigurationLocation>();
+    private final Map<ConfigurationLocation, ConfigurationLocation> instanceCache
+            = new WeakHashMap<ConfigurationLocation, ConfigurationLocation>();
 
     /**
      * Create a new location.
@@ -27,7 +27,7 @@ public class ConfigurationLocationFactory {
      * @param description the optional description.
      * @return the location.
      */
-    public static ConfigurationLocation create(final Project project,
+    public ConfigurationLocation create(final Project project,
                                                final ConfigurationType type,
                                                final String location,
                                                final String description) {
@@ -64,12 +64,12 @@ public class ConfigurationLocationFactory {
         configurationLocation.setLocation(location);
         configurationLocation.setDescription(description);
 
-        synchronized (INSTANCE_CACHE) {
-            if (INSTANCE_CACHE.containsKey(configurationLocation)) {
-                return INSTANCE_CACHE.get(configurationLocation);
+        synchronized (instanceCache) {
+            if (instanceCache.containsKey(configurationLocation)) {
+                return instanceCache.get(configurationLocation);
 
             } else {
-                INSTANCE_CACHE.put(configurationLocation, configurationLocation);
+                instanceCache.put(configurationLocation, configurationLocation);
             }
         }
 
@@ -83,7 +83,7 @@ public class ConfigurationLocationFactory {
      * @param stringRepresentation the toString of another ConfigurationLocation.
      * @return the location.
      */
-    public static ConfigurationLocation create(final Project project, final String stringRepresentation) {
+    public ConfigurationLocation create(final Project project, final String stringRepresentation) {
         if (project == null) {
             throw new IllegalArgumentException("A project is required");
         }

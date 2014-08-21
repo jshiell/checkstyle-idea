@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.6.0: Fixed caching of project relative locations between projects (#106).</li>
     <li>4.6.0: Moved to IDEA SDK 133.696 (13.0.2).</li>
     <li>4.5.5: Fixed: Project base directory is no longer permanently cached (#106).</li>
     <li>4.5.4: Fixed: Null check for view; thanks to Miel Donkers (#104).</li>
@@ -90,6 +91,8 @@
                         serviceImplementation="org.infernus.idea.checkstyle.CheckStyleConfiguration"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"
                         serviceImplementation="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"
+                        serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 

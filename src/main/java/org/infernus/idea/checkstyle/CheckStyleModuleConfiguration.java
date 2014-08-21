@@ -1,9 +1,11 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -83,7 +85,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
         ConfigurationLocation activeLocation = null;
         try {
-            activeLocation = ConfigurationLocationFactory.create(module.getProject(), getProperty(ACTIVE_CONFIG));
+            activeLocation = configurationLocationFactory(module.getProject()).create(module.getProject(), getProperty(ACTIVE_CONFIG));
         } catch (IllegalArgumentException e) {
             LOG.warn("Could not load active configuration", e);
         }
@@ -94,6 +96,10 @@ public final class CheckStyleModuleConfiguration extends Properties
         }
 
         return activeLocation;
+    }
+
+    private ConfigurationLocationFactory configurationLocationFactory(final Project project) {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     private ConfigurationLocation getProjectConfiguration() {

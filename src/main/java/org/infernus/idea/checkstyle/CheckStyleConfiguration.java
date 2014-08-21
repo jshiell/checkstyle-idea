@@ -70,7 +70,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         this.project = project;
 
         final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-        final ConfigurationLocation checkStyleSunChecks = ConfigurationLocationFactory.create(project, ConfigurationType.CLASSPATH,
+        final ConfigurationLocation checkStyleSunChecks = configurationLocationFactory().create(project, ConfigurationType.CLASSPATH,
                 SUN_CHECKS_CONFIG, resources.getString("file.default.description"));
         presetLocations.add(checkStyleSunChecks);
     }
@@ -131,7 +131,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
             ConfigurationLocation activeLocation = null;
             try {
-                activeLocation = ConfigurationLocationFactory.create(project, storage.get(ACTIVE_CONFIG));
+                activeLocation = configurationLocationFactory().create(project, storage.get(ACTIVE_CONFIG));
             } catch (IllegalArgumentException e) {
                 LOG.warn("Could not load active configuration", e);
             }
@@ -162,7 +162,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
                 final String value = entry.getValue();
                 try {
-                    final ConfigurationLocation location = ConfigurationLocationFactory.create(
+                    final ConfigurationLocation location = configurationLocationFactory().create(
                             project, value);
 
                     final Map<String, String> properties = new HashMap<String, String>();
@@ -200,6 +200,10 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         } finally {
             storageLock.unlock();
         }
+    }
+
+    private ConfigurationLocationFactory configurationLocationFactory() {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
