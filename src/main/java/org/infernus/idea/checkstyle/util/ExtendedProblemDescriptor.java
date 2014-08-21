@@ -5,6 +5,7 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.QuickFix;
 import com.intellij.lang.annotation.ProblemGroup;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
@@ -72,6 +73,7 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
         return delegate.getEndElement();
     }
 
+    @NotNull
     public ProblemHighlightType getHighlightType() {
         return delegate.getHighlightType();
     }
@@ -116,5 +118,10 @@ public class ExtendedProblemDescriptor implements ProblemDescriptor {
 
     public void setProblemGroup(@Nullable final ProblemGroup problemGroup) {
         delegate.setProblemGroup(problemGroup);
+    }
+
+    @Override
+    public TextRange getTextRangeInElement() {
+        return delegate.getTextRangeInElement();
     }
 }

@@ -10,8 +10,8 @@
 </p>
         ]]>
     </description>
-    <version>4.5.5</version>
-    <idea-version since-build="129.677"/>
+    <version>4.6.0</version>
+    <idea-version since-build="133.696"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.6.0: Moved to IDEA SDK 133.696 (13.0.2).</li>
     <li>4.5.5: Fixed: Project base directory is no longer permanently cached (#106).</li>
     <li>4.5.4: Fixed: Null check for view; thanks to Miel Donkers (#104).</li>
     <li>4.5.3: Fixed: Added range check for line numbers (#100).</li>

@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.6.0 - Moved to IDEA SDK 133.696 (13.0.2).
 4.5.5 - Fixed: Project base directory is no longer permanently cached (#106).
 4.5.4 - Fixed: Null check for view; thanks to Miel Donkers (#104).
 4.5.3 - Fixed: Added range check for line numbers (#100).
