@@ -1,45 +1,64 @@
 package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.vfs.VirtualFile;
 
-import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Custom FileChooser Descriptor that allows the specification of a file extension.
  */
 public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
-    private static final String JAR = "jar";
-    private final String fileExtension;
+    private final String[] fileExtensions;
 
     /**
      * Construct a file chooser descriptor for the given file extension.
      *
-     * @param title       the dialog title.
-     * @param description the dialog description.
-     * @param fileExt     the file extension.
+     * @param title          the dialog title.
+     * @param description    the dialog description.
+     * @param fileExtensions the file extension(s).
      */
-    public ExtensionFileChooserDescriptor(final String title, final String description, final String fileExt) {
-        // select a single file, not jars or jar contents
-        super(true, false, fileExt.equalsIgnoreCase(JAR), fileExt.equalsIgnoreCase(JAR), false, false);
+    public ExtensionFileChooserDescriptor(final String title, final String description, final String... fileExtensions) {
+        super(true, false, containsJar(fileExtensions), containsJar(fileExtensions), false, false);
+
         setTitle(title);
         setDescription(description);
-        fileExtension = fileExt;
+
+        this.fileExtensions = sortAndMakeLowercase(fileExtensions);
     }
 
-    @Override
-    public boolean isFileSelectable(VirtualFile file) {
-        final String extension = file.getExtension();
-        return Comparing.strEqual(extension, fileExtension);
-    }
-
-    @Override
-    public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
-        if (file.isDirectory()) {
-            return true;
+    private static boolean containsJar(final String[] extensions) {
+        if (extensions == null) {
+            return false;
         }
-        final String extension = file.getExtension();
-        return Comparing.strEqual(extension, fileExtension);
+        for (final String extension : extensions) {
+            if ("jar".equalsIgnoreCase(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String[] sortAndMakeLowercase(final String[] strings) {
+        Arrays.sort(strings);
+        for (int i = 0; i < strings.length; i++) {
+            strings[i] = strings[i].toLowerCase();
+        }
+        return strings;
+    }
+
+    @Override
+    public boolean isFileSelectable(final VirtualFile file) {
+        return fileExtensionMatches(file);
+    }
+
+    @Override
+    public boolean isFileVisible(final VirtualFile file, final boolean showHiddenFiles) {
+        return file.isDirectory() || fileExtensionMatches(file);
+    }
+
+    private boolean fileExtensionMatches(final VirtualFile file) {
+        final String currentExtension = file.getExtension();
+        return currentExtension != null && Arrays.binarySearch(fileExtensions, currentExtension.toLowerCase()) >= 0;
     }
 }

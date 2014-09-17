@@ -56,7 +56,6 @@ public class LocationDialogue extends JDialog {
     private final ErrorPanel errorPanel;
     private final CompletePanel completePanel;
 
-    private final Project project;
     private final List<String> thirdPartyClasspath;
 
     private JButton commitButton;
@@ -78,7 +77,6 @@ public class LocationDialogue extends JDialog {
             throw new IllegalArgumentException("Project may not be null");
         }
 
-        this.project = project;
         this.thirdPartyClasspath = thirdPartyClasspath;
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project);
