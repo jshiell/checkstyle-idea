@@ -44,7 +44,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="commons-io-2.4" level="project" />
-    <orderEntry type="library" name="checkstyle-5.7-all" level="project" />
+    <orderEntry type="library" name="checkstyle-5.8-all" level="project" />
   </component>
 </module>
 
