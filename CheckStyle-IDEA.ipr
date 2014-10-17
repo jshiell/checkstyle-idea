@@ -32,21 +32,21 @@
         <entry key="active-configuration" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
         <entry key="check-nonjava-files" value="false" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="LOCAL_FILE:$PRJ_DIR$/test-configs/beyondtrack_checks.xml:Issue 86" />
-        <entry key="location-1" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-96.xml:Issue 96" />
+        <entry key="location-0" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-23.checkstyle:Issue 23" />
+        <entry key="location-1" value="LOCAL_FILE:$PRJ_DIR$/test-configs/beyondtrack_checks.xml:Issue 86" />
         <entry key="location-10" value="LOCAL_FILE:$PRJ_DIR$/test-configs/amigo-cs5.0.xml:A2" />
-        <entry key="location-11" value="LOCAL_FILE:$PRJ_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
-        <entry key="location-12" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="location-13" value="LOCAL_FILE:$PRJ_DIR$/test-configs/sonar.xml:Sonar" />
-        <entry key="location-2" value="LOCAL_FILE:$PRJ_DIR$/test-configs/beyondtrack_checks.xml:BT" />
-        <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-53.xml:Issue 53" />
+        <entry key="location-11" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-53.xml:Issue 53" />
+        <entry key="location-12" value="LOCAL_FILE:$PRJ_DIR$/test-configs/beyondtrack_checks.xml:BT" />
+        <entry key="location-13" value="LOCAL_FILE:/Users/jshiell/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-2" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man" />
+        <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-96.xml:Issue 96" />
         <entry key="location-4" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
-        <entry key="location-5" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man2" />
-        <entry key="location-6" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-23.checkstyle:Issue 23" />
-        <entry key="location-7" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man" />
-        <entry key="location-8" value="LOCAL_FILE:$PRJ_DIR$/test-configs/import-control.xml:ImportControl" />
+        <entry key="location-5" value="LOCAL_FILE:$PRJ_DIR$/test-configs/sonar.xml:Sonar" />
+        <entry key="location-6" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man2" />
+        <entry key="location-7" value="LOCAL_FILE:$PRJ_DIR$/test-configs/import-control.xml:ImportControl" />
+        <entry key="location-8" value="LOCAL_FILE:$PRJ_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
         <entry key="location-9" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-98.xml:Issue 98" />
-        <entry key="property-12.checkstyle.suppressions.file" value="$USER_HOME$/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-13.checkstyle.suppressions.file" value="$USER_HOME$/Projects/Yazino/support/build/checkstyle-loose/src/main/resources/yazino-checkstyle-suppressions.xml" />
         <entry key="property-9.samedir" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="$PROJECT_DIR$/../Third Party/CreateYourOwnCheckStyleCheck/BlundellCheckstyle/target/blundell-checkstyle-checks-1.0.jar" />

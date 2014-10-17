@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.8.0 - New: Updated to CheckStyle 5.9 (#115).
 4.7.0 - New: Updated to CheckStyle 5.8 (#114).
 4.6.2 - Removed commons-logging from plugin classpath (#113).
 4.6.1 - Rules files may now have extension 'checkstyle' (#112).
