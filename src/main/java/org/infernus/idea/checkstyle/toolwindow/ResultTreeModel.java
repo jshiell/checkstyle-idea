@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleConstants;

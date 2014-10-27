@@ -28,7 +28,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     List<TogglableTreeNode> getAllChildren() {
         return Collections.unmodifiableList(children);
     }

@@ -11,6 +11,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -69,7 +70,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private final CheckStylePlugin checkStylePlugin;
     private final Project project;
     private final ToolWindow toolWindow;
-    private final JComboBox configurationOverrideCombo = new JComboBox();
+    private final ComboBox configurationOverrideCombo = new ComboBox();
     private final DefaultComboBoxModel configurationOverrideModel = new DefaultComboBoxModel();
 
     private boolean displayingErrors = true;

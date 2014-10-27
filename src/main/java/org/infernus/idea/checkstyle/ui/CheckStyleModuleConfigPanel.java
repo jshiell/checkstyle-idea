@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.ui.ComboBox;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
@@ -22,7 +23,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     private final JRadioButton useProjectConfigurationRadio = new JRadioButton();
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
     private final JRadioButton excludeRadio = new JRadioButton();
-    private final JComboBox configurationFilesCombo = new JComboBox();
+    private final ComboBox configurationFilesCombo = new ComboBox();
     private final DefaultComboBoxModel configurationFilesModel = new DefaultComboBoxModel();
     private final JLabel configurationFilesLabel = new JLabel();
 
