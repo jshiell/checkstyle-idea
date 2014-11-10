@@ -6,7 +6,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 5.9 from within IDEA.
+    of Java files with CheckStyle 6.0 from within IDEA.
 </p>
         ]]>
     </description>
