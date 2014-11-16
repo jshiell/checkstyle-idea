@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.0 from within IDEA.
+    of Java files with CheckStyle 6.1 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.9.0</version>
+    <version>4.10.0</version>
     <idea-version since-build="133.696"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.10.0 - New: Updated to CheckStyle 6.1 (#120).</li>
     <li>4.9.0: New: Updated to CheckStyle 6.0 (#116).</li>
     <li>4.8.0: New: Updated to CheckStyle 5.9 (#115).</li>
     <li>4.7.0: New: Updated to CheckStyle 5.8 (#114).</li>

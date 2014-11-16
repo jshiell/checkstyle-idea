@@ -17,7 +17,7 @@
     <orderEntry type="library" scope="TEST" name="org.mockito:mockito-all:1.9.5" level="project" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="com.puppycrawl.tools:checkstyle:6.0" level="project" />
+    <orderEntry type="library" name="com.puppycrawl.tools:checkstyle:6.1" level="project" />
     <orderEntry type="library" name="commons-io:commons-io:2.4" level="project" />
   </component>
 </module>

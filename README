@@ -4,7 +4,7 @@ CheckStyle-IDEA
 
 https://github.com/jshiell/checkstyle-idea
 
-A plug-in for JetBrains' IntelliJ IDEA 13 which provides real-time
+A plug-in for JetBrains' IntelliJ IDEA 13/14 which provides real-time
 feedback against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.10.0 - New: Updated to CheckStyle 6.1 (#120).
 4.9.0 - New: Updated to CheckStyle 6.0 (#116).
 4.8.0 - New: Updated to CheckStyle 5.9 (#115).
 4.7.0 - New: Updated to CheckStyle 5.8 (#114).
