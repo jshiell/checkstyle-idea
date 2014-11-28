@@ -6,7 +6,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.1 from within IDEA.
+    of Java files with CheckStyle 6.1.1 from within IDEA.
 </p>
         ]]>
     </description>
@@ -19,8 +19,9 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>4.11.0 - Fixed: Made DTDs for import_control 1.1 and packages 1.0 available for offline access (#123).</li>
-    <li>4.10.0 - New: Updated to CheckStyle 6.1 (#120).</li>
+    <li>4.11.0: New: Updated to CheckStyle 6.1.1 (#124).</li>
+    <li>4.11.0: Fixed: Made DTDs for import_control 1.1 and packages 1.0 available for offline access (#123).</li>
+    <li>4.10.0: New: Updated to CheckStyle 6.1 (#120).</li>
     <li>4.9.0: New: Updated to CheckStyle 6.0 (#116).</li>
     <li>4.8.0: New: Updated to CheckStyle 5.9 (#115).</li>
     <li>4.7.0: New: Updated to CheckStyle 5.8 (#114).</li>
