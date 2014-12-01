@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.11.1 - Fixed: ClassCast on ToolWindow via presumed race condition (#82).
 4.11.0 - New: Updated to CheckStyle 6.1.1 (#124).
 4.11.0 - Fixed: Made DTDs for import_control 1.1 and packages 1.0 available for offline access (#123).
 4.10.0 - New: Updated to CheckStyle 6.1 (#120).

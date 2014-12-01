@@ -16,6 +16,7 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
+import javax.swing.*;
 import java.util.ResourceBundle;
 
 /**
@@ -72,11 +73,13 @@ public abstract class BaseAction extends AnAction {
 
     protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {
         final Content content = toolWindow.getContentManager().getContent(0);
-        // the content instance will be a JLabel while the component initialises
-        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            panel.setProgressText(resources.getString(progressTextKey));
+        if (content != null) {
+            final JComponent component = content.getComponent();
+            // the content instance will be a JLabel while the component initialises
+            if (component instanceof CheckStyleToolWindowPanel) {
+                final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) component;
+                panel.setProgressText(ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE).getString(progressTextKey));
+            }
         }
     }
 
