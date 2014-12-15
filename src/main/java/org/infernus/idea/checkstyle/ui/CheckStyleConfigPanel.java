@@ -282,8 +282,11 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> locations) {
-        this.locations = locations;
-        locationModel.setLocations(locations);
+        this.locations = new ArrayList<ConfigurationLocation>(locations);
+
+        final List<ConfigurationLocation> modelLocations = new ArrayList<ConfigurationLocation>(locations);
+        Collections.sort(modelLocations);
+        locationModel.setLocations(modelLocations);
     }
 
     public void setActiveLocation(final ConfigurationLocation activeLocation) {

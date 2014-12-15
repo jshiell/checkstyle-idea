@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.model;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
+import org.infernus.idea.checkstyle.util.ObjectUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -17,16 +18,16 @@ import java.util.*;
 /**
  * Bean encapsulating a configuration source.
  */
-public abstract class ConfigurationLocation implements Cloneable {
+public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation> {
 
     private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
 
     private static final long BLACKLIST_TIME_MS = 1000 * 60;
 
+    private final Map<String, String> properties = new HashMap<String, String>();
     private final ConfigurationType type;
     private String location;
     private String description;
-    private Map<String, String> properties = new HashMap<String, String>();
 
     private boolean propertiesCheckedThisSession;
     private long blacklistedUntil;
@@ -136,7 +137,7 @@ public abstract class ConfigurationLocation implements Cloneable {
         if (element != null) {
             extractPropertyNames(element, propertyNames);
 
-            for (final Element child : (List<Element>) element.getChildren()) {
+            for (final Element child : element.getChildren()) {
                 propertyNames.addAll(extractProperties(child));
             }
         }
@@ -173,17 +174,14 @@ public abstract class ConfigurationLocation implements Cloneable {
         InputStream is = resolveFile();
 
         if (!propertiesCheckedThisSession) {
-            // update property definitions
             final List<String> propertiesInFile = extractProperties(is);
 
-            // merge properties from files
             for (final String propertyName : propertiesInFile) {
                 if (!properties.containsKey(propertyName)) {
                     properties.put(propertyName, "");
                 }
             }
 
-            // remove redundant properties
             for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
@@ -210,7 +208,6 @@ public abstract class ConfigurationLocation implements Cloneable {
     }
 
     public String getDescriptor() {
-        assert type != null;
         assert location != null;
         assert description != null;
 
@@ -266,7 +263,7 @@ public abstract class ConfigurationLocation implements Cloneable {
 
     @Override
     public final int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
+        int result = type.hashCode();
         result = 31 * result + (location != null ? location.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
@@ -277,6 +274,11 @@ public abstract class ConfigurationLocation implements Cloneable {
         assert description != null;
 
         return description;
+    }
+
+    @Override
+    public int compareTo(@NotNull final ConfigurationLocation configurationLocation) {
+        return ObjectUtils.compare(getDescription(), configurationLocation.getDescription());
     }
 
     public boolean isBlacklisted() {
