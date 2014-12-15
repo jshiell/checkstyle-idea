@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -46,7 +46,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
 
     private final Set<ConfigurationLocation> presetLocations = new HashSet<ConfigurationLocation>();
-    private final Map<String, String> storage = new ConcurrentHashMap<String, String>();
+    private final SortedMap<String, String> storage = new ConcurrentSkipListMap<String, String>();
     private final ReentrantLock storageLock = new ReentrantLock();
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<ConfigurationListener>());
 
@@ -389,10 +389,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
      */
     @Nullable
     private File getProjectPath() {
-        if (project == null) {
-            return null;
-        }
-
         final VirtualFile baseDir = project.getBaseDir();
         if (baseDir == null) {
             return null;
