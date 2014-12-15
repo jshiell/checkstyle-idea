@@ -60,7 +60,11 @@ class ListPropertyResolver implements PropertyResolver {
                     + "' has no value defined in the configuration.");
         }
 
-        return propertyNamesToValues.get(propertyName);
+        final String propertyValue = propertyNamesToValues.get(propertyName);
+        if (propertyValue != null && propertyValue.trim().length() == 0) {
+            return null;
+        }
+        return propertyValue;
     }
 
     /**

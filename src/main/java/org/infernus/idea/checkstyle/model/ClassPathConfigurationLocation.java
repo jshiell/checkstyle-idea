@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 /**
  * A configuration file accessible via the IDE classpath.
