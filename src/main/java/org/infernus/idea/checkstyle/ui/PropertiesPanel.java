@@ -8,9 +8,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.io.IOException;
@@ -27,7 +29,8 @@ public class PropertiesPanel extends JPanel {
      * Properties table, hacked for enable/disable support.
      */
     private final JBTable propertiesTable = new JBTable(propertiesModel) {
-        public Component prepareRenderer(final TableCellRenderer renderer,
+        @NotNull
+        public Component prepareRenderer(@NotNull final TableCellRenderer renderer,
                                          final int row, final int column) {
             final Component comp = super.prepareRenderer(renderer, row, column);
             comp.setEnabled(isEnabled());
@@ -70,8 +73,17 @@ public class PropertiesPanel extends JPanel {
      * @return the location or null if no valid location entered.
      */
     public ConfigurationLocation getConfigurationLocation() {
+        commitCellEdits();
+
         configurationLocation.setProperties(propertiesModel.getProperties());
         return configurationLocation;
+    }
+
+    private void commitCellEdits() {
+        final TableCellEditor cellEditor = propertiesTable.getCellEditor();
+        if (cellEditor != null) {
+            cellEditor.stopCellEditing();
+        }
     }
 
     /**

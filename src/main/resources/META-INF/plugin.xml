@@ -22,6 +22,7 @@
     <li>4.11.2: Fixed: Changed configuration storage to use a sorted map, to stop silly changes to project files.</li>
     <li>4.11.2: Fixed: Configuration files are now sorted by description in the configuration panel.</li>
     <li>4.11.2: Fixed: Filename defaults should now be taken into account (#119).</li>
+    <li>4.11.2 - Fixed: Cell edits in properties table are now directly committed on action (#119).</li>
     <li>4.11.1: Fixed: ClassCast on ToolWindow via presumed race condition (#82).</li>
     <li>4.11.0: New: Updated to CheckStyle 6.1.1 (#124).</li>
     <li>4.11.0: Fixed: Made DTDs for import_control 1.1 and packages 1.0 available for offline access (#123).</li>
