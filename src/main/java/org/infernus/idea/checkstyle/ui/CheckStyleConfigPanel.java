@@ -431,7 +431,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
                     (String) getValue(Action.NAME),
                     (String) getValue(Action.SHORT_DESCRIPTION),
-                    "jar");
+                    false, "jar");
             final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, project.getBaseDir());
             if (chosen != null) {
                 ((DefaultListModel) pathList.getModel()).addElement(
@@ -469,7 +469,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
                     (String) getValue(Action.NAME),
                     (String) getValue(Action.SHORT_DESCRIPTION),
-                    "jar");
+                    false, "jar");
             final VirtualFile toSelect = LocalFileSystem.getInstance().findFileByPath(selectedFile);
             final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
             if (chosen != null) {

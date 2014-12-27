@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * A configuration file on a mounted file system.
@@ -16,6 +19,7 @@ import java.io.*;
 public class FileConfigurationLocation extends ConfigurationLocation {
 
     private static final Log LOG = LogFactory.getLog(FileConfigurationLocation.class);
+    private static final int BUFFER_SIZE = 4096;
 
     private final Project project;
 
@@ -67,12 +71,79 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @NotNull
     protected InputStream resolveFile() throws IOException {
-        final File locationFile = new File(getLocation());
+        final String detokenisedLocation = getLocation();
+        if (isInJarFile(detokenisedLocation)) {
+            final String[] fileParts = detokenisedLocation.split("!/");
+            return readFileFromJar(fileParts[0], fileParts[1]);
+        }
+
+        final File locationFile = new File(detokenisedLocation);
         if (!locationFile.exists()) {
             throw new FileNotFoundException("File does not exist: " + absolutePathOf(locationFile));
         }
 
         return new FileInputStream(locationFile);
+    }
+
+    private boolean isInJarFile(final String detokenisedLocation) {
+        return detokenisedLocation != null && detokenisedLocation.toLowerCase().contains(".jar!/");
+    }
+
+    public InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {
+        ZipFile jarFile = null;
+        try {
+            jarFile = new ZipFile(jarPath);
+            for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
+                final ZipEntry entry = e.nextElement();
+
+                if (!entry.isDirectory() && entry.getName().equals(filePath)) {
+                    BufferedInputStream bis = null;
+
+                    try {
+                        bis = new BufferedInputStream(jarFile.getInputStream(entry));
+                        return new ByteArrayInputStream(readFrom(bis));
+
+                    } finally {
+                        closeQuietly(bis);
+                    }
+                }
+            }
+
+        } finally {
+            closeQuietly(jarFile);
+        }
+
+        throw new FileNotFoundException("File does not exist: " + jarPath + " containing " + filePath);
+    }
+
+    private byte[] readFrom(final BufferedInputStream bis) throws IOException {
+        final ByteArrayOutputStream rulesFile = new ByteArrayOutputStream();
+        final byte[] readBuffer = new byte[BUFFER_SIZE];
+        int count;
+        while ((count = bis.read(readBuffer, 0, BUFFER_SIZE)) != -1) {
+            rulesFile.write(readBuffer, 0, count);
+        }
+        return rulesFile.toByteArray();
+    }
+
+    private static void closeQuietly(final ZipFile jarFile) {
+        if (jarFile != null) {
+            try {
+                jarFile.close();
+            } catch (IOException ignored) {
+                // ignored
+            }
+        }
+    }
+
+    private static void closeQuietly(final BufferedInputStream bis) {
+        if (bis != null) {
+            try {
+                bis.close();
+            } catch (IOException ignored) {
+                // ignored
+            }
+        }
     }
 
     /**

@@ -164,6 +164,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.12.0 - New: Files can now be selected from within JAR files (#125).
 4.11.2 - Fixed: Changed configuration storage to use a sorted map, to stop silly changes to project files.
 4.11.2 - Fixed: Configuration files are now sorted by description in the configuration panel.
 4.11.2 - Fixed: Filename defaults should now be taken into account (#119).
