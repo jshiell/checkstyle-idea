@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
@@ -73,8 +74,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     protected InputStream resolveFile() throws IOException {
         final String detokenisedLocation = getLocation();
         if (isInJarFile(detokenisedLocation)) {
-            final String[] fileParts = detokenisedLocation.split("!/");
-            return readFileFromJar(fileParts[0], fileParts[1]);
+            return readLocationFromJar(detokenisedLocation);
         }
 
         final File locationFile = new File(detokenisedLocation);
@@ -83,6 +83,67 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         return new FileInputStream(locationFile);
+    }
+
+    private InputStream readLocationFromJar(final String detokenisedLocation) throws IOException {
+        final String[] fileParts = detokenisedLocation.split("!/");
+        final InputStream fileStream = readFileFromJar(fileParts[0], fileParts[1]);
+        if (fileStream == null) {
+            throw new FileNotFoundException("File does not exist: " + fileParts[0] + " containing " + fileParts[1]);
+        }
+        return fileStream;
+    }
+
+    @Nullable
+    @Override
+    public String resolveAssociatedFile(final String filename, final Module module) throws IOException {
+        final String associatedFile = super.resolveAssociatedFile(filename, module);
+        if (associatedFile != null) {
+            return associatedFile;
+        }
+
+        final String detokenisedLocation = getLocation();
+        if (isInJarFile(detokenisedLocation)) {
+            return writeStreamToTemporaryFile(
+                    readFileFromJar(detokenisedLocation.split("!/")[0], filename),
+                    extensionOf(filename));
+        }
+
+        return null;
+    }
+
+    private String extensionOf(final String filename) {
+        if (filename != null && filename.contains(".")) {
+            return filename.substring(filename.lastIndexOf("."));
+        }
+        return ".tmp";
+    }
+
+    private String writeStreamToTemporaryFile(final InputStream fileStream,
+                                              final String fileSuffix) throws IOException {
+        if (fileStream == null) {
+            return null;
+        }
+
+        final File tempFile = File.createTempFile("csidea-", fileSuffix);
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(tempFile));
+            writeTo(fileStream, out);
+            tempFile.deleteOnExit();
+            return tempFile.getAbsolutePath();
+
+        } finally {
+            closeQuietly(out, fileStream);
+        }
+    }
+
+    private void writeTo(final InputStream fileStream, final BufferedOutputStream out) throws IOException {
+        final byte[] buffer = new byte[BUFFER_SIZE];
+        int read;
+        while ((read = fileStream.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
     }
 
     private boolean isInJarFile(final String detokenisedLocation) {
@@ -113,7 +174,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             closeQuietly(jarFile);
         }
 
-        throw new FileNotFoundException("File does not exist: " + jarPath + " containing " + filePath);
+        return null;
     }
 
     private byte[] readFrom(final BufferedInputStream bis) throws IOException {
@@ -136,12 +197,14 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
     }
 
-    private static void closeQuietly(final BufferedInputStream bis) {
-        if (bis != null) {
-            try {
-                bis.close();
-            } catch (IOException ignored) {
-                // ignored
+    private static void closeQuietly(final Closeable... closeables) {
+        for (Closeable closeable : closeables) {
+            if (closeable != null) {
+                try {
+                    closeable.close();
+                } catch (IOException ignored) {
+                    // ignored
+                }
             }
         }
     }
