@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ContentEntry;
+import com.intellij.openapi.roots.ModuleRootManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
@@ -182,7 +185,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -198,6 +201,91 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
 
         return is;
+    }
+
+    @Nullable
+    public String resolveAssociatedFile(final String filename,
+                                        final Module module) throws IOException {
+        if (filename == null) {
+            return null;
+        } else if (new File(filename).exists()) {
+            return filename;
+        }
+
+        return findFile(filename, module);
+    }
+
+    private String findFile(final String fileName, final Module module) {
+        if (fileName == null
+                || "".equals(fileName.trim())
+                || fileName.toLowerCase().startsWith("http://")
+                || fileName.toLowerCase().startsWith("https://")) {
+            return fileName;
+        }
+
+        File suppressionFile = checkRelativeToRulesFile(fileName);
+        if (module != null) {
+            suppressionFile = checkProjectBaseDir(module, fileName,
+                    checkModuleFile(module, fileName,
+                            checkModuleContentRoots(fileName, suppressionFile, ModuleRootManager.getInstance(module))));
+        }
+
+        if (suppressionFile != null) {
+            return suppressionFile.getAbsolutePath();
+        }
+        return null;
+    }
+
+    private File checkRelativeToRulesFile(final String fileName) {
+        if (getBaseDir() != null) {
+            final File configFileRelativePath = new File(getBaseDir(), fileName);
+            if (configFileRelativePath.exists()) {
+                return configFileRelativePath;
+            }
+        }
+        return null;
+    }
+
+    private File checkProjectBaseDir(final Module module,
+                                     final String fileName,
+                                     final File suppressionFile) {
+        if (suppressionFile == null && module.getProject().getBaseDir() != null) {
+            final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
+            if (projectRelativePath.exists()) {
+                return projectRelativePath;
+            }
+        }
+        return suppressionFile;
+    }
+
+    private File checkModuleFile(final Module module,
+                                 final String fileName,
+                                 final File suppressionFile) {
+        if (suppressionFile == null && module.getModuleFile() != null) {
+            final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
+            if (moduleRelativePath.exists()) {
+                return moduleRelativePath;
+            }
+        }
+        return suppressionFile;
+    }
+
+    private File checkModuleContentRoots(final String fileName,
+                                         final File suppressionFile,
+                                         final ModuleRootManager rootManager) {
+        if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
+            for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
+                if (contentEntry.getFile() == null) {
+                    continue;
+                }
+
+                final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
+                if (contentEntryPath.exists()) {
+                    return contentEntryPath;
+                }
+            }
+        }
+        return suppressionFile;
     }
 
     public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {

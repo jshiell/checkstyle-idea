@@ -1,8 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.ContentEntry;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
@@ -15,16 +13,18 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.util.IDEAUtilities.getResource;
+import static org.infernus.idea.checkstyle.util.IDEAUtilities.showError;
 import static org.infernus.idea.checkstyle.util.IDEAUtilities.showWarning;
 
 class CheckerFactoryWorker extends Thread {
-    private final Log LOG = LogFactory.getLog(CheckerFactory.class);
+    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
@@ -174,25 +174,30 @@ class CheckerFactoryWorker extends Thread {
         }
 
         final String fileName = currentChild.getAttribute(propertyName);
-        if (!isEmpty(fileName) && !new File(fileName).exists()) {
-            final String resolvedFile = findFile(fileName);
+        try {
+            final String resolvedFile = location.resolveAssociatedFile(fileName, module);
+            if (!isEmpty(fileName)
+                    && (resolvedFile == null || !resolvedFile.equals(fileName))) {
+                rootElement.removeChild(currentChild);
 
-            rootElement.removeChild(currentChild);
+                if (resolvedFile != null) {
+                    rootElement.addChild(elementWithUpdatedFile(
+                            resolvedFile, currentChild, elementName, propertyName));
 
-            if (resolvedFile != null) {
-                rootElement.addChild(elementWithUpdatedFile(
-                        resolvedFile, currentChild, elementName, propertyName));
+                } else if (module != null) {
+                    showWarning(module.getProject(), getResource(
+                            format("checkstyle.not-found.%s", elementName),
+                            format("CheckStyle %s %s not found", elementName, propertyName)));
+                }
+            }
 
-            } else if (module != null) {
-                showWarning(module.getProject(), getResource(
-                        format("checkstyle.not-found.%s", elementName),
-                        format("CheckStyle %s %s not found", elementName, propertyName)));
+        } catch (IOException e) {
+            if (module != null) {
+                final MessageFormat errorFormat = new MessageFormat(
+                        getResource("checkstyle.checker-failed", "Load failed due to {0}"));
+                showError(module.getProject(), errorFormat.format(e.getMessage()));
             }
         }
-    }
-
-    private boolean hasAttribute(final Configuration node, final String attributeName) {
-        return Arrays.binarySearch(node.getAttributeNames(), attributeName) >= 0;
     }
 
     private boolean isEmpty(final String fileName) {
@@ -234,72 +239,5 @@ class CheckerFactoryWorker extends Thread {
         newFilter.addAttribute(propertyName, filename);
 
         return newFilter;
-    }
-
-    private String findFile(final String fileName) {
-        if (fileName == null
-                || fileName.toLowerCase().startsWith("http://")
-                || fileName.toLowerCase().startsWith("https://")) {
-            return fileName;
-        }
-
-        File suppressionFile = checkRelativeToRulesFile(fileName);
-        if (module != null) {
-            suppressionFile = checkProjectBaseDir(fileName,
-                    checkModuleFile(fileName,
-                            checkModuleContentRoots(fileName, suppressionFile, ModuleRootManager.getInstance(module))));
-        }
-
-        if (suppressionFile != null) {
-            return suppressionFile.getAbsolutePath();
-        }
-        return null;
-    }
-
-    private File checkRelativeToRulesFile(final String fileName) {
-        if (location.getBaseDir() != null) {
-            final File configFileRelativePath = new File(location.getBaseDir(), fileName);
-            if (configFileRelativePath.exists()) {
-                return configFileRelativePath;
-            }
-        }
-        return null;
-    }
-
-    private File checkProjectBaseDir(final String fileName, File suppressionFile) {
-        if (suppressionFile == null && module.getProject().getBaseDir() != null) {
-            final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
-            if (projectRelativePath.exists()) {
-                suppressionFile = projectRelativePath;
-            }
-        }
-        return suppressionFile;
-    }
-
-    private File checkModuleFile(final String fileName, File suppressionFile) {
-        if (suppressionFile == null && module.getModuleFile() != null) {
-            final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
-            if (moduleRelativePath.exists()) {
-                suppressionFile = moduleRelativePath;
-            }
-        }
-        return suppressionFile;
-    }
-
-    private File checkModuleContentRoots(final String fileName, File suppressionFile, final ModuleRootManager rootManager) {
-        if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
-            for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
-                if (contentEntry.getFile() == null) {
-                    continue;
-                }
-
-                final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
-                if (contentEntryPath.exists()) {
-                    suppressionFile = contentEntryPath;
-                    break;
-                }
-            }
-        }
-        return suppressionFile;
     }
 }
