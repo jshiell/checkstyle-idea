@@ -1,14 +1,22 @@
 CheckStyle-IDEA
 ---------------
-(c) Copyright 2006-2014 CheckStyle-IDEA Contributors
+(c) Copyright 2006-2015 CheckStyle-IDEA Contributors
 
 https://github.com/jshiell/checkstyle-idea
 
-A plug-in for JetBrains' IntelliJ IDEA 13/14 which provides real-time
+A plug-in for JetBrains' IntelliJ IDEA 14 which provides real-time
 feedback against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
+
+= WARNING ==================================================================
+
+CheckStyle 6.2 support is blocked as it requires JDK1.7, while IDEA runs on
+JDK 1.6 on some platforms (OS X, certainly). This is in turn blocked by
+https://youtrack.jetbrains.com/issue/IDEA-117324. Sorry.
+
+============================================================================
 
 
 Use
@@ -98,7 +106,7 @@ Limitations
 
 * CheckStyle errors and warnings from the inspection are both shown at
   a single level, as IDEA will only allow one warning level for an inspection.
-  
+
 * Loading a file from a URL is current experimental and not guaranteed to do
   anything at all.
 
@@ -292,7 +300,7 @@ Version History
 3.0   - New: Result list may be filtered on severity.
 3.0   - New: Back-end re-written to support multiple CheckStyle files. You will need to set your configuration
              once again I'm afraid.
-             
+
 2.4   - New: Default CheckStyle file now has generics patch applied.
 2.4   - New: Scans in progress may be aborted.
 2.4   - Fixed: Null Pointer Exception with package HTML check.
@@ -317,7 +325,7 @@ Version History
 2.0.1 - WARNING: Due to persistence changes you will need to reconfigure the plug-in after upgrading.
 2.0.1 - Fixed: Configuration dialogue now enables 'apply' when moving to default
         scheme from a configuration file.
-2.0.1 - Changed: Remove deprecated API calls to [hopefully] ensure forward 7.0 compatibility.      
+2.0.1 - Changed: Remove deprecated API calls to [hopefully] ensure forward 7.0 compatibility.
 2.0.1 - Changed: Icons improved.
 2.0.0 - This version offers no new features. However, 2.x versions will only work
         with IDEA 7M2 or above.
