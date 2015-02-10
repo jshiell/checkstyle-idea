@@ -32,9 +32,8 @@ public class ExpandAll extends BaseAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            panel.expandTree();
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            ((CheckStyleToolWindowPanel) content.getComponent()).expandTree();
         }
     }
 

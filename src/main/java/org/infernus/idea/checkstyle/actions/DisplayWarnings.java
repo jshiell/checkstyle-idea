@@ -33,9 +33,8 @@ public class DisplayWarnings extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            return panel.isDisplayingWarnings();
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            return ((CheckStyleToolWindowPanel) content.getComponent()).isDisplayingWarnings();
         }
 
         return false;
@@ -58,7 +57,7 @@ public class DisplayWarnings extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
             final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setDisplayingWarnings(selected);
             panel.filterDisplayedResults();

@@ -172,6 +172,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.13.1 - Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).
 4.13.0 - New: Moved to IDEA 14 SDK.
 4.12.0 - New: Files can now be selected from within JAR files (#125).
 4.11.2 - Fixed: Changed configuration storage to use a sorted map, to stop silly changes to project files.

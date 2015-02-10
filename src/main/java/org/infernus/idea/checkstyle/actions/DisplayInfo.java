@@ -33,9 +33,8 @@ public class DisplayInfo extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            return panel.isDisplayingInfo();
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            return ((CheckStyleToolWindowPanel) content.getComponent()).isDisplayingInfo();
         }
 
         return false;
@@ -58,7 +57,7 @@ public class DisplayInfo extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
             final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setDisplayingInfo(selected);
             panel.filterDisplayedResults();

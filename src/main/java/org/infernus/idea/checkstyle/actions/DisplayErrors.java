@@ -33,9 +33,8 @@ public class DisplayErrors extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            return panel.isDisplayingErrors();
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            return ((CheckStyleToolWindowPanel) content.getComponent()).isDisplayingErrors();
         }
 
         return false;
@@ -58,7 +57,7 @@ public class DisplayErrors extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
             final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
             panel.setDisplayingErrors(selected);
             panel.filterDisplayedResults();

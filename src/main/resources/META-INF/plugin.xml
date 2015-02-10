@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.13.0</version>
+    <version>4.13.1</version>
     <idea-version since-build="139.658"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.13.1: Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).</li>
     <li>4.13.0: New: Moved to IDEA 14 SDK.</li>
     <li>4.12.0: New: Files can now be selected from within JAR files (#125).</li>
     <li>4.11.2: Fixed: Changed configuration storage to use a sorted map, to stop silly changes to project files.</li>

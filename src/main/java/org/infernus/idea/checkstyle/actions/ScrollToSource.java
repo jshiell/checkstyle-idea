@@ -33,9 +33,8 @@ public final class ScrollToSource extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            return panel.isScrollToSource();
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            return ((CheckStyleToolWindowPanel) content.getComponent()).isScrollToSource();
         }
 
         return false;
@@ -58,9 +57,8 @@ public final class ScrollToSource extends ToggleAction {
                 project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
 
         final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) content.getComponent();
-            panel.setScrollToSource(selected);
+        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
+            ((CheckStyleToolWindowPanel) content.getComponent()).setScrollToSource(selected);
         }
     }
 }
