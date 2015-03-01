@@ -172,6 +172,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.13.2 - New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.
 4.13.2 - Fixed: Third party classes were not available in dialogue editors. (#133).
 4.13.1 - Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).
 4.13.0 - New: Moved to IDEA 14 SDK.
