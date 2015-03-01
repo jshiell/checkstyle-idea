@@ -20,7 +20,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A configuration factory and resolver for CheckStyle.
@@ -30,15 +33,10 @@ public class CheckerFactory {
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
-    private List<URL> thirdPartyClassPath = null;
 
     public CheckerContainer getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
-        thirdPartyClassPath = new ArrayList<URL>();
-        for (String path : thirdPartyJars) {
-            thirdPartyClassPath.add(new File(path).toURI().toURL());
-        }
-        return getChecker(location, null, null);
+        return getChecker(location, null, classLoaderForPaths(toFileUrls(thirdPartyJars)));
     }
 
     /**
@@ -110,11 +108,21 @@ public class CheckerFactory {
             throws MalformedURLException {
         if (classLoader == null && module != null) {
             return moduleClassPathBuilder(module).build(module);
-        } else if (classLoader == null && thirdPartyClassPath != null) {
-            URL[] urls = new URL[thirdPartyClassPath.size()];
-            return new URLClassLoader(thirdPartyClassPath.toArray(urls), this.getClass().getClassLoader());
         }
         return classLoader;
+    }
+
+    private ClassLoader classLoaderForPaths(final List<URL> classPaths) {
+        URL[] urls = new URL[classPaths.size()];
+        return new URLClassLoader(classPaths.toArray(urls), this.getClass().getClassLoader());
+    }
+
+    private List<URL> toFileUrls(final List<String> thirdPartyJars) throws MalformedURLException {
+        final List<URL> thirdPartyClassPath = new ArrayList<URL>();
+        for (String path : thirdPartyJars) {
+            thirdPartyClassPath.add(new File(path).toURI().toURL());
+        }
+        return thirdPartyClassPath;
     }
 
     private ModuleClassPathBuilder moduleClassPathBuilder(@NotNull final Module module) {
