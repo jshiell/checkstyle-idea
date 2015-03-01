@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
@@ -36,22 +37,24 @@ public class CheckerFactory {
 
     public CheckerContainer getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
-        return getChecker(location, null, classLoaderForPaths(toFileUrls(thirdPartyJars)));
+        return getChecker(location, null, null, classLoaderForPaths(toFileUrls(thirdPartyJars)));
     }
 
     /**
      * Get a checker for a given configuration, with the default module classloader.
      *
      * @param location the location of the CheckStyle file.
+     * @param project  the current project.
      * @param module   the current module.
      * @return the checker for the module or null if it cannot be created.
      * @throws IOException         if the CheckStyle file cannot be resolved.
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
+                                       @Nullable final Project project,
                                        @Nullable final Module module)
             throws CheckstyleException, IOException {
-        return getChecker(location, module, null);
+        return getChecker(location, project, module, null);
     }
 
     /**
@@ -65,10 +68,11 @@ public class CheckerFactory {
      * @throws CheckstyleException if CheckStyle initialisation fails.
      */
     public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
+                                       @Nullable final Project project,
                                        @Nullable final Module module,
                                        @Nullable final ClassLoader classLoader)
             throws CheckstyleException, IOException {
-        final CachedChecker cachedChecker = getOrCreateCachedChecker(location, module, classLoader);
+        final CachedChecker cachedChecker = getOrCreateCachedChecker(location, project, module, classLoader);
         if (cachedChecker != null) {
             return cachedChecker.getCheckerContainer();
         }
@@ -76,6 +80,7 @@ public class CheckerFactory {
     }
 
     private CachedChecker getOrCreateCachedChecker(final ConfigurationLocation location,
+                                                   final Project project,
                                                    final Module module,
                                                    final ClassLoader classLoader)
             throws IOException, CheckstyleException {
@@ -94,7 +99,7 @@ public class CheckerFactory {
 
             final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
             final CachedChecker checker = createChecker(location, module, propertyResolver,
-                    moduleClassLoaderFrom(module, classLoader));
+                    classLoaderFor(project, module, classLoader));
             if (checker != null) {
                 cache.put(location, checker);
                 return checker;
@@ -104,12 +109,12 @@ public class CheckerFactory {
         }
     }
 
-    private ClassLoader moduleClassLoaderFrom(final Module module, final ClassLoader classLoader)
+    private ClassLoader classLoaderFor(final Project project, final Module module, final ClassLoader overrideClassLoader)
             throws MalformedURLException {
-        if (classLoader == null && module != null) {
-            return moduleClassPathBuilder(module).build(module);
+        if (overrideClassLoader == null && project != null) {
+            return moduleClassPathBuilder(project).build(module);
         }
-        return classLoader;
+        return overrideClassLoader;
     }
 
     private ClassLoader classLoaderForPaths(final List<URL> classPaths) {
@@ -125,8 +130,8 @@ public class CheckerFactory {
         return thirdPartyClassPath;
     }
 
-    private ModuleClassPathBuilder moduleClassPathBuilder(@NotNull final Module module) {
-        return ServiceManager.getService(module.getProject(), ModuleClassPathBuilder.class);
+    private ModuleClassPathBuilder moduleClassPathBuilder(final Project project) {
+        return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
 
     /**
@@ -145,14 +150,15 @@ public class CheckerFactory {
      * Get the checker configuration for a given configuration.
      *
      * @param location the location of the CheckStyle file.
-     * @param module   the current module.
-     * @return a configuration.
+     * @param project  the current project.
+     * @param module   the current module.  @return a configuration.
      * @throws IllegalArgumentException if no checker with the given location exists and it cannot be created.
      */
     public Configuration getConfig(@NotNull final ConfigurationLocation location,
+                                   @NotNull final Project project,
                                    @Nullable final Module module) {
         try {
-            final CachedChecker checker = getOrCreateCachedChecker(location, module, null);
+            final CachedChecker checker = getOrCreateCachedChecker(location, project, module, null);
             if (checker != null) {
                 return checker.getConfig();
             }

@@ -172,6 +172,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.13.2 - Fixed: Third party classes were not available in dialogue editors. (#133).
 4.13.1 - Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).
 4.13.0 - New: Moved to IDEA 14 SDK.
 4.12.0 - New: Files can now be selected from within JAR files (#125).

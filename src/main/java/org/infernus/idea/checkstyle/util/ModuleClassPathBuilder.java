@@ -42,7 +42,7 @@ public class ModuleClassPathBuilder {
             throws MalformedURLException {
 
         if (baseModule == null) {
-            return null;
+            return thirdPartyClassLoader();
         }
 
         final Set<URL> outputPaths = new HashSet<URL>();

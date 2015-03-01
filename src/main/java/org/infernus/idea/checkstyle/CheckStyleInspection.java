@@ -54,10 +54,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Produce a CheckStyle checker.
      *
      * @param checkStylePlugin the plugin.
-     * @param module           the current module. May be null.
-     * @return a checker.
+     * @param project
+     *@param module           the current module. May be null.  @return a checker.
      */
     private CheckerContainer getChecker(final CheckStylePlugin checkStylePlugin,
+                                        final Project project,
                                         @Nullable final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
@@ -80,7 +81,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory().getChecker(configurationLocation, module);
+            return getCheckerFactory().getChecker(configurationLocation, project, module);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
@@ -131,10 +132,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Retrieve a CheckStyle configuration.
      *
      * @param checkStylePlugin the plugin.
-     * @param module           the current module. May be null.
-     * @return a checkstyle configuration.
+     * @param project the current project.
+     *@param module           the current module. May be null.  @return a checkstyle configuration.
      */
     private Configuration getConfig(final CheckStylePlugin checkStylePlugin,
+                                    final Project project,
                                     final Module module) {
         LOG.debug("Getting CheckStyle checker for inspection.");
 
@@ -145,7 +147,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             }
 
             LOG.info("Loading configuration from " + configurationLocation);
-            return getCheckerFactory().getConfig(configurationLocation, module);
+            return getCheckerFactory().getConfig(configurationLocation, project, module);
 
         } catch (Exception e) {
             LOG.error("Checker could not be created.", e);
@@ -222,7 +224,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 }
             }
 
-            return scanFile(psiFile, manager, checkStylePlugin, module);
+            return scanFile(psiFile, manager, checkStylePlugin, psiFile.getProject(), module);
 
         } catch (ProcessCanceledException e) {
             LOG.warn("Process cancelled when scanning: " + psiFile.getName());
@@ -246,12 +248,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
     private ProblemDescriptor[] scanFile(final PsiFile psiFile,
                                          final InspectionManager manager,
                                          final CheckStylePlugin checkStylePlugin,
+                                         final Project project,
                                          final Module module)
             throws IOException {
         ScannableFile scannableFile = null;
         try {
-            final CheckerContainer checkerContainer = getChecker(checkStylePlugin, module);
-            final Configuration config = getConfig(checkStylePlugin, module);
+            final CheckerContainer checkerContainer = getChecker(checkStylePlugin, project, module);
+            final Configuration config = getConfig(checkStylePlugin, project, module);
             if (checkerContainer == null || config == null) {
                 return new ProblemDescriptor[0];
             }

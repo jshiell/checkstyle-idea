@@ -8,6 +8,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -189,7 +190,7 @@ final class FileScanner implements Runnable {
                 return null;
             }
 
-            return performCheckStyleScan(module, tempFiles, filesToElements, override);
+            return performCheckStyleScan(module.getProject(), module, tempFiles, filesToElements, override);
 
         } finally {
             for (final ScannableFile tempFile : tempFiles) {
@@ -208,7 +209,8 @@ final class FileScanner implements Runnable {
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final Module module,
+    private Map<PsiFile, List<ProblemDescriptor>> performCheckStyleScan(final Project project,
+                                                                        final Module module,
                                                                         final List<ScannableFile> tempFiles,
                                                                         final Map<String, PsiFile> filesToElements,
                                                                         final ConfigurationLocation override) {
@@ -225,8 +227,8 @@ final class FileScanner implements Runnable {
             return null;
         }
 
-        final CheckerContainer checkerContainer = getChecker(module, moduleClassLoader, location);
-        final Configuration config = getConfig(module, location);
+        final CheckerContainer checkerContainer = getChecker(project, module, moduleClassLoader, location);
+        final Configuration config = getConfig(module.getProject(), module, location);
         if (checkerContainer == null || config == null) {
             return Collections.emptyMap();
         }
@@ -281,13 +283,14 @@ final class FileScanner implements Runnable {
         return tempFile;
     }
 
-    private CheckerContainer getChecker(final Module module,
+    private CheckerContainer getChecker(final Project project,
+                                        final Module module,
                                         final ClassLoader classLoader,
                                         final ConfigurationLocation location) {
         LOG.debug("Getting CheckStyle checker with location " + location);
 
         try {
-            return getCheckerFactory().getChecker(location, module, classLoader);
+            return getCheckerFactory().getChecker(location, project, module, classLoader);
 
         } catch (Exception e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
@@ -320,11 +323,13 @@ final class FileScanner implements Runnable {
         return ServiceManager.getService(CheckerFactory.class);
     }
 
-    private Configuration getConfig(final Module module, final ConfigurationLocation location) {
+    private Configuration getConfig(final Project project,
+                                    final Module module,
+                                    final ConfigurationLocation location) {
         LOG.debug("Getting CheckStyle config for location " + location);
 
         try {
-            return getCheckerFactory().getConfig(location, module);
+            return getCheckerFactory().getConfig(location, project, module);
 
         } catch (Throwable e) {
             throw new CheckStylePluginException("Couldn't create Checker", e);
