@@ -6,12 +6,12 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.1.1 from within IDEA.
+    of Java files with CheckStyle 6.4.1 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.13.2</version>
-    <idea-version since-build="133.696"/>
+    <version>4.13.3</version>
+    <idea-version since-build="139"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.13.3: New: Moved to CHeckstyle 6.4.1 (supports java 8 syntax)</li>
     <li>4.13.2: New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.</li>
     <li>4.13.2: Fixed: Third party classes were not available in dialogue editors. (#133).</li>
     <li>4.13.1: Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).</li>
