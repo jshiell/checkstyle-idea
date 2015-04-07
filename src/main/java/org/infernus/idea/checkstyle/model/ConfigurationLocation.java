@@ -120,7 +120,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 return extractProperties(configDoc.getRootElement());
 
             } catch (Exception e) {
-                LOG.error("CheckStyle file could not be parsed for properties.", e);
+                LOG.warn("CheckStyle file could not be parsed for properties.", e);
             }
         }
 
