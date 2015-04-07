@@ -10,12 +10,6 @@ profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
-= WARNING ==================================================================
-
-CheckStyle 6.2 support is blocked as it requires JDK1.7, while IDEA runs on
-JDK 1.6 on some platforms (OS X, certainly). This is in turn blocked by
-https://youtrack.jetbrains.com/issue/IDEA-117324. Sorry.
-
 ============================================================================
 
 
@@ -172,6 +166,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.13.3 - New: Updated to CheckStyle 6.4.1.
 4.13.2 - New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.
 4.13.2 - Fixed: Third party classes were not available in dialogue editors. (#133).
 4.13.1 - Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).

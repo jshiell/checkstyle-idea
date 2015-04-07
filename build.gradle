@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.6
-version = '4.13.2'
+sourceCompatibility = 1.8
+version = '4.13.3'
 
 repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ configurations {
 dependencies {
     ideaSdkLibs fileTree(dir: "$ideaSdk", include: '*.jar')
 
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.1.1') {
+    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.4.1') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile group: 'commons-io', name: 'commons-io', version: '2.4'

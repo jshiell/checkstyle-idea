@@ -3,6 +3,6 @@
 # IDEA seems to be really rubbish at pulling down Maven libraries if they're not
 # in the local repo. So, easy fix if the dependency breaks:
 
-CHECKSTYLE_VERSION=6.1.1
+CHECKSTYLE_VERSION=6.4.1
 
 mvn org.apache.maven.plugins:maven-dependency-plugin:2.1:get -DrepoUrl=http://http://repo2.maven.org/maven2/com/puppycrawl/tools/ -Dartifact=com.puppycrawl.tools:checkstyle:$CHECKSTYLE_VERSION
