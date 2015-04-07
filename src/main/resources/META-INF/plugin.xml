@@ -6,7 +6,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.4.1 from within IDEA.
+    of Java files with CheckStyle 6.5 from within IDEA.
 </p>
         ]]>
     </description>
@@ -19,7 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>4.14.0: New: Moved to CheckStyle 6.4.1, which requires Java 7 or above.</li>
+    <li>4.14.0: New: Moved to CheckStyle 6.5, which requires Java 7 or above.</li>
     <li>4.14.0: New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with the bundled JDK.</li>
     <li>4.14.0: New: As such, we now use the IDEA 14.1 SDK.</li>
     <li>4.13.2: New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.</li>

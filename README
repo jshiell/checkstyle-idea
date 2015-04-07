@@ -176,7 +176,7 @@ LICENCE file.
 Version History
 ---------------
 
-4.14.0 - New: Moved to CheckStyle 6.4.1, which requires Java 7 or above.
+4.14.0 - New: Moved to CheckStyle 6.5, which requires Java 7 or above.
 4.14.0 - New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with the bundled JDK.
 4.14.0 - New: As such, we now use the IDEA 14.1 SDK.
 4.13.2 - New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.
