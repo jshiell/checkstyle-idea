@@ -4,7 +4,7 @@ CheckStyle-IDEA
 
 https://github.com/jshiell/checkstyle-idea
 
-A plug-in for JetBrains' IntelliJ IDEA 14 which provides real-time
+A plug-in for JetBrains' IntelliJ IDEA 14.1 which provides real-time
 feedback against a given CheckStyle (http://checkstyle.sourceforge.net/)
 profile by way of an inspection.
 
@@ -12,6 +12,15 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 
 ============================================================================
 
+OS X users please note - CheckStyle 6.2 and above require Java 8. As the
+default IDEA package for OS X runs on Java 6, please make use of the versions
+with the bundled JDK, e.g.
+
+  https://download.jetbrains.com/idea/ideaIU-14.1.1-custom-jdk-bundled.dmg
+
+All other users please note - we require IDEA to be running on JDK 8.
+
+============================================================================
 
 Use
 ---
@@ -143,8 +152,9 @@ Thanks to those who have contributed work and effort directly to this project:
 * Kristin Young
 * Simon Billingsley
 * Miel Donkers
+* Dmitrij (zherebjatjew)
 
- And also thanks are due to the authors and contributors of:
+And also thanks are due to the authors and contributors of:
 
 * Eclipse-CS, for inspiration and solutions to coding problems.
 * JetStyle, for filling the area of static scanning and also giving me
@@ -166,7 +176,9 @@ LICENCE file.
 Version History
 ---------------
 
-4.13.3 - New: Updated to CheckStyle 6.4.1.
+4.14.0 - New: Moved to CheckStyle 6.4.1, which requires Java 7 or above.
+4.14.0 - New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with the bundled JDK.
+4.14.0 - New: As such, we now use the IDEA 14.1 SDK.
 4.13.2 - New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.
 4.13.2 - Fixed: Third party classes were not available in dialogue editors. (#133).
 4.13.1 - Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).
