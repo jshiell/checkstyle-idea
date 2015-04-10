@@ -16,6 +16,8 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     private static final Log LOG = LogFactory.getLog(HTTPURLConfigurationLocation.class);
 
+    private File tempFile;
+
     /**
      * Create a new URL configuration.
      */
@@ -29,53 +31,59 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     @NotNull
     protected InputStream resolveFile() throws IOException {
-        Reader reader = null;
-        Writer writer = null;
         try {
-            final URL url = new URL(getLocation());
-            final URLConnection urlConnection = url.openConnection();
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(false);
-            urlConnection.setAllowUserInteraction(false);
+            return new FileInputStream(writeFileTo(connectionTo(getLocation()), temporaryFile()));
 
-            if (url.getUserInfo() != null) {
-                final String basicAuth = "Basic " + DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes());
-                urlConnection.setRequestProperty("Authorization", basicAuth);
-            }
+        } catch (IOException e) {
+            LOG.error("Couldn't read URL: " + getLocation(), e);
+            throw e;
+        }
+    }
 
-            final File tempFile = File.createTempFile("checkStyle", ".xml");
-            tempFile.deleteOnExit();
-            writer = new BufferedWriter(new FileWriter(tempFile));
+    @NotNull
+    private URLConnection connectionTo(final String location) throws IOException {
+        final URL url = new URL(location);
+        final URLConnection urlConnection = url.openConnection();
+        urlConnection.setDoInput(true);
+        urlConnection.setDoOutput(false);
+        urlConnection.setAllowUserInteraction(false);
 
-            urlConnection.connect();
-            reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        addBasicAuth(url, urlConnection);
+
+        return urlConnection;
+    }
+
+    private void addBasicAuth(final URL url, final URLConnection urlConnection) {
+        if (url.getUserInfo() != null) {
+            urlConnection.setRequestProperty("Authorization",
+                    "Basic " + DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes()));
+        }
+    }
+
+    private File writeFileTo(final URLConnection urlConnection, final File destinationFile) throws IOException {
+        urlConnection.connect();
+
+        try (Writer writer = new BufferedWriter(new FileWriter(destinationFile));
+             Reader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
             int readChar;
             while ((readChar = reader.read()) != -1) {
                 writer.write(readChar);
             }
 
             writer.flush();
-            return new FileInputStream(tempFile);
 
-        } catch (IOException e) {
-            LOG.error("Couldn't read URL: " + getLocation(), e);
-            throw e;
+            return destinationFile;
+        }
+    }
 
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    // ignore
-                }
+    @NotNull
+    private File temporaryFile() throws IOException {
+        synchronized (this) {
+            if (tempFile == null) {
+                tempFile = File.createTempFile("checkStyle", ".xml");
+                tempFile.deleteOnExit();
             }
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+            return tempFile;
         }
     }
 
