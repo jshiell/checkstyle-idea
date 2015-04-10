@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
@@ -102,17 +103,19 @@ public abstract class AbstractCheckerThread extends Thread {
      * @param virtualFile the file to process.
      */
     private void buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
-        VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor() {
-            @Override
-            public boolean visitFile(@NotNull final VirtualFile file) {
-                if (!file.isDirectory()) {
-                    final PsiFile psiFile = psiManager.findFile(virtualFile);
-                    if (psiFile != null) {
-                        files.add(psiFile);
+        ApplicationManager.getApplication().runReadAction(() -> {
+            VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor() {
+                @Override
+                public boolean visitFile(@NotNull final VirtualFile file) {
+                    if (!file.isDirectory()) {
+                        final PsiFile psiFile = psiManager.findFile(virtualFile);
+                        if (psiFile != null) {
+                            files.add(psiFile);
+                        }
                     }
+                    return true;
                 }
-                return true;
-            }
+            });
         });
     }
 

@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.14.0</version>
+    <version>4.14.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.14.1: Fixed: findFile now uses ReadAction (#140).</li>
     <li>4.14.0: New: Moved to CheckStyle 6.5, which requires Java 7 or above.</li>
     <li>4.14.0: New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with the bundled JDK.</li>
     <li>4.14.0: New: As such, we now use the IDEA 14.1 SDK.</li>
