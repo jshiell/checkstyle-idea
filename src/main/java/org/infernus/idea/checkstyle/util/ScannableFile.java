@@ -12,10 +12,8 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.regex.Matcher;
 
@@ -30,7 +28,7 @@ public class ScannableFile {
 
     /**
      * Create a new scannable file from a PSI file.
-     * <p/>
+     * <p>
      * If required this will create a temporary copy of the file.
      *
      * @param psiFile the psiFile to create the file from.
@@ -136,8 +134,7 @@ public class ScannableFile {
         final CodeStyleSettings codeStyleSettings
                 = CodeStyleSettingsManager.getSettings(psiFile.getProject());
 
-        final BufferedWriter tempFileOut = new BufferedWriter(
-                new FileWriter(outFile));
+        final Writer tempFileOut = writerTo(outFile);
         for (final char character : psiFile.getText().toCharArray()) {
             if (character == '\n') { // IDEA uses \n internally
                 tempFileOut.write(codeStyleSettings.getLineSeparator());
@@ -147,6 +144,13 @@ public class ScannableFile {
         }
         tempFileOut.flush();
         tempFileOut.close();
+    }
+
+    @NotNull
+    private Writer writerTo(final File outFile) throws FileNotFoundException {
+        return new BufferedWriter(
+                new OutputStreamWriter(
+                        new FileOutputStream(outFile), Charset.forName("UTF-8").newEncoder()));
     }
 
     public File getFile() {

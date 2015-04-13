@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
-version = '4.14.1'
+version = '4.14.2'
 
 repositories {
     mavenCentral()
