@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.14.2: Fixed: Updated icons to more closely resemble current CheckStyle icon.</li>
     <li>4.14.2: Fixed: File writes are now forced to UTF-8 (#84).</li>
     <li>4.14.1: Fixed: HTTP rules files should result in fewer temporary files (#149).</li>
     <li>4.14.1: Fixed: findFile now uses ReadAction (#140).</li>
