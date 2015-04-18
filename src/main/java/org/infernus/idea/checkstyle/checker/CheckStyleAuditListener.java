@@ -33,12 +33,12 @@ public class CheckStyleAuditListener implements AuditListener {
     private final Map<String, PsiFile> fileNamesToPsiFiles;
     private final InspectionManager manager;
 
-    private final List<AuditEvent> errors = new ArrayList<AuditEvent>();
-    private final Map<PsiFile, List<ProblemDescriptor>> problems = new HashMap<PsiFile, List<ProblemDescriptor>>();
+    private final List<AuditEvent> errors = new ArrayList<>();
+    private final Map<PsiFile, List<ProblemDescriptor>> problems = new HashMap<>();
 
     /**
      * Create a new listener.
-     * <p/>
+     * <p>
      * Use the second argument to determine if we return our extended problem
      * descriptors. This is provided to avoid problems with downstream code
      * that may be interested in the implementation type.
@@ -46,7 +46,7 @@ public class CheckStyleAuditListener implements AuditListener {
      * @param fileNamesToPsiFiles    a map of files name to PSI files for the files being scanned.
      * @param manager                the current inspection manager.
      * @param useExtendedDescriptors should we return standard IntelliJ
- *                               problem descriptors or extended ones with severity information?
+     *                               problem descriptors or extended ones with severity information?
      * @param suppressErrors         pass CheckStyle errors to IDEA as warnings.
      * @param tabWidth               the tab width for the given rules file.
      * @param checks                 the check modifications to use.
@@ -56,7 +56,7 @@ public class CheckStyleAuditListener implements AuditListener {
                                    final boolean useExtendedDescriptors,
                                    final boolean suppressErrors,
                                    final int tabWidth, final List<Check> checks) {
-        this.fileNamesToPsiFiles = new HashMap<String, PsiFile>(fileNamesToPsiFiles);
+        this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
         this.manager = manager;
         this.usingExtendedDescriptors = useExtendedDescriptors;
         this.checks = checks;
@@ -125,7 +125,7 @@ public class CheckStyleAuditListener implements AuditListener {
     private void addProblem(final PsiFile psiFile, final ProblemDescriptor problemDescriptor) {
         List<ProblemDescriptor> problemsForFile = problems.get(psiFile);
         if (problemsForFile == null) {
-            problemsForFile = new ArrayList<ProblemDescriptor>();
+            problemsForFile = new ArrayList<>();
             problems.put(psiFile, problemsForFile);
         }
 
@@ -138,7 +138,7 @@ public class CheckStyleAuditListener implements AuditListener {
     private class ProcessResultsThread implements Runnable {
 
         public void run() {
-            final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<PsiFile, List<Integer>>();
+            final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<>();
 
             synchronized (errors) {
                 for (final AuditEvent event : errors) {
@@ -155,7 +155,7 @@ public class CheckStyleAuditListener implements AuditListener {
                     if (lineLengthCache == null) {
                         // we cache the offset of each line as it is created, so as to
                         // avoid retreating ground we've already covered.
-                        lineLengthCache = new ArrayList<Integer>();
+                        lineLengthCache = new ArrayList<>();
                         lineLengthCache.add(0); // line 1 is offset 0
 
                         lineLengthCachesByFile.put(psiFile, lineLengthCache);
@@ -169,85 +169,112 @@ public class CheckStyleAuditListener implements AuditListener {
         private void processEvent(final PsiFile psiFile,
                                   final List<Integer> lineLengthCache,
                                   final AuditEvent event) {
-            final char[] text = psiFile.textToCharArray();
+            if (additionalChecksFail(psiFile, event)) {
+                return;
+            }
 
-            // check for package HTML siblings, as our scan can't find these
-            // if we're using a temporary file
+            final Position position = findPosition(lineLengthCache, event, psiFile.textToCharArray());
+            final PsiElement victim = position.element(psiFile);
 
+            if (victim != null) {
+                addProblemTo(victim, psiFile, event, position.afterEndOfLine);
+            } else {
+                LOG.warn("Couldn't find victim for error: " + event.getFileName() + "("
+                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
+            }
+        }
+
+        private void addProblemTo(final PsiElement victim,
+                                  final PsiFile psiFile,
+                                  final AuditEvent event,
+                                  final boolean afterEndOfLine) {
+            try {
+                final ProblemDescriptor problem = manager.createProblemDescriptor(
+                        victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
+                        false, afterEndOfLine);
+
+                if (usingExtendedDescriptors) {
+                    addProblem(psiFile, extendDescriptor(event, problem));
+                } else {
+                    addProblem(psiFile, problem);
+                }
+
+            } catch (PsiInvalidElementAccessException e) {
+                LOG.error("Element access failed", e);
+            }
+        }
+
+        private boolean additionalChecksFail(final PsiFile psiFile, final AuditEvent event) {
             if (checks != null) {
                 for (final Check check : checks) {
                     if (!check.process(psiFile, event)) {
-                        return;
+                        return true;
                     }
                 }
             }
+            return false;
+        }
 
-            int offset;
-            boolean afterEndOfLine = false;
-
+        @NotNull
+        private Position findPosition(final List<Integer> lineLengthCache, final AuditEvent event, final char[] text) {
             if (event.getLine() == 0) {
-                offset = event.getColumn();
+                return Position.at(event.getColumn());
 
             } else if (event.getLine() <= lineLengthCache.size()) {
-                offset = lineLengthCache.get(event.getLine() - 1) + event.getColumn();
+                return Position.at(lineLengthCache.get(event.getLine() - 1) + event.getColumn());
 
             } else {
-                // start from end of cached data
-                offset = lineLengthCache.get(lineLengthCache.size() - 1);
-                int line = lineLengthCache.size();
+                return searchFromEndOfCachedData(lineLengthCache, event, text);
+            }
+        }
 
-                int column = 0;
-                for (int i = offset; i < text.length; ++i) {
-                    final char character = text[i];
+        @NotNull
+        private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache,
+                                                   final AuditEvent event,
+                                                   final char[] text) {
+            final Position position;
+            int offset = lineLengthCache.get(lineLengthCache.size() - 1);
+            boolean afterEndOfLine = false;
+            int line = lineLengthCache.size();
 
-                    // for linefeeds we need to handle CR, LF and CRLF,
-                    // hence we accept either and only trigger a new
-                    // line on the LF of CRLF.
-                    final char nextChar = (i + 1) < text.length ? text[i + 1] : '\0';
-                    if (character == '\n' || character == '\r' && nextChar != '\n') {
-                        ++line;
-                        ++offset;
-                        lineLengthCache.add(offset);
-                        column = 0;
-                    } else if (character == '\t') {
-                        column += tabWidth;
-                        ++offset;
-                    } else {
-                        ++column;
-                        ++offset;
+            int column = 0;
+            for (int i = offset; i < text.length; ++i) {
+                final char character = text[i];
+
+                // for linefeeds we need to handle CR, LF and CRLF,
+                // hence we accept either and only trigger a new
+                // line on the LF of CRLF.
+                final char nextChar = nextCharacter(text, i);
+                if (character == '\n' || character == '\r' && nextChar != '\n') {
+                    ++line;
+                    ++offset;
+                    lineLengthCache.add(offset);
+                    column = 0;
+                } else if (character == '\t') {
+                    column += tabWidth;
+                    ++offset;
+                } else {
+                    ++column;
+                    ++offset;
+                }
+
+                if (event.getLine() == line && event.getColumn() == column) {
+                    if (column == 0 && Character.isWhitespace(nextChar)) {
+                        afterEndOfLine = true;
                     }
-
-                    if (event.getLine() == line && event.getColumn() == column) {
-                        if (column == 0 && Character.isWhitespace(nextChar)) {
-                            afterEndOfLine = true;
-                        }
-                        break;
-                    }
+                    break;
                 }
             }
 
-            final PsiElement victim;
-            victim = psiFile.findElementAt(offset);
+            position = Position.at(offset, afterEndOfLine);
+            return position;
+        }
 
-            if (victim == null) {
-                LOG.warn("Couldn't find victim for error: " + event.getFileName() + "("
-                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
-            } else {
-                try {
-                    final ProblemDescriptor problem = manager.createProblemDescriptor(
-                            victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
-                            false, afterEndOfLine);
-
-                    if (usingExtendedDescriptors) {
-                        addProblem(psiFile, extendDescriptor(event, problem));
-                    } else {
-                        addProblem(psiFile, problem);
-                    }
-
-                } catch (PsiInvalidElementAccessException e) {
-                    LOG.error("Element access failed", e);
-                }
+        private char nextCharacter(final char[] text, final int i) {
+            if ((i + 1) < text.length) {
+                return text[i + 1];
             }
+            return '\0';
         }
 
         private String messageFor(final AuditEvent event) {
@@ -281,6 +308,29 @@ public class CheckStyleAuditListener implements AuditListener {
                 }
             }
             return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+        }
+    }
+
+    private static final class Position {
+        private final boolean afterEndOfLine;
+        private final int offset;
+
+        public static Position at(final int offset, final boolean afterEndOfLine) {
+            return new Position(offset, afterEndOfLine);
+        }
+
+        public static Position at(final int offset) {
+            return new Position(offset, false);
+        }
+
+        private Position(final int offset,
+                         final boolean afterEndOfLine) {
+            this.offset = offset;
+            this.afterEndOfLine = afterEndOfLine;
+        }
+
+        private PsiElement element(final PsiFile psiFile) {
+            return psiFile.findElementAt(offset);
         }
     }
 
