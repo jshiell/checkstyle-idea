@@ -51,4 +51,9 @@ class CachedChecker {
     public boolean isValid() {
         return (getTimeStamp() + CACHE_VALID_TIME) >= System.currentTimeMillis();
     }
+
+    public void destroy() {
+        checkerContainer.destroy();
+    }
+
 }

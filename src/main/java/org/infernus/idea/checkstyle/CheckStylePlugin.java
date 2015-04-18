@@ -9,9 +9,7 @@ import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
-import org.infernus.idea.checkstyle.checker.CheckFilesThread;
-import org.infernus.idea.checkstyle.checker.ScanFilesThread;
+import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
@@ -30,7 +28,7 @@ import java.util.Set;
 public final class CheckStylePlugin implements ProjectComponent {
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
-    private final Set<AbstractCheckerThread> checksInProgress = new HashSet<AbstractCheckerThread>();
+    private final Set<AbstractCheckerThread> checksInProgress = new HashSet<>();
     private final Project project;
     private final CheckStyleConfiguration configuration;
 
@@ -87,7 +85,13 @@ public final class CheckStylePlugin implements ProjectComponent {
     }
 
     public void projectClosed() {
-        LOG.debug("Project closed.");
+        LOG.debug("Project closed; invalidating checkers.");
+
+        invalidateCheckerCache();
+    }
+
+    private void invalidateCheckerCache() {
+        ServiceManager.getService(CheckerFactoryCache.class).invalidate();
     }
 
     @NotNull
@@ -165,10 +169,7 @@ public final class CheckStylePlugin implements ProjectComponent {
      */
     public void stopChecks() {
         synchronized (checksInProgress) {
-            for (final AbstractCheckerThread thread : checksInProgress) {
-                thread.stopCheck();
-            }
-
+            checksInProgress.forEach(AbstractCheckerThread::stopCheck);
             checksInProgress.clear();
         }
     }

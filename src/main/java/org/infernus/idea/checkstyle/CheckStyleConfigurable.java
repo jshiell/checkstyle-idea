@@ -6,7 +6,7 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
@@ -78,7 +78,7 @@ public class CheckStyleConfigurable implements Configurable {
 
         reset(); // save current data as unmodified
 
-        getCheckerFactory().invalidateCache();
+        getCheckerFactoryCache().invalidate();
 
         resetModuleClassBuilder();
     }
@@ -94,8 +94,8 @@ public class CheckStyleConfigurable implements Configurable {
         return ServiceManager.getService(project, CheckStyleConfiguration.class);
     }
 
-    private CheckerFactory getCheckerFactory() {
-        return ServiceManager.getService(CheckerFactory.class);
+    private CheckerFactoryCache getCheckerFactoryCache() {
+        return ServiceManager.getService(CheckerFactoryCache.class);
     }
 
     public void reset() {

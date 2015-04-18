@@ -176,6 +176,7 @@ LICENCE file.
 Version History
 ---------------
 
+4.14.2 - Fixed: Cached checkers are now cleaned by a background task (#141).
 4.14.2 - Fixed: Updated icons to more closely resemble current CheckStyle icon.
 4.14.2 - Fixed: File writes are now forced to UTF-8 (#84).
 4.14.1 - Fixed: HTTP rules files should result in fewer temporary files (#149).

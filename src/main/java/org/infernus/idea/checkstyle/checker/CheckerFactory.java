@@ -22,9 +22,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A configuration factory and resolver for CheckStyle.
@@ -33,7 +33,11 @@ public class CheckerFactory {
 
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
-    private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<ConfigurationLocation, CachedChecker>();
+    private final CheckerFactoryCache cache;
+
+    public CheckerFactory(@NotNull final CheckerFactoryCache cache) {
+        this.cache = cache;
+    }
 
     public CheckerContainer getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
@@ -84,29 +88,20 @@ public class CheckerFactory {
                                                    final Module module,
                                                    final ClassLoader classLoader)
             throws IOException, CheckstyleException {
-        synchronized (cache) {
-            if (cache.containsKey(location)) {
-                final CachedChecker cachedChecker = cache.get(location);
-                if (cachedChecker != null && cachedChecker.isValid()) {
-                    return cachedChecker;
-                } else {
-                    if (cachedChecker != null) {
-                        cachedChecker.getCheckerContainer().destroy();
-                    }
-                    cache.remove(location);
-                }
-            }
-
-            final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
-            final CachedChecker checker = createChecker(location, module, propertyResolver,
-                    classLoaderFor(project, module, classLoader));
-            if (checker != null) {
-                cache.put(location, checker);
-                return checker;
-            }
-
-            return null;
+        final Optional<CachedChecker> cachedChecker = cache.get(location);
+        if (cachedChecker.isPresent()) {
+            return cachedChecker.get();
         }
+
+        final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
+        final CachedChecker checker = createChecker(location, module, propertyResolver,
+                classLoaderFor(project, module, classLoader));
+        if (checker != null) {
+            cache.put(location, checker);
+            return checker;
+        }
+
+        return null;
     }
 
     private ClassLoader classLoaderFor(final Project project, final Module module, final ClassLoader overrideClassLoader)
@@ -123,7 +118,7 @@ public class CheckerFactory {
     }
 
     private List<URL> toFileUrls(final List<String> thirdPartyJars) throws MalformedURLException {
-        final List<URL> thirdPartyClassPath = new ArrayList<URL>();
+        final List<URL> thirdPartyClassPath = new ArrayList<>();
         for (String path : thirdPartyJars) {
             thirdPartyClassPath.add(new File(path).toURI().toURL());
         }
@@ -132,18 +127,6 @@ public class CheckerFactory {
 
     private ModuleClassPathBuilder moduleClassPathBuilder(final Project project) {
         return ServiceManager.getService(project, ModuleClassPathBuilder.class);
-    }
-
-    /**
-     * Invalidate any cached checkers.
-     */
-    public void invalidateCache() {
-        synchronized (cache) {
-            for (CachedChecker cachedChecker : cache.values()) {
-                cachedChecker.getCheckerContainer().destroy();
-            }
-            cache.clear();
-        }
     }
 
     /**

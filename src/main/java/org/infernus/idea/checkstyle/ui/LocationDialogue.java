@@ -6,6 +6,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
 import javax.swing.*;
@@ -194,7 +195,7 @@ public class LocationDialogue extends JDialog {
         configurationLocation = location;
 
         try {
-            new CheckerFactory().getChecker(location, thirdPartyClasspath);
+            new CheckerFactory(new CheckerFactoryCache()).getChecker(location, thirdPartyClasspath);
         } catch (Exception e) {
             errorPanel.setError(e);
             moveToStep(CurrentStep.ERROR);
