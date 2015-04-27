@@ -126,6 +126,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.15.0** New: Updated to CheckStyle 6.6 (#150).
 * **4.14.2** Fixed: Cached checkers are now cleaned by a background task (#141).
 * **4.14.2** Fixed: Updated icons to more closely resemble current CheckStyle icon.
 * **4.14.2** Fixed: File writes are now forced to UTF-8 (#84).
