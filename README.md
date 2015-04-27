@@ -48,7 +48,7 @@ If an error occurs during the check an exception will be thrown, which IDEA will
 
 ## Notable Extensions
 
-### sevntu.checkstyle - http://sevntu-checkstyle.github.io/sevntu.checkstyle/
+### [sevntu.checkstyle](http://sevntu-checkstyle.github.io/sevntu.checkstyle/)
 
 *sevntu.checkstyle* offers a number of useful checks written by students of the Sevastopol National Technical University (SevNTU). They're also kind enough to
 offer instructions on setting them up with this plugin.
