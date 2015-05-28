@@ -11,8 +11,10 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 > OS X users please note - CheckStyle 6.2 and above require Java 8. As the
 > default IDEA package for OS X runs on Java 6, please make use of the versions
 > with the bundled JDK, e.g.
-> 
-> [https://download.jetbrains.com/idea/ideaIU-14.1.2-custom-jdk-bundled.dmg](https://download.jetbrains.com/idea/ideaIU-14.1.2-custom-jdk-bundled.dmg)
+>
+> [Community Edition (14.1.3)](https://download.jetbrains.com/idea/ideaIC-14.1.3-custom-jdk-bundled.dmg)
+>
+> [Ultimate Edition (14.1.3)](https://download.jetbrains.com/idea/ideaIU-14.1.3-custom-jdk-bundled.dmg)
 >
 > All other users please note - we require IDEA to be running on JDK 8.
 
