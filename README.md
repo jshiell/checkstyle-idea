@@ -128,6 +128,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.16.0** New: Updated to CheckStyle 6.7 (#168).
 * **4.15.0** New: Updated to CheckStyle 6.6 (#150).
 * **4.14.2** Fixed: Cached checkers are now cleaned by a background task (#141).
 * **4.14.2** Fixed: Updated icons to more closely resemble current CheckStyle icon.
