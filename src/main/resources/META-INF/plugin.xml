@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.16.1: Fixed: Only files in the project content source are scanned (#172).</li>
     <li>4.16.1: Fixed: Mirrored JAR files are now used when available. (#141).</li>
     <li>4.16.0: New: Updated to CheckStyle 6.7 (#168).</li>
     <li>4.15.0: New: Updated to CheckStyle 6.6 (#150).</li>

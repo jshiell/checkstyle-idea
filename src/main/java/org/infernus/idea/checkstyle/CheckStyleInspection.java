@@ -36,10 +36,12 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.singletonList;
+import static org.infernus.idea.checkstyle.checker.PsiFileValidator.isScannable;
 
 /**
  * Inspection for CheckStyle integration for IntelliJ IDEA.
@@ -50,13 +52,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
 
-    /**
-     * Produce a CheckStyle checker.
-     *
-     * @param checkStylePlugin the plugin.
-     * @param project
-     *@param module           the current module. May be null.  @return a checker.
-     */
     private CheckerContainer getChecker(final CheckStylePlugin checkStylePlugin,
                                         final Project project,
                                         @Nullable final Module module) {
@@ -132,8 +127,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
      * Retrieve a CheckStyle configuration.
      *
      * @param checkStylePlugin the plugin.
-     * @param project the current project.
-     *@param module           the current module. May be null.  @return a checkstyle configuration.
+     * @param project          the current project.
+     * @param module           the current module. May be null.  @return a checkstyle configuration.
      */
     private Configuration getConfig(final CheckStylePlugin checkStylePlugin,
                                     final Project project,
@@ -191,7 +186,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         LOG.debug("Inspection has been invoked.");
 
         try {
-            if (!psiFile.isValid() || !psiFile.isPhysical()) {
+            if (!isScannable(psiFile)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Skipping file as invalid: " + psiFile.getName());
                 }
@@ -278,7 +273,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final Checker checker = checkerContainer.getChecker();
             synchronized (checker) {
                 checker.addListener(listener);
-                checker.process(Arrays.asList(scannableFile.getFile()));
+                checker.process(singletonList(scannableFile.getFile()));
                 checker.removeListener(listener);
             }
 

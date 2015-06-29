@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static org.infernus.idea.checkstyle.checker.PsiFileValidator.isScannable;
+
 /**
  * Runnable for scanning an individual file.
  */
@@ -125,8 +127,8 @@ final class FileScanner implements Runnable {
 
         Module module = null;
 
-        final List<ScannableFile> tempFiles = new ArrayList<ScannableFile>();
-        final Map<String, PsiFile> filesToElements = new HashMap<String, PsiFile>();
+        final List<ScannableFile> tempFiles = new ArrayList<>();
+        final Map<String, PsiFile> filesToElements = new HashMap<>();
 
         final boolean checkTestClasses = this.plugin.getConfiguration().isScanningTestClasses();
         final boolean scanOnlyJavaFiles = !plugin.getConfiguration().isScanningNonJavaFiles();
@@ -139,7 +141,7 @@ final class FileScanner implements Runnable {
                         LOG.debug("Processing " + describe(psiFile));
                     }
 
-                    if (psiFile == null || !psiFile.getVirtualFile().isValid() || !psiFile.isPhysical()) {
+                    if (!isScannable(psiFile)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping as invalid type: " + describe(psiFile));
                         }
@@ -249,7 +251,7 @@ final class FileScanner implements Runnable {
     }
 
     private List<File> asListOfFiles(final List<ScannableFile> tempFiles) {
-        final List<File> listOfFiles = new ArrayList<File>();
+        final List<File> listOfFiles = new ArrayList<>();
         for (ScannableFile tempFile : tempFiles) {
             listOfFiles.add(tempFile.getFile());
         }
