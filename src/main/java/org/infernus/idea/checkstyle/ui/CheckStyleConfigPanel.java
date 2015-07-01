@@ -31,7 +31,7 @@ import java.util.List;
  * Provides a configuration panel for project-level configuration.
  */
 public final class CheckStyleConfigPanel extends JPanel {
-    private final JList pathList = new JBList(new DefaultListModel());
+    private final JList pathList = new JBList(new DefaultListModel<String>());
 
     private final JCheckBox testClassesCheckbox = new JCheckBox();
     private final JCheckBox scanNonJavaFilesCheckbox = new JCheckBox();
@@ -211,7 +211,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             thirdPartyClasspath = classpath;
         }
 
-        final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
+        final DefaultListModel<String> listModel = pathListModel();
         listModel.clear();
 
         for (final String classPathFile : thirdPartyClasspath) {
@@ -219,6 +219,11 @@ public final class CheckStyleConfigPanel extends JPanel {
                 listModel.addElement(classPathFile);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private DefaultListModel<String> pathListModel() {
+        return (DefaultListModel<String>) pathList.getModel();
     }
 
     /**
@@ -230,7 +235,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     public List<String> getThirdPartyClasspath() {
         final List<String> classpath = new ArrayList<>();
 
-        final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
+        final DefaultListModel listModel = pathListModel();
         for (int i = 0; i < listModel.size(); ++i) {
             final String path = (String) listModel.get(i);
             classpath.add(path);
@@ -278,10 +283,10 @@ public final class CheckStyleConfigPanel extends JPanel {
         return Collections.unmodifiableList(locationModel.getLocations());
     }
 
-    public void setConfigurationLocations(final List<ConfigurationLocation> locations) {
-        this.locations = new ArrayList<>(locations);
+    public void setConfigurationLocations(final List<ConfigurationLocation> newLocations) {
+        this.locations = new ArrayList<>(newLocations);
 
-        final List<ConfigurationLocation> modelLocations = new ArrayList<>(locations);
+        final List<ConfigurationLocation> modelLocations = new ArrayList<>(newLocations);
         Collections.sort(modelLocations);
         locationModel.setLocations(modelLocations);
     }
@@ -418,7 +423,7 @@ public final class CheckStyleConfigPanel extends JPanel {
                     false, "jar");
             final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, project.getBaseDir());
             if (chosen != null) {
-                ((DefaultListModel) pathList.getModel()).addElement(
+                (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
             }
         }
@@ -445,8 +450,8 @@ public final class CheckStyleConfigPanel extends JPanel {
                 return;
             }
 
-            final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
-            final String selectedFile = (String) listModel.get(selected);
+            final DefaultListModel<String> listModel = pathListModel();
+            final String selectedFile = listModel.get(selected);
 
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
                     (String) getValue(Action.NAME),
@@ -484,7 +489,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             }
 
             for (final int index : selected) {
-                ((DefaultListModel) pathList.getModel()).remove(index);
+                (pathListModel()).remove(index);
             }
         }
     }
@@ -510,8 +515,8 @@ public final class CheckStyleConfigPanel extends JPanel {
                 return;
             }
 
-            final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
-            final Object element = listModel.remove(selected);
+            final DefaultListModel<String> listModel = pathListModel();
+            final String element = listModel.remove(selected);
             listModel.add(selected - 1, element);
 
             pathList.setSelectedIndex(selected - 1);
@@ -534,14 +539,13 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
 
         public void actionPerformed(final ActionEvent e) {
-            final DefaultListModel listModel = (DefaultListModel)
-                    pathList.getModel();
+            final DefaultListModel<String> listModel = pathListModel();
             final int selected = pathList.getSelectedIndex();
             if (selected == -1 || selected == (listModel.getSize() - 1)) {
                 return;
             }
 
-            final Object element = listModel.remove(selected);
+            final String element = listModel.remove(selected);
             listModel.add(selected + 1, element);
 
             pathList.setSelectedIndex(selected + 1);
