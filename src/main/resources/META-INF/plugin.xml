@@ -136,11 +136,10 @@
 
         <moduleConfigurable instance="org.infernus.idea.checkstyle.CheckStyleModuleConfigurable"/>
 
-        <localInspection id="CheckStyleIDEAInspection"
-                         implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
-                         displayName="Real-time scan"
-                         groupName="CheckStyle"
-                         shortName="CheckStyle"
+        <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
+                         bundle="org.infernus.idea.checkstyle.CheckStyleBundle"
+                         key="inspection.display-name"
+                         groupKey="inspection.group"
                          level="WARNING"
                          enabledByDefault="true"/>
 

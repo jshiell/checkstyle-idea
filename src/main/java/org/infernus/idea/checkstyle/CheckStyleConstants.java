@@ -7,6 +7,8 @@ public final class CheckStyleConstants {
 
     /**
      * The name of the application resource bundle.
+     *
+     * TODO replace with CheckStyleBundle
      */
     public static final String RESOURCE_BUNDLE
             = "org.infernus.idea.checkstyle.resource";
@@ -15,11 +17,6 @@ public final class CheckStyleConstants {
      * Plug-in identifier.
      */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
-
-    /**
-     * Inspection identifier.
-     */
-    public static final String ID_INSPECTION = "CheckStyleIDEAInspection";
 
     /**
      * Plug-in module identifier.

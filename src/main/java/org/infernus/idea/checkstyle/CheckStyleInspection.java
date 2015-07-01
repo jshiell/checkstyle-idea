@@ -27,9 +27,7 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ScannableFile;
-import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,24 +150,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
     @Nullable
     public JComponent createOptionsPanel() {
         return configPanel;
-    }
-
-    @NotNull
-    public String getGroupDisplayName() {
-        return IDEAUtilities.getResource("plugin.group", "CheckStyle");
-    }
-
-    @NotNull
-    public String getDisplayName() {
-        return IDEAUtilities.getResource("plugin.display-name",
-                "Real-time scan");
-    }
-
-    @Pattern("[a-zA-Z_0-9.-]+")
-    @NotNull
-    @Override
-    public String getID() {
-        return CheckStyleConstants.ID_INSPECTION;
     }
 
     @Nullable
