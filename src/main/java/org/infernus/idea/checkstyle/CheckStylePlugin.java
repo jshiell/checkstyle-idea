@@ -6,10 +6,16 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.puppycrawl.tools.checkstyle.TreeWalker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.checker.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
+import org.infernus.idea.checkstyle.checker.CheckFilesThread;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
@@ -42,6 +48,18 @@ public final class CheckStylePlugin implements ProjectComponent {
         this.configuration = ServiceManager.getService(project, CheckStyleConfiguration.class);
 
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
+
+        disableCheckStyleLogging();
+    }
+
+    private void disableCheckStyleLogging() {
+        try {
+            // This is a nasty hack to get around IDEA's DialogAppender sending any errors to the Event Log,
+            // which would result in CheckStyle parse errors spamming the Event Log.
+            Logger.getLogger(TreeWalker.class).setLevel(Level.OFF);
+        } catch (Exception e) {
+            LOG.error("Unable to suppress logging from CheckStyle's TreeWalker", e);
+        }
     }
 
     public Project getProject() {
@@ -69,7 +87,7 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     /**
      * Is a scan in progress?
-     * <p/>
+     * <p>
      * This is only expected to be called from the event thread.
      *
      * @return true if a scan is in progress.

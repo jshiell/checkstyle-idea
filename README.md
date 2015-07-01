@@ -129,6 +129,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 ## Version History
 
 * **4.17.0** New: Updated to CheckStyle 6.8.1.
+* **4.17.0** Fixed: TreeWalker logs are now suppressed, reducing event log spam when editing files (#169).
 * **4.17.0** Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a ShortName change (#173).
 * **4.17.0** Fixed: Only files in the project content source are scanned (#172).
 * **4.17.0** Fixed: Mirrored JAR files are now used when available (#141).
