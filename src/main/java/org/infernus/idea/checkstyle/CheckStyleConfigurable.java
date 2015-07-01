@@ -30,7 +30,7 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public String getDisplayName() {
-        return IDEAUtilities.getResource("plugin.configuration-name", "CheckStyle Plugin");
+        return CheckStyleBundle.message("plugin.configuration-name");
     }
 
     public String getHelpTopic() {
@@ -53,8 +53,7 @@ public class CheckStyleConfigurable implements Configurable {
 
         } catch (IOException e) {
             LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
-            IDEAUtilities.showError(project,
-                    IDEAUtilities.getResource("checkstyle.file-not-found", "The CheckStyle file could not be read."));
+            IDEAUtilities.showError(project, CheckStyleBundle.message("checkstyle.file-not-found"));
             return true;
         }
     }

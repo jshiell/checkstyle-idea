@@ -32,6 +32,10 @@ import java.util.Set;
  * Main class for the CheckStyle scanning plug-in.
  */
 public final class CheckStylePlugin implements ProjectComponent {
+
+    public static final String ID_PLUGIN = "CheckStyle-IDEA";
+    public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
+
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
     private final Set<AbstractCheckerThread> checksInProgress = new HashSet<>();
@@ -114,7 +118,7 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     @NotNull
     public String getComponentName() {
-        return CheckStyleConstants.ID_PLUGIN;
+        return ID_PLUGIN;
     }
 
     public void initComponent() {

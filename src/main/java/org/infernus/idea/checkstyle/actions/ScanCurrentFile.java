@@ -8,8 +8,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public class ScanCurrentFile extends BaseAction {
             }
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             toolWindow.activate(new Runnable() {
                 @Override
                 public void run() {

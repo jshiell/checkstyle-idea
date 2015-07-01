@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
@@ -15,9 +15,9 @@ public class PropertiesTableModel extends AbstractTableModel {
     protected static final int COLUMN_VALUE = 1;
     private static final int NUMBER_OF_COLUMNS = 2;
 
-    private final List<String> orderedNames = new ArrayList<String>();
+    private final List<String> orderedNames = new ArrayList<>();
     private final Map<String, String> properties
-            = new HashMap<String, String>();
+            = new HashMap<>();
 
     /**
      * Create a new empty properties table model.
@@ -69,7 +69,7 @@ public class PropertiesTableModel extends AbstractTableModel {
      * @return the map of properties to values.
      */
     public Map<String, String> getProperties() {
-        return new HashMap<String, String>(properties);
+        return new HashMap<>(properties);
     }
 
     public int getColumnCount() {
@@ -81,10 +81,7 @@ public class PropertiesTableModel extends AbstractTableModel {
     }
 
     public String getColumnName(final int column) {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        return resources.getString("config.file.properties.table." + column);
+        return CheckStyleBundle.message("config.file.properties.table." + column);
     }
 
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {

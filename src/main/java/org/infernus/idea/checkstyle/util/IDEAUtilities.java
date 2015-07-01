@@ -4,24 +4,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.LightColors;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 import java.awt.*;
 import java.net.URL;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 /**
  * General utilities to make life easier with regards to IDEA.
  */
 public final class IDEAUtilities {
 
-    private static final Log LOG = LogFactory.getLog(IDEAUtilities.class);
     private static final int PREFERRED_ALERT_WIDTH = 400;
 
     private IDEAUtilities() {
@@ -109,43 +103,6 @@ public final class IDEAUtilities {
         };
 
         SwingUtilities.invokeLater(showMessage);
-    }
-
-    /**
-     * Get a string resource.
-     *
-     * @param resourceKey the key of the resource.
-     * @param fallback    the fallback value if the resource does not exist.
-     * @return the resource value.
-     */
-    public static String getResource(final String resourceKey,
-                                     final String fallback) {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        String resourceValue = null;
-        if (resources == null) {
-            LOG.warn("Resource bundle was not found: "
-                    + CheckStyleConstants.RESOURCE_BUNDLE);
-
-        } else {
-            try {
-                resourceValue = resources.getString(resourceKey);
-
-            } catch (MissingResourceException e) {
-                resourceValue = null;
-            }
-
-            if (resourceValue == null) {
-                LOG.debug(resourceKey + " was not defined in resource bundle.");
-            }
-        }
-
-        if (resourceValue == null) { // fallback
-            resourceValue = fallback;
-        }
-
-        return resourceValue;
     }
 
 }

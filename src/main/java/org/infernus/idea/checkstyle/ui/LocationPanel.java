@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -19,7 +19,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ResourceBundle;
 
 public class LocationPanel extends JPanel {
 
@@ -46,16 +45,14 @@ public class LocationPanel extends JPanel {
     }
 
     private void initialise() {
-        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
+        relativeFileCheckbox.setText(CheckStyleBundle.message("config.file.relative-file.text"));
+        relativeFileCheckbox.setToolTipText(CheckStyleBundle.message("config.file.relative-file.tooltip"));
+        insecureHttpCheckbox.setText(CheckStyleBundle.message("config.file.insecure-http.text"));
+        insecureHttpCheckbox.setToolTipText(CheckStyleBundle.message("config.file.insecure-http.tooltip"));
 
-        relativeFileCheckbox.setText(resources.getString("config.file.relative-file.text"));
-        relativeFileCheckbox.setToolTipText(resources.getString("config.file.relative-file.tooltip"));
-        insecureHttpCheckbox.setText(resources.getString("config.file.insecure-http.text"));
-        insecureHttpCheckbox.setToolTipText(resources.getString("config.file.insecure-http.tooltip"));
-
-        fileLocationRadio.setText(resources.getString("config.file.file.text"));
+        fileLocationRadio.setText(CheckStyleBundle.message("config.file.file.text"));
         fileLocationRadio.addActionListener(new RadioButtonActionListener());
-        urlLocationRadio.setText(resources.getString("config.file.url.text"));
+        urlLocationRadio.setText(CheckStyleBundle.message("config.file.url.text"));
         urlLocationRadio.addActionListener(new RadioButtonActionListener());
 
         final ButtonGroup locationGroup = new ButtonGroup();
@@ -65,11 +62,11 @@ public class LocationPanel extends JPanel {
         fileLocationRadio.setSelected(true);
         enabledFileLocation();
 
-        final JLabel descriptionLabel = new JLabel(resources.getString("config.file.description.text"));
-        descriptionField.setToolTipText(resources.getString("config.file.description.tooltip"));
+        final JLabel descriptionLabel = new JLabel(CheckStyleBundle.message("config.file.description.text"));
+        descriptionField.setToolTipText(CheckStyleBundle.message("config.file.description.tooltip"));
 
-        final JLabel fileLocationLabel = new JLabel(resources.getString("config.file.file.label"));
-        final JLabel urlLocationlabel = new JLabel(resources.getString("config.file.url.label"));
+        final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
+        final JLabel urlLocationlabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
 
         setBorder(new EmptyBorder(8, 8, 4, 8));
 
@@ -212,15 +209,12 @@ public class LocationPanel extends JPanel {
         private static final long serialVersionUID = -992858528081327052L;
 
         public BrowseAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
+            putValue(Action.NAME, CheckStyleBundle.message(
                     "config.file.browse.text"));
             putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
+                    CheckStyleBundle.message("config.file.browse.tooltip"));
             putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.browse.tooltip"));
+                    CheckStyleBundle.message("config.file.browse.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {

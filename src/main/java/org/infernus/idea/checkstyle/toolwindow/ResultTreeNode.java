@@ -3,13 +3,11 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 
 import javax.swing.*;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -50,12 +48,7 @@ public class ResultTreeNode {
             throw new IllegalArgumentException("Filename may not be null");
         }
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        final MessageFormat fileResultMessage = new MessageFormat(
-                resources.getString("plugin.results.scan-file-result"));
-
-        this.text = fileResultMessage.format(new Object[]{fileName, problemCount});
+        this.text = CheckStyleBundle.message("plugin.results.scan-file-result", fileName, problemCount);
         icon = IDEAUtilities.getIcon("/fileTypes/java.png");
     }
 
@@ -210,18 +203,13 @@ public class ResultTreeNode {
             return text;
         }
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-        final MessageFormat stringFormat = new MessageFormat(
-                resources.getString("plugin.results.file-result"));
-
         final String column = problem instanceof ExtendedProblemDescriptor
                 ? Integer.toString(((ExtendedProblemDescriptor) problem).getColumn()) : "?";
         final int line = problem instanceof ExtendedProblemDescriptor
                 ? ((ExtendedProblemDescriptor) problem).getLine()
                 : problem.getLineNumber();
 
-        return stringFormat.format(new Object[]{file.getName(),
-                problem.getDescriptionTemplate(), line, column});
+        return CheckStyleBundle.message("plugin.results.file-result", file.getName(),
+                problem.getDescriptionTemplate(), line, column);
     }
 }

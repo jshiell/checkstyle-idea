@@ -6,7 +6,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +17,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
 public class PropertiesPanel extends JPanel {
     private static final Log LOG = LogFactory.getLog(PropertiesPanel.class);
@@ -57,8 +55,7 @@ public class PropertiesPanel extends JPanel {
         setBorder(new EmptyBorder(8, 8, 4, 8));
         setPreferredSize(new Dimension(500, 400));
 
-        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-        propertiesTable.setToolTipText(resources.getString("config.file.properties.tooltip"));
+        propertiesTable.setToolTipText(CheckStyleBundle.message("config.file.properties.tooltip"));
         propertiesTable.setStriped(true);
         propertiesTable.getTableHeader().setReorderingAllowed(false);
 
@@ -103,13 +100,8 @@ public class PropertiesPanel extends JPanel {
         } catch (IOException e) {
             LOG.error("Couldn't resolve properties file", e);
 
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            final String message = resources.getString("config.file.resolve-failed");
-            final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-            Messages.showErrorDialog(project, formattedMessage,
-                    resources.getString("config.file.error.title"));
+            Messages.showErrorDialog(project, CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()),
+                    CheckStyleBundle.message("config.file.error.title"));
 
         } finally {
             if (configInputStream != null) {

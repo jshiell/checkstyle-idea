@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/jshiell/checkstyle-idea">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
-    <resource-bundle>org.infernus.idea.checkstyle.resource</resource-bundle>
+    <resource-bundle>org.infernus.idea.checkstyle.CheckStyleBundle</resource-bundle>
     <description>
         <![CDATA[
 <p>
@@ -24,6 +24,7 @@
     <li>4.17.0: Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a ShortName change (#173).</li>
     <li>4.17.0: Fixed: Only files in the project content source are scanned (#172).</li>
     <li>4.17.0: Fixed: Mirrored JAR files are now used when available. (#141).</li>
+    <li>4.17.0: Fixed: Modernised resource bundle usage.</li>
     <li>4.16.0: New: Updated to CheckStyle 6.7 (#168).</li>
     <li>4.15.0: New: Updated to CheckStyle 6.6 (#150).</li>
     <li>4.14.2: Fixed: Cached checkers are now cleaned by a background task (#141).</li>

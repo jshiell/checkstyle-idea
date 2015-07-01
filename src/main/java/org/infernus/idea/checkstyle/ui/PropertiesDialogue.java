@@ -3,14 +3,13 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.ResourceBundle;
 
 /**
  * Allows setting of file properties.
@@ -115,15 +114,12 @@ public class PropertiesDialogue extends JDialog {
          * Create a new action.
          */
         public OkayAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
+            putValue(Action.NAME, CheckStyleBundle.message(
                     "config.file.okay.text"));
             putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.okay.tooltip"));
+                    CheckStyleBundle.message("config.file.okay.tooltip"));
             putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.okay.tooltip"));
+                    CheckStyleBundle.message("config.file.okay.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent event) {
@@ -142,15 +138,9 @@ public class PropertiesDialogue extends JDialog {
          * Create a new action.
          */
         public CancelAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString(
-                    "config.file.cancel.text"));
-            putValue(Action.SHORT_DESCRIPTION,
-                    resources.getString("config.file.cancel.tooltip"));
-            putValue(Action.LONG_DESCRIPTION,
-                    resources.getString("config.file.cancel.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.cancel.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {

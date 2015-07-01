@@ -1,10 +1,9 @@
 package org.infernus.idea.checkstyle.ui;
 
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ResourceBundle;
 
 /**
  * Provides a dummy panel for the inspection configuration.
@@ -29,12 +28,8 @@ public final class CheckStyleInspectionPanel extends JPanel {
      * Initialise the view.
      */
     protected void initialise() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
         // fake a multi-line label with a text area
-        descriptionLabel.setText(resources.getString(
-                "config.inspection.description"));
+        descriptionLabel.setText(CheckStyleBundle.message("config.inspection.description"));
         descriptionLabel.setEditable(false);
         descriptionLabel.setEnabled(false);
         descriptionLabel.setWrapStyleWord(true);

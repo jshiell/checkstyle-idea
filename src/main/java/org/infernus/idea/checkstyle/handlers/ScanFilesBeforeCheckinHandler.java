@@ -11,7 +11,6 @@ import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitExecutor;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
@@ -25,13 +24,12 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.infernus.idea.checkstyle.util.IDEAUtilities.getResource;
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 /**
  * Before Checkin Handler to scan files with Checkstyle.
@@ -51,7 +49,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
     @Nullable
     public RefreshableOnComponent getBeforeCheckinConfigurationPanel() {
-        final JCheckBox checkBox = new JCheckBox(getResource("handler.before.checkin.checkbox", "Scan with CheckStyle"));
+        final JCheckBox checkBox = new JCheckBox(message("handler.before.checkin.checkbox"));
 
         return new RefreshableOnComponent() {
             public JComponent getComponent() {
@@ -90,12 +88,12 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
         if (plugin.getConfiguration().isScanFilesBeforeCheckin()) {
             try {
-                final Map<PsiFile, List<ProblemDescriptor>> scanResults = new HashMap<PsiFile, List<ProblemDescriptor>>();
-                new Task.Modal(project, getResource("handler.before.checkin.scan.text", "CheckStyle is Scanning"), false) {
+                final Map<PsiFile, List<ProblemDescriptor>> scanResults = new HashMap<>();
+                new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
-                        progressIndicator.setText(getResource("handler.before.checkin.scan.in-progress", "Scanning..."));
+                        progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
-                        plugin.scanFiles(new ArrayList<VirtualFile>(checkinPanel.getVirtualFiles()), scanResults);
+                        plugin.scanFiles(new ArrayList<>(checkinPanel.getVirtualFiles()), scanResults);
                     }
                 }.queue();
 
@@ -160,12 +158,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             commitButtonText = commitButtonText.substring(0, commitButtonText.length() - 3);
         }
 
-        final String[] buttons = new String[]{getResource("handler.before.checkin.error.review", "Review"),
-                commitButtonText, CommonBundle.getCancelButtonText()};
+        final String[] buttons = new String[]{
+                message("handler.before.checkin.error.review"),
+                commitButtonText,
+                CommonBundle.getCancelButtonText()};
 
-        final MessageFormat errorFormat = new MessageFormat(getResource("handler.before.checkin.error.text", "{0} files contain problems"));
-        return Messages.showDialog(plugin.getProject(), errorFormat.format(new Object[]{errorCount}),
-                getResource("handler.before.checkin.error.title", "CheckStyle Scan"),
+        return Messages.showDialog(plugin.getProject(), message("handler.before.checkin.error.text", errorCount),
+                message("handler.before.checkin.error.title"),
                 buttons, 0, UIUtil.getWarningIcon());
     }
 

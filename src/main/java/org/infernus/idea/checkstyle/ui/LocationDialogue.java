@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -14,10 +14,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 /**
  * Allows selection of the location of the CheckStyle file.
@@ -33,7 +31,7 @@ public class LocationDialogue extends JDialog {
         private boolean allowNext;
         private boolean allowCommit;
 
-        private CurrentStep(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
+        CurrentStep(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
             this.allowPrevious = allowPrevious;
             this.allowNext = allowNext;
             this.allowCommit = allowCommit;
@@ -68,7 +66,7 @@ public class LocationDialogue extends JDialog {
     /**
      * Create a dialogue.
      *
-     * @param project the current project.
+     * @param project             the current project.
      * @param thirdPartyClasspath the third-party classpath.
      */
     public LocationDialogue(final Project project, final List<String> thirdPartyClasspath) {
@@ -161,17 +159,15 @@ public class LocationDialogue extends JDialog {
     }
 
     private void moveToStep(final CurrentStep newStep) {
-        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
         remove(panelForCurrentStep());
         currentStep = newStep;
 
         if (currentStep.isAllowCommit()) {
-            commitButton.setText(resources.getString("config.file.okay.text"));
-            commitButton.setToolTipText(resources.getString("config.file.okay.text"));
+            commitButton.setText(CheckStyleBundle.message("config.file.okay.text"));
+            commitButton.setToolTipText(CheckStyleBundle.message("config.file.okay.text"));
         } else {
-            commitButton.setText(resources.getString("config.file.next.text"));
-            commitButton.setToolTipText(resources.getString("config.file.next.text"));
+            commitButton.setText(CheckStyleBundle.message("config.file.next.text"));
+            commitButton.setToolTipText(CheckStyleBundle.message("config.file.next.text"));
         }
 
         previousButton.setEnabled(currentStep.isAllowPrevious());
@@ -209,8 +205,6 @@ public class LocationDialogue extends JDialog {
         private static final long serialVersionUID = 3800521701284308642L;
 
         public void actionPerformed(final ActionEvent event) {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
             commitButton.setEnabled(false);
 
             final ConfigurationLocation location;
@@ -218,12 +212,12 @@ public class LocationDialogue extends JDialog {
                 case SELECT:
                     location = locationPanel.getConfigurationLocation();
                     if (location == null) {
-                        showError(resources, resources.getString("config.file.no-file"));
+                        showError(CheckStyleBundle.message("config.file.no-file"));
                         return;
                     }
 
                     if (location.getDescription() == null || location.getDescription().isEmpty()) {
-                        showError(resources, resources.getString("config.file.no-description"));
+                        showError(CheckStyleBundle.message("config.file.no-description"));
                         return;
                     }
 
@@ -233,9 +227,7 @@ public class LocationDialogue extends JDialog {
                         properties = location.getProperties();
 
                     } catch (IOException e) {
-                        final String message = resources.getString("config.file.resolve-failed");
-                        final String formattedMessage = new MessageFormat(message).format(new Object[]{e.getMessage()});
-                        showError(resources, formattedMessage);
+                        showError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
                         return;
                     }
 
@@ -263,8 +255,8 @@ public class LocationDialogue extends JDialog {
         }
     }
 
-    private void showError(final ResourceBundle resources, final String formattedMessage) {
-        Messages.showErrorDialog(this, formattedMessage, resources.getString("config.file.error.title"));
+    private void showError(final String formattedMessage) {
+        Messages.showErrorDialog(this, formattedMessage, CheckStyleBundle.message("config.file.error.title"));
         commitButton.setEnabled(true);
     }
 
@@ -272,11 +264,9 @@ public class LocationDialogue extends JDialog {
         private static final long serialVersionUID = 3800521701284308642L;
 
         public PreviousAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.file.previous.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.previous.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.previous.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.previous.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.previous.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.previous.tooltip"));
         }
 
         @Override
@@ -315,12 +305,9 @@ public class LocationDialogue extends JDialog {
         private static final long serialVersionUID = -994620715558602656L;
 
         public CancelAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.file.cancel.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.cancel.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.cancel.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.cancel.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {

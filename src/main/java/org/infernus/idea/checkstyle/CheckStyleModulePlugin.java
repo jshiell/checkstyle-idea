@@ -33,7 +33,7 @@ public class CheckStyleModulePlugin implements ModuleComponent {
 
     @NotNull
     public String getComponentName() {
-        return CheckStyleConstants.ID_MODULE_PLUGIN;
+        return CheckStylePlugin.ID_MODULE_PLUGIN;
     }
 
     public void initComponent() {

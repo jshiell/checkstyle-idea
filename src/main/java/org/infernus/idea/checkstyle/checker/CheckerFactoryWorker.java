@@ -9,17 +9,16 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 import static java.lang.String.format;
-import static org.infernus.idea.checkstyle.util.IDEAUtilities.getResource;
 import static org.infernus.idea.checkstyle.util.IDEAUtilities.showError;
 import static org.infernus.idea.checkstyle.util.IDEAUtilities.showWarning;
 
@@ -185,17 +184,14 @@ class CheckerFactoryWorker extends Thread {
                             resolvedFile, currentChild, elementName, propertyName));
 
                 } else if (module != null) {
-                    showWarning(module.getProject(), getResource(
-                            format("checkstyle.not-found.%s", elementName),
-                            format("CheckStyle %s %s not found", elementName, propertyName)));
+                    showWarning(module.getProject(), CheckStyleBundle.message(
+                            format("checkstyle.not-found.%s", elementName)));
                 }
             }
 
         } catch (IOException e) {
             if (module != null) {
-                final MessageFormat errorFormat = new MessageFormat(
-                        getResource("checkstyle.checker-failed", "Load failed due to {0}"));
-                showError(module.getProject(), errorFormat.format(e.getMessage()));
+                showError(module.getProject(), CheckStyleBundle.message("checkstyle.checker-failed", e.getMessage()));
             }
         }
     }

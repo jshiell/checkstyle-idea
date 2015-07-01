@@ -1,7 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.ComboBox;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Provides module level configuration UI.
@@ -45,26 +44,23 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     }
 
     private JPanel buildConfigurationPanel() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
         final JPanel configPanel = new JPanel(new GridBagLayout());
 
-        final JLabel informationLabel = new JLabel(resources.getString("config.module.information"),
+        final JLabel informationLabel = new JLabel(CheckStyleBundle.message("config.module.information"),
                 IDEAUtilities.getIcon("/general/information.png"), SwingConstants.LEFT);
         configPanel.add(informationLabel, new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(16, 8, 16, 8), 0, 0));
 
-        useProjectConfigurationRadio.setText(resources.getString("config.module.project-configuration.text"));
-        useProjectConfigurationRadio.setToolTipText(resources.getString("config.module.project-configuration.tooltip"));
+        useProjectConfigurationRadio.setText(CheckStyleBundle.message("config.module.project-configuration.text"));
+        useProjectConfigurationRadio.setToolTipText(CheckStyleBundle.message("config.module.project-configuration.tooltip"));
         useProjectConfigurationRadio.addActionListener(new RadioListener());
 
-        useModuleConfigurationRadio.setText(resources.getString("config.module.module-configuration.text"));
-        useModuleConfigurationRadio.setToolTipText(resources.getString("config.module.module-configuration.tooltip"));
+        useModuleConfigurationRadio.setText(CheckStyleBundle.message("config.module.module-configuration.text"));
+        useModuleConfigurationRadio.setToolTipText(CheckStyleBundle.message("config.module.module-configuration.tooltip"));
         useModuleConfigurationRadio.addActionListener(new RadioListener());
 
-        excludeRadio.setText(resources.getString("config.module.exclude.text"));
-        excludeRadio.setToolTipText(resources.getString("config.module.exclude.tooltip"));
+        excludeRadio.setText(CheckStyleBundle.message("config.module.exclude.text"));
+        excludeRadio.setToolTipText(CheckStyleBundle.message("config.module.exclude.tooltip"));
         excludeRadio.addActionListener(new RadioListener());
 
         final ButtonGroup radioGroup = new ButtonGroup();
@@ -77,11 +73,11 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         configPanel.add(useModuleConfigurationRadio, new GridBagConstraints(0, 2, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
 
-        configurationFilesLabel.setText(resources.getString("config.module.module-file.text"));
+        configurationFilesLabel.setText(CheckStyleBundle.message("config.module.module-file.text"));
         configPanel.add(configurationFilesLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(8, 32, 8, 8), 0, 0));
 
-        configurationFilesCombo.setToolTipText(resources.getString("config.module.module-file.tooltip"));
+        configurationFilesCombo.setToolTipText(CheckStyleBundle.message("config.module.module-file.tooltip"));
         configurationFilesCombo.setModel(configurationFilesModel);
         configPanel.add(configurationFilesCombo, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
@@ -100,7 +96,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     }
 
     private List<ConfigurationLocation> getConfigurationLocations() {
-        final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
+        final List<ConfigurationLocation> locations = new ArrayList<>();
 
         for (int i = 0; i < configurationFilesModel.getSize(); ++i) {
             locations.add((ConfigurationLocation) configurationFilesModel.getElementAt(i));

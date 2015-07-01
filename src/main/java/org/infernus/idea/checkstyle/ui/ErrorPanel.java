@@ -1,14 +1,13 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.ui.components.JBScrollPane;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ResourceBundle;
 
 public class ErrorPanel extends JPanel {
     private final JTextArea errorField = new JTextArea();
@@ -24,8 +23,7 @@ public class ErrorPanel extends JPanel {
     private void initialise() {
         setBorder(new EmptyBorder(8, 8, 8, 8));
 
-        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-        final JLabel infoLabel = new JLabel(resources.getString("config.file.error.caption"));
+        final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.error.caption"));
         infoLabel.setBorder(new EmptyBorder(0, 0, 8, 0));
         add(infoLabel, BorderLayout.NORTH);
 

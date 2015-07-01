@@ -10,14 +10,13 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 import javax.swing.*;
-import java.util.ResourceBundle;
 
 /**
  * Base class for plug-in actions.
@@ -50,7 +49,7 @@ public abstract class BaseAction extends AnAction {
 
             // check if tool window is registered
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
@@ -78,7 +77,7 @@ public abstract class BaseAction extends AnAction {
             // the content instance will be a JLabel while the component initialises
             if (component instanceof CheckStyleToolWindowPanel) {
                 final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) component;
-                panel.setProgressText(ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE).getString(progressTextKey));
+                panel.setProgressText(CheckStyleBundle.message(progressTextKey));
             }
         }
     }

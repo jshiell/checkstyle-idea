@@ -11,7 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
@@ -40,7 +40,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
 
-    private final Set<ConfigurationLocation> presetLocations = new HashSet<ConfigurationLocation>();
+    private final Set<ConfigurationLocation> presetLocations = new HashSet<>();
 
     private final Project project;
 
@@ -64,17 +64,14 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     private JPanel buildConfigPanel() {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
+        testClassesCheckbox.setText(CheckStyleBundle.message("config.test-classes.checkbox.text"));
+        testClassesCheckbox.setToolTipText(CheckStyleBundle.message("config.test-classes.checkbox.tooltip"));
 
-        testClassesCheckbox.setText(resources.getString("config.test-classes.checkbox.text"));
-        testClassesCheckbox.setToolTipText(resources.getString("config.test-classes.checkbox.tooltip"));
+        scanNonJavaFilesCheckbox.setText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.text"));
+        scanNonJavaFilesCheckbox.setToolTipText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.tooltip"));
 
-        scanNonJavaFilesCheckbox.setText(resources.getString("config.scan-nonjava-files.checkbox.text"));
-        scanNonJavaFilesCheckbox.setToolTipText(resources.getString("config.scan-nonjava-files.checkbox.tooltip"));
-
-        suppressErrorsCheckbox.setText(resources.getString("config.suppress-errors.checkbox.text"));
-        suppressErrorsCheckbox.setToolTipText(resources.getString("config.suppress-errors.checkbox.tooltip"));
+        suppressErrorsCheckbox.setText(CheckStyleBundle.message("config.suppress-errors.checkbox.text"));
+        suppressErrorsCheckbox.setToolTipText(CheckStyleBundle.message("config.suppress-errors.checkbox.tooltip"));
 
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
@@ -88,17 +85,17 @@ public final class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
                 2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(buildRuleFilePanel(resources), new GridBagConstraints(
+        configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
                 0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
-        configFilePanel.add(buildClassPathPanel(resources), new GridBagConstraints(
+        configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
                 0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
         return configFilePanel;
     }
 
-    private JPanel buildRuleFilePanel(final ResourceBundle resources) {
+    private JPanel buildRuleFilePanel() {
         setColumnWith(locationTable, 0, 40, 50, 50);
         setColumnWith(locationTable, 1, 100, 200, 200);
         locationTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -114,16 +111,16 @@ public final class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setPreferredSize(new Dimension(300, 50));
 
         final JPanel container = new JPanel(new BorderLayout());
-        container.add(new TitledSeparator(resources.getString("config.file.tab")), BorderLayout.NORTH);
+        container.add(new TitledSeparator(CheckStyleBundle.message("config.file.tab")), BorderLayout.NORTH);
         container.add(tableDecorator.createPanel(), BorderLayout.CENTER);
-        final JLabel infoLabel = new JLabel(resources.getString("config.file.description"),
+        final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.description"),
                 IDEAUtilities.getIcon("/general/information.png"), SwingConstants.LEFT);
         infoLabel.setBorder(new EmptyBorder(8, 0, 4, 0));
         container.add(infoLabel, BorderLayout.SOUTH);
         return container;
     }
 
-    private JPanel buildClassPathPanel(final ResourceBundle resources) {
+    private JPanel buildClassPathPanel() {
         final ToolbarDecorator pathListDecorator = ToolbarDecorator.createDecorator(pathList);
         pathListDecorator.setAddAction(new AddPathAction());
         pathListDecorator.setEditAction(new EditPathAction());
@@ -133,7 +130,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         pathListDecorator.setPreferredSize(new Dimension(300, 50));
 
         final JPanel container = new JPanel(new BorderLayout());
-        container.add(new TitledSeparator(resources.getString("config.path.tab")), BorderLayout.NORTH);
+        container.add(new TitledSeparator(CheckStyleBundle.message("config.path.tab")), BorderLayout.NORTH);
         container.add(pathListDecorator.createPanel(), BorderLayout.CENTER);
         return container;
     }
@@ -209,7 +206,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     public void setThirdPartyClasspath(final List<String> classpath) {
         if (classpath == null) {
-            thirdPartyClasspath = new ArrayList<String>();
+            thirdPartyClasspath = new ArrayList<>();
         } else {
             thirdPartyClasspath = classpath;
         }
@@ -231,7 +228,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      */
     @NotNull
     public List<String> getThirdPartyClasspath() {
-        final List<String> classpath = new ArrayList<String>();
+        final List<String> classpath = new ArrayList<>();
 
         final DefaultListModel listModel = (DefaultListModel) pathList.getModel();
         for (int i = 0; i < listModel.size(); ++i) {
@@ -282,9 +279,9 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> locations) {
-        this.locations = new ArrayList<ConfigurationLocation>(locations);
+        this.locations = new ArrayList<>(locations);
 
-        final List<ConfigurationLocation> modelLocations = new ArrayList<ConfigurationLocation>(locations);
+        final List<ConfigurationLocation> modelLocations = new ArrayList<>(locations);
         Collections.sort(modelLocations);
         locationModel.setLocations(modelLocations);
     }
@@ -312,12 +309,9 @@ public final class CheckStyleConfigPanel extends JPanel {
         private static final long serialVersionUID = -7266120887003483814L;
 
         public AddLocationAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.file.add.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.add.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.add.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.add.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -328,12 +322,9 @@ public final class CheckStyleConfigPanel extends JPanel {
             if (dialogue.isCommitted()) {
                 final ConfigurationLocation newLocation = dialogue.getConfigurationLocation();
                 if (locationModel.getLocations().contains(newLocation)) {
-                    final ResourceBundle resources = ResourceBundle.getBundle(
-                            CheckStyleConstants.RESOURCE_BUNDLE);
-
                     Messages.showWarningDialog(project,
-                            resources.getString("config.file.error.duplicate.text"),
-                            resources.getString("config.file.error.duplicate.title"));
+                            CheckStyleBundle.message("config.file.error.duplicate.text"),
+                            CheckStyleBundle.message("config.file.error.duplicate.title"));
 
                 } else {
                     locationModel.addLocation(dialogue.getConfigurationLocation());
@@ -349,11 +340,9 @@ public final class CheckStyleConfigPanel extends JPanel {
         private static final long serialVersionUID = -799542186049804472L;
 
         public RemoveLocationAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.file.remove.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.remove.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.remove.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.remove.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -373,11 +362,9 @@ public final class CheckStyleConfigPanel extends JPanel {
         private static final long serialVersionUID = -799542186049804472L;
 
         public EditPropertiesAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.file.properties.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.file.properties.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.file.properties.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.file.properties.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -419,12 +406,9 @@ public final class CheckStyleConfigPanel extends JPanel {
          * Create a new add path action.
          */
         public AddPathAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.path.add.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.path.add.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.path.add.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.path.add.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -450,11 +434,9 @@ public final class CheckStyleConfigPanel extends JPanel {
          * Create a new edit path action.
          */
         public EditPathAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.path.edit.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.path.edit.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.path.edit.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.path.edit.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -490,11 +472,9 @@ public final class CheckStyleConfigPanel extends JPanel {
          * Create a new add path action.
          */
         public RemovePathAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.path.remove.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.path.remove.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.path.remove.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.path.remove.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -519,11 +499,9 @@ public final class CheckStyleConfigPanel extends JPanel {
          * Create a new move-up path action.
          */
         public MoveUpPathAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.path.move-up.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.path.move-up.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.path.move-up.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.path.move-up.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {
@@ -550,11 +528,9 @@ public final class CheckStyleConfigPanel extends JPanel {
          * Create a new move-down path action.
          */
         public MoveDownPathAction() {
-            final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
-
-            putValue(Action.NAME, resources.getString("config.path.move-down.text"));
-            putValue(Action.SHORT_DESCRIPTION, resources.getString("config.path.move-down.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, resources.getString("config.path.move-down.tooltip"));
+            putValue(Action.NAME, CheckStyleBundle.message("config.path.move-down.text"));
+            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
+            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
         }
 
         public void actionPerformed(final ActionEvent e) {

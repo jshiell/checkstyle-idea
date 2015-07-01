@@ -133,6 +133,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.17.0** Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a ShortName change (#173).
 * **4.17.0** Fixed: Only files in the project content source are scanned (#172).
 * **4.17.0** Fixed: Mirrored JAR files are now used when available (#141).
+* **4.17.0** Fixed: Modernised resource bundle usage.
 * **4.16.0** New: Updated to CheckStyle 6.7 (#168).
 * **4.15.0** New: Updated to CheckStyle 6.6 (#150).
 * **4.14.2** Fixed: Cached checkers are now cleaned by a background task (#141).

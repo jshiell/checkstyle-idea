@@ -8,6 +8,7 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -179,16 +179,16 @@ public class CheckerFactory {
         if (workerResult instanceof CheckstyleException) {
             final CheckstyleException checkstyleException = (CheckstyleException) workerResult;
             if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
-                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking",
-                        "Not compatible with CheckStyle 5.6+. Remove DoubleCheckedLocking.");
+                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking"
+                );
             }
-            return blacklistAndShowMessage(location, module, "checkstyle.checker-failed", "Load failed due to {0}",
+            return blacklistAndShowMessage(location, module, "checkstyle.checker-failed",
                     checkstyleException.getMessage());
 
         } else if (workerResult instanceof IOException) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
                     (IOException) workerResult);
-            return blacklistAndShowMessage(location, module, "checkstyle.file-not-found", "Not found: {0}", location.getLocation());
+            return blacklistAndShowMessage(location, module, "checkstyle.file-not-found", location.getLocation());
 
         } else if (workerResult instanceof Throwable) {
             location.blacklist();
@@ -219,16 +219,14 @@ public class CheckerFactory {
     private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
                                                   final Module module,
                                                   final String messageKey,
-                                                  final String messageFallback,
                                                   final Object... messageArgs) {
         if (!location.isBlacklisted()) {
             location.blacklist();
 
-            final MessageFormat messageFormat = new MessageFormat(IDEAUtilities.getResource(messageKey, messageFallback));
             if (module != null) {
-                IDEAUtilities.showError(module.getProject(), messageFormat.format(messageArgs));
+                IDEAUtilities.showError(module.getProject(), CheckStyleBundle.message(messageKey, messageArgs));
             } else {
-                throw new CheckStylePluginException(messageFormat.format(messageArgs));
+                throw new CheckStylePluginException(CheckStyleBundle.message(messageKey, messageArgs));
             }
         }
         return null;

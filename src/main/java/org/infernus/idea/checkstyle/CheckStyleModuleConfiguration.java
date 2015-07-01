@@ -17,7 +17,7 @@ import java.util.*;
  * A manager for CheckStyle module configuration.
  */
 @State(
-        name = CheckStyleConstants.ID_MODULE_PLUGIN,
+        name = CheckStylePlugin.ID_MODULE_PLUGIN,
         storages = {@Storage(id = "other", file = "$MODULE_FILE$")}
 )
 public final class CheckStyleModuleConfiguration extends Properties

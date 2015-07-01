@@ -12,9 +12,9 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 import java.util.*;
 
@@ -35,7 +35,7 @@ public class ScanCurrentChangeList extends BaseAction {
             }
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
             project.getComponent(CheckStylePlugin.class).checkFiles(filesFor(changeListManager.getDefaultChangeList()), getSelectedOverride(toolWindow));

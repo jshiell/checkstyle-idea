@@ -3,13 +3,12 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -58,7 +57,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
     /**
      * Set the root message.
-     * <p/>
+     * <p>
      * This will trigger a reload on the model, thanks to JTree's lack of support for
      * a node changed event for the root node.
      *
@@ -66,9 +65,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      */
     public void setRootText(@Nullable final String messageText) {
         if (messageText == null) {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-            visibleRootNode.setUserObject(new ResultTreeNode(resources.getString("plugin.results.no-scan")));
+            visibleRootNode.setUserObject(new ResultTreeNode(CheckStyleBundle.message("plugin.results.no-scan")));
 
         } else {
             visibleRootNode.setUserObject(new ResultTreeNode(messageText));
@@ -79,7 +76,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
     /**
      * Set the root message.
-     * <p/>
+     * <p>
      * This will trigger a reload on the model, thanks to JTree's lack of support for
      * a node changed event for the root node.
      *
@@ -90,10 +87,7 @@ public class ResultTreeModel extends DefaultTreeModel {
             setRootText(null);
 
         } else {
-            final ResourceBundle resources = ResourceBundle.getBundle(
-                    CheckStyleConstants.RESOURCE_BUNDLE);
-
-            setRootText(resources.getString(messageKey));
+            setRootText(CheckStyleBundle.message(messageKey));
         }
     }
 
@@ -107,7 +101,7 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private void filter(final boolean sendEvents, final SeverityLevel... levels) {
-        final Set<TogglableTreeNode> changedNodes = new HashSet<TogglableTreeNode>();
+        final Set<TogglableTreeNode> changedNodes = new HashSet<>();
 
         for (int fileIndex = 0; fileIndex < visibleRootNode.getChildCount(); ++fileIndex) {
             final TogglableTreeNode fileNode = (TogglableTreeNode) visibleRootNode.getChildAt(fileIndex);
@@ -175,9 +169,6 @@ public class ResultTreeModel extends DefaultTreeModel {
                          final SeverityLevel... levels) {
         visibleRootNode.removeAllChildren();
 
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
         if (results == null || results.size() == 0) {
             setRootMessage("plugin.results.scan-no-results");
 
@@ -207,9 +198,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                 visibleRootNode.add(fileNode);
             }
 
-            final MessageFormat resultsMessage = new MessageFormat(
-                    resources.getString("plugin.results.scan-results"));
-            setRootText(resultsMessage.format(new Object[]{itemCount, results.size()}));
+            setRootText(CheckStyleBundle.message("plugin.results.scan-results", itemCount, results.size()));
         }
 
         filter(false, levels);
@@ -217,12 +206,8 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<ProblemDescriptor>> results) {
-        final List<PsiFile> sortedFiles = new ArrayList<PsiFile>(results.keySet());
-        Collections.sort(sortedFiles, new Comparator<PsiFile>() {
-            public int compare(final PsiFile file1, final PsiFile file2) {
-                return file1.getName().compareTo(file2.getName());
-            }
-        });
+        final List<PsiFile> sortedFiles = new ArrayList<>(results.keySet());
+        Collections.sort(sortedFiles, (file1, file2) -> file1.getName().compareTo(file2.getName()));
         return sortedFiles;
     }
 }

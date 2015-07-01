@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * A manager for CheckStyle plug-in configuration.
  */
 @State(
-        name = CheckStyleConstants.ID_PLUGIN,
+        name = CheckStylePlugin.ID_PLUGIN,
         storages = {
                 @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
                 @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme = StorageScheme.DIRECTORY_BASED)
@@ -32,6 +31,9 @@ import java.util.concurrent.locks.ReentrantLock;
 )
 public final class CheckStyleConfiguration implements ExportableComponent,
         PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
+
+    public static final String PROJECT_DIR = "$PRJ_DIR$";
+    public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
 
     private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
 
@@ -45,10 +47,10 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
     private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
 
-    private final Set<ConfigurationLocation> presetLocations = new HashSet<ConfigurationLocation>();
-    private final SortedMap<String, String> storage = new ConcurrentSkipListMap<String, String>();
+    private final Set<ConfigurationLocation> presetLocations = new HashSet<>();
+    private final SortedMap<String, String> storage = new ConcurrentSkipListMap<>();
     private final ReentrantLock storageLock = new ReentrantLock();
-    private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<ConfigurationListener>());
+    private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
 
     private final Project project;
 
@@ -69,9 +71,8 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
         this.project = project;
 
-        final ResourceBundle resources = ResourceBundle.getBundle(CheckStyleConstants.RESOURCE_BUNDLE);
         final ConfigurationLocation checkStyleSunChecks = configurationLocationFactory().create(project, ConfigurationType.CLASSPATH,
-                SUN_CHECKS_CONFIG, resources.getString("file.default.description"));
+                SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
         presetLocations.add(checkStyleSunChecks);
     }
 
@@ -153,7 +154,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     public List<ConfigurationLocation> getConfigurationLocations() {
         storageLock.lock();
         try {
-            final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
+            final List<ConfigurationLocation> locations = new ArrayList<>();
 
             for (Map.Entry<String, String> entry : storage.entrySet()) {
                 if (!entry.getKey().startsWith(LOCATION_PREFIX)) {
@@ -165,7 +166,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                     final ConfigurationLocation location = configurationLocationFactory().create(
                             project, value);
 
-                    final Map<String, String> properties = new HashMap<String, String>();
+                    final Map<String, String> properties = new HashMap<>();
 
                     final int index = Integer.parseInt(entry.getKey().substring(LOCATION_PREFIX.length()));
                     final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
@@ -242,10 +243,8 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read properties from " + configurationLocation, e);
-                    final MessageFormat message = new MessageFormat(
-                            IDEAUtilities.getResource("checkstyle.could-not-read-properties",
-                                    "Properties could not be read from the CheckStyle configuration file from {0}."));
-                    IDEAUtilities.showError(project, message.format(new Object[]{configurationLocation.getLocation()}));
+                    IDEAUtilities.showError(project,
+                            CheckStyleBundle.message("checkstyle.could-not-read-properties", configurationLocation.getLocation()));
                 }
 
                 ++index;
@@ -262,7 +261,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
     @NotNull
     public List<String> getThirdPartyClassPath() {
-        final List<String> thirdPartyClasspath = new ArrayList<String>();
+        final List<String> thirdPartyClasspath = new ArrayList<>();
 
         final String value = storage.get(THIRDPARTY_CLASSPATH);
         if (value != null) {
@@ -340,7 +339,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
         LOG.debug("Processing file: " + path);
 
-        for (String prefix : new String[]{CheckStyleConstants.PROJECT_DIR, CheckStyleConstants.LEGACY_PROJECT_DIR}) {
+        for (String prefix : new String[]{PROJECT_DIR, LEGACY_PROJECT_DIR}) {
             if (path.startsWith(prefix)) {
                 return untokeniseForPrefix(path, prefix, getProjectPath());
             }
@@ -374,7 +373,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         if (projectPath != null) {
             final String projectPathAbs = projectPath.getAbsolutePath();
             if (path.startsWith(projectPathAbs)) {
-                return CheckStyleConstants.PROJECT_DIR + path.substring(
+                return PROJECT_DIR + path.substring(
                         projectPathAbs.length());
             }
         }
@@ -437,11 +436,11 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         public Map<String, String> configuration;
 
         public ProjectSettings() {
-            this.configuration = new TreeMap<String, String>();
+            this.configuration = new TreeMap<>();
         }
 
         public ProjectSettings(final Map<String, String> configuration) {
-            this.configuration = new TreeMap<String, String>(configuration);
+            this.configuration = new TreeMap<>(configuration);
         }
 
         public Map<String, String> configurationAsMap() {

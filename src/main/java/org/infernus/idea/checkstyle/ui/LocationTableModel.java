@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,7 +8,6 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * A table model for editing CheckStyle file locations.
@@ -21,7 +20,7 @@ public class LocationTableModel extends AbstractTableModel {
     protected static final int COLUMN_FILE = 2;
     private static final int NUMBER_OF_COLUMNS = 3;
 
-    private final List<ConfigurationLocation> locations = new ArrayList<ConfigurationLocation>();
+    private final List<ConfigurationLocation> locations = new ArrayList<>();
     private ConfigurationLocation activeLocation;
 
     /**
@@ -163,10 +162,7 @@ public class LocationTableModel extends AbstractTableModel {
     }
 
     public String getColumnName(final int column) {
-        final ResourceBundle resources = ResourceBundle.getBundle(
-                CheckStyleConstants.RESOURCE_BUNDLE);
-
-        return resources.getString("config.file.locations.table." + column);
+        return CheckStyleBundle.message("config.file.locations.table." + column);
     }
 
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {

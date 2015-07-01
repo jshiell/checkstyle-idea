@@ -12,8 +12,8 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 /**
  * Action to execute a CheckStyle scan on the current module.
@@ -29,7 +29,7 @@ public class ScanModule extends BaseAction {
             }
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final VirtualFile[] selectedFiles
                     = FileEditorManager.getInstance(project).getSelectedFiles();

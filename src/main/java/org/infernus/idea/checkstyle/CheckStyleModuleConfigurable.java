@@ -5,7 +5,6 @@ import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -21,7 +20,7 @@ public class CheckStyleModuleConfigurable implements Configurable {
     private CheckStyleModuleConfigPanel configPanel;
 
     public String getDisplayName() {
-        return IDEAUtilities.getResource("plugin.configuration-name", "CheckStyle Plugin");
+        return CheckStyleBundle.message("plugin.configuration-name");
     }
 
     public String getHelpTopic() {

@@ -23,12 +23,11 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.ConfigurationListener;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -42,7 +41,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +53,8 @@ import java.util.regex.Pattern;
  */
 public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener {
 
+    public static final String ID_TOOLWINDOW = "CheckStyle";
+
     /**
      * Logger for this class.
      */
@@ -62,10 +62,10 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
     private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
-    private static final String DEFAULT_OVERRIDE = IDEAUtilities.getResource("plugin.toolwindow.default-file", "<As configured>");
+    private static final String DEFAULT_OVERRIDE = CheckStyleBundle.message("plugin.toolwindow.default-file");
 
     private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
-            = new HashMap<Pattern, String>();
+            = new HashMap<>();
 
     private final CheckStylePlugin checkStylePlugin;
     private final Project project;
@@ -120,12 +120,12 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         final ActionGroup mainActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
         final ActionToolbar mainToolbar = ActionManager.getInstance().createActionToolbar(
-                CheckStyleConstants.ID_TOOLWINDOW, mainActionGroup, false);
+                ID_TOOLWINDOW, mainActionGroup, false);
 
         final ActionGroup treeActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(TREE_ACTION_GROUP);
         final ActionToolbar treeToolbar = ActionManager.getInstance().createActionToolbar(
-                CheckStyleConstants.ID_TOOLWINDOW, treeActionGroup, false);
+                ID_TOOLWINDOW, treeActionGroup, false);
 
         final Box toolBarBox = Box.createHorizontalBox();
         toolBarBox.add(mainToolbar.getComponent());
@@ -175,7 +175,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         progressPanel = new JToolBar(JToolBar.HORIZONTAL);
         progressPanel.add(Box.createHorizontalStrut(4));
-        progressPanel.add(new JLabel(IDEAUtilities.getResource("plugin.toolwindow.override", "Use rules file:")));
+        progressPanel.add(new JLabel(CheckStyleBundle.message("plugin.toolwindow.override")));
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(configurationOverrideCombo);
         progressPanel.add(Box.createHorizontalStrut(4));
@@ -204,9 +204,9 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             return null;
         }
 
-        final ToolWindow toolWindow = toolWindowManager.getToolWindow(CheckStyleConstants.ID_TOOLWINDOW);
+        final ToolWindow toolWindow = toolWindowManager.getToolWindow(ID_TOOLWINDOW);
         if (toolWindow == null) {
-            LOG.debug("Couldn't get tool window for ID " + CheckStyleConstants.ID_TOOLWINDOW);
+            LOG.debug("Couldn't get tool window for ID " + ID_TOOLWINDOW);
             return null;
         }
 
@@ -216,7 +216,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             }
         }
 
-        LOG.debug("Could not find tool window panel on tool window with ID " + CheckStyleConstants.ID_TOOLWINDOW);
+        LOG.debug("Could not find tool window panel on tool window with ID " + ID_TOOLWINDOW);
         return null;
     }
 
@@ -275,18 +275,14 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     /**
      * Increment the progress of the progress bar by a given number.
-     * <p/>
+     * <p>
      * You should call {@link #displayInProgress(int)} first for useful semantics.
      *
      * @param size the size to increment by.
      */
     public void incrementProgressBarBy(final int size) {
         if (progressBar.getValue() < progressBar.getMaximum()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    progressBar.setValue(progressBar.getValue() + size);
-                }
-            });
+            SwingUtilities.invokeLater(() -> progressBar.setValue(progressBar.getValue() + size));
         }
     }
 
@@ -501,16 +497,13 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                         args[i] = errorMatcher.group(i + 1);
                     }
 
-                    errorText = new MessageFormat(IDEAUtilities.getResource(
-                            CHECKSTYLE_ERROR_PATTERNS.get(errorPattern),
-                            "An error occurred during the scan.")).format(args);
+                    errorText = CheckStyleBundle.message(CHECKSTYLE_ERROR_PATTERNS.get(errorPattern), args);
                 }
             }
         }
 
         if (errorText == null) {
-            errorText = IDEAUtilities.getResource("plugin.results.error",
-                    "An error occurred during the scan.");
+            errorText = CheckStyleBundle.message("plugin.results.error");
         }
 
         treeModel.clear();
@@ -520,7 +513,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 
     private SeverityLevel[] getDisplayedSeverities() {
-        final List<SeverityLevel> severityLevels = new ArrayList<SeverityLevel>();
+        final List<SeverityLevel> severityLevels = new ArrayList<>();
 
         if (displayingErrors) {
             severityLevels.add(SeverityLevel.ERROR);

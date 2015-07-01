@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleConstants;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -249,7 +249,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
         LOG.debug("Processing file: " + path);
 
-        for (String prefix : new String[]{CheckStyleConstants.PROJECT_DIR, CheckStyleConstants.LEGACY_PROJECT_DIR}) {
+        for (String prefix : new String[]{CheckStyleConfiguration.PROJECT_DIR, CheckStyleConfiguration.LEGACY_PROJECT_DIR}) {
             if (path.startsWith(prefix)) {
                 // path is relative to project dir
                 final File projectPath = getProjectPath();
@@ -280,7 +280,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
         final File projectPath = getProjectPath();
         if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
-            return CheckStyleConstants.PROJECT_DIR
+            return CheckStyleConfiguration.PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
         return toUnixPath(path);
