@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.7 from within IDEA.
+    of Java files with CheckStyle 6.8.1 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.16.1</version>
+    <version>4.17.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,8 +19,9 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>4.16.1: Fixed: Only files in the project content source are scanned (#172).</li>
-    <li>4.16.1: Fixed: Mirrored JAR files are now used when available. (#141).</li>
+    <li>4.17.0: New: Updated to CheckStyle 6.8.1.</li>
+    <li>4.17.0: Fixed: Only files in the project content source are scanned (#172).</li>
+    <li>4.17.0: Fixed: Mirrored JAR files are now used when available. (#141).</li>
     <li>4.16.0: New: Updated to CheckStyle 6.7 (#168).</li>
     <li>4.15.0: New: Updated to CheckStyle 6.6 (#150).</li>
     <li>4.14.2: Fixed: Cached checkers are now cleaned by a background task (#141).</li>
