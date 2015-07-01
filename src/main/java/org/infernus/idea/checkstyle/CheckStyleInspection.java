@@ -30,7 +30,6 @@ import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
 import org.infernus.idea.checkstyle.util.IDEAUtilities;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.intellij.lang.annotations.Pattern;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -171,12 +170,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
     @Override
     public String getID() {
         return CheckStyleConstants.ID_INSPECTION;
-    }
-
-    @NotNull
-    @NonNls
-    public String getShortName() {
-        return CheckStyleConstants.ID_PLUGIN;
     }
 
     @Nullable
