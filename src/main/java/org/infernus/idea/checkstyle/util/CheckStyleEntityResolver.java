@@ -24,7 +24,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
             CheckStyleEntityResolver.class);
 
     private static final Map<DTDKey, String> DTD_MAP
-            = new HashMap<DTDKey, String>();
+            = new HashMap<>();
 
     static {
         DTD_MAP.put(new DTDKey(

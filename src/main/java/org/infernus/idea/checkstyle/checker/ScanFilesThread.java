@@ -9,7 +9,6 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +56,7 @@ public class ScanFilesThread extends AbstractCheckerThread {
     }
 
 
-    public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
+    public void runFileScanner(final FileScanner fileScanner) {
         fileScanner.run();
     }
 

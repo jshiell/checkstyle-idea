@@ -22,7 +22,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 public class ModuleClassPathBuilder {
 
@@ -51,9 +50,9 @@ public class ModuleClassPathBuilder {
             return thirdPartyClassLoader();
         }
 
-        final Set<URL> outputPaths = new HashSet<URL>();
+        final Set<URL> outputPaths = new HashSet<>();
 
-        final Set<Module> transitiveDependencies = new HashSet<Module>();
+        final Set<Module> transitiveDependencies = new HashSet<>();
         ModuleUtil.getDependencies(baseModule, transitiveDependencies);
         for (Module moduleInScope : transitiveDependencies) {
             if (LOG.isDebugEnabled()) {

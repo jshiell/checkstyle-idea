@@ -16,8 +16,8 @@ class CreateScannableFileAction implements Runnable {
      */
     private IOException failure;
 
-    private PsiFile psiFile;
-    private Module module;
+    private final PsiFile psiFile;
+    private final Module module;
 
     /**
      * The created temporary file.

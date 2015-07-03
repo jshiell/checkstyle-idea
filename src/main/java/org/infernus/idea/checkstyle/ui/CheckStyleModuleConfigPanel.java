@@ -23,7 +23,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
     private final JRadioButton excludeRadio = new JRadioButton();
     private final ComboBox configurationFilesCombo = new ComboBox();
-    private final DefaultComboBoxModel configurationFilesModel = new DefaultComboBoxModel();
+    private final DefaultComboBoxModel<ConfigurationLocation> configurationFilesModel = new DefaultComboBoxModel<>();
     private final JLabel configurationFilesLabel = new JLabel();
 
     private List<ConfigurationLocation> configurationLocations;
@@ -78,6 +78,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(8, 32, 8, 8), 0, 0));
 
         configurationFilesCombo.setToolTipText(CheckStyleBundle.message("config.module.module-file.tooltip"));
+        //noinspection unchecked
         configurationFilesCombo.setModel(configurationFilesModel);
         configPanel.add(configurationFilesCombo, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
@@ -99,7 +100,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         final List<ConfigurationLocation> locations = new ArrayList<>();
 
         for (int i = 0; i < configurationFilesModel.getSize(); ++i) {
-            locations.add((ConfigurationLocation) configurationFilesModel.getElementAt(i));
+            locations.add(configurationFilesModel.getElementAt(i));
         }
 
         return Collections.unmodifiableList(locations);
@@ -111,10 +112,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         configurationFilesModel.removeAllElements();
 
         if (locations != null && locations.size() > 0) {
-            for (final ConfigurationLocation location : locations) {
-                configurationFilesModel.addElement(location);
-            }
-
+            locations.forEach(configurationFilesModel::addElement);
             configurationFilesModel.setSelectedItem(locations.get(0));
         }
 

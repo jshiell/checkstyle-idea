@@ -27,9 +27,9 @@ public class LocationDialogue extends JDialog {
         ERROR(true, false, false),
         COMPLETE(true, false, true);
 
-        private boolean allowPrevious;
-        private boolean allowNext;
-        private boolean allowCommit;
+        private final boolean allowPrevious;
+        private final boolean allowNext;
+        private final boolean allowCommit;
 
         Step(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
             this.allowPrevious = allowPrevious;

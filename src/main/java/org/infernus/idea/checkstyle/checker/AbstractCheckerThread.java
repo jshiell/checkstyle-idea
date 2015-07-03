@@ -158,6 +158,6 @@ public abstract class AbstractCheckerThread extends Thread {
         }
     }
 
-    public abstract void runFileScanner(FileScanner fileScanner) throws InterruptedException, InvocationTargetException;
+    public abstract void runFileScanner(FileScanner fileScanner);
 
 }

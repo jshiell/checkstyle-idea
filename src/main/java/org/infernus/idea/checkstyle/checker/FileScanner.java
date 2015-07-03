@@ -115,11 +115,9 @@ final class FileScanner implements Runnable {
      * @return a list of tree nodes representing the result tree for this
      * file, an empty list or null if this file is invalid or
      * has no errors.
-     * @throws Throwable if the
      */
     private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
-                                                               final ConfigurationLocation override)
-            throws Throwable {
+                                                               final ConfigurationLocation override) {
         if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {
             LOG.debug("No elements were specified");
             return null;

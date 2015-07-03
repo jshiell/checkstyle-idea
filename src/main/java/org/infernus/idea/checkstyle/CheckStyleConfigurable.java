@@ -21,7 +21,7 @@ public class CheckStyleConfigurable implements Configurable {
 
     private final Project project;
 
-    private CheckStyleConfigPanel configPanel;
+    private final CheckStyleConfigPanel configPanel;
 
     public CheckStyleConfigurable(@NotNull final Project project) {
         this.project = project;

@@ -16,7 +16,7 @@ public class ConfigurationLocationFactory {
      * to other modules with a reference to the given location.
      */
     private final Map<ConfigurationLocation, ConfigurationLocation> instanceCache
-            = new WeakHashMap<ConfigurationLocation, ConfigurationLocation>();
+            = new WeakHashMap<>();
 
     /**
      * Create a new location.

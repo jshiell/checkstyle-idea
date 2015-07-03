@@ -13,7 +13,6 @@ import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
 import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class CheckFilesThread extends AbstractCheckerThread {
     }
 
     @Override
-    public void runFileScanner(final FileScanner fileScanner) throws InterruptedException, InvocationTargetException {
+    public void runFileScanner(final FileScanner fileScanner) {
         ApplicationManager.getApplication().runReadAction(fileScanner);
     }
 
