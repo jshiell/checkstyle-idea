@@ -27,7 +27,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private static final long BLACKLIST_TIME_MS = 1000 * 60;
 
-    private final Map<String, String> properties = new HashMap<String, String>();
+    private final Map<String, String> properties = new HashMap<>();
     private final ConfigurationType type;
     private String location;
     private String description;
@@ -105,6 +105,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.propertiesCheckedThisSession = false;
     }
 
+    public void reset() {
+        propertiesCheckedThisSession = false;
+        blacklistedUntil = 0L;
+    }
+
     /**
      * Extract all settable properties from the given configuration file.
      *
@@ -124,7 +129,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             }
         }
 
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     /**
@@ -135,7 +140,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
      */
     @SuppressWarnings("unchecked")
     private List<String> extractProperties(final Element element) {
-        final List<String> propertyNames = new ArrayList<String>();
+        final List<String> propertyNames = new ArrayList<>();
 
         if (element != null) {
             extractPropertyNames(element, propertyNames);
@@ -185,7 +190,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -318,7 +323,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         cloned.setDescription(getDescription());
         cloned.setLocation(getLocation());
         try {
-            cloned.setProperties(new HashMap<String, String>(getProperties()));
+            cloned.setProperties(new HashMap<>(getProperties()));
         } catch (IOException e) {
             throw new RuntimeException("Failed to resolve properties for " + this);
         }

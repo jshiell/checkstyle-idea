@@ -21,7 +21,7 @@ import java.util.Map;
  * Allows selection of the location of the CheckStyle file.
  */
 public class LocationDialogue extends JDialog {
-    private enum CurrentStep {
+    private enum Step {
         SELECT(false, true, false),
         PROPERTIES(true, true, false),
         ERROR(true, false, false),
@@ -31,7 +31,7 @@ public class LocationDialogue extends JDialog {
         private boolean allowNext;
         private boolean allowCommit;
 
-        CurrentStep(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
+        Step(final boolean allowPrevious, final boolean allowNext, final boolean allowCommit) {
             this.allowPrevious = allowPrevious;
             this.allowNext = allowNext;
             this.allowCommit = allowCommit;
@@ -59,7 +59,7 @@ public class LocationDialogue extends JDialog {
 
     private JButton commitButton;
     private JButton previousButton;
-    private CurrentStep currentStep = CurrentStep.SELECT;
+    private Step currentStep = Step.SELECT;
     private boolean committed = true;
     private ConfigurationLocation configurationLocation;
 
@@ -117,7 +117,7 @@ public class LocationDialogue extends JDialog {
         add(bottomPanel, BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(commitButton);
-        moveToStep(CurrentStep.SELECT);
+        moveToStep(Step.SELECT);
 
         pack();
 
@@ -158,7 +158,7 @@ public class LocationDialogue extends JDialog {
         return configurationLocation;
     }
 
-    private void moveToStep(final CurrentStep newStep) {
+    private void moveToStep(final Step newStep) {
         remove(panelForCurrentStep());
         currentStep = newStep;
 
@@ -187,18 +187,22 @@ public class LocationDialogue extends JDialog {
         return committed;
     }
 
-    private void testLoadOfFile(final ConfigurationLocation location) {
+    private Step attemptLoadOfFile(final ConfigurationLocation location) {
         configurationLocation = location;
 
+        final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
-            new CheckerFactory(new CheckerFactoryCache()).getChecker(location, thirdPartyClasspath);
+            location.reset();
+            new CheckerFactory(cache).getChecker(location, thirdPartyClasspath);
+            return Step.COMPLETE;
+
         } catch (Exception e) {
             errorPanel.setError(e);
-            moveToStep(CurrentStep.ERROR);
-            return;
-        }
+            return Step.ERROR;
 
-        moveToStep(CurrentStep.COMPLETE);
+        } finally {
+            cache.shutdown();
+        }
     }
 
     private class NextAction extends AbstractAction {
@@ -232,16 +236,16 @@ public class LocationDialogue extends JDialog {
                     }
 
                     if (properties == null || properties.isEmpty()) {
-                        testLoadOfFile(location);
+                        moveToStep(attemptLoadOfFile(location));
                     } else {
                         propertiesPanel.setConfigurationLocation(location);
-                        moveToStep(CurrentStep.PROPERTIES);
+                        moveToStep(Step.PROPERTIES);
                     }
                     return;
 
                 case PROPERTIES:
                     location = propertiesPanel.getConfigurationLocation();
-                    testLoadOfFile(location);
+                    moveToStep(attemptLoadOfFile(location));
                     return;
 
                 case COMPLETE:
@@ -275,7 +279,7 @@ public class LocationDialogue extends JDialog {
 
             switch (currentStep) {
                 case PROPERTIES:
-                    moveToStep(CurrentStep.SELECT);
+                    moveToStep(Step.SELECT);
                     return;
 
                 case COMPLETE:
@@ -283,12 +287,12 @@ public class LocationDialogue extends JDialog {
                     try {
                         final Map<String, String> properties = configurationLocation.getProperties();
                         if (properties == null || properties.isEmpty()) {
-                            moveToStep(CurrentStep.SELECT);
+                            moveToStep(Step.SELECT);
                         } else {
-                            moveToStep(CurrentStep.PROPERTIES);
+                            moveToStep(Step.PROPERTIES);
                         }
                     } catch (IOException e1) {
-                        moveToStep(CurrentStep.SELECT);
+                        moveToStep(Step.SELECT);
                     }
                     return;
 

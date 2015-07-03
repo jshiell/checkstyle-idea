@@ -28,6 +28,10 @@ public class CheckerFactoryCache {
         startBackgroundCleanupTask();
     }
 
+    public void shutdown() {
+        cleanUpExecutor.shutdown();
+    }
+
     public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location) {
         cacheLock.readLock().lock();
         try {

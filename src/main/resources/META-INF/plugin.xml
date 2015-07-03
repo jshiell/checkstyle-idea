@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.17.0</version>
+    <version>4.17.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.17.1: Properties are properly reloaded after hitting previous in the add file wizard (#170).</li>
     <li>4.17.0: New: Updated to CheckStyle 6.8.1.</li>
     <li>4.17.0: Fixed: TreeWalker logs are now suppressed, reducing event log spam when editing files (#169).</li>
     <li>4.17.0: Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a ShortName change (#173).</li>
