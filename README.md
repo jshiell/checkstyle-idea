@@ -128,6 +128,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.17.1** Fixed: Source files that are within output paths are no longer scanned (#172).
 * **4.17.1** Fixed: Properties are properly reloaded after hitting previous in the add file wizard (#170).
 * **4.17.0** New: Updated to CheckStyle 6.8.1.
 * **4.17.0** Fixed: TreeWalker logs are now suppressed, reducing event log spam when editing files (#169).

@@ -8,12 +8,16 @@ import org.jetbrains.annotations.PropertyKey;
 import java.lang.ref.Reference;
 import java.util.ResourceBundle;
 
-public class CheckStyleBundle {
+public final class CheckStyleBundle {
 
     private static Reference<ResourceBundle> bundleReference;
 
     @NonNls
     private static final String BUNDLE = "org.infernus.idea.checkstyle.CheckStyleBundle";
+
+    private CheckStyleBundle() {
+        // utility class
+    }
 
     public static String message(@PropertyKey(resourceBundle = BUNDLE) final String key, final Object... params) {
         return CommonBundle.message(getBundle(), key, params);

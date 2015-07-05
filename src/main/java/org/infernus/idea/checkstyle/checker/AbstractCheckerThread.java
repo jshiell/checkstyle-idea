@@ -18,15 +18,14 @@ import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class AbstractCheckerThread extends Thread {
 
     private static final Log LOG = LogFactory.getLog(AbstractCheckerThread.class);
 
-    private final List<PsiFile> files = new ArrayList<PsiFile>();
-    private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<Module, Set<PsiFile>>();
+    private final List<PsiFile> files = new ArrayList<>();
+    private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<>();
     private final CheckStylePlugin plugin;
     private final ModuleClassPathBuilder moduleClassPathBuilder;
     private final ConfigurationLocation overrideConfigLocation;
@@ -52,7 +51,7 @@ public abstract class AbstractCheckerThread extends Thread {
             final Module module = ModuleUtil.findModuleForPsiElement(file);
             Set<PsiFile> filesForModule = moduleToFiles.get(module);
             if (filesForModule == null) {
-                filesForModule = new HashSet<PsiFile>();
+                filesForModule = new HashSet<>();
                 moduleToFiles.put(module, filesForModule);
             }
             filesForModule.add(file);
@@ -149,7 +148,7 @@ public abstract class AbstractCheckerThread extends Thread {
                 for (final PsiFile psiFile : filesForModule) {
                     final List<ProblemDescriptor> resultsForFile = fileScanner.getResults().get(psiFile);
                     if (resultsForFile != null && !resultsForFile.isEmpty()) {
-                        getFileResults().put(psiFile, new ArrayList<ProblemDescriptor>(resultsForFile));
+                        getFileResults().put(psiFile, new ArrayList<>(resultsForFile));
                     }
                 }
             } else {
