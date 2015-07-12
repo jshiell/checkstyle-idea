@@ -27,7 +27,7 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.infernus.idea.checkstyle.util.FileTypes;
-import org.infernus.idea.checkstyle.util.ScannableFile;
+import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

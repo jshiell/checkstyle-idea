@@ -1,10 +1,11 @@
-package org.infernus.idea.checkstyle.util;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.util.ModulePaths;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

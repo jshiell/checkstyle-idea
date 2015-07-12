@@ -4,7 +4,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+import org.infernus.idea.checkstyle.checker.ExtendedProblemDescriptor;
 import org.infernus.idea.checkstyle.util.Icons;
 
 import javax.swing.*;

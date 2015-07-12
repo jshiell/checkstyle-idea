@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle.util;
+package org.infernus.idea.checkstyle.checker;
 
 import java.io.IOException;
 import java.net.URL;

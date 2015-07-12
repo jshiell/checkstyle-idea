@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle.util;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;

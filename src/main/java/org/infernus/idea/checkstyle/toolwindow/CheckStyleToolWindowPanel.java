@@ -27,7 +27,7 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.ConfigurationListener;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
+import org.infernus.idea.checkstyle.checker.ExtendedProblemDescriptor;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

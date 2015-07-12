@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.util.ScannableFile;
 
 import java.io.IOException;
 

@@ -25,7 +25,6 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.FileTypes;
-import org.infernus.idea.checkstyle.util.ScannableFile;
 
 import java.io.File;
 import java.io.IOException;

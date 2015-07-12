@@ -13,7 +13,6 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;

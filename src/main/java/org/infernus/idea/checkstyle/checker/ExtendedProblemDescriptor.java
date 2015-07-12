@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle.util;
+package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;

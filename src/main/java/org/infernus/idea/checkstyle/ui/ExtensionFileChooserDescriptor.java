@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle.util;
+package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.vfs.VirtualFile;

@@ -127,8 +127,8 @@
 
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckStyleConfiguration"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckStyleConfiguration"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"
-                        serviceImplementation="org.infernus.idea.checkstyle.util.ModuleClassPathBuilder"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"
+                        serviceImplementation="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"
                         serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
 

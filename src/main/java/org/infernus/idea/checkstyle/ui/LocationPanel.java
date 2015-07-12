@@ -11,7 +11,6 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
-import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

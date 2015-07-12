@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.Notifications;
-import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
+import org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

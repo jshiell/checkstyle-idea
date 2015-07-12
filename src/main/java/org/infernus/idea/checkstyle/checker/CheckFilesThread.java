@@ -10,7 +10,6 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
-import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 
 import javax.swing.*;
 import java.util.HashMap;
