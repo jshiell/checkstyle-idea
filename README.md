@@ -128,6 +128,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.17.2** Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.
+* **4.17.2** Fixed: Modernised how notifications are raised.
 * **4.17.1** Fixed: Java source files that are marked as generated are no longer scanned (#172).
 * **4.17.1** Fixed: Properties are properly reloaded after hitting previous in the add file wizard (#170).
 * **4.17.0** New: Updated to CheckStyle 6.8.1.

@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.17.1</version>
+    <version>4.17.2</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,8 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.17.2: Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.</li>
+    <li>4.17.2: Fixed: Modernised how notifications are raised.</li>
     <li>4.17.1: Fixed: Java source files that are marked as generated are no longer scanned (#172).</li>
     <li>4.17.1: Properties are properly reloaded after hitting previous in the add file wizard (#170).</li>
     <li>4.17.0: New: Updated to CheckStyle 6.8.1.</li>
