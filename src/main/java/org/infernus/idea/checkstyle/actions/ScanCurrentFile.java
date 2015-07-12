@@ -10,7 +10,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.util.FileTypes;
 
 import java.util.Arrays;
 
@@ -102,7 +102,7 @@ public class ScanCurrentFile extends BaseAction {
 
             } else if (scanOnlyJavaFiles) {
                 // check files are valid
-                if (!CheckStyleUtilities.isJavaFile(selectedFile.getFileType())) {
+                if (!FileTypes.isJava(selectedFile.getFileType())) {
                     presentation.setEnabled(false);
                     return;
                 }

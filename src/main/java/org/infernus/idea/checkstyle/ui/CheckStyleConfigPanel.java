@@ -14,8 +14,8 @@ import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ExtensionFileChooserDescriptor;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
-import org.infernus.idea.checkstyle.util.ObjectUtils;
+import org.infernus.idea.checkstyle.util.Icons;
+import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -114,7 +114,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         container.add(new TitledSeparator(CheckStyleBundle.message("config.file.tab")), BorderLayout.NORTH);
         container.add(tableDecorator.createPanel(), BorderLayout.CENTER);
         final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.description"),
-                IDEAUtilities.getIcon("/general/information.png"), SwingConstants.LEFT);
+                Icons.icon("/general/information.png"), SwingConstants.LEFT);
         infoLabel.setBorder(new EmptyBorder(8, 0, 4, 0));
         container.add(infoLabel, BorderLayout.SOUTH);
         return container;
@@ -267,7 +267,7 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     private boolean haveLocationsChanged() throws IOException {
-        if (!ObjectUtils.equals(locations, locationModel.getLocations())) {
+        if (!Objects.equals(locations, locationModel.getLocations())) {
             return true;
         }
 

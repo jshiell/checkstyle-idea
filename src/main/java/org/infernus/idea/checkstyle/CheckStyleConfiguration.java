@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -243,7 +243,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read properties from " + configurationLocation, e);
-                    IDEAUtilities.showError(project,
+                    Notifications.showError(project,
                             CheckStyleBundle.message("checkstyle.could-not-read-properties", configurationLocation.getLocation()));
                 }
 

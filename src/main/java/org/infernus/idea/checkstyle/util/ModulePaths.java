@@ -20,11 +20,11 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
-public final class Paths {
+public final class ModulePaths {
 
-    private static final Log LOG = LogFactory.getLog(Paths.class);
+    private static final Log LOG = LogFactory.getLog(ModulePaths.class);
 
-    private Paths() {
+    private ModulePaths() {
         // utility class
     }
 

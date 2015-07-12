@@ -1,8 +1,8 @@
 package org.infernus.idea.checkstyle.util;
 
-public final class ObjectUtils {
+public final class Objects {
 
-    private ObjectUtils() {
+    private Objects() {
     }
 
     // ideally we'd use common-lang here, but I've learnt my lesson on relying on the IDEA CP

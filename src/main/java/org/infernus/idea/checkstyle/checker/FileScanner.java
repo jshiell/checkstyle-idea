@@ -24,7 +24,7 @@ import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.util.FileTypes;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 
 import java.io.File;
@@ -166,7 +166,7 @@ final class FileScanner implements Runnable {
                         continue;
                     }
 
-                    if (scanOnlyJavaFiles && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+                    if (scanOnlyJavaFiles && !FileTypes.isJava(psiFile.getFileType())) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Skipping non-Java file " + psiFile.getName());
                         }

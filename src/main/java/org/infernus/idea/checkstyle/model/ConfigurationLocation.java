@@ -6,7 +6,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
-import org.infernus.idea.checkstyle.util.ObjectUtils;
+import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -371,7 +371,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     @Override
     public int compareTo(@NotNull final ConfigurationLocation configurationLocation) {
-        return ObjectUtils.compare(getDescription(), configurationLocation.getDescription());
+        return Objects.compare(getDescription(), configurationLocation.getDescription());
     }
 
     public boolean isBlacklisted() {

@@ -26,7 +26,7 @@ import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
-import org.infernus.idea.checkstyle.util.CheckStyleUtilities;
+import org.infernus.idea.checkstyle.util.FileTypes;
 import org.infernus.idea.checkstyle.util.ScannableFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -169,7 +169,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             final CheckStylePlugin checkStylePlugin = getPlugin(manager.getProject());
 
             if (!checkStylePlugin.getConfiguration().isScanningNonJavaFiles()
-                    && !CheckStyleUtilities.isJavaFile(psiFile.getFileType())) {
+                    && !FileTypes.isJava(psiFile.getFileType())) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Skipping as file is not a Java file: " + psiFile.getName());
                 }

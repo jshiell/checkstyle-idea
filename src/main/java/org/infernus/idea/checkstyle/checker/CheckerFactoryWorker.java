@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import static java.lang.String.format;
-import static org.infernus.idea.checkstyle.util.IDEAUtilities.showError;
-import static org.infernus.idea.checkstyle.util.IDEAUtilities.showWarning;
+import static org.infernus.idea.checkstyle.util.Notifications.showError;
+import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 class CheckerFactoryWorker extends Thread {
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);

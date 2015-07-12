@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.model;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.util.FileUtils;
+import org.infernus.idea.checkstyle.util.FilePaths;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -38,9 +38,9 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
 
         try {
             final String basePath = projectPath.getAbsolutePath() + File.separator;
-            return basePath + FileUtils.getRelativePath(path, basePath, File.separator);
+            return basePath + FilePaths.relativePath(path, basePath, File.separator);
 
-        } catch (FileUtils.PathResolutionException e) {
+        } catch (FilePaths.PathResolutionException e) {
             LOG.debug("No common path was found between " + path + " and " + projectPath.getAbsolutePath());
             return path;
 

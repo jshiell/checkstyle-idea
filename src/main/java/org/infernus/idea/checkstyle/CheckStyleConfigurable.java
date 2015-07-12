@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +53,7 @@ public class CheckStyleConfigurable implements Configurable {
 
         } catch (IOException e) {
             LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
-            IDEAUtilities.showError(project, CheckStyleBundle.message("checkstyle.file-not-found"));
+            Notifications.showError(project, CheckStyleBundle.message("checkstyle.file-not-found"));
             return true;
         }
     }

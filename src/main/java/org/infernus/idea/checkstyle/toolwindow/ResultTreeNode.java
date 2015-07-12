@@ -5,7 +5,7 @@ import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.util.ExtendedProblemDescriptor;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.Icons;
 
 import javax.swing.*;
 
@@ -33,7 +33,7 @@ public class ResultTreeNode {
         }
 
         this.text = text;
-        icon = IDEAUtilities.getIcon("/general/information.png");
+        icon = Icons.icon("/general/information.png");
     }
 
 
@@ -49,7 +49,7 @@ public class ResultTreeNode {
         }
 
         this.text = CheckStyleBundle.message("plugin.results.scan-file-result", fileName, problemCount);
-        icon = IDEAUtilities.getIcon("/fileTypes/java.png");
+        icon = Icons.icon("/fileTypes/java.png");
     }
 
     /**
@@ -78,13 +78,13 @@ public class ResultTreeNode {
 
     private void updateIconsForProblem() {
         if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/general/hideWarnings.png");
+            icon = Icons.icon("/general/hideWarnings.png");
         } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/general/warning.png");
+            icon = Icons.icon("/general/warning.png");
         } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
-            icon = IDEAUtilities.getIcon("/general/information.png");
+            icon = Icons.icon("/general/information.png");
         } else {
-            icon = IDEAUtilities.getIcon("/general/error.png");
+            icon = Icons.icon("/general/error.png");
         }
     }
 

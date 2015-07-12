@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.regex.Pattern;
 
-public class FileUtils {
+public class FilePaths {
 
-    private FileUtils() {
+    private FilePaths() {
         // utility class
     }
 
@@ -27,9 +27,9 @@ public class FileUtils {
      * @return the relative file.
      * @see "http://stackoverflow.com/a/3054692"
      */
-    public static String getRelativePath(@NotNull final String targetPath,
-                                         @NotNull final String basePath,
-                                         @NotNull final String pathSeparator) {
+    public static String relativePath(@NotNull final String targetPath,
+                                      @NotNull final String basePath,
+                                      @NotNull final String pathSeparator) {
         // Normalize the paths
         String normalizedTargetPath = FilenameUtils.normalizeNoEndSeparator(targetPath);
         String normalizedBasePath = FilenameUtils.normalizeNoEndSeparator(basePath);

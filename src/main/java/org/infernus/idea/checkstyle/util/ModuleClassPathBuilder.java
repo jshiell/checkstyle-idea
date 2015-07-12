@@ -53,8 +53,8 @@ public class ModuleClassPathBuilder {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Adding module to classpath: " + moduleInScope.getName());
             }
-            outputPaths.addAll(Paths.compilerOutputPathsFor(moduleInScope));
-            outputPaths.addAll(Paths.libraryPathsFor(moduleInScope));
+            outputPaths.addAll(ModulePaths.compilerOutputPathsFor(moduleInScope));
+            outputPaths.addAll(ModulePaths.libraryPathsFor(moduleInScope));
         }
 
         if (LOG.isDebugEnabled()) {

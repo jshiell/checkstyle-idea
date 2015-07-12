@@ -5,13 +5,13 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class FileUtilsTest {
+public class FilePathsTest {
 
     @Test
     public void testGetRelativePathsUnix() {
-        assertEquals("stuff/xyz.dat", FileUtils.getRelativePath("/var/data/stuff/xyz.dat", "/var/data/", "/"));
-        assertEquals("../../b/c", FileUtils.getRelativePath("/a/b/c", "/a/x/y/", "/"));
-        assertEquals("../../b/c", FileUtils.getRelativePath("/m/n/o/a/b/c", "/m/n/o/a/x/y/", "/"));
+        assertEquals("stuff/xyz.dat", FilePaths.relativePath("/var/data/stuff/xyz.dat", "/var/data/", "/"));
+        assertEquals("../../b/c", FilePaths.relativePath("/a/b/c", "/a/x/y/", "/"));
+        assertEquals("../../b/c", FilePaths.relativePath("/m/n/o/a/b/c", "/m/n/o/a/x/y/", "/"));
     }
 
     @Test
@@ -19,7 +19,7 @@ public class FileUtilsTest {
         String target = "C:\\Windows\\Boot\\Fonts\\chs_boot.ttf";
         String base = "C:\\Windows\\Speech\\Common\\sapisvr.exe";
 
-        String relPath = FileUtils.getRelativePath(target, base, "\\");
+        String relPath = FilePaths.relativePath(target, base, "\\");
         assertEquals("..\\..\\Boot\\Fonts\\chs_boot.ttf", relPath);
     }
 
@@ -28,7 +28,7 @@ public class FileUtilsTest {
         String target = "C:\\Windows\\Boot\\Fonts\\chs_boot.ttf";
         String base = "C:\\Windows\\Speech\\Common\\";
 
-        String relPath = FileUtils.getRelativePath(target, base, "\\");
+        String relPath = FilePaths.relativePath(target, base, "\\");
         assertEquals("..\\..\\Boot\\Fonts\\chs_boot.ttf", relPath);
     }
 
@@ -37,7 +37,7 @@ public class FileUtilsTest {
         String target = "C:\\Windows\\Boot\\Fonts";
         String base = "C:\\Windows\\Speech\\Common\\foo.txt";
 
-        String relPath = FileUtils.getRelativePath(target, base, "\\");
+        String relPath = FilePaths.relativePath(target, base, "\\");
         assertEquals("..\\..\\Boot\\Fonts", relPath);
     }
 
@@ -47,7 +47,7 @@ public class FileUtilsTest {
         String base = "C:\\Windows\\Speech\\Common\\";
         String expected = "..\\..\\Boot";
 
-        String relPath = FileUtils.getRelativePath(target, base, "\\");
+        String relPath = FilePaths.relativePath(target, base, "\\");
         assertEquals(expected, relPath);
     }
 
@@ -57,10 +57,10 @@ public class FileUtilsTest {
         String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo\\";
 
         try {
-            FileUtils.getRelativePath(target, base, "\\");
+            FilePaths.relativePath(target, base, "\\");
             fail();
 
-        } catch (FileUtils.PathResolutionException ex) {
+        } catch (FilePaths.PathResolutionException ex) {
             // expected exception
         }
     }
@@ -70,7 +70,7 @@ public class FileUtilsTest {
         String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
         String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
 
-        assertEquals(".", FileUtils.getRelativePath(target, base, "\\"));
+        assertEquals(".", FilePaths.relativePath(target, base, "\\"));
     }
 
     @Test
@@ -78,6 +78,6 @@ public class FileUtilsTest {
         String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
         String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
 
-        assertEquals(".", FileUtils.getRelativePath(target, base, "\\"));
+        assertEquals(".", FilePaths.relativePath(target, base, "\\"));
     }
 }

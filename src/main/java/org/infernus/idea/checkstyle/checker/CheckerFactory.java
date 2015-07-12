@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.IDEAUtilities;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -224,7 +224,7 @@ public class CheckerFactory {
             location.blacklist();
 
             if (module != null) {
-                IDEAUtilities.showError(module.getProject(), CheckStyleBundle.message(messageKey, messageArgs));
+                Notifications.showError(module.getProject(), CheckStyleBundle.message(messageKey, messageArgs));
             } else {
                 throw new CheckStylePluginException(CheckStyleBundle.message(messageKey, messageArgs));
             }
