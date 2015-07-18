@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.17.2</version>
+    <version>4.17.3</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.17.3: Fixed: Started reducing the embarrassing amount of duplicated code.</li>
     <li>4.17.2: Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.</li>
     <li>4.17.2: Fixed: Modernised how notifications are raised.</li>
     <li>4.17.1: Fixed: Java source files that are marked as generated are no longer scanned (#172).</li>
@@ -124,8 +125,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"
                             serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
-        <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
-                            serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
+        <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.Checkers"
+                            serviceImplementation="org.infernus.idea.checkstyle.checker.Checkers"/>
 
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckStyleConfiguration"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckStyleConfiguration"/>

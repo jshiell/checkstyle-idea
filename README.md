@@ -128,6 +128,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.17.3** Fixed: Started reducing the embarrassing amount of duplicated code.
 * **4.17.2** Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.
 * **4.17.2** Fixed: Modernised how notifications are raised.
 * **4.17.1** Fixed: Java source files that are marked as generated are no longer scanned (#172).

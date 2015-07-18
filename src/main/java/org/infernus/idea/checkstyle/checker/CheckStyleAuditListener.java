@@ -103,20 +103,6 @@ public class CheckStyleAuditListener implements AuditListener {
         }
     }
 
-    /**
-     * Get the problems for a given file as found by this scan.
-     *
-     * @param psiFile the file to check for results.
-     * @return the problems found by this scan.
-     */
-    public List<ProblemDescriptor> getProblems(final PsiFile psiFile) {
-        final List<ProblemDescriptor> problemsForFile = problems.get(psiFile);
-        if (problemsForFile != null) {
-            return Collections.unmodifiableList(problemsForFile);
-        }
-        return Collections.emptyList();
-    }
-
     public Map<PsiFile, List<ProblemDescriptor>> getAllProblems() {
         return Collections.unmodifiableMap(problems);
     }
@@ -131,9 +117,6 @@ public class CheckStyleAuditListener implements AuditListener {
         problemsForFile.add(problemDescriptor);
     }
 
-    /**
-     * Runnable to process an audit event.
-     */
     private class ProcessResultsThread implements Runnable {
 
         public void run() {

@@ -1,9 +1,7 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
@@ -18,20 +16,12 @@ import java.util.List;
 public class CheckFilesThread extends AbstractCheckerThread {
     private static final Log LOG = LogFactory.getLog(CheckFilesThread.class);
 
-    /**
-     * Create a thread to check the given files.
-     *
-     * @param checkStylePlugin       CheckStylePlugin.
-     * @param moduleClassPathBuilder the class path builder.
-     * @param virtualFiles           the files to check.
-     * @param overrideConfigLocation if non-null this configuration will be used in preference to the normal configuration.
-     */
     public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
                             final ModuleClassPathBuilder moduleClassPathBuilder,
                             final List<VirtualFile> virtualFiles,
                             final ConfigurationLocation overrideConfigLocation) {
         super(checkStylePlugin, moduleClassPathBuilder, virtualFiles, overrideConfigLocation);
-        this.setFileResults(new HashMap<PsiFile, List<ProblemDescriptor>>());
+        this.setFileResults(new HashMap<>());
     }
 
     @Override
@@ -39,45 +29,14 @@ public class CheckFilesThread extends AbstractCheckerThread {
         ApplicationManager.getApplication().runReadAction(fileScanner);
     }
 
-    /**
-     * Execute the file check.
-     */
     @Override
     public void run() {
         setRunning(true);
 
         try {
-            // set progress bar
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
-                    if (toolWindowPanel != null) {
-                        toolWindowPanel.displayInProgress(getFiles().size());
-                    }
-                }
-            });
-
-            this.processFilesForModuleInfoAndScan();
-
-            // invoke Swing fun in Swing thread.
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
-                    if (toolWindowPanel != null) {
-                        switch (getConfigurationLocationStatus()) {
-                            case NOT_PRESENT:
-                                toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
-                                break;
-                            case BLACKLISTED:
-                                toolWindowPanel.displayWarningResult("plugin.results.rules-blacklist");
-                                break;
-                            default:
-                                toolWindowPanel.displayResults(getFileResults());
-                        }
-                    }
-                    markThreadComplete();
-                }
-            });
+            beginProgressDisplay();
+            processFilesForModuleInfoAndScan();
+            displayResults();
 
         } catch (final Throwable e) {
             final CheckStylePluginException processedError = CheckStylePlugin.processError(
@@ -85,18 +44,47 @@ public class CheckFilesThread extends AbstractCheckerThread {
 
             if (processedError != null) {
                 LOG.error("An error occurred while scanning a file.", processedError);
-
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
-                        if (toolWindowPanel != null) {
-                            toolWindowPanel.displayErrorResult(processedError);
-                        }
-                        markThreadComplete();
-                    }
-                });
+                displayErrorResult(processedError);
             }
         }
+    }
+
+    private void displayErrorResult(final CheckStylePluginException processedError) {
+        SwingUtilities.invokeLater(() -> {
+            final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+            if (toolWindowPanel != null) {
+                toolWindowPanel.displayErrorResult(processedError);
+            }
+            markThreadComplete();
+        });
+    }
+
+    private void beginProgressDisplay() {
+        SwingUtilities.invokeLater(() -> {
+            final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+            if (toolWindowPanel != null) {
+                toolWindowPanel.displayInProgress(getFiles().size());
+            }
+        });
+    }
+
+    private void displayResults() {
+        SwingUtilities.invokeLater(() -> {
+            final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
+            if (toolWindowPanel != null) {
+                switch (getConfigurationLocationStatus()) {
+                    case NOT_PRESENT:
+                        toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
+                        break;
+                    case BLACKLISTED:
+                        toolWindowPanel.displayWarningResult("plugin.results.rules-blacklist");
+                        break;
+                    default:
+                        toolWindowPanel.displayResults(getFileResults());
+                }
+            }
+            markThreadComplete();
+        });
     }
 
 }

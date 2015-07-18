@@ -13,7 +13,7 @@ class CachedChecker {
      */
     private static final int CACHE_VALID_TIME = 60000;
 
-    private final CheckerContainer checkerContainer;
+    private final CheckStyleChecker checkStyleChecker;
     private final Configuration config;
 
     private long timeStamp;
@@ -21,23 +21,23 @@ class CachedChecker {
     /**
      * Create a new checker value.
      *
-     * @param checkerContainer the checker instance.
+     * @param checkStyleChecker the checker instance.
      * @param config           the checker configuration.
      */
-    public CachedChecker(final CheckerContainer checkerContainer,
+    public CachedChecker(final CheckStyleChecker checkStyleChecker,
                          final Configuration config) {
-        if (checkerContainer == null) {
+        if (checkStyleChecker == null) {
             throw new IllegalArgumentException("Checker may not be null");
         }
 
-        this.checkerContainer = checkerContainer;
+        this.checkStyleChecker = checkStyleChecker;
         this.timeStamp = System.currentTimeMillis();
         this.config = config;
     }
 
-    public CheckerContainer getCheckerContainer() {
+    public CheckStyleChecker getCheckStyleChecker() {
         this.timeStamp = System.currentTimeMillis();
-        return checkerContainer;
+        return checkStyleChecker;
     }
 
     public Configuration getConfig() {
@@ -53,7 +53,7 @@ class CachedChecker {
     }
 
     public void destroy() {
-        checkerContainer.destroy();
+        checkStyleChecker.destroy();
     }
 
 }

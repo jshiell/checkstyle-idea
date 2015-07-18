@@ -9,8 +9,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
@@ -20,8 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public abstract class AbstractCheckerThread extends Thread {
-
-    private static final Log LOG = LogFactory.getLog(AbstractCheckerThread.class);
 
     private final List<PsiFile> files = new ArrayList<>();
     private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<>();
@@ -102,18 +98,7 @@ public abstract class AbstractCheckerThread extends Thread {
      */
     private void buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
         ApplicationManager.getApplication().runReadAction(() -> {
-            VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor() {
-                @Override
-                public boolean visitFile(@NotNull final VirtualFile file) {
-                    if (!file.isDirectory()) {
-                        final PsiFile psiFile = psiManager.findFile(virtualFile);
-                        if (psiFile != null) {
-                            files.add(psiFile);
-                        }
-                    }
-                    return true;
-                }
-            });
+            VfsUtilCore.visitChildrenRecursively(virtualFile, new AddChildFiles(virtualFile, psiManager));
         });
     }
 
@@ -122,40 +107,51 @@ public abstract class AbstractCheckerThread extends Thread {
             if (!isRunning()) {
                 break;
             }
-
             if (module == null) {
                 continue;
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
 
-            final ClassLoader moduleClassLoader = moduleClassPathBuilder.build(module);
-
-            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassLoader, overrideConfigLocation);
-            this.runFileScanner(fileScanner);
+            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassPathBuilder.build(module), overrideConfigLocation);
+            runFileScanner(fileScanner);
 
             configurationLocationStatus = fileScanner.getConfigurationLocationStatus();
 
             //noinspection ThrowableResultOfMethodCallIgnored
             if (fileScanner.getError() != null) {
-                // throw any exceptions from the thread
                 throw fileScanner.getError();
             }
 
-            // add results if necessary
-            if (fileScanner.getResults() != null) {
-                for (final PsiFile psiFile : filesForModule) {
-                    final List<ProblemDescriptor> resultsForFile = fileScanner.getResults().get(psiFile);
-                    if (resultsForFile != null && !resultsForFile.isEmpty()) {
-                        getFileResults().put(psiFile, new ArrayList<>(resultsForFile));
-                    }
+            for (final PsiFile psiFile : filesForModule) {
+                final List<ProblemDescriptor> resultsForFile = fileScanner.getResults().get(psiFile);
+                if (resultsForFile != null && !resultsForFile.isEmpty()) {
+                    getFileResults().put(psiFile, new ArrayList<>(resultsForFile));
                 }
-            } else {
-                LOG.warn("No results found for scan");
             }
         }
     }
 
     public abstract void runFileScanner(FileScanner fileScanner);
 
+    private class AddChildFiles extends VirtualFileVisitor {
+        private final VirtualFile virtualFile;
+        private final PsiManager psiManager;
+
+        public AddChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
+            this.virtualFile = virtualFile;
+            this.psiManager = psiManager;
+        }
+
+        @Override
+        public boolean visitFile(@NotNull final VirtualFile file) {
+            if (!file.isDirectory()) {
+                final PsiFile psiFile = psiManager.findFile(virtualFile);
+                if (psiFile != null) {
+                    files.add(psiFile);
+                }
+            }
+            return true;
+        }
+    }
 }

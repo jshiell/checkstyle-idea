@@ -20,7 +20,7 @@ public final class CheckFactory {
     }
 
     public static List<Check> getChecks(final Configuration config) {
-        final List<Check> checks = new ArrayList<Check>();
+        final List<Check> checks = new ArrayList<>();
 
         for (final Class checkClass : CHECK_CLASSES) {
             try {

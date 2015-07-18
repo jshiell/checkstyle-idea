@@ -5,7 +5,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.Checkers;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
@@ -193,7 +193,7 @@ public class LocationDialogue extends JDialog {
         final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
             location.reset();
-            new CheckerFactory(cache).getChecker(location, thirdPartyClasspath);
+            new Checkers(cache).verify(location, thirdPartyClasspath);
             return Step.COMPLETE;
 
         } catch (Exception e) {

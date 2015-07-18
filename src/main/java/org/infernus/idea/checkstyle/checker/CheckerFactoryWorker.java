@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
-import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
@@ -23,7 +22,7 @@ import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 class CheckerFactoryWorker extends Thread {
-    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
+    private static final Log LOG = LogFactory.getLog(Checkers.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
@@ -64,7 +63,7 @@ class CheckerFactoryWorker extends Thread {
     public void run() {
         try {
             int tabWidth = DEFAULT_TAB_WIDTH;
-            final Checker checker = new Checker();
+            final com.puppycrawl.tools.checkstyle.Checker checker = new com.puppycrawl.tools.checkstyle.Checker();
             Configuration config = null;
 
             if (location != null) {
@@ -93,7 +92,7 @@ class CheckerFactoryWorker extends Thread {
             if (config == null) {
                 config = new DefaultConfiguration("checker");
             }
-            threadReturn[0] = new CachedChecker(new CheckerContainer(checker, tabWidth), config);
+            threadReturn[0] = new CachedChecker(new CheckStyleChecker(checker, tabWidth), config);
 
         } catch (Exception e) {
             threadReturn[0] = e;

@@ -1,14 +1,18 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
@@ -25,61 +29,69 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * A configuration factory and resolver for CheckStyle.
- */
-public class CheckerFactory {
+import static java.util.Collections.emptyMap;
 
-    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
+public class Checkers {
+
+    private static final Log LOG = LogFactory.getLog(Checkers.class);
 
     private final CheckerFactoryCache cache;
 
-    public CheckerFactory(@NotNull final CheckerFactoryCache cache) {
+    public Checkers(@NotNull final CheckerFactoryCache cache) {
         this.cache = cache;
     }
 
-    public CheckerContainer getChecker(final ConfigurationLocation location, final List<String> thirdPartyJars)
+    public void verify(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
-        return getChecker(location, null, null, classLoaderForPaths(toFileUrls(thirdPartyJars)));
+        getChecker(null, null, location, classLoaderForPaths(toFileUrls(thirdPartyJars)));
     }
 
-    /**
-     * Get a checker for a given configuration, with the default module classloader.
-     *
-     * @param location the location of the CheckStyle file.
-     * @param project  the current project.
-     * @param module   the current module.
-     * @return the checker for the module or null if it cannot be created.
-     * @throws IOException         if the CheckStyle file cannot be resolved.
-     * @throws CheckstyleException if CheckStyle initialisation fails.
-     */
-    public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
-                                       @Nullable final Project project,
-                                       @Nullable final Module module)
-            throws CheckstyleException, IOException {
-        return getChecker(location, project, module, null);
-    }
-
-    /**
-     * Get a checker for a given configuration.
-     *
-     * @param location    the location of the CheckStyle file.
-     * @param module      the current module.
-     * @param classLoader class loader for CheckStyle use, or null to create a module class-loader if required.
-     * @return the checker for the module or null if it cannot be created.
-     * @throws IOException         if the CheckStyle file cannot be resolved.
-     * @throws CheckstyleException if CheckStyle initialisation fails.
-     */
-    public CheckerContainer getChecker(@NotNull final ConfigurationLocation location,
-                                       @Nullable final Project project,
-                                       @Nullable final Module module,
-                                       @Nullable final ClassLoader classLoader)
-            throws CheckstyleException, IOException {
-        final CachedChecker cachedChecker = getOrCreateCachedChecker(location, project, module, classLoader);
-        if (cachedChecker != null) {
-            return cachedChecker.getCheckerContainer();
+    public Map<PsiFile, List<ProblemDescriptor>> scan(@NotNull final Project project,
+                                                      @Nullable final Module module,
+                                                      @NotNull final List<ScannableFile> scannableFiles,
+                                                      @Nullable final ConfigurationLocation configurationLocation,
+                                                      @NotNull final CheckStyleConfiguration pluginConfiguration,
+                                                      @Nullable final ClassLoader moduleClassLoader,
+                                                      final boolean useExtendedDescriptors) {
+        if (scannableFiles.isEmpty()) {
+            return emptyMap();
         }
-        return null;
+
+        final CheckStyleChecker checkStyleChecker = getChecker(project, module, configurationLocation, moduleClassLoader);
+        final Configuration config = getConfig(project, module, configurationLocation);
+        if (checkStyleChecker == null || config == null) {
+            return emptyMap();
+        }
+
+        return checkStyleChecker.process(scannableFiles, inspectionManager(module), useExtendedDescriptors,
+                pluginConfiguration, config);
+    }
+
+    private InspectionManager inspectionManager(final Module module) {
+        return InspectionManager.getInstance(module.getProject());
+    }
+
+    @Nullable
+    private CheckStyleChecker getChecker(@Nullable final Project project,
+                                         @Nullable final Module module,
+                                         @Nullable final ConfigurationLocation location,
+                                         @Nullable final ClassLoader classLoader) {
+        LOG.debug("Getting CheckStyle checker with location " + location);
+
+        if (location == null) {
+            return null;
+        }
+
+        try {
+            final CachedChecker cachedChecker = getOrCreateCachedChecker(location, project, module, classLoader);
+            if (cachedChecker != null) {
+                return cachedChecker.getCheckStyleChecker();
+            }
+            return null;
+
+        } catch (Exception e) {
+            throw new CheckStylePluginException("Couldn't create Checker from " + location, e);
+        }
     }
 
     private CachedChecker getOrCreateCachedChecker(final ConfigurationLocation location,
@@ -112,7 +124,7 @@ public class CheckerFactory {
     }
 
     private ClassLoader classLoaderForPaths(final List<URL> classPaths) {
-        URL[] urls = new URL[classPaths.size()];
+        final URL[] urls = new URL[classPaths.size()];
         return new URLClassLoader(classPaths.toArray(urls), this.getClass().getClassLoader());
     }
 
@@ -128,39 +140,25 @@ public class CheckerFactory {
         return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
 
-    /**
-     * Get the checker configuration for a given configuration.
-     *
-     * @param location the location of the CheckStyle file.
-     * @param project  the current project.
-     * @param module   the current module.  @return a configuration.
-     * @throws IllegalArgumentException if no checker with the given location exists and it cannot be created.
-     */
-    public Configuration getConfig(@NotNull final ConfigurationLocation location,
-                                   @NotNull final Project project,
-                                   @Nullable final Module module) {
+    @Nullable
+    private Configuration getConfig(@NotNull final Project project,
+                                    @Nullable final Module module,
+                                    @Nullable final ConfigurationLocation location) {
+        LOG.debug("Getting CheckStyle config for location " + location);
+
         try {
             final CachedChecker checker = getOrCreateCachedChecker(location, project, module, null);
-            if (checker != null) {
-                return checker.getConfig();
+            if (checker == null) {
+                return null;
             }
-            return null;
+            return checker.getConfig();
 
         } catch (Exception e) {
-            throw new IllegalStateException("Unable to find or create a checker from " + location, e);
+            LOG.error("Checker could not be created.", e);
+            throw new CheckStylePluginException("Couldn't create Checker from " + location, e);
         }
     }
 
-    /**
-     * Load the Checkstyle configuration in a separate thread.
-     *
-     * @param location           The location of the Checkstyle configuration file.
-     * @param module             the current module.
-     * @param resolver           the resolver.
-     * @param contextClassLoader the context class loader, or null for default.
-     * @return loaded Configuration object
-     * @throws CheckstyleException If there was any error loading the configuration file.
-     */
     private CachedChecker createChecker(final ConfigurationLocation location,
                                         final Module module,
                                         final PropertyResolver resolver,
