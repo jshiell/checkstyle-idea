@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
@@ -14,10 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
-import org.infernus.idea.checkstyle.checker.CheckFilesThread;
-import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.checker.ScanFilesThread;
+import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -202,8 +198,8 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(@NotNull final List<VirtualFile> files,
-                                                           @NotNull final Map<PsiFile, List<ProblemDescriptor>> results) {
+    public Map<PsiFile, List<Problem>> scanFiles(@NotNull final List<VirtualFile> files,
+                                                 @NotNull final Map<PsiFile, List<Problem>> results) {
         LOG.info("Scanning current file(s).");
         if (files.isEmpty()) {
             LOG.debug("No files provided.");

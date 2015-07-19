@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.handlers;
 
 import com.intellij.CommonBundle;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -18,32 +17,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
-/**
- * Before Checkin Handler to scan files with Checkstyle.
- */
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private static final Log LOG = LogFactory.getLog(ScanFilesBeforeCheckinHandler.class);
 
     private final CheckinProjectPanel checkinPanel;
 
-    public ScanFilesBeforeCheckinHandler(final CheckinProjectPanel myCheckinPanel) {
-        if (myCheckinPanel == null) {
-            throw new IllegalArgumentException("CheckinPanel is required");
-        }
-
+    public ScanFilesBeforeCheckinHandler(@NotNull final CheckinProjectPanel myCheckinPanel) {
         this.checkinPanel = myCheckinPanel;
     }
 
@@ -62,11 +55,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             }
 
             public void saveState() {
-                getSettings().setScanFilesBeforeCheckin(checkBox.isSelected());
+                settings().ifPresent(settings -> settings.setScanFilesBeforeCheckin(checkBox.isSelected()));
             }
 
             public void restoreState() {
-                checkBox.setSelected(getSettings().isScanFilesBeforeCheckin());
+                checkBox.setSelected(settings()
+                        .map(CheckStyleConfiguration::isScanFilesBeforeCheckin)
+                        .orElseGet(() -> Boolean.FALSE));
             }
         };
     }
@@ -88,7 +83,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
         if (plugin.getConfiguration().isScanFilesBeforeCheckin()) {
             try {
-                final Map<PsiFile, List<ProblemDescriptor>> scanResults = new HashMap<>();
+                final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
@@ -111,23 +106,23 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         }
     }
 
-    private CheckStyleConfiguration getSettings() {
+    private Optional<CheckStyleConfiguration> settings() {
         final Project project = checkinPanel.getProject();
         if (project == null) {
             LOG.error("Could not get project for check-in panel");
-            return null;
+            return empty();
         }
 
         final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
         if (plugin == null) {
             LOG.error("Could not get CheckStyle Plug-in, skipping");
-            return null;
+            return empty();
         }
 
-        return plugin.getConfiguration();
+        return ofNullable(plugin.getConfiguration());
     }
 
-    private ReturnResult processScanResults(final Map<PsiFile, List<ProblemDescriptor>> results,
+    private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,
                                             final CommitExecutor executor,
                                             final CheckStylePlugin plugin) {
         final int errorCount = results.keySet().size();
@@ -168,7 +163,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 buttons, 0, UIUtil.getWarningIcon());
     }
 
-    private void showResultsInToolWindow(final Map<PsiFile, List<ProblemDescriptor>> results,
+    private void showResultsInToolWindow(final Map<PsiFile, List<Problem>> results,
                                          final CheckStylePlugin plugin) {
         final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
         if (toolWindowPanel != null) {

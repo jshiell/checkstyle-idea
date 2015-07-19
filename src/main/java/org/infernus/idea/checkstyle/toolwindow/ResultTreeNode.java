@@ -1,11 +1,11 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.checker.ExtendedProblemDescriptor;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.util.Icons;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
@@ -15,7 +15,7 @@ import javax.swing.*;
 public class ResultTreeNode {
 
     private PsiFile file;
-    private ProblemDescriptor problem;
+    private Problem problem;
     private Icon icon;
     private String text;
     private String tooltip;
@@ -58,20 +58,12 @@ public class ResultTreeNode {
      * @param file    the file the problem exists in.
      * @param problem the problem.
      */
-    public ResultTreeNode(final PsiFile file, final ProblemDescriptor problem) {
-        if (file == null) {
-            throw new IllegalArgumentException("File may not be null");
-        }
-        if (problem == null) {
-            throw new IllegalArgumentException("Problem may not be null");
-        }
-
+    public ResultTreeNode(@NotNull final PsiFile file,
+                          @NotNull final Problem problem) {
         this.file = file;
         this.problem = problem;
 
-        if (problem instanceof ExtendedProblemDescriptor) {
-            severity = ((ExtendedProblemDescriptor) problem).getSeverity();
-        }
+        severity = problem.severityLevel();
 
         updateIconsForProblem();
     }
@@ -102,7 +94,7 @@ public class ResultTreeNode {
      *
      * @return the problem associated with this node.
      */
-    public ProblemDescriptor getProblem() {
+    public Problem getProblem() {
         return problem;
     }
 
@@ -203,13 +195,7 @@ public class ResultTreeNode {
             return text;
         }
 
-        final String column = problem instanceof ExtendedProblemDescriptor
-                ? Integer.toString(((ExtendedProblemDescriptor) problem).getColumn()) : "?";
-        final int line = problem instanceof ExtendedProblemDescriptor
-                ? ((ExtendedProblemDescriptor) problem).getLine()
-                : problem.getLineNumber();
-
         return CheckStyleBundle.message("plugin.results.file-result", file.getName(),
-                problem.getDescriptionTemplate(), line, column);
+                problem.message(), problem.line(), Integer.toString(problem.column()));
     }
 }

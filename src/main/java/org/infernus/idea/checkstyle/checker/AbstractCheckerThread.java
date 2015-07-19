@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -24,7 +23,7 @@ public abstract class AbstractCheckerThread extends Thread {
     private final CheckStylePlugin plugin;
     private final ConfigurationLocation overrideConfigLocation;
 
-    private Map<PsiFile, List<ProblemDescriptor>> fileResults;
+    private Map<PsiFile, List<Problem>> fileResults;
     private ConfigurationLocationStatus configurationLocationStatus = ConfigurationLocationStatus.PRESENT;
     private boolean running = true;
 
@@ -50,11 +49,11 @@ public abstract class AbstractCheckerThread extends Thread {
         }
     }
 
-    protected Map<PsiFile, List<ProblemDescriptor>> getFileResults() {
+    protected Map<PsiFile, List<Problem>> getFileResults() {
         return fileResults;
     }
 
-    protected void setFileResults(final Map<PsiFile, List<ProblemDescriptor>> fileResults) {
+    protected void setFileResults(final Map<PsiFile, List<Problem>> fileResults) {
         this.fileResults = fileResults;
     }
 
@@ -121,7 +120,7 @@ public abstract class AbstractCheckerThread extends Thread {
             }
 
             for (final PsiFile psiFile : filesForModule) {
-                final List<ProblemDescriptor> resultsForFile = fileScanner.getResults().get(psiFile);
+                final List<Problem> resultsForFile = fileScanner.getResults().get(psiFile);
                 if (resultsForFile != null && !resultsForFile.isEmpty()) {
                     getFileResults().put(psiFile, new ArrayList<>(resultsForFile));
                 }

@@ -1,9 +1,9 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -11,18 +11,12 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import java.util.*;
 
-/**
- * Tree model for the scan results.
- */
 public class ResultTreeModel extends DefaultTreeModel {
 
     private static final long serialVersionUID = 2161855162879365203L;
 
     private final DefaultMutableTreeNode visibleRootNode;
 
-    /**
-     * Create an empty result tree.
-     */
     public ResultTreeModel() {
         super(new DefaultMutableTreeNode());
 
@@ -32,20 +26,6 @@ public class ResultTreeModel extends DefaultTreeModel {
         setRootMessage(null);
     }
 
-    /**
-     * Create a tree with the given model.
-     *
-     * @param results the model.
-     */
-    public ResultTreeModel(final Map<PsiFile, List<ProblemDescriptor>> results) {
-        this();
-
-        setModel(results);
-    }
-
-    /**
-     * Clear the tree.
-     */
     public void clear() {
         visibleRootNode.removeAllChildren();
         nodeStructureChanged(visibleRootNode);
@@ -155,7 +135,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      *
      * @param results the model.
      */
-    public void setModel(final Map<PsiFile, List<ProblemDescriptor>> results) {
+    public void setModel(final Map<PsiFile, List<Problem>> results) {
         setModel(results, SeverityLevel.ERROR, SeverityLevel.WARNING, SeverityLevel.INFO);
     }
 
@@ -165,7 +145,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      * @param results the model.
      * @param levels  the levels to display.
      */
-    public void setModel(final Map<PsiFile, List<ProblemDescriptor>> results,
+    public void setModel(final Map<PsiFile, List<Problem>> results,
                          final SeverityLevel... levels) {
         visibleRootNode.removeAllChildren();
 
@@ -176,9 +156,9 @@ public class ResultTreeModel extends DefaultTreeModel {
             int itemCount = 0;
             for (final PsiFile file : sortedFileNames(results)) {
                 final TogglableTreeNode fileNode = new TogglableTreeNode();
-                final List<ProblemDescriptor> problems = results.get(file);
+                final List<Problem> problems = results.get(file);
                 if (problems != null) {
-                    for (final ProblemDescriptor problem : problems) {
+                    for (final Problem problem : problems) {
                         final ResultTreeNode problemObj = new ResultTreeNode(file, problem);
 
                         final TogglableTreeNode problemNode = new TogglableTreeNode(problemObj);
@@ -205,7 +185,7 @@ public class ResultTreeModel extends DefaultTreeModel {
         nodeStructureChanged(visibleRootNode);
     }
 
-    private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<ProblemDescriptor>> results) {
+    private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<Problem>> results) {
         final List<PsiFile> sortedFiles = new ArrayList<>(results.keySet());
         Collections.sort(sortedFiles, (file1, file2) -> file1.getName().compareTo(file2.getName()));
         return sortedFiles;

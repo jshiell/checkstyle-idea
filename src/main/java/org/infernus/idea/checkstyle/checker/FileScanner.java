@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -28,7 +26,7 @@ final class FileScanner implements Runnable {
     private final ConfigurationLocation overrideConfigLocation;
 
     private ConfigurationLocationStatus configurationLocationStatus = ConfigurationLocationStatus.PRESENT;
-    private Map<PsiFile, List<ProblemDescriptor>> results;
+    private Map<PsiFile, List<Problem>> results;
     private Throwable error;
 
     public FileScanner(final CheckStylePlugin checkStylePlugin,
@@ -53,7 +51,7 @@ final class FileScanner implements Runnable {
     }
 
     @NotNull
-    public Map<PsiFile, List<ProblemDescriptor>> getResults() {
+    public Map<PsiFile, List<Problem>> getResults() {
         if (results != null) {
             return Collections.unmodifiableMap(results);
         }
@@ -69,8 +67,8 @@ final class FileScanner implements Runnable {
         return configurationLocationStatus;
     }
 
-    private Map<PsiFile, List<ProblemDescriptor>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
-                                                               final ConfigurationLocation override) {
+    private Map<PsiFile, List<Problem>> checkPsiFile(final Set<PsiFile> psiFilesToScan,
+                                                     final ConfigurationLocation override) {
         if (psiFilesToScan == null || psiFilesToScan.isEmpty()) {
             LOG.debug("No elements were specified");
             return null;
@@ -89,16 +87,12 @@ final class FileScanner implements Runnable {
 
             return checkerFactory(module)
                     .checker(module, location)
-                    .map(checker -> checker.scan(scannableFiles, inspectionManager(module), plugin.getConfiguration()))
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration()))
                     .orElseGet(Collections::emptyMap);
 
         } finally {
             scannableFiles.forEach(file -> ScannableFile.deleteIfRequired(file));
         }
-    }
-
-    private InspectionManager inspectionManager(final Module module) {
-        return InspectionManager.getInstance(module.getProject());
     }
 
     @Nullable

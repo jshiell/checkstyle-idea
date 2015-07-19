@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
@@ -28,7 +27,7 @@ public class ScanFilesThread extends AbstractCheckerThread {
      */
     public ScanFilesThread(@NotNull final CheckStylePlugin checkStylePlugin,
                            @NotNull final List<VirtualFile> vFiles,
-                           @NotNull final Map<PsiFile, List<ProblemDescriptor>> results) {
+                           @NotNull final Map<PsiFile, List<Problem>> results) {
         super(checkStylePlugin, vFiles, null);
         this.setFileResults(results);
     }

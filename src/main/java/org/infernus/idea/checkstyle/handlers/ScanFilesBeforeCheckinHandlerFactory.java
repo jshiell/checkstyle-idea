@@ -10,8 +10,8 @@ public class ScanFilesBeforeCheckinHandlerFactory extends CheckinHandlerFactory 
 
     @NotNull
     @Override
-    public CheckinHandler createHandler(final CheckinProjectPanel checkinProjectPanel,
-                                        final CommitContext commitContext) {
+    public CheckinHandler createHandler(@NotNull final CheckinProjectPanel checkinProjectPanel,
+                                        @NotNull final CommitContext commitContext) {
         return new ScanFilesBeforeCheckinHandler(checkinProjectPanel);
     }
 

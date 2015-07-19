@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -26,8 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.ConfigurationListener;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.checker.ExtendedProblemDescriptor;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -333,17 +332,11 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 
     private int lineFor(final ResultTreeNode nodeInfo) {
-        if (nodeInfo.getProblem() instanceof ExtendedProblemDescriptor) {
-            return ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getLine();
-        }
-        return nodeInfo.getProblem().getLineNumber();
+        return nodeInfo.getProblem().line();
     }
 
     private int columnFor(final ResultTreeNode nodeInfo) {
-        if (nodeInfo.getProblem() instanceof ExtendedProblemDescriptor) {
-            return ((ExtendedProblemDescriptor) nodeInfo.getProblem()).getColumn();
-        }
-        return 0;
+        return nodeInfo.getProblem().column();
     }
 
     /**
@@ -544,7 +537,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      *
      * @param results the map of checked files to problem descriptors.
      */
-    public CheckStyleToolWindowPanel displayResults(final Map<PsiFile, List<ProblemDescriptor>> results) {
+    public CheckStyleToolWindowPanel displayResults(final Map<PsiFile, List<Problem>> results) {
         treeModel.setModel(results, getDisplayedSeverities());
 
         invalidate();

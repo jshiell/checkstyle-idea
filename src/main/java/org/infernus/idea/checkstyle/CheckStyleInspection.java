@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
@@ -22,6 +23,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.infernus.idea.checkstyle.CheckStylePlugin.processError;
@@ -68,8 +70,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             return asArray(checkerFactory(psiFile.getProject())
                     .checker(module, configurationLocation)
-                    .map(checker -> checker.inspect(scannableFiles, manager, plugin.getConfiguration()))
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration()))
                     .map(results -> results.get(psiFile))
+                    .map(results -> asProblemDescriptors(results, manager))
                     .orElseGet(Collections::emptyList));
 
         } catch (ProcessCanceledException | AssertionError e) {
@@ -88,6 +91,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
         } finally {
             scannableFiles.forEach(file -> ScannableFile.deleteIfRequired(file));
         }
+    }
+
+    private List<ProblemDescriptor> asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
+        return results.stream()
+                .map(problem -> problem.toProblemDescriptor(manager))
+                .collect(Collectors.toList());
     }
 
     private Module moduleOf(@NotNull final PsiFile psiFile) {

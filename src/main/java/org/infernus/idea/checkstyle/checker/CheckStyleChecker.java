@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
@@ -31,29 +29,15 @@ public class CheckStyleChecker {
     }
 
     @NotNull
-    public Map<PsiFile, List<ProblemDescriptor>> scan(@NotNull final List<ScannableFile> scannableFiles,
-                                                      @NotNull final InspectionManager manager,
-                                                      @NotNull final CheckStyleConfiguration pluginConfig) {
+    public Map<PsiFile, List<Problem>> scan(@NotNull final List<ScannableFile> scannableFiles,
+                                            @NotNull final CheckStyleConfiguration pluginConfig) {
         if (scannableFiles.isEmpty()) {
             return emptyMap();
         }
 
         return processAndAudit(filesOf(scannableFiles),
-                createExtendedListener(mapFilesToElements(scannableFiles), manager, pluginConfig))
-                .getAllProblems();
-    }
-
-    @NotNull
-    public Map<PsiFile, List<ProblemDescriptor>> inspect(@NotNull final List<ScannableFile> scannableFiles,
-                                                         @NotNull final InspectionManager manager,
-                                                         @NotNull final CheckStyleConfiguration pluginConfig) {
-        if (scannableFiles.isEmpty()) {
-            return emptyMap();
-        }
-
-        return processAndAudit(filesOf(scannableFiles),
-                createListener(mapFilesToElements(scannableFiles), manager, pluginConfig))
-                .getAllProblems();
+                createListener(mapFilesToElements(scannableFiles), pluginConfig))
+                .getProblems();
     }
 
     private Map<String, PsiFile> mapFilesToElements(final List<ScannableFile> scannableFiles) {
@@ -81,16 +65,8 @@ public class CheckStyleChecker {
     }
 
     private CheckStyleAuditListener createListener(final Map<String, PsiFile> filesToScan,
-                                                   final InspectionManager manager,
                                                    final CheckStyleConfiguration pluginConfig) {
-        return new CheckStyleAuditListener(filesToScan, manager,
-                pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
-    }
-
-    private CheckStyleAuditListener createExtendedListener(final Map<String, PsiFile> filesToScan,
-                                                           final InspectionManager manager,
-                                                           final CheckStyleConfiguration pluginConfig) {
-        return new CheckStyleExtendedAuditListener(filesToScan, manager,
+        return new CheckStyleAuditListener(filesToScan,
                 pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
     }
 

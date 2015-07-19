@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
@@ -10,7 +7,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiInvalidElementAccessException;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
-import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checks.Check;
@@ -18,9 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-/**
- * Listener for the CheckStyle process.
- */
 public class CheckStyleAuditListener implements AuditListener {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
@@ -29,18 +22,15 @@ public class CheckStyleAuditListener implements AuditListener {
     private final List<Check> checks;
     private final int tabWidth;
     private final Map<String, PsiFile> fileNamesToPsiFiles;
-    private final InspectionManager manager;
 
     private final List<AuditEvent> errors = new ArrayList<>();
-    private final Map<PsiFile, List<ProblemDescriptor>> problems = new HashMap<>();
+    private final Map<PsiFile, List<Problem>> problems = new HashMap<>();
 
     public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles,
-                                   @NotNull final InspectionManager manager,
                                    final boolean suppressErrors,
                                    final int tabWidth,
                                    @NotNull final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
-        this.manager = manager;
         this.checks = checks;
         this.suppressErrors = suppressErrors;
         this.tabWidth = tabWidth;
@@ -87,18 +77,18 @@ public class CheckStyleAuditListener implements AuditListener {
     }
 
     @NotNull
-    public Map<PsiFile, List<ProblemDescriptor>> getAllProblems() {
+    public Map<PsiFile, List<Problem>> getProblems() {
         return Collections.unmodifiableMap(problems);
     }
 
-    private void addProblem(final PsiFile psiFile, final ProblemDescriptor problemDescriptor) {
-        List<ProblemDescriptor> problemsForFile = problems.get(psiFile);
+    private void addProblem(final PsiFile psiFile, final Problem problem) {
+        List<Problem> problemsForFile = problems.get(psiFile);
         if (problemsForFile == null) {
             problemsForFile = new ArrayList<>();
             problems.put(psiFile, problemsForFile);
         }
 
-        problemsForFile.add(problemDescriptor);
+        problemsForFile.add(problem);
     }
 
     private class ProcessResultsThread implements Runnable {
@@ -155,11 +145,7 @@ public class CheckStyleAuditListener implements AuditListener {
                                   final AuditEvent event,
                                   final boolean afterEndOfLine) {
             try {
-                final ProblemDescriptor problem = manager.createProblemDescriptor(
-                        victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
-                        false, afterEndOfLine);
-
-                addProblem(psiFile, annotateProblem(event, problem));
+                addProblem(psiFile, new Problem(victim, event, afterEndOfLine, suppressErrors));
 
             } catch (PsiInvalidElementAccessException e) {
                 LOG.error("Element access failed", e);
@@ -237,36 +223,6 @@ public class CheckStyleAuditListener implements AuditListener {
             return '\0';
         }
 
-        private String messageFor(final AuditEvent event) {
-            if (event.getLocalizedMessage() != null) {
-                return event.getLocalizedMessage().getMessage();
-            }
-            return event.getMessage();
-        }
-
-        @NotNull
-        private ProblemHighlightType problemHighlightTypeFor(final SeverityLevel severityLevel) {
-            if (severityLevel != null && !suppressErrors) {
-                switch (severityLevel) {
-                    case ERROR:
-                        return ProblemHighlightType.ERROR;
-                    case WARNING:
-                        return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-                    case INFO:
-                        return ProblemHighlightType.WEAK_WARNING;
-                    case IGNORE:
-                        return ProblemHighlightType.INFORMATION;
-                    default:
-                        return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-                }
-            }
-            return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-        }
-    }
-
-    protected ProblemDescriptor annotateProblem(@NotNull final AuditEvent event,
-                                                @NotNull final ProblemDescriptor problem) {
-        return problem;
     }
 
     private static final class Position {
