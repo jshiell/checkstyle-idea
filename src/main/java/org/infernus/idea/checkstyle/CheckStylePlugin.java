@@ -14,7 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.infernus.idea.checkstyle.checker.*;
+import org.infernus.idea.checkstyle.checker.AbstractCheckerThread;
+import org.infernus.idea.checkstyle.checker.CheckFilesThread;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.checker.ScanFilesThread;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -164,7 +167,7 @@ public final class CheckStylePlugin implements ProjectComponent {
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, moduleClassPathBuilder(), files, overrideConfigLocation);
+        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files, overrideConfigLocation);
         checkFilesThread.setPriority(Thread.MIN_PRIORITY);
 
         synchronized (checksInProgress) {
@@ -172,10 +175,6 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         checkFilesThread.start();
-    }
-
-    private ModuleClassPathBuilder moduleClassPathBuilder() {
-        return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
 
     /**
@@ -203,14 +202,14 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(final List<VirtualFile> files,
-                                                           final Map<PsiFile, List<ProblemDescriptor>> results) {
+    public Map<PsiFile, List<ProblemDescriptor>> scanFiles(@NotNull final List<VirtualFile> files,
+                                                           @NotNull final Map<PsiFile, List<ProblemDescriptor>> results) {
         LOG.info("Scanning current file(s).");
-        if (files == null) {
+        if (files.isEmpty()) {
             LOG.debug("No files provided.");
             return results;
         }
-        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, moduleClassPathBuilder(), files, results);
+        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
 
         synchronized (checksInProgress) {
             checksInProgress.add(scanFilesThread);

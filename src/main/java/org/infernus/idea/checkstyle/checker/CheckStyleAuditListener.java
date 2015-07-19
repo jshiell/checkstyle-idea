@@ -25,7 +25,6 @@ public class CheckStyleAuditListener implements AuditListener {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
 
-    private final boolean usingExtendedDescriptors;
     private final boolean suppressErrors;
     private final List<Check> checks;
     private final int tabWidth;
@@ -35,29 +34,13 @@ public class CheckStyleAuditListener implements AuditListener {
     private final List<AuditEvent> errors = new ArrayList<>();
     private final Map<PsiFile, List<ProblemDescriptor>> problems = new HashMap<>();
 
-    /**
-     * Create a new listener.
-     * <p>
-     * Use the second argument to determine if we return our extended problem
-     * descriptors. This is provided to avoid problems with downstream code
-     * that may be interested in the implementation type.
-     *
-     * @param fileNamesToPsiFiles    a map of files name to PSI files for the files being scanned.
-     * @param manager                the current inspection manager.
-     * @param useExtendedDescriptors should we return standard IntelliJ
-     *                               problem descriptors or extended ones with severity information?
-     * @param suppressErrors         pass CheckStyle errors to IDEA as warnings.
-     * @param tabWidth               the tab width for the given rules file.
-     * @param checks                 the check modifications to use.
-     */
-    public CheckStyleAuditListener(final Map<String, PsiFile> fileNamesToPsiFiles,
-                                   final InspectionManager manager,
-                                   final boolean useExtendedDescriptors,
+    public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles,
+                                   @NotNull final InspectionManager manager,
                                    final boolean suppressErrors,
-                                   final int tabWidth, final List<Check> checks) {
+                                   final int tabWidth,
+                                   @NotNull final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
         this.manager = manager;
-        this.usingExtendedDescriptors = useExtendedDescriptors;
         this.checks = checks;
         this.suppressErrors = suppressErrors;
         this.tabWidth = tabWidth;
@@ -103,6 +86,7 @@ public class CheckStyleAuditListener implements AuditListener {
         }
     }
 
+    @NotNull
     public Map<PsiFile, List<ProblemDescriptor>> getAllProblems() {
         return Collections.unmodifiableMap(problems);
     }
@@ -175,11 +159,7 @@ public class CheckStyleAuditListener implements AuditListener {
                         victim, messageFor(event), null, problemHighlightTypeFor(event.getSeverityLevel()),
                         false, afterEndOfLine);
 
-                if (usingExtendedDescriptors) {
-                    addProblem(psiFile, extendDescriptor(event, problem));
-                } else {
-                    addProblem(psiFile, problem);
-                }
+                addProblem(psiFile, annotateProblem(event, problem));
 
             } catch (PsiInvalidElementAccessException e) {
                 LOG.error("Element access failed", e);
@@ -187,11 +167,9 @@ public class CheckStyleAuditListener implements AuditListener {
         }
 
         private boolean additionalChecksFail(final PsiFile psiFile, final AuditEvent event) {
-            if (checks != null) {
-                for (final Check check : checks) {
-                    if (!check.process(psiFile, event)) {
-                        return true;
-                    }
+            for (final Check check : checks) {
+                if (!check.process(psiFile, event)) {
+                    return true;
                 }
             }
             return false;
@@ -266,13 +244,6 @@ public class CheckStyleAuditListener implements AuditListener {
             return event.getMessage();
         }
 
-        private ProblemDescriptor extendDescriptor(final AuditEvent event,
-                                                   final ProblemDescriptor problem) {
-            return new ExtendedProblemDescriptor(problem, event.getSeverityLevel(),
-                    event.getLine(), event.getColumn());
-        }
-
-
         @NotNull
         private ProblemHighlightType problemHighlightTypeFor(final SeverityLevel severityLevel) {
             if (severityLevel != null && !suppressErrors) {
@@ -291,6 +262,11 @@ public class CheckStyleAuditListener implements AuditListener {
             }
             return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
         }
+    }
+
+    protected ProblemDescriptor annotateProblem(@NotNull final AuditEvent event,
+                                                @NotNull final ProblemDescriptor problem) {
+        return problem;
     }
 
     private static final class Position {

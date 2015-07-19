@@ -1,18 +1,13 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
@@ -29,53 +24,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
 
-public class Checkers {
+public class CheckerFactory {
 
-    private static final Log LOG = LogFactory.getLog(Checkers.class);
+    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
+    private final Project project;
     private final CheckerFactoryCache cache;
 
-    public Checkers(@NotNull final CheckerFactoryCache cache) {
+    public CheckerFactory(@NotNull final Project project,
+                          @NotNull final CheckerFactoryCache cache) {
+        this.project = project;
         this.cache = cache;
     }
 
     public void verify(final ConfigurationLocation location, final List<String> thirdPartyJars)
             throws CheckstyleException, IOException {
-        getChecker(null, null, location, classLoaderForPaths(toFileUrls(thirdPartyJars)));
+        checker(null, location, classLoaderForPaths(toFileUrls(thirdPartyJars)));
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> scan(@NotNull final Project project,
-                                                      @Nullable final Module module,
-                                                      @NotNull final List<ScannableFile> scannableFiles,
-                                                      @Nullable final ConfigurationLocation configurationLocation,
-                                                      @NotNull final CheckStyleConfiguration pluginConfiguration,
-                                                      @Nullable final ClassLoader moduleClassLoader,
-                                                      final boolean useExtendedDescriptors) {
-        if (scannableFiles.isEmpty()) {
-            return emptyMap();
-        }
-
-        final CheckStyleChecker checkStyleChecker = getChecker(project, module, configurationLocation, moduleClassLoader);
-        final Configuration config = getConfig(project, module, configurationLocation);
-        if (checkStyleChecker == null || config == null) {
-            return emptyMap();
-        }
-
-        return checkStyleChecker.process(scannableFiles, inspectionManager(module), useExtendedDescriptors,
-                pluginConfiguration, config);
-    }
-
-    private InspectionManager inspectionManager(final Module module) {
-        return InspectionManager.getInstance(module.getProject());
+    public Optional<CheckStyleChecker> checker(@Nullable final Module module,
+                                               @Nullable final ConfigurationLocation configurationLocation) {
+        return ofNullable(checker(module, configurationLocation, moduleClassPathBuilder().build(module)));
     }
 
     @Nullable
-    private CheckStyleChecker getChecker(@Nullable final Project project,
-                                         @Nullable final Module module,
-                                         @Nullable final ConfigurationLocation location,
-                                         @Nullable final ClassLoader classLoader) {
+    private CheckStyleChecker checker(@Nullable final Module module,
+                                      @Nullable final ConfigurationLocation location,
+                                      @Nullable final ClassLoader classLoader) {
         LOG.debug("Getting CheckStyle checker with location " + location);
 
         if (location == null) {
@@ -83,7 +60,7 @@ public class Checkers {
         }
 
         try {
-            final CachedChecker cachedChecker = getOrCreateCachedChecker(location, project, module, classLoader);
+            final CachedChecker cachedChecker = getOrCreateCachedChecker(location, module, classLoader);
             if (cachedChecker != null) {
                 return cachedChecker.getCheckStyleChecker();
             }
@@ -95,7 +72,6 @@ public class Checkers {
     }
 
     private CachedChecker getOrCreateCachedChecker(final ConfigurationLocation location,
-                                                   final Project project,
                                                    final Module module,
                                                    final ClassLoader classLoader)
             throws IOException, CheckstyleException {
@@ -106,7 +82,7 @@ public class Checkers {
 
         final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
         final CachedChecker checker = createChecker(location, module, propertyResolver,
-                classLoaderFor(project, module, classLoader));
+                classLoaderFor(module, classLoader));
         if (checker != null) {
             cache.put(location, checker);
             return checker;
@@ -115,10 +91,11 @@ public class Checkers {
         return null;
     }
 
-    private ClassLoader classLoaderFor(final Project project, final Module module, final ClassLoader overrideClassLoader)
+    private ClassLoader classLoaderFor(final Module module,
+                                       final ClassLoader overrideClassLoader)
             throws MalformedURLException {
-        if (overrideClassLoader == null && project != null) {
-            return moduleClassPathBuilder(project).build(module);
+        if (overrideClassLoader == null) {
+            return moduleClassPathBuilder().build(module);
         }
         return overrideClassLoader;
     }
@@ -136,27 +113,8 @@ public class Checkers {
         return thirdPartyClassPath;
     }
 
-    private ModuleClassPathBuilder moduleClassPathBuilder(final Project project) {
+    private ModuleClassPathBuilder moduleClassPathBuilder() {
         return ServiceManager.getService(project, ModuleClassPathBuilder.class);
-    }
-
-    @Nullable
-    private Configuration getConfig(@NotNull final Project project,
-                                    @Nullable final Module module,
-                                    @Nullable final ConfigurationLocation location) {
-        LOG.debug("Getting CheckStyle config for location " + location);
-
-        try {
-            final CachedChecker checker = getOrCreateCachedChecker(location, project, module, null);
-            if (checker == null) {
-                return null;
-            }
-            return checker.getConfig();
-
-        } catch (Exception e) {
-            LOG.error("Checker could not be created.", e);
-            throw new CheckStylePluginException("Couldn't create Checker from " + location, e);
-        }
     }
 
     private CachedChecker createChecker(final ConfigurationLocation location,

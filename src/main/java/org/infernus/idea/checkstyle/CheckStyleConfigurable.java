@@ -7,9 +7,9 @@ import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.Notifications;
-import org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -38,10 +38,6 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public JComponent createComponent() {
-        if (configPanel == null) {
-            return null;
-        }
-
         reset();
 
         return configPanel;
@@ -49,7 +45,7 @@ public class CheckStyleConfigurable implements Configurable {
 
     public boolean isModified() {
         try {
-            return configPanel != null && configPanel.isModified();
+            return configPanel.isModified();
 
         } catch (IOException e) {
             LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
@@ -59,10 +55,6 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void apply() throws ConfigurationException {
-        if (configPanel == null) {
-            return;
-        }
-
         final CheckStyleConfiguration configuration = getConfiguration();
         configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
@@ -98,10 +90,6 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void reset() {
-        if (configPanel == null) {
-            return;
-        }
-
         final CheckStyleConfiguration configuration = getConfiguration();
         configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
         configPanel.setPresetLocations(configuration.getPresetLocations());

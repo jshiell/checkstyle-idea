@@ -88,7 +88,7 @@ public class CheckerFactoryCache {
         });
     }
 
-    private <T> T writeToCache(Supplier<T> task) {
+    private <T> T writeToCache(final Supplier<T> task) {
         cacheLock.writeLock().lock();
         try {
             return task.get();

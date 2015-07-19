@@ -5,9 +5,10 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.checker.Checkers;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,6 +51,8 @@ public class LocationDialogue extends JDialog {
         }
     }
 
+    private final Project project;
+
     private final LocationPanel locationPanel;
     private final PropertiesPanel propertiesPanel;
     private final ErrorPanel errorPanel;
@@ -69,12 +72,11 @@ public class LocationDialogue extends JDialog {
      * @param project             the current project.
      * @param thirdPartyClasspath the third-party classpath.
      */
-    public LocationDialogue(final Project project, final List<String> thirdPartyClasspath) {
+    public LocationDialogue(@NotNull final Project project,
+                            final List<String> thirdPartyClasspath) {
         super(WindowManager.getInstance().getFrame(project));
 
-        if (project == null) {
-            throw new IllegalArgumentException("Project may not be null");
-        }
+        this.project = project;
 
         this.thirdPartyClasspath = thirdPartyClasspath;
         this.locationPanel = new LocationPanel(project);
@@ -193,7 +195,7 @@ public class LocationDialogue extends JDialog {
         final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
             location.reset();
-            new Checkers(cache).verify(location, thirdPartyClasspath);
+            new CheckerFactory(project, cache).verify(location, thirdPartyClasspath);
             return Step.COMPLETE;
 
         } catch (Exception e) {

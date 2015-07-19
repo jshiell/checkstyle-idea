@@ -8,6 +8,8 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -16,16 +18,15 @@ import java.util.List;
 public class CheckFilesThread extends AbstractCheckerThread {
     private static final Log LOG = LogFactory.getLog(CheckFilesThread.class);
 
-    public CheckFilesThread(final CheckStylePlugin checkStylePlugin,
-                            final ModuleClassPathBuilder moduleClassPathBuilder,
-                            final List<VirtualFile> virtualFiles,
-                            final ConfigurationLocation overrideConfigLocation) {
-        super(checkStylePlugin, moduleClassPathBuilder, virtualFiles, overrideConfigLocation);
+    public CheckFilesThread(@NotNull final CheckStylePlugin checkStylePlugin,
+                            @NotNull final List<VirtualFile> virtualFiles,
+                            @Nullable final ConfigurationLocation overrideConfigLocation) {
+        super(checkStylePlugin, virtualFiles, overrideConfigLocation);
         this.setFileResults(new HashMap<>());
     }
 
     @Override
-    public void runFileScanner(final FileScanner fileScanner) {
+    public void runFileScanner(@NotNull final FileScanner fileScanner) {
         ApplicationManager.getApplication().runReadAction(fileScanner);
     }
 

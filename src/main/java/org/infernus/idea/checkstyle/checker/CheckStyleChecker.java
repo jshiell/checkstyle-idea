@@ -7,6 +7,7 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.HashMap;
@@ -14,26 +15,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
+
 public class CheckStyleChecker {
     private final Checker checker;
+    private final Configuration configuration;
     private final int tabWidth;
 
-    public CheckStyleChecker(final Checker checker, final int tabWidth) {
-        if (checker == null) {
-            throw new IllegalArgumentException("checker may not be null");
-        }
-
+    public CheckStyleChecker(@NotNull final Checker checker,
+                             @NotNull final Configuration configuration,
+                             final int tabWidth) {
         this.checker = checker;
+        this.configuration = configuration;
         this.tabWidth = tabWidth;
     }
 
-    public Map<PsiFile, List<ProblemDescriptor>> process(final List<ScannableFile> scannableFiles,
-                                                         final InspectionManager manager,
-                                                         final boolean useExtendedDescriptors,
-                                                         final CheckStyleConfiguration pluginConfig,
-                                                         final Configuration checkerConfig) {
+    @NotNull
+    public Map<PsiFile, List<ProblemDescriptor>> scan(@NotNull final List<ScannableFile> scannableFiles,
+                                                      @NotNull final InspectionManager manager,
+                                                      @NotNull final CheckStyleConfiguration pluginConfig) {
+        if (scannableFiles.isEmpty()) {
+            return emptyMap();
+        }
+
         return processAndAudit(filesOf(scannableFiles),
-                createListener(mapFilesToElements(scannableFiles), manager, useExtendedDescriptors, pluginConfig, checkerConfig))
+                createExtendedListener(mapFilesToElements(scannableFiles), manager, pluginConfig))
+                .getAllProblems();
+    }
+
+    @NotNull
+    public Map<PsiFile, List<ProblemDescriptor>> inspect(@NotNull final List<ScannableFile> scannableFiles,
+                                                         @NotNull final InspectionManager manager,
+                                                         @NotNull final CheckStyleConfiguration pluginConfig) {
+        if (scannableFiles.isEmpty()) {
+            return emptyMap();
+        }
+
+        return processAndAudit(filesOf(scannableFiles),
+                createListener(mapFilesToElements(scannableFiles), manager, pluginConfig))
                 .getAllProblems();
     }
 
@@ -63,11 +82,16 @@ public class CheckStyleChecker {
 
     private CheckStyleAuditListener createListener(final Map<String, PsiFile> filesToScan,
                                                    final InspectionManager manager,
-                                                   final boolean useExtendedDescriptors,
-                                                   final CheckStyleConfiguration pluginConfig,
-                                                   final Configuration checkerConfig) {
-        return new CheckStyleAuditListener(filesToScan, manager, useExtendedDescriptors,
-                pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(checkerConfig));
+                                                   final CheckStyleConfiguration pluginConfig) {
+        return new CheckStyleAuditListener(filesToScan, manager,
+                pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
+    }
+
+    private CheckStyleAuditListener createExtendedListener(final Map<String, PsiFile> filesToScan,
+                                                           final InspectionManager manager,
+                                                           final CheckStyleConfiguration pluginConfig) {
+        return new CheckStyleExtendedAuditListener(filesToScan, manager,
+                pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
     }
 
     public int getTabWidth() {

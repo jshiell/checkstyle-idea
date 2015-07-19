@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
@@ -24,7 +25,6 @@ final class FileScanner implements Runnable {
 
     private final CheckStylePlugin plugin;
     private final Set<PsiFile> filesToScan;
-    private final ClassLoader moduleClassLoader;
     private final ConfigurationLocation overrideConfigLocation;
 
     private ConfigurationLocationStatus configurationLocationStatus = ConfigurationLocationStatus.PRESENT;
@@ -33,11 +33,9 @@ final class FileScanner implements Runnable {
 
     public FileScanner(final CheckStylePlugin checkStylePlugin,
                        final Set<PsiFile> filesToScan,
-                       final ClassLoader moduleClassLoader,
                        final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.filesToScan = filesToScan;
-        this.moduleClassLoader = moduleClassLoader;
         this.overrideConfigLocation = overrideConfigLocation;
     }
 
@@ -89,12 +87,18 @@ final class FileScanner implements Runnable {
 
             scannableFiles.addAll(ScannableFile.createAndValidate(psiFilesToScan, plugin, module));
 
-            return checkers().scan(module.getProject(), module, scannableFiles, location,
-                    plugin.getConfiguration(), moduleClassLoader, true);
+            return checkerFactory(module)
+                    .checker(module, location)
+                    .map(checker -> checker.scan(scannableFiles, inspectionManager(module), plugin.getConfiguration()))
+                    .orElseGet(Collections::emptyMap);
 
         } finally {
             scannableFiles.forEach(file -> ScannableFile.deleteIfRequired(file));
         }
+    }
+
+    private InspectionManager inspectionManager(final Module module) {
+        return InspectionManager.getInstance(module.getProject());
     }
 
     @Nullable
@@ -111,8 +115,8 @@ final class FileScanner implements Runnable {
         return location;
     }
 
-    private Checkers checkers() {
-        return ServiceManager.getService(Checkers.class);
+    private CheckerFactory checkerFactory(final Module project) {
+        return ServiceManager.getService(project.getProject(), CheckerFactory.class);
     }
 
 }

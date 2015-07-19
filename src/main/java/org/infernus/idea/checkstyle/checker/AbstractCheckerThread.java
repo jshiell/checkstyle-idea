@@ -22,7 +22,6 @@ public abstract class AbstractCheckerThread extends Thread {
     private final List<PsiFile> files = new ArrayList<>();
     private final Map<Module, Set<PsiFile>> moduleToFiles = new HashMap<>();
     private final CheckStylePlugin plugin;
-    private final ModuleClassPathBuilder moduleClassPathBuilder;
     private final ConfigurationLocation overrideConfigLocation;
 
     private Map<PsiFile, List<ProblemDescriptor>> fileResults;
@@ -30,11 +29,9 @@ public abstract class AbstractCheckerThread extends Thread {
     private boolean running = true;
 
     public AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
-                                 @NotNull final ModuleClassPathBuilder moduleClassPathBuilder,
                                  @NotNull final List<VirtualFile> virtualFiles,
                                  @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
-        this.moduleClassPathBuilder = moduleClassPathBuilder;
         this.overrideConfigLocation = overrideConfigLocation;
 
         final PsiManager psiManager = PsiManager.getInstance(this.plugin.getProject());
@@ -113,7 +110,7 @@ public abstract class AbstractCheckerThread extends Thread {
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
 
-            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, moduleClassPathBuilder.build(module), overrideConfigLocation);
+            final FileScanner fileScanner = new FileScanner(plugin, filesForModule, overrideConfigLocation);
             runFileScanner(fileScanner);
 
             configurationLocationStatus = fileScanner.getConfigurationLocationStatus();

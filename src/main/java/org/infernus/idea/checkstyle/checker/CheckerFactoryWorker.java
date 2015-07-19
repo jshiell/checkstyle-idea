@@ -22,7 +22,7 @@ import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 class CheckerFactoryWorker extends Thread {
-    private static final Log LOG = LogFactory.getLog(Checkers.class);
+    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
@@ -92,7 +92,7 @@ class CheckerFactoryWorker extends Thread {
             if (config == null) {
                 config = new DefaultConfiguration("checker");
             }
-            threadReturn[0] = new CachedChecker(new CheckStyleChecker(checker, tabWidth), config);
+            threadReturn[0] = new CachedChecker(new CheckStyleChecker(checker, config, tabWidth));
 
         } catch (Exception e) {
             threadReturn[0] = e;

@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.checker.Checkers;
+import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -65,9 +66,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             scannableFiles.addAll(ScannableFile.createAndValidate(singletonList(psiFile), plugin, module));
 
-            return asArray(checkers()
-                    .scan(psiFile.getProject(), module, scannableFiles, configurationLocation, plugin.getConfiguration(), null, false)
-                    .get(psiFile));
+            return asArray(checkerFactory(psiFile.getProject())
+                    .checker(module, configurationLocation)
+                    .map(checker -> checker.inspect(scannableFiles, manager, plugin.getConfiguration()))
+                    .map(results -> results.get(psiFile))
+                    .orElseGet(Collections::emptyList));
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.warn("Process cancelled when scanning: " + psiFile.getName());
@@ -98,8 +101,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return NO_PROBLEMS_FOUND;
     }
 
-    private Checkers checkers() {
-        return ServiceManager.getService(Checkers.class);
+    private CheckerFactory checkerFactory(final Project project) {
+        return ServiceManager.getService(project, CheckerFactory.class);
     }
 
 }

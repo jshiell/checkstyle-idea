@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.checks;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public final class CheckFactory {
     private CheckFactory() {
     }
 
+    @NotNull
     public static List<Check> getChecks(final Configuration config) {
         final List<Check> checks = new ArrayList<>();
 

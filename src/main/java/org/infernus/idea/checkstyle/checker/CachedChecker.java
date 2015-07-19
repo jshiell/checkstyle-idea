@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Key for checker cache.
@@ -14,34 +14,17 @@ class CachedChecker {
     private static final int CACHE_VALID_TIME = 60000;
 
     private final CheckStyleChecker checkStyleChecker;
-    private final Configuration config;
 
     private long timeStamp;
 
-    /**
-     * Create a new checker value.
-     *
-     * @param checkStyleChecker the checker instance.
-     * @param config           the checker configuration.
-     */
-    public CachedChecker(final CheckStyleChecker checkStyleChecker,
-                         final Configuration config) {
-        if (checkStyleChecker == null) {
-            throw new IllegalArgumentException("Checker may not be null");
-        }
-
+    public CachedChecker(@NotNull final CheckStyleChecker checkStyleChecker) {
         this.checkStyleChecker = checkStyleChecker;
         this.timeStamp = System.currentTimeMillis();
-        this.config = config;
     }
 
     public CheckStyleChecker getCheckStyleChecker() {
         this.timeStamp = System.currentTimeMillis();
         return checkStyleChecker;
-    }
-
-    public Configuration getConfig() {
-        return config;
     }
 
     public long getTimeStamp() {

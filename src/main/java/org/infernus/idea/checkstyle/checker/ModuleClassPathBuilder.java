@@ -32,15 +32,7 @@ public class ModuleClassPathBuilder {
         this.configuration = configuration;
     }
 
-    /**
-     * Build a class loader for the compilation path of the module.
-     *
-     * @param baseModule the module in question.
-     * @return the class loader to use, or null if the module was null.
-     * @throws java.net.MalformedURLException if the URL conversion fails.
-     */
-    public ClassLoader build(final Module baseModule)
-            throws MalformedURLException {
+    public ClassLoader build(final Module baseModule) {
 
         if (baseModule == null) {
             return thirdPartyClassLoader();
