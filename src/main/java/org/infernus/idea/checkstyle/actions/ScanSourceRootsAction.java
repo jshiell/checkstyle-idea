@@ -33,7 +33,7 @@ class ScanSourceRootsAction implements Runnable {
      * @return the flattened list of files.
      */
     private List<VirtualFile> flattenFiles(final VirtualFile[] files) {
-        final List<VirtualFile> flattened = new ArrayList<VirtualFile>();
+        final List<VirtualFile> flattened = new ArrayList<>();
 
         if (files != null) {
             for (final VirtualFile file : files) {

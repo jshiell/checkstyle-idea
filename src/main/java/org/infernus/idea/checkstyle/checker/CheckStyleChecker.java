@@ -70,10 +70,6 @@ public class CheckStyleChecker {
                 pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
     }
 
-    public int getTabWidth() {
-        return tabWidth;
-    }
-
     public void destroy() {
         checker.destroy();
     }

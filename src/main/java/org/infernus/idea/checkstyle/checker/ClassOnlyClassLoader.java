@@ -9,7 +9,7 @@ import java.util.Enumeration;
  * This is a URLClassLoader that doesn't allow loading of resources, to avoid
  * polluting the CheckStyle classpath with more than is required.
  */
-public class ClassOnlyClassLoader extends URLClassLoader {
+class ClassOnlyClassLoader extends URLClassLoader {
 
     public ClassOnlyClassLoader(final URL[] urls, final ClassLoader parent) {
         super(urls, parent);

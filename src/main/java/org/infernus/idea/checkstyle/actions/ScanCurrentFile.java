@@ -35,21 +35,18 @@ public class ScanCurrentFile extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        setProgressText(toolWindow, "plugin.status.in-progress.current");
+            toolWindow.activate(() -> {
+                try {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        final VirtualFile selectedFile = getSelectedFile(project);
-                        if (selectedFile != null) {
-                            project.getComponent(CheckStylePlugin.class).checkFiles(
-                                    Arrays.asList(selectedFile), getSelectedOverride(toolWindow));
-                        }
-
-                    } catch (Throwable e) {
-                        CheckStylePlugin.processErrorAndLog("Current File scan", e);
+                    final VirtualFile selectedFile = getSelectedFile(project);
+                    if (selectedFile != null) {
+                        project.getComponent(CheckStylePlugin.class).checkFiles(
+                                Arrays.asList(selectedFile), getSelectedOverride(toolWindow));
                     }
+
+                } catch (Throwable e) {
+                    CheckStylePlugin.processErrorAndLog("Current File scan", e);
                 }
             });
 
@@ -69,7 +66,7 @@ public class ScanCurrentFile extends BaseAction {
 
         // this is the preferred solution, but it doesn't respect the focus of split editors at present
         final VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
-        if (selectedFiles != null && selectedFiles.length > 0) {
+        if (selectedFiles.length > 0) {
             return selectedFiles[0];
         }
 

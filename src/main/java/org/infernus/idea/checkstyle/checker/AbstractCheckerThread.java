@@ -27,9 +27,9 @@ public abstract class AbstractCheckerThread extends Thread {
     private ConfigurationLocationStatus configurationLocationStatus = ConfigurationLocationStatus.PRESENT;
     private boolean running = true;
 
-    public AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
-                                 @NotNull final List<VirtualFile> virtualFiles,
-                                 @Nullable final ConfigurationLocation overrideConfigLocation) {
+    AbstractCheckerThread(@NotNull final CheckStylePlugin checkStylePlugin,
+                          @NotNull final List<VirtualFile> virtualFiles,
+                          @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.overrideConfigLocation = overrideConfigLocation;
 
@@ -49,36 +49,36 @@ public abstract class AbstractCheckerThread extends Thread {
         }
     }
 
-    protected Map<PsiFile, List<Problem>> getFileResults() {
+    Map<PsiFile, List<Problem>> getFileResults() {
         return fileResults;
     }
 
-    protected void setFileResults(final Map<PsiFile, List<Problem>> fileResults) {
+    void setFileResults(final Map<PsiFile, List<Problem>> fileResults) {
         this.fileResults = fileResults;
     }
 
-    protected List<PsiFile> getFiles() {
+    List<PsiFile> getFiles() {
         return files;
     }
 
     @Nullable
-    protected CheckStyleToolWindowPanel toolWindowPanel() {
+    CheckStyleToolWindowPanel toolWindowPanel() {
         return CheckStyleToolWindowPanel.panelFor(plugin.getProject());
     }
 
-    protected void markThreadComplete() {
+    void markThreadComplete() {
         plugin.setThreadComplete(this);
     }
 
-    protected synchronized boolean isRunning() {
+    private synchronized boolean isRunning() {
         return running;
     }
 
-    protected synchronized void setRunning(final boolean running) {
+    synchronized void setRunning(final boolean running) {
         this.running = running;
     }
 
-    protected ConfigurationLocationStatus getConfigurationLocationStatus() {
+    ConfigurationLocationStatus getConfigurationLocationStatus() {
         return configurationLocationStatus;
     }
 
@@ -98,7 +98,7 @@ public abstract class AbstractCheckerThread extends Thread {
         });
     }
 
-    protected void processFilesForModuleInfoAndScan() throws Throwable {
+    void processFilesForModuleInfoAndScan() throws Throwable {
         for (final Module module : moduleToFiles.keySet()) {
             if (!isRunning()) {
                 break;
@@ -128,7 +128,7 @@ public abstract class AbstractCheckerThread extends Thread {
         }
     }
 
-    public abstract void runFileScanner(FileScanner fileScanner);
+    protected abstract void runFileScanner(FileScanner fileScanner);
 
     private class AddChildFiles extends VirtualFileVisitor {
         private final VirtualFile virtualFile;

@@ -34,19 +34,19 @@
         <entry key="check-test-classes" value="false" />
         <entry key="location-0" value="LOCAL_FILE:$PRJ_DIR$/test-configs/amigo-cs5.0.xml:A2" />
         <entry key="location-1" value="LOCAL_FILE:$PRJ_DIR$/test-configs/amigo-cs5.0.xml:Amigo" />
-        <entry key="location-10" value="LOCAL_FILE:$PRJ_DIR$/test-configs/sonar.xml:Sonar" />
-        <entry key="location-2" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
-        <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="location-4" value="LOCAL_FILE:$PRJ_DIR$/test-configs/checkstyle-with-header.xml:With header" />
-        <entry key="location-5" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-164/checkstyle.xml:Issue 164" />
-        <entry key="location-6" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-98.xml:Issue 98" />
-        <entry key="location-7" value="LOCAL_FILE:$PRJ_DIR$/test-configs/testy.jar!/yazino-checkstyle-rules.xml:JAR test" />
-        <entry key="location-8" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man" />
-        <entry key="location-9" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man2" />
-        <entry key="property-3.checkstyle.suppressions.file" value="$PROJECT_DIR$/test-configs/yazino-checkstyle-suppressions.xml" />
-        <entry key="property-5.checkstyle.suppressions.file" value="$PROJECT_DIR$/test-configs/yazino-checkstyle-suppressions.xml" />
-        <entry key="property-6.samedir" value="" />
-        <entry key="property-7.checkstyle.suppressions.file" value="yazino-checkstyle-suppressions.xml" />
+        <entry key="location-10" value="LOCAL_FILE:$PRJ_DIR$/test-configs/testy.jar!/yazino-checkstyle-rules.xml:JAR test" />
+        <entry key="location-2" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man" />
+        <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/man-checkstyle.xml:Man2" />
+        <entry key="location-4" value="LOCAL_FILE:$PRJ_DIR$/test-configs/sonar.xml:Sonar" />
+        <entry key="location-5" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
+        <entry key="location-6" value="LOCAL_FILE:$PRJ_DIR$/test-configs/checkstyle-with-header.xml:With header" />
+        <entry key="location-7" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-8" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-164/checkstyle.xml:Issue 164" />
+        <entry key="location-9" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-98.xml:Issue 98" />
+        <entry key="property-10.checkstyle.suppressions.file" value="yazino-checkstyle-suppressions.xml" />
+        <entry key="property-7.checkstyle.suppressions.file" value="$PROJECT_DIR$/test-configs/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-8.checkstyle.suppressions.file" value="$PROJECT_DIR$/test-configs/yazino-checkstyle-suppressions.xml" />
+        <entry key="property-9.samedir" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="$PROJECT_DIR$/../Third Party/CreateYourOwnCheckStyleCheck/BlundellCheckstyle/target/blundell-checkstyle-checks-1.0.jar;$PRJ_DIR$/test-configs/issue-164/vdna-checkstyle-2.1.1-SNAPSHOT.jar" />
       </map>

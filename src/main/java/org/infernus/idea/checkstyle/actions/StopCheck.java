@@ -30,15 +30,12 @@ public class StopCheck extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(new Runnable() {
-                @Override
-                public void run() {
-                    setProgressText(toolWindow, "plugin.status.in-progress.current");
+            toolWindow.activate(() -> {
+                setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                    checkStylePlugin.stopChecks();
+                checkStylePlugin.stopChecks();
 
-                    setProgressText(toolWindow, "plugin.status.aborted");
-                }
+                setProgressText(toolWindow, "plugin.status.aborted");
             });
 
         } catch (Throwable e) {

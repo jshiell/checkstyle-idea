@@ -20,10 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Main class for the CheckStyle scanning plug-in.
@@ -198,13 +195,13 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public Map<PsiFile, List<Problem>> scanFiles(@NotNull final List<VirtualFile> files,
-                                                 @NotNull final Map<PsiFile, List<Problem>> results) {
-        LOG.info("Scanning current file(s).");
+    public Map<PsiFile, List<Problem>> scanFiles(@NotNull final List<VirtualFile> files) {
+        final Map<PsiFile, List<Problem>> results = new HashMap<>();
+
         if (files.isEmpty()) {
-            LOG.debug("No files provided.");
             return results;
         }
+
         final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
 
         synchronized (checksInProgress) {

@@ -33,23 +33,20 @@ public class ScanProject extends BaseAction {
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        setProgressText(toolWindow, "plugin.status.in-progress.current");
+            toolWindow.activate(() -> {
+                try {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-                        final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
+                    final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+                    final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
 
-                        if (sourceRoots != null && sourceRoots.length > 0) {
-                            ApplicationManager.getApplication().runReadAction(
-                                    new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow)));
-                        }
-
-                    } catch (Throwable e) {
-                        CheckStylePlugin.processErrorAndLog("Project scan", e);
+                    if (sourceRoots.length > 0) {
+                        ApplicationManager.getApplication().runReadAction(
+                                new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow)));
                     }
+
+                } catch (Throwable e) {
+                    CheckStylePlugin.processErrorAndLog("Project scan", e);
                 }
             });
 
@@ -83,7 +80,7 @@ public class ScanProject extends BaseAction {
                     = projectRootManager.getContentSourceRoots();
 
             // disable if no files are selected
-            if (sourceRoots == null || sourceRoots.length == 0) {
+            if (sourceRoots.length == 0) {
                 presentation.setEnabled(false);
 
             } else {

@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public final class PsiFileValidator {
+final class PsiFileValidator {
 
     private PsiFileValidator() {
     }

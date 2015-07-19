@@ -53,14 +53,14 @@ public class ScanCurrentChangeList extends BaseAction {
             return Collections.emptyList();
         }
 
-        final Collection<VirtualFile> filesInChanges = new HashSet<VirtualFile>();
+        final Collection<VirtualFile> filesInChanges = new HashSet<>();
         for (Change change : changeList.getChanges()) {
             if (change.getVirtualFile() != null) {
                 filesInChanges.add(change.getVirtualFile());
             }
         }
 
-        return new ArrayList<VirtualFile>(filesInChanges);
+        return new ArrayList<>(filesInChanges);
     }
 
     @Override

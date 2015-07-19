@@ -185,7 +185,7 @@ public class ConfigurationLocationTest {
     private void updatePropertyOn(final TestConfigurationLocation configurationLocation,
                                   final String propertyKey,
                                   final String propertyValue) throws IOException {
-        final Map<String,String> properties = new HashMap<String, String>(underTest.getProperties());
+        final Map<String,String> properties = new HashMap<>(underTest.getProperties());
         properties.put(propertyKey, propertyValue);
         configurationLocation.setProperties(properties);
     }

@@ -40,7 +40,7 @@ public class CheckerFactory {
     }
 
     public void verify(final ConfigurationLocation location, final List<String> thirdPartyJars)
-            throws CheckstyleException, IOException {
+            throws IOException {
         checker(null, location, classLoaderForPaths(toFileUrls(thirdPartyJars)));
     }
 
@@ -92,8 +92,7 @@ public class CheckerFactory {
     }
 
     private ClassLoader classLoaderFor(final Module module,
-                                       final ClassLoader overrideClassLoader)
-            throws MalformedURLException {
+                                       final ClassLoader overrideClassLoader) {
         if (overrideClassLoader == null) {
             return moduleClassPathBuilder().build(module);
         }

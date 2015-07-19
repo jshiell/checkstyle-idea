@@ -89,7 +89,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } finally {
-            scannableFiles.forEach(file -> ScannableFile.deleteIfRequired(file));
+            scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 

@@ -408,10 +408,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     /**
      * Expand the error tree to the fullest.
      */
-    public CheckStyleToolWindowPanel expandTree() {
+    public void expandTree() {
         expandTree(3);
-
-        return this;
     }
 
     /**
@@ -537,7 +535,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      *
      * @param results the map of checked files to problem descriptors.
      */
-    public CheckStyleToolWindowPanel displayResults(final Map<PsiFile, List<Problem>> results) {
+    public void displayResults(final Map<PsiFile, List<Problem>> results) {
         treeModel.setModel(results, getDisplayedSeverities());
 
         invalidate();
@@ -545,8 +543,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         expandTree();
         clearProgress();
-
-        return this;
     }
 
     public boolean isDisplayingErrors() {

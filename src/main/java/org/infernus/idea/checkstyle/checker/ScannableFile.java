@@ -211,13 +211,13 @@ public class ScannableFile {
         return realFile;
     }
 
-    public static void deleteIfRequired(ScannableFile scannableFile) {
+    public static void deleteIfRequired(@Nullable final ScannableFile scannableFile) {
         if (scannableFile != null) {
             scannableFile.deleteIfRequired();
         }
     }
 
-    public void deleteIfRequired() {
+    private void deleteIfRequired() {
         if (baseTempDir != null
                 && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
             delete(baseTempDir);

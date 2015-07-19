@@ -51,21 +51,18 @@ public class ScanModule extends BaseAction {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
-            toolWindow.activate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        setProgressText(toolWindow, "plugin.status.in-progress.current");
+            toolWindow.activate(() -> {
+                try {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        final VirtualFile[] moduleSourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
-                        if (moduleSourceRoots.length > 0) {
-                            ApplicationManager.getApplication().runReadAction(
-                                    new ScanSourceRootsAction(project, moduleSourceRoots, getSelectedOverride(toolWindow)));
-                        }
-
-                    } catch (Throwable e) {
-                        CheckStylePlugin.processErrorAndLog("Current Module scan", e);
+                    final VirtualFile[] moduleSourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
+                    if (moduleSourceRoots.length > 0) {
+                        ApplicationManager.getApplication().runReadAction(
+                                new ScanSourceRootsAction(project, moduleSourceRoots, getSelectedOverride(toolWindow)));
                     }
+
+                } catch (Throwable e) {
+                    CheckStylePlugin.processErrorAndLog("Current Module scan", e);
                 }
             });
 

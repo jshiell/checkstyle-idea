@@ -27,7 +27,7 @@ class CachedChecker {
         return checkStyleChecker;
     }
 
-    public long getTimeStamp() {
+    private long getTimeStamp() {
         return timeStamp;
     }
 

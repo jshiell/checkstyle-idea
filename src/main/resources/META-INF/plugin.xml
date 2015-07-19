@@ -123,8 +123,8 @@
 
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"
-                        serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
+        <applicationService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"
+                            serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
 
         <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
                         serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
