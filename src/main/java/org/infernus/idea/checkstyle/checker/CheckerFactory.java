@@ -71,7 +71,7 @@ public class CheckerFactory {
         }
     }
 
-    private CachedChecker getOrCreateCachedChecker(final ConfigurationLocation location,
+    private CachedChecker getOrCreateCachedChecker(@NotNull final ConfigurationLocation location,
                                                    final Module module,
                                                    final ClassLoader classLoader)
             throws IOException, CheckstyleException {
