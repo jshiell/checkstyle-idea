@@ -128,6 +128,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.17.3** Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.
 * **4.17.3** Fixed: Started reducing the embarrassing amount of duplicated code.
 * **4.17.2** Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.
 * **4.17.2** Fixed: Modernised how notifications are raised.
@@ -257,11 +258,11 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **3.1** Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.
 * **3.1** Improved: If a suppression file is not found then it will be ignored and the user will be warned.
 * **3.1** Fixed: Concurrency issues. Thanks to Gerhard Radatz.
-* 3.0.13- Fixed: File location fixes galore! Thanks to Gerhard Radatz.
-* 3.0.13- Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
-* 3.0.12- Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.
-* 3.0.11- Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.
-* 3.0.10- Fixed: Partial property detection. Thanks to LightGuard.JP.
+* **3.0.13** Fixed: File location fixes galore! Thanks to Gerhard Radatz.
+* **3.0.13** Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
+* **3.0.12** Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.
+* **3.0.11** Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.
+* **3.0.10** Fixed: Partial property detection. Thanks to LightGuard.JP.
 * **3.0.9** Fixed: Cache sychronisation problem.
 * **3.0.8** Fixed: Null property in configuration hash-table resulting in NPE.
 * **3.0.7** Fixed: Module scan results are no longer shared between files.

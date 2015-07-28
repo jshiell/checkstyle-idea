@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.17.3: Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.</li>
     <li>4.17.3: Fixed: Started reducing the embarrassing amount of duplicated code.</li>
     <li>4.17.2: Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.</li>
     <li>4.17.2: Fixed: Modernised how notifications are raised.</li>

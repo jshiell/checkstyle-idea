@@ -75,6 +75,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     .map(results -> asProblemDescriptors(results, manager))
                     .orElseGet(Collections::emptyList));
 
+        } catch (NullPointerException e) { // temp fix for 127, until it's fixed in CS
+            LOG.warn("NPE suppressed when scanning: " + psiFile.getName(), e);
+            return NO_PROBLEMS_FOUND;
+
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.warn("Process cancelled when scanning: " + psiFile.getName());
             return NO_PROBLEMS_FOUND;
