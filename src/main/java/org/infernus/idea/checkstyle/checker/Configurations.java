@@ -99,10 +99,19 @@ public class Configurations {
         }
 
         final String fileName = currentChild.getAttribute(propertyName);
+        if (!isEmpty(fileName)) {
+            resolveAndUpdateFile(rootElement, currentChild, elementName, propertyName, fileName);
+        }
+    }
+
+    private void resolveAndUpdateFile(final DefaultConfiguration rootElement,
+                                      final Configuration currentChild,
+                                      final String elementName,
+                                      final String propertyName,
+                                      final String fileName) {
         try {
             final String resolvedFile = location.resolveAssociatedFile(fileName, module);
-            if (!isEmpty(fileName)
-                    && (resolvedFile == null || !resolvedFile.equals(fileName))) {
+            if (resolvedFile == null || !resolvedFile.equals(fileName)) {
                 rootElement.removeChild(currentChild);
 
                 if (resolvedFile != null) {
@@ -135,16 +144,19 @@ public class Configurations {
 
         final DefaultConfiguration newFilter = new DefaultConfiguration(elementName);
 
-        if (originalElement.getChildren() != null) {
-            for (Configuration child : originalElement.getChildren()) {
-                newFilter.addChild(child);
-            }
-        }
-        if (originalElement.getMessages() != null) {
-            for (String messageKey : originalElement.getMessages().keySet()) {
-                newFilter.addMessage(messageKey, originalElement.getMessages().get(messageKey));
-            }
-        }
+        copyChildren(originalElement, newFilter);
+        copyMessages(originalElement, newFilter);
+        copyAttributes(originalElement, elementName, propertyName, newFilter);
+
+        newFilter.addAttribute(propertyName, filename);
+
+        return newFilter;
+    }
+
+    private void copyAttributes(@NotNull final Configuration originalElement,
+                                @NotNull final String elementName,
+                                @NotNull final String propertyName,
+                                final DefaultConfiguration newFilter) {
         if (originalElement.getAttributeNames() != null) {
             for (String attributeName : originalElement.getAttributeNames()) {
                 if (attributeName.equals(propertyName)) {
@@ -157,10 +169,24 @@ public class Configurations {
                 }
             }
         }
+    }
 
-        newFilter.addAttribute(propertyName, filename);
+    private void copyMessages(@NotNull final Configuration originalElement,
+                              final DefaultConfiguration newFilter) {
+        if (originalElement.getMessages() != null) {
+            for (String messageKey : originalElement.getMessages().keySet()) {
+                newFilter.addMessage(messageKey, originalElement.getMessages().get(messageKey));
+            }
+        }
+    }
 
-        return newFilter;
+    private void copyChildren(@NotNull final Configuration originalElement,
+                              final DefaultConfiguration newFilter) {
+        if (originalElement.getChildren() != null) {
+            for (Configuration child : originalElement.getChildren()) {
+                newFilter.addChild(child);
+            }
+        }
     }
 
 }
