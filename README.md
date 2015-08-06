@@ -128,6 +128,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.18.0** New: Updated to CheckStyle 6.8.2.
 * **4.17.3** Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.
 * **4.17.3** Fixed: Started reducing the embarrassing amount of duplicated code.
 * **4.17.2** Fixed: Errors are also now entered in the event log, so they can be read after the balloon popup closes.
