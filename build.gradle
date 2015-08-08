@@ -14,7 +14,7 @@ configurations {
 dependencies {
     ideaSdkLibs fileTree(dir: "$ideaSdk", include: '*.jar')
 
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.8.2') {
+    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.9') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
