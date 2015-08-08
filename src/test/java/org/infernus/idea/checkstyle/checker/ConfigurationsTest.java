@@ -283,6 +283,32 @@ public class ConfigurationsTest {
     }
 
     @Test
+    public void aSuppressionFilterWithAnUnresolvableFilenameAndAResolvableDefaultHasTheModuleUpdated() throws CheckstyleException {
+        assertThat(
+                underTest.resolveFilePaths(checker()
+                        .withChild(config("SuppressionFilter")
+                                .withAttribute("file", "anUnresolvableFile")
+                                .withAttribute("default", "aFileToResolve"))
+                        .build()),
+                is(configEqualTo(checker()
+                        .withChild(config("SuppressionFilter")
+                                .withAttribute("file", "anUnresolvableFile")
+                                .withAttribute("default", "aResolvedFile"))
+                        .build())));
+    }
+
+    @Test
+    public void aSuppressionFilterWithAnUnresolvableFilenameAndAnUnresolvableDefaultHasTheModuleRemoved() throws CheckstyleException {
+        assertThat(
+                underTest.resolveFilePaths(checker()
+                        .withChild(config("SuppressionFilter")
+                                .withAttribute("file", "anUnresolvableFile")
+                                .withAttribute("default", "anUnresolvableFile"))
+                        .build()),
+                is(configEqualTo(checker().build())));
+    }
+
+    @Test
     public void aRegexpHeaderWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
