@@ -37,7 +37,7 @@
         <entry key="location-2" value="LOCAL_FILE:$PRJ_DIR$/test-configs/sonar.xml:Sonar" />
         <entry key="location-3" value="CLASSPATH:/sun_checks.xml:The default CheckStyle rules" />
         <entry key="location-4" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="property-4.checkstyle.suppressions.file" value="sdfsdf" />
+        <entry key="property-4.checkstyle.suppressions.file" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="$PROJECT_DIR$/../Third Party/CreateYourOwnCheckStyleCheck/BlundellCheckstyle/target/blundell-checkstyle-checks-1.0.jar;$PRJ_DIR$/test-configs/issue-164/vdna-checkstyle-2.1.1-SNAPSHOT.jar" />
       </map>

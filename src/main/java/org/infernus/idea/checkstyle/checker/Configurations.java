@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
@@ -29,7 +28,6 @@ public class Configurations {
     private static final String REGEXP_HEADER_ELEMENT = "RegexpHeader";
     private static final String REGEXP_HEADER_HEADERFILE = "headerFile";
     private static final String PROPERTY_ELEMENT = "property";
-    private static final String DEFAULT_ATTRIBUTE = "default";
 
     private static final int DEFAULT_TAB_WIDTH = 8;
 
@@ -119,25 +117,15 @@ public class Configurations {
                                       final String fileName) throws IOException {
         final String resolvedFile = location.resolveAssociatedFile(fileName, module);
         if (resolvedFile == null || !resolvedFile.equals(fileName)) {
-            final String resolvedDefault = resolveDefaultIfPresent(configModule);
-
             configRoot.removeChild(configModule);
-            if (resolvedFile != null || resolvedDefault != null) {
+            if (resolvedFile != null) {
                 configRoot.addChild(elementWithUpdatedFile(
-                        resolvedFile, resolvedDefault, configModule, propertyName));
+                        resolvedFile, configModule, propertyName));
 
             } else if (module != null) {
                 showWarning(module.getProject(), message(format("checkstyle.not-found.%s", configModule.getName())));
             }
         }
-    }
-
-    @Nullable
-    private String resolveDefaultIfPresent(final Configuration element) throws IOException {
-        if (asList(element.getAttributeNames()).contains(DEFAULT_ATTRIBUTE)) {
-            return location.resolveAssociatedFile(getAttributeOrNull(element, DEFAULT_ATTRIBUTE), module);
-        }
-        return null;
     }
 
     private String getAttributeOrNull(final Configuration element, final String attributeName) {
@@ -152,8 +140,7 @@ public class Configurations {
         return stringValue == null || stringValue.trim().length() == 0;
     }
 
-    private DefaultConfiguration elementWithUpdatedFile(@Nullable final String filename,
-                                                        @Nullable final String defaultValue,
+    private DefaultConfiguration elementWithUpdatedFile(@NotNull final String filename,
                                                         @NotNull final Configuration originalElement,
                                                         @NotNull final String propertyName) {
         // The CheckStyle API won't allow attribute values to be changed, only appended to,
@@ -165,14 +152,7 @@ public class Configurations {
         copyMessages(originalElement, target);
         copyAttributes(originalElement, propertyName, target);
 
-        if (filename != null) {
-            target.addAttribute(propertyName, filename);
-        } else {
-            target.addAttribute(propertyName, getAttributeOrNull(originalElement, propertyName));
-        }
-        if (defaultValue != null) {
-            target.addAttribute(DEFAULT_ATTRIBUTE, defaultValue);
-        }
+        target.addAttribute(propertyName, filename);
 
         return target;
     }
@@ -182,7 +162,7 @@ public class Configurations {
                                 @NotNull final DefaultConfiguration target) {
         if (source.getAttributeNames() != null) {
             for (String attributeName : source.getAttributeNames()) {
-                if (attributeName.equals(propertyName) || attributeName.equals(DEFAULT_ATTRIBUTE)) {
+                if (attributeName.equals(propertyName)) {
                     continue;
                 }
                 target.addAttribute(attributeName, getAttributeOrNull(source, attributeName));
