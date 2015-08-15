@@ -132,6 +132,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.18.1** Fixed: Prefix added to inspection messages (#181).
 * **4.18.0** New: Updated to CheckStyle 6.9.
 * **4.17.3** Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.
 * **4.17.3** Fixed: Started reducing the embarrassing amount of duplicated code.

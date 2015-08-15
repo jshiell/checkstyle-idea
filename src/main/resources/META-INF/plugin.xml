@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.18.0</version>
+    <version>4.18.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.18.1: Fixed: Prefix added to inspection messages (#181).</li>
     <li>4.18.0: New: Updated to CheckStyle 6.9.</li>
     <li>4.17.3: Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.</li>
     <li>4.17.3: Fixed: Started reducing the embarrassing amount of duplicated code.</li>

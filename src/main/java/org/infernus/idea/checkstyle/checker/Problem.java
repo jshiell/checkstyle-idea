@@ -6,6 +6,7 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.psi.PsiElement;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.jetbrains.annotations.NotNull;
 
 public class Problem {
@@ -28,7 +29,12 @@ public class Problem {
     @NotNull
     public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager) {
         return inspectionManager.createProblemDescriptor(
-                target, message(), null, problemHighlightType(), false, afterEndOfLine);
+                target,
+                CheckStyleBundle.message("inspection.message", message()),
+                null,
+                problemHighlightType(),
+                false,
+                afterEndOfLine);
     }
 
     @NotNull
