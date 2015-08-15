@@ -55,6 +55,10 @@ If an error occurs during the check an exception will be thrown, which IDEA will
 *sevntu.checkstyle* offers a number of useful checks written by students of the Sevastopol National Technical University (SevNTU). They're also kind enough to
 offer instructions on setting them up with this plugin.
 
+### [Checkstyle Addons](http://checkstyle-addons.thomasjensen.com/)
+
+*Checkstyle Addons* offers additional Checkstyle checks not found in other Checkstyle extensions, and it's easy to [set up in Checkstyle-IDEA](http://checkstyle-addons.thomasjensen.com/run.html#run-intellij).
+
 
 ## Frequently Asked Questions
 
