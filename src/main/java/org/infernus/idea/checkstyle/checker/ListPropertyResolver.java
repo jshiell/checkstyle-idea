@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +21,7 @@ class ListPropertyResolver implements PropertyResolver {
         return propertyNamesToValues;
     }
 
-    public String resolve(final String propertyName) throws CheckstyleException {
+    public String resolve(final String propertyName) {
         // collect properties that are referenced in the config file
         if (!propertyNames.contains(propertyName)) {
             propertyNames.add(propertyName);

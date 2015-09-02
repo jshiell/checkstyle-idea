@@ -2,9 +2,11 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.Checker;
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -58,7 +60,11 @@ public class CheckStyleChecker {
                                                     final CheckStyleAuditListener auditListener) {
         synchronized (checker) {
             checker.addListener(auditListener);
-            checker.process(files);
+            try {
+                checker.process(files);
+            } catch (CheckstyleException e) {
+                throw new CheckStylePluginException(e.getMessage(), e);
+            }
             checker.removeListener(auditListener);
         }
         return auditListener;

@@ -91,7 +91,7 @@ final class FileScanner implements Runnable {
                     .orElseGet(Collections::emptyMap);
 
         } finally {
-            scannableFiles.forEach(file -> ScannableFile.deleteIfRequired(file));
+            scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 

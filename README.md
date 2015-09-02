@@ -16,6 +16,11 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 >
 > [Ultimate Edition (14.1.4)](https://download.jetbrains.com/idea/ideaIU-14.1.4-custom-jdk-bundled.dmg)
 >
+> or, for Brew Cask users,
+>
+>   brew cask install intellij-idea-ce-bundled-jdk
+>   brew cask install intellij-idea-bundled-jdk
+>
 > All other users please note - we require IDEA to be running on JDK 8.
 
 ## Use
@@ -132,6 +137,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.19.0** New: Updated to CheckStyle 6.10.1.
 * **4.18.1** Fixed: Prefix added to inspection messages (#181).
 * **4.18.0** New: Updated to CheckStyle 6.9.
 * **4.17.3** Fixed: Temporary suppression of exception in #127 until it's fixed in CheckStyle.
