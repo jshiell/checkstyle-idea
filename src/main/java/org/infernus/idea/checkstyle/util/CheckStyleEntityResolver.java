@@ -95,7 +95,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
          * @param publicId the public ID.
          * @param systemId the system ID.
          */
-        public DTDKey(@NotNull final String publicId,
+        DTDKey(@NotNull final String publicId,
                       @NotNull final String systemId) {
             this.publicId = publicId;
             this.systemId = systemId;

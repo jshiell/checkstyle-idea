@@ -11,7 +11,7 @@ import java.util.Enumeration;
  */
 class ClassOnlyClassLoader extends URLClassLoader {
 
-    public ClassOnlyClassLoader(final URL[] urls, final ClassLoader parent) {
+    ClassOnlyClassLoader(final URL[] urls, final ClassLoader parent) {
         super(urls, parent);
     }
 

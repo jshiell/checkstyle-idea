@@ -14,6 +14,8 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static org.infernus.idea.checkstyle.CheckStylePlugin.processError;
 
 public class CheckStyleInspection extends LocalInspectionTool {
 
@@ -75,25 +76,31 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     .map(results -> asProblemDescriptors(results, manager))
                     .orElseGet(Collections::emptyList));
 
-        } catch (NullPointerException e) { // temp fix for 127, until it's fixed in CS
-            LOG.warn("NPE suppressed when scanning: " + psiFile.getName(), e);
+        } catch (ProcessCanceledException | AssertionError e) {
+            LOG.debug("Process cancelled when scanning: " + psiFile.getName());
             return NO_PROBLEMS_FOUND;
 
-        } catch (ProcessCanceledException | AssertionError e) {
-            LOG.warn("Process cancelled when scanning: " + psiFile.getName());
+        } catch (CheckStylePluginParseException e) {
+            LOG.debug("Parse exception caught when scanning: " + psiFile.getName(), e);
+            return NO_PROBLEMS_FOUND;
+
+        } catch (CheckStylePluginException e) {
+            blacklist(configurationLocation);
+            LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
-            if (configurationLocation != null) {
-                configurationLocation.blacklist();
-            }
-
-            LOG.error("The inspection could not be executed.",
-                    processError("The inspection could not be executed.", e));
+            LOG.warn("The inspection could not be executed.", e);
             return NO_PROBLEMS_FOUND;
 
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
+        }
+    }
+
+    private void blacklist(final ConfigurationLocation configurationLocation) {
+        if (configurationLocation != null) {
+            configurationLocation.blacklist();
         }
     }
 

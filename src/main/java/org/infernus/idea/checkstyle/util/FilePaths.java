@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.regex.Pattern;
 
-public class FilePaths {
+public final class FilePaths {
 
     private FilePaths() {
         // utility class

@@ -134,7 +134,7 @@ public abstract class AbstractCheckerThread extends Thread {
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 
-        public AddChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
+        AddChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
             this.virtualFile = virtualFile;
             this.psiManager = psiManager;
         }

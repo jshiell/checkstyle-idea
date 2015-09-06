@@ -41,7 +41,7 @@ public class ScanCurrentChangeList extends BaseAction {
             project.getComponent(CheckStylePlugin.class).checkFiles(filesFor(changeListManager.getDefaultChangeList()), getSelectedOverride(toolWindow));
 
         } catch (Throwable e) {
-            final CheckStylePluginException processed = CheckStylePlugin.processError(null, e);
+            final CheckStylePluginException processed = CheckStylePluginException.wrap(e);
             if (processed != null) {
                 LOG.error("Modified files scan failed", processed);
             }
@@ -93,7 +93,7 @@ public class ScanCurrentChangeList extends BaseAction {
 
         } catch (Throwable e) {
             final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
+                    = CheckStylePluginException.wrap(e);
             if (processed != null) {
                 LOG.error("Button update failed.", processed);
             }

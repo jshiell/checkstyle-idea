@@ -14,7 +14,7 @@ class ScanSourceRootsAction implements Runnable {
     private final VirtualFile[] sourceRoots;
     private final ConfigurationLocation selectedOverride;
 
-    public ScanSourceRootsAction(@NotNull final Project project,
+    ScanSourceRootsAction(@NotNull final Project project,
                                  @NotNull final VirtualFile[] sourceRoots,
                                  final ConfigurationLocation selectedOverride) {
         this.project = project;

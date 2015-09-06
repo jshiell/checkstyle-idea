@@ -29,7 +29,7 @@ final class FileScanner implements Runnable {
     private Map<PsiFile, List<Problem>> results;
     private Throwable error;
 
-    public FileScanner(final CheckStylePlugin checkStylePlugin,
+    FileScanner(final CheckStylePlugin checkStylePlugin,
                        final Set<PsiFile> filesToScan,
                        final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;

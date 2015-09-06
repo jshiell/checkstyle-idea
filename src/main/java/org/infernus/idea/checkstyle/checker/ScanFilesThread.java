@@ -42,7 +42,7 @@ public class ScanFilesThread extends AbstractCheckerThread {
             this.processFilesForModuleInfoAndScan();
 
         } catch (final Throwable e) {
-            final CheckStylePluginException processedError = CheckStylePlugin.processError(
+            final CheckStylePluginException processedError = CheckStylePluginException.wrap(
                     "An error occurred during a file scan.", e);
 
             if (processedError != null) {

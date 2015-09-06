@@ -63,7 +63,7 @@ public class CheckStyleChecker {
             try {
                 checker.process(files);
             } catch (CheckstyleException e) {
-                throw new CheckStylePluginException(e.getMessage(), e);
+                throw CheckStylePluginException.wrap(e);
             }
             checker.removeListener(auditListener);
         }

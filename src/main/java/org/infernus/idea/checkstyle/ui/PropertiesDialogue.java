@@ -113,7 +113,7 @@ public class PropertiesDialogue extends JDialog {
         /**
          * Create a new action.
          */
-        public OkayAction() {
+        OkayAction() {
             putValue(Action.NAME, CheckStyleBundle.message(
                     "config.file.okay.text"));
             putValue(Action.SHORT_DESCRIPTION,
@@ -137,7 +137,7 @@ public class PropertiesDialogue extends JDialog {
         /**
          * Create a new action.
          */
-        public CancelAction() {
+        CancelAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.cancel.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));

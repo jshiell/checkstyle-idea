@@ -17,7 +17,7 @@ class CachedChecker {
 
     private long timeStamp;
 
-    public CachedChecker(@NotNull final CheckStyleChecker checkStyleChecker) {
+    CachedChecker(@NotNull final CheckStyleChecker checkStyleChecker) {
         this.checkStyleChecker = checkStyleChecker;
         this.timeStamp = System.currentTimeMillis();
     }

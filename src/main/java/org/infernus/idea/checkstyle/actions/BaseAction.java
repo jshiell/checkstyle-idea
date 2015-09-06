@@ -63,7 +63,7 @@ public abstract class BaseAction extends AnAction {
 
         } catch (Throwable e) {
             final CheckStylePluginException processed
-                    = CheckStylePlugin.processError(null, e);
+                    = CheckStylePluginException.wrap(e);
             if (processed != null) {
                 LOG.error("Action update failed", processed);
             }

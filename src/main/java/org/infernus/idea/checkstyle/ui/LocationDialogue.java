@@ -269,7 +269,7 @@ public class LocationDialogue extends JDialog {
     private class PreviousAction extends AbstractAction {
         private static final long serialVersionUID = 3800521701284308642L;
 
-        public PreviousAction() {
+        PreviousAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.previous.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.previous.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.previous.tooltip"));
@@ -310,7 +310,7 @@ public class LocationDialogue extends JDialog {
     private class CancelAction extends AbstractAction {
         private static final long serialVersionUID = -994620715558602656L;
 
-        public CancelAction() {
+        CancelAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.cancel.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));

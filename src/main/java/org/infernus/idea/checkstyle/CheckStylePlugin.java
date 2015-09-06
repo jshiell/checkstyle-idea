@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.TreeWalker;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -121,31 +120,9 @@ public final class CheckStylePlugin implements ProjectComponent {
     public void disposeComponent() {
     }
 
-    /**
-     * Process an error.
-     *
-     * @param message a description of the error. May be null.
-     * @param error   the exception.
-     * @return any exception to be passed upwards.
-     */
-    public static CheckStylePluginException processError(@Nullable final String message,
-                                                         @NotNull final Throwable error) {
-        Throwable root = error;
-        while (root.getCause() != null
-                && !(root instanceof CheckstyleException)) {
-            root = root.getCause();
-        }
-
-        if (message != null) {
-            return new CheckStylePluginException(message, root);
-        }
-
-        return new CheckStylePluginException(root.getMessage(), root);
-    }
-
     public static void processErrorAndLog(@NotNull final String action,
                                           @NotNull final Throwable e) {
-        final CheckStylePluginException processed = processError(null, e);
+        final CheckStylePluginException processed = CheckStylePluginException.wrap(e);
         if (processed != null) {
             LOG.error(action + " failed", processed);
         }

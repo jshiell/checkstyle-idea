@@ -29,7 +29,7 @@ class CreateScannableFileAction implements Runnable {
      * @param psiFile the file to read.
      * @param module the module the file belongs to.
      */
-    public CreateScannableFileAction(final PsiFile psiFile, final Module module) {
+    CreateScannableFileAction(final PsiFile psiFile, final Module module) {
         this.psiFile = psiFile;
         this.module = module;
     }

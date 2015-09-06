@@ -137,6 +137,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.19.1** Fixed: Improved handling of unparsable files (#185).
 * **4.19.0** New: Updated to CheckStyle 6.10.1.
 * **4.18.1** Fixed: Prefix added to inspection messages (#181).
 * **4.18.0** New: Updated to CheckStyle 6.9.

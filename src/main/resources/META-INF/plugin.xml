@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.19.0</version>
+    <version>4.19.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.19.1: Fixed: Improved handling of unparsable files (#185).</li>
     <li>4.19.0: New: Updated to CheckStyle 6.10.1.</li>
     <li>4.18.1: Fixed: Prefix added to inspection messages (#181).</li>
     <li>4.18.0: New: Updated to CheckStyle 6.9.</li>

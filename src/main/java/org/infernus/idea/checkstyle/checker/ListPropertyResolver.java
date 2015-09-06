@@ -13,7 +13,7 @@ class ListPropertyResolver implements PropertyResolver {
 
     private final List<String> propertyNames = new ArrayList<>();
 
-    public ListPropertyResolver(final Map<String, String> properties) {
+    ListPropertyResolver(final Map<String, String> properties) {
         setProperties(properties);
     }
 
