@@ -12,9 +12,9 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 > default IDEA package for OS X runs on Java 6, please make use of the versions
 > with the bundled JDK, e.g.
 >
-> [Community Edition (14.1.4)](https://download.jetbrains.com/idea/ideaIC-14.1.4-custom-jdk-bundled.dmg)
+> [Community Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIC-14.1.5-custom-jdk-bundled.dmg)
 >
-> [Ultimate Edition (14.1.4)](https://download.jetbrains.com/idea/ideaIU-14.1.4-custom-jdk-bundled.dmg)
+> [Ultimate Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIU-14.1.5-custom-jdk-bundled.dmg)
 >
 > or, for Brew Cask users,
 >
