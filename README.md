@@ -137,6 +137,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.20.1** Fixed: Rules accessed via HTTP no longer use temporary files (#67).
 * **4.20.0** New: Updated to CheckStyle 6.11.2 (#189).
 * **4.19.1** Fixed: Improved handling of unparsable files (#185).
 * **4.19.0** New: Updated to CheckStyle 6.10.1.

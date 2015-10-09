@@ -16,11 +16,6 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     private static final Log LOG = LogFactory.getLog(HTTPURLConfigurationLocation.class);
 
-    private File tempFile;
-
-    /**
-     * Create a new URL configuration.
-     */
     HTTPURLConfigurationLocation() {
         super(ConfigurationType.HTTP_URL);
     }
@@ -32,7 +27,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     @NotNull
     protected InputStream resolveFile() throws IOException {
         try {
-            return new FileInputStream(writeFileTo(connectionTo(getLocation()), temporaryFile()));
+            return new ByteArrayInputStream(asBytes(connectionTo(getLocation())));
 
         } catch (IOException e) {
             LOG.error("Couldn't read URL: " + getLocation(), e);
@@ -60,10 +55,11 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         }
     }
 
-    private File writeFileTo(final URLConnection urlConnection, final File destinationFile) throws IOException {
+    private byte[] asBytes(final URLConnection urlConnection) throws IOException {
         urlConnection.connect();
 
-        try (Writer writer = new BufferedWriter(new FileWriter(destinationFile));
+        final ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(responseBody));
              Reader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
             int readChar;
             while ((readChar = reader.read()) != -1) {
@@ -72,18 +68,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
             writer.flush();
 
-            return destinationFile;
-        }
-    }
-
-    @NotNull
-    private File temporaryFile() throws IOException {
-        synchronized (this) {
-            if (tempFile == null) {
-                tempFile = File.createTempFile("checkStyle", ".xml");
-                tempFile.deleteOnExit();
-            }
-            return tempFile;
+            return responseBody.toByteArray();
         }
     }
 
