@@ -25,14 +25,15 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
+import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
 
 public class CheckStyleInspection extends LocalInspectionTool {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleInspection.class);
-    private static final ProblemDescriptor[] NO_PROBLEMS_FOUND = null;
+    private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
 
     private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
 
@@ -49,10 +50,16 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return configPanel;
     }
 
-    @Nullable
+    @Override
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
+        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, manager), NO_PROBLEMS_FOUND), manager);
+    }
+
+    @Nullable
+    public List<Problem> inspectFile(@NotNull final PsiFile psiFile,
+                                     @NotNull final InspectionManager manager) {
         LOG.debug("Inspection has been invoked.");
 
         final CheckStylePlugin plugin = plugin(manager.getProject());
@@ -69,12 +76,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             scannableFiles.addAll(ScannableFile.createAndValidate(singletonList(psiFile), plugin, module));
 
-            return asArray(checkerFactory(psiFile.getProject())
+            return checkerFactory(psiFile.getProject())
                     .checker(module, configurationLocation)
                     .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration()))
                     .map(results -> results.get(psiFile))
-                    .map(results -> asProblemDescriptors(results, manager))
-                    .orElseGet(Collections::emptyList));
+                    .orElseGet(() -> NO_PROBLEMS_FOUND);
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
@@ -104,25 +110,22 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
-    private List<ProblemDescriptor> asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
-        return results.stream()
-                .map(problem -> problem.toProblemDescriptor(manager))
-                .collect(Collectors.toList());
+    @NotNull
+    private ProblemDescriptor[] asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
+        return ofNullable(results)
+                .map(problems -> problems.stream()
+                        .map(problem -> problem.toProblemDescriptor(manager))
+                        .toArray(ProblemDescriptor[]::new))
+                .orElseGet(() -> ProblemDescriptor.EMPTY_ARRAY);
     }
 
     private Module moduleOf(@NotNull final PsiFile psiFile) {
         return ModuleUtil.findModuleForPsiElement(psiFile);
     }
 
-    private ProblemDescriptor[] asArray(final List<ProblemDescriptor> problems) {
-        if (problems != null) {
-            return problems.toArray(new ProblemDescriptor[problems.size()]);
-        }
-        return NO_PROBLEMS_FOUND;
-    }
-
     private CheckerFactory checkerFactory(final Project project) {
         return ServiceManager.getService(project, CheckerFactory.class);
     }
+
 
 }

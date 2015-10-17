@@ -29,12 +29,14 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="active-configuration" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-193.xml:Issue 193" />
         <entry key="check-nonjava-files" value="false" />
         <entry key="check-test-classes" value="false" />
-        <entry key="location-0" value="CLASSPATH:/sun_checks.xml:The default Checkstyle rules" />
-        <entry key="location-1" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
-        <entry key="property-1.checkstyle.suppressions.file" value="" />
+        <entry key="location-0" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-193.xml:Issue 193" />
+        <entry key="location-1" value="HTTP_URL:http://localhost/cs/issue-193.xml:Issue 193 via HTTP" />
+        <entry key="location-2" value="CLASSPATH:/sun_checks.xml:The default Checkstyle rules" />
+        <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="property-3.checkstyle.suppressions.file" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="$PROJECT_DIR$/../Third Party/CreateYourOwnCheckStyleCheck/BlundellCheckstyle/target/blundell-checkstyle-checks-1.0.jar;$PRJ_DIR$/test-configs/issue-164/vdna-checkstyle-2.1.1-SNAPSHOT.jar" />
       </map>

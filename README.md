@@ -12,14 +12,13 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 > default IDEA package for OS X runs on Java 6, please make use of the versions
 > with the bundled JDK, e.g.
 >
-> [Community Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIC-14.1.5-custom-jdk-bundled.dmg)
->
-> [Ultimate Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIU-14.1.5-custom-jdk-bundled.dmg)
+> * [Community Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIC-14.1.5-custom-jdk-bundled.dmg)
+> * [Ultimate Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIU-14.1.5-custom-jdk-bundled.dmg)
 >
 > or, for Brew Cask users,
 >
->   brew cask install intellij-idea-ce-bundled-jdk
->   brew cask install intellij-idea-bundled-jdk
+> * brew cask install intellij-idea-ce-bundled-jdk
+> * brew cask install intellij-idea-bundled-jdk
 >
 > All other users please note - we require IDEA to be running on JDK 8.
 
@@ -137,6 +136,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.20.1** Fixed: Inspection now checks for cancellation (#192).
 * **4.20.1** Fixed: Rules accessed via HTTP no longer use temporary files (#67).
 * **4.20.0** New: Updated to CheckStyle 6.11.2 (#189).
 * **4.19.1** Fixed: Improved handling of unparsable files (#185).
