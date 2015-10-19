@@ -64,6 +64,11 @@ offer instructions on setting them up with this plugin.
 *Checkstyle Addons* offers additional Checkstyle checks not found in other Checkstyle extensions, and it's easy to [set up in Checkstyle-IDEA](http://checkstyle-addons.thomasjensen.com/run.html#run-intellij).
 
 
+## Development
+
+You can easily build and install the plugin via Gradle.
+
+
 ## Frequently Asked Questions
 
 ### I see a *Cannot Load Project* error stating *Unsupported major.minor version 52.0*.
