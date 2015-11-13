@@ -155,6 +155,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.21.0** New: Updated to CheckStyle 6.12.1.
 * **4.20.1** Fixed: Inspection now checks for cancellation (#192).
 * **4.20.1** Fixed: Rules accessed via HTTP no longer use temporary files (#67).
 * **4.20.0** New: Updated to CheckStyle 6.11.2 (#189).
