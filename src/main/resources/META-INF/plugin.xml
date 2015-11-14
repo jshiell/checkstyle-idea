@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.11.2 from within IDEA.
+    of Java files with CheckStyle 6.12.1 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.20.1</version>
+    <version>4.21.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.21.0: New: Updated to CheckStyle 6.12.1.</li>
     <li>4.20.1: Fixed: Inspection now checks for cancellation (#192).</li>
     <li>4.20.1: Fixed: Rules accessed via HTTP no longer use temporary files (#67).</li>
     <li>4.20.0: New: Updated to CheckStyle 6.11.2 (#189).</li>
