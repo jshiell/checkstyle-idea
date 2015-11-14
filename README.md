@@ -137,6 +137,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Simon Billingsley
 * Miel Donkers
 * Dmitrij (zherebjatjew)
+* Thomas Jensen
 
 And also thanks are due to the authors and contributors of:
 
