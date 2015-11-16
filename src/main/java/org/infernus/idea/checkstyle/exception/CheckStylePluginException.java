@@ -36,10 +36,15 @@ public class CheckStylePluginException extends RuntimeException {
 
     private static Throwable rootOrCheckStyleException(final Throwable error) {
         Throwable root = error;
-        while (root.getCause() != null && !(root instanceof CheckstyleException)) {
+        while (root.getCause() != null && notBaseCheckstyleException(root)) {
             root = root.getCause();
         }
         return root;
+    }
+
+    private static boolean notBaseCheckstyleException(final Throwable root) {
+        return !(root instanceof CheckstyleException
+                && !(root.getCause() instanceof CheckstyleException));
     }
 
     private static boolean isParseException(final Throwable throwable) {

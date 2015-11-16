@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.21.0</version>
+    <version>4.21.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.21.1: Fixed: Now properly swallows parse errors from Checkstyle 6.12.</li>
     <li>4.21.0: New: Updated to CheckStyle 6.12.1.</li>
     <li>4.20.1: Fixed: Inspection now checks for cancellation (#192).</li>
     <li>4.20.1: Fixed: Rules accessed via HTTP no longer use temporary files (#67).</li>
