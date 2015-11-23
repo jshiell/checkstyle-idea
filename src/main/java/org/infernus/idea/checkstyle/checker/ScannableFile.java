@@ -51,7 +51,7 @@ public class ScannableFile {
      * @throws IOException if file creation is required and fails.
      */
     public ScannableFile(@NotNull final PsiFile psiFile,
-                         @NotNull final Module module)
+                         @Nullable final Module module)
             throws IOException {
         this.psiFile = psiFile;
 
@@ -68,7 +68,7 @@ public class ScannableFile {
 
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final CheckStylePlugin plugin,
-                                                        @NotNull final Module module) {
+                                                        @Nullable final Module module) {
 
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
@@ -85,7 +85,7 @@ public class ScannableFile {
 
     @Nullable
     private static ScannableFile create(@NotNull final PsiFile psiFile,
-                                        @NotNull final Module module) {
+                                        @Nullable final Module module) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile, module);
             ApplicationManager.getApplication().runReadAction(fileAction);
@@ -111,7 +111,7 @@ public class ScannableFile {
     }
 
     private File createTemporaryFileFor(@NotNull final PsiFile file,
-                                        @NotNull final Module module,
+                                        @Nullable final Module module,
                                         @NotNull final File tempDir)
             throws IOException {
         final File temporaryFile = new File(parentDirFor(file, module, tempDir), file.getName());
@@ -123,11 +123,11 @@ public class ScannableFile {
     }
 
     private File parentDirFor(@NotNull final PsiFile file,
-                              @NotNull final Module module,
+                              @Nullable final Module module,
                               @NotNull final File baseTmpDir) {
         File tmpDirForFile = null;
 
-        if (file.getParent() != null) {
+        if (file.getParent() != null && module != null) {
             final String parentUrl = file.getParent().getVirtualFile().getUrl();
             for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
                 if (parentUrl.startsWith(moduleSourceRoot)) {

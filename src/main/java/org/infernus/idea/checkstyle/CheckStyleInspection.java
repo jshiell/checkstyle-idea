@@ -54,11 +54,18 @@ public class CheckStyleInspection extends LocalInspectionTool {
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
-        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, manager), NO_PROBLEMS_FOUND), manager);
+        final Module module = moduleOf(psiFile);
+        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, module, manager), NO_PROBLEMS_FOUND), manager);
+    }
+
+    @Nullable
+    private Module moduleOf(@NotNull final PsiFile psiFile) {
+        return ModuleUtil.findModuleForPsiElement(psiFile);
     }
 
     @Nullable
     public List<Problem> inspectFile(@NotNull final PsiFile psiFile,
+                                     @Nullable final Module module,
                                      @NotNull final InspectionManager manager) {
         LOG.debug("Inspection has been invoked.");
 
@@ -67,8 +74,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
         ConfigurationLocation configurationLocation = null;
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
-            final Module module = moduleOf(psiFile);
-
             configurationLocation = plugin.getConfigurationLocation(module, null);
             if (configurationLocation == null || configurationLocation.isBlacklisted()) {
                 return NO_PROBLEMS_FOUND;
@@ -117,10 +122,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
                         .map(problem -> problem.toProblemDescriptor(manager))
                         .toArray(ProblemDescriptor[]::new))
                 .orElseGet(() -> ProblemDescriptor.EMPTY_ARRAY);
-    }
-
-    private Module moduleOf(@NotNull final PsiFile psiFile) {
-        return ModuleUtil.findModuleForPsiElement(psiFile);
     }
 
     private CheckerFactory checkerFactory(final Project project) {

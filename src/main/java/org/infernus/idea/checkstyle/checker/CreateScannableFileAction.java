@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -27,9 +29,10 @@ class CreateScannableFileAction implements Runnable {
      * Create a thread to read the given file to a temporary file.
      *
      * @param psiFile the file to read.
-     * @param module the module the file belongs to.
+     * @param module  the module the file belongs to.
      */
-    CreateScannableFileAction(final PsiFile psiFile, final Module module) {
+    CreateScannableFileAction(@NotNull final PsiFile psiFile,
+                              @Nullable final Module module) {
         this.psiFile = psiFile;
         this.module = module;
     }
