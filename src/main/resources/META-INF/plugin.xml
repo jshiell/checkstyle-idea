@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.21.2</version>
+    <version>4.22.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.22.0: New: Updated to CheckStyle 6.13.</li>
     <li>4.21.2: Fixed: Fixed thread access issue with module lookup in inspection (#200).</li>
     <li>4.21.1: Fixed: Now properly swallows parse errors from Checkstyle 6.12.</li>
     <li>4.21.0: New: Updated to CheckStyle 6.12.1.</li>
