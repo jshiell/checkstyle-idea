@@ -1,15 +1,26 @@
 package org.infernus.idea.checkstyle.exception;
 
+import antlr.ANTLRException;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
 public class CheckStylePluginException extends RuntimeException {
     private static final long serialVersionUID = -2138216104879078592L;
+
+    private static final Set<Class<? extends Throwable>> PARSE_EXCEPTIONS = new HashSet<>(asList(
+            RecognitionException.class,
+            TokenStreamException.class,
+            NullPointerException.class,
+            ArrayIndexOutOfBoundsException.class));
 
     public CheckStylePluginException(final String message) {
         super(message);
@@ -49,9 +60,11 @@ public class CheckStylePluginException extends RuntimeException {
 
     private static boolean isParseException(final Throwable throwable) {
         if (throwable instanceof CheckstyleException) {
-            final CheckstyleException checkstyleException = (CheckstyleException) throwable;
-            return checkstyleException.getCause() instanceof RecognitionException
-                    || checkstyleException.getCause() instanceof TokenStreamException;
+            for (Class<? extends Throwable> parseExceptionType : PARSE_EXCEPTIONS) {
+                if (parseExceptionType.isAssignableFrom(throwable.getCause().getClass())) {
+                    return true;
+                }
+            }
         }
         return false;
     }
