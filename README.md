@@ -156,6 +156,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.22.2** Fixed: Static scan rewritten to use IDEA's thread pooling and block less on read actions (#11).
 * **4.22.1** Fixed: Now treats NPEs and AIOOBEs as parse exceptions (#201, #203).
 * **4.22.0** New: Updated to CheckStyle 6.13.
 * **4.21.2** Fixed: Fixed thread access issue with module lookup in inspection (#200).

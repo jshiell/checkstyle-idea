@@ -281,7 +281,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     public void incrementProgressBarBy(final int size) {
         if (progressBar.getValue() < progressBar.getMaximum()) {
-            SwingUtilities.invokeLater(() -> progressBar.setValue(progressBar.getValue() + size));
+            progressBar.setValue(progressBar.getValue() + size);
         }
     }
 

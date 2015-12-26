@@ -22,11 +22,11 @@ public class Async {
         }
     }
 
-    private static <T> Future<T> executeOnPooledThread(final Callable<T> callable) {
+    public static <T> Future<T> executeOnPooledThread(final Callable<T> callable) {
         return ApplicationManager.getApplication().executeOnPooledThread(callable);
     }
 
-    private static <T> Future<T> whenFinished(final Future<T> future) {
+    public static <T> Future<T> whenFinished(final Future<T> future) {
         while (!future.isDone() && !future.isCancelled()) {
             ProgressManager.checkCanceled();
             waitFor(FIFTY_MS);

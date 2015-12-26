@@ -15,23 +15,18 @@ class ScanSourceRootsAction implements Runnable {
     private final ConfigurationLocation selectedOverride;
 
     ScanSourceRootsAction(@NotNull final Project project,
-                                 @NotNull final VirtualFile[] sourceRoots,
-                                 final ConfigurationLocation selectedOverride) {
+                          @NotNull final VirtualFile[] sourceRoots,
+                          final ConfigurationLocation selectedOverride) {
         this.project = project;
         this.sourceRoots = sourceRoots;
         this.selectedOverride = selectedOverride;
     }
 
     public void run() {
-        project.getComponent(CheckStylePlugin.class).checkFiles(flattenFiles(sourceRoots), selectedOverride);
+        project.getComponent(CheckStylePlugin.class)
+                .asyncScanFiles(flattenFiles(sourceRoots), selectedOverride);
     }
 
-    /**
-     * Flatten a nested list of files, returning all files in the array.
-     *
-     * @param files the top level of files.
-     * @return the flattened list of files.
-     */
     private List<VirtualFile> flattenFiles(final VirtualFile[] files) {
         final List<VirtualFile> flattened = new ArrayList<>();
 

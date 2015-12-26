@@ -8,6 +8,7 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xml.sax.InputSource;
 
 class CheckerFactoryWorker extends Thread {
     private final Object[] threadReturn = new Object[1];
@@ -37,7 +38,7 @@ class CheckerFactoryWorker extends Thread {
 
     public void run() {
         try {
-            Configuration config = ConfigurationLoader.loadConfiguration(location.resolve(), resolver, true);
+            Configuration config = ConfigurationLoader.loadConfiguration(new InputSource(location.resolve()), resolver, true);
             if (config == null) {
                 // from the CS code this state appears to occur when there's no <module> element found
                 // in the input stream

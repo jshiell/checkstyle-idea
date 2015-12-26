@@ -19,7 +19,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+
+import static java.util.Collections.emptyMap;
+import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
+import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
 /**
  * Main class for the CheckStyle scanning plug-in.
@@ -31,7 +39,7 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
 
-    private final Set<AbstractCheckerThread> checksInProgress = new HashSet<>();
+    private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
     private final CheckStyleConfiguration configuration;
 
@@ -128,8 +136,34 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public void checkFiles(final List<VirtualFile> files,
-                           final ConfigurationLocation overrideConfigLocation) {
+    private <T> Future<T> checkInProgress(final Future<T> checkFuture) {
+        synchronized (checksInProgress) {
+            if (!checkFuture.isDone()) {
+                checksInProgress.add(checkFuture);
+            }
+        }
+        return checkFuture;
+    }
+
+    public void stopChecks() {
+        synchronized (checksInProgress) {
+            checksInProgress.forEach(task -> task.cancel(true));
+            checksInProgress.clear();
+        }
+    }
+
+    public <T> void checkComplete(final Future<T> task) {
+        if (task == null) {
+            return;
+        }
+
+        synchronized (checksInProgress) {
+            checksInProgress.remove(task);
+        }
+    }
+
+    public void asyncScanFiles(final List<VirtualFile> files,
+                               final ConfigurationLocation overrideConfigLocation) {
         LOG.info("Scanning current file(s).");
 
         if (files == null || files.isEmpty()) {
@@ -137,67 +171,29 @@ public final class CheckStylePlugin implements ProjectComponent {
             return;
         }
 
-        final CheckFilesThread checkFilesThread = new CheckFilesThread(this, files, overrideConfigLocation);
-        checkFilesThread.setPriority(Thread.MIN_PRIORITY);
-
-        synchronized (checksInProgress) {
-            checksInProgress.add(checkFilesThread);
-        }
-
-        checkFilesThread.start();
-    }
-
-    /**
-     * Stop any checks in progress.
-     */
-    public void stopChecks() {
-        synchronized (checksInProgress) {
-            checksInProgress.forEach(AbstractCheckerThread::stopCheck);
-            checksInProgress.clear();
-        }
-    }
-
-    /**
-     * Mark a thread as complete.
-     *
-     * @param thread the thread to mark.
-     */
-    public void setThreadComplete(final AbstractCheckerThread thread) {
-        if (thread == null) {
-            return;
-        }
-
-        synchronized (checksInProgress) {
-            checksInProgress.remove(thread);
-        }
+        final ScanFiles checkFiles = new ScanFiles(this, files, overrideConfigLocation);
+        checkFiles.addListener(new UiFeedbackScannerListener(this));
+        runAsyncCheck(checkFiles);
     }
 
     public Map<PsiFile, List<Problem>> scanFiles(@NotNull final List<VirtualFile> files) {
-        final Map<PsiFile, List<Problem>> results = new HashMap<>();
-
         if (files.isEmpty()) {
-            return results;
+            return emptyMap();
         }
 
-        final ScanFilesThread scanFilesThread = new ScanFilesThread(this, files, results);
-
-        synchronized (checksInProgress) {
-            checksInProgress.add(scanFilesThread);
-        }
-
-        scanFilesThread.start();
         try {
-            scanFilesThread.join();
+            return whenFinished(runAsyncCheck(new ScanFiles(this, files, null))).get();
 
         } catch (final Throwable e) {
-            LOG.error("Error scanning files");
-
-        } finally {
-            synchronized (checksInProgress) {
-                checksInProgress.remove(scanFilesThread);
-            }
+            LOG.error("Error scanning files", e);
+            return emptyMap();
         }
-        return results;
+    }
+
+    private Future<Map<PsiFile, List<Problem>>> runAsyncCheck(final ScanFiles checker) {
+        final Future<Map<PsiFile, List<Problem>>> checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
+        checker.addListener(new ScanCompletionTracker(checkFilesFuture));
+        return checkFilesFuture;
     }
 
     public ConfigurationLocation getConfigurationLocation(@Nullable final Module module,
@@ -220,6 +216,32 @@ public final class CheckStylePlugin implements ProjectComponent {
 
         }
         return getConfiguration().getActiveConfiguration();
+    }
+
+    private class ScanCompletionTracker implements ScannerListener {
+        private final Future<Map<PsiFile, List<Problem>>> future;
+
+        public ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
+            this.future = future;
+        }
+
+        @Override
+        public void scanStarting(final List<PsiFile> filesToScan) {
+        }
+
+        @Override
+        public void filesScanned(final int count) {
+        }
+
+        @Override
+        public void scanComplete(final ConfigurationLocationStatus configurationLocationStatus,
+                                 final Map<PsiFile, List<Problem>> scanResults) {
+            checkComplete(future);
+        }
+
+        @Override
+        public void errorCaught(final CheckStylePluginException error) {
+        }
     }
 
 }

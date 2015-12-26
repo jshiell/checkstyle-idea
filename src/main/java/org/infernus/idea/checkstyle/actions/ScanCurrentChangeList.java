@@ -38,7 +38,7 @@ public class ScanCurrentChangeList extends BaseAction {
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(CheckStylePlugin.class).checkFiles(filesFor(changeListManager.getDefaultChangeList()), getSelectedOverride(toolWindow));
+            project.getComponent(CheckStylePlugin.class).asyncScanFiles(filesFor(changeListManager.getDefaultChangeList()), getSelectedOverride(toolWindow));
 
         } catch (Throwable e) {
             final CheckStylePluginException processed = CheckStylePluginException.wrap(e);

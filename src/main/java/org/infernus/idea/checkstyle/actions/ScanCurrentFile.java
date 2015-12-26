@@ -41,7 +41,7 @@ public class ScanCurrentFile extends BaseAction {
 
                     final VirtualFile selectedFile = getSelectedFile(project);
                     if (selectedFile != null) {
-                        project.getComponent(CheckStylePlugin.class).checkFiles(
+                        project.getComponent(CheckStylePlugin.class).asyncScanFiles(
                                 Arrays.asList(selectedFile), getSelectedOverride(toolWindow));
                     }
 
