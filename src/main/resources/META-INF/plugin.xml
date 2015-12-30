@@ -12,7 +12,7 @@
     </description>
     <version>4.22.2</version>
     <idea-version since-build="141.178"/>
-    <vendor url="http://infernus.org/" email="james@infernus.org">James Shiell</vendor>
+    <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
 
