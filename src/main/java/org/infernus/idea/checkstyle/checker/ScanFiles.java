@@ -70,16 +70,15 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
     @Override
     public final Map<PsiFile, List<Problem>> call() throws Exception {
-        Map<PsiFile, List<Problem>> scanResults = emptyMap();
-
         try {
             fireCheckStarting(files);
-            final Pair<ConfigurationLocationStatus, Map<PsiFile, List<Problem>>> scanResult = processFilesForModuleInfoAndScan();
-            fireCheckComplete(scanResult.first, scanResult.second);
+            final Pair<ConfigurationLocationStatus, Map<PsiFile, List<Problem>>> scanResult
+                    = processFilesForModuleInfoAndScan();
+            return checkComplete(scanResult.first, scanResult.second);
 
         } catch (final RuntimeInterruptedException e) {
             LOG.debug("Scan cancelled by IDEA", e);
-            fireCheckComplete(PRESENT, emptyMap());
+            return checkComplete(PRESENT, emptyMap());
 
         } catch (final Throwable e) {
             final CheckStylePluginException processedError = CheckStylePluginException.wrap(
@@ -90,9 +89,14 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 fireErrorCaught(processedError);
             }
 
-            fireCheckComplete(PRESENT, emptyMap());
+            return checkComplete(PRESENT, emptyMap());
         }
-        return scanResults;
+    }
+
+    private Map<PsiFile, List<Problem>> checkComplete(final ConfigurationLocationStatus configurationLocationStatus,
+                                                      final Map<PsiFile, List<Problem>> filesToProblems) {
+        fireCheckComplete(configurationLocationStatus, filesToProblems);
+        return filesToProblems;
     }
 
     public void addListener(ScannerListener listener) {
