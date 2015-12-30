@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.RuntimeInterruptedException;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -75,6 +76,10 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             fireCheckStarting(files);
             final Pair<ConfigurationLocationStatus, Map<PsiFile, List<Problem>>> scanResult = processFilesForModuleInfoAndScan();
             fireCheckComplete(scanResult.first, scanResult.second);
+
+        } catch (final RuntimeInterruptedException e) {
+            LOG.debug("Scan cancelled by IDEA", e);
+            fireCheckComplete(PRESENT, emptyMap());
 
         } catch (final Throwable e) {
             final CheckStylePluginException processedError = CheckStylePluginException.wrap(
