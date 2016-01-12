@@ -1,6 +1,6 @@
 # CheckStyle-IDEA
 
-&copy; Copyright 2006-2015 CheckStyle-IDEA Contributors
+&copy; Copyright 2006-2016 CheckStyle-IDEA Contributors
 
 [Hosted on GitHub](https://github.com/jshiell/checkstyle-idea)
 
@@ -10,7 +10,7 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 
 > OS X users please note - CheckStyle 6.2 and above require Java 8. As the
 > default IDEA package for OS X runs on Java 6, please make use of the versions
-> with the bundled JDK, e.g.
+> with the bundled JDK, e.g. for IDEA 14
 >
 > * [Community Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIC-14.1.5-custom-jdk-bundled.dmg)
 > * [Ultimate Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIU-14.1.5-custom-jdk-bundled.dmg)
@@ -156,6 +156,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.23.0** New: Updated to CheckStyle 6.14.1.
 * **4.22.2** Fixed: Static scan rewritten to use IDEA's thread pooling and block less on read actions (#11).
 * **4.22.1** Fixed: Now treats NPEs and AIOOBEs as parse exceptions (#201, #203).
 * **4.22.0** New: Updated to CheckStyle 6.13.
