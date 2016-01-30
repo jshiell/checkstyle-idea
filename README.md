@@ -4,7 +4,7 @@
 
 [Hosted on GitHub](https://github.com/jshiell/checkstyle-idea)
 
-A plug-in for JetBrains' IntelliJ IDEA 14.1 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
+A plug-in for JetBrains' IntelliJ IDEA 14.1/15 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
@@ -138,6 +138,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Miel Donkers
 * Dmitrij (zherebjatjew)
 * Thomas Jensen
+* Rustam Vishnyakov (@dyadix)
 
 And also thanks are due to the authors and contributors of:
 
@@ -156,6 +157,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.24.0** New: Added code style importer - thanks to Rustam Vishnyakov (@dyadix).
 * **4.23.0** New: Updated to CheckStyle 6.14.1.
 * **4.22.2** Fixed: Static scan rewritten to use IDEA's thread pooling and block less on read actions (#11).
 * **4.22.1** Fixed: Now treats NPEs and AIOOBEs as parse exceptions (#201, #203).
