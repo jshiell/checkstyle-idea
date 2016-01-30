@@ -172,6 +172,9 @@
                     canCloseContents="false"
                     factoryClass="org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowFactory"
                     icon="/org/infernus/idea/checkstyle/images/checkstyle13.png"/>
+        <schemeImporter name="CheckStyle Configuration"
+                        schemeClass="com.intellij.psi.codeStyle.CodeStyleScheme"
+                        implementationClass="org.infernus.idea.checkstyle.importer.CheckStyleCodeStyleImporter"/>
     </extensions>
 
     <actions>
