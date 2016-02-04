@@ -159,7 +159,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **4.25.0** New: Updated to CheckStyle 6.15.
+* **4.25.0** New: Updated to CheckStyle 6.15 - thanks to Thomas Harning (@harningt).
 * **4.24.0** New: Added code style importer - thanks to Rustam Vishnyakov (@dyadix).
 * **4.23.0** New: Updated to CheckStyle 6.14.1.
 * **4.22.2** Fixed: Static scan rewritten to use IDEA's thread pooling and block less on read actions (#11).
