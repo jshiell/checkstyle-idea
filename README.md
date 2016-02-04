@@ -68,18 +68,19 @@ offer instructions on setting them up with this plugin.
 
 Note that the plugin has been entirely developed on OS X - while it should be fine on Linux, I've no idea what result you'd get with Windows. YMMV.
 
-The pre-requisites for the plugin are fairly light - you'll need Git; JDK 1.8.x and IntelliJ 14.
+The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x.
 
     git clone https://github.com/jshiell/checkstyle-idea.git checkstyle-idea
     cd checkstyle-idea
 
-Then edit `gradle.properites` to point at your local installation of IDEA and at your plugin directory. The defaults should be suitable for IDEA 14 on OS X.
+You can then easily build via Gradle:
 
-You can then easily build and install the plugin via Gradle:
+    ./gradlew clean buildPlugin
 
-    ./gradlew clean installPlugin
+To run it in a sandboxed IDEA, run:
 
-This will build the plugin to `build/distributions/checkstyle-idea-<version>.zip` and install the plugin to your local IDEA.
+    ./gradlew prepareSandbox # only needed once
+    ./gradlew runIdea
 
 You can also build (and more importantly work on) the plugin via IDEA. There is a project file supplied, however it is targetted at OS X so some paths may be incorrect. You'll also need to have set up an *IntelliJ Platform Plugin SDK* if you haven't before - you can do this in *Project Structure*, under *SDKs*, just as you would for a JVM. 
 
