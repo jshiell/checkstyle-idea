@@ -1,4 +1,14 @@
+plugins {
+    id "org.jetbrains.intellij" version "0.0.39"
+}
+
 apply plugin: 'java'
+apply plugin: 'org.jetbrains.intellij'
+
+intellij {
+    version 'IC-15.0.3'
+    pluginName 'CheckStyle-IDEA'
+}
 
 sourceCompatibility = 1.8
 version = '4.24.0'
@@ -11,13 +21,7 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    ideaSdkLibs
-}
-
 dependencies {
-    ideaSdkLibs fileTree(dir: "$ideaSdk", include: '*.jar')
-
     compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.14.1') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
@@ -28,29 +32,4 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.ideaSdkLibs
-    }
-    test {
-        compileClasspath += configurations.ideaSdkLibs
-        runtimeClasspath += configurations.ideaSdkLibs
-    }
-}
-
-task zip(type: Zip, dependsOn: test) {
-    into('CheckStyle-IDEA/lib') {
-        from configurations.runtime
-        from configurations.runtime.allArtifacts.files
-    }
-}
-
-task installPlugin(dependsOn: zip) << {
-    delete "${System.properties['user.home']}/$pluginDir/CheckStyle-IDEA"
-    copy {
-        from zipTree("${project.buildDir}/${project.distsDirName}/${project.name}-${project.version}.zip")
-        into file("${System.properties['user.home']}/$pluginDir")
-    }
 }
