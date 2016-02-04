@@ -8,10 +8,11 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
     version 'IC-15.0.3'
     pluginName 'CheckStyle-IDEA'
+    updateSinceUntilBuild = false
 }
 
 sourceCompatibility = 1.8
-version = '4.25.0'
+version = '4.25.1'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.10'

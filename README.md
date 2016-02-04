@@ -159,6 +159,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.25.1** Fixed: minimum supported build is now IDEA 14 once again.
 * **4.25.0** New: Updated to CheckStyle 6.15 - thanks to Thomas Harning (@harningt).
 * **4.24.0** New: Added code style importer - thanks to Rustam Vishnyakov (@dyadix).
 * **4.23.0** New: Updated to CheckStyle 6.14.1.
