@@ -16,6 +16,12 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     private static final Log LOG = LogFactory.getLog(HTTPURLConfigurationLocation.class);
 
+    private static final int CONTENT_CACHE_SECONDS = 2;
+    private static final int ONE_SECOND = 1000;
+
+    private byte[] cachedContent;
+    private long cacheExpiry;
+
     HTTPURLConfigurationLocation() {
         super(ConfigurationType.HTTP_URL);
     }
@@ -26,11 +32,19 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     @NotNull
     protected InputStream resolveFile() throws IOException {
+        if (cachedContent != null && cacheExpiry > System.currentTimeMillis()) {
+            return new ByteArrayInputStream(cachedContent);
+        }
+
         try {
-            return new ByteArrayInputStream(asBytes(connectionTo(getLocation())));
+            cachedContent = asBytes(connectionTo(getLocation()));
+            cacheExpiry = System.currentTimeMillis() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
+            return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
             LOG.error("Couldn't read URL: " + getLocation(), e);
+            cachedContent = null;
+            cacheExpiry = 0;
             throw e;
         }
     }
