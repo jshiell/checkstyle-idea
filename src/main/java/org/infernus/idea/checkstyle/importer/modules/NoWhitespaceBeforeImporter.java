@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class NoWhitespaceBeforeImporter extends ModuleImporter {
-    
+
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);

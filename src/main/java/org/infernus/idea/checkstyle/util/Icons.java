@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.util;
 import javax.swing.*;
 import java.net.URL;
 
-public class Icons {
+public final class Icons {
 
     private Icons() {
     }

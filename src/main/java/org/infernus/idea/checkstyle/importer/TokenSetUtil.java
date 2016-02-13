@@ -8,7 +8,7 @@ import java.util.Arrays;
 class TokenSetUtil {
     private TokenSetUtil() {
     }
-    
+
     static int[] getTokens(String tokenString) {
         String[] tokenStrings = tokenString.split("\\s*,\\s*");
         int[] tokenIds = new int[tokenStrings.length];
@@ -17,7 +17,7 @@ class TokenSetUtil {
             try {
                 Field f = TokenTypes.class.getDeclaredField(tokenStr);
                 tokenIds[i] = f.getInt(null);
-                i ++;
+                i++;
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 // Ignore
             }

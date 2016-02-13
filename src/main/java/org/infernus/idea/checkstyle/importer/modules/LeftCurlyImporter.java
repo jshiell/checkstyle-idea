@@ -10,15 +10,15 @@ import java.util.Set;
 
 @SuppressWarnings("unused")
 public class LeftCurlyImporter extends ModuleImporter {
-    private final static String OPTION_PROP = "option";
-    
-    private final static String LEFT_CURLY_POLICY_EOL   = "eol";
-    private final static String LEFT_CURLY_POLICY_NL    = "nl";
-    private final static String LEFT_CURLY_POLICY_NLOW  = "nlow";
-    
+    private static final String OPTION_PROP = "option";
+
+    private static final String LEFT_CURLY_POLICY_EOL = "eol";
+    private static final String LEFT_CURLY_POLICY_NL = "nl";
+    private static final String LEFT_CURLY_POLICY_NLOW = "nlow";
+
     private int leftCurlyPolicy = CommonCodeStyleSettings.END_OF_LINE;
-    
-    private final static Set<Integer> CONDITIONAL_TOKENS = setOf(
+
+    private static final Set<Integer> CONDITIONAL_TOKENS = setOf(
             TokenTypes.LITERAL_WHILE,
             TokenTypes.LITERAL_TRY,
             TokenTypes.LITERAL_CATCH,
@@ -30,7 +30,7 @@ public class LeftCurlyImporter extends ModuleImporter {
             TokenTypes.LITERAL_ELSE,
             TokenTypes.LITERAL_FOR
     );
-    
+
     @Override
     protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         if (OPTION_PROP.equals(attrName)) {

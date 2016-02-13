@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.importer.modules;
 
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +16,7 @@ public class LineLengthImporter extends ModuleImporter {
         if (MAX_PROP.equals(attrName)) {
             try {
                 maxColumns = Integer.parseInt(attrValue);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 // ignore
             }
         }

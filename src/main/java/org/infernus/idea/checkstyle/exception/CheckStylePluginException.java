@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.exception;
 
-import antlr.ANTLRException;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;

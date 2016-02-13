@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("unused")
 public class EmptyLineSeparatorImporter extends ModuleImporter {
     private boolean noEmptyLinesBetweenFields = false;
-    private final static String NO_EMPTY_LINES_BETWEEN_FIELDS_PROP = "allowNoEmptyLineBetweenFields";
+    private static final String NO_EMPTY_LINES_BETWEEN_FIELDS_PROP = "allowNoEmptyLineBetweenFields";
 
     @Override
     protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
@@ -26,8 +26,7 @@ public class EmptyLineSeparatorImporter extends ModuleImporter {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
         if (noEmptyLinesBetweenFields) {
             javaSettings.BLANK_LINES_AROUND_FIELD = 0;
-        }
-        else if (appliesTo(TokenTypes.VARIABLE_DEF)) {
+        } else if (appliesTo(TokenTypes.VARIABLE_DEF)) {
             javaSettings.BLANK_LINES_AROUND_FIELD = 1;
         }
         if (appliesTo(TokenTypes.PACKAGE_DEF)) {

@@ -11,11 +11,11 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class WhitespaceAroundImporter extends ModuleImporter {
 
-    private final static Set<Integer> ASSIGNMENTS = 
+    private static final Set<Integer> ASSIGNMENTS =
             setOf(
-                    TokenTypes.ASSIGN, 
-                    TokenTypes.BAND_ASSIGN, 
-                    TokenTypes.BOR_ASSIGN, 
+                    TokenTypes.ASSIGN,
+                    TokenTypes.BAND_ASSIGN,
+                    TokenTypes.BOR_ASSIGN,
                     TokenTypes.BSR_ASSIGN,
                     TokenTypes.BXOR_ASSIGN,
                     TokenTypes.DIV_ASSIGN,
@@ -26,48 +26,48 @@ public class WhitespaceAroundImporter extends ModuleImporter {
                     TokenTypes.SR_ASSIGN,
                     TokenTypes.STAR_ASSIGN
             );
-    private final static Set<Integer> LOGICAL_OPERATORS =
+    private static final Set<Integer> LOGICAL_OPERATORS =
             setOf(
                     TokenTypes.LOR,
                     TokenTypes.LAND
             );
-    private final static Set<Integer> EQUALITY_OPERATORS =
+    private static final Set<Integer> EQUALITY_OPERATORS =
             setOf(
                     TokenTypes.EQUAL,
                     TokenTypes.NOT_EQUAL
             );
-    private final static Set<Integer> RELATIONAL_OPERATORS =
+    private static final Set<Integer> RELATIONAL_OPERATORS =
             setOf(
                     TokenTypes.LT,
                     TokenTypes.LE,
                     TokenTypes.GT,
                     TokenTypes.GE
             );
-    private final static Set<Integer> BITWISE_OPERATORS =
+    private static final Set<Integer> BITWISE_OPERATORS =
             setOf(
                     TokenTypes.BAND,
                     TokenTypes.BOR,
                     TokenTypes.BXOR
             );
-    private final static Set<Integer> ADDITIVE_OPERATORS =
+    private static final Set<Integer> ADDITIVE_OPERATORS =
             setOf(
                     TokenTypes.PLUS,
                     TokenTypes.MINUS
             );
-    private final static Set<Integer> MULTIPLICATIVE_OPERATORS =
+    private static final Set<Integer> MULTIPLICATIVE_OPERATORS =
             setOf(
                     TokenTypes.STAR,
                     TokenTypes.DIV,
                     TokenTypes.MOD
             );
-    private final static Set<Integer> SHIFT_OPERATORS =
+    private static final Set<Integer> SHIFT_OPERATORS =
             setOf(
                     TokenTypes.SR,
                     TokenTypes.SL,
                     TokenTypes.BSR
             );
-    
-    
+
+
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);

@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class FileTabCharacterImporter extends ModuleImporter {
-    private final static String FILE_EXTENSIONS_PROP = "fileExtensions";
+    private static final String FILE_EXTENSIONS_PROP = "fileExtensions";
     private String[] extensions;
-    
+
     @Override
     protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         if (FILE_EXTENSIONS_PROP.equals(attrName)) {
@@ -30,15 +30,14 @@ public class FileTabCharacterImporter extends ModuleImporter {
                     setNoTabChar(settings, fileType);
                 }
             }
-        }
-        else {
+        } else {
             for (FileType fileType : FileTypeManager.getInstance().getRegisteredFileTypes()) {
                 setNoTabChar(settings, fileType);
             }
         }
     }
 
-    private void setNoTabChar(final @NotNull CodeStyleSettings settings, final FileType fileType) {
+    private void setNoTabChar(@NotNull final CodeStyleSettings settings, final FileType fileType) {
         CommonCodeStyleSettings.IndentOptions indentOptions = settings.getIndentOptions(fileType);
         if (indentOptions != null) {
             indentOptions.USE_TAB_CHARACTER = false;

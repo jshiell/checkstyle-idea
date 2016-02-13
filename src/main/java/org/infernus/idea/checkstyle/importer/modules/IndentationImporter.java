@@ -7,18 +7,18 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class IndentationImporter extends ModuleImporter {
-    private final static String BASIC_OFFSET_PROP     = "basicOffset";
-    private final static String CASE_INDENT_PROP      = "caseIndent";
-    private final static String LINE_WRAP_INDENT_PROP = "lineWrappingIndentation";
-    
-    private final static int     DEFAULT_BASIC_OFFSET       = 4;
-    private final static int     DEFAULT_LINE_WRAP_INDENT   = 4;
-    private final static boolean DEFAULT_INDENT_CASE        = true;
-    
+    private static final String BASIC_OFFSET_PROP = "basicOffset";
+    private static final String CASE_INDENT_PROP = "caseIndent";
+    private static final String LINE_WRAP_INDENT_PROP = "lineWrappingIndentation";
+
+    private static final int DEFAULT_BASIC_OFFSET = 4;
+    private static final int DEFAULT_LINE_WRAP_INDENT = 4;
+    private static final boolean DEFAULT_INDENT_CASE = true;
+
     private int basicIndent = DEFAULT_BASIC_OFFSET;
     private int continuationIndent = DEFAULT_LINE_WRAP_INDENT;
     private boolean indentCase = DEFAULT_INDENT_CASE;
-    
+
     @Override
     protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         switch (attrName) {

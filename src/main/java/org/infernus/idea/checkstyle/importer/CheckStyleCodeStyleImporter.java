@@ -52,7 +52,7 @@ public class CheckStyleCodeStyleImporter implements SchemeImporter<CodeStyleSche
     public String getAdditionalImportInfo(@NotNull final CodeStyleScheme scheme) {
         return null;
     }
-    
+
     @Nullable
     private Configuration loadConfiguration(@NotNull VirtualFile selectedFile) throws Exception {
         InputStream inputStream = null;
@@ -60,18 +60,20 @@ public class CheckStyleCodeStyleImporter implements SchemeImporter<CodeStyleSche
             inputStream = selectedFile.getInputStream();
             InputSource inputSource = new InputSource(inputStream);
             return ConfigurationLoader.loadConfiguration(inputSource, null, false);
-        }
-        finally {
-            if (inputStream != null) //noinspection ThrowFromFinallyBlock
+        } finally {
+            if (inputStream != null) { //noinspection ThrowFromFinallyBlock
                 inputStream.close();
+            }
         }
     }
 
-    static void importConfiguration(@NotNull Configuration configuration, @NotNull CodeStyleSettings settings) 
+    static void importConfiguration(@NotNull Configuration configuration, @NotNull CodeStyleSettings settings)
             throws IllegalAccessException, InstantiationException {
-        ModuleImporter moduleImporter = 
+        ModuleImporter moduleImporter =
                 ModuleImporterFactory.getModuleImporter(configuration);
-        if (moduleImporter != null) moduleImporter.importTo(settings);
+        if (moduleImporter != null) {
+            moduleImporter.importTo(settings);
+        }
         for (Configuration childConfig : configuration.getChildren()) {
             importConfiguration(childConfig, settings);
         }

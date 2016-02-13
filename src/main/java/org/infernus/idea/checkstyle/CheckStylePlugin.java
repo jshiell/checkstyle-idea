@@ -221,7 +221,7 @@ public final class CheckStylePlugin implements ProjectComponent {
     private class ScanCompletionTracker implements ScannerListener {
         private final Future<Map<PsiFile, List<Problem>>> future;
 
-        public ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
+        ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
             this.future = future;
         }
 

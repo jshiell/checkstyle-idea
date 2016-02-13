@@ -7,19 +7,19 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class ModuleImporter {
-    private final static String TOKENS_PROP = "tokens";
+    private static final String TOKENS_PROP = "tokens";
+
     private int[] tokens;
 
     @NotNull
     protected CommonCodeStyleSettings getJavaSettings(@NotNull CodeStyleSettings settings) {
-        return settings.getCommonSettings(JavaLanguage.INSTANCE); 
+        return settings.getCommonSettings(JavaLanguage.INSTANCE);
     }
-    
+
     public void setFrom(@NotNull Configuration moduleConfig) {
         for (String attrName : moduleConfig.getAttributeNames()) {
             try {
@@ -48,17 +48,19 @@ public abstract class ModuleImporter {
         }
         return true;
     }
-    
+
     protected boolean appliesToOneOf(Set<Integer> tokenSet) {
         if (tokens != null) {
             for (int token : tokens) {
-                if (tokenSet.contains(token)) return true;
+                if (tokenSet.contains(token)) {
+                    return true;
+                }
             }
             return false;
         }
         return true;
     }
-    
+
     protected static Set<Integer> setOf(int... ids) {
         Set<Integer> tokenSet = new HashSet<>(ids.length);
         for (int id : ids) {
@@ -66,9 +68,9 @@ public abstract class ModuleImporter {
         }
         return tokenSet;
     }
-    
+
     public abstract void importTo(@NotNull CodeStyleSettings settings);
-    
+
     protected int getIntOrDefault(@NotNull String intStr, int defaultValue) {
         try {
             return Integer.parseInt(intStr);
