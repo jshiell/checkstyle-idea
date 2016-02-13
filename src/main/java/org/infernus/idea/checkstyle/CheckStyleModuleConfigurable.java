@@ -64,7 +64,7 @@ public class CheckStyleModuleConfigurable implements Configurable {
 
         final CheckStyleModuleConfiguration configuration = getConfiguration();
 
-        configPanel.setConfigurationLocations(configuration.getConfigurationLocations());
+        configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
 
         if (configuration.isExcluded()) {
             configPanel.setExcluded(true);

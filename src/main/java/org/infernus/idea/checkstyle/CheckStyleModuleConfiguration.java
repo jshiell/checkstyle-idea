@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -46,9 +47,7 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
-        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
-
-        if (configurationLocation != null && !configurationLocations.contains(configurationLocation)) {
+        if (configurationLocation != null && !configurationLocations().contains(configurationLocation)) {
             throw new IllegalArgumentException("Location is not valid: " + configurationLocation);
         }
 
@@ -77,8 +76,6 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     public ConfigurationLocation getActiveConfiguration() {
-        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
-
         if (!containsKey(ACTIVE_CONFIG)) {
             return getProjectConfiguration();
         }
@@ -90,7 +87,7 @@ public final class CheckStyleModuleConfiguration extends Properties
             LOG.warn("Could not load active configuration", e);
         }
 
-        if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
+        if (activeLocation == null || !configurationLocations().contains(activeLocation)) {
             LOG.info("Active module configuration is invalid, returning project configuration");
             return getProjectConfiguration();
         }
@@ -98,28 +95,29 @@ public final class CheckStyleModuleConfiguration extends Properties
         return activeLocation;
     }
 
+    private ConfigurationLocation getProjectConfiguration() {
+        return checkstylePlugin().getConfiguration().getActiveConfiguration();
+    }
+
+    public List<ConfigurationLocation> configurationLocations() {
+        return checkstylePlugin().getConfiguration().configurationLocations();
+    }
+
+    public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
+        return checkstylePlugin().getConfiguration().getAndResolveConfigurationLocations();
+    }
+
+    @NotNull
+    private CheckStylePlugin checkstylePlugin() {
+        final CheckStylePlugin checkStylePlugin = module.getProject().getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+        return checkStylePlugin;
+    }
+
     private ConfigurationLocationFactory configurationLocationFactory(final Project project) {
         return ServiceManager.getService(project, ConfigurationLocationFactory.class);
-    }
-
-    private ConfigurationLocation getProjectConfiguration() {
-        final CheckStylePlugin checkStylePlugin
-                = module.getProject().getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-
-        return checkStylePlugin.getConfiguration().getActiveConfiguration();
-    }
-
-    public List<ConfigurationLocation> getConfigurationLocations() {
-        final CheckStylePlugin checkStylePlugin
-                = module.getProject().getComponent(CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-
-        return checkStylePlugin.getConfiguration().getConfigurationLocations();
     }
 
     public ModuleSettings getState() {

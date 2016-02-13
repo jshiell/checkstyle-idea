@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * A manager for CheckStyle plug-in configuration.
@@ -100,8 +101,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     }
 
     public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
-        final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
-
+        final List<ConfigurationLocation> configurationLocations = configurationLocations();
         if (configurationLocation != null && !configurationLocations.contains(configurationLocation)) {
             throw new IllegalArgumentException("Location is not valid: " + configurationLocation);
         }
@@ -121,8 +121,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     public ConfigurationLocation getActiveConfiguration() {
         storageLock.lock();
         try {
-            final List<ConfigurationLocation> configurationLocations = getConfigurationLocations();
-
             if (!storage.containsKey(ACTIVE_CONFIG)) {
                 return null;
             }
@@ -134,12 +132,12 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 LOG.warn("Could not load active configuration", e);
             }
 
+            final List<ConfigurationLocation> configurationLocations = configurationLocations();
             if (activeLocation == null || !configurationLocations.contains(activeLocation)) {
                 LOG.info("Active configuration is invalid, returning null");
                 return null;
             }
 
-            // ensure we update the map with any parsing/tokenisation changes
             setActiveConfiguration(activeLocation);
 
             return activeLocation;
@@ -148,56 +146,76 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         }
     }
 
-    public List<ConfigurationLocation> getConfigurationLocations() {
+    public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
+        return setConfigurationLocations(configurationLocations(), false);
+    }
+
+    public List<ConfigurationLocation> configurationLocations() {
         storageLock.lock();
         try {
-            final List<ConfigurationLocation> locations = new ArrayList<>();
+            final List<ConfigurationLocation> locations = storage.entrySet().stream()
+                    .filter(this::propertyIsALocation)
+                    .map(this::deserialiseLocation)
+                    .filter(this::notNull)
+                    .collect(Collectors.toList());
 
-            for (Map.Entry<String, String> entry : storage.entrySet()) {
-                if (!entry.getKey().startsWith(LOCATION_PREFIX)) {
-                    continue;
-                }
+            return addPresetLocationsTo(locations);
 
-                final String value = entry.getValue();
-                try {
-                    final ConfigurationLocation location = configurationLocationFactory().create(
-                            project, value);
-
-                    final Map<String, String> properties = new HashMap<>();
-
-                    final int index = Integer.parseInt(entry.getKey().substring(LOCATION_PREFIX.length()));
-                    final String propertyPrefix = PROPERTIES_PREFIX + index + ".";
-
-                    // loop again over all settings to find the properties belonging to this configuration
-                    // not the best solution, but since there are only few items it doesn't hurt too much...
-                    for (Map.Entry<String, String> innerEntry : storage.entrySet()) {
-                        if (innerEntry.getKey().startsWith(propertyPrefix)) {
-                            final String propertyName = innerEntry.getKey().substring(propertyPrefix.length());
-                            properties.put(propertyName, innerEntry.getValue());
-                        }
-                    }
-
-                    location.setProperties(properties);
-                    locations.add(location);
-
-                } catch (IllegalArgumentException e) {
-                    LOG.error("Could not parse location: " + value, e);
-                }
-            }
-
-            for (ConfigurationLocation presetLocation : presetLocations) {
-                if (!locations.contains(presetLocation)) {
-                    locations.add(0, presetLocation);
-                }
-            }
-
-            // ensure we update the map with any parsing/tokenisation changes
-            setConfigurationLocations(locations, false);
-
-            return locations;
         } finally {
             storageLock.unlock();
         }
+    }
+
+    private boolean notNull(Object object) {
+        return object != null;
+    }
+
+    @Nullable
+    private ConfigurationLocation deserialiseLocation(final Map.Entry<String, String> locationProperty) {
+        final String serialisedLocation = locationProperty.getValue();
+        try {
+            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            location.setProperties(propertiesFor(locationProperty));
+            return location;
+
+        } catch (IllegalArgumentException e) {
+            LOG.error("Could not parse location: " + serialisedLocation, e);
+            return null;
+        }
+    }
+
+    private boolean propertyIsALocation(final Map.Entry<String, String> property) {
+        return property.getKey().startsWith(LOCATION_PREFIX);
+    }
+
+    private List<ConfigurationLocation> addPresetLocationsTo(final List<ConfigurationLocation> locations) {
+        presetLocations.stream()
+                .filter(presetLocation -> !locations.contains(presetLocation))
+                .forEach(presetLocation -> locations.add(0, presetLocation));
+        return locations;
+    }
+
+    @NotNull
+    private Map<String, String> propertiesFor(final Map.Entry<String, String> storageEntry) {
+        final Map<String, String> properties = new HashMap<>();
+
+        final String propertyPrefix = propertyPrefix(storageEntry.getKey());
+
+        // loop again over all settings to find the properties belonging to this configuration
+        // not the best solution, but since there are only few items it doesn't hurt too much...
+        storage.entrySet().stream()
+                .filter(property -> property.getKey().startsWith(propertyPrefix))
+                .forEach(property -> {
+                    final String propertyName = property.getKey().substring(propertyPrefix.length());
+                    properties.put(propertyName, property.getValue());
+                });
+        return properties;
+    }
+
+    @NotNull
+    private String propertyPrefix(final String key) {
+        final int index = Integer.parseInt(key.substring(LOCATION_PREFIX.length()));
+        return PROPERTIES_PREFIX + index + ".";
     }
 
     private ConfigurationLocationFactory configurationLocationFactory() {
@@ -208,19 +226,14 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         setConfigurationLocations(configurationLocations, true);
     }
 
-    private void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations,
-                                           final boolean fireEvents) {
+    private List<ConfigurationLocation> setConfigurationLocations(final List<ConfigurationLocation> configurationLocations,
+                                                                  final boolean fireEvents) {
         storageLock.lock();
         try {
-            for (final Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
-                final String propertyName = i.next().toString();
-                if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
-                    i.remove();
-                }
-            }
+            removeUnknownProperties();
 
             if (configurationLocations == null) {
-                return;
+                return null;
             }
 
             int index = 0;
@@ -251,8 +264,19 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                 fireConfigurationChanged();
             }
 
+            return configurationLocations;
+
         } finally {
             storageLock.unlock();
+        }
+    }
+
+    private void removeUnknownProperties() {
+        for (final Iterator i = storage.keySet().iterator(); i.hasNext(); ) {
+            final String propertyName = i.next().toString();
+            if (propertyName.startsWith(LOCATION_PREFIX) || propertyName.startsWith(PROPERTIES_PREFIX)) {
+                i.remove();
+            }
         }
     }
 

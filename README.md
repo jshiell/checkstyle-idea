@@ -159,8 +159,9 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **4.25.2** Fixed: scan before checkin is now persisted across IDEA restarts (#216).
-* **4.25.1** Fixed: minimum supported build is now IDEA 14 once again.
+* **4.25.2** Fixed: Rule files should no longer be read every time the active configuration is queried (#212).
+* **4.25.2** Fixed: Scan before checkin is now persisted across IDEA restarts (#216).
+* **4.25.1** Fixed: Minimum supported build is now IDEA 14 once again.
 * **4.25.0** New: Updated to CheckStyle 6.15 - thanks to Thomas Harning (@harningt).
 * **4.24.0** New: Added code style importer - thanks to Rustam Vishnyakov (@dyadix).
 * **4.23.0** New: Updated to CheckStyle 6.14.1.
