@@ -42,6 +42,8 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
     private static final String SUPPRESS_ERRORS = "suppress-errors";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
+    private static final String SCAN_BEFORE_CHECKIN = "scan-before-checkin";
+
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
 
@@ -53,11 +55,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
 
     private final Project project;
-
-    /**
-     * Scan files before vcs checkin.
-     */
-    private boolean scanFilesBeforeCheckin = false;
 
     /**
      * Create a new configuration bean.
@@ -292,38 +289,44 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     }
 
     public boolean isScanningTestClasses() {
-        final String p = storage.get(CHECK_TEST_CLASSES);
-        return p != null && Boolean.valueOf(p);
+        return booleanValueOf(CHECK_TEST_CLASSES);
     }
 
     public void setScanningTestClasses(final boolean scanTestFles) {
-        storage.put(CHECK_TEST_CLASSES, Boolean.toString(scanTestFles));
+        save(CHECK_TEST_CLASSES, scanTestFles);
     }
 
     public boolean isScanningNonJavaFiles() {
-        final String propertyValue = storage.get(CHECK_NONJAVA_FILES);
-        return propertyValue != null && Boolean.valueOf(propertyValue);
+        return booleanValueOf(CHECK_NONJAVA_FILES);
     }
 
     public void setScanningNonJavaFiles(final boolean scanNonJavaFiles) {
-        storage.put(CHECK_NONJAVA_FILES, Boolean.toString(scanNonJavaFiles));
+        save(CHECK_NONJAVA_FILES, scanNonJavaFiles);
     }
 
     public boolean isSuppressingErrors() {
-        final String propertyValue = storage.get(SUPPRESS_ERRORS);
-        return propertyValue != null && Boolean.valueOf(propertyValue);
+        return booleanValueOf(SUPPRESS_ERRORS);
     }
 
     public void setSuppressingErrors(final boolean suppressingErrors) {
-        storage.put(SUPPRESS_ERRORS, Boolean.toString(suppressingErrors));
+        save(SUPPRESS_ERRORS, suppressingErrors);
     }
 
     public boolean isScanFilesBeforeCheckin() {
-        return scanFilesBeforeCheckin;
+        return booleanValueOf(SCAN_BEFORE_CHECKIN);
     }
 
     public void setScanFilesBeforeCheckin(final boolean scanFilesBeforeCheckin) {
-        this.scanFilesBeforeCheckin = scanFilesBeforeCheckin;
+        save(SCAN_BEFORE_CHECKIN, scanFilesBeforeCheckin);
+    }
+
+    private void save(final String propertyName, final boolean propertyValue) {
+        storage.put(propertyName, Boolean.toString(propertyValue));
+    }
+
+    private boolean booleanValueOf(final String propertyName) {
+        final String propertyValue = storage.get(propertyName);
+        return propertyValue != null && Boolean.valueOf(propertyValue);
     }
 
     /**

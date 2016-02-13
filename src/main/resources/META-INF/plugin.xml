@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.25.1</version>
+    <version>4.25.2</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.25.2: Fixed: scan before checkin is now persisted across IDEA restarts (#216).</li>
     <li>4.25.1: Fixed: minimum supported build is now IDEA 14 once again.</li>
     <li>4.25.0: New: Updated to CheckStyle 6.15.</li>
     <li>4.24.0: New: Added code style importer - thanks to Rustam Vishnyakov (@dyadix).</li>
