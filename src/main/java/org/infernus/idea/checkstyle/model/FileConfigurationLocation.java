@@ -14,6 +14,8 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * A configuration file on a mounted file system.
  */
@@ -63,7 +65,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public void setLocation(final String location) {
-        if (location == null || location.trim().length() == 0) {
+        if (isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
         }
 

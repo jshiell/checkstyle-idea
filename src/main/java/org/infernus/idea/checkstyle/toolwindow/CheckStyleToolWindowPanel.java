@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * The tool window for CheckStyle scans.
  */
@@ -238,7 +240,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      * @param text the new progress text, or null to clear.
      */
     public void setProgressText(@Nullable final String text) {
-        if (text == null || text.trim().length() == 0) {
+        if (isBlank(text)) {
             progressLabel.setText(" ");
         } else {
             progressLabel.setText(text);

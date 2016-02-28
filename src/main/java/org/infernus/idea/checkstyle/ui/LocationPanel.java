@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 public class LocationPanel extends JPanel {
 
     private final JButton browseButton = new JButton(new BrowseAction());
@@ -219,7 +221,7 @@ public class LocationPanel extends JPanel {
         public void actionPerformed(final ActionEvent e) {
             final VirtualFile toSelect;
             final String configFilePath = fileLocationField.getText();
-            if (configFilePath != null && configFilePath.trim().length() > 0) {
+            if (!isBlank(configFilePath)) {
                 toSelect = LocalFileSystem.getInstance().findFileByPath(configFilePath);
             } else {
                 toSelect = project.getBaseDir();

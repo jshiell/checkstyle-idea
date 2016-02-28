@@ -5,9 +5,12 @@ import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.util.Icons;
+import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -139,7 +142,7 @@ public class ResultTreeNode {
      * @param text the file the node represents.
      */
     public void setText(final String text) {
-        if (text == null || text.trim().length() == 0) {
+        if (isBlank(text)) {
             throw new IllegalArgumentException("Text may not be null/empty");
         }
         this.text = text;

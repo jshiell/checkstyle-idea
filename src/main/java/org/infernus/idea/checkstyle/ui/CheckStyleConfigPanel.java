@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * Provides a configuration panel for project-level configuration.
  */
@@ -214,7 +216,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         listModel.clear();
 
         for (final String classPathFile : thirdPartyClasspath) {
-            if (classPathFile != null && classPathFile.trim().length() > 0) {
+            if (!isBlank(classPathFile)) {
                 listModel.addElement(classPathFile);
             }
         }

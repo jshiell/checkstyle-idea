@@ -42,6 +42,13 @@ The *Scan Test Classes* checkbox will enable scanning of Java files under test s
 
 If a custom file is being used and properties are available for definition then these will accessible using the 'Edit Properties' button.
 
+### Eclipse-CS Variable Support
+
+The following variables will be available if you have not otherwise overridden their values:
+
+* **basedir**, **project_loc**, **workspace_loc** - mapped to the project directory.
+* **config_loc**, **samedir** - mapped to the directory the rules file is in, or the project directory for remote rules files (e.g. HTTP).
+
 ### Third Party Checks 
 
 This tab allows you to specify any third-party checks which your configuration file makes use of. All selected directories/JAR files will be added to CheckStyle's classpath.
@@ -105,14 +112,6 @@ CheckStyle is unable to retrieve information on exceptions in your project until
 * CheckStyle errors and warnings from the inspection are both shown at a single level, as IDEA will only allow one warning level for an inspection.
 
 
-## Future
-
-The following are potential features which are likely to be investigated for future releases.
-
-* Scan selected files/folder in the project panel.
-* Better error feedback.
-
-
 ## Feedback
 
 Any comments or bug reports are most welcome - please visit
@@ -159,6 +158,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.26.0** New: Added support for Eclipse-CS predefined variables (#217).
 * **4.25.2** Fixed: Rule files should no longer be read every time the active configuration is queried (#212).
 * **4.25.2** Fixed: Scan before checkin is now persisted across IDEA restarts (#216).
 * **4.25.1** Fixed: Minimum supported build is now IDEA 14 once again.

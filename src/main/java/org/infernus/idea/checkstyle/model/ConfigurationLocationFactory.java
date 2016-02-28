@@ -5,6 +5,8 @@ import com.intellij.openapi.project.Project;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * Factory for configuration location objects.
  */
@@ -28,9 +30,9 @@ public class ConfigurationLocationFactory {
      * @return the location.
      */
     public ConfigurationLocation create(final Project project,
-                                               final ConfigurationType type,
-                                               final String location,
-                                               final String description) {
+                                        final ConfigurationType type,
+                                        final String location,
+                                        final String description) {
         if (type == null) {
             throw new IllegalArgumentException("Type is required");
         }
@@ -88,7 +90,7 @@ public class ConfigurationLocationFactory {
             throw new IllegalArgumentException("A project is required");
         }
 
-        if (stringRepresentation == null || stringRepresentation.trim().length() == 0) {
+        if (isBlank(stringRepresentation)) {
             throw new IllegalArgumentException("A non-blank representation is required");
         }
 

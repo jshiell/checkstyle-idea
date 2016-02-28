@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 public class Configurations {
     private static final Log LOG = LogFactory.getLog(Configurations.class);
@@ -99,7 +100,7 @@ public class Configurations {
                                           final String propertyName)
             throws CheckstyleException {
         final String fileName = getAttributeOrNull(configModule, propertyName);
-        if (!isEmpty(fileName)) {
+        if (!isBlank(fileName)) {
             try {
                 resolveAndUpdateFile(configRoot, configModule, propertyName, fileName);
 
@@ -134,10 +135,6 @@ public class Configurations {
         } catch (CheckstyleException e) {
             return null;
         }
-    }
-
-    private boolean isEmpty(final String stringValue) {
-        return stringValue == null || stringValue.trim().length() == 0;
     }
 
     private DefaultConfiguration elementWithUpdatedFile(@NotNull final String filename,

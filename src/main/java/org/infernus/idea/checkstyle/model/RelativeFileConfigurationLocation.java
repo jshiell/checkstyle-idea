@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.FilePaths;
+import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -22,7 +23,7 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
 
     @Override
     public void setLocation(final String location) {
-        if (location == null || location.trim().length() == 0) {
+        if (Strings.isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
         }
 

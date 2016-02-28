@@ -19,12 +19,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 public class CheckerFactory {
 
@@ -80,7 +78,7 @@ public class CheckerFactory {
             return cachedChecker.get();
         }
 
-        final ListPropertyResolver propertyResolver = new ListPropertyResolver(location.getProperties());
+        final ListPropertyResolver propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location));
         final CachedChecker checker = createChecker(location, module, propertyResolver,
                 classLoaderFor(module, classLoader));
         if (checker != null) {
@@ -89,6 +87,28 @@ public class CheckerFactory {
         }
 
         return null;
+    }
+
+    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location) throws IOException {
+        final Map<String, String> properties = new HashMap<>(location.getProperties());
+
+        addIfAbsent("basedir", project.getBasePath(), properties);
+        addIfAbsent("project_loc", project.getBasePath(), properties);
+        addIfAbsent("workspace_loc", project.getBasePath(), properties);
+
+        final String locationBaseDir = ofNullable(location.getBaseDir())
+                .map(File::toString)
+                .orElseGet(project::getBasePath);
+        addIfAbsent("config_loc", locationBaseDir, properties);
+        addIfAbsent("samedir", locationBaseDir, properties);
+
+        return properties;
+    }
+
+    private void addIfAbsent(final String key, final String value, final Map<String, String> properties) {
+        if (isBlank(properties.get(key))) {
+            properties.put(key, value);
+        }
     }
 
     private ClassLoader classLoaderFor(final Module module,

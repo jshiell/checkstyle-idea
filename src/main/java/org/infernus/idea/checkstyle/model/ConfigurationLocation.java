@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * Bean encapsulating a configuration source.
  */
@@ -61,7 +63,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public void setLocation(final String location) {
-        if (location == null || location.trim().length() == 0) {
+        if (isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
         }
 
@@ -190,7 +192,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 class ListPropertyResolver implements PropertyResolver {
 
     private final Map<String, String> propertyNamesToValues = new HashMap<>();
@@ -31,7 +33,7 @@ class ListPropertyResolver implements PropertyResolver {
         }
 
         final String propertyValue = propertyNamesToValues.get(propertyName);
-        if (propertyValue != null && propertyValue.trim().length() == 0) {
+        if (isBlank(propertyValue)) {
             return null;
         }
         return propertyValue;

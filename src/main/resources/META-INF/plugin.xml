@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.26.0: New: Added support for Eclipse-CS predefined variables (#217).</li>
     <li>4.25.2: Fixed: Rule files should no longer be read every time the active configuration is queried (#212).</li>
     <li>4.25.2: Fixed: Scan before checkin is now persisted across IDEA restarts (#216).</li>
     <li>4.25.1: Fixed: Minimum supported build is now IDEA 14 once again.</li>
