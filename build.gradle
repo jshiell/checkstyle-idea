@@ -6,13 +6,13 @@ apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
-    version 'IC-15.0.3'
+    version 'IC-15.0.5'
     pluginName 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
 }
 
 sourceCompatibility = 1.8
-version = '4.26.0'
+version = '4.27.0'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.15') {
+    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.17') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile group: 'commons-io', name: 'commons-io', version: '2.4'

@@ -158,6 +158,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.27.0** New: Updated to CheckStyle 6.17.
 * **4.26.0** New: Added support for Eclipse-CS predefined variables (#217).
 * **4.25.2** Fixed: Rule files should no longer be read every time the active configuration is queried (#212).
 * **4.25.2** Fixed: Scan before checkin is now persisted across IDEA restarts (#216).
