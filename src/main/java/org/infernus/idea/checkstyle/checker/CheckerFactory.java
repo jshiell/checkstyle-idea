@@ -78,7 +78,7 @@ public class CheckerFactory {
             return cachedChecker.get();
         }
 
-        final ListPropertyResolver propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location));
+        final ListPropertyResolver propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location, module));
         final CachedChecker checker = createChecker(location, module, propertyResolver,
                 classLoaderFor(module, classLoader));
         if (checker != null) {
@@ -89,10 +89,12 @@ public class CheckerFactory {
         return null;
     }
 
-    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location) throws IOException {
+    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location,
+                                                       final Module module) throws IOException {
         final Map<String, String> properties = new HashMap<>(location.getProperties());
 
-        addIfAbsent("basedir", project.getBasePath(), properties);
+        addIfAbsent("basedir", basePathFor(module), properties);
+
         addIfAbsent("project_loc", project.getBasePath(), properties);
         addIfAbsent("workspace_loc", project.getBasePath(), properties);
 
@@ -103,6 +105,16 @@ public class CheckerFactory {
         addIfAbsent("samedir", locationBaseDir, properties);
 
         return properties;
+    }
+
+    private String basePathFor(final Module module) {
+        if (module != null) {
+            final File moduleFile = new File(module.getModuleFilePath());
+            if (moduleFile.getParent() != null && moduleFile.getParentFile().exists()) {
+                return moduleFile.getParentFile().getAbsolutePath();
+            }
+        }
+        return project.getBasePath();
     }
 
     private void addIfAbsent(final String key, final String value, final Map<String, String> properties) {

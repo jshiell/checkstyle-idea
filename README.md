@@ -48,7 +48,8 @@ If a custom file is being used and properties are available for definition then 
 
 The following variables will be available if you have not otherwise overridden their values:
 
-* **basedir**, **project_loc**, **workspace_loc** - mapped to the project directory.
+* **basedir** - mapped to the location of the current module file, or the project directory as a fallback. 
+* **project_loc**, **workspace_loc** - mapped to the project directory.
 * **config_loc**, **samedir** - mapped to the directory the rules file is in, or the project directory for remote rules files (e.g. HTTP).
 
 ### Third Party Checks 
@@ -160,6 +161,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.27.1** Fixed: **basedir** now maps to the directory of the current module file, when available (#223).
 * **4.27.0** New: Updated to CheckStyle 6.17.
 * **4.26.0** New: Added support for Eclipse-CS predefined variables (#217).
 * **4.25.2** Fixed: Rule files should no longer be read every time the active configuration is queried (#212).

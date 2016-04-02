@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.25.2</version>
+    <version>4.27.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.27.1: Fixed: **basedir** now maps to the directory of the current module file, when available (#223).</li>
     <li>4.27.0: New: Updated to CheckStyle 6.17.</li>
     <li>4.26.0: New: Added support for Eclipse-CS predefined variables (#217).</li>
     <li>4.25.2: Fixed: Rule files should no longer be read every time the active configuration is queried (#212).</li>
