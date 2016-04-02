@@ -15,8 +15,13 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Optional;
+
+import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
+import static java.util.Optional.ofNullable;
 
 /**
  * Base class for plug-in actions.
@@ -38,7 +43,6 @@ public abstract class BaseAction extends AnAction {
                 presentation.setVisible(false);
 
                 return;
-
             }
 
             final CheckStylePlugin checkStylePlugin
@@ -89,5 +93,9 @@ public abstract class BaseAction extends AnAction {
             return ((CheckStyleToolWindowPanel) content.getComponent()).getSelectedOverride();
         }
         return null;
+    }
+
+    protected Optional<Project> project(@NotNull final AnActionEvent event) {
+        return ofNullable(PROJECT.getData(event.getDataContext()));
     }
 }
