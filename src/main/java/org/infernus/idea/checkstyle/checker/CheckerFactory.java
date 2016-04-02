@@ -73,7 +73,7 @@ public class CheckerFactory {
                                                    final Module module,
                                                    final ClassLoader classLoader)
             throws IOException, CheckstyleException {
-        final Optional<CachedChecker> cachedChecker = cache.get(location);
+        final Optional<CachedChecker> cachedChecker = cache.get(location, module);
         if (cachedChecker.isPresent()) {
             return cachedChecker.get();
         }
@@ -82,7 +82,7 @@ public class CheckerFactory {
         final CachedChecker checker = createChecker(location, module, propertyResolver,
                 classLoaderFor(module, classLoader));
         if (checker != null) {
-            cache.put(location, checker);
+            cache.put(location, module, checker);
             return checker;
         }
 
@@ -153,8 +153,7 @@ public class CheckerFactory {
         if (workerResult instanceof CheckstyleException) {
             final CheckstyleException checkstyleException = (CheckstyleException) workerResult;
             if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
-                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking"
-                );
+                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
             }
             return blacklistAndShowMessage(location, module, "checkstyle.checker-failed",
                     checkstyleException.getMessage());

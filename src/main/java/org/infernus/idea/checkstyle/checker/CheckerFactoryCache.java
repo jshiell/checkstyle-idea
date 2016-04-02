@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,7 @@ public class CheckerFactoryCache {
     private static final int CLEANUP_PERIOD_SECONDS = 30;
 
     private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
-    private final Map<ConfigurationLocation, CachedChecker> cache = new HashMap<>();
+    private final Map<CacheKey, CachedChecker> cache = new HashMap<>();
 
     private final ScheduledExecutorService cleanUpExecutor = Executors.newScheduledThreadPool(ONE_THREAD);
 
@@ -32,11 +33,13 @@ public class CheckerFactoryCache {
         cleanUpExecutor.shutdown();
     }
 
-    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location) {
+    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location,
+                                       final Module module) {
+        final CacheKey key = new CacheKey(location, module);
         cacheLock.readLock().lock();
         try {
-            if (cache.containsKey(location)) {
-                final CachedChecker cachedChecker = cache.get(location);
+            if (cache.containsKey(key)) {
+                final CachedChecker cachedChecker = cache.get(key);
                 if (cachedChecker != null && cachedChecker.isValid()) {
                     return Optional.of(cachedChecker);
 
@@ -46,7 +49,7 @@ public class CheckerFactoryCache {
                         if (cachedChecker != null) {
                             cachedChecker.destroy();
                         }
-                        return cache.remove(location);
+                        return cache.remove(key);
                     });
                     cacheLock.readLock().lock();
                 }
@@ -58,8 +61,10 @@ public class CheckerFactoryCache {
         }
     }
 
-    public void put(@NotNull final ConfigurationLocation location, @NotNull final CachedChecker checker) {
-        writeToCache(() -> cache.put(location, checker));
+    public void put(@NotNull final ConfigurationLocation location,
+                    final Module module,
+                    @NotNull final CachedChecker checker) {
+        writeToCache(() -> cache.put(new CacheKey(location, module), checker));
     }
 
     public void invalidate() {
@@ -77,7 +82,7 @@ public class CheckerFactoryCache {
 
     private void cleanUpExpiredCachedCheckers() {
         writeToCache(() -> {
-            final List<ConfigurationLocation> itemsToRemove = cache.entrySet().stream()
+            final List<CacheKey> itemsToRemove = cache.entrySet().stream()
                     .filter(cacheEntry -> cacheEntry.getValue() != null && !cacheEntry.getValue().isValid())
                     .map(cacheEntry -> {
                         cacheEntry.getValue().destroy();
@@ -94,6 +99,41 @@ public class CheckerFactoryCache {
             return task.get();
         } finally {
             cacheLock.writeLock().unlock();
+        }
+    }
+
+    private class CacheKey {
+        private final ConfigurationLocation location;
+        private final String moduleName;
+
+        private CacheKey(final ConfigurationLocation location, final Module module) {
+            this.location = location;
+            this.moduleName = module != null ? module.getName() : "noModule";
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            final CacheKey cacheKey = (CacheKey) o;
+
+            if (location != null ? !location.equals(cacheKey.location) : cacheKey.location != null) {
+                return false;
+            }
+            return moduleName != null ? moduleName.equals(cacheKey.moduleName) : cacheKey.moduleName == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = location != null ? location.hashCode() : 0;
+            result = 31 * result + (moduleName != null ? moduleName.hashCode() : 0);
+            return result;
         }
     }
 }
