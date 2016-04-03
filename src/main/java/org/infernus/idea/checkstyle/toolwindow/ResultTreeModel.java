@@ -62,12 +62,13 @@ public class ResultTreeModel extends DefaultTreeModel {
      *
      * @param messageKey the message key to display.
      */
-    public void setRootMessage(@Nullable final String messageKey) {
+    public void setRootMessage(@Nullable final String messageKey,
+                               @Nullable final Object... messageArgs) {
         if (messageKey == null) {
             setRootText(null);
 
         } else {
-            setRootText(CheckStyleBundle.message(messageKey));
+            setRootText(CheckStyleBundle.message(messageKey, messageArgs));
         }
     }
 

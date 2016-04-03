@@ -459,11 +459,12 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         treeModel.setRootMessage("plugin.results.in-progress");
     }
 
-    public void displayWarningResult(final String messageKey) {
+    public void displayWarningResult(final String messageKey,
+                                     final Object... messageArgs) {
         clearProgress();
 
         treeModel.clear();
-        treeModel.setRootMessage(messageKey);
+        treeModel.setRootMessage(messageKey, messageArgs);
     }
 
     /**

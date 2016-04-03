@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.resultOf;
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.*;
 
 public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
@@ -72,13 +73,13 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     public final Map<PsiFile, List<Problem>> call() throws Exception {
         try {
             fireCheckStarting(files);
-            final Pair<ConfigurationLocationStatus, Map<PsiFile, List<Problem>>> scanResult
+            final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult
                     = processFilesForModuleInfoAndScan();
             return checkComplete(scanResult.first, scanResult.second);
 
         } catch (final RuntimeInterruptedException e) {
             LOG.debug("Scan cancelled by IDEA", e);
-            return checkComplete(PRESENT, emptyMap());
+            return checkComplete(resultOf(PRESENT), emptyMap());
 
         } catch (final Throwable e) {
             final CheckStylePluginException processedError = CheckStylePluginException.wrap(
@@ -89,13 +90,13 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 fireErrorCaught(processedError);
             }
 
-            return checkComplete(PRESENT, emptyMap());
+            return checkComplete(resultOf(PRESENT), emptyMap());
         }
     }
 
-    private Map<PsiFile, List<Problem>> checkComplete(final ConfigurationLocationStatus configurationLocationStatus,
+    private Map<PsiFile, List<Problem>> checkComplete(final ConfigurationLocationResult configurationLocationResult,
                                                       final Map<PsiFile, List<Problem>> filesToProblems) {
-        fireCheckComplete(configurationLocationStatus, filesToProblems);
+        fireCheckComplete(configurationLocationResult, filesToProblems);
         return filesToProblems;
     }
 
@@ -107,8 +108,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireCheckComplete(final ConfigurationLocationStatus configLocationStatus, Map<PsiFile, List<Problem>> fileResults) {
-        listeners.forEach(listener -> listener.scanComplete(configLocationStatus, fileResults));
+    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult, Map<PsiFile, List<Problem>> fileResults) {
+        listeners.forEach(listener -> listener.scanComplete(configLocationResult, fileResults));
     }
 
     private void fireErrorCaught(final CheckStylePluginException error) {
@@ -129,7 +130,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         return allChildFiles;
     }
 
-    private Pair<ConfigurationLocationStatus, Map<PsiFile, List<Problem>>> processFilesForModuleInfoAndScan() {
+    private Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> processFilesForModuleInfoAndScan() {
         final Map<PsiFile, List<Problem>> fileResults = new HashMap<>();
 
         for (final Module module : moduleToFiles.keySet()) {
@@ -137,9 +138,9 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
-            final Pair<ConfigurationLocationStatus, ConfigurationLocation> location = configurationLocation(overrideConfigLocation, module);
-            if (location.first != PRESENT) {
-                return pair(location.first, emptyMap());
+            final ConfigurationLocationResult locationResult = configurationLocation(overrideConfigLocation, module);
+            if (locationResult.status != PRESENT) {
+                return pair(locationResult, emptyMap());
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
@@ -147,11 +148,11 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
-            fileResults.putAll(filesWithProblems(filesForModule, checkFiles(module, filesForModule, location.second)));
+            fileResults.putAll(filesWithProblems(filesForModule, checkFiles(module, filesForModule, locationResult.location)));
             fireFilesScanned(filesForModule.size());
         }
 
-        return pair(PRESENT, fileResults);
+        return pair(resultOf(PRESENT), fileResults);
     }
 
     @NotNull
@@ -168,16 +169,16 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private Pair<ConfigurationLocationStatus, ConfigurationLocation> configurationLocation(final ConfigurationLocation override,
-                                                                                           final Module module) {
+    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override,
+                                                              final Module module) {
         final ConfigurationLocation location = plugin.getConfigurationLocation(module, override);
         if (location == null) {
-            return pair(NOT_PRESENT, null);
+            return resultOf(NOT_PRESENT);
         }
         if (location.isBlacklisted()) {
-            return pair(BLACKLISTED, null);
+            return resultOf(location, BLACKLISTED);
         }
-        return pair(PRESENT, location);
+        return resultOf(location, PRESENT);
     }
 
     private Map<PsiFile, List<Problem>> checkFiles(final Module module,

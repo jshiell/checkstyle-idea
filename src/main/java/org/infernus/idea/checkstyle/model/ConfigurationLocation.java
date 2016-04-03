@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static java.lang.Math.max;
+import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -377,11 +379,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public boolean isBlacklisted() {
-        return blacklistedUntil > System.currentTimeMillis();
+        return blacklistedUntil > currentTimeMillis();
+    }
+
+    public long blacklistedForSeconds() {
+        return max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
     }
 
     public void blacklist() {
-        blacklistedUntil = System.currentTimeMillis() + BLACKLIST_TIME_MS;
+        blacklistedUntil = currentTimeMillis() + BLACKLIST_TIME_MS;
     }
 
     public void removeFromBlacklist() {

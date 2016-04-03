@@ -234,7 +234,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         @Override
-        public void scanComplete(final ConfigurationLocationStatus configurationLocationStatus,
+        public void scanComplete(final ConfigurationLocationResult configurationLocationResult,
                                  final Map<PsiFile, List<Problem>> scanResults) {
             checkComplete(future);
         }
