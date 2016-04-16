@@ -11,8 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
@@ -53,6 +56,15 @@ public class Configurations {
             }
         }
         return DEFAULT_TAB_WIDTH;
+    }
+
+    public Optional<String> baseDir(final Configuration rootElement) {
+        for (final String attributeName : rootElement.getAttributeNames()) {
+            if ("basedir".equals(attributeName)) {
+                return ofNullable(getAttributeOrNull(rootElement, "basedir"));
+            }
+        }
+        return empty();
     }
 
     private int intValueOrDefault(final String value, final int defaultValue) {

@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -21,13 +22,16 @@ public class CheckStyleChecker {
     private final Checker checker;
     private final Configuration configuration;
     private final int tabWidth;
+    private final Optional<String> baseDir;
 
     public CheckStyleChecker(@NotNull final Checker checker,
                              @NotNull final Configuration configuration,
-                             final int tabWidth) {
+                             final int tabWidth,
+                             @NotNull final Optional<String> baseDir) {
         this.checker = checker;
         this.configuration = configuration;
         this.tabWidth = tabWidth;
+        this.baseDir = baseDir;
     }
 
     @NotNull
@@ -73,7 +77,7 @@ public class CheckStyleChecker {
     private CheckStyleAuditListener createListener(final Map<String, PsiFile> filesToScan,
                                                    final CheckStyleConfiguration pluginConfig) {
         return new CheckStyleAuditListener(filesToScan,
-                pluginConfig.isSuppressingErrors(), tabWidth, CheckFactory.getChecks(configuration));
+                pluginConfig.isSuppressingErrors(), tabWidth, baseDir, CheckFactory.getChecks(configuration));
     }
 
     public void destroy() {

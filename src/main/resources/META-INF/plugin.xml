@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.27.3</version>
+    <version>4.27.4</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.27.4: Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).</li>
     <li>4.27.3: New: the remaining blacklist time is now displayed in the result message.</li>
     <li>4.27.2: Fixed: the *reload rules files* button now correctly clears the blacklist (#224).</li>
     <li>4.27.1: Fixed: **basedir** now maps to the directory of the current module file, when available (#223).</li>

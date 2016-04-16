@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.*;
 
 public class CheckStyleAuditListener implements AuditListener {
@@ -21,6 +22,7 @@ public class CheckStyleAuditListener implements AuditListener {
     private final boolean suppressErrors;
     private final List<Check> checks;
     private final int tabWidth;
+    private final Optional<String> baseDir;
     private final Map<String, PsiFile> fileNamesToPsiFiles;
 
     private final List<AuditEvent> errors = new ArrayList<>();
@@ -29,11 +31,13 @@ public class CheckStyleAuditListener implements AuditListener {
     public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles,
                                    final boolean suppressErrors,
                                    final int tabWidth,
+                                   @NotNull final Optional<String> baseDir,
                                    @NotNull final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
         this.checks = checks;
         this.suppressErrors = suppressErrors;
         this.tabWidth = tabWidth;
+        this.baseDir = baseDir;
     }
 
     public void auditStarted(final AuditEvent auditEvent) {
@@ -98,7 +102,7 @@ public class CheckStyleAuditListener implements AuditListener {
 
             synchronized (errors) {
                 for (final AuditEvent event : errors) {
-                    final PsiFile psiFile = fileNamesToPsiFiles.get(event.getFileName());
+                    final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
                     if (psiFile == null) {
                         if (LOG.isInfoEnabled()) {
                             LOG.info("Could not find mapping for file: " + event.getFileName()
@@ -120,6 +124,19 @@ public class CheckStyleAuditListener implements AuditListener {
                     processEvent(psiFile, lineLengthCache, event);
                 }
             }
+        }
+
+        private String filenameFrom(final AuditEvent event) {
+            return baseDir
+                    .map(prefix -> withTrailingSeparator(prefix) + event.getFileName())
+                    .orElseGet(event::getFileName);
+        }
+
+        private String withTrailingSeparator(final String path) {
+            if (path != null && !path.endsWith(File.separator)) {
+                return path + File.separator;
+            }
+            return path;
         }
 
         private void processEvent(final PsiFile psiFile,

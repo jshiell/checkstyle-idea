@@ -61,7 +61,7 @@ class CheckerFactoryWorker extends Thread {
         checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
         checker.configure(config);
 
-        return new CheckStyleChecker(checker, config, configurations.tabWidth(config));
+        return new CheckStyleChecker(checker, config, configurations.tabWidth(config), configurations.baseDir(config));
     }
 
 }
