@@ -37,6 +37,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -164,6 +166,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         resultsTree.addTreeSelectionListener(treeSelectionListener);
         final MouseListener treeMouseListener = new ToolWindowMouseListener();
         resultsTree.addMouseListener(treeMouseListener);
+        resultsTree.addKeyListener(new ToolWindowKeyboardListener());
         resultsTree.setCellRenderer(new ResultTreeRenderer());
 
         progressLabel = new JLabel(" ");
@@ -377,6 +380,25 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             }
         }
 
+    }
+
+    /**
+     * Listen for Enter key being pressed and scroll to the error's source
+     */
+    protected class ToolWindowKeyboardListener extends KeyAdapter {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() != KeyEvent.VK_ENTER) {
+                return;
+            }
+
+            final TreePath treePath = resultsTree.getSelectionPath();
+
+            if (treePath != null) {
+                scrollToError(treePath);
+            }
+        }
     }
 
     /**
