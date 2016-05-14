@@ -162,6 +162,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.27.5** Fixed: Relative Header check filenames are now resolved relative to the project file (#227).
 * **4.27.5** New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.
 * **4.27.4** Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).
 * **4.27.3** New: the remaining blacklist time is now displayed in the result message.

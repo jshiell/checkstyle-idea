@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -25,13 +27,14 @@ public class Configurations {
     private static final Log LOG = LogFactory.getLog(Configurations.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
-    private static final String SUPPRESSION_FILTER_ELEMENT = "SuppressionFilter";
-    private static final String SUPPRESSION_FILTER_FILE = "file";
-    private static final String IMPORT_CONTROL_ELEMENT = "ImportControl";
-    private static final String IMPORT_CONTROL_FILE = "file";
-    private static final String REGEXP_HEADER_ELEMENT = "RegexpHeader";
-    private static final String REGEXP_HEADER_HEADERFILE = "headerFile";
     private static final String PROPERTY_ELEMENT = "property";
+
+    private static final Map<String, String> FILENAME_REPLACEMENTS = new HashMap<String, String>() {{
+        put("RegexpHeader", "headerFile");
+        put("Header", "headerFile");
+        put("SuppressionFilter", "file");
+        put("ImportControl", "file");
+    }};
 
     private static final int DEFAULT_TAB_WIDTH = 8;
 
@@ -87,17 +90,9 @@ public class Configurations {
         }
 
         for (final Configuration currentChild : rootElement.getChildren()) {
-            if (SUPPRESSION_FILTER_ELEMENT.equals(currentChild.getName())) {
+            if (FILENAME_REPLACEMENTS.containsKey(currentChild.getName())) {
                 checkFilenameForProperty((DefaultConfiguration) rootElement,
-                        currentChild, SUPPRESSION_FILTER_FILE);
-
-            } else if (REGEXP_HEADER_ELEMENT.equals(currentChild.getName())) {
-                checkFilenameForProperty((DefaultConfiguration) rootElement,
-                        currentChild, REGEXP_HEADER_HEADERFILE);
-
-            } else if (IMPORT_CONTROL_ELEMENT.equals(currentChild.getName())) {
-                checkFilenameForProperty((DefaultConfiguration) rootElement,
-                        currentChild, IMPORT_CONTROL_FILE);
+                        currentChild, FILENAME_REPLACEMENTS.get(currentChild.getName()));
 
             } else if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
                 resolveFilePaths(currentChild);
