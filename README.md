@@ -13,9 +13,9 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 > with the bundled JDK, e.g.
 >
 > * [Community Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIC-14.1.5-custom-jdk-bundled.dmg)
-> * [Community Edition (15.0.5)](https://download.jetbrains.com/idea/ideaIC-15.0.5-custom-jdk-bundled.dmg)
+> * [Community Edition (15.0.6)](https://download.jetbrains.com/idea/ideaIC-15.0.6-custom-jdk-bundled.dmg)
 > * [Ultimate Edition (14.1.5)](https://download.jetbrains.com/idea/ideaIU-14.1.5-custom-jdk-bundled.dmg)
-> * [Ultimate Edition (15.0.5)](https://download.jetbrains.com/idea/ideaIU-15.0.5-custom-jdk-bundled.dmg)
+> * [Ultimate Edition (15.0.6)](https://download.jetbrains.com/idea/ideaIU-15.0.6-custom-jdk-bundled.dmg)
 >
 > or, for Brew Cask users,
 >
