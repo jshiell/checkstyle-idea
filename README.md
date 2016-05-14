@@ -143,6 +143,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Thomas Jensen
 * Rustam Vishnyakov (@dyadix)
 * Thomas Harning (@harningt)
+* František Hartman (@frant-hartm)
 
 And also thanks are due to the authors and contributors of:
 
@@ -161,6 +162,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.27.5** New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.
 * **4.27.4** Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).
 * **4.27.3** New: the remaining blacklist time is now displayed in the result message.
 * **4.27.2** Fixed: the *reload rules files* button now correctly clears the blacklist (#224).
