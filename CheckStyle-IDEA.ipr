@@ -274,24 +274,24 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="com.puppycrawl.tools:checkstyle:6.17" type="repository">
-      <properties maven-id="com.puppycrawl.tools:checkstyle:6.17" />
+    <library name="com.puppycrawl.tools:checkstyle:6.18" type="repository">
+      <properties maven-id="com.puppycrawl.tools:checkstyle:6.18" />
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/6.17/checkstyle-6.17.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/6.18/checkstyle-6.18.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/antlr/antlr/2.7.7/antlr-2.7.7.jar!/" />
-        <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4-runtime/4.5.2-1/antlr4-runtime-4.5.2-1.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4-runtime/4.5.3/antlr4-runtime-4.5.3.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/commons-beanutils/commons-beanutils/1.9.2/commons-beanutils-1.9.2.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/commons-cli/commons-cli/1.3.1/commons-cli-1.3.1.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.9.6/ant-1.9.6.jar!/" />
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.9.6/ant-launcher-1.9.6.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.9.7/ant-1.9.7.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.9.7/ant-launcher-1.9.7.jar!/" />
         <root url="jar://$APPLICATION_HOME_DIR$/jre/jdk/Contents/Home/lib/tools.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/6.17/checkstyle-6.17-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/6.18/checkstyle-6.18-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="commons-io:commons-io:2.4" type="repository">

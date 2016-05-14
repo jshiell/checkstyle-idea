@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.17 from within IDEA.
+    of Java files with CheckStyle 6.18 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.27.5</version>
+    <version>4.28.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,8 +19,9 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>4.27.5: Fixed: Relative Header check filenames are now resolved relative to the project file (#227).</li>
-    <li>4.27.5: New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.</li>
+    <li>4.28.0: New: Updated to CheckStyle 6.18.</li>
+    <li>4.28.0: Fixed: Relative Header check filenames are now resolved relative to the project file (#227).</li>
+    <li>4.28.0: New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.</li>
     <li>4.27.4: Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).</li>
     <li>4.27.3: New: the remaining blacklist time is now displayed in the result message.</li>
     <li>4.27.2: Fixed: the *reload rules files* button now correctly clears the blacklist (#224).</li>
