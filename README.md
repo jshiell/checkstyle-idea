@@ -162,6 +162,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.28.1** Fixed: IllegalStateExceptions from Checkstyle are now treated as parse exceptions (#228).
 * **4.28.0** New: Updated to CheckStyle 6.18.
 * **4.28.0** Fixed: Relative Header check filenames are now resolved relative to the project file (#227).
 * **4.28.0** New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.

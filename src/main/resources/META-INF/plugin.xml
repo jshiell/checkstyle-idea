@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.28.0</version>
+    <version>4.28.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.28.1: Fixed: IllegalStateExceptions from Checkstyle are now treated as parse exceptions (#228).</li>
     <li>4.28.0: New: Updated to CheckStyle 6.18.</li>
     <li>4.28.0: Fixed: Relative Header check filenames are now resolved relative to the project file (#227).</li>
     <li>4.28.0: New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.</li>

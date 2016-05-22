@@ -56,6 +56,13 @@ public class CheckStylePluginExceptionTest {
     }
 
     @Test
+    public void aCheckstyleExceptionThatHasACauseOfAnIllegalStateExceptionIsWrappedInAPluginParseException() {
+        assertThat(
+                wrap(new CheckstyleException("aTestException", new IllegalStateException("aTestException"))),
+                is(instanceOf(CheckStylePluginParseException.class)));
+    }
+
+    @Test
     public void aCheckstyleExceptionThatHasACauseOfAnyOtherExceptionIsWrappedInAPluginException() {
         assertThat(
                 wrap(new CheckstyleException("aTestException", new IllegalStateException("aTestException"))),

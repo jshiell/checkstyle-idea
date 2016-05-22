@@ -19,7 +19,8 @@ public class CheckStylePluginException extends RuntimeException {
             RecognitionException.class,
             TokenStreamException.class,
             NullPointerException.class,
-            ArrayIndexOutOfBoundsException.class));
+            ArrayIndexOutOfBoundsException.class,
+            IllegalStateException.class));
 
     public CheckStylePluginException(final String message) {
         super(message);
