@@ -274,8 +274,8 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="com.puppycrawl.tools:checkstyle:6.18" type="repository">
-      <properties maven-id="com.puppycrawl.tools:checkstyle:6.18" />
+    <library name="com.puppycrawl.tools:checkstyle:6.19" type="repository">
+      <properties maven-id="com.puppycrawl.tools:checkstyle:6.19" />
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/6.18/checkstyle-6.18.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/antlr/antlr/2.7.7/antlr-2.7.7.jar!/" />
