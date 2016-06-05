@@ -130,10 +130,14 @@ public class Configurations {
                 configRoot.addChild(elementWithUpdatedFile(
                         resolvedFile, configModule, propertyName));
 
-            } else if (module != null) {
+            } else if (module != null && isNotOptional(configModule)) {
                 showWarning(module.getProject(), message(format("checkstyle.not-found.%s", configModule.getName())));
             }
         }
+    }
+
+    private boolean isNotOptional(final Configuration configModule) {
+        return !"true".equalsIgnoreCase(getAttributeOrNull(configModule, "optional"));
     }
 
     private String getAttributeOrNull(final Configuration element, final String attributeName) {
