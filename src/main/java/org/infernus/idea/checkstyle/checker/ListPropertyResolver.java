@@ -27,9 +27,6 @@ class ListPropertyResolver implements PropertyResolver {
         // collect properties that are referenced in the config file
         if (!propertyNames.contains(propertyName)) {
             propertyNames.add(propertyName);
-
-            propertyNamesToValues.put(propertyName, "Property '" + propertyName
-                    + "' has no value defined in the configuration.");
         }
 
         final String propertyValue = propertyNamesToValues.get(propertyName);

@@ -162,6 +162,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.29.1** Fixed: Default property values should now be applied (#237).
 * **4.29.0** New: Updated to CheckStyle 6.19.
 * **4.29.0** Fixed: Optional suppression files should no longer generate errors (#231).
 * **4.28.1** Fixed: IllegalStateExceptions from Checkstyle are now treated as parse exceptions (#228).

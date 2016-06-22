@@ -10,7 +10,7 @@
 </p>
         ]]>
     </description>
-    <version>4.29.0</version>
+    <version>4.29.1</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.29.1: Fixed: Default property values should now be applied (#237).</li>
     <li>4.29.0: New: Updated to CheckStyle 6.19.</li>
     <li>4.29.0: Fixed: Optional suppression files should no longer generate errors (#231).</li>
     <li>4.28.1: Fixed: IllegalStateExceptions from Checkstyle are now treated as parse exceptions (#228).</li>
