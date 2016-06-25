@@ -50,7 +50,7 @@ public class CheckerFactory {
     @Nullable
     private CheckStyleChecker checker(@Nullable final Module module,
                                       @Nullable final ConfigurationLocation location,
-                                      @Nullable final ClassLoader classLoader) {
+                                      @Nullable final ClassLoader classLoader) throws CheckStylePluginException {
         LOG.debug("Getting CheckStyle checker with location " + location);
 
         if (location == null) {
