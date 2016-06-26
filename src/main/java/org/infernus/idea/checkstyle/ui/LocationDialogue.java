@@ -202,8 +202,6 @@ public class LocationDialogue extends JDialog {
             errorPanel.setError(e);
             return Step.ERROR;
 
-        } finally {
-            cache.shutdown();
         }
     }
 

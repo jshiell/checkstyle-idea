@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.concurrency.JobScheduler;
 import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -17,20 +17,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CheckerFactoryCache {
-    private static final int ONE_THREAD = 1;
     private static final int CLEANUP_PERIOD_SECONDS = 30;
 
     private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
     private final Map<CacheKey, CachedChecker> cache = new HashMap<>();
 
-    private final ScheduledExecutorService cleanUpExecutor = Executors.newScheduledThreadPool(ONE_THREAD);
+    private final ScheduledExecutorService cleanUpExecutor = JobScheduler.getScheduler();
 
     public CheckerFactoryCache() {
         startBackgroundCleanupTask();
-    }
-
-    public void shutdown() {
-        cleanUpExecutor.shutdown();
     }
 
     public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location,
@@ -76,8 +71,11 @@ public class CheckerFactoryCache {
     }
 
     private void startBackgroundCleanupTask() {
-        cleanUpExecutor.scheduleAtFixedRate(this::cleanUpExpiredCachedCheckers,
-                CLEANUP_PERIOD_SECONDS, CLEANUP_PERIOD_SECONDS, TimeUnit.SECONDS);
+        // Use {@link ScheduleThreadPoolExecutor#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)} rather
+        // than {@link ScheduleThreadPoolExecutor#scheduleWithFixedRate(Runnable, long, long, TimeUnit)} as
+        // recommended by JetBrains for compatibility with hibernation.
+        cleanUpExecutor.scheduleWithFixedDelay(this::cleanUpExpiredCachedCheckers, CLEANUP_PERIOD_SECONDS,
+                                               CLEANUP_PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     private void cleanUpExpiredCachedCheckers() {
