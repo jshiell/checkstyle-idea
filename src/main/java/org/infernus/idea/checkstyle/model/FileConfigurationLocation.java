@@ -116,7 +116,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     private String extensionOf(final String filename) {
         if (filename != null && filename.contains(".")) {
-            return filename.substring(filename.lastIndexOf("."));
+            return filename.substring(filename.lastIndexOf('.'));
         }
         return ".tmp";
     }
