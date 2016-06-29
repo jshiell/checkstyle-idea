@@ -218,6 +218,7 @@ public class LocationPanel extends JPanel {
                     CheckStyleBundle.message("config.file.browse.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final VirtualFile toSelect;
             final String configFilePath = fileLocationField.getText();
@@ -243,6 +244,7 @@ public class LocationPanel extends JPanel {
      * Handles radio button selections.
      */
     protected final class RadioButtonActionListener implements ActionListener {
+        @Override
         public void actionPerformed(final ActionEvent e) {
             if (urlLocationRadio.isSelected()) {
                 enabledURLLocation();

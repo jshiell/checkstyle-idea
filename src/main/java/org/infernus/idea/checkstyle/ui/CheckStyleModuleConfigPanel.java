@@ -197,6 +197,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      */
     private class RadioListener implements ActionListener {
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final boolean showModuleConfig = useModuleConfigurationRadio.isSelected();
 

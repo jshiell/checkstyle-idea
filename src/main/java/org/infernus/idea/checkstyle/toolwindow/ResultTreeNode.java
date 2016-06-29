@@ -193,6 +193,7 @@ public class ResultTreeNode {
         this.description = description;
     }
 
+    @Override
     public String toString() {
         if (text != null) {
             return text;

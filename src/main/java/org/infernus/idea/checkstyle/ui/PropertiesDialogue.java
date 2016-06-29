@@ -122,6 +122,7 @@ public class PropertiesDialogue extends JDialog {
                     CheckStyleBundle.message("config.file.okay.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent event) {
             committed = true;
             setVisible(false);
@@ -143,6 +144,7 @@ public class PropertiesDialogue extends JDialog {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             committed = false;
 

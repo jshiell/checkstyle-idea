@@ -320,6 +320,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final LocationDialogue dialogue = new LocationDialogue(project, getThirdPartyClasspath());
 
@@ -351,6 +352,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
@@ -373,6 +375,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
@@ -417,6 +420,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
                     (String) getValue(Action.NAME),
@@ -445,6 +449,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 0) {
@@ -483,6 +488,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final int[] selected = pathList.getSelectedIndices();
             if (selected == null || selected.length == 0) {
@@ -510,6 +516,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 1) {
@@ -539,6 +546,7 @@ public final class CheckStyleConfigPanel extends JPanel {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final DefaultListModel<String> listModel = pathListModel();
             final int selected = pathList.getSelectedIndex();
