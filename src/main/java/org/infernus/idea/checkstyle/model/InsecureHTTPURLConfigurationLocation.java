@@ -38,7 +38,7 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
 
     private static class AllTrustingTrustManager implements X509TrustManager {
         public X509Certificate[] getAcceptedIssuers() {
-            return null;
+            return new X509Certificate[] {};
         }
 
         public void checkClientTrusted(final X509Certificate[] certs, final String authType) {

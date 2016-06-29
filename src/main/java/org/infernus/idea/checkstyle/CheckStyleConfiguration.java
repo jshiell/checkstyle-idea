@@ -233,7 +233,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
             removeUnknownProperties();
 
             if (configurationLocations == null) {
-                return null;
+                return Collections.emptyList();
             }
 
             int index = 0;
