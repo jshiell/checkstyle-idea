@@ -147,10 +147,12 @@ public class LocationTableModel extends AbstractTableModel {
         return Collections.unmodifiableList(locations);
     }
 
+    @Override
     public int getColumnCount() {
         return NUMBER_OF_COLUMNS;
     }
 
+    @Override
     public Class<?> getColumnClass(final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:
@@ -161,10 +163,12 @@ public class LocationTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public String getColumnName(final int column) {
         return CheckStyleBundle.message("config.file.locations.table." + column);
     }
 
+    @Override
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         return columnIndex == COLUMN_ACTIVE;
     }
@@ -183,10 +187,12 @@ public class LocationTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public int getRowCount() {
         return locations.size();
     }
 
+    @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:

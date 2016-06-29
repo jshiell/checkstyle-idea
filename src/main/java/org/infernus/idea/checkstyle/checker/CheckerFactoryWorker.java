@@ -36,6 +36,7 @@ class CheckerFactoryWorker extends Thread {
         return threadReturn[0];
     }
 
+    @Override
     public void run() {
         try {
             Configuration config = ConfigurationLoader.loadConfiguration(new InputSource(location.resolve()), resolver, true);

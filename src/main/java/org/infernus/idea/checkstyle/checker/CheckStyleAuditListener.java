@@ -97,6 +97,7 @@ public class CheckStyleAuditListener implements AuditListener {
 
     private class ProcessResultsThread implements Runnable {
 
+        @Override
         public void run() {
             final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<>();
 

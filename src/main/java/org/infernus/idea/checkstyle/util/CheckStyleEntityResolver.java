@@ -64,6 +64,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
 
     }
 
+    @Override
     public InputSource resolveEntity(final String publicId,
                                      final String systemId)
             throws SAXException, IOException {
@@ -101,6 +102,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
             this.systemId = systemId;
         }
 
+        @Override
         public boolean equals(final Object o) {
             if (this == o) {
                 return true;
@@ -121,6 +123,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
             return true;
         }
 
+        @Override
         public int hashCode() {
             return 31 * publicId.hashCode() + systemId.hashCode();
         }

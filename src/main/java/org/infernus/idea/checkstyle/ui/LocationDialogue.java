@@ -210,6 +210,7 @@ public class LocationDialogue extends JDialog {
     private class NextAction extends AbstractAction {
         private static final long serialVersionUID = 3800521701284308642L;
 
+        @Override
         public void actionPerformed(final ActionEvent event) {
             commitButton.setEnabled(false);
 
@@ -316,6 +317,7 @@ public class LocationDialogue extends JDialog {
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
         }
 
+        @Override
         public void actionPerformed(final ActionEvent e) {
             committed = false;
 

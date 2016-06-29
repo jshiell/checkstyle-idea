@@ -406,6 +406,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     protected class ToolWindowSelectionListener implements TreeSelectionListener {
 
+        @Override
         public void valueChanged(final TreeSelectionEvent e) {
             if (!scrollToSource) {
                 return;

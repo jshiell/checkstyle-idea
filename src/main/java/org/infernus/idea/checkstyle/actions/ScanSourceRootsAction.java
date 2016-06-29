@@ -22,6 +22,7 @@ class ScanSourceRootsAction implements Runnable {
         this.selectedOverride = selectedOverride;
     }
 
+    @Override
     public void run() {
         project.getComponent(CheckStylePlugin.class)
                 .asyncScanFiles(flattenFiles(sourceRoots), selectedOverride);

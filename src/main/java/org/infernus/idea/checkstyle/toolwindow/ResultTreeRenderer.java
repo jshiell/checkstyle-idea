@@ -21,6 +21,7 @@ public class ResultTreeRenderer extends JLabel
         setOpaque(false);
     }
 
+    @Override
     public void paintComponent(final Graphics g) {
         g.setColor(getBackground());
 
@@ -39,6 +40,7 @@ public class ResultTreeRenderer extends JLabel
         super.paintComponent(g);
     }
 
+    @Override
     public Component getTreeCellRendererComponent(final JTree tree,
                                                   final Object value,
                                                   final boolean selected,

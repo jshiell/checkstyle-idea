@@ -55,6 +55,7 @@ class CreateScannableFileAction implements Runnable {
         return file;
     }
 
+    @Override
     public void run() {
         try {
             file = new ScannableFile(psiFile, module);
