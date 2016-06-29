@@ -195,6 +195,7 @@ public class CheckerFactory {
             try {
                 worker.join();
             } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
             }
         }
 
