@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 class ModuleImporterFactory {
 
+    private ModuleImporterFactory() {}
+
     @Nullable
     static ModuleImporter getModuleImporter(@NotNull Configuration configuration)
             throws InstantiationException, IllegalAccessException {
