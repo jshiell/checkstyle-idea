@@ -35,11 +35,11 @@ public final class FilePaths {
         String normalizedBasePath = FilenameUtils.normalizeNoEndSeparator(basePath);
 
         // Undo the changes to the separators made by normalization
-        if (pathSeparator.equals("/")) {
+        if ("/".equals(pathSeparator)) {
             normalizedTargetPath = FilenameUtils.separatorsToUnix(normalizedTargetPath);
             normalizedBasePath = FilenameUtils.separatorsToUnix(normalizedBasePath);
 
-        } else if (pathSeparator.equals("\\")) {
+        } else if ("\\".equals(pathSeparator)) {
             normalizedTargetPath = FilenameUtils.separatorsToWindows(normalizedTargetPath);
             normalizedBasePath = FilenameUtils.separatorsToWindows(normalizedBasePath);
 
