@@ -165,6 +165,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.29.2** Fixed: Corrected cleanup thread pooling (#239). Thanks to Baron Roberts.
 * **4.29.2** Fixed: If the rules file for a configuration is deleted, we continue to show errors. It will now be deactivated (#240). Thanks to Victor Alenkov.
 * **4.29.1** Fixed: Default property values should now be applied (#237).
 * **4.29.0** New: Updated to CheckStyle 6.19.
