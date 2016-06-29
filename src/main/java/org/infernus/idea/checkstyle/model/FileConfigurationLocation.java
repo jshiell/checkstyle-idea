@@ -194,7 +194,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             try {
                 jarFile.close();
             } catch (IOException ignored) {
-                // ignored
             }
         }
     }
@@ -205,7 +204,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
                 try {
                     closeable.close();
                 } catch (IOException ignored) {
-                    // ignored
                 }
             }
         }

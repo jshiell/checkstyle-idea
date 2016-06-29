@@ -107,8 +107,7 @@ public class PropertiesPanel extends JPanel {
             if (configInputStream != null) {
                 try {
                     configInputStream.close();
-                } catch (IOException e) {
-                    // ignored
+                } catch (IOException ignored) {
                 }
             }
         }

@@ -75,7 +75,6 @@ public class Configurations {
             try {
                 return Integer.valueOf(value);
             } catch (NumberFormatException ignored) {
-                // ignored
             }
         }
         return defaultValue;
