@@ -144,6 +144,9 @@ Thanks to those who have contributed work and effort directly to this project:
 * Rustam Vishnyakov (@dyadix)
 * Thomas Harning (@harningt)
 * František Hartman (@frant-hartm)
+* Victor Alenkov (@BorzdeG)
+* Baron Roberts (@baron1405)
+* George Kankava (@georgekankava)
 
 And also thanks are due to the authors and contributors of:
 
