@@ -168,7 +168,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
 
         final int propertyStart = value.indexOf("${");
-        final int propertyEnd = value.indexOf("}");
+        final int propertyEnd = value.indexOf('}');
         if (propertyStart >= 0 && propertyEnd >= 0) {
             final String propertyName = value.substring(
                     propertyStart + 2, propertyEnd);

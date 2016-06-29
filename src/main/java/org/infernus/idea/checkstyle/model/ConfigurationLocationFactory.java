@@ -94,7 +94,7 @@ public class ConfigurationLocationFactory {
             throw new IllegalArgumentException("A non-blank representation is required");
         }
 
-        final int typeSplitIndex = stringRepresentation.indexOf(":");
+        final int typeSplitIndex = stringRepresentation.indexOf(':');
         if (typeSplitIndex <= 0 || typeSplitIndex >= stringRepresentation.length() - 1) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
@@ -102,7 +102,7 @@ public class ConfigurationLocationFactory {
         final String typeString = stringRepresentation.substring(0, typeSplitIndex);
 
 
-        final int descriptionSplitIndex = stringRepresentation.lastIndexOf(":");
+        final int descriptionSplitIndex = stringRepresentation.lastIndexOf(':');
         if (descriptionSplitIndex <= 0) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
