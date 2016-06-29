@@ -49,8 +49,8 @@ class ListPropertyResolver implements PropertyResolver {
             return;
         }
 
-        for (final String propertyName : properties.keySet()) {
-            setProperty(propertyName, properties.get(propertyName));
+        for (final Map.Entry<String, String> propertieEntry : properties.entrySet()) {
+            setProperty(propertieEntry.getKey(), propertieEntry.getValue());
         }
     }
 }
