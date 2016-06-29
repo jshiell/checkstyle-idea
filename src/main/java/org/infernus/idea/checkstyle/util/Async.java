@@ -41,6 +41,7 @@ public class Async {
             Thread.sleep(millis);
         } catch (InterruptedException ignored) {
             // ignored
+            Thread.currentThread().interrupt();
         }
     }
 }
