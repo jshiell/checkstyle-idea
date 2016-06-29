@@ -11,6 +11,8 @@ import java.util.concurrent.Future;
 public class Async {
     private static final int FIFTY_MS = 50;
 
+    private Async() {}
+
     @Nullable
     public static <T> T asyncResultOf(@NotNull final Callable<T> callable,
                                       @Nullable final T defaultValue) {
