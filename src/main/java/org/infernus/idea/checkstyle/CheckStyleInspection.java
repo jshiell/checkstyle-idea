@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,6 +99,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
         } catch (CheckStylePluginException e) {
             blacklist(configurationLocation);
             LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
+            if (e.getCause() instanceof FileNotFoundException){
+                plugin.getConfiguration().setActiveConfiguration(null);
+            }
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {

@@ -1,6 +1,9 @@
 CheckStyle-IDEA.zip
 .DS_Store
 /*.iws
+*.ipr
+*.iml
+.idea/
 /target/
 /build/*
 /test-configs/
