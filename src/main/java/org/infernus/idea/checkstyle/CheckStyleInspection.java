@@ -99,10 +99,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (CheckStylePluginException e) {
-            LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
             if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
                 disableActiveConfiguration(plugin, manager.getProject());
             } else {
+                LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
                 blacklist(configurationLocation);
             }
             return NO_PROBLEMS_FOUND;
@@ -118,7 +118,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private void disableActiveConfiguration(final CheckStylePlugin plugin, final Project project) {
         plugin.getConfiguration().setActiveConfiguration(null);
-        showWarning(project, message("checkstyle.configuration-disabled.error"));
+        showWarning(project, message("checkstyle.configuration-disabled.file-not-found"));
     }
 
     private void blacklist(final ConfigurationLocation configurationLocation) {

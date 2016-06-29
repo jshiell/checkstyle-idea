@@ -194,7 +194,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext(); ) {
+            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
                 if (!propertiesInFile.contains(i.next())) {
                     i.remove();
                 }
@@ -386,7 +386,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
     }
 
-    public void blacklist() {
+    public void  blacklist() {
         blacklistedUntil = currentTimeMillis() + BLACKLIST_TIME_MS;
     }
 
