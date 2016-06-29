@@ -142,7 +142,7 @@ public final class CheckStyleModuleConfiguration extends Properties
      * Wrapper class for IDEA state serialisation.
      */
     public static class ModuleSettings {
-        public Map<String, String> configuration = new HashMap<>();
+        private Map<String, String> configuration = new HashMap<>();
 
         public ModuleSettings() {
             this.configuration = new HashMap<>();
