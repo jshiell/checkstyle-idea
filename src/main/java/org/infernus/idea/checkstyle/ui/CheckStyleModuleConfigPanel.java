@@ -111,12 +111,12 @@ public class CheckStyleModuleConfigPanel extends JPanel {
 
         configurationFilesModel.removeAllElements();
 
-        if (locations != null && locations.size() > 0) {
+        if (locations != null && !locations.isEmpty()) {
             locations.forEach(configurationFilesModel::addElement);
             configurationFilesModel.setSelectedItem(locations.get(0));
         }
 
-        useModuleConfigurationRadio.setEnabled(locations != null && locations.size() > 0);
+        useModuleConfigurationRadio.setEnabled(locations != null && !locations.isEmpty());
     }
 
     /**

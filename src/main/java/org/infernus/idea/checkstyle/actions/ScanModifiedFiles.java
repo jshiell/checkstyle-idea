@@ -68,7 +68,7 @@ public class ScanModifiedFiles extends BaseAction {
 
             // disable if no files are modified
             final List<VirtualFile> modifiedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
-            if (modifiedFiles.size() == 0) {
+            if (modifiedFiles.isEmpty()) {
                 presentation.setEnabled(false);
 
             } else {
