@@ -99,7 +99,7 @@ public final class CheckStylePlugin implements ProjectComponent {
      */
     public boolean isScanInProgress() {
         synchronized (checksInProgress) {
-            return checksInProgress.size() > 0;
+            return !checksInProgress.isEmpty();
         }
     }
 
