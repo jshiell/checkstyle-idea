@@ -42,7 +42,7 @@ public enum ConfigurationType {
         }
 
         final String processedType = typeAsString.toUpperCase().replace(' ', '_');
-        if (processedType.equals("FILE")) {
+        if ("FILE".equals(processedType)) {
             return LOCAL_FILE;
         }
 

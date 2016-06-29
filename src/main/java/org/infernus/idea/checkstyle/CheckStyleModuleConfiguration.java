@@ -68,7 +68,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
     public boolean isExcluded() {
         return containsKey(EXCLUDE_FROM_SCAN)
-                && getProperty(EXCLUDE_FROM_SCAN, "false").equalsIgnoreCase("true");
+                && "true".equalsIgnoreCase(getProperty(EXCLUDE_FROM_SCAN, "false"));
     }
 
     public boolean isUsingModuleConfiguration() {
