@@ -29,7 +29,9 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
+import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 public class CheckStyleInspection extends LocalInspectionTool {
 
@@ -97,10 +99,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (CheckStylePluginException e) {
-            blacklist(configurationLocation);
             LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
-            if (e.getCause() instanceof FileNotFoundException){
-                plugin.getConfiguration().setActiveConfiguration(null);
+            if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
+                disableActiveConfiguration(plugin, manager.getProject());
+            } else {
+                blacklist(configurationLocation);
             }
             return NO_PROBLEMS_FOUND;
 
@@ -111,6 +114,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
+    }
+
+    private void disableActiveConfiguration(final CheckStylePlugin plugin, final Project project) {
+        plugin.getConfiguration().setActiveConfiguration(null);
+        showWarning(project, message("checkstyle.configuration-disabled.error"));
     }
 
     private void blacklist(final ConfigurationLocation configurationLocation) {
