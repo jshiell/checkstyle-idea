@@ -30,11 +30,11 @@ public class ResultTreeRenderer extends JLabel
             offset = getIcon().getIconWidth() + getIconTextGap();
         }
 
-        g.fillRect(offset, 0, (getWidth() - 1 - offset), (getHeight() - 1));
+        g.fillRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
 
         if (selected) {
             g.setColor(UIManager.getColor("Tree.selectionBorderColor"));
-            g.drawRect(offset, 0, (getWidth() - 1 - offset), (getHeight() - 1));
+            g.drawRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
         }
 
         super.paintComponent(g);

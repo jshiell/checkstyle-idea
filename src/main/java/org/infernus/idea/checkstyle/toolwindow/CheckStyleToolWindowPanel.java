@@ -216,7 +216,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         for (Content currentContent : toolWindow.getContentManager().getContents()) {
             if (currentContent.getComponent() instanceof CheckStyleToolWindowPanel) {
-                return ((CheckStyleToolWindowPanel) currentContent.getComponent());
+                return (CheckStyleToolWindowPanel) currentContent.getComponent();
             }
         }
 
