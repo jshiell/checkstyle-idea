@@ -138,6 +138,25 @@ public final class CheckStyleModuleConfiguration extends Properties
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        CheckStyleModuleConfiguration that = (CheckStyleModuleConfiguration) o;
+
+        return module != null ? module.equals(that.module) : that.module == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (module != null ? module.hashCode() : 0);
+        return result;
+    }
+
     /**
      * Wrapper class for IDEA state serialisation.
      */
