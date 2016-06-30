@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 
 public class FilePathsTest {
 
+    private static final String C_JAVA_WORKSPACE_ACCEPTANCE_TESTS_STANDARD_TEST_DATA_GEO = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
+
     @Test
     public void testGetRelativePathsUnix() {
         assertEquals("stuff/xyz.dat", FilePaths.relativePath("/var/data/stuff/xyz.dat", "/var/data/", "/"));
@@ -67,16 +69,16 @@ public class FilePathsTest {
 
     @Test
     public void testTargetAndBaseAreIdentical() {
-        String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
-        String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
+        String target = C_JAVA_WORKSPACE_ACCEPTANCE_TESTS_STANDARD_TEST_DATA_GEO;
+        String base = C_JAVA_WORKSPACE_ACCEPTANCE_TESTS_STANDARD_TEST_DATA_GEO;
 
         assertEquals(".", FilePaths.relativePath(target, base, "\\"));
     }
 
     @Test
     public void testTargetAndBaseAreIdentical2() {
-        String target = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
-        String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo";
+        String target = C_JAVA_WORKSPACE_ACCEPTANCE_TESTS_STANDARD_TEST_DATA_GEO;
+        String base = C_JAVA_WORKSPACE_ACCEPTANCE_TESTS_STANDARD_TEST_DATA_GEO;
 
         assertEquals(".", FilePaths.relativePath(target, base, "\\"));
     }

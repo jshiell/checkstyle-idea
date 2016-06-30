@@ -35,6 +35,11 @@ public class ConfigurationLocationTest {
             "  <property name=\"something\" value=\"${property-four}\"/>\n" +
             "</module>\n" +
             "</module>";
+    private static final String PROPERTY_ONE = "property-one";
+    private static final String PROPERTY_TWO = "property-two";
+    private static final String A_VALUE = "aValue";
+    private static final String A_NEW_DESCRIPTION = "aNewDescription";
+    private static final String A_LOCATION = "aLocation";
 
     private TestConfigurationLocation underTest;
 
@@ -48,8 +53,8 @@ public class ConfigurationLocationTest {
     public void whenReadPropertiesAreExtracted() throws IOException {
         underTest.resolve();
 
-        assertThat(underTest.getProperties(), hasEntry("property-one", ""));
-        assertThat(underTest.getProperties(), hasEntry("property-two", ""));
+        assertThat(underTest.getProperties(), hasEntry(PROPERTY_ONE, ""));
+        assertThat(underTest.getProperties(), hasEntry(PROPERTY_TWO, ""));
         assertThat(underTest.getProperties(), hasEntry("property-three", ""));
     }
 
@@ -60,8 +65,8 @@ public class ConfigurationLocationTest {
         underTest.setLocation(TEST_FILE_2);
         underTest.resolve();
 
-        assertThat(underTest.getProperties(), hasEntry("property-one", ""));
-        assertThat(underTest.getProperties(), hasEntry("property-two", ""));
+        assertThat(underTest.getProperties(), hasEntry(PROPERTY_ONE, ""));
+        assertThat(underTest.getProperties(), hasEntry(PROPERTY_TWO, ""));
         assertThat(underTest.getProperties(), hasEntry("property-four", ""));
         assertThat(underTest.getProperties(), not(hasKey("property-three")));
     }
@@ -70,27 +75,27 @@ public class ConfigurationLocationTest {
     public void propertyValuesAreRetainedWhenThePropertiesAreReread() throws IOException {
         underTest.resolve();
 
-        updatePropertyOn(underTest, "property-two", "aValue");
+        updatePropertyOn(underTest, PROPERTY_TWO, A_VALUE);
 
         underTest.setLocation(TEST_FILE_2);
         underTest.resolve();
 
-        assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
+        assertThat(underTest.getProperties(), hasEntry(PROPERTY_TWO, A_VALUE));
     }
 
     @Test
     public void theDescriptionIsSetToThePassedStringWhenNotNull() {
-        underTest.setDescription("aNewDescription");
+        underTest.setDescription(A_NEW_DESCRIPTION);
 
-        assertThat(underTest.getDescription(), is(equalTo("aNewDescription")));
+        assertThat(underTest.getDescription(), is(equalTo(A_NEW_DESCRIPTION)));
     }
 
     @Test
     public void theDescriptionDefaultsToTheLocationWhenANullValueIsGiven() {
-        underTest.setLocation("aLocation");
+        underTest.setLocation(A_LOCATION);
         underTest.setDescription(null);
 
-        assertThat(underTest.getDescription(), is(equalTo("aLocation")));
+        assertThat(underTest.getDescription(), is(equalTo(A_LOCATION)));
     }
 
     @Test
@@ -116,7 +121,7 @@ public class ConfigurationLocationTest {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
-        location1.setDescription("aNewDescription");
+        location1.setDescription(A_NEW_DESCRIPTION);
 
         assertThat(location1.hasChangedFrom(location2), is(true));
     }
@@ -126,7 +131,7 @@ public class ConfigurationLocationTest {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
-        updatePropertyOn(location1, "property-two", "aValue");
+        updatePropertyOn(location1, PROPERTY_TWO, A_VALUE);
 
         assertThat(location1.hasChangedFrom(location2), is(true));
     }
@@ -149,7 +154,7 @@ public class ConfigurationLocationTest {
 
     @Test
     public void aDescriptorContainsTheLocationDescriptionAndType() {
-        final ConfigurationLocation location = new TestConfigurationLocation("aLocation");
+        final ConfigurationLocation location = new TestConfigurationLocation(A_LOCATION);
 
         assertThat(location.getDescriptor(), is(equalTo(format("%s:%s:%s",
                 location.getType(), location.getLocation(), location.getDescription()))));
@@ -158,10 +163,10 @@ public class ConfigurationLocationTest {
     @Test
     public void equalsIgnoresProperties() throws IOException {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
-        updatePropertyOn(location1, "property-one", "aValue");
+        updatePropertyOn(location1, PROPERTY_ONE, A_VALUE);
 
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
-        updatePropertyOn(location2, "property-one", "anotherValue");
+        updatePropertyOn(location2, PROPERTY_ONE, "anotherValue");
 
         assertThat(location1, is(equalTo(location2)));
     }
@@ -169,10 +174,10 @@ public class ConfigurationLocationTest {
     @Test
     public void hashCodeIgnoresProperties() throws IOException {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
-        updatePropertyOn(location1, "property-one", "aValue");
+        updatePropertyOn(location1, PROPERTY_ONE, A_VALUE);
 
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
-        updatePropertyOn(location2, "property-one", "anotherValue");
+        updatePropertyOn(location2, PROPERTY_ONE, "anotherValue");
 
         assertThat(location1.hashCode(), is(equalTo(location2.hashCode())));
     }

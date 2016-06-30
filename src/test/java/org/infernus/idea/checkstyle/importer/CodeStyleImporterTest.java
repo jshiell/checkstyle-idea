@@ -31,8 +31,9 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
             "          \"-//Puppy Crawl//DTD Check Configuration 1.3//EN\"\n" +
             "          \"http://www.puppycrawl.com/dtds/configuration_1_3.dtd\">\n" +
             "<module name = \"Checker\">\n";
+    private static final String MODULE = "</module>";
     private final static String FILE_SUFFIX =
-            "</module>";
+            MODULE;
     
     private void importConfiguration(@NotNull String configuration) throws Exception {
         configuration = FILE_PREFIX + configuration + FILE_SUFFIX;
@@ -40,7 +41,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
     }
     
     private String inTreeWalker(@NotNull String configuration) {
-        return "<module name=\"TreeWalker\">" + configuration + "</module>";
+        return "<module name=\"TreeWalker\">" + configuration + MODULE;
     }
     
     private Configuration loadConfiguration(@NotNull String configuration) throws CheckstyleException {
@@ -53,7 +54,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                 inTreeWalker(
                         "<module name=\"LineLength\">\n" +
                         "    <property name=\"max\" value=\"100\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertEquals(100, javaSettings.RIGHT_MARGIN);
@@ -66,7 +67,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                 inTreeWalker(
                         "<module name=\"EmptyLineSeparator\">\n" +
                         "    <property name=\"tokens\" value=\"VARIABLE_DEF, METHOD_DEF\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertEquals(1, javaSettings.BLANK_LINES_AROUND_FIELD);
@@ -86,7 +87,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                         "<module name=\"FileTabCharacter\">\n" +
                         "    <property name=\"eachLine\" value=\"true\" />\n" +
                         "    <property name=\"fileExtensions\" value=\"java,xml\" />\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertFalse(javaIndentOptions.USE_TAB_CHARACTER);
@@ -118,7 +119,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                 inTreeWalker(
                         "<module name=\"WhitespaceAfter\">\n" +
                         "    <property name=\"tokens\" value=\"COMMA, SEMI\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertTrue(javaSettings.SPACE_AFTER_COMMA);
@@ -135,7 +136,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                         "<module name=\"WhitespaceAround\">\n" +
                         "    <property name=\"tokens\" value=\"ASSIGN\"/>\n" +
                         "    <property name=\"tokens\" value=\"EQUAL\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertTrue(javaSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS);
@@ -168,7 +169,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                         "<module name=\"LeftCurly\">\n" +
                         "    <property name=\"option\" value=\"eol\"/>\n" +
                         "    <property name=\"tokens\" value=\"METHOD_DEF,LITERAL_IF\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertEquals(CommonCodeStyleSettings.NEXT_LINE, javaSettings.CLASS_BRACE_STYLE);
@@ -184,7 +185,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                 inTreeWalker(
                         "<module name=\"NeedBraces\">\n" +
                         "    <property name=\"allowSingleLineStatement\" value=\"true\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         assertEquals(CommonCodeStyleSettings.FORCE_BRACES_IF_MULTILINE, javaSettings.DOWHILE_BRACE_FORCE);
@@ -207,7 +208,7 @@ public class CodeStyleImporterTest extends LightPlatformTestCase {
                         "            <property name=\"throwsIndent\" value=\"4\"/>\n" +
                         "            <property name=\"lineWrappingIndentation\" value=\"4\"/>\n" +
                         "            <property name=\"arrayInitIndent\" value=\"2\"/>\n" +
-                        "</module>"
+                                MODULE
                 )
         );
         javaSettings.INDENT_BREAK_FROM_CASE = true;
