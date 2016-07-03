@@ -501,10 +501,10 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         if (error.getCause() != null
                 && error.getCause() instanceof CheckstyleException) {
 
-            for (final Pattern errorPattern
-                    : CHECKSTYLE_ERROR_PATTERNS.keySet()) {
+            for (final Map.Entry<Pattern, String> errorPatternEntry
+                    : CHECKSTYLE_ERROR_PATTERNS.entrySet()) {
                 final Matcher errorMatcher
-                        = errorPattern.matcher(error.getCause().getMessage());
+                        = errorPatternEntry.getKey().matcher(error.getCause().getMessage());
                 if (errorMatcher.find()) {
                     final Object[] args = new Object[errorMatcher.groupCount()];
 
@@ -512,7 +512,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                         args[i] = errorMatcher.group(i + 1);
                     }
 
-                    errorText = CheckStyleBundle.message(CHECKSTYLE_ERROR_PATTERNS.get(errorPattern), args);
+                    errorText = CheckStyleBundle.message(errorPatternEntry.getValue(), args);
                 }
             }
         }

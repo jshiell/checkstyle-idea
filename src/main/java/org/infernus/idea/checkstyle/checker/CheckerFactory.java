@@ -241,9 +241,9 @@ public class CheckerFactory {
         if (resolver != null && resolver instanceof ListPropertyResolver) {
             final ListPropertyResolver listResolver = (ListPropertyResolver) resolver;
             final Map<String, String> propertiesToValues = listResolver.getPropertyNamesToValues();
-            for (final String propertyName : propertiesToValues.keySet()) {
-                final String propertyValue = propertiesToValues.get(propertyName);
-                LOG.debug("- Property: " + propertyName + "=" + propertyValue);
+            for (final Map.Entry<String, String> propertyEntry : propertiesToValues.entrySet()) {
+                final String propertyValue = propertyEntry.getValue();
+                LOG.debug("- Property: " + propertyEntry.getKey() + "=" + propertyValue);
             }
         }
     }
