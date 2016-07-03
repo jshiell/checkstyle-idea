@@ -40,7 +40,7 @@ public final class CheckStyleModuleConfiguration extends Properties
      */
     public CheckStyleModuleConfiguration(final Module module) {
         if (module == null) {
-            throw new IllegalArgumentException("Project is required");
+            throw new IllegalArgumentException("Module is required");
         }
 
         this.module = module;
@@ -140,21 +140,24 @@ public final class CheckStyleModuleConfiguration extends Properties
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
         CheckStyleModuleConfiguration that = (CheckStyleModuleConfiguration) o;
 
-        return module != null ? module.equals(that.module) : that.module == null;
-
+        return module.equals(that.module);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (module != null ? module.hashCode() : 0);
-        return result;
+        return 31 * super.hashCode() + module.hashCode();
     }
 
     /**
