@@ -49,7 +49,7 @@ public class ResultTreeRenderer extends JLabel
                                                   final int row,
                                                   final boolean hasFocus) {
         this.selected = selected;
-        
+
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         if (node != null) {
             final Object userObject = node.getUserObject();

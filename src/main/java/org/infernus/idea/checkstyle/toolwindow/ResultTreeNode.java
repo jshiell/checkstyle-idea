@@ -5,7 +5,6 @@ import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.util.Icons;
-import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
