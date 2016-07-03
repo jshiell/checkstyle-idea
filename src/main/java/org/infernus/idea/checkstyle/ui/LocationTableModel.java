@@ -154,12 +154,10 @@ public class LocationTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(final int columnIndex) {
-        switch (columnIndex) {
-            case COLUMN_ACTIVE:
-                return Boolean.class;
-
-            default:
-                return String.class;
+        if (columnIndex == COLUMN_ACTIVE) {
+            return Boolean.class;
+        } else {
+            return String.class;
         }
     }
 
@@ -176,14 +174,10 @@ public class LocationTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
         final ConfigurationLocation rowLocation = locations.get(rowIndex);
-
-        switch (columnIndex) {
-            case COLUMN_ACTIVE:
-                updateActiveLocation(rowLocation, rowIndex, true);
-                break;
-
-            default:
-                throw new IllegalArgumentException("Column is not editable: " + columnIndex);
+        if (columnIndex == COLUMN_ACTIVE) {
+            updateActiveLocation(rowLocation, rowIndex, true);
+        } else {
+            throw new IllegalArgumentException("Column is not editable: " + columnIndex);
         }
     }
 

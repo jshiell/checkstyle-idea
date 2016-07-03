@@ -95,14 +95,11 @@ public class PropertiesTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(final Object aValue, final int rowIndex,
                            final int columnIndex) {
-        switch (columnIndex) {
-            case COLUMN_VALUE:
-                final String propertyName = orderedNames.get(rowIndex);
-                properties.put(propertyName, aValue != null
-                        ? aValue.toString() : null);
-                break;
-
-            default:
+        if (columnIndex == COLUMN_VALUE) {
+            final String propertyName = orderedNames.get(rowIndex);
+            properties.put(propertyName, aValue != null
+                    ? aValue.toString() : null);
+        } else {
                 throw new IllegalArgumentException("Invalid column: "
                         + columnIndex);
         }
