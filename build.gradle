@@ -12,7 +12,7 @@ intellij {
 }
 
 sourceCompatibility = 1.8
-version = '4.29.2'
+version = '4.30.0'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.13'
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '6.19') {
+    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.0') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile group: 'commons-io', name: 'commons-io', version: '2.4'

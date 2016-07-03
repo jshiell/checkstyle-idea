@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 6.19 from within IDEA.
+    of Java files with CheckStyle 7.0 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.29.2</version>
+    <version>4.30.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,7 +19,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>ffffdfsdffsd</li>
+    <li>4.30.0: New: Updated to CheckStyle 7.0.</li>
+    <li>4.29.2: Fixed: Corrected cleanup thread pooling (#239). Thanks to Baron Roberts.</li>
     <li>4.29.2: Fixed: If the rules file for a configuration is deleted, we continue to show errors. It will now be deactivated (#240). Thanks to Victor Alenkov.</li>
     <li>4.29.1: Fixed: Default property values should now be applied (#237).</li>
     <li>4.29.0: New: Updated to CheckStyle 6.19.</li>
