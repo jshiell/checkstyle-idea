@@ -22,6 +22,11 @@ import java.util.Map;
  * Allows selection of the location of the CheckStyle file.
  */
 public class LocationDialogue extends JDialog {
+
+    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
+    private static final int WIDTH = 500;
+    private static final int HEIGHT = 400;
+
     private enum Step {
         SELECT(false, true, false),
         PROPERTIES(true, true, false),
@@ -89,7 +94,7 @@ public class LocationDialogue extends JDialog {
 
     public void initialise() {
         setLayout(new BorderLayout());
-        setMinimumSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(WIDTH, HEIGHT));
         setModal(true);
 
         commitButton = new JButton(new NextAction());
@@ -101,19 +106,19 @@ public class LocationDialogue extends JDialog {
 
         if (SystemInfo.isMac) {
             bottomPanel.add(cancelButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
             bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0,
-                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         } else {
             bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
             bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         }
         bottomPanel.add(previousButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         bottomPanel.add(commitButton, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(panelForCurrentStep(), BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);

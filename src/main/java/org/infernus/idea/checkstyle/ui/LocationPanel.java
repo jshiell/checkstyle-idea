@@ -23,6 +23,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 public class LocationPanel extends JPanel {
 
+    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
     private final JButton browseButton = new JButton(new BrowseAction());
     private final JTextField fileLocationField = new JTextField(20);
     private final JTextField urlLocationField = new JTextField(20);
@@ -72,36 +73,36 @@ public class LocationPanel extends JPanel {
         setBorder(new EmptyBorder(8, 8, 4, 8));
 
         add(descriptionLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         add(descriptionField, new GridBagConstraints(1, 0, 2, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
 
         add(fileLocationRadio, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(fileLocationLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         add(fileLocationField, new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         add(browseButton, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(relativeFileCheckbox, new GridBagConstraints(1, 3, 2, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(urlLocationRadio, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 4, 4, 4), 0, 0));
 
         add(urlLocationlabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         add(urlLocationField, new GridBagConstraints(1, 5, 2, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
 
         add(insecureHttpCheckbox, new GridBagConstraints(1, 6, 2, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(Box.createVerticalGlue(), new GridBagConstraints(0, 7, 3, 1, 0.0, 1.0,
-                GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
     }
 
     private void enabledFileLocation() {

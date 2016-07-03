@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class CheckStyleModuleConfigPanel extends JPanel {
 
+    private static final Insets ISOLATED_COMPONENT_INSETS = new Insets(8, 8, 8, 8);
     private final JRadioButton useProjectConfigurationRadio = new JRadioButton();
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
     private final JRadioButton excludeRadio = new JRadioButton();
@@ -69,9 +70,9 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         radioGroup.add(excludeRadio);
 
         configPanel.add(useProjectConfigurationRadio, new GridBagConstraints(0, 1, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
         configPanel.add(useModuleConfigurationRadio, new GridBagConstraints(0, 2, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
 
         configurationFilesLabel.setText(CheckStyleBundle.message("config.module.module-file.text"));
         configPanel.add(configurationFilesLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
@@ -81,10 +82,10 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         //noinspection unchecked
         configurationFilesCombo.setModel(configurationFilesModel);
         configPanel.add(configurationFilesCombo, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
 
         configPanel.add(excludeRadio, new GridBagConstraints(0, 4, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(8, 8, 8, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
 
         configPanel.add(Box.createGlue(), new GridBagConstraints(0, 5, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));

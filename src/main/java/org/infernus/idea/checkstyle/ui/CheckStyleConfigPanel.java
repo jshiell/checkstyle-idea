@@ -32,6 +32,12 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  * Provides a configuration panel for project-level configuration.
  */
 public final class CheckStyleConfigPanel extends JPanel {
+    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
+    private static final int ACTIVE_COL_MIN_WIDTH = 40;
+    private static final int ACTIVE_COL_MAX_WIDTH = 50;
+    private static final int DESC_COL_MIN_WIDTH = 100;
+    private static final int DESC_COL_MAX_WIDTH = 200;
+    private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
     private final JList pathList = new JBList(new DefaultListModel<String>());
 
     private final JCheckBox testClassesCheckbox = new JCheckBox();
@@ -79,26 +85,26 @@ public final class CheckStyleConfigPanel extends JPanel {
 
         configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
                 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
                 1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
                 2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
                 0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
-                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
                 0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
-                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
     }
 
     private JPanel buildRuleFilePanel() {
-        setColumnWith(locationTable, 0, 40, 50, 50);
-        setColumnWith(locationTable, 1, 100, 200, 200);
+        setColumnWith(locationTable, 0, ACTIVE_COL_MIN_WIDTH, ACTIVE_COL_MAX_WIDTH, ACTIVE_COL_MAX_WIDTH);
+        setColumnWith(locationTable, 1, DESC_COL_MIN_WIDTH, DESC_COL_MAX_WIDTH, DESC_COL_MAX_WIDTH);
         locationTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         locationTable.setStriped(true);
         locationTable.getTableHeader().setReorderingAllowed(false);
@@ -109,7 +115,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setRemoveAction(new RemoveLocationAction());
         tableDecorator.setEditActionUpdater(new DisableForDefaultUpdater());
         tableDecorator.setRemoveActionUpdater(new DisableForDefaultUpdater());
-        tableDecorator.setPreferredSize(new Dimension(300, 50));
+        tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         final JPanel container = new JPanel(new BorderLayout());
         container.add(new TitledSeparator(CheckStyleBundle.message("config.file.tab")), BorderLayout.NORTH);
@@ -128,7 +134,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         pathListDecorator.setRemoveAction(new RemovePathAction());
         pathListDecorator.setMoveUpAction(new MoveUpPathAction());
         pathListDecorator.setMoveDownAction(new MoveDownPathAction());
-        pathListDecorator.setPreferredSize(new Dimension(300, 50));
+        pathListDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         final JPanel container = new JPanel(new BorderLayout());
         container.add(new TitledSeparator(CheckStyleBundle.message("config.path.tab")), BorderLayout.NORTH);
