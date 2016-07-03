@@ -460,6 +460,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
      * Wrapper class for IDEA state serialisation.
      */
     public static class ProjectSettings {
+        // this must remain public for serialisation purposes
         public Map<String, String> configuration;
 
         public ProjectSettings() {
