@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class FileConfigurationLocationTest {
     private static final String PROJECT_PATH = "/the/base-project/path";
+    private static final String A_PATH_TO_CHECKSTYLE_XML = "/a-path/to/checkstyle.xml";
 
     @Mock
     private Project project;
@@ -44,7 +45,7 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForUnixPaths() {
-        underTest.setLocation(PROJECT_PATH + "/a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_PATH + A_PATH_TO_CHECKSTYLE_XML);
 
         assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PRJ_DIR$/a-path/to/checkstyle.xml:aDescription")));
     }
@@ -64,9 +65,9 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void aUnixLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
-        underTest.setLocation(PROJECT_PATH + "/a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_PATH + A_PATH_TO_CHECKSTYLE_XML);
 
-        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/a-path/to/checkstyle.xml")));
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + A_PATH_TO_CHECKSTYLE_XML)));
     }
 
     @Test

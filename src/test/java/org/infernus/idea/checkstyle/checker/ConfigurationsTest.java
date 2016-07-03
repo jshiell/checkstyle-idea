@@ -31,6 +31,17 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigurationsTest {
 
+    private static final String A_FILE_TO_RESOLVE = "aFileToResolve";
+    private static final String A_RESOLVED_FILE = "aResolvedFile";
+    private static final String TRIGGERS_AN_IO_EXCEPTION = "triggersAnIoException";
+    private static final String TREE_WALKER = "TreeWalker";
+    private static final String PROPERTY = "property";
+    private static final String TAB_WIDTH = "tabWidth";
+    private static final String SUPPRESSION_FILTER = "SuppressionFilter";
+    private static final String IMPORT_CONTROL = "ImportControl";
+    private static final String AN_UNRESOLVABLE_FILE = "anUnresolvableFile";
+    private static final String REGEXP_HEADER = "RegexpHeader";
+    private static final String HEADER_FILE = "headerFile";
     @Mock
     private ConfigurationLocation configurationLocation;
     @Mock
@@ -44,9 +55,9 @@ public class ConfigurationsTest {
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module))
-                .thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
+        when(configurationLocation.resolveAssociatedFile(A_FILE_TO_RESOLVE, module))
+                .thenReturn(A_RESOLVED_FILE);
+        when(configurationLocation.resolveAssociatedFile(TRIGGERS_AN_IO_EXCEPTION, module))
                 .thenThrow(new IOException("aTriggeredIoException"));
 
         underTest = new Configurations(configurationLocation, module);
@@ -73,9 +84,9 @@ public class ConfigurationsTest {
     public void tabWidthPropertyValueIsReturnedWhenPresent() {
         assertThat(
                 underTest.tabWidth(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(PROPERTY)
+                                        .withAttribute("name", TAB_WIDTH)
                                         .withAttribute("value", "7")))
                         .build()),
                 is(equalTo(7)));
@@ -85,9 +96,9 @@ public class ConfigurationsTest {
     public void aTabWidthPropertyWithANonIntegerValueReturnsTheDefault() {
         assertThat(
                 underTest.tabWidth(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(PROPERTY)
+                                        .withAttribute("name", TAB_WIDTH)
                                         .withAttribute("value", "dd")))
                         .build()),
                 is(equalTo(8)));
@@ -97,9 +108,9 @@ public class ConfigurationsTest {
     public void aTabWidthPropertyWithNoValueReturnsTheDefault() {
         assertThat(
                 underTest.tabWidth(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(PROPERTY)
+                                        .withAttribute("name", TAB_WIDTH)))
                         .build()),
                 is(equalTo(8)));
     }
@@ -117,13 +128,13 @@ public class ConfigurationsTest {
     public void childrenOfUpdatedElementsArePreserved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aFileToResolve")
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_FILE_TO_RESOLVE)
                                 .withChild(config("aChildModule")))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aResolvedFile")
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_RESOLVED_FILE)
                                 .withChild(config("aChildModule")))
                         .build())));
     }
@@ -132,15 +143,15 @@ public class ConfigurationsTest {
     public void attributesOfUpdatedElementsArePreserved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "aFileToResolve")
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", A_FILE_TO_RESOLVE)
                                         .withAttribute("anotherAttribute", "anotherValue")))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "aResolvedFile")
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", A_RESOLVED_FILE)
                                         .withAttribute("anotherAttribute", "anotherValue")))
                         .build())));
     }
@@ -149,14 +160,14 @@ public class ConfigurationsTest {
     public void messagesOfUpdatedElementsArePreserved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aFileToResolve")
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_FILE_TO_RESOLVE)
                                 .withMessage("messageKey", "messageValue")
                                 .withMessage("anotherMessageKey", "anotherMessageValue"))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aResolvedFile")
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_RESOLVED_FILE)
                                 .withMessage("messageKey", "messageValue")
                                 .withMessage("anotherMessageKey", "anotherMessageValue"))
                         .build())));
@@ -166,20 +177,20 @@ public class ConfigurationsTest {
     public void multipleElementsAreUpdated() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aFileToResolve"))
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "anUnresolvableFile"))
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "aFileToResolve")))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_FILE_TO_RESOLVE))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", AN_UNRESOLVABLE_FILE))
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, A_FILE_TO_RESOLVE)))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aResolvedFile"))
-                        .withChild(config("TreeWalker")
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "aResolvedFile")))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_RESOLVED_FILE))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, A_RESOLVED_FILE)))
                         .build())));
     }
 
@@ -187,15 +198,15 @@ public class ConfigurationsTest {
     public void removalOfElementsDoesNotEffectOtherElements() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "anUnresolvableFile"))
-                        .withChild(config("TreeWalker")
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "anUnresolvableFile"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", AN_UNRESOLVABLE_FILE))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, AN_UNRESOLVABLE_FILE))
                                 .withChild(config("ConstantName")))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker")
+                        .withChild(config(TREE_WALKER)
                                 .withChild(config("ConstantName")))
                         .build())));
     }
@@ -204,20 +215,20 @@ public class ConfigurationsTest {
     public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionDoesNotModifyTheConfiguration() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "triggersAnIoException"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", TRIGGERS_AN_IO_EXCEPTION))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "triggersAnIoException"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", TRIGGERS_AN_IO_EXCEPTION))
                         .build())));
     }
 
     @Test
     public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionTriggersAnErrorNotification() throws CheckstyleException {
         underTest.resolveFilePaths(checker()
-                .withChild(config("SuppressionFilter")
-                        .withAttribute("file", "triggersAnIoException"))
+                .withChild(config(SUPPRESSION_FILTER)
+                        .withAttribute("file", TRIGGERS_AN_IO_EXCEPTION))
                 .build());
 
         final Notification notification = sentNotification();
@@ -230,9 +241,9 @@ public class ConfigurationsTest {
     @Test
     public void aModuleWithAFilenameThatIsNotResolvesTriggersAWarningNotification() throws CheckstyleException {
         underTest.resolveFilePaths(checker()
-                .withChild(config("TreeWalker")
-                        .withChild(config("RegexpHeader")
-                                .withAttribute("headerFile", "anUnresolvableFile")))
+                .withChild(config(TREE_WALKER)
+                        .withChild(config(REGEXP_HEADER)
+                                .withAttribute(HEADER_FILE, AN_UNRESOLVABLE_FILE)))
                 .build());
 
         final Notification notification = sentNotification();
@@ -245,8 +256,8 @@ public class ConfigurationsTest {
     @Test
     public void aModuleWithAFilenameThatIsBlankDoesNotHaveResolutionAttempted() throws CheckstyleException {
         underTest.resolveFilePaths(checker()
-                .withChild(config("TreeWalker")
-                        .withChild(config("ImportControl")
+                .withChild(config(TREE_WALKER)
+                        .withChild(config(IMPORT_CONTROL)
                                 .withAttribute("file", "")))
                 .build());
 
@@ -263,12 +274,12 @@ public class ConfigurationsTest {
     public void aSuppressionFilterWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aFileToResolve"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_FILE_TO_RESOLVE))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "aResolvedFile"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", A_RESOLVED_FILE))
                         .build())));
     }
 
@@ -276,8 +287,8 @@ public class ConfigurationsTest {
     public void aSuppressionFilterWithAnUnresolvableFilenameHasTheModuleRemoved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("SuppressionFilter")
-                                .withAttribute("file", "anUnresolvableFile"))
+                        .withChild(config(SUPPRESSION_FILTER)
+                                .withAttribute("file", AN_UNRESOLVABLE_FILE))
                         .build()),
                 is(configEqualTo(checker().build())));
     }
@@ -286,14 +297,14 @@ public class ConfigurationsTest {
     public void aRegexpHeaderWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "aFileToResolve")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, A_FILE_TO_RESOLVE)))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "aResolvedFile")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, A_RESOLVED_FILE)))
                         .build())));
     }
 
@@ -301,12 +312,12 @@ public class ConfigurationsTest {
     public void aRegexpHeaderWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("RegexpHeader")
-                                        .withAttribute("headerFile", "anUnresolvableFile")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(REGEXP_HEADER)
+                                        .withAttribute(HEADER_FILE, AN_UNRESOLVABLE_FILE)))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker"))
+                        .withChild(config(TREE_WALKER))
                         .build())));
     }
 
@@ -314,14 +325,14 @@ public class ConfigurationsTest {
     public void aImportControlWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "aFileToResolve")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", A_FILE_TO_RESOLVE)))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "aResolvedFile")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", A_RESOLVED_FILE)))
                         .build())));
     }
 
@@ -329,12 +340,12 @@ public class ConfigurationsTest {
     public void anImportControlWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() throws CheckstyleException {
         assertThat(
                 underTest.resolveFilePaths(checker()
-                        .withChild(config("TreeWalker")
-                                .withChild(config("ImportControl")
-                                        .withAttribute("file", "anUnresolvableFile")))
+                        .withChild(config(TREE_WALKER)
+                                .withChild(config(IMPORT_CONTROL)
+                                        .withAttribute("file", AN_UNRESOLVABLE_FILE)))
                         .build()),
                 is(configEqualTo(checker()
-                        .withChild(config("TreeWalker"))
+                        .withChild(config(TREE_WALKER))
                         .build())));
     }
 
