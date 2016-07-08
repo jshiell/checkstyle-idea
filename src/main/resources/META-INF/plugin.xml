@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.30.1: Fixed: StringIndexOutOfBoundsExceptions are now treated as parse errors (#258).</li>
     <li>4.30.1: Fixed: Style importer no longer errors on missing properties (#256).</li>
     <li>4.30.0: New: Updated to CheckStyle 7.0.</li>
     <li>4.29.2: Fixed: Corrected cleanup thread pooling (#239). Thanks to Baron Roberts.</li>

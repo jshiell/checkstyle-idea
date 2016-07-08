@@ -20,6 +20,7 @@ public class CheckStylePluginException extends RuntimeException {
             TokenStreamException.class,
             NullPointerException.class,
             ArrayIndexOutOfBoundsException.class,
+            StringIndexOutOfBoundsException.class,
             IllegalStateException.class));
 
     public CheckStylePluginException(final String message) {
