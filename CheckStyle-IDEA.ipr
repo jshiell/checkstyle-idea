@@ -36,11 +36,19 @@
         <entry key="location-1" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-193.xml:Issue 193" />
         <entry key="location-2" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-218.xml:Issue 218" />
         <entry key="location-3" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-236.xml:Issue 236" />
-        <entry key="location-4" value="CLASSPATH:/sun_checks.xml:The default Checkstyle rules" />
-        <entry key="location-5" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
+        <entry key="location-4" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-256-1.xml:Issue 256 (1)" />
+        <entry key="location-5" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-256-1.xml:Issue 256 (1a)" />
+        <entry key="location-6" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-256-2.xml:Issue 256 (2)" />
+        <entry key="location-7" value="LOCAL_FILE:$PRJ_DIR$/test-configs/issue-256-3.xml:Issue 256 (3)" />
+        <entry key="location-8" value="CLASSPATH:/sun_checks.xml:The default Checkstyle rules" />
+        <entry key="location-9" value="LOCAL_FILE:$PRJ_DIR$/test-configs/yazino-checkstyle-rules.xml:Yazino" />
         <entry key="property-0.basedir" value="" />
         <entry key="property-2.config_loc" value="" />
-        <entry key="property-5.checkstyle.suppressions.file" value="" />
+        <entry key="property-4.checkstyle.header.file" value="header.file" />
+        <entry key="property-5.checkstyle.header.file" value="header.file" />
+        <entry key="property-6.checkstyle.header.file" value="header.file" />
+        <entry key="property-7.checkstyle.header.file" value="header.file" />
+        <entry key="property-9.checkstyle.suppressions.file" value="" />
         <entry key="suppress-errors" value="false" />
         <entry key="thirdparty-classpath" value="$PROJECT_DIR$/../Third Party/CreateYourOwnCheckStyleCheck/BlundellCheckstyle/target/blundell-checkstyle-checks-1.0.jar;$PRJ_DIR$/test-configs/issue-164/vdna-checkstyle-2.1.1-SNAPSHOT.jar" />
       </map>

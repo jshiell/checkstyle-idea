@@ -8,7 +8,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.codeStyle.CodeStyleScheme;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
+import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.InputSource;
@@ -19,6 +22,8 @@ import java.io.InputStream;
  * Imports code style settings from check style configuration file.
  */
 public class CheckStyleCodeStyleImporter implements SchemeImporter<CodeStyleScheme> {
+    private static final Log LOG = LogFactory.getLog(CheckStyleCodeStyleImporter.class);
+
     @NotNull
     @Override
     public String[] getSourceExtensions() {
@@ -42,6 +47,7 @@ public class CheckStyleCodeStyleImporter implements SchemeImporter<CodeStyleSche
                 return targetScheme;
             }
         } catch (Exception e) {
+            LOG.error("Failed to import style", e);
             throw new SchemeImportException(e);
         }
         return null;
@@ -59,7 +65,7 @@ public class CheckStyleCodeStyleImporter implements SchemeImporter<CodeStyleSche
         try {
             inputStream = selectedFile.getInputStream();
             InputSource inputSource = new InputSource(inputStream);
-            return ConfigurationLoader.loadConfiguration(inputSource, null, false);
+            return ConfigurationLoader.loadConfiguration(inputSource, name -> "", false);
         } finally {
             if (inputStream != null) { //noinspection ThrowFromFinallyBlock
                 inputStream.close();
