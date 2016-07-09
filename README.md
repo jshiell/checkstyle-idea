@@ -2,7 +2,7 @@
 
 &copy; Copyright 2006-2016 CheckStyle-IDEA Contributors
 
-[Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
+Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
 A plug-in for JetBrains' IntelliJ IDEA 14.1/15/2016 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
