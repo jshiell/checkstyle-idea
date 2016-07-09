@@ -15,7 +15,7 @@ sourceCompatibility = 1.8
 version = '4.30.1'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.13'
+    gradleVersion = '2.14'
 }
 
 repositories {
