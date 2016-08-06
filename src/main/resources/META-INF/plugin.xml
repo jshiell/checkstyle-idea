@@ -10,8 +10,8 @@
 </p>
         ]]>
     </description>
-    <version>4.31.0</version>
-    <idea-version since-build="141.178"/>
+    <version>4.31.1</version>
+    <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.31.1: New: Updated IDEA SDK to 15.0.6 (143.2370.31), which means no more IDEA 14 support.</li>
     <li>4.31.0: New: Updated to CheckStyle 7.1 (#264).</li>
     <li>4.30.1: Fixed: StringIndexOutOfBoundsExceptions are now treated as parse errors (#258).</li>
     <li>4.30.1: Fixed: Style importer no longer errors on missing properties (#256).</li>

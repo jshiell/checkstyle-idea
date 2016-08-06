@@ -12,7 +12,7 @@ intellij {
 }
 
 sourceCompatibility = 1.8
-version = '4.31.0'
+version = '4.31.1'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14'
