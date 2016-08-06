@@ -6,11 +6,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 7.0 from within IDEA.
+    of Java files with CheckStyle 7.1 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.30.1</version>
+    <version>4.31.0</version>
     <idea-version since-build="141.178"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -19,6 +19,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.31.0: New: Updated to CheckStyle 7.1 (#264).</li>
     <li>4.30.1: Fixed: StringIndexOutOfBoundsExceptions are now treated as parse errors (#258).</li>
     <li>4.30.1: Fixed: Style importer no longer errors on missing properties (#256).</li>
     <li>4.30.0: New: Updated to CheckStyle 7.0.</li>
