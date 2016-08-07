@@ -109,7 +109,7 @@ CheckStyle is unable to retrieve information on exceptions in your project until
 
 ## Limitations
 
-* Suppressions that depend on the full path of the file will not work consistently. This is because we need to create temporary files before the scan in many cases, and at present these are only placed in a directory structure matching the packages involved. This may well change in the future.
+* If you import Gradle project withs **Create separate module per source set** active in IDEA 2016 or above then the module source paths are truncated. This means relative paths (e.g. suppressions on `src/test/.+`) may not work as expected.
 * The plugin will throw exceptions if used with class files targeted at a later version than that of the JDK used by IDEA. Please run IDEA on the latest available JVM, ideally the bundled version from JetBrains where available.
 * If you change the configuration options the real-time scan will not be updated until the file is either changed or reopened.
 * We do not check if a property definition is required for a given file. Hence you can exit configuration without setting required properties. Given, however, that CheckStyle files can change without the plug-in being aware this is something we'll always have to live with to some degree.
