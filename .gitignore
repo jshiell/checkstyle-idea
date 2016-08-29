@@ -11,3 +11,4 @@ META-INF
 !src/main/resources/META-INF
 /.gradle/
 /.gradletasknamecache
+.idea/
