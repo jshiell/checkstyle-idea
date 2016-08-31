@@ -1,10 +1,14 @@
 package org.infernus.idea.checkstyle.checker;
 
+import java.io.InputStream;
+
 import com.intellij.openapi.module.Module;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,8 +42,10 @@ class CheckerFactoryWorker extends Thread {
 
     @Override
     public void run() {
+        InputStream is = null;
         try {
-            Configuration config = ConfigurationLoader.loadConfiguration(new InputSource(location.resolve()), resolver, true);
+            is = location.resolve();
+            Configuration config = ConfigurationLoader.loadConfiguration(new InputSource(is), resolver, true);
             if (config == null) {
                 // from the CS code this state appears to occur when there's no <module> element found
                 // in the input stream
@@ -52,6 +58,8 @@ class CheckerFactoryWorker extends Thread {
 
         } catch (Exception e) {
             threadReturn[0] = e;
+        } finally {
+            IOUtils.closeQuietly(is);
         }
     }
 
