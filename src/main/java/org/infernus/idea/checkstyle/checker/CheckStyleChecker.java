@@ -68,8 +68,9 @@ public class CheckStyleChecker {
                 checker.process(files);
             } catch (CheckstyleException e) {
                 throw CheckStylePluginException.wrap(e);
+            } finally {
+                checker.removeListener(auditListener);
             }
-            checker.removeListener(auditListener);
         }
         return auditListener;
     }
