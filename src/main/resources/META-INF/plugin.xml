@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <idea-plugin version="2" url="https://github.com/jshiell/checkstyle-idea">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
@@ -32,7 +33,7 @@
     <li>4.28.1: Fixed: IllegalStateExceptions from Checkstyle are now treated as parse exceptions (#228).</li>
     <li>4.28.0: New: Updated to CheckStyle 6.18.</li>
     <li>4.28.0: Fixed: Relative Header check filenames are now resolved relative to the project file (#227).</li>
-    <li>4.28.0: New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.</li>
+    <li>4.28.0: New: Allow error selection by pressing Enter key (#226). Thanks to Franti&scaron;ek Hartman.</li>
     <li>4.27.4: Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).</li>
     <li>4.27.3: New: the remaining blacklist time is now displayed in the result message.</li>
     <li>4.27.2: Fixed: the *reload rules files* button now correctly clears the blacklist (#224).</li>
