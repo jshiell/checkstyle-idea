@@ -13,6 +13,7 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
@@ -40,8 +41,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
     private final JList pathList = new JBList(new DefaultListModel<String>());
 
-    private final JCheckBox testClassesCheckbox = new JCheckBox();
-    private final JCheckBox scanNonJavaFilesCheckbox = new JCheckBox();
+    private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
+    private final JComboBox<ScanScope> scopeDropdown = new JComboBox<>(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
@@ -51,8 +52,7 @@ public final class CheckStyleConfigPanel extends JPanel {
 
     private final Project project;
 
-    private boolean scanTestClasses;
-    private boolean scanNonJavaFiles;
+    private ScanScope scanScope = ScanScope.getDefaultValue();
     private boolean suppressingErrors;
     private List<String> thirdPartyClasspath;
     private List<ConfigurationLocation> locations;
@@ -71,11 +71,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     private JPanel buildConfigPanel() {
-        testClassesCheckbox.setText(CheckStyleBundle.message("config.test-classes.checkbox.text"));
-        testClassesCheckbox.setToolTipText(CheckStyleBundle.message("config.test-classes.checkbox.tooltip"));
-
-        scanNonJavaFilesCheckbox.setText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.text"));
-        scanNonJavaFilesCheckbox.setToolTipText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.tooltip"));
+        scopeDropdownLabel.setToolTipText(CheckStyleBundle.message("config.scanscope.tooltip"));
+        scopeDropdown.setToolTipText(CheckStyleBundle.message("config.scanscope.tooltip"));
 
         suppressErrorsCheckbox.setText(CheckStyleBundle.message("config.suppress-errors.checkbox.text"));
         suppressErrorsCheckbox.setToolTipText(CheckStyleBundle.message("config.suppress-errors.checkbox.tooltip"));
@@ -83,10 +80,10 @@ public final class CheckStyleConfigPanel extends JPanel {
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
-        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
+        configFilePanel.add(scopeDropdownLabel, new GridBagConstraints(
                 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
+        configFilePanel.add(scopeDropdown, new GridBagConstraints(
                 1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
@@ -156,44 +153,13 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    /**
-     * Should we scan test classes?
-     *
-     * @param scanTestClasses true to scan test classes.
-     */
-    public void setScanTestClasses(final boolean scanTestClasses) {
-        this.scanTestClasses = scanTestClasses;
-        testClassesCheckbox.setSelected(scanTestClasses);
+    public void setScanScope(final ScanScope pScanScope) {
+        this.scanScope = pScanScope;
+        scopeDropdown.setSelectedItem(pScanScope);
     }
 
-    /**
-     * Determine if we should scan test classes.
-     *
-     * @return true if test classes should be scanned.
-     */
-    public boolean isScanTestClasses() {
-        scanTestClasses = testClassesCheckbox.isSelected();
-        return scanTestClasses;
-    }
-
-    /**
-     * Should we scan non-Java files?
-     *
-     * @param scanNonJavaFiles true to scan all files types, false to scan only Java files.
-     */
-    public void setScanNonJavaFiles(final boolean scanNonJavaFiles) {
-        this.scanNonJavaFiles = scanNonJavaFiles;
-        scanNonJavaFilesCheckbox.setSelected(scanNonJavaFiles);
-    }
-
-    /**
-     * Determine if we should scan non-Java files.
-     *
-     * @return true if non-Java classes should be scanned.
-     */
-    public boolean isScanNonJavaFiles() {
-        scanNonJavaFiles = scanNonJavaFilesCheckbox.isSelected();
-        return scanNonJavaFiles;
+    public ScanScope getScanScope() {
+        return scanScope;
     }
 
     public void setSuppressingErrors(final boolean suppressingErrors) {
@@ -261,8 +227,7 @@ public final class CheckStyleConfigPanel extends JPanel {
         return haveLocationsChanged()
                 || hasActiveLocationChanged()
                 || !getThirdPartyClasspath().equals(thirdPartyClasspath)
-                || testClassesCheckbox.isSelected() != scanTestClasses
-                || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles
+                || scopeDropdown.getSelectedItem() != scanScope
                 || suppressErrorsCheckbox.isSelected() != suppressingErrors;
     }
 

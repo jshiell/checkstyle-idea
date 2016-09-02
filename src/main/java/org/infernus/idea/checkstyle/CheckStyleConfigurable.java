@@ -59,8 +59,7 @@ public class CheckStyleConfigurable implements Configurable {
         configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
 
-        configuration.setScanningTestClasses(configPanel.isScanTestClasses());
-        configuration.setScanningNonJavaFiles(configPanel.isScanNonJavaFiles());
+        configuration.setScanScope(configPanel.getScanScope());
         configuration.setSuppressingErrors(configPanel.isSuppressingErrors());
 
         final List<String> thirdPartyClasspath
@@ -94,8 +93,7 @@ public class CheckStyleConfigurable implements Configurable {
         configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
         configPanel.setPresetLocations(configuration.getPresetLocations());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
-        configPanel.setScanTestClasses(configuration.isScanningTestClasses());
-        configPanel.setScanNonJavaFiles(configuration.isScanningNonJavaFiles());
+        configPanel.setScanScope(configuration.getScanScope());
         configPanel.setSuppressingErrors(configuration.isSuppressingErrors());
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
     }

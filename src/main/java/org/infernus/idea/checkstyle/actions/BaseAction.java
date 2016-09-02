@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
@@ -97,5 +98,17 @@ public abstract class BaseAction extends AnAction {
 
     protected Optional<Project> project(@NotNull final AnActionEvent event) {
         return ofNullable(PROJECT.getData(event.getDataContext()));
+    }
+
+    protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
+        boolean result = false;
+        for (VirtualFile file : files) {
+            if ((file.isDirectory() && containsAtLeastOneFile(file.getChildren()))
+                || (!file.isDirectory() && file.isValid())) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 }
