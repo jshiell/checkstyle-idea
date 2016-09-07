@@ -275,7 +275,9 @@ public class CheckStyleConfiguration implements ExportableComponent,
         if (value != null) {
             final String[] parts = value.split(";");
             for (final String part : parts) {
-                thirdPartyClasspath.add(untokenisePath(part));
+                if (part.length() > 0) {
+                    thirdPartyClasspath.add(untokenisePath(part));
+                }
             }
         }
 
