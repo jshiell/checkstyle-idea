@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
- * A manager for CheckStyle plug-in configuration.
+ * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
  */
 @State(
         name = CheckStylePlugin.ID_PLUGIN,
@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
                 @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme = StorageScheme.DIRECTORY_BASED)
         }
 )
-public final class CheckStyleConfiguration implements ExportableComponent,
-        PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
-
+public class CheckStyleConfiguration implements ExportableComponent,
+    PersistentStateComponent<CheckStyleConfiguration.ProjectSettings>
+{
     public static final String PROJECT_DIR = "$PRJ_DIR$";
     public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
 
@@ -50,9 +50,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
 
-    private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
-
-    private final Set<ConfigurationLocation> presetLocations = new HashSet<>();
     private final SortedMap<String, String> storage = new ConcurrentSkipListMap<>();
     private final ReentrantLock storageLock = new ReentrantLock();
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
@@ -70,10 +67,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         }
 
         this.project = project;
-
-        final ConfigurationLocation checkStyleSunChecks = configurationLocationFactory().create(project, ConfigurationType.CLASSPATH,
-                SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
-        presetLocations.add(checkStyleSunChecks);
     }
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
@@ -96,10 +89,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     @NotNull
     public String getPresentableName() {
         return "CheckStyle-IDEA Project Settings";
-    }
-
-    public Set<ConfigurationLocation> getPresetLocations() {
-        return Collections.unmodifiableSet(presetLocations);
     }
 
     public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
@@ -129,7 +118,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
             ConfigurationLocation activeLocation = null;
             try {
-                activeLocation = configurationLocationFactory().create(project, storage.get(ACTIVE_CONFIG));
+                activeLocation = configurationLocationFactory().create(getProject(), storage.get(ACTIVE_CONFIG));
             } catch (IllegalArgumentException e) {
                 LOG.warn("Could not load active configuration", e);
             }
@@ -160,8 +149,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                     .map(this::deserialiseLocation)
                     .filter(this::notNull)
                     .collect(Collectors.toList());
-
-            return addPresetLocationsTo(locations);
+                return locations;
 
         } finally {
             storageLock.unlock();
@@ -176,7 +164,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
     private ConfigurationLocation deserialiseLocation(final Map.Entry<String, String> locationProperty) {
         final String serialisedLocation = locationProperty.getValue();
         try {
-            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            final ConfigurationLocation location = configurationLocationFactory().create(getProject(), serialisedLocation);
             location.setProperties(propertiesFor(locationProperty));
             return location;
 
@@ -188,13 +176,6 @@ public final class CheckStyleConfiguration implements ExportableComponent,
 
     private boolean propertyIsALocation(final Map.Entry<String, String> property) {
         return property.getKey().startsWith(LOCATION_PREFIX);
-    }
-
-    private List<ConfigurationLocation> addPresetLocationsTo(final List<ConfigurationLocation> locations) {
-        presetLocations.stream()
-                .filter(presetLocation -> !locations.contains(presetLocation))
-                .forEach(presetLocation -> locations.add(0, presetLocation));
-        return locations;
     }
 
     @NotNull
@@ -220,8 +201,12 @@ public final class CheckStyleConfiguration implements ExportableComponent,
         return PROPERTIES_PREFIX + index + ".";
     }
 
-    private ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+    Project getProject() {
+        return project;
+    }
+
+    ConfigurationLocationFactory configurationLocationFactory() {
+        return ServiceManager.getService(getProject(), ConfigurationLocationFactory.class);
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> configurationLocations) {
@@ -255,7 +240,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read properties from " + configurationLocation, e);
-                    Notifications.showError(project,
+                    Notifications.showError(getProject(),
                             CheckStyleBundle.message("checkstyle.could-not-read-properties", configurationLocation.getLocation()));
                 }
 
@@ -425,7 +410,7 @@ public final class CheckStyleConfiguration implements ExportableComponent,
      */
     @Nullable
     private File getProjectPath() {
-        final VirtualFile baseDir = project.getBaseDir();
+        final VirtualFile baseDir = getProject().getBaseDir();
         if (baseDir == null) {
             return null;
         }
