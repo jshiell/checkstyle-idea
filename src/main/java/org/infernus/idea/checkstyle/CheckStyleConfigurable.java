@@ -52,7 +52,6 @@ public class CheckStyleConfigurable implements Configurable {
         return configPanel;
     }
 
-
     @Override
     public boolean isModified() {
         LOG.trace("isModified() - enter");
@@ -76,8 +75,7 @@ public class CheckStyleConfigurable implements Configurable {
         }
     }
 
-    private boolean hasActiveLocationChanged(final CheckStyleConfiguration pConfiguration) throws IOException
-    {
+    private boolean hasActiveLocationChanged(final CheckStyleConfiguration pConfiguration) throws IOException {
         final ConfigurationLocation configActiveLocation = pConfiguration.getActiveConfiguration();
         final ConfigurationLocation panelActiveLocation = configPanel.getActiveLocation();
         boolean result = false;
@@ -99,7 +97,6 @@ public class CheckStyleConfigurable implements Configurable {
         }
         return result;
     }
-
 
     public void apply() throws ConfigurationException {
         LOG.trace("apply() - enter");
@@ -125,7 +122,6 @@ public class CheckStyleConfigurable implements Configurable {
         }
     }
 
-
     CheckStyleConfiguration getConfiguration() {
         return ServiceManager.getService(project, CheckStyleConfiguration.class);
     }
@@ -133,7 +129,6 @@ public class CheckStyleConfigurable implements Configurable {
     private CheckerFactoryCache getCheckerFactoryCache() {
         return ServiceManager.getService(CheckerFactoryCache.class);
     }
-
 
     public void reset() {
         LOG.trace("reset() - enter");
@@ -145,7 +140,6 @@ public class CheckStyleConfigurable implements Configurable {
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
         LOG.trace("reset() - exit");
     }
-
 
     public void disposeUIResources() {
         // do nothing

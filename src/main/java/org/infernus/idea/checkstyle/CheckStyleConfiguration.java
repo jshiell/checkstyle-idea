@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
-import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
@@ -420,7 +419,6 @@ public class CheckStyleConfiguration implements ExportableComponent,
         return new File(baseDir.getPath());
     }
 
-
     /**
      * Create a copy of the current configuration.
      *
@@ -434,7 +432,6 @@ public class CheckStyleConfiguration implements ExportableComponent,
             storageLock.unlock();
         }
     }
-
 
     /**
      * Load the state from the given settings beans.
@@ -455,25 +452,21 @@ public class CheckStyleConfiguration implements ExportableComponent,
         }
     }
 
-
-
     /**
      * Needed when a setting written by a previous version of this plugin gets loaded by a newer version; converts
      * the scan scope settings based on flags to the enum value.
+     *
      * @param pLoadedMap the loaded settings
      */
-    private void convertSettingsFormat(final Map<String, String> pLoadedMap)
-    {
+    private void convertSettingsFormat(final Map<String, String> pLoadedMap) {
         if (pLoadedMap != null && !pLoadedMap.isEmpty() && !pLoadedMap.containsKey(SCANSCOPE_SETTING)) {
             ScanScope scope = ScanScope.fromFlags(
-                booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf(CHECK_NONJAVA_FILES));
+                    booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf(CHECK_NONJAVA_FILES));
             pLoadedMap.put(SCANSCOPE_SETTING, scope.name());
             pLoadedMap.remove(CHECK_TEST_CLASSES);
             pLoadedMap.remove(CHECK_NONJAVA_FILES);
         }
     }
-
-
 
     /**
      * Wrapper class for IDEA state serialisation.

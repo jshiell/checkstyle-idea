@@ -19,7 +19,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
-import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,9 +27,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -245,11 +243,10 @@ public class CheckStyleConfigPanel extends JPanel {
         locationModel.setLocations(modelLocations);
     }
 
-    private void ensurePresetLocations(final List<ConfigurationLocation> locations)
-    {
+    private void ensurePresetLocations(final List<ConfigurationLocation> locations) {
         presetLocations.stream()
-            .filter(presetLocation -> !locations.contains(presetLocation))
-            .forEach(presetLocation -> locations.add(0, presetLocation));
+                .filter(presetLocation -> !locations.contains(presetLocation))
+                .forEach(presetLocation -> locations.add(0, presetLocation));
     }
 
     public void setActiveLocation(final ConfigurationLocation activeLocation) {
