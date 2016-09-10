@@ -153,6 +153,7 @@ public class CheckStyleAuditListener implements AuditListener {
             if (victim != null) {
                 addProblemTo(victim, psiFile, event, position.afterEndOfLine);
             } else {
+                addProblemTo(psiFile, psiFile, event, false);
                 LOG.warn("Couldn't find victim for error: " + event.getFileName() + "("
                         + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
             }
