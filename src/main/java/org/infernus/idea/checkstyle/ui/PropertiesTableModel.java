@@ -11,8 +11,8 @@ import java.util.*;
 public class PropertiesTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -5666606037841678795L;
 
-    protected static final int COLUMN_NAME = 0;
-    protected static final int COLUMN_VALUE = 1;
+    private static final int COLUMN_NAME = 0;
+    private static final int COLUMN_VALUE = 1;
     private static final int NUMBER_OF_COLUMNS = 2;
 
     private final List<String> orderedNames = new ArrayList<>();

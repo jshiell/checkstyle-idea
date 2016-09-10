@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class LocationDialogue extends JDialog {
 
-    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
+    private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private static final int WIDTH = 500;
     private static final int HEIGHT = 400;
 

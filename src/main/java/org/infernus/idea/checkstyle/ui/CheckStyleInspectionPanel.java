@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public final class CheckStyleInspectionPanel extends JPanel {
     /**
      * Initialise the view.
      */
-    protected void initialise() {
+    private void initialise() {
         // fake a multi-line label with a text area
         descriptionLabel.setText(CheckStyleBundle.message("config.inspection.description"));
         descriptionLabel.setEditable(false);
@@ -39,7 +40,7 @@ public final class CheckStyleInspectionPanel extends JPanel {
 
         final GridBagConstraints descLabelConstraints = new GridBagConstraints(
                 0, 0, 3, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,
-                GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0);
+                GridBagConstraints.BOTH, JBUI.insets(4), 0, 0);
         add(descriptionLabel, descLabelConstraints);
     }
 

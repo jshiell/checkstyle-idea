@@ -15,9 +15,9 @@ import java.util.List;
 public class LocationTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -7914774770821623832L;
 
-    protected static final int COLUMN_ACTIVE = 0;
-    protected static final int COLUMN_DESCRIPTION = 1;
-    protected static final int COLUMN_FILE = 2;
+    private static final int COLUMN_ACTIVE = 0;
+    private static final int COLUMN_DESCRIPTION = 1;
+    private static final int COLUMN_FILE = 2;
     private static final int NUMBER_OF_COLUMNS = 3;
 
     private final List<ConfigurationLocation> locations = new ArrayList<>();

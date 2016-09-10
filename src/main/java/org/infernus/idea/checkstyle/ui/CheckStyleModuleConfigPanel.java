@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
@@ -14,12 +15,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.intellij.util.ui.JBUI.*;
+
 /**
  * Provides module level configuration UI.
  */
 public class CheckStyleModuleConfigPanel extends JPanel {
 
-    private static final Insets ISOLATED_COMPONENT_INSETS = new Insets(8, 8, 8, 8);
+    private static final Insets ISOLATED_COMPONENT_INSETS = JBUI.insets(8);
     private final JRadioButton useProjectConfigurationRadio = new JRadioButton();
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
     private final JRadioButton excludeRadio = new JRadioButton();
@@ -50,7 +53,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         final JLabel informationLabel = new JLabel(CheckStyleBundle.message("config.module.information"),
                 Icons.icon("/general/information.png"), SwingConstants.LEFT);
         configPanel.add(informationLabel, new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(16, 8, 16, 8), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, JBUI.insets(16, 8), 0, 0));
 
         useProjectConfigurationRadio.setText(CheckStyleBundle.message("config.module.project-configuration.text"));
         useProjectConfigurationRadio.setToolTipText(CheckStyleBundle.message("config.module.project-configuration.tooltip"));
@@ -76,7 +79,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
 
         configurationFilesLabel.setText(CheckStyleBundle.message("config.module.module-file.text"));
         configPanel.add(configurationFilesLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
-                GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(8, 32, 8, 8), 0, 0));
+                GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(8, 32, 8, 8), 0, 0));
 
         configurationFilesCombo.setToolTipText(CheckStyleBundle.message("config.module.module-file.tooltip"));
         //noinspection unchecked
@@ -88,7 +91,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
 
         configPanel.add(Box.createGlue(), new GridBagConstraints(0, 5, 2, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, emptyInsets(), 0, 0));
 
         useProjectConfigurationRadio.setSelected(true);
         configurationFilesLabel.setEnabled(false);

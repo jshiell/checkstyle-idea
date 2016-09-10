@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 
@@ -43,18 +44,18 @@ public class PropertiesDialogue extends JDialog {
         bottomPanel.setBorder(new EmptyBorder(4, 8, 8, 8));
 
         bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, JBUI.insets(4), 0, 0));
 
         if (SystemInfo.isMac) {
             bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(4), 0, 0));
             bottomPanel.add(okayButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(4), 0, 0));
         } else {
             bottomPanel.add(okayButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(4), 0, 0));
             bottomPanel.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+                    GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(4), 0, 0));
         }
 
         add(propertiesPanel, BorderLayout.CENTER);

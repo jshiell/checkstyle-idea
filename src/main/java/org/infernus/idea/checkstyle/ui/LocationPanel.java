@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -23,7 +24,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 public class LocationPanel extends JPanel {
 
-    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
+    private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private final JButton browseButton = new JButton(new BrowseAction());
     private final JTextField fileLocationField = new JTextField(20);
     private final JTextField urlLocationField = new JTextField(20);
@@ -91,7 +92,7 @@ public class LocationPanel extends JPanel {
                 GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
         add(urlLocationRadio, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(8, 4, 4, 4), 0, 0));
+                GridBagConstraints.WEST, GridBagConstraints.NONE, JBUI.insets(8, 4, 4, 4), 0, 0));
 
         add(urlLocationlabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
@@ -207,10 +208,10 @@ public class LocationPanel extends JPanel {
         }
     }
 
-    protected final class BrowseAction extends AbstractAction {
+    private final class BrowseAction extends AbstractAction {
         private static final long serialVersionUID = -992858528081327052L;
 
-        public BrowseAction() {
+        BrowseAction() {
             putValue(Action.NAME, CheckStyleBundle.message(
                     "config.file.browse.text"));
             putValue(Action.SHORT_DESCRIPTION,
@@ -244,7 +245,7 @@ public class LocationPanel extends JPanel {
     /**
      * Handles radio button selections.
      */
-    protected final class RadioButtonActionListener implements ActionListener {
+    private final class RadioButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(final ActionEvent e) {
             if (urlLocationRadio.isSelected()) {

@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
@@ -20,6 +21,6 @@ public class CompletePanel extends JPanel {
         setBorder(new EmptyBorder(4, 4, 4, 4));
 
         add(infoLabel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.NORTHWEST,
-                GridBagConstraints.NONE, new Insets(8, 8, 8, 8), 0, 0));
+                GridBagConstraints.NONE, JBUI.insets(8), 0, 0));
     }
 }
