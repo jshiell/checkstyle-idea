@@ -58,18 +58,17 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private final Project project;
 
-
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
 
         this.project = project;
-        this.presetLocations = buildPresetLocations(project);
+        this.presetLocations = buildPresetLocations();
 
         initialise();
     }
 
-    private List<ConfigurationLocation> buildPresetLocations(@NotNull final Project project) {
-        final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory(project);
+    private List<ConfigurationLocation> buildPresetLocations() {
+        final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory();
         final List<ConfigurationLocation> result = new ArrayList<>();
         final ConfigurationLocation checkStyleSunChecks = locationFactory.create(project, ConfigurationType.CLASSPATH,
             SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
@@ -77,7 +76,7 @@ public class CheckStyleConfigPanel extends JPanel {
         return Collections.unmodifiableList(result);
     }
 
-    ConfigurationLocationFactory getConfigurationLocationFactory(@NotNull final Project project) {
+    private ConfigurationLocationFactory getConfigurationLocationFactory() {
         return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
@@ -261,10 +260,10 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the addition of a configuration location.
      */
-    protected final class AddLocationAction extends ToolbarAction {
+    private final class AddLocationAction extends ToolbarAction {
         private static final long serialVersionUID = -7266120887003483814L;
 
-        public AddLocationAction() {
+        AddLocationAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.add.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
@@ -293,10 +292,10 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a configuration location.
      */
-    protected final class RemoveLocationAction extends ToolbarAction {
+    private final class RemoveLocationAction extends ToolbarAction {
         private static final long serialVersionUID = -799542186049804472L;
 
-        public RemoveLocationAction() {
+        RemoveLocationAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.remove.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
@@ -316,10 +315,10 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Edit the properties of a configuration location.
      */
-    protected final class EditPropertiesAction extends ToolbarAction {
+    private final class EditPropertiesAction extends ToolbarAction {
         private static final long serialVersionUID = -799542186049804472L;
 
-        public EditPropertiesAction() {
+        EditPropertiesAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.file.properties.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
@@ -346,7 +345,7 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    protected abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
+    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
         private static final long serialVersionUID = 7091312536206510956L;
 
         @Override
@@ -358,13 +357,13 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the addition of a path element.
      */
-    protected final class AddPathAction extends ToolbarAction {
+    private final class AddPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1389576037231727360L;
 
         /**
          * Create a new add path action.
          */
-        public AddPathAction() {
+        AddPathAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.path.add.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
@@ -387,13 +386,13 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the editing of a path element.
      */
-    protected final class EditPathAction extends ToolbarAction {
+    private final class EditPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1455378231580505750L;
 
         /**
          * Create a new edit path action.
          */
-        public EditPathAction() {
+        EditPathAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.path.edit.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
@@ -426,13 +425,13 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a path element.
      */
-    protected final class RemovePathAction extends ToolbarAction {
+    private final class RemovePathAction extends ToolbarAction {
         private static final long serialVersionUID = 7339136485307147623L;
 
         /**
          * Create a new add path action.
          */
-        public RemovePathAction() {
+        RemovePathAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.path.remove.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
@@ -454,13 +453,13 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move up of a path element.
      */
-    protected final class MoveUpPathAction extends ToolbarAction {
+    private final class MoveUpPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1230778908605654344L;
 
         /**
          * Create a new move-up path action.
          */
-        public MoveUpPathAction() {
+        MoveUpPathAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.path.move-up.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
@@ -484,13 +483,13 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move down of a path element.
      */
-    protected final class MoveDownPathAction extends ToolbarAction {
+    private final class MoveDownPathAction extends ToolbarAction {
         private static final long serialVersionUID = 1222511743014969175L;
 
         /**
          * Create a new move-down path action.
          */
-        public MoveDownPathAction() {
+        MoveDownPathAction() {
             putValue(Action.NAME, CheckStyleBundle.message("config.path.move-down.text"));
             putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
             putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
