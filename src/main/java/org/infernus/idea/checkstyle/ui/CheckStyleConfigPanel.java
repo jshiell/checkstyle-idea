@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
@@ -12,16 +13,22 @@ import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -31,39 +38,49 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 /**
  * Provides a configuration panel for project-level configuration.
  */
-public final class CheckStyleConfigPanel extends JPanel {
+public class CheckStyleConfigPanel extends JPanel {
     private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
     private static final int ACTIVE_COL_MIN_WIDTH = 40;
     private static final int ACTIVE_COL_MAX_WIDTH = 50;
     private static final int DESC_COL_MIN_WIDTH = 100;
     private static final int DESC_COL_MAX_WIDTH = 200;
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
+
+    private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
+    private final List<ConfigurationLocation> presetLocations;
+
     private final JList pathList = new JBList(new DefaultListModel<String>());
 
-    private final JCheckBox testClassesCheckbox = new JCheckBox();
-    private final JCheckBox scanNonJavaFilesCheckbox = new JCheckBox();
+    private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
+    private final JComboBox<ScanScope> scopeDropdown = new JComboBox<>(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
 
-    private final Set<ConfigurationLocation> presetLocations = new HashSet<>();
-
     private final Project project;
 
-    private boolean scanTestClasses;
-    private boolean scanNonJavaFiles;
-    private boolean suppressingErrors;
-    private List<String> thirdPartyClasspath;
-    private List<ConfigurationLocation> locations;
-    private ConfigurationLocation activeLocation;
 
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
 
         this.project = project;
+        this.presetLocations = buildPresetLocations(project);
 
         initialise();
+    }
+
+    private List<ConfigurationLocation> buildPresetLocations(@NotNull final Project project) {
+        final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory(project);
+        final List<ConfigurationLocation> result = new ArrayList<>();
+        final ConfigurationLocation checkStyleSunChecks = locationFactory.create(project, ConfigurationType.CLASSPATH,
+            SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
+        result.add(checkStyleSunChecks);
+        return Collections.unmodifiableList(result);
+    }
+
+    ConfigurationLocationFactory getConfigurationLocationFactory(@NotNull final Project project) {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     private void initialise() {
@@ -71,11 +88,8 @@ public final class CheckStyleConfigPanel extends JPanel {
     }
 
     private JPanel buildConfigPanel() {
-        testClassesCheckbox.setText(CheckStyleBundle.message("config.test-classes.checkbox.text"));
-        testClassesCheckbox.setToolTipText(CheckStyleBundle.message("config.test-classes.checkbox.tooltip"));
-
-        scanNonJavaFilesCheckbox.setText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.text"));
-        scanNonJavaFilesCheckbox.setToolTipText(CheckStyleBundle.message("config.scan-nonjava-files.checkbox.tooltip"));
+        scopeDropdownLabel.setToolTipText(CheckStyleBundle.message("config.scanscope.tooltip"));
+        scopeDropdown.setToolTipText(CheckStyleBundle.message("config.scanscope.tooltip"));
 
         suppressErrorsCheckbox.setText(CheckStyleBundle.message("config.suppress-errors.checkbox.text"));
         suppressErrorsCheckbox.setToolTipText(CheckStyleBundle.message("config.suppress-errors.checkbox.tooltip"));
@@ -83,10 +97,10 @@ public final class CheckStyleConfigPanel extends JPanel {
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
-        configFilePanel.add(testClassesCheckbox, new GridBagConstraints(
+        configFilePanel.add(scopeDropdownLabel, new GridBagConstraints(
                 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(scanNonJavaFilesCheckbox, new GridBagConstraints(
+        configFilePanel.add(scopeDropdown, new GridBagConstraints(
                 1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
@@ -156,54 +170,22 @@ public final class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    /**
-     * Should we scan test classes?
-     *
-     * @param scanTestClasses true to scan test classes.
-     */
-    public void setScanTestClasses(final boolean scanTestClasses) {
-        this.scanTestClasses = scanTestClasses;
-        testClassesCheckbox.setSelected(scanTestClasses);
+    public void setScanScope(@Nullable final ScanScope pScanScope) {
+        scopeDropdown.setSelectedItem(pScanScope != null ? pScanScope : ScanScope.getDefaultValue());
     }
 
-    /**
-     * Determine if we should scan test classes.
-     *
-     * @return true if test classes should be scanned.
-     */
-    public boolean isScanTestClasses() {
-        scanTestClasses = testClassesCheckbox.isSelected();
-        return scanTestClasses;
-    }
-
-    /**
-     * Should we scan non-Java files?
-     *
-     * @param scanNonJavaFiles true to scan all files types, false to scan only Java files.
-     */
-    public void setScanNonJavaFiles(final boolean scanNonJavaFiles) {
-        this.scanNonJavaFiles = scanNonJavaFiles;
-        scanNonJavaFilesCheckbox.setSelected(scanNonJavaFiles);
-    }
-
-    /**
-     * Determine if we should scan non-Java files.
-     *
-     * @return true if non-Java classes should be scanned.
-     */
-    public boolean isScanNonJavaFiles() {
-        scanNonJavaFiles = scanNonJavaFilesCheckbox.isSelected();
-        return scanNonJavaFiles;
+    @NotNull
+    public ScanScope getScanScope() {
+        ScanScope scope = (ScanScope) scopeDropdown.getSelectedItem();
+        return scope != null ? scope : ScanScope.getDefaultValue();
     }
 
     public void setSuppressingErrors(final boolean suppressingErrors) {
-        this.suppressingErrors = suppressingErrors;
         suppressErrorsCheckbox.setSelected(suppressingErrors);
     }
 
     public boolean isSuppressingErrors() {
-        suppressingErrors = suppressErrorsCheckbox.isSelected();
-        return suppressingErrors;
+        return suppressErrorsCheckbox.isSelected();
     }
 
     /**
@@ -212,6 +194,7 @@ public final class CheckStyleConfigPanel extends JPanel {
      * @param classpath the third party classpath.
      */
     public void setThirdPartyClasspath(final List<String> classpath) {
+        List<String> thirdPartyClasspath = null;
         if (classpath == null) {
             thirdPartyClasspath = new ArrayList<>();
         } else {
@@ -251,55 +234,25 @@ public final class CheckStyleConfigPanel extends JPanel {
         return classpath;
     }
 
-    /**
-     * Have the settings been modified?
-     *
-     * @return true if the settings have been modified.
-     * @throws IOException if the properties cannot be read.
-     */
-    public boolean isModified() throws IOException {
-        return haveLocationsChanged()
-                || hasActiveLocationChanged()
-                || !getThirdPartyClasspath().equals(thirdPartyClasspath)
-                || testClassesCheckbox.isSelected() != scanTestClasses
-                || scanNonJavaFilesCheckbox.isSelected() != scanNonJavaFiles
-                || suppressErrorsCheckbox.isSelected() != suppressingErrors;
-    }
-
-    private boolean hasActiveLocationChanged() throws IOException {
-        if (activeLocation == null) {
-            return locationModel.getActiveLocation() != null;
-        }
-        return activeLocation.hasChangedFrom(locationModel.getActiveLocation());
-    }
-
-    private boolean haveLocationsChanged() throws IOException {
-        if (!Objects.equals(locations, locationModel.getLocations())) {
-            return true;
-        }
-
-        for (int i = 0; i < locations.size(); ++i) {
-            if (locations.get(i).hasChangedFrom(locationModel.getLocationAt(i))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public List<ConfigurationLocation> getConfigurationLocations() {
         return Collections.unmodifiableList(locationModel.getLocations());
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> newLocations) {
-        this.locations = new ArrayList<>(newLocations);
-
         final List<ConfigurationLocation> modelLocations = new ArrayList<>(newLocations);
         Collections.sort(modelLocations);
+        ensurePresetLocations(modelLocations);
         locationModel.setLocations(modelLocations);
     }
 
+    private void ensurePresetLocations(final List<ConfigurationLocation> locations)
+    {
+        presetLocations.stream()
+            .filter(presetLocation -> !locations.contains(presetLocation))
+            .forEach(presetLocation -> locations.add(0, presetLocation));
+    }
+
     public void setActiveLocation(final ConfigurationLocation activeLocation) {
-        this.activeLocation = activeLocation;
         locationModel.setActiveLocation(activeLocation);
     }
 
@@ -307,12 +260,6 @@ public final class CheckStyleConfigPanel extends JPanel {
         return locationModel.getActiveLocation();
     }
 
-    public void setPresetLocations(final Set<ConfigurationLocation> presetLocations) {
-        this.presetLocations.clear();
-        if (presetLocations != null) {
-            this.presetLocations.addAll(presetLocations);
-        }
-    }
 
     /**
      * Process the addition of a configuration location.
@@ -571,7 +518,9 @@ public final class CheckStyleConfigPanel extends JPanel {
         @Override
         public boolean isEnabled(final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem == -1 || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
+            final CheckStyleConfiguration config = ServiceManager.getService(project, CheckStyleConfiguration.class);
+            return selectedItem == -1
+                || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
         }
     }
 }

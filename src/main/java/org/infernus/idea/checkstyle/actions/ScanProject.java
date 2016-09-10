@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 /**
@@ -30,21 +31,26 @@ public class ScanProject extends BaseAction {
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
+            final ScanScope scope = checkStylePlugin.getConfiguration().getScanScope();
 
             final ToolWindow toolWindow = ToolWindowManager.getInstance(
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             toolWindow.activate(() -> {
                 try {
                     setProgressText(toolWindow, "plugin.status.in-progress.current");
-
-                    final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-                    final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
-
-                    if (sourceRoots.length > 0) {
-                        ApplicationManager.getApplication().runReadAction(
-                                new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow)));
+                    Runnable scanAction = null;
+                    if (scope == ScanScope.Everything) {
+                        scanAction = new ScanEverythingAction(project, getSelectedOverride(toolWindow));
+                    } else {
+                        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+                        final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
+                        if (sourceRoots.length > 0) {
+                            scanAction = new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow));
+                        }
                     }
-
+                    if (scanAction != null) {
+                        ApplicationManager.getApplication().runReadAction(scanAction);
+                    }
                 } catch (Throwable e) {
                     CheckStylePlugin.processErrorAndLog("Project scan", e);
                 }
@@ -68,23 +74,25 @@ public class ScanProject extends BaseAction {
                 return;
             }
 
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
+            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
+            final ScanScope scope = checkStylePlugin.getConfiguration().getScanScope();
 
-            final ProjectRootManager projectRootManager
-                    = ProjectRootManager.getInstance(project);
-            final VirtualFile[] sourceRoots
-                    = projectRootManager.getContentSourceRoots();
-
-            // disable if no files are selected
-            if (sourceRoots.length == 0) {
-                presentation.setEnabled(false);
-
+            VirtualFile[] sourceRoots = null;
+            if (scope == ScanScope.Everything) {
+                sourceRoots = new VirtualFile[]{project.getBaseDir()};
             } else {
+                final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+                sourceRoots = projectRootManager.getContentSourceRoots();
+            }
+
+            // disable if no files are selected or scan in progress
+            if (containsAtLeastOneFile(sourceRoots)) {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
             }
         } catch (Throwable e) {
             CheckStylePlugin.processErrorAndLog("Project button update", e);

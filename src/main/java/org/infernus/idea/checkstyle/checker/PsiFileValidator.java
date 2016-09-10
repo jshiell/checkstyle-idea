@@ -10,6 +10,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +29,7 @@ final class PsiFileValidator {
                 && psiFile.isValid()
                 && psiFile.isPhysical()
                 && hasDocument(psiFile)
-                && isInSource(psiFile)
+                && isInSource(psiFile, pluginConfig)
                 && isValidFileType(psiFile, pluginConfig)
                 && isScannableIfTest(psiFile, pluginConfig)
                 && modulesMatch(psiFile, module)
@@ -41,13 +42,13 @@ final class PsiFileValidator {
 
     private static boolean isValidFileType(final PsiFile psiFile,
                                            final CheckStyleConfiguration pluginConfig) {
-        return pluginConfig.isScanningNonJavaFiles()
+        return pluginConfig.getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
                                              final CheckStyleConfiguration pluginConfig) {
-        return pluginConfig.isScanningTestClasses()
+        return pluginConfig.getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
 
@@ -55,9 +56,9 @@ final class PsiFileValidator {
         return JavaProjectRootsUtil.isInGeneratedCode(psiFile.getVirtualFile(), psiFile.getProject());
     }
 
-    private static boolean isInSource(@NotNull final PsiFile psiFile) {
-        return ProjectFileIndex.SERVICE.getInstance(psiFile.getProject())
-                .isInSourceContent(psiFile.getVirtualFile());
+    private static boolean isInSource(@NotNull final PsiFile psiFile, final CheckStyleConfiguration pluginConfig) {
+        return pluginConfig.getScanScope() == ScanScope.Everything
+            || ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile());
     }
 
     private static boolean isTestClass(final PsiElement element) {

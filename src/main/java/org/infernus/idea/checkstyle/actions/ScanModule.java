@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 /**
@@ -50,17 +51,26 @@ public class ScanModule extends BaseAction {
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
+            final ScanScope scope = checkStylePlugin.getConfiguration().getScanScope();
 
             toolWindow.activate(() -> {
                 try {
                     setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                    final VirtualFile[] moduleSourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
-                    if (moduleSourceRoots.length > 0) {
-                        ApplicationManager.getApplication().runReadAction(
-                                new ScanSourceRootsAction(project, moduleSourceRoots, getSelectedOverride(toolWindow)));
+                    Runnable scanAction = null;
+                    if (scope == ScanScope.Everything) {
+                        scanAction = new ScanEverythingAction(module, getSelectedOverride(toolWindow));
+                    } else {
+                        final VirtualFile[] moduleSourceRoots =
+                            ModuleRootManager.getInstance(module).getSourceRoots(scope.includeTestClasses());
+                        if (moduleSourceRoots.length > 0) {
+                            scanAction = new ScanSourceRootsAction(project, moduleSourceRoots,
+                                getSelectedOverride(toolWindow));
+                        }
                     }
-
+                    if (scanAction != null) {
+                        ApplicationManager.getApplication().runReadAction(scanAction);
+                    }
                 } catch (Throwable e) {
                     CheckStylePlugin.processErrorAndLog("Current Module scan", e);
                 }
@@ -101,17 +111,21 @@ public class ScanModule extends BaseAction {
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
+            final ScanScope scope = checkStylePlugin.getConfiguration().getScanScope();
 
-            final ModuleRootManager moduleRootManager
-                    = ModuleRootManager.getInstance(module);
-            final VirtualFile[] moduleFiles = moduleRootManager.getSourceRoots();
-
-            // disable if no files are selected
-            if (moduleFiles.length == 0) {
-                presentation.setEnabled(false);
-
+            VirtualFile[] moduleFiles = null;
+            final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
+            if (scope == ScanScope.Everything) {
+                moduleFiles = moduleRootManager.getContentRoots();
             } else {
+                moduleFiles = moduleRootManager.getSourceRoots(scope.includeTestClasses());
+            }
+
+            // disable if no files are selected or scan in progress
+            if (containsAtLeastOneFile(moduleFiles)) {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
             }
         } catch (Throwable e) {
             CheckStylePlugin.processErrorAndLog("Current Module button update", e);

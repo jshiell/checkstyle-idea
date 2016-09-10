@@ -70,7 +70,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @Override
-    public final Map<PsiFile, List<Problem>> call() throws Exception {
+    public final Map<PsiFile, List<Problem>> call() {
         try {
             fireCheckStarting(files);
             final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult
