@@ -8,13 +8,13 @@ import java.util.Map;
 
 public interface ScannerListener {
 
-    void scanStarting(final List<PsiFile> filesToScan);
+    void scanStarting(List<PsiFile> filesToScan);
 
     void filesScanned(int count);
 
-    void scanComplete(final ConfigurationLocationResult configurationLocationResult,
-                      final Map<PsiFile, List<Problem>> scanResults);
+    void scanComplete(ConfigurationLocationResult configurationLocationResult,
+                      Map<PsiFile, List<Problem>> scanResults);
 
-    void errorCaught(final CheckStylePluginException error);
+    void errorCaught(CheckStylePluginException error);
 
 }

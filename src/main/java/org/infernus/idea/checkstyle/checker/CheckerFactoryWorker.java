@@ -1,18 +1,17 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.io.InputStream;
-
 import com.intellij.openapi.module.Module;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.InputSource;
+
+import java.io.InputStream;
 
 class CheckerFactoryWorker extends Thread {
     private final Object[] threadReturn = new Object[1];

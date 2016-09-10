@@ -8,7 +8,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.codeStyle.CodeStyleScheme;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
-import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
