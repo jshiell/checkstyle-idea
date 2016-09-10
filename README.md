@@ -147,6 +147,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Baron Roberts (@baron1405)
 * George Kankava (@georgekankava)
 * Thomas Jensen (@tsjensen)
+* Klaus Tannenberg (@KTannenberg)
 
 And also thanks are due to the authors and contributors of:
 
@@ -165,9 +166,10 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.32.1** Fixed: `tabWidth` is now read properly, improving element matching for errors (#259, #265). Thanks to Klaus Tannenberg (@KTannenberg).
 * **4.32.0** New: Errors for which we cannot find a matching element are now displayed at the top of the file (#265).
 * **4.32.0** New: Updated to CheckStyle 7.1.1.
-* **4.32.0** New: Scan scopes expanded and improved (#268). Thanks to Thomas Jensen.
+* **4.32.0** New: Scan scopes expanded and improved (#268). Thanks to Thomas Jensen (@tsjensen).
 * **4.31.1** New: Updated IDEA SDK to 15.0.6 (143.2370.31), which means no more IDEA 14 support.
 * **4.31.0** New: Updated to CheckStyle 7.1 (#264).
 * **4.30.1** Fixed: StringIndexOutOfBoundsExceptions are now treated as parse errors (#258).
