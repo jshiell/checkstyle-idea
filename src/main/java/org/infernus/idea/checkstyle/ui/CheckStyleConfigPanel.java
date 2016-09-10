@@ -5,6 +5,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
@@ -12,8 +13,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -37,7 +38,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  * Provides a configuration panel for project-level configuration.
  */
 public class CheckStyleConfigPanel extends JPanel {
-    private static final Insets COMPONENT_INSETS = new Insets(4, 4, 4, 4);
+    private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private static final int ACTIVE_COL_MIN_WIDTH = 40;
     private static final int ACTIVE_COL_MAX_WIDTH = 50;
     private static final int DESC_COL_MIN_WIDTH = 100;
@@ -50,7 +51,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final JList pathList = new JBList(new DefaultListModel<String>());
 
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
-    private final JComboBox<ScanScope> scopeDropdown = new JComboBox<>(ScanScope.values());
+    private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
@@ -71,7 +72,7 @@ public class CheckStyleConfigPanel extends JPanel {
         final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory();
         final List<ConfigurationLocation> result = new ArrayList<>();
         final ConfigurationLocation checkStyleSunChecks = locationFactory.create(project, ConfigurationType.CLASSPATH,
-            SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
+                SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
         result.add(checkStyleSunChecks);
         return Collections.unmodifiableList(result);
     }
@@ -191,7 +192,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * @param classpath the third party classpath.
      */
     public void setThirdPartyClasspath(final List<String> classpath) {
-        List<String> thirdPartyClasspath = null;
+        List<String> thirdPartyClasspath;
         if (classpath == null) {
             thirdPartyClasspath = new ArrayList<>();
         } else {
@@ -514,9 +515,8 @@ public class CheckStyleConfigPanel extends JPanel {
         @Override
         public boolean isEnabled(final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
-            final CheckStyleConfiguration config = ServiceManager.getService(project, CheckStyleConfiguration.class);
             return selectedItem == -1
-                || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
+                    || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
         }
     }
 }
