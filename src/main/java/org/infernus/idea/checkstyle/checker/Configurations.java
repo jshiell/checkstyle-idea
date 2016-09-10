@@ -27,7 +27,6 @@ public class Configurations {
     private static final Log LOG = LogFactory.getLog(Configurations.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
-    private static final String PROPERTY_ELEMENT = "property";
 
     private static final Map<String, String> FILENAME_REPLACEMENTS = new HashMap<String, String>() {{
         put("RegexpHeader", "headerFile");
@@ -50,12 +49,7 @@ public class Configurations {
     public int tabWidth(final Configuration rootElement) {
         for (final Configuration currentChild : rootElement.getChildren()) {
             if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
-                for (Configuration configuration : currentChild.getChildren()) {
-                    if (PROPERTY_ELEMENT.equals(configuration.getName())
-                            && "tabWidth".equals(getAttributeOrNull(configuration, "name"))) {
-                        return intValueOrDefault(getAttributeOrNull(configuration, "value"), DEFAULT_TAB_WIDTH);
-                    }
-                }
+                return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), DEFAULT_TAB_WIDTH);
             }
         }
         return DEFAULT_TAB_WIDTH;
