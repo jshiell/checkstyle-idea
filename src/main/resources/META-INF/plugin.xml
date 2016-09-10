@@ -7,7 +7,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 7.1 from within IDEA.
+    of Java files with CheckStyle 7.1.1 from within IDEA.
 </p>
         ]]>
     </description>
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.32.0: New: Updated to CheckStyle 7.1.1.</li>
     <li>4.32.0: New: Scan scopes expanded and improved (#268). Thanks to Thomas Jensen.</li>
     <li>4.31.1: New: Updated IDEA SDK to 15.0.6 (143.2370.31), which means no more IDEA 14 support.</li>
     <li>4.31.0: New: Updated to CheckStyle 7.1 (#264).</li>
