@@ -74,9 +74,7 @@ public class ConfigurationsTest {
         assertThat(
                 underTest.tabWidth(checker()
                         .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")
-                                        .withAttribute("value", "7")))
+                                .withAttribute("tabWidth", "7"))
                         .build()),
                 is(equalTo(7)));
     }
@@ -86,9 +84,7 @@ public class ConfigurationsTest {
         assertThat(
                 underTest.tabWidth(checker()
                         .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")
-                                        .withAttribute("value", "dd")))
+                                .withAttribute("tabWidth", "dd"))
                         .build()),
                 is(equalTo(8)));
     }
@@ -98,8 +94,7 @@ public class ConfigurationsTest {
         assertThat(
                 underTest.tabWidth(checker()
                         .withChild(config("TreeWalker")
-                                .withChild(config("property")
-                                        .withAttribute("name", "tabWidth")))
+                                .withAttribute("tabWidth", ""))
                         .build()),
                 is(equalTo(8)));
     }
