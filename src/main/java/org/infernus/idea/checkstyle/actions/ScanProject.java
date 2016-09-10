@@ -37,7 +37,7 @@ public class ScanProject extends BaseAction {
                     project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             toolWindow.activate(() -> {
                 try {
-                    setProgressText(toolWindow, "plugin.status.in-progress.current");
+                    setProgressText(toolWindow, "plugin.status.in-progress.project");
                     Runnable scanAction = null;
                     if (scope == ScanScope.Everything) {
                         scanAction = new ScanEverythingAction(project, getSelectedOverride(toolWindow));

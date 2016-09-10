@@ -55,7 +55,7 @@ public class ScanModule extends BaseAction {
 
             toolWindow.activate(() -> {
                 try {
-                    setProgressText(toolWindow, "plugin.status.in-progress.current");
+                    setProgressText(toolWindow, "plugin.status.in-progress.module");
 
                     Runnable scanAction = null;
                     if (scope == ScanScope.Everything) {
