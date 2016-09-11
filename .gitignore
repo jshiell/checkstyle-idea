@@ -1,6 +1,6 @@
 CheckStyle-IDEA.zip
 .DS_Store
-/*.iws
+*.iws
 *.ipr
 *.iml
 .idea/

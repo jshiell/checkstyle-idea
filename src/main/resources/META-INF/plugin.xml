@@ -186,6 +186,8 @@
                         serviceImplementation="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"
                         serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstyleProjectService"
+                        serviceImplementation="org.infernus.idea.checkstyle.CheckstyleProjectService"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 

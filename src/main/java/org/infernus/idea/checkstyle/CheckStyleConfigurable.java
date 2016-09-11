@@ -1,5 +1,9 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.IOException;
+import java.util.List;
+import javax.swing.JComponent;
+
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -14,16 +18,14 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.io.IOException;
-import java.util.List;
-
 
 /**
  * The "configurable component" required by IntelliJ IDEA to provide a Swing form for inclusion into the 'Settings'
  * dialog. Registered in {@code plugin.xml} as a {@code projectConfigurable} extension.
  */
-public class CheckStyleConfigurable implements Configurable {
+public class CheckStyleConfigurable
+        implements Configurable
+{
     private static final Log LOG = LogFactory.getLog(CheckStyleConfigurable.class);
 
     private final Project project;
@@ -57,11 +59,11 @@ public class CheckStyleConfigurable implements Configurable {
         LOG.trace("isModified() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
         try {
-            boolean result = haveLocationsChanged(configuration)
-                || hasActiveLocationChanged(configuration)
-                || !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath())
-                || configuration.getScanScope() != configPanel.getScanScope()
-                || configuration.isSuppressingErrors() != configPanel.isSuppressingErrors();
+            boolean result = haveLocationsChanged(configuration) || hasActiveLocationChanged(configuration) ||
+                    !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath()) ||
+                    configuration.getScanScope() != configPanel.getScanScope() || configuration.isSuppressingErrors()
+                    != configPanel.isSuppressingErrors() || !configuration.getCheckstyleVersion().equals(configPanel
+                    .getCheckstyleVersion());
             if (LOG.isTraceEnabled()) {
                 LOG.trace("isModified() - exit - result=" + result);
             }
@@ -101,6 +103,7 @@ public class CheckStyleConfigurable implements Configurable {
     public void apply() throws ConfigurationException {
         LOG.trace("apply() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
+        configuration.setCheckstyleVersion(configPanel.getCheckstyleVersion());
         configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
         configuration.setScanScope(configPanel.getScanScope());
@@ -109,14 +112,17 @@ public class CheckStyleConfigurable implements Configurable {
         final List<String> thirdPartyClasspath = configPanel.getThirdPartyClasspath();
         configuration.setThirdPartyClassPath(thirdPartyClasspath);
 
+        CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        csService.activateCheckstyleVersion(configPanel.getCheckstyleVersion());
+
         getCheckerFactoryCache().invalidate();
         resetModuleClassBuilder();
         LOG.trace("apply() - exit");
     }
 
     private void resetModuleClassBuilder() {
-        final ModuleClassPathBuilder moduleClassPathBuilder =
-            ServiceManager.getService(project, ModuleClassPathBuilder.class);
+        final ModuleClassPathBuilder moduleClassPathBuilder = ServiceManager.getService(project,
+                ModuleClassPathBuilder.class);
         if (moduleClassPathBuilder != null) {
             moduleClassPathBuilder.reset();
         }
@@ -133,6 +139,7 @@ public class CheckStyleConfigurable implements Configurable {
     public void reset() {
         LOG.trace("reset() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
+        configPanel.setCheckstyleVersion(configuration.getCheckstyleVersion());
         configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
         configPanel.setScanScope(configuration.getScanScope());

@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -9,10 +12,6 @@ import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +32,7 @@ public class CheckStyleConfigurableTest {
 
             CheckStyleConfiguration mockConfig = Mockito.mock(CheckStyleConfiguration.class);
             when(mockConfig.getProject()).thenReturn(mockProject);
+            when(mockConfig.getCheckstyleVersion()).thenReturn("7.1.2");
             when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
             when(mockConfig.getActiveConfiguration()).thenReturn(mockLocations.get(0));
             when(mockConfig.configurationLocations()).thenReturn(mockLocations);
@@ -57,6 +57,7 @@ public class CheckStyleConfigurableTest {
         final List<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
                 new ConfigurationLocationFactory());
 
+        when(mockPanel.getCheckstyleVersion()).thenReturn("7.1.2");
         when(mockPanel.getActiveLocation()).thenReturn(mockLocations.get(0));
         when(mockPanel.getConfigurationLocations()).thenReturn(mockLocations);
         when(mockPanel.getThirdPartyClasspath()).thenReturn(Arrays.asList("cp1", "cp2"));

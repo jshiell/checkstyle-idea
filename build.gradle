@@ -1,3 +1,7 @@
+import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask;
+import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask;
+import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask;
+
 buildscript {
     repositories {
         maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
@@ -25,15 +29,65 @@ repositories {
     jcenter()
 }
 
+sourceSets {
+    csaccess {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+        }
+    }
+}
+configurations {
+    csaccessCompile.extendsFrom(compile)
+    csaccessCompile {
+        exclude group: 'com.jetbrains', module: 'idea'
+    }
+    csaccessCompileOnly.extendsFrom(compileOnly)
+    csaccessCompileClasspath.extendsFrom(compileClasspath)
+    csaccessRuntime.extendsFrom(runtime)
+}
+tasks.compileTestJava.dependsOn compileCsaccessJava
+tasks.testClasses.dependsOn csaccessClasses
+tasks.jar.dependsOn csaccessClasses
+
 dependencies {
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.4') {
+    // TODO We aim to have Checkstyle removed from the following line:
+    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    // The Checkstyle version given here is the *base version* against which our code is initially compiled.
+    // This is mostly for convenience, so we don't have to use reflection overly much. At runtime, the Checkstyle
+    // version will depend on the plugin configuration.
+    // TODO Activate the following line when the compile dependency above is removed:
+    //csaccessCompile group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1';
+    csaccessCompile group: 'org.jetbrains', name: 'annotations', version: '15.0';
 
+    testCompile group: 'junit', name: 'junit', version: '4.12';
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3';
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19';
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
+}
+
+project.tasks.create(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+task copyCheckstyleArtifactsToSandbox(type: CopyCheckstyleArtifactsToSandboxTask);
+task copyCheckstyleArtifactsToTestSandbox(type: CopyCheckstyleArtifactsToSandboxTask) { setTest(); }
+task copyClassesToSandbox(type: CopyClassesToSandboxTask);
+task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
+
+// Defer the rest of the wiring until after the intellij plugin's tasks have been created:
+tasks.all { final Task task ->
+    if ('buildPlugin' == task.name || 'runIdea' == task.name) {
+        task.dependsOn(copyCheckstyleArtifactsToSandbox);
+        task.dependsOn tasks['copyClassesToSandbox'];
+    }
+    else if ('prepareSandbox' == task.name) {
+        tasks['copyCheckstyleArtifactsToSandbox'].dependsOn task;
+        tasks['copyClassesToSandbox'].dependsOn task;
+    }
+    else if ('prepareTestsSandbox' == task.name) {
+        tasks['copyCheckstyleArtifactsToTestSandbox'].dependsOn task;
+        tasks['copyClassesToTestSandbox'].dependsOn task;
+    }
 }
