@@ -1,23 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleServiceManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.puppycrawl.tools.checkstyle.TreeWalker;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.infernus.idea.checkstyle.checker.*;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +7,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleServiceManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
+import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.checker.ScanFiles;
+import org.infernus.idea.checkstyle.checker.ScannerListener;
+import org.infernus.idea.checkstyle.checker.UiFeedbackScannerListener;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import static java.util.Collections.emptyMap;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
@@ -58,13 +59,7 @@ public final class CheckStylePlugin implements ProjectComponent {
     }
 
     private void disableCheckStyleLogging() {
-        try {
-            // This is a nasty hack to get around IDEA's DialogAppender sending any errors to the Event Log,
-            // which would result in CheckStyle parse errors spamming the Event Log.
-            Logger.getLogger(TreeWalker.class).setLevel(Level.OFF);
-        } catch (Exception e) {
-            LOG.error("Unable to suppress logging from CheckStyle's TreeWalker", e);
-        }
+        new Checkstyle().disableCheckstyleLogging();  // TODO reuse class
     }
 
     public Project getProject() {

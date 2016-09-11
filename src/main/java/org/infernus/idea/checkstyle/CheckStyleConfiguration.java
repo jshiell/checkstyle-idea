@@ -1,7 +1,27 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.*;
+import com.intellij.openapi.components.ExportableComponent;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.components.StoragePathMacros;
+import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
@@ -13,25 +33,14 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
 /**
  * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
  */
-@State(
-        name = CheckStylePlugin.ID_PLUGIN,
-        storages = {
-                @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
-                @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme = StorageScheme.DIRECTORY_BASED)
-        }
-)
-public class CheckStyleConfiguration implements ExportableComponent,
-    PersistentStateComponent<CheckStyleConfiguration.ProjectSettings>
+@State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage(id = "default", file = StoragePathMacros.PROJECT_FILE)
+        , @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme =
+        StorageScheme.DIRECTORY_BASED)})
+public class CheckStyleConfiguration
+        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings>
 {
     public static final String PROJECT_DIR = "$PRJ_DIR$";
     public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
@@ -39,6 +48,7 @@ public class CheckStyleConfiguration implements ExportableComponent,
     private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
 
     private static final String ACTIVE_CONFIG = "active-configuration";
+    private static final String CHECKSTYLE_VERSION_SETTING = "checkstyle-version";
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
     private static final String SCANSCOPE_SETTING = "scanscope";
@@ -143,12 +153,10 @@ public class CheckStyleConfiguration implements ExportableComponent,
     public List<ConfigurationLocation> configurationLocations() {
         storageLock.lock();
         try {
-            final List<ConfigurationLocation> locations = storage.entrySet().stream()
-                    .filter(this::propertyIsALocation)
-                    .map(this::deserialiseLocation)
-                    .filter(this::notNull)
-                    .collect(Collectors.toList());
-                return locations;
+            final List<ConfigurationLocation> locations = storage.entrySet().stream().filter
+                    (this::propertyIsALocation).map(this::deserialiseLocation).filter(this::notNull).collect
+                    (Collectors.toList());
+            return locations;
 
         } finally {
             storageLock.unlock();
@@ -163,7 +171,8 @@ public class CheckStyleConfiguration implements ExportableComponent,
     private ConfigurationLocation deserialiseLocation(final Map.Entry<String, String> locationProperty) {
         final String serialisedLocation = locationProperty.getValue();
         try {
-            final ConfigurationLocation location = configurationLocationFactory().create(getProject(), serialisedLocation);
+            final ConfigurationLocation location = configurationLocationFactory().create(getProject(),
+                    serialisedLocation);
             location.setProperties(propertiesFor(locationProperty));
             return location;
 
@@ -185,12 +194,11 @@ public class CheckStyleConfiguration implements ExportableComponent,
 
         // loop again over all settings to find the properties belonging to this configuration
         // not the best solution, but since there are only few items it doesn't hurt too much...
-        storage.entrySet().stream()
-                .filter(property -> property.getKey().startsWith(propertyPrefix))
-                .forEach(property -> {
-                    final String propertyName = property.getKey().substring(propertyPrefix.length());
-                    properties.put(propertyName, property.getValue());
-                });
+        storage.entrySet().stream().filter(property -> property.getKey().startsWith(propertyPrefix)).forEach(property
+                -> {
+            final String propertyName = property.getKey().substring(propertyPrefix.length());
+            properties.put(propertyName, property.getValue());
+        });
         return properties;
     }
 
@@ -212,8 +220,9 @@ public class CheckStyleConfiguration implements ExportableComponent,
         setConfigurationLocations(configurationLocations, true);
     }
 
-    private List<ConfigurationLocation> setConfigurationLocations(final List<ConfigurationLocation> configurationLocations,
-                                                                  final boolean fireEvents) {
+    private List<ConfigurationLocation> setConfigurationLocations(final List<ConfigurationLocation>
+                                                                          configurationLocations, final boolean
+            fireEvents) {
         storageLock.lock();
         try {
             removeUnknownProperties();
@@ -239,8 +248,8 @@ public class CheckStyleConfiguration implements ExportableComponent,
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read properties from " + configurationLocation, e);
-                    Notifications.showError(getProject(),
-                            CheckStyleBundle.message("checkstyle.could-not-read-properties", configurationLocation.getLocation()));
+                    Notifications.showError(getProject(), CheckStyleBundle.message("checkstyle" + "" +
+                            ".could-not-read-properties", configurationLocation.getLocation()));
                 }
 
                 ++index;
@@ -300,6 +309,24 @@ public class CheckStyleConfiguration implements ExportableComponent,
         storage.put(THIRDPARTY_CLASSPATH, valueString.toString());
     }
 
+    public String getCheckstyleVersion() {
+        String result = storage.get(CHECKSTYLE_VERSION_SETTING);
+        if (result == null) {
+            CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+            result = csService.getDefaultVersion();
+        }
+        return result;
+    }
+
+    public void setCheckstyleVersion(@Nullable final String pVersion) {
+        String v = pVersion;
+        if (pVersion == null) {
+            CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+            v = csService.getDefaultVersion();
+        }
+        storage.put(CHECKSTYLE_VERSION_SETTING, v);
+    }
+
     @NotNull
     public ScanScope getScanScope() {
         return scopeValueOf(SCANSCOPE_SETTING);
@@ -341,8 +368,7 @@ public class CheckStyleConfiguration implements ExportableComponent,
         if (propertyValue != null) {
             try {
                 result = ScanScope.valueOf(propertyValue);
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // settings got messed up (manual edit?) - use default
             }
         }
@@ -396,8 +422,7 @@ public class CheckStyleConfiguration implements ExportableComponent,
         if (projectPath != null) {
             final String projectPathAbs = projectPath.getAbsolutePath();
             if (path.startsWith(projectPathAbs)) {
-                return PROJECT_DIR + path.substring(
-                        projectPathAbs.length());
+                return PROJECT_DIR + path.substring(projectPathAbs.length());
             }
         }
 
@@ -460,8 +485,8 @@ public class CheckStyleConfiguration implements ExportableComponent,
      */
     private void convertSettingsFormat(final Map<String, String> pLoadedMap) {
         if (pLoadedMap != null && !pLoadedMap.isEmpty() && !pLoadedMap.containsKey(SCANSCOPE_SETTING)) {
-            ScanScope scope = ScanScope.fromFlags(
-                    booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf(CHECK_NONJAVA_FILES));
+            ScanScope scope = ScanScope.fromFlags(booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf
+                    (CHECK_NONJAVA_FILES));
             pLoadedMap.put(SCANSCOPE_SETTING, scope.name());
             pLoadedMap.remove(CHECK_TEST_CLASSES);
             pLoadedMap.remove(CHECK_NONJAVA_FILES);
@@ -471,7 +496,8 @@ public class CheckStyleConfiguration implements ExportableComponent,
     /**
      * Wrapper class for IDEA state serialisation.
      */
-    public static class ProjectSettings {
+    public static class ProjectSettings
+    {
         // this must remain public for serialisation purposes
         public Map<String, String> configuration;
 

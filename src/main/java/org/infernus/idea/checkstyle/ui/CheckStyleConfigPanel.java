@@ -1,5 +1,27 @@
 package org.infernus.idea.checkstyle.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableColumn;
+
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -10,29 +32,24 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.*;
+import com.intellij.ui.AnActionButton;
+import com.intellij.ui.AnActionButtonRunnable;
+import com.intellij.ui.AnActionButtonUpdater;
+import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
+import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableColumn;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
  * Provides a configuration panel for project-level configuration.
@@ -50,6 +67,8 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private final JList pathList = new JBList(new DefaultListModel<String>());
 
+    private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") + ":");
+    private final ComboBox csVersionDropdown;
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
     private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
@@ -59,11 +78,13 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private final Project project;
 
+
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
 
         this.project = project;
         this.presetLocations = buildPresetLocations();
+        this.csVersionDropdown = buildCheckstyleVersionComboBox(project);
 
         initialise();
     }
@@ -75,6 +96,12 @@ public class CheckStyleConfigPanel extends JPanel {
                 SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
         result.add(checkStyleSunChecks);
         return Collections.unmodifiableList(result);
+    }
+
+    private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project project) {
+        SortedSet<String> versions = ServiceManager.getService(project, CheckstyleProjectService.class).getSupportedVersions();
+        String[] supportedVersions = versions.toArray(new String[versions.size()]);
+        return new ComboBox(supportedVersions);
     }
 
     private ConfigurationLocationFactory getConfigurationLocationFactory() {
@@ -95,20 +122,26 @@ public class CheckStyleConfigPanel extends JPanel {
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
-        configFilePanel.add(scopeDropdownLabel, new GridBagConstraints(
+        configFilePanel.add(csVersionDropdownLabel, new GridBagConstraints(
                 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(scopeDropdown, new GridBagConstraints(
+        configFilePanel.add(csVersionDropdown, new GridBagConstraints(
                 1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(scopeDropdownLabel, new GridBagConstraints(
+                2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(scopeDropdown, new GridBagConstraints(
+                3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
-                2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                4, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 1, 5, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 2, 3, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 2, 5, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
@@ -203,11 +236,20 @@ public class CheckStyleConfigPanel extends JPanel {
         listModel.clear();
 
         for (final String classPathFile : thirdPartyClasspath) {
-            if (!isBlank(classPathFile)) {
+            if (!Strings.isBlank(classPathFile)) {
                 listModel.addElement(classPathFile);
             }
         }
     }
+
+    public String getCheckstyleVersion() {
+        return (String) csVersionDropdown.getSelectedItem();
+    }
+
+    public void setCheckstyleVersion(@NotNull final String pVersion) {
+        csVersionDropdown.setSelectedItem(pVersion);
+    }
+
 
     @SuppressWarnings("unchecked")
     private DefaultListModel<String> pathListModel() {
