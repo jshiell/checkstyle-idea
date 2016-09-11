@@ -20,10 +20,6 @@ intellij {
 sourceCompatibility = 1.8
 version = '4.35.0'
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
-}
-
 repositories {
     mavenCentral()
 }
