@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -7,11 +8,13 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.util.messages.MessageBus;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +34,16 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigurationsTest {
 
+    private static final int CODE_STYLE_TAB_SIZE = 3;
+
     @Mock
     private ConfigurationLocation configurationLocation;
     @Mock
     private Module module;
     @Mock
     private Notifications notifications;
+    @Mock
+    private CodeStyleSettings codeStyleSettings;
 
     private Configurations underTest;
 
@@ -49,7 +56,15 @@ public class ConfigurationsTest {
         when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
                 .thenThrow(new IOException("aTriggeredIoException"));
 
-        underTest = new Configurations(configurationLocation, module);
+        when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
+
+        underTest = new Configurations(configurationLocation, module) {
+            @NotNull
+            @Override
+            CodeStyleSettings currentCodeStyleSettings() {
+                return codeStyleSettings;
+            }
+        };
     }
 
     private void interceptApplicationNotifications() {
@@ -66,7 +81,7 @@ public class ConfigurationsTest {
     public void aDefaultTabWidthIsEightIsUsedWhenNoTabWidthPropertyIsPresent() {
         assertThat(
                 underTest.tabWidth(checker().build()),
-                is(equalTo(8)));
+                is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 
     @Test
@@ -86,7 +101,7 @@ public class ConfigurationsTest {
                         .withChild(config("TreeWalker")
                                 .withAttribute("tabWidth", "dd"))
                         .build()),
-                is(equalTo(8)));
+                is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 
     @Test
@@ -96,7 +111,7 @@ public class ConfigurationsTest {
                         .withChild(config("TreeWalker")
                                 .withAttribute("tabWidth", ""))
                         .build()),
-                is(equalTo(8)));
+                is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 
     @Test

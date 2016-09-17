@@ -1,6 +1,9 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
@@ -35,8 +38,6 @@ public class Configurations {
         put("ImportControl", "file");
     }};
 
-    private static final int DEFAULT_TAB_WIDTH = 8;
-
     private final ConfigurationLocation location;
     private final Module module;
 
@@ -49,10 +50,26 @@ public class Configurations {
     public int tabWidth(final Configuration rootElement) {
         for (final Configuration currentChild : rootElement.getChildren()) {
             if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
-                return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), DEFAULT_TAB_WIDTH);
+                return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), defaultTabSize());
             }
         }
-        return DEFAULT_TAB_WIDTH;
+        return defaultTabSize();
+    }
+
+    private int defaultTabSize() {
+        return currentCodeStyleSettings().getTabSize(JavaFileType.INSTANCE);
+    }
+
+    @NotNull
+    CodeStyleSettings currentCodeStyleSettings() {
+        return codeStyleSettingsManager().getCurrentSettings();
+    }
+
+    private CodeStyleSettingsManager codeStyleSettingsManager() {
+        if (module != null) {
+            return CodeStyleSettingsManager.getInstance(module.getProject());
+        }
+        return CodeStyleSettingsManager.getInstance();
     }
 
     public Optional<String> baseDir(final Configuration rootElement) {
