@@ -38,8 +38,8 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
         }
 
         try {
-            final String basePath = projectPath.getAbsolutePath() + File.separator;
-            return basePath + FilePaths.relativePath(path, basePath, File.separator);
+            final String basePath = absolutePathOf(projectPath) + separatorChar();
+            return basePath + FilePaths.relativePath(path, basePath, "" + separatorChar());
 
         } catch (FilePaths.PathResolutionException e) {
             LOG.debug("No common path was found between " + path + " and " + projectPath.getAbsolutePath());

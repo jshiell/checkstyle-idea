@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,7 +127,8 @@ public class FileConfigurationLocationTest {
             if (file.getPath().startsWith("c:")) {
                 return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
             }
-            return file.getAbsolutePath();
+
+            return FilenameUtils.separatorsToUnix(file.getPath());
         }
     }
 
