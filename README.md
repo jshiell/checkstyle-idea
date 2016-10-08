@@ -148,6 +148,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * George Kankava (@georgekankava)
 * Thomas Jensen (@tsjensen)
 * Klaus Tannenberg (@KTannenberg)
+* Nikolay Bespalov (@nikolaybespalov)
 
 And also thanks are due to the authors and contributors of:
 
