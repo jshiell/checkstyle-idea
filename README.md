@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nikolaybespalov/checkstyle-idea.svg?branch=master)](https://travis-ci.org/nikolaybespalov/checkstyle-idea)
+
 # CheckStyle-IDEA
 
 &copy; Copyright 2006-2016 CheckStyle-IDEA Contributors
