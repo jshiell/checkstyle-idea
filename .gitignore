@@ -4,11 +4,9 @@ CheckStyle-IDEA.zip
 *.ipr
 *.iml
 .idea/
-/target/
-/build/*
+/build/
+/buildSrc/build/
 /test-configs/
-META-INF
-!src/main/resources/META-INF
-/.gradle/
+.gradle/
 /.gradletasknamecache
-.idea/
+_support/
