@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.33.0** New: Updated to CheckStyle 7.2.
 * **4.32.2** Fixed: Victim location errors are now at debug level.
 * **4.32.2** Fixed: The default tab width is now set from the IDEA Java Code Style, rather than defaulting to the Checkstyle default.
 * **4.32.1** Fixed: `tabWidth` is now read properly, improving element matching for errors (#259, #265). Thanks to Klaus Tannenberg (@KTannenberg).
