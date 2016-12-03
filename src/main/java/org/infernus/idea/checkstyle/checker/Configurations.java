@@ -30,6 +30,7 @@ public class Configurations {
     private static final Log LOG = LogFactory.getLog(Configurations.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
+    private static final int DEFAULT_CHECKSTYLE_TAB_SIZE = 8;
 
     private static final Map<String, String> FILENAME_REPLACEMENTS = new HashMap<String, String>() {{
         put("RegexpHeader", "headerFile");
@@ -57,7 +58,13 @@ public class Configurations {
     }
 
     private int defaultTabSize() {
-        return currentCodeStyleSettings().getTabSize(JavaFileType.INSTANCE);
+        try {
+            return currentCodeStyleSettings().getTabSize(JavaFileType.INSTANCE);
+        } catch (AssertionError e) {
+            // #278 - there appears to be a timing issue where the code style settings fetch will sometimes
+            // fail on startup
+            return DEFAULT_CHECKSTYLE_TAB_SIZE;
+        }
     }
 
     @NotNull

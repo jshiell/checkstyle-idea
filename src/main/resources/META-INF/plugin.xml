@@ -21,6 +21,7 @@
         <![CDATA[
 <ul>
     <li>4.34.0: New: Updated to CheckStyle 7.3.</li>
+    <li>4.34.0: Fixed: Added (hopefully) a workaround for #278.</li>
     <li>4.33.0: New: Updated to CheckStyle 7.2.</li>
     <li>4.32.2: Fixed: Victim location errors are now at debug level.</li>
     <li>4.32.2: Fixed: The default tab width is now set from the IDEA Java Code Style, rather than defaulting to the Checkstyle default.</li>
