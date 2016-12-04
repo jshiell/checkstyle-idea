@@ -8,5 +8,6 @@ CheckStyle-IDEA.zip
 /buildSrc/build/
 /test-configs/
 .gradle/
+gradle-app.setting
 /.gradletasknamecache
 _support/
