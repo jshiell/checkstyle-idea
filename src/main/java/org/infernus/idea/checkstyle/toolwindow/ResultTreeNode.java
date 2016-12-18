@@ -1,15 +1,15 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import javax.swing.Icon;
+
 import com.intellij.psi.PsiFile;
-import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
@@ -71,11 +71,11 @@ public class ResultTreeNode {
     }
 
     private void updateIconsForProblem() {
-        if (severity != null && SeverityLevel.IGNORE.equals(severity)) {
+        if (severity != null && SeverityLevel.Ignore.equals(severity)) {
             icon = Icons.icon("/general/hideWarnings.png");
-        } else if (severity != null && SeverityLevel.WARNING.equals(severity)) {
+        } else if (severity != null && SeverityLevel.Warning.equals(severity)) {
             icon = Icons.icon("/general/warning.png");
-        } else if (severity != null && SeverityLevel.INFO.equals(severity)) {
+        } else if (severity != null && SeverityLevel.Info.equals(severity)) {
             icon = Icons.icon("/general/information.png");
         } else {
             icon = Icons.icon("/general/error.png");

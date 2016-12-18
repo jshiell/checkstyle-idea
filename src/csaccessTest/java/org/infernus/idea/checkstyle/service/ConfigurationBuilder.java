@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle.checker;
+package org.infernus.idea.checkstyle.service;
 
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.api.Configuration;

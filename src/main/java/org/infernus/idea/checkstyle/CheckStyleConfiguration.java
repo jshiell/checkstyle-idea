@@ -208,7 +208,7 @@ public class CheckStyleConfiguration
         return PROPERTIES_PREFIX + index + ".";
     }
 
-    Project getProject() {
+    public Project getProject() {
         return project;
     }
 

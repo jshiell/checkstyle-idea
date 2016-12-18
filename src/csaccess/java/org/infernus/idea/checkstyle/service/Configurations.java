@@ -1,0 +1,88 @@
+package org.infernus.idea.checkstyle.service;
+
+import java.util.Optional;
+
+import com.intellij.ide.highlighter.JavaFileType;
+import com.intellij.openapi.module.Module;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
+import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
+public class Configurations
+{
+    private static final Log LOG = LogFactory.getLog(Configurations.class);
+
+    private static final String TREE_WALKER_ELEMENT = "TreeWalker";
+    private static final int DEFAULT_CHECKSTYLE_TAB_SIZE = 8;
+
+    private final Module module;
+
+    public Configurations(@Nullable final Module module) {
+        this.module = module;
+    }
+
+    public int tabWidth(final Configuration rootElement) {
+        for (final Configuration currentChild : rootElement.getChildren()) {
+            if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
+                return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), defaultTabSize());
+            }
+        }
+        return defaultTabSize();
+    }
+
+    private int defaultTabSize() {
+        try {
+            return currentCodeStyleSettings().getTabSize(JavaFileType.INSTANCE);
+        } catch (AssertionError e) {
+            // #278 - there appears to be a timing issue where the code style settings fetch will sometimes
+            // fail on startup
+            return DEFAULT_CHECKSTYLE_TAB_SIZE;
+        }
+    }
+
+    @NotNull
+    CodeStyleSettings currentCodeStyleSettings() {
+        return codeStyleSettingsManager().getCurrentSettings();
+    }
+
+    private CodeStyleSettingsManager codeStyleSettingsManager() {
+        if (module != null) {
+            return CodeStyleSettingsManager.getInstance(module.getProject());
+        }
+        return CodeStyleSettingsManager.getInstance();
+    }
+
+    public Optional<String> baseDir(final Configuration rootElement) {
+        for (final String attributeName : rootElement.getAttributeNames()) {
+            if ("basedir".equals(attributeName)) {
+                return ofNullable(getAttributeOrNull(rootElement, "basedir"));
+            }
+        }
+        return empty();
+    }
+
+    private int intValueOrDefault(final String value, final int defaultValue) {
+        if (value != null) {
+            try {
+                return Integer.valueOf(value);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return defaultValue;
+    }
+
+    private String getAttributeOrNull(final Configuration element, final String attributeName) {
+        try {
+            return element.getAttribute(attributeName);
+        } catch (CheckstyleException e) {
+            return null;
+        }
+    }
+}

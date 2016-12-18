@@ -1,4 +1,7 @@
-package org.infernus.idea.checkstyle.checker;
+package org.infernus.idea.checkstyle.service;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
@@ -6,9 +9,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     private static final int INDENT_SIZE = 2;

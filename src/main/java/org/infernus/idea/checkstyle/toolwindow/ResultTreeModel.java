@@ -1,15 +1,20 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
-import com.intellij.psi.PsiFile;
-import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.checker.Problem;
-import org.jetbrains.annotations.Nullable;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import java.util.*;
+
+import com.intellij.psi.PsiFile;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.jetbrains.annotations.Nullable;
 
 public class ResultTreeModel extends DefaultTreeModel {
 
@@ -137,7 +142,7 @@ public class ResultTreeModel extends DefaultTreeModel {
      * @param results the model.
      */
     public void setModel(final Map<PsiFile, List<Problem>> results) {
-        setModel(results, SeverityLevel.ERROR, SeverityLevel.WARNING, SeverityLevel.INFO);
+        setModel(results, SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
     }
 
     /**

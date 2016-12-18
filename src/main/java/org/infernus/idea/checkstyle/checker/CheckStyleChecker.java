@@ -1,87 +1,46 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.psi.PsiFile;
-import com.puppycrawl.tools.checkstyle.Checker;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import com.puppycrawl.tools.checkstyle.api.Configuration;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.checks.CheckFactory;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyMap;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.jetbrains.annotations.NotNull;
 
-public class CheckStyleChecker {
-    private final Checker checker;
-    private final Configuration configuration;
+public class CheckStyleChecker
+{
+    /** checker with config */
+    private final CheckstyleInternalObject checkstyleInternalObjects;
+
     private final int tabWidth;
     private final Optional<String> baseDir;
 
-    public CheckStyleChecker(@NotNull final Checker checker,
-                             @NotNull final Configuration configuration,
-                             final int tabWidth,
+
+    public CheckStyleChecker(@NotNull final CheckstyleInternalObject pCheckstyleInternalObjects, final int tabWidth,
                              @NotNull final Optional<String> baseDir) {
-        this.checker = checker;
-        this.configuration = configuration;
+        this.checkstyleInternalObjects = pCheckstyleInternalObjects;
         this.tabWidth = tabWidth;
         this.baseDir = baseDir;
     }
 
     @NotNull
-    public Map<PsiFile, List<Problem>> scan(@NotNull final List<ScannableFile> scannableFiles,
-                                            @NotNull final CheckStyleConfiguration pluginConfig) {
-        if (scannableFiles.isEmpty()) {
-            return emptyMap();
-        }
+    public Map<PsiFile, List<Problem>> scan(@NotNull final List<ScannableFile> scannableFiles, @NotNull final
+    CheckStyleConfiguration pluginConfig) {
 
-        return processAndAudit(filesOf(scannableFiles),
-                createListener(mapFilesToElements(scannableFiles), pluginConfig))
-                .getProblems();
+        final CheckstyleProjectService csService = ServiceManager.getService(pluginConfig.getProject(),
+                CheckstyleProjectService.class);
+        return csService.getCheckstyleInstance().scan(checkstyleInternalObjects, scannableFiles, pluginConfig
+                .isSuppressingErrors(), tabWidth, baseDir);
     }
 
-    private Map<String, PsiFile> mapFilesToElements(final List<ScannableFile> scannableFiles) {
-        final Map<String, PsiFile> filePathsToElements = new HashMap<>();
-        for (ScannableFile scannableFile : scannableFiles) {
-            filePathsToElements.put(scannableFile.getAbsolutePath(), scannableFile.getPsiFile());
-        }
-        return filePathsToElements;
-    }
 
-    private List<File> filesOf(final List<ScannableFile> scannableFiles) {
-        return scannableFiles.stream()
-                .map(ScannableFile::getFile)
-                .collect(Collectors.toList());
-    }
-
-    private CheckStyleAuditListener processAndAudit(final List<File> files,
-                                                    final CheckStyleAuditListener auditListener) {
-        synchronized (checker) {
-            checker.addListener(auditListener);
-            try {
-                checker.process(files);
-            } catch (CheckstyleException e) {
-                throw CheckStylePluginException.wrap(e);
-            } finally {
-                checker.removeListener(auditListener);
-            }
-        }
-        return auditListener;
-    }
-
-    private CheckStyleAuditListener createListener(final Map<String, PsiFile> filesToScan,
-                                                   final CheckStyleConfiguration pluginConfig) {
-        return new CheckStyleAuditListener(filesToScan,
-                pluginConfig.isSuppressingErrors(), tabWidth, baseDir, CheckFactory.getChecks(configuration));
-    }
-
-    public void destroy() {
-        checker.destroy();
+    public void destroy(@NotNull final Project pProject) {
+        final CheckstyleProjectService csService = ServiceManager.getService(pProject, CheckstyleProjectService.class);
+        csService.getCheckstyleInstance().destroyChecker(checkstyleInternalObjects);
     }
 }

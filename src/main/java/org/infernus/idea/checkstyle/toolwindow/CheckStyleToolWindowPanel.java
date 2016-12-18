@@ -1,5 +1,34 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -18,37 +47,16 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.ConfigurationListener;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -498,9 +506,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     public void displayErrorResult(final Throwable error) {
         // match some friendly error messages.
         String errorText = null;
-        if (error.getCause() != null
-                && error.getCause() instanceof CheckstyleException) {
-
+        if (error instanceof CheckstyleToolException && error.getCause() != null) {
             for (final Map.Entry<Pattern, String> errorPatternEntry
                     : CHECKSTYLE_ERROR_PATTERNS.entrySet()) {
                 final Matcher errorMatcher
@@ -531,15 +537,15 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         final List<SeverityLevel> severityLevels = new ArrayList<>();
 
         if (displayingErrors) {
-            severityLevels.add(SeverityLevel.ERROR);
+            severityLevels.add(SeverityLevel.Error);
         }
 
         if (displayingWarnings) {
-            severityLevels.add(SeverityLevel.WARNING);
+            severityLevels.add(SeverityLevel.Warning);
         }
 
         if (displayingInfo) {
-            severityLevels.add(SeverityLevel.INFO);
+            severityLevels.add(SeverityLevel.Info);
         }
 
         return severityLevels.toArray(new SeverityLevel[severityLevels.size()]);

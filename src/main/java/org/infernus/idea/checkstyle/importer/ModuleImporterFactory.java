@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.importer;
 
-import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ class ModuleImporterFactory {
     private ModuleImporterFactory() {}
 
     @Nullable
-    static ModuleImporter getModuleImporter(@NotNull Configuration configuration)
+    static ModuleImporter getModuleImporter(@NotNull ConfigurationModule configuration)
             throws InstantiationException, IllegalAccessException {
         String name = configuration.getName();
         ModuleImporter moduleImporter = createImporter(name);

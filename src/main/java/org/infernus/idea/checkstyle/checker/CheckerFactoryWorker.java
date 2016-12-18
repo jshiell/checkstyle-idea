@@ -1,32 +1,32 @@
 package org.infernus.idea.checkstyle.checker;
 
+import java.util.Map;
+
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
-import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
-import com.puppycrawl.tools.checkstyle.PropertyResolver;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import com.puppycrawl.tools.checkstyle.api.Configuration;
-import org.apache.commons.io.IOUtils;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xml.sax.InputSource;
 
-import java.io.InputStream;
 
-class CheckerFactoryWorker extends Thread {
+class CheckerFactoryWorker
+        extends Thread
+{
+    // TODO Why use an array here?
     private final Object[] threadReturn = new Object[1];
 
     private final ConfigurationLocation location;
-    private final PropertyResolver resolver;
-    private final Configurations configurations;
+    private final Map<String, String> properties;
+    private final Module module;
 
-    CheckerFactoryWorker(@NotNull final ConfigurationLocation location,
-                         @NotNull final PropertyResolver resolver,
-                         @Nullable final Module module,
-                         @Nullable final ClassLoader contextClassLoader) {
+
+    // TODO The ClassLoader argument should be superfluous, as we use a custom classloader from here on, anyway.
+    CheckerFactoryWorker(@NotNull final ConfigurationLocation location, @NotNull Map<String, String> pProperties,
+                         @Nullable final Module pModule, @Nullable final ClassLoader contextClassLoader) {
         this.location = location;
-        this.resolver = resolver;
-        this.configurations = new Configurations(location, module);
+        properties = pProperties;
+        this.module = pModule;
 
         if (contextClassLoader != null) {
             setContextClassLoader(contextClassLoader);
@@ -35,41 +35,22 @@ class CheckerFactoryWorker extends Thread {
         }
     }
 
+
     public Object getResult() {
         return threadReturn[0];
     }
 
+
     @Override
     public void run() {
-        InputStream is = null;
+
+        super.run();
+        final CheckstyleProjectService csService = ServiceManager.getService(module.getProject(),
+                CheckstyleProjectService.class);
         try {
-            is = location.resolve();
-            Configuration config = ConfigurationLoader.loadConfiguration(new InputSource(is), resolver, true);
-            if (config == null) {
-                // from the CS code this state appears to occur when there's no <module> element found
-                // in the input stream
-                throw new CheckstyleException("Couldn't find root module in " + location.getLocation());
-            }
-
-            config = configurations.resolveFilePaths(config);
-
-            threadReturn[0] = new CachedChecker(createCreater(config));
-
-        } catch (Exception e) {
+            threadReturn[0] = csService.getCheckstyleInstance().createChecker(module, location, properties);
+        } catch (RuntimeException e) {
             threadReturn[0] = e;
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
-
-    @NotNull
-    private CheckStyleChecker createCreater(final Configuration config)
-            throws CheckstyleException {
-        final com.puppycrawl.tools.checkstyle.Checker checker = new com.puppycrawl.tools.checkstyle.Checker();
-        checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
-        checker.configure(config);
-
-        return new CheckStyleChecker(checker, config, configurations.tabWidth(config), configurations.baseDir(config));
-    }
-
 }

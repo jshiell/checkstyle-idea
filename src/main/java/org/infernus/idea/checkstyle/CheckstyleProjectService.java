@@ -9,12 +9,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.IOUtils;
@@ -38,7 +32,8 @@ public class CheckstyleProjectService
 
     private final Project project;
 
-    private final AtomicReference<Future<CheckstyleClassLoader>> CHECKSTYLE_CLASSLOADER = new AtomicReference<>();
+    private Callable<CheckstyleClassLoader> checkstyleClassLoaderFactory = null;
+    private CheckstyleClassLoader checkstyleClassLoader = null;
 
     private final SortedSet<String> supportedVersions;
 
@@ -136,24 +131,31 @@ public class CheckstyleProjectService
 
     public void activateCheckstyleVersion(@Nullable final String pVersion) {
         final String version = isSupportedVersion(pVersion) ? pVersion : getDefaultVersion();
-        final Future<CheckstyleClassLoader> future = new FutureTask<>(new Callable<CheckstyleClassLoader>()
-        {
-            @Override
-            public CheckstyleClassLoader call() {
-                return new CheckstyleClassLoader(version);
-            }
-        });
-        CHECKSTYLE_CLASSLOADER.set(future);
+        synchronized (project) {
+            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>()
+            {
+                @Override
+                public CheckstyleClassLoader call() {
+                    return new CheckstyleClassLoader(project, version);
+                }
+            };
+            checkstyleClassLoader = null;
+        }
     }
 
 
     public CheckstyleActions getCheckstyleInstance() {
         try {
-            // Don't worry about caching, class loaders do lots of caching.
-            return CHECKSTYLE_CLASSLOADER.get().get(3, TimeUnit.SECONDS).loadCheckstyleImpl();
+            synchronized (project) {
+                if (checkstyleClassLoader == null) {
+                    checkstyleClassLoader = checkstyleClassLoaderFactory.call();
+                }
+                // Don't worry about caching, class loaders do lots of caching.
+                return checkstyleClassLoader.loadCheckstyleImpl();
+            }
         } catch (CheckStylePluginException e) {
             throw e;
-        } catch (InterruptedException | ExecutionException | TimeoutException | RuntimeException e) {
+        } catch (Exception e) {
             throw new CheckStylePluginException("internal error", e);
         }
     }

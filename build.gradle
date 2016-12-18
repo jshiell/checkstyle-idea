@@ -1,6 +1,6 @@
-import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask;
-import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask;
-import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask;
+import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask
+import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask
+import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask
 
 buildscript {
     repositories {
@@ -22,7 +22,7 @@ intellij {
 }
 
 sourceCompatibility = 1.8
-version = '4.35.0'
+version = '5.0.0'
 
 repositories {
     mavenLocal()
@@ -36,33 +36,77 @@ sourceSets {
             runtimeClasspath += main.output
         }
     }
+    csaccessTest {
+        java {
+            compileClasspath += main.output
+            compileClasspath += csaccess.output
+            runtimeClasspath += main.output
+            runtimeClasspath += csaccess.output
+        }
+    }
 }
 configurations {
     csaccessCompile.extendsFrom(compile)
-    csaccessCompile {
-        exclude group: 'com.jetbrains', module: 'idea'
-    }
     csaccessCompileOnly.extendsFrom(compileOnly)
     csaccessCompileClasspath.extendsFrom(compileClasspath)
     csaccessRuntime.extendsFrom(runtime)
+
+    csaccessTestCompile.extendsFrom(csaccessCompile)
+    csaccessTestCompile.extendsFrom(testCompile)
+    csaccessTestCompileOnly.extendsFrom(csaccessCompileOnly)
+    csaccessTestCompileOnly.extendsFrom(testCompileOnly)
+    csaccessTestCompileClasspath.extendsFrom(csaccessCompileClasspath)
+    csaccessTestCompileClasspath.extendsFrom(testCompileClasspath)
+    csaccessTestRuntime.extendsFrom(csaccessRuntime)
+    csaccessTestRuntime.extendsFrom(testRuntime)
 }
 tasks.compileTestJava.dependsOn compileCsaccessJava
 tasks.testClasses.dependsOn csaccessClasses
 tasks.jar.dependsOn csaccessClasses
 
-dependencies {
-    // TODO We aim to have Checkstyle removed from the following line:
-    compile(group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1') {
-        exclude group: 'commons-logging', module: 'commons-logging'
+tasks.compileCsaccessTestJava.dependsOn compileCsaccessJava
+tasks.csaccessTestClasses.dependsOn csaccessClasses
+
+test {
+    // beforeTest { descriptor ->
+    //     logger.lifecycle("Running test: " + descriptor)
+    // }
+    afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
+        if (descriptor.getParent() == null) {
+            logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
+                    testResult.successfulTestCount + ' successful, ' +
+                    testResult.skippedTestCount + ' skipped.');
+        }
     }
+}
+task runCsaccessTests(type: Test) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP;
+    testClassesDir = sourceSets.csaccessTest.output.classesDir
+    classpath = sourceSets.csaccessTest.runtimeClasspath
+    configure {
+        // beforeTest { descriptor ->
+        //     logger.lifecycle("Running test: " + descriptor)
+        // }
+        afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
+            if (descriptor.getParent() == null) {
+                logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
+                        testResult.successfulTestCount + ' successful, ' +
+                        testResult.skippedTestCount + ' skipped.');
+            }
+        }
+    }
+}
+test.dependsOn(runCsaccessTests)
+
+dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
 
     // The Checkstyle version given here is the *base version* against which our code is initially compiled.
     // This is mostly for convenience, so we don't have to use reflection overly much. At runtime, the Checkstyle
     // version will depend on the plugin configuration.
-    // TODO Activate the following line when the compile dependency above is removed:
-    //csaccessCompile group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1';
-    csaccessCompile group: 'org.jetbrains', name: 'annotations', version: '15.0';
+    csaccessCompile (group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1') {
+        exclude group: 'commons-logging', module: 'commons-logging';
+    }
 
     testCompile group: 'junit', name: 'junit', version: '4.12';
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3';
@@ -75,6 +119,7 @@ task copyCheckstyleArtifactsToSandbox(type: CopyCheckstyleArtifactsToSandboxTask
 task copyCheckstyleArtifactsToTestSandbox(type: CopyCheckstyleArtifactsToSandboxTask) { setTest(); }
 task copyClassesToSandbox(type: CopyClassesToSandboxTask);
 task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
+
 
 // Defer the rest of the wiring until after the intellij plugin's tasks have been created:
 tasks.all { final Task task ->

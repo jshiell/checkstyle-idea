@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.actions;
 
+import java.util.Optional;
+import javax.swing.JComponent;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
@@ -13,29 +16,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.util.Optional;
-
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 import static java.util.Optional.ofNullable;
 
 /**
  * Base class for plug-in actions.
  */
-public abstract class BaseAction extends AnAction {
+public abstract class BaseAction
+        extends AnAction
+{
+    private static final Log LOG = LogFactory.getLog(BaseAction.class);
 
-    private static final Log LOG = LogFactory.getLog(
-            BaseAction.class);
 
     @Override
     public void update(final AnActionEvent event) {
+        Project project = null;
         try {
-            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
+            project = DataKeys.PROJECT.getData(event.getDataContext());
             final Presentation presentation = event.getPresentation();
 
             // check a project is loaded
@@ -46,15 +46,14 @@ public abstract class BaseAction extends AnAction {
                 return;
             }
 
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
+            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
 
             // check if tool window is registered
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow
+                    (CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
@@ -65,13 +64,8 @@ public abstract class BaseAction extends AnAction {
             // enable
             presentation.setEnabled(toolWindow.isAvailable());
             presentation.setVisible(true);
-
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePluginException.wrap(e);
-            if (processed != null) {
-                LOG.error("Action update failed", processed);
-            }
+            LOG.error("Action update failed", e);
         }
     }
 
@@ -103,8 +97,8 @@ public abstract class BaseAction extends AnAction {
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
         boolean result = false;
         for (VirtualFile file : files) {
-            if ((file.isDirectory() && containsAtLeastOneFile(file.getChildren()))
-                || (!file.isDirectory() && file.isValid())) {
+            if ((file.isDirectory() && containsAtLeastOneFile(file.getChildren())) || (!file.isDirectory() && file
+                    .isValid())) {
                 result = true;
                 break;
             }
