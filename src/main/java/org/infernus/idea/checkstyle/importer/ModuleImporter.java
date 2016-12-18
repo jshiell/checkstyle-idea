@@ -1,75 +1,46 @@
 package org.infernus.idea.checkstyle.importer;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
+import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public abstract class ModuleImporter {
-    private static final String TOKENS_PROP = "tokens";
 
-    private int[] tokens;
+    private Set<KnownTokenTypes> tokens;
 
     @NotNull
     protected CommonCodeStyleSettings getJavaSettings(@NotNull CodeStyleSettings settings) {
         return settings.getCommonSettings(JavaLanguage.INSTANCE);
     }
 
-    public void setFrom(@NotNull Configuration moduleConfig) {
-        for (String attrName : moduleConfig.getAttributeNames()) {
-            try {
-                handleAttribute(attrName, moduleConfig.getAttribute(attrName));
-            } catch (CheckstyleException e) {
-                // Ignore, shouldn't happen
-            }
+    public void setFrom(@NotNull ConfigurationModule moduleConfig) {
+        tokens = moduleConfig.getKnownTokenTypes();
+        for (Map.Entry<String, String> entry : moduleConfig.getProperties().entrySet()) {
+            handleAttribute(entry.getKey(), entry.getValue());
         }
     }
 
-    protected boolean handleAttribute(@NotNull String attrName, @NotNull String attrValue) {
-        if (TOKENS_PROP.equals(attrName)) {
-            tokens = TokenSetUtil.getTokens(attrValue);
-        }
-        return false;
+    protected abstract void handleAttribute(@NotNull String attrName, @NotNull String attrValue);
+
+
+    protected boolean appliesTo(KnownTokenTypes token) {
+        return tokens == null || tokens.isEmpty() || tokens.contains(token);
     }
 
-    protected boolean appliesTo(int tokenId) {
-        if (tokens != null) {
-            for (int token : tokens) {
-                if (token == tokenId) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
+    protected boolean appliesToOneOf(Set<KnownTokenTypes> tokenSet) {
+        return tokens == null || tokens.isEmpty() || !Collections.disjoint(tokens, tokenSet);
     }
 
-    protected boolean appliesToOneOf(Set<Integer> tokenSet) {
-        if (tokens != null) {
-            for (int token : tokens) {
-                if (tokenSet.contains(token)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
-    }
-
-    protected static Set<Integer> setOf(int... ids) {
-        Set<Integer> tokenSet = new HashSet<>(ids.length);
-        for (int id : ids) {
-            tokenSet.add(id);
-        }
-        return tokenSet;
-    }
 
     public abstract void importTo(@NotNull CodeStyleSettings settings);
+
 
     protected int getIntOrDefault(@NotNull String intStr, int defaultValue) {
         try {

@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle.actions;
 
+import java.util.List;
+
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -11,40 +13,36 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
-
-import java.util.List;
 
 /**
  * Scan modified files.
  * <p/>
  * If the project is not setup to use VCS then no files will be scanned.
  */
-public class ScanModifiedFiles extends BaseAction {
+public class ScanModifiedFiles
+        extends BaseAction
+{
+    private static final Log LOG = LogFactory.getLog(ScanModifiedFiles.class);
 
-    private static final Log LOG = LogFactory.getLog(
-            ScanModifiedFiles.class);
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
+        Project project = null;
         try {
-            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
+            project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) {
                 return;
             }
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow
+                    (CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(CheckStylePlugin.class).asyncScanFiles(changeListManager.getAffectedFiles(), getSelectedOverride(toolWindow));
-
+            project.getComponent(CheckStylePlugin.class).asyncScanFiles(changeListManager.getAffectedFiles(),
+                    getSelectedOverride(toolWindow));
         } catch (Throwable e) {
-            final CheckStylePluginException processed = CheckStylePluginException.wrap(e);
-            if (processed != null) {
-                LOG.error("Modified files scan failed", processed);
-            }
+            LOG.error("Modified files scan failed", e);
         }
     }
 
@@ -52,14 +50,14 @@ public class ScanModifiedFiles extends BaseAction {
     public void update(final AnActionEvent event) {
         super.update(event);
 
+        Project project = null;
         try {
-            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
+            project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) { // check if we're loading...
                 return;
             }
 
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
+            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
@@ -70,17 +68,11 @@ public class ScanModifiedFiles extends BaseAction {
             final List<VirtualFile> modifiedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
             if (modifiedFiles.isEmpty()) {
                 presentation.setEnabled(false);
-
             } else {
                 presentation.setEnabled(!checkStylePlugin.isScanInProgress());
             }
-
         } catch (Throwable e) {
-            final CheckStylePluginException processed
-                    = CheckStylePluginException.wrap(e);
-            if (processed != null) {
-                LOG.error("Button update failed.", processed);
-            }
+            LOG.error("Button update failed.", e);
         }
     }
 }

@@ -1,5 +1,14 @@
 package org.infernus.idea.checkstyle.checker;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.RuntimeInterruptedException;
 import com.intellij.openapi.components.ServiceManager;
@@ -18,16 +27,17 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
-import java.util.concurrent.Callable;
-
 import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.resultOf;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.*;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.BLACKLISTED;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.NOT_PRESENT;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.PRESENT;
 
-public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
+
+public class ScanFiles
+        implements Callable<Map<PsiFile, List<Problem>>>
+{
     private static final Log LOG = LogFactory.getLog(ScanFiles.class);
 
     private final List<PsiFile> files;
@@ -36,8 +46,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     private final CheckStylePlugin plugin;
     private final ConfigurationLocation overrideConfigLocation;
 
-    public ScanFiles(@NotNull final CheckStylePlugin checkStylePlugin,
-                     @NotNull final List<VirtualFile> virtualFiles,
+    public ScanFiles(@NotNull final CheckStylePlugin checkStylePlugin, @NotNull final List<VirtualFile> virtualFiles,
                      @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.overrideConfigLocation = overrideConfigLocation;
@@ -73,23 +82,19 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     public final Map<PsiFile, List<Problem>> call() {
         try {
             fireCheckStarting(files);
-            final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult
-                    = processFilesForModuleInfoAndScan();
+            final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult =
+                    processFilesForModuleInfoAndScan();
             return checkComplete(scanResult.first, scanResult.second);
-
         } catch (final RuntimeInterruptedException e) {
             LOG.debug("Scan cancelled by IDEA", e);
             return checkComplete(resultOf(PRESENT), emptyMap());
-
+        } catch (final CheckStylePluginException e) {
+            LOG.error("An error occurred while scanning a file.", e);
+            fireErrorCaught(e);
+            return checkComplete(resultOf(PRESENT), emptyMap());
         } catch (final Throwable e) {
-            final CheckStylePluginException processedError = CheckStylePluginException.wrap(
-                    "An error occurred during a file scan.", e);
-
-            if (processedError != null) {
-                LOG.error("An error occurred while scanning a file.", processedError);
-                fireErrorCaught(processedError);
-            }
-
+            LOG.error("An error occurred while scanning a file.", e);
+            fireErrorCaught(new CheckStylePluginException("An error occurred while scanning a file.", e));
             return checkComplete(resultOf(PRESENT), emptyMap());
         }
     }
@@ -108,7 +113,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult, Map<PsiFile, List<Problem>> fileResults) {
+    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult, Map<PsiFile,
+            List<Problem>> fileResults) {
         listeners.forEach(listener -> listener.scanComplete(configLocationResult, fileResults));
     }
 
@@ -148,7 +154,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
-            fileResults.putAll(filesWithProblems(filesForModule, checkFiles(module, filesForModule, locationResult.location)));
+            fileResults.putAll(filesWithProblems(filesForModule, checkFiles(module, filesForModule, locationResult
+                    .location)));
             fireFilesScanned(filesForModule.size());
         }
 
@@ -156,8 +163,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private Map<PsiFile, List<Problem>> filesWithProblems(final Set<PsiFile> filesForModule,
-                                                          final Map<PsiFile, List<Problem>> moduleFileResults) {
+    private Map<PsiFile, List<Problem>> filesWithProblems(final Set<PsiFile> filesForModule, final Map<PsiFile,
+            List<Problem>> moduleFileResults) {
         final Map<PsiFile, List<Problem>> moduleResults = new HashMap<>();
         for (final PsiFile psiFile : filesForModule) {
             final List<Problem> resultsForFile = moduleFileResults.get(psiFile);
@@ -169,8 +176,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override,
-                                                              final Module module) {
+    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override, final Module
+            module) {
         final ConfigurationLocation location = plugin.getConfigurationLocation(module, override);
         if (location == null) {
             return resultOf(NOT_PRESENT);
@@ -181,18 +188,14 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         return resultOf(location, PRESENT);
     }
 
-    private Map<PsiFile, List<Problem>> checkFiles(final Module module,
-                                                   final Set<PsiFile> filesToScan,
-                                                   final ConfigurationLocation configurationLocation) {
+    private Map<PsiFile, List<Problem>> checkFiles(final Module module, final Set<PsiFile> filesToScan, final
+    ConfigurationLocation configurationLocation) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
-            return checkerFactory(module)
-                    .checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration()))
-                    .orElseGet(Collections::emptyMap);
-
+            return checkerFactory(module).checker(module, configurationLocation).map(checker -> checker.scan
+                    (scannableFiles, plugin.getConfiguration())).orElseGet(Collections::emptyMap);
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
@@ -202,7 +205,9 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         return ServiceManager.getService(project.getProject(), CheckerFactory.class);
     }
 
-    private class FindChildFiles extends VirtualFileVisitor {
+    private class FindChildFiles
+            extends VirtualFileVisitor
+    {
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 
@@ -223,6 +228,5 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             }
             return true;
         }
-
     }
 }

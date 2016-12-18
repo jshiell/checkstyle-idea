@@ -1,10 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.concurrency.JobScheduler;
-import com.intellij.openapi.module.Module;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +11,20 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class CheckerFactoryCache {
+import com.intellij.concurrency.JobScheduler;
+import com.intellij.openapi.module.Module;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
+
+public class CheckerFactoryCache
+{
     private static final int CLEANUP_PERIOD_SECONDS = 30;
 
+    // TODO This may work more reliably if we just used a ConcurrentHashMap instead of our own reimplementation.
+    //      Also, we should check for expiration only when we return a Checker from the cache, so we don't need the
+    //      backgroundCleanupTask.
     private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
-    private final Map<CacheKey, CachedChecker> cache = new HashMap<>();
+    private final Map<CheckerFactoryCacheKey, CachedChecker> cache = new HashMap<>();
 
     private final ScheduledExecutorService cleanUpExecutor = JobScheduler.getScheduler();
 
@@ -28,21 +32,19 @@ public class CheckerFactoryCache {
         startBackgroundCleanupTask();
     }
 
-    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location,
-                                       final Module module) {
-        final CacheKey key = new CacheKey(location, module);
+    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location, final Module module) {
+        final CheckerFactoryCacheKey key = new CheckerFactoryCacheKey(location, module, module.getProject().getName());
         cacheLock.readLock().lock();
         try {
             if (cache.containsKey(key)) {
                 final CachedChecker cachedChecker = cache.get(key);
                 if (cachedChecker != null && cachedChecker.isValid()) {
                     return Optional.of(cachedChecker);
-
                 } else {
                     cacheLock.readLock().unlock();
                     writeToCache(() -> {
                         if (cachedChecker != null) {
-                            cachedChecker.destroy();
+                            cachedChecker.destroy(module.getProject());
                         }
                         return cache.remove(key);
                     });
@@ -50,24 +52,27 @@ public class CheckerFactoryCache {
                 }
             }
             return Optional.empty();
-
         } finally {
             cacheLock.readLock().unlock();
         }
     }
 
-    public void put(@NotNull final ConfigurationLocation location,
-                    final Module module,
-                    @NotNull final CachedChecker checker) {
-        writeToCache(() -> cache.put(new CacheKey(location, module), checker));
+    public void put(@NotNull final ConfigurationLocation location, final Module module, @NotNull final CachedChecker
+            checker) {
+        writeToCache(() -> cache.put(new CheckerFactoryCacheKey(location, module, module.getProject().getName()),
+                checker));
     }
 
     public void invalidate() {
         writeToCache(() -> {
-            cache.values().forEach(CachedChecker::destroy);
+            cache.values().forEach(this::destroyChecker);
             cache.clear();
             return null;
         });
+    }
+
+    private void destroyChecker(@NotNull final CachedChecker pCachedChecker) {
+        pCachedChecker.destroy(pCachedChecker.getProject());
     }
 
     private void startBackgroundCleanupTask() {
@@ -75,18 +80,16 @@ public class CheckerFactoryCache {
         // than {@link ScheduleThreadPoolExecutor#scheduleWithFixedRate(Runnable, long, long, TimeUnit)} as
         // recommended by JetBrains for compatibility with hibernation.
         cleanUpExecutor.scheduleWithFixedDelay(this::cleanUpExpiredCachedCheckers, CLEANUP_PERIOD_SECONDS,
-                                               CLEANUP_PERIOD_SECONDS, TimeUnit.SECONDS);
+                CLEANUP_PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     private void cleanUpExpiredCachedCheckers() {
         writeToCache(() -> {
-            final List<CacheKey> itemsToRemove = cache.entrySet().stream()
-                    .filter(cacheEntry -> cacheEntry.getValue() != null && !cacheEntry.getValue().isValid())
-                    .map(cacheEntry -> {
-                        cacheEntry.getValue().destroy();
-                        return cacheEntry.getKey();
-                    })
-                    .collect(Collectors.toList());
+            final List<CheckerFactoryCacheKey> itemsToRemove = cache.entrySet().stream().filter(cacheEntry ->
+                    cacheEntry.getValue() != null && !cacheEntry.getValue().isValid()).map(cacheEntry -> {
+                destroyChecker(cacheEntry.getValue());
+                return cacheEntry.getKey();
+            }).collect(Collectors.toList());
             return cache.entrySet().removeIf(entry -> itemsToRemove.contains(entry.getKey()));
         });
     }
@@ -97,41 +100,6 @@ public class CheckerFactoryCache {
             return task.get();
         } finally {
             cacheLock.writeLock().unlock();
-        }
-    }
-
-    private class CacheKey {
-        private final ConfigurationLocation location;
-        private final String moduleName;
-
-        private CacheKey(final ConfigurationLocation location, final Module module) {
-            this.location = location;
-            this.moduleName = module != null ? module.getName() : "noModule";
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final CacheKey cacheKey = (CacheKey) o;
-
-            if (location != null ? !location.equals(cacheKey.location) : cacheKey.location != null) {
-                return false;
-            }
-            return moduleName != null ? moduleName.equals(cacheKey.moduleName) : cacheKey.moduleName == null;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = location != null ? location.hashCode() : 0;
-            result = 31 * result + (moduleName != null ? moduleName.hashCode() : 0);
-            return result;
         }
     }
 }

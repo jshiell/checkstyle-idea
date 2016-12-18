@@ -1,15 +1,18 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
-import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-
 @SuppressWarnings("unused")
-public class LeftCurlyImporter extends ModuleImporter {
+public class LeftCurlyImporter
+        extends ModuleImporter
+{
     private static final String OPTION_PROP = "option";
 
     private static final String LEFT_CURLY_POLICY_EOL = "eol";
@@ -18,21 +21,20 @@ public class LeftCurlyImporter extends ModuleImporter {
 
     private int leftCurlyPolicy = CommonCodeStyleSettings.END_OF_LINE;
 
-    private static final Set<Integer> CONDITIONAL_TOKENS = setOf(
-            TokenTypes.LITERAL_WHILE,
-            TokenTypes.LITERAL_TRY,
-            TokenTypes.LITERAL_CATCH,
-            TokenTypes.LITERAL_FINALLY,
-            TokenTypes.LITERAL_SYNCHRONIZED,
-            TokenTypes.LITERAL_SWITCH,
-            TokenTypes.LITERAL_DO,
-            TokenTypes.LITERAL_IF,
-            TokenTypes.LITERAL_ELSE,
-            TokenTypes.LITERAL_FOR
-    );
+    private static final Set<KnownTokenTypes> CONDITIONAL_TOKENS = EnumSet.of(
+            KnownTokenTypes.LITERAL_WHILE,
+            KnownTokenTypes.LITERAL_TRY,
+            KnownTokenTypes.LITERAL_CATCH,
+            KnownTokenTypes.LITERAL_FINALLY,
+            KnownTokenTypes.LITERAL_SYNCHRONIZED,
+            KnownTokenTypes.LITERAL_SWITCH,
+            KnownTokenTypes.LITERAL_DO,
+            KnownTokenTypes.LITERAL_IF,
+            KnownTokenTypes.LITERAL_ELSE,
+            KnownTokenTypes.LITERAL_FOR);
 
     @Override
-    protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
+    protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         if (OPTION_PROP.equals(attrName)) {
             switch (attrValue) {
                 case LEFT_CURLY_POLICY_EOL:
@@ -45,18 +47,16 @@ public class LeftCurlyImporter extends ModuleImporter {
                     leftCurlyPolicy = CommonCodeStyleSettings.NEXT_LINE_IF_WRAPPED;
                     break;
             }
-            return true;
         }
-        return super.handleAttribute(attrName, attrValue);
     }
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
-        if (appliesTo(TokenTypes.CLASS_DEF) || appliesTo(TokenTypes.INTERFACE_DEF)) {
+        if (appliesTo(KnownTokenTypes.CLASS_DEF) || appliesTo(KnownTokenTypes.INTERFACE_DEF)) {
             javaSettings.CLASS_BRACE_STYLE = leftCurlyPolicy;
         }
-        if (appliesTo(TokenTypes.METHOD_DEF) || appliesTo(TokenTypes.CTOR_DEF)) {
+        if (appliesTo(KnownTokenTypes.METHOD_DEF) || appliesTo(KnownTokenTypes.CTOR_DEF)) {
             javaSettings.METHOD_BRACE_STYLE = leftCurlyPolicy;
         }
         if (appliesToOneOf(CONDITIONAL_TOKENS)) {

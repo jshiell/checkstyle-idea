@@ -1,4 +1,12 @@
-package org.infernus.idea.checkstyle.checker;
+package org.infernus.idea.checkstyle.service;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
@@ -9,15 +17,15 @@ import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checks.Check;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 
-import java.io.File;
-import java.util.*;
-
-public class CheckStyleAuditListener implements AuditListener {
-
+public class CheckStyleAuditListener
+        implements AuditListener
+{
     private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
 
     private final boolean suppressErrors;
@@ -29,11 +37,9 @@ public class CheckStyleAuditListener implements AuditListener {
     private final List<AuditEvent> errors = new ArrayList<>();
     private final Map<PsiFile, List<Problem>> problems = new HashMap<>();
 
-    public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles,
-                                   final boolean suppressErrors,
-                                   final int tabWidth,
-                                   @NotNull final Optional<String> baseDir,
-                                   @NotNull final List<Check> checks) {
+    public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles, final boolean
+            suppressErrors, final int tabWidth, @NotNull final Optional<String> baseDir, @NotNull final List<Check>
+            checks) {
         this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
         this.checks = checks;
         this.suppressErrors = suppressErrors;
@@ -73,8 +79,7 @@ public class CheckStyleAuditListener implements AuditListener {
         }
     }
 
-    public void addException(final AuditEvent auditEvent,
-                             final Throwable throwable) {
+    public void addException(final AuditEvent auditEvent, final Throwable throwable) {
         LOG.error("Exception during CheckStyle execution", throwable);
         synchronized (errors) {
             errors.add(auditEvent);
@@ -96,7 +101,9 @@ public class CheckStyleAuditListener implements AuditListener {
         problemsForFile.add(problem);
     }
 
-    private class ProcessResultsThread implements Runnable {
+    private class ProcessResultsThread
+            implements Runnable
+    {
 
         @Override
         public void run() {
@@ -107,8 +114,8 @@ public class CheckStyleAuditListener implements AuditListener {
                     final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
                     if (psiFile == null) {
                         if (LOG.isInfoEnabled()) {
-                            LOG.info("Could not find mapping for file: " + event.getFileName()
-                                    + " in " + fileNamesToPsiFiles);
+                            LOG.info("Could not find mapping for file: " + event.getFileName() + " in " +
+                                    fileNamesToPsiFiles);
                         }
                         return;
                     }
@@ -129,9 +136,8 @@ public class CheckStyleAuditListener implements AuditListener {
         }
 
         private String filenameFrom(final AuditEvent event) {
-            return baseDir
-                    .map(prefix -> withTrailingSeparator(prefix) + event.getFileName())
-                    .orElseGet(event::getFileName);
+            return baseDir.map(prefix -> withTrailingSeparator(prefix) + event.getFileName()).orElseGet
+                    (event::getFileName);
         }
 
         private String withTrailingSeparator(final String path) {
@@ -141,9 +147,7 @@ public class CheckStyleAuditListener implements AuditListener {
             return path;
         }
 
-        private void processEvent(final PsiFile psiFile,
-                                  final List<Integer> lineLengthCache,
-                                  final AuditEvent event) {
+        private void processEvent(final PsiFile psiFile, final List<Integer> lineLengthCache, final AuditEvent event) {
             if (additionalChecksFail(psiFile, event)) {
                 return;
             }
@@ -155,26 +159,54 @@ public class CheckStyleAuditListener implements AuditListener {
                 addProblemTo(victim, psiFile, event, position.afterEndOfLine);
             } else {
                 addProblemTo(psiFile, psiFile, event, false);
-                LOG.debug("Couldn't find victim for error: " + event.getFileName() + "("
-                        + event.getLine() + ":" + event.getColumn() + ") " + event.getMessage());
+                LOG.debug("Couldn't find victim for error: " + event.getFileName() + "(" + event.getLine() + ":" +
+                        event.getColumn() + ") " + event.getMessage());
             }
         }
 
-        private void addProblemTo(final PsiElement victim,
-                                  final PsiFile psiFile,
-                                  final AuditEvent event,
+        private void addProblemTo(final PsiElement victim, final PsiFile psiFile, @NotNull final AuditEvent event,
                                   final boolean afterEndOfLine) {
+            String message = event.getMessage();
+            if (event.getLocalizedMessage() != null) {
+                message = event.getLocalizedMessage().getMessage();
+            }
+            final SeverityLevel severityLevel = readSeverityLevel(event.getSeverityLevel());
             try {
-                addProblem(psiFile, new Problem(victim, event, afterEndOfLine, suppressErrors));
+                addProblem(psiFile, new Problem(victim, message, severityLevel, event.getLine(), event.getColumn(),
+                        afterEndOfLine, suppressErrors));
 
             } catch (PsiInvalidElementAccessException e) {
                 LOG.error("Element access failed", e);
             }
         }
 
+        private SeverityLevel readSeverityLevel(final com.puppycrawl.tools.checkstyle.api.SeverityLevel
+                                                        pSeverityLevel) {
+            SeverityLevel result = null;
+            if (pSeverityLevel != null) {
+                switch (pSeverityLevel) {
+                    case ERROR:
+                        result = SeverityLevel.Error;
+                        break;
+                    case WARNING:
+                        result = SeverityLevel.Warning;
+                        break;
+                    case INFO:
+                        result = SeverityLevel.Info;
+                        break;
+                    case IGNORE:
+                        // fall through
+                    default:
+                        result = SeverityLevel.Ignore;
+                        break;
+                }
+            }
+            return result;
+        }
+
         private boolean additionalChecksFail(final PsiFile psiFile, final AuditEvent event) {
             for (final Check check : checks) {
-                if (!check.process(psiFile, event)) {
+                if (!check.process(psiFile, event.getSourceName())) {
                     return true;
                 }
             }
@@ -195,9 +227,8 @@ public class CheckStyleAuditListener implements AuditListener {
         }
 
         @NotNull
-        private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache,
-                                                   final AuditEvent event,
-                                                   final char[] text) {
+        private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache, final AuditEvent event, final
+        char[] text) {
             final Position position;
             int offset = lineLengthCache.get(lineLengthCache.size() - 1);
             boolean afterEndOfLine = false;
@@ -245,7 +276,8 @@ public class CheckStyleAuditListener implements AuditListener {
 
     }
 
-    private static final class Position {
+    private static final class Position
+    {
         private final boolean afterEndOfLine;
         private final int offset;
 
@@ -257,8 +289,7 @@ public class CheckStyleAuditListener implements AuditListener {
             return new Position(offset, false);
         }
 
-        private Position(final int offset,
-                         final boolean afterEndOfLine) {
+        private Position(final int offset, final boolean afterEndOfLine) {
             this.offset = offset;
             this.afterEndOfLine = afterEndOfLine;
         }

@@ -2,23 +2,22 @@ package org.infernus.idea.checkstyle.importer.modules;
 
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
-import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class EmptyLineSeparatorImporter extends ModuleImporter {
+public class EmptyLineSeparatorImporter
+        extends ModuleImporter
+{
     private boolean noEmptyLinesBetweenFields = false;
     private static final String NO_EMPTY_LINES_BETWEEN_FIELDS_PROP = "allowNoEmptyLineBetweenFields";
 
     @Override
-    protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
-        if (!super.handleAttribute(attrName, attrValue)) {
-            if (NO_EMPTY_LINES_BETWEEN_FIELDS_PROP.equals(attrName)) {
-                noEmptyLinesBetweenFields = Boolean.parseBoolean(attrValue);
-            }
+    protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
+        if (NO_EMPTY_LINES_BETWEEN_FIELDS_PROP.equals(attrName)) {
+            noEmptyLinesBetweenFields = Boolean.parseBoolean(attrValue);
         }
-        return false;
     }
 
     @Override
@@ -26,18 +25,17 @@ public class EmptyLineSeparatorImporter extends ModuleImporter {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
         if (noEmptyLinesBetweenFields) {
             javaSettings.BLANK_LINES_AROUND_FIELD = 0;
-        } else if (appliesTo(TokenTypes.VARIABLE_DEF)) {
+        } else if (appliesTo(KnownTokenTypes.VARIABLE_DEF)) {
             javaSettings.BLANK_LINES_AROUND_FIELD = 1;
         }
-        if (appliesTo(TokenTypes.PACKAGE_DEF)) {
+        if (appliesTo(KnownTokenTypes.PACKAGE_DEF)) {
             javaSettings.BLANK_LINES_AFTER_PACKAGE = 1;
         }
-        if (appliesTo(TokenTypes.IMPORT)) {
+        if (appliesTo(KnownTokenTypes.IMPORT)) {
             javaSettings.BLANK_LINES_AFTER_IMPORTS = 1;
         }
-        if (appliesTo(TokenTypes.METHOD_DEF)) {
+        if (appliesTo(KnownTokenTypes.METHOD_DEF)) {
             javaSettings.BLANK_LINES_AROUND_METHOD = 1;
         }
     }
-
 }

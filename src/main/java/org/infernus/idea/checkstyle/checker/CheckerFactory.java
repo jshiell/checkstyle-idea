@@ -1,29 +1,34 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
-import com.puppycrawl.tools.checkstyle.PropertyResolver;
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.Notifications;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.Notifications;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
+/**
+ * Creates Checkers. Registered as projectService in {@code plugin.xml}.
+ */
 public class CheckerFactory {
 
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
@@ -72,7 +77,7 @@ public class CheckerFactory {
     private CachedChecker getOrCreateCachedChecker(@NotNull final ConfigurationLocation location,
                                                    final Module module,
                                                    final ClassLoader classLoader)
-            throws IOException, CheckstyleException {
+            throws IOException {
         final Optional<CachedChecker> cachedChecker = cache.get(location, module);
         if (cachedChecker.isPresent()) {
             return cachedChecker.get();
@@ -150,9 +155,8 @@ public class CheckerFactory {
 
     private CachedChecker createChecker(final ConfigurationLocation location,
                                         final Module module,
-                                        final PropertyResolver resolver,
-                                        final ClassLoader contextClassLoader)
-            throws CheckstyleException {
+                                        final ListPropertyResolver resolver,
+                                        final ClassLoader contextClassLoader) {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Call to create new checker.");
@@ -162,8 +166,8 @@ public class CheckerFactory {
 
         final Object workerResult = executeWorker(location, module, resolver, contextClassLoader);
 
-        if (workerResult instanceof CheckstyleException) {
-            return blacklistAndShowMessage(location, module, (CheckstyleException) workerResult);
+        if (workerResult instanceof CheckstyleToolException) {
+            return blacklistAndShowMessage(location, module, (CheckstyleToolException) workerResult);
 
         } else if (workerResult instanceof IOException) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), (IOException) workerResult);
@@ -171,7 +175,7 @@ public class CheckerFactory {
 
         } else if (workerResult instanceof Throwable) {
             location.blacklist();
-            throw new CheckstyleException("Could not load configuration", (Throwable) workerResult);
+            throw new CheckStylePluginException("Could not load configuration", (Throwable) workerResult);
         }
 
         return (CachedChecker) workerResult;
@@ -179,7 +183,7 @@ public class CheckerFactory {
 
     private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
                                                   final Module module,
-                                                  final CheckstyleException checkstyleException) {
+                                                  final CheckstyleToolException checkstyleException) {
         if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
             return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
 
@@ -192,10 +196,10 @@ public class CheckerFactory {
 
     private Object executeWorker(final ConfigurationLocation location,
                                  final Module module,
-                                 final PropertyResolver resolver,
+                                 final ListPropertyResolver resolver,
                                  final ClassLoader contextClassLoader) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(
-                location, resolver, module, contextClassLoader);
+                location, resolver.getPropertyNamesToValues(), module, contextClassLoader);
         worker.start();
 
         while (worker.isAlive()) {
@@ -244,10 +248,9 @@ public class CheckerFactory {
         }
     }
 
-    private void logProperties(final PropertyResolver resolver) {
-        if (resolver != null && resolver instanceof ListPropertyResolver) {
-            final ListPropertyResolver listResolver = (ListPropertyResolver) resolver;
-            final Map<String, String> propertiesToValues = listResolver.getPropertyNamesToValues();
+    private void logProperties(final ListPropertyResolver resolver) {
+        if (resolver != null) {
+            final Map<String, String> propertiesToValues = resolver.getPropertyNamesToValues();
             for (final Map.Entry<String, String> propertyEntry : propertiesToValues.entrySet()) {
                 final String propertyValue = propertyEntry.getValue();
                 LOG.debug("- Property: " + propertyEntry.getKey() + "=" + propertyValue);

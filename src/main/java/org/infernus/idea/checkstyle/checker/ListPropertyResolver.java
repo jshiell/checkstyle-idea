@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.puppycrawl.tools.checkstyle.PropertyResolver;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.Map;
 
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
-class ListPropertyResolver implements PropertyResolver {
+class ListPropertyResolver {
 
     private final Map<String, String> propertyNamesToValues = new HashMap<>();
 

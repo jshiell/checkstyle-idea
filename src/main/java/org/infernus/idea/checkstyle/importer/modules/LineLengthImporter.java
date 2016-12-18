@@ -6,13 +6,15 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class LineLengthImporter extends ModuleImporter {
+public class LineLengthImporter
+        extends ModuleImporter
+{
     private static final int DEFAULT_MAX_COLUMNS = 80;
     private static final String MAX_PROP = "max";
     private int maxColumns = DEFAULT_MAX_COLUMNS;
 
     @Override
-    protected boolean handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
+    protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         if (MAX_PROP.equals(attrName)) {
             try {
                 maxColumns = Integer.parseInt(attrValue);
@@ -20,7 +22,6 @@ public class LineLengthImporter extends ModuleImporter {
                 // ignore
             }
         }
-        return false;
     }
 
     @Override

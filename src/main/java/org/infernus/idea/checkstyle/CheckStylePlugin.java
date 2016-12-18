@@ -33,7 +33,9 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 /**
  * Main class for the CheckStyle scanning plug-in.
  */
-public final class CheckStylePlugin implements ProjectComponent {
+public final class CheckStylePlugin
+        implements ProjectComponent
+{
 
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
@@ -123,12 +125,8 @@ public final class CheckStylePlugin implements ProjectComponent {
     public void disposeComponent() {
     }
 
-    public static void processErrorAndLog(@NotNull final String action,
-                                          @NotNull final Throwable e) {
-        final CheckStylePluginException processed = CheckStylePluginException.wrap(e);
-        if (processed != null) {
-            LOG.error(action + " failed", processed);
-        }
+    public static void processErrorAndLog(@NotNull final String action, @NotNull final Throwable e) {
+        LOG.error(action + " failed", e);
     }
 
     private <T> Future<T> checkInProgress(final Future<T> checkFuture) {
@@ -157,8 +155,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public void asyncScanFiles(final List<VirtualFile> files,
-                               final ConfigurationLocation overrideConfigLocation) {
+    public void asyncScanFiles(final List<VirtualFile> files, final ConfigurationLocation overrideConfigLocation) {
         LOG.info("Scanning current file(s).");
 
         if (files == null || files.isEmpty()) {
@@ -178,7 +175,6 @@ public final class CheckStylePlugin implements ProjectComponent {
 
         try {
             return whenFinished(runAsyncCheck(new ScanFiles(this, files, null))).get();
-
         } catch (final Throwable e) {
             LOG.error("Error scanning files", e);
             return emptyMap();
@@ -191,15 +187,15 @@ public final class CheckStylePlugin implements ProjectComponent {
         return checkFilesFuture;
     }
 
-    public ConfigurationLocation getConfigurationLocation(@Nullable final Module module,
-                                                          @Nullable final ConfigurationLocation override) {
+    public ConfigurationLocation getConfigurationLocation(@Nullable final Module module, @Nullable final
+    ConfigurationLocation override) {
         if (override != null) {
             return override;
         }
 
         if (module != null) {
-            final CheckStyleModuleConfiguration moduleConfiguration
-                    = ModuleServiceManager.getService(module, CheckStyleModuleConfiguration.class);
+            final CheckStyleModuleConfiguration moduleConfiguration = ModuleServiceManager.getService(module,
+                    CheckStyleModuleConfiguration.class);
             if (moduleConfiguration == null) {
                 throw new IllegalStateException("Couldn't get checkstyle module configuration");
             }
@@ -208,12 +204,13 @@ public final class CheckStylePlugin implements ProjectComponent {
                 return null;
             }
             return moduleConfiguration.getActiveConfiguration();
-
         }
         return getConfiguration().getActiveConfiguration();
     }
 
-    private class ScanCompletionTracker implements ScannerListener {
+    private class ScanCompletionTracker
+            implements ScannerListener
+    {
         private final Future<Map<PsiFile, List<Problem>>> future;
 
         ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
@@ -229,8 +226,8 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         @Override
-        public void scanComplete(final ConfigurationLocationResult configurationLocationResult,
-                                 final Map<PsiFile, List<Problem>> scanResults) {
+        public void scanComplete(final ConfigurationLocationResult configurationLocationResult, final Map<PsiFile,
+                List<Problem>> scanResults) {
             checkComplete(future);
         }
 
@@ -238,5 +235,4 @@ public final class CheckStylePlugin implements ProjectComponent {
         public void errorCaught(final CheckStylePluginException error) {
         }
     }
-
 }
