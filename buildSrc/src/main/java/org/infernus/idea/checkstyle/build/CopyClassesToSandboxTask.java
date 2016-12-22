@@ -16,24 +16,22 @@ import org.gradle.api.tasks.SourceSet;
 public class CopyClassesToSandboxTask
         extends Copy
 {
-    private static final String CHECKSTYLE_SOURCESET_NAME = "csaccess";
-
     private static final String TARGET_SUBFOLDER = "checkstyle/classes";
 
 
     public CopyClassesToSandboxTask() {
         setGroup("intellij");
-        dependsOn(getProject().getTasks().getByName(CHECKSTYLE_SOURCESET_NAME + "Classes"));
-        JavaPluginConvention javaConvention = getProject().getConvention().getPlugin(JavaPluginConvention.class);
-        SourceSet csaccessSourceSet = javaConvention.getSourceSets().getByName(CHECKSTYLE_SOURCESET_NAME);
+        final JavaPluginConvention jpc = getProject().getConvention().getPlugin(JavaPluginConvention.class);
+        SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
+        dependsOn(getProject().getTasks().getByName(csaccessSourceSet.getClassesTaskName()));
         from(csaccessSourceSet.getOutput());
         configureTask(false);
     }
 
 
     private void configureTask(final boolean pIsTest) {
-        setDescription("Copy classes from \'" + CHECKSTYLE_SOURCESET_NAME + "\' sourceset into the prepared " +
-                (pIsTest ? "test " : "") + "sandbox");
+        setDescription("Copy classes from \'" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
+                + "\' sourceset into the prepared " + (pIsTest ? "test " : "") + "sandbox");
         into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "") +
                 "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
     }
@@ -43,13 +41,13 @@ public class CopyClassesToSandboxTask
         configureTask(true);
         final Project project = getProject();
 
-        // The 'test' task now depends on this one
+        // The 'test' and 'runCsaccessTests' tasks now depend on this one
         project.afterEvaluate(new Closure(this)
         {
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());
-                project.getTasks().getByName("runCsaccessTests").dependsOn(getOwner());
+                project.getTasks().getByName(RunCsaccessTestsTask.NAME).dependsOn(getOwner());
                 return null;
             }
         });
