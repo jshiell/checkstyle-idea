@@ -41,7 +41,7 @@ public class CopyCheckstyleArtifactsToSandboxTask
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());
-                project.getTasks().getByName("runCsaccessTests").dependsOn(getOwner());
+                project.getTasks().getByName(RunCsaccessTestsTask.NAME).dependsOn(getOwner());
                 return null;
             }
         });

@@ -6,12 +6,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
+
 /**
- * Just so we generate a sorted property file with the classpath infos.
+ * Just so we generate a sorted property file with the classpath information.
  */
 class SortedProperties
-        extends Properties {
-
+        extends Properties
+{
     @Override
     public synchronized Enumeration<Object> keys() {
         List<Object> keyList = Collections.list(super.keys());

@@ -1,6 +1,8 @@
 import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask
 import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask
+import org.infernus.idea.checkstyle.build.CustomSourceSetCreator
 import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask
+import org.infernus.idea.checkstyle.build.RunCsaccessTestsTask
 
 buildscript {
     repositories {
@@ -9,10 +11,10 @@ buildscript {
 }
 
 plugins {
+    id 'java'
     id "org.jetbrains.intellij" version "0.1.10"
 }
 
-apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
@@ -29,77 +31,16 @@ repositories {
     jcenter()
 }
 
-sourceSets {
-    csaccess {
-        java {
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-        }
-    }
-    csaccessTest {
-        java {
-            compileClasspath += main.output
-            compileClasspath += csaccess.output
-            runtimeClasspath += main.output
-            runtimeClasspath += csaccess.output
-        }
-    }
-}
-configurations {
-    csaccessCompile.extendsFrom(compile)
-    csaccessCompileOnly.extendsFrom(compileOnly)
-    csaccessCompileClasspath.extendsFrom(compileClasspath)
-    csaccessRuntime.extendsFrom(runtime)
+new CustomSourceSetCreator(project)
+        .establishCsAccessSourceSet()
+        .establishCsAccessTestSourceSet();
 
-    csaccessTestCompile.extendsFrom(csaccessCompile)
-    csaccessTestCompile.extendsFrom(testCompile)
-    csaccessTestCompileOnly.extendsFrom(csaccessCompileOnly)
-    csaccessTestCompileOnly.extendsFrom(testCompileOnly)
-    csaccessTestCompileClasspath.extendsFrom(csaccessCompileClasspath)
-    csaccessTestCompileClasspath.extendsFrom(testCompileClasspath)
-    csaccessTestRuntime.extendsFrom(csaccessRuntime)
-    csaccessTestRuntime.extendsFrom(testRuntime)
-}
-tasks.compileTestJava.dependsOn compileCsaccessJava
-tasks.testClasses.dependsOn csaccessClasses
-tasks.jar.dependsOn csaccessClasses
-
-tasks.compileCsaccessTestJava.dependsOn compileCsaccessJava
-tasks.csaccessTestClasses.dependsOn csaccessClasses
-
-test {
-    // beforeTest { descriptor ->
-    //     logger.lifecycle("Running test: " + descriptor)
-    // }
-    afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
-        if (descriptor.getParent() == null) {
-            logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
-                    testResult.successfulTestCount + ' successful, ' +
-                    testResult.skippedTestCount + ' skipped.');
-        }
-    }
-}
-task runCsaccessTests(type: Test) {
-    group = LifecycleBasePlugin.VERIFICATION_GROUP;
-    testClassesDir = sourceSets.csaccessTest.output.classesDir
-    classpath = sourceSets.csaccessTest.runtimeClasspath
-    configure {
-        // beforeTest { descriptor ->
-        //     logger.lifecycle("Running test: " + descriptor)
-        // }
-        afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
-            if (descriptor.getParent() == null) {
-                logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
-                        testResult.successfulTestCount + ' successful, ' +
-                        testResult.skippedTestCount + ' skipped.');
-            }
-        }
-    }
-}
-test.dependsOn(runCsaccessTests)
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Dependencies
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    compile group: 'commons-io', name: 'commons-io', version: '2.4';
 
     // The Checkstyle version given here is the *base version* against which our code is initially compiled.
     // This is mostly for convenience, so we don't have to use reflection overly much. At runtime, the Checkstyle
@@ -114,17 +55,44 @@ dependencies {
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
 }
 
-project.tasks.create(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Tests
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ext {
+    // testConfigClosure is used by both tasks 'test' and 'runCsaccessTests':
+    testConfigClosure = {
+        // beforeTest { final TestDescriptor descriptor ->
+        //     logger.lifecycle("Running test: " + descriptor)
+        // }
+        afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
+            if (descriptor.getParent() == null) {
+                logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
+                        testResult.successfulTestCount + ' successful, ' +
+                        testResult.skippedTestCount + ' skipped.');
+            }
+        }
+    }
+}
+test((Closure) testConfigClosure);
+tasks.create(RunCsaccessTestsTask.NAME, RunCsaccessTestsTask.class);
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Extra tasks for getting Checkstyle in different versions into the plugin distribution
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+tasks.create(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
 task copyCheckstyleArtifactsToSandbox(type: CopyCheckstyleArtifactsToSandboxTask);
 task copyCheckstyleArtifactsToTestSandbox(type: CopyCheckstyleArtifactsToSandboxTask) { setTest(); }
 task copyClassesToSandbox(type: CopyClassesToSandboxTask);
 task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
 
-
-// Defer the rest of the wiring until after the intellij plugin's tasks have been created:
+// Defer some of the wiring until after the intellij plugin's tasks have been created:
 tasks.all { final Task task ->
     if ('buildPlugin' == task.name || 'runIdea' == task.name) {
-        task.dependsOn(copyCheckstyleArtifactsToSandbox);
+        task.dependsOn((Task) copyCheckstyleArtifactsToSandbox);
         task.dependsOn tasks['copyClassesToSandbox'];
     }
     else if ('prepareSandbox' == task.name) {
