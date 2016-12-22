@@ -12,6 +12,7 @@ buildscript {
 
 plugins {
     id 'java'
+    id 'jacoco'
     id "org.jetbrains.intellij" version "0.1.10"
 }
 
@@ -76,7 +77,22 @@ ext {
     }
 }
 test((Closure) testConfigClosure);
-tasks.create(RunCsaccessTestsTask.NAME, RunCsaccessTestsTask.class);
+Task rct = tasks.create(RunCsaccessTestsTask.NAME, RunCsaccessTestsTask.class);
+
+test.jacoco.enabled = false;
+task jacocoTestReport4csaccess(type: JacocoReport, dependsOn: rct) {
+    reports {
+        xml.enabled = false;
+        csv.enabled = false;
+        html.enabled = true;
+    }
+    def SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
+    classDirectories = files(csaccessSourceSet.output.classesDir);
+    sourceDirectories = csaccessSourceSet.java.sourceDirectories;
+    executionData = files("${buildDir}/jacoco/${RunCsaccessTestsTask.NAME}.exec");
+}
+tasks.remove(tasks.jacocoTestReport);
+tasks.check.dependsOn tasks.jacocoTestReport4csaccess;
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -92,7 +108,7 @@ task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
 // Defer some of the wiring until after the intellij plugin's tasks have been created:
 tasks.all { final Task task ->
     if ('buildPlugin' == task.name || 'runIdea' == task.name) {
-        task.dependsOn((Task) copyCheckstyleArtifactsToSandbox);
+        task.dependsOn(tasks.copyCheckstyleArtifactsToSandbox);
         task.dependsOn tasks['copyClassesToSandbox'];
     }
     else if ('prepareSandbox' == task.name) {
