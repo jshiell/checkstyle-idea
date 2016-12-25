@@ -1,8 +1,9 @@
+import org.infernus.idea.checkstyle.build.CheckstyleVersions
 import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask
 import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask
+import org.infernus.idea.checkstyle.build.CsaccessTestTask
 import org.infernus.idea.checkstyle.build.CustomSourceSetCreator
 import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask
-import org.infernus.idea.checkstyle.build.RunCsaccessTestsTask
 
 buildscript {
     repositories {
@@ -13,40 +14,45 @@ buildscript {
 plugins {
     id 'java'
     id 'jacoco'
-    id "org.jetbrains.intellij" version "0.1.10"
+    id 'org.jetbrains.intellij' version '0.1.10'
 }
 
 apply plugin: 'org.jetbrains.intellij'
-
-intellij {
-    version 'IC-15.0.6'
-    pluginName 'CheckStyle-IDEA'
-    updateSinceUntilBuild = false
-}
-
-sourceCompatibility = 1.8
-version = '5.0.0'
 
 repositories {
     mavenLocal()
     jcenter()
 }
 
+sourceCompatibility = 1.8
+version = '5.0.0'
+
+intellij {
+    version = 'IC-15.0.6';
+    pluginName 'CheckStyle-IDEA'
+    updateSinceUntilBuild = false
+}
+
 new CustomSourceSetCreator(project)
         .establishCsAccessSourceSet()
         .establishCsAccessTestSourceSet();
+// TODO csaccessTest should be recognized as test directories in IntelliJ
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Dependencies
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.4';
-
+ext {
     // The Checkstyle version given here is the *base version* against which our code is initially compiled.
     // This is mostly for convenience, so we don't have to use reflection overly much. At runtime, the Checkstyle
     // version will depend on the plugin configuration.
-    csaccessCompile (group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.1.1') {
+    checkstyleBaseVersion = '7.1.1';
+}
+
+dependencies {
+    compile group: 'commons-io', name: 'commons-io', version: '2.4';
+
+    csaccessCompileOnly (group: 'com.puppycrawl.tools', name: 'checkstyle', version: checkstyleBaseVersion) {
         exclude group: 'commons-logging', module: 'commons-logging';
     }
 
@@ -62,11 +68,17 @@ dependencies {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ext {
-    // testConfigClosure is used by both tasks 'test' and 'runCsaccessTests':
+    // testConfigClosure is used by all tasks of type Test (runCsaccessTests, test, xtest_*):
     testConfigClosure = {
-        // beforeTest { final TestDescriptor descriptor ->
-        //     logger.lifecycle("Running test: " + descriptor)
-        // }
+        //beforeTest { final TestDescriptor descriptor ->
+        //    logger.lifecycle("Running test: " + descriptor)
+        //}
+        testLogging {
+            showStackTraces = true;
+            showExceptions = true;
+            showCauses = true;
+            exceptionFormat 'full'
+        }
         afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
             if (descriptor.getParent() == null) {
                 logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
@@ -77,26 +89,59 @@ ext {
     }
 }
 test((Closure) testConfigClosure);
-Task rct = tasks.create(RunCsaccessTestsTask.NAME, RunCsaccessTestsTask.class);
+Task rct = tasks.create(CsaccessTestTask.NAME, CsaccessTestTask.class);
+rct.setCheckstyleVersion((String) checkstyleBaseVersion, true);
+tasks.test.dependsOn rct;
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Cross-check 'csaccessTest' unit tests against the different Checkstyle runtimes
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+task xtest {
+    setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
+    setDescription('Runs the \'' + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME +
+            '\' unit tests against all supported Checkstyle runtimes.');
+}
+tasks.check.dependsOn tasks.xtest;
+new CheckstyleVersions(project).versions.each { final String csVersion ->
+    if (checkstyleBaseVersion != csVersion) {
+        CsaccessTestTask xt = tasks.create(CsaccessTestTask.getTaskName(csVersion), CsaccessTestTask.class);
+        xt.setCheckstyleVersion(csVersion, false);
+        tasks.xtest.dependsOn(xt);
+    }
+}
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Exclusive test coverage report for 'csaccess' classes
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 test.jacoco.enabled = false;
-task jacocoTestReport4csaccess(type: JacocoReport, dependsOn: rct) {
+task jacocoTestReport4csaccess(type: JacocoReport, dependsOn: tasks.withType(CsaccessTestTask)) {
+    description 'Generate exclusive JaCoCo test report on the \'' + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME +
+            '\' classes';
     reports {
-        xml.enabled = false;
+        xml.enabled = true;
         csv.enabled = false;
         html.enabled = true;
     }
     def SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
     classDirectories = files(csaccessSourceSet.output.classesDir);
     sourceDirectories = csaccessSourceSet.java.sourceDirectories;
-    executionData = files("${buildDir}/jacoco/${RunCsaccessTestsTask.NAME}.exec");
+    executionData = files(tasks.withType(CsaccessTestTask)*.name.collect {
+        new File("${buildDir}/jacoco", "${it}.exec")
+    });
+    // TODO We should fail the build if a certain coverage is not reached. This will be possible with Gradle 4.0 (see
+    // https://github.com/gradle/gradle/issues/824) or with a handcrafted workaround such as
+    // https://github.com/springfox/springfox/blob/fb780ee1f14627b239fba95730a69900b9b2313a/gradle/coverage.gradle
 }
 tasks.remove(tasks.jacocoTestReport);
-tasks.check.dependsOn tasks.jacocoTestReport4csaccess;
+tasks.xtest.dependsOn tasks.jacocoTestReport4csaccess;
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Extra tasks for getting Checkstyle in different versions into the plugin distribution
+//   Extra tasks for packaging Checkstyle in different versions into the plugin distribution
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 tasks.create(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);

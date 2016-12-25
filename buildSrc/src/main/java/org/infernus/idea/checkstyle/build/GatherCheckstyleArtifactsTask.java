@@ -38,6 +38,7 @@ public class GatherCheckstyleArtifactsTask
 
     public GatherCheckstyleArtifactsTask()
     {
+        super();
         setGroup(LifecycleBasePlugin.BUILD_GROUP);
         setDescription("Gathers Checkstyle libraries and their dependencies for bundling");
         final Project project = getProject();
@@ -92,13 +93,9 @@ public class GatherCheckstyleArtifactsTask
 
     private Set<File> resolveDependencies(final Project pProject, final String pCheckstyleVersion)
     {
-        final String csVersionGradle = pCheckstyleVersion.replaceAll("\\.", "_");
-        final Configuration csConf = pProject.getConfigurations().create("checkstyle_" + csVersionGradle);
-        final Dependency csDep = pProject.getDependencies().create(
-            "com.puppycrawl.tools:checkstyle:" + pCheckstyleVersion);
-        csConf.getDependencies().add(csDep);
+        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(pProject, pCheckstyleVersion);
+        final Configuration csConf = pProject.getConfigurations().detachedConfiguration(csDep);
         final Set<File> files = csConf.resolve();
-        pProject.getConfigurations().remove(csConf);
         return files;
     }
 

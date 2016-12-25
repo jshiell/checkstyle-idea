@@ -20,6 +20,7 @@ public class CopyClassesToSandboxTask
 
 
     public CopyClassesToSandboxTask() {
+        super();
         setGroup("intellij");
         final JavaPluginConvention jpc = getProject().getConvention().getPlugin(JavaPluginConvention.class);
         SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
@@ -47,7 +48,7 @@ public class CopyClassesToSandboxTask
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());
-                project.getTasks().getByName(RunCsaccessTestsTask.NAME).dependsOn(getOwner());
+                project.getTasks().getByName(CsaccessTestTask.NAME).dependsOn(getOwner());
                 return null;
             }
         });
