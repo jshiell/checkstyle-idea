@@ -13,7 +13,10 @@ public class CopyCheckstyleArtifactsToSandboxTask
 {
     static final String TARGET_SUBFOLDER = "checkstyle/lib";
 
+
     public CopyCheckstyleArtifactsToSandboxTask() {
+
+        super();
         setGroup("intellij");
         configureTask(false);
         final GatherCheckstyleArtifactsTask gatherTask = (GatherCheckstyleArtifactsTask) getProject().getTasks()
@@ -41,7 +44,7 @@ public class CopyCheckstyleArtifactsToSandboxTask
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());
-                project.getTasks().getByName(RunCsaccessTestsTask.NAME).dependsOn(getOwner());
+                project.getTasks().getByName(CsaccessTestTask.NAME).dependsOn(getOwner());
                 return null;
             }
         });
