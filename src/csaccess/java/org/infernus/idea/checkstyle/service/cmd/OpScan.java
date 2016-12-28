@@ -16,6 +16,7 @@ import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.checks.CheckFactory;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.service.CheckStyleAuditListener;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,9 @@ public class OpScan
 
     public OpScan(@NotNull final CheckstyleInternalObject pCheckerWithConfig, @NotNull final List<ScannableFile>
             pScannableFiles, final boolean pIsSuppressingErrors, final int pTabWidth, final Optional<String> pBaseDir) {
+        if (!(pCheckerWithConfig instanceof CheckerWithConfig)) {
+            throw new CheckstyleVersionMixException(CheckerWithConfig.class, pCheckerWithConfig);
+        }
         checkerWithConfig = (CheckerWithConfig) pCheckerWithConfig;
         scannableFiles = pScannableFiles;
         isSuppressingErrors = pIsSuppressingErrors;

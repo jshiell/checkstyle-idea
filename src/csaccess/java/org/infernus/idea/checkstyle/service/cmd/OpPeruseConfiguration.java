@@ -12,7 +12,7 @@ import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.service.entities.HasConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,8 +35,7 @@ public class OpPeruseConfiguration
     public OpPeruseConfiguration(@NotNull final CheckstyleInternalObject pConfiguration, @NotNull final ConfigVisitor
             pVisitor) {
         if (!(pConfiguration instanceof HasConfig)) {
-            throw new CheckStylePluginException("internal error: " + (pConfiguration != null ? pConfiguration
-                    .getClass().getName() : null) + " does not implement HasConfig");
+            throw new CheckstyleVersionMixException(HasConfig.class, pConfiguration);
         }
         configuration = ((HasConfig) pConfiguration).getConfiguration();
         visitor = pVisitor;
