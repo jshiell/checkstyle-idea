@@ -5,7 +5,7 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 
 
 public class CheckerWithConfig
-        implements HasChecker, HasConfig
+        implements HasChecker, HasCsConfig
 {
     private final Checker checker;
 
