@@ -2,12 +2,13 @@ package org.infernus.idea.checkstyle.service.entities;
 
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 
-public class ConfigObject
-    implements HasConfig
+
+public class CsConfigObject
+    implements HasCsConfig
 {
     private final Configuration configuration;
 
-    public ConfigObject(final Configuration pConfiguration) {
+    public CsConfigObject(final Configuration pConfiguration) {
         configuration = pConfiguration;
     }
 

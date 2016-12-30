@@ -44,9 +44,14 @@ public class CheckstyleActionsImpl
     @Override
     public CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final
     Map<String, String> pProperties) {
-        return executeCommand(new OpCreateChecker(pModule, pLocation, pProperties));
+        return createChecker(pModule, pLocation, pProperties, null);
     }
 
+    @Override
+    public CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final
+    Map<String, String> pProperties, @Nullable final CheckstyleInternalObject pConfigurations) {
+        return executeCommand(new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations));
+    }
 
     @Override
     public void destroyChecker(@NotNull final CheckstyleInternalObject pCheckerWithConfig) {

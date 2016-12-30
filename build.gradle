@@ -77,6 +77,7 @@ ext {
             showStackTraces = true;
             showExceptions = true;
             showCauses = true;
+            //showStandardStreams = true;
             exceptionFormat 'full'
         }
         afterSuite { final TestDescriptor descriptor, final TestResult testResult ->

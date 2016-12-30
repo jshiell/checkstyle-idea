@@ -43,4 +43,9 @@ public class CheckStyleChecker
         final CheckstyleProjectService csService = ServiceManager.getService(pProject, CheckstyleProjectService.class);
         csService.getCheckstyleInstance().destroyChecker(checkstyleInternalObjects);
     }
+
+
+    public CheckstyleInternalObject getCheckerWithConfig4UnitTest() {
+        return checkstyleInternalObjects;
+    }
 }

@@ -8,10 +8,14 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
+import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.Configurations;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
+import org.infernus.idea.checkstyle.service.entities.HasInfernusConfigurations;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -26,11 +30,28 @@ public class OpCreateChecker
 
     private final Map<String, String> variables;
 
+    private final Configurations configurations;
 
-    public OpCreateChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String, String> pVariables) {
+
+    public OpCreateChecker(@NotNull final Module pModule, final ConfigurationLocation pLocation, final Map<String,
+            String> pVariables) {
+        this(pModule, pLocation, pVariables, null);
+    }
+
+    public OpCreateChecker(@NotNull final Module pModule, final ConfigurationLocation pLocation, final Map<String,
+            String> pVariables, @Nullable final CheckstyleInternalObject pConfigurations) {
         module = pModule;
         location = pLocation;
         variables = pVariables;
+
+        if (pConfigurations != null) {
+            if (!(pConfigurations instanceof HasInfernusConfigurations)) {
+                throw new CheckstyleVersionMixException(HasInfernusConfigurations.class, pConfigurations);
+            }
+            configurations = ((HasInfernusConfigurations) pConfigurations).getConfigurations();
+        } else {
+            configurations = null;
+        }
     }
 
 
@@ -38,15 +59,15 @@ public class OpCreateChecker
     @NotNull
     public CheckStyleChecker execute(@NotNull final Project pProject) throws CheckstyleException {
 
-        final Configuration config = loadConfig();
+        final Configuration csConfig = loadConfig();
 
         final Checker checker = new Checker();
         checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
-        checker.configure(config);
+        checker.configure(csConfig);
 
-        CheckerWithConfig cwc = new CheckerWithConfig(checker, config);
-        Configurations configurations = new Configurations(module);
-        return new CheckStyleChecker(cwc, configurations.tabWidth(config), configurations.baseDir(config));
+        CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
+        final Configurations configs = configurations != null ? configurations : new Configurations(module);
+        return new CheckStyleChecker(cwc, configs.tabWidth(csConfig), configs.baseDir(csConfig));
     }
 
 

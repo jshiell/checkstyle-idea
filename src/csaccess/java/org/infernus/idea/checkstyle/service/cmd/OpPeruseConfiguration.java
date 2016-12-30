@@ -13,14 +13,13 @@ import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
-import org.infernus.idea.checkstyle.service.entities.HasConfig;
+import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 /**
  * Iterate on the configuration modules recursively, calling a visitor on each one.
- *
- * @author Thomas Jensen
  */
 public class OpPeruseConfiguration
         implements CheckstyleCommand<Void>
@@ -34,10 +33,10 @@ public class OpPeruseConfiguration
 
     public OpPeruseConfiguration(@NotNull final CheckstyleInternalObject pConfiguration, @NotNull final ConfigVisitor
             pVisitor) {
-        if (!(pConfiguration instanceof HasConfig)) {
-            throw new CheckstyleVersionMixException(HasConfig.class, pConfiguration);
+        if (!(pConfiguration instanceof HasCsConfig)) {
+            throw new CheckstyleVersionMixException(HasCsConfig.class, pConfiguration);
         }
-        configuration = ((HasConfig) pConfiguration).getConfiguration();
+        configuration = ((HasCsConfig) pConfiguration).getConfiguration();
         visitor = pVisitor;
     }
 

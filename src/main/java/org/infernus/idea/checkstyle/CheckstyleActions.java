@@ -31,6 +31,18 @@ public interface CheckstyleActions
     CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String,
             String> pProperties);
 
+    /**
+     * Create a new Checkstyle checker.
+     *
+     * @param pModule IntelliJ module
+     * @param pLocation configuration location
+     * @param pProperties property values needed in the configuration file
+     * @param pConfigurations an internal object, intended for mocking in unit tests
+     * @return the new checker
+     */
+    CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String,
+            String> pProperties, @Nullable final CheckstyleInternalObject pConfigurations);
+
 
     /**
      * Destroy a checker.
@@ -50,9 +62,9 @@ public interface CheckstyleActions
      * @param pBaseDir the base dir
      * @return list of problems per file
      */
-    Map<PsiFile, List<Problem>> scan(@NotNull final CheckstyleInternalObject pCheckerWithConfig, @NotNull final
-    List<ScannableFile> pScannableFiles, final boolean pIsSuppressingErrors, final int pTabWidth, final
-    Optional<String> pBaseDir);
+    Map<PsiFile, List<Problem>> scan(@NotNull final CheckstyleInternalObject pCheckerWithConfig,
+        @NotNull final List<ScannableFile> pScannableFiles, final boolean pIsSuppressingErrors, final int pTabWidth,
+        final Optional<String> pBaseDir);
 
 
     /**

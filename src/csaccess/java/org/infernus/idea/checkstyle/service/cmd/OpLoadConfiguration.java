@@ -3,6 +3,8 @@ package org.infernus.idea.checkstyle.service.cmd;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,11 +22,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.IgnoringResolver;
 import org.infernus.idea.checkstyle.service.SimpleResolver;
-import org.infernus.idea.checkstyle.service.entities.ConfigObject;
-import org.infernus.idea.checkstyle.service.entities.HasConfig;
+import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
+import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
 import static java.lang.String.format;
@@ -33,11 +36,12 @@ import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
+
 /**
  * Load a Checkstyle configuration file.
  */
 public class OpLoadConfiguration
-        implements CheckstyleCommand<HasConfig>
+        implements CheckstyleCommand<HasCsConfig>
 {
     private static final Log LOG = LogFactory.getLog(OpLoadConfiguration.class);
 
@@ -122,14 +126,13 @@ public class OpLoadConfiguration
 
 
     @Override
-    public HasConfig execute(@NotNull final Project pProject) throws CheckstyleException {
+    public HasCsConfig execute(@NotNull final Project pProject) throws CheckstyleException {
 
-        HasConfig result = null;
+        HasCsConfig result = null;
         InputStream is = null;
         try {
             is = getInputStream();
-            InputSource inputSource = new InputSource(is);
-            Configuration configuration = ConfigurationLoader.loadConfiguration(inputSource, resolver, false);
+            Configuration configuration = callLoadConfiguration(is);
             if (configuration == null) {
                 // from the CS code this state appears to occur when there's no <module> element found
                 // in the input stream
@@ -138,11 +141,46 @@ public class OpLoadConfiguration
             if (module != null) {
                 resolveFilePaths(configuration);
             }
-            result = new ConfigObject(configuration);
+            result = new CsConfigObject(configuration);
         } catch (IOException e) {
             throw new CheckstyleException("Error loading file", e);
         } finally {
             IOUtils.closeQuietly(is);
+        }
+        return result;
+    }
+
+
+    private Configuration callLoadConfiguration(final InputStream pIs) {
+        boolean inputSourceRequired = false;
+        Method method = null;
+        try {
+            // This will fail in Checkstyle 6.10, 6.10.1, 6.11, and 6.11.1. The method was re-enabled in 6.11.2.
+            method = ConfigurationLoader.class.getMethod("loadConfiguration", InputSource.class, PropertyResolver
+                    .class, boolean.class);
+            inputSourceRequired = true;
+        } catch (NoSuchMethodException e) {
+            try {
+                // Solution for Checkstyle 6.10, 6.10.1, 6.11, and 6.11.1.
+                method = ConfigurationLoader.class.getMethod("loadConfiguration", InputStream.class, PropertyResolver
+                        .class, boolean.class);
+            } catch (NoSuchMethodException pE) {
+                throw new CheckstyleServiceException("internal error - Could not call " //
+                        + ConfigurationLoader.class.getName() + ".loadConfiguration() " //
+                        + "because the method was not found. New Checkstyle runtime?");
+            }
+        }
+
+        Configuration result = null;
+        try {
+            if (inputSourceRequired) {
+                result = (Configuration) method.invoke(null, new InputSource(pIs), resolver, false);
+            } else {
+                result = (Configuration) method.invoke(null, pIs, resolver, false);
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new CheckstyleServiceException("internal error - Failed to call " //
+                    + ConfigurationLoader.class.getName() + ".loadConfiguration()", e);
         }
         return result;
     }
