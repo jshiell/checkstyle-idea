@@ -38,6 +38,15 @@ new CustomSourceSetCreator(project)
         .establishCsAccessTestSourceSet();
 // TODO csaccessTest should be recognized as test directories in IntelliJ
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8';
+    options.compilerArgs << '-Xlint:deprecation';
+    if (it.name == 'compileCsaccessJava' || it.name == 'compileCsaccessTestJava') {
+        options.compilerArgs << '-Xlint:unchecked';
+    }
+}
+
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Dependencies
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
