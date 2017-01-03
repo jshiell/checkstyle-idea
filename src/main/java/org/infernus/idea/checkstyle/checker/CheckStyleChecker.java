@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
@@ -32,15 +31,14 @@ public class CheckStyleChecker
     public Map<PsiFile, List<Problem>> scan(@NotNull final List<ScannableFile> scannableFiles, @NotNull final
     CheckStyleConfiguration pluginConfig) {
 
-        final CheckstyleProjectService csService = ServiceManager.getService(pluginConfig.getProject(),
-                CheckstyleProjectService.class);
+        final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(pluginConfig.getProject());
         return csService.getCheckstyleInstance().scan(checkstyleInternalObjects, scannableFiles, pluginConfig
                 .isSuppressingErrors(), tabWidth, baseDir);
     }
 
 
     public void destroy(@NotNull final Project pProject) {
-        final CheckstyleProjectService csService = ServiceManager.getService(pProject, CheckstyleProjectService.class);
+        final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(pProject);
         csService.getCheckstyleInstance().destroyChecker(checkstyleInternalObjects);
     }
 

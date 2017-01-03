@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.checker;
 
 import java.util.Map;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -45,8 +44,7 @@ class CheckerFactoryWorker
     public void run() {
 
         super.run();
-        final CheckstyleProjectService csService = ServiceManager.getService(module.getProject(),
-                CheckstyleProjectService.class);
+        final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(module.getProject());
         try {
             threadReturn[0] = csService.getCheckstyleInstance().createChecker(module, location, properties);
         } catch (RuntimeException e) {

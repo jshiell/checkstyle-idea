@@ -10,6 +10,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.IOUtils;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
@@ -29,6 +30,9 @@ public class CheckstyleProjectService
     private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
 
     private static final String PROP_NAME_JAVA8 = "checkstyle.versions.java8";
+
+    /** mock instance which may be set and used by unit tests */
+    private static CheckstyleProjectService sMock = null;
 
     private final Project project;
 
@@ -158,5 +162,19 @@ public class CheckstyleProjectService
         } catch (Exception e) {
             throw new CheckStylePluginException("internal error", e);
         }
+    }
+
+
+    public static CheckstyleProjectService getInstance(@NotNull final Project pProject) {
+        CheckstyleProjectService result = sMock;
+        if (result == null) {
+            result = ServiceManager.getService(pProject, CheckstyleProjectService.class);
+        }
+        return result;
+    }
+
+
+    public static void activateMock4UnitTesting(@Nullable final CheckstyleProjectService pMock) {
+        sMock = pMock;
     }
 }

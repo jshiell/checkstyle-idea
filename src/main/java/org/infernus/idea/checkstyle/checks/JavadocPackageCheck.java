@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.checks;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -96,7 +95,7 @@ public final class JavadocPackageCheck
 
         // TODO Going through the whole config is somewhat inefficient here; might do this centrally and only
         // once. Currently we don't care because there is only one such class.
-        final CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         final AtomicReference<String> value = new AtomicReference<>();
         csService.getCheckstyleInstance().peruseConfiguration(config, new ConfigVisitor()
         {

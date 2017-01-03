@@ -99,7 +99,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project project) {
-        SortedSet<String> versions = ServiceManager.getService(project, CheckstyleProjectService.class).getSupportedVersions();
+        SortedSet<String> versions = CheckstyleProjectService.getInstance(project).getSupportedVersions();
         String[] supportedVersions = versions.toArray(new String[versions.size()]);
         return new ComboBox(supportedVersions);
     }
