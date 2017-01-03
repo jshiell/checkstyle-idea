@@ -163,16 +163,10 @@ public class CheckerFactory {
         final Object workerResult = executeWorker(location, module, resolver, contextClassLoader);
 
         if (workerResult instanceof CheckstyleException) {
-            final CheckstyleException checkstyleException = (CheckstyleException) workerResult;
-            if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
-                return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
-            }
-            return blacklistAndShowMessage(location, module, "checkstyle.checker-failed",
-                    checkstyleException.getMessage());
+            return blacklistAndShowMessage(location, module, (CheckstyleException) workerResult);
 
         } else if (workerResult instanceof IOException) {
-            LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
-                    (IOException) workerResult);
+            LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), (IOException) workerResult);
             return blacklistAndShowMessage(location, module, "checkstyle.file-not-found", location.getLocation());
 
         } else if (workerResult instanceof Throwable) {
@@ -181,6 +175,19 @@ public class CheckerFactory {
         }
 
         return (CachedChecker) workerResult;
+    }
+
+    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
+                                                  final Module module,
+                                                  final CheckstyleException checkstyleException) {
+        if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
+            return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
+
+        } else if (checkstyleException.getMessage().contains("unable to parse configuration stream") && checkstyleException.getCause() != null) {
+            return blacklistAndShowMessage(location, module, checkstyleException.getCause().getMessage());
+        }
+
+        return blacklistAndShowMessage(location, module, "checkstyle.parse-failed", checkstyleException.getMessage());
     }
 
     private Object executeWorker(final ConfigurationLocation location,

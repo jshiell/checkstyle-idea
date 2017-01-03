@@ -21,6 +21,7 @@
         <![CDATA[
 <ul>
     <li>4.35.0: New: Updated to CheckStyle 7.4.</li>
+    <li>4.35.0: Fixed: Improved error feedback when properties are missing from rules files (#275).</li>
     <li>4.34.0: New: Updated to CheckStyle 7.3.</li>
     <li>4.34.0: Fixed: Added (hopefully) a workaround for #278.</li>
     <li>4.33.0: New: Updated to CheckStyle 7.2.</li>
