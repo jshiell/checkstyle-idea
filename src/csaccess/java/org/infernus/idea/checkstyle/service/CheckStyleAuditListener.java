@@ -58,10 +58,12 @@ public class CheckStyleAuditListener
         final ProcessResultsThread findThread = new ProcessResultsThread();
 
         final Application application = ApplicationManager.getApplication();
-        if (application.isDispatchThread()) {
-            findThread.run();
-        } else {
-            application.runReadAction(findThread);
+        if (application != null) {  // can be null in unit tests
+            if (application.isDispatchThread()) {
+                findThread.run();
+            } else {
+                application.runReadAction(findThread);
+            }
         }
     }
 
