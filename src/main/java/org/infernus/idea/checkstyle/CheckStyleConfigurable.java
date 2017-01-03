@@ -112,7 +112,7 @@ public class CheckStyleConfigurable
         final List<String> thirdPartyClasspath = configPanel.getThirdPartyClasspath();
         configuration.setThirdPartyClassPath(thirdPartyClasspath);
 
-        CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         csService.activateCheckstyleVersion(configPanel.getCheckstyleVersion());
 
         getCheckerFactoryCache().invalidate();

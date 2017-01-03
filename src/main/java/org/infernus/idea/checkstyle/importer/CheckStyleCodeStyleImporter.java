@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.importer;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.options.SchemeFactory;
 import com.intellij.openapi.options.SchemeImportException;
 import com.intellij.openapi.options.SchemeImporter;
@@ -57,7 +56,7 @@ public class CheckStyleCodeStyleImporter
             }
             CheckstyleInternalObject configuration = loadConfiguration(project, selectedFile);
             if (configuration != null) {
-                checkstyleProjectService = ServiceManager.getService(project, CheckstyleProjectService.class);
+                checkstyleProjectService = CheckstyleProjectService.getInstance(project);
                 importConfiguration(configuration, targetScheme.getCodeStyleSettings());
                 return targetScheme;
             }
@@ -79,7 +78,7 @@ public class CheckStyleCodeStyleImporter
     @Nullable
     private CheckstyleInternalObject loadConfiguration(@NotNull final Project project, @NotNull VirtualFile
             selectedFile) {
-        CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         return csService.getCheckstyleInstance().loadConfiguration(selectedFile, true, null);
     }
 

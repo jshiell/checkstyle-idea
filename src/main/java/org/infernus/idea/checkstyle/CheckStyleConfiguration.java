@@ -312,7 +312,7 @@ public class CheckStyleConfiguration
     public String getCheckstyleVersion() {
         String result = storage.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
-            CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+            CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
             result = csService.getDefaultVersion();
         }
         return result;
@@ -321,7 +321,7 @@ public class CheckStyleConfiguration
     public void setCheckstyleVersion(@Nullable final String pVersion) {
         String v = pVersion;
         if (pVersion == null) {
-            CheckstyleProjectService csService = ServiceManager.getService(project, CheckstyleProjectService.class);
+            CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
             v = csService.getDefaultVersion();
         }
         storage.put(CHECKSTYLE_VERSION_SETTING, v);
