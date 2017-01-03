@@ -10,14 +10,12 @@ buildscript {
         maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
     }
 }
-
 plugins {
     id 'java'
     id 'jacoco'
+    id 'idea'
     id 'org.jetbrains.intellij' version '0.1.10'
 }
-
-apply plugin: 'org.jetbrains.intellij'
 
 repositories {
     mavenLocal()
@@ -36,7 +34,6 @@ intellij {
 new CustomSourceSetCreator(project)
         .establishCsAccessSourceSet()
         .establishCsAccessTestSourceSet();
-// TODO csaccessTest should be recognized as test directories in IntelliJ
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8';
@@ -52,16 +49,13 @@ tasks.withType(JavaCompile) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ext {
-    // The Checkstyle version given here is the *base version* against which our code is initially compiled.
-    // This is mostly for convenience, so we don't have to use reflection overly much. At runtime, the Checkstyle
-    // version will depend on the plugin configuration.
-    checkstyleBaseVersion = '7.1.1';
+    supportedCsVersions = new CheckstyleVersions(project);
 }
 
 dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.4';
 
-    csaccessCompileOnly (group: 'com.puppycrawl.tools', name: 'checkstyle', version: checkstyleBaseVersion) {
+    csaccessCompileOnly ("com.puppycrawl.tools:checkstyle:${supportedCsVersions.getBaseVersion()}") {
         exclude group: 'commons-logging', module: 'commons-logging';
     }
 
@@ -79,9 +73,6 @@ dependencies {
 ext {
     // testConfigClosure is used by all tasks of type Test (runCsaccessTests, test, xtest_*):
     testConfigClosure = {
-        //beforeTest { final TestDescriptor descriptor ->
-        //    logger.lifecycle("Running test: " + descriptor)
-        //}
         testLogging {
             showStackTraces = true;
             showExceptions = true;
@@ -100,7 +91,7 @@ ext {
 }
 test((Closure) testConfigClosure);
 Task rct = tasks.create(CsaccessTestTask.NAME, CsaccessTestTask.class);
-rct.setCheckstyleVersion((String) checkstyleBaseVersion, true);
+rct.setCheckstyleVersion((String) supportedCsVersions.baseVersion, true);
 tasks.test.dependsOn rct;
 
 
@@ -114,8 +105,8 @@ task xtest {
             '\' unit tests against all supported Checkstyle runtimes.');
 }
 tasks.check.dependsOn tasks.xtest;
-new CheckstyleVersions(project).versions.each { final String csVersion ->
-    if (checkstyleBaseVersion != csVersion) {
+supportedCsVersions.versions.each { final String csVersion ->
+    if (supportedCsVersions.baseVersion != csVersion) {
         CsaccessTestTask xt = tasks.create(CsaccessTestTask.getTaskName(csVersion), CsaccessTestTask.class);
         xt.setCheckstyleVersion(csVersion, false);
         tasks.xtest.dependsOn(xt);
@@ -174,4 +165,25 @@ tasks.all { final Task task ->
         tasks['copyCheckstyleArtifactsToTestSandbox'].dependsOn task;
         tasks['copyClassesToTestSandbox'].dependsOn task;
     }
+}
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Configure IntelliJ IDEA
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+idea.project {
+    languageLevel = JavaVersion.VERSION_1_8;
+}
+idea.module {
+    downloadJavadoc = true;
+    downloadSources = true;
+    excludeDirs += file('.idea');
+    excludeDirs += file('_support');
+    // TODO We should also tell IntelliJ automatically that csaccessTest contains test code.
+    // The following lines should really do it, but currently don't, which seems like a Gradle bug to me:
+    //def SourceSet catSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME);
+    //testSourceDirs += catSourceSet.getJava().getSrcDirs();
+    //testSourceDirs += catSourceSet.getResources().getSrcDirs();
+    //scopes.TEST.plus += [configurations.getByName(catSourceSet.getRuntimeConfigurationName())];
 }

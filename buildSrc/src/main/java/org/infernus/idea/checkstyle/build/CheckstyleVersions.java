@@ -21,8 +21,8 @@ import org.gradle.api.artifacts.ModuleDependency;
 
 
 /**
- * Read the {@code checkstyle.versions.*} properties from <i>checkstyle-idea.properties</i> and make them available
- * to the build process.
+ * Read the {@code checkstyle.versions.*} and the {@code baseVersion} properties from <i>checkstyle-idea.properties</i>
+ * and make them available to the build process.
  */
 public class CheckstyleVersions
 {
@@ -32,22 +32,27 @@ public class CheckstyleVersions
 
     private static final String PROP_NAME_JAVA8 = "checkstyle.versions.java8";
 
+    private static final String PROP_NAME_BASEVERSION = "baseVersion";
+
     private final File propertyFile;
 
     private final SortedSet<String> versions;
 
+    private final String baseVersion;
+
 
     public CheckstyleVersions(final Project project) {
         propertyFile = new File(project.getProjectDir(), PROP_FILE);
-        versions = buildVersionSet();
+        final Properties props = readProperties();
+        versions = buildVersionSet(props);
+        baseVersion = readBaseVersion(props);
     }
 
 
-    private SortedSet<String> buildVersionSet() {
-        final Properties props = readProperties();
+    private SortedSet<String> buildVersionSet(final Properties pProperties) {
         SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
-        theVersions.addAll(readVersions(props, PROP_NAME_JAVA7));
-        Set<String> versions8 = readVersions(props, PROP_NAME_JAVA8);
+        theVersions.addAll(readVersions(pProperties, PROP_NAME_JAVA7));
+        Set<String> versions8 = readVersions(pProperties, PROP_NAME_JAVA8);
         if (!Collections.disjoint(theVersions, versions8)) {
             throw new GradleException("Properties '" + PROP_NAME_JAVA7 + "' and '" + PROP_NAME_JAVA8 + "' contain " +
                     "duplicate entries in configuration file '" + PROP_FILE + "'");
@@ -103,6 +108,20 @@ public class CheckstyleVersions
     }
 
 
+    private String readBaseVersion(final Properties pProperties) {
+        final String baseVersion = pProperties.getProperty(PROP_NAME_BASEVERSION);
+        if (baseVersion == null || baseVersion.trim().isEmpty()) {
+            throw new GradleException("Property '" + PROP_NAME_BASEVERSION + "' missing from configuration file '"
+                    + PROP_FILE + "'");
+        }
+        if (!versions.contains(baseVersion)) {
+            throw new GradleException("Specified base version '" + baseVersion + "' is not a supported version. "
+                    + "Supported versions: " + versions);
+        }
+        return baseVersion;
+    }
+
+
     public File getPropertyFile() {
         return propertyFile;
     }
@@ -110,6 +129,10 @@ public class CheckstyleVersions
 
     public SortedSet<String> getVersions() {
         return versions;
+    }
+
+    public String getBaseVersion() {
+        return baseVersion;
     }
 
 
