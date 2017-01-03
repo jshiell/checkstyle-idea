@@ -274,10 +274,10 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="com.puppycrawl.tools:checkstyle:7.3" type="repository">
-      <properties maven-id="com.puppycrawl.tools:checkstyle:7.3" />
+    <library name="com.puppycrawl.tools:checkstyle:7.4" type="repository">
+      <properties maven-id="com.puppycrawl.tools:checkstyle:7.4" />
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/7.3/checkstyle-7.3.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/7.4/checkstyle-7.4.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/antlr/antlr/2.7.7/antlr-2.7.7.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4-runtime/4.5.3/antlr4-runtime-4.5.3.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar!/" />
@@ -290,7 +290,7 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/7.3/checkstyle-7.3-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/puppycrawl/tools/checkstyle/7.4/checkstyle-7.4-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="commons-io:commons-io:2.4" type="repository">

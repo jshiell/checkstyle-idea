@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **4.35.0** New: Updated to CheckStyle 7.4.
 * **4.34.0** New: Updated to CheckStyle 7.3.
 * **4.34.0** Fixed: Added (hopefully) a workaround for #278.
 * **4.33.0** New: Updated to CheckStyle 7.2.

@@ -7,11 +7,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 7.3 from within IDEA.
+    of Java files with CheckStyle 7.4 from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.34.0</version>
+    <version>4.35.0</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>4.35.0: New: Updated to CheckStyle 7.4.</li>
     <li>4.34.0: New: Updated to CheckStyle 7.3.</li>
     <li>4.34.0: Fixed: Added (hopefully) a workaround for #278.</li>
     <li>4.33.0: New: Updated to CheckStyle 7.2.</li>

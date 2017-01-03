@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
+import java.util.Set;
 
 import java.io.File;
 import java.util.*;
