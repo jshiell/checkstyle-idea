@@ -15,6 +15,7 @@ import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
@@ -49,7 +50,7 @@ public class CheckstyleActionsImpl
 
     @Override
     public CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final
-    Map<String, String> pProperties, @Nullable final CheckstyleInternalObject pConfigurations) {
+    Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations) {
         return executeCommand(new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations));
     }
 

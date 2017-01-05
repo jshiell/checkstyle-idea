@@ -8,27 +8,29 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 public class Configurations
+    implements TabWidthAndBaseDirProvider
 {
-    private static final Log LOG = LogFactory.getLog(Configurations.class);
-
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final int DEFAULT_CHECKSTYLE_TAB_SIZE = 8;
 
     private final Module module;
 
-    public Configurations(@Nullable final Module module) {
+    private final Configuration rootElement;
+
+
+    public Configurations(@Nullable final Module module, @NotNull final Configuration rootElement) {
         this.module = module;
+        this.rootElement = rootElement;
     }
 
-    public int tabWidth(final Configuration rootElement) {
+    public int tabWidth() {
         for (final Configuration currentChild : rootElement.getChildren()) {
             if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
                 return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), defaultTabSize());
@@ -59,7 +61,7 @@ public class Configurations
         return CodeStyleSettingsManager.getInstance();
     }
 
-    public Optional<String> baseDir(final Configuration rootElement) {
+    public Optional<String> baseDir() {
         for (final String attributeName : rootElement.getAttributeNames()) {
             if ("basedir".equals(attributeName)) {
                 return ofNullable(getAttributeOrNull(rootElement, "basedir"));
