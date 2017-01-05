@@ -13,6 +13,7 @@ import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,7 @@ public interface CheckstyleActions
      * @return the new checker
      */
     CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pProperties, @Nullable final CheckstyleInternalObject pConfigurations);
+            String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations);
 
 
     /**

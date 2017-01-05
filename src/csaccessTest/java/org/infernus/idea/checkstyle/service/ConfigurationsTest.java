@@ -5,9 +5,10 @@ import java.io.IOException;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -22,11 +23,8 @@ public class ConfigurationsTest
 {
     private static final int CODE_STYLE_TAB_SIZE = 3;
 
-    private Configurations underTest;
 
-
-    @Before
-    public void setUp() throws IOException {
+    private TabWidthAndBaseDirProvider createClassUnderTest(final Configuration pConfig) throws IOException {
 
         final Module module = Mockito.mock(Module.class);
         final ConfigurationLocation configurationLocation = Mockito.mock(ConfigurationLocation.class);
@@ -37,7 +35,7 @@ public class ConfigurationsTest
                 ("aTriggeredIoException"));
         when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
 
-        underTest = new Configurations(module)
+        return new Configurations(module, pConfig)
         {
             @NotNull
             @Override
@@ -49,28 +47,29 @@ public class ConfigurationsTest
 
 
     @Test
-    public void aDefaultTabWidthIsEightIsUsedWhenNoTabWidthPropertyIsPresent() {
-        assertThat(underTest.tabWidth(ConfigurationBuilder.checker().build()), is(equalTo(CODE_STYLE_TAB_SIZE)));
+    public void aDefaultTabWidthIsEightIsUsedWhenNoTabWidthPropertyIsPresent() throws IOException {
+        assertThat(createClassUnderTest(ConfigurationBuilder.checker().build()).tabWidth(), //
+                is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 
 
     @Test
-    public void tabWidthPropertyValueIsReturnedWhenPresent() {
-        assertThat(underTest.tabWidth(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "7")).build()), is(equalTo(7)));
+    public void tabWidthPropertyValueIsReturnedWhenPresent() throws IOException {
+        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
+                ("TreeWalker").withAttribute("tabWidth", "7")).build()).tabWidth(), is(equalTo(7)));
     }
 
 
     @Test
-    public void aTabWidthPropertyWithANonIntegerValueReturnsTheDefault() {
-        assertThat(underTest.tabWidth(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "dd")).build()), is(equalTo(CODE_STYLE_TAB_SIZE)));
+    public void aTabWidthPropertyWithANonIntegerValueReturnsTheDefault() throws IOException {
+        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
+                ("TreeWalker").withAttribute("tabWidth", "dd")).build()).tabWidth(), is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 
 
     @Test
-    public void aTabWidthPropertyWithNoValueReturnsTheDefault() {
-        assertThat(underTest.tabWidth(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "")).build()), is(equalTo(CODE_STYLE_TAB_SIZE)));
+    public void aTabWidthPropertyWithNoValueReturnsTheDefault() throws IOException {
+        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
+                ("TreeWalker").withAttribute("tabWidth", "")).build()).tabWidth(), is(equalTo(CODE_STYLE_TAB_SIZE)));
     }
 }

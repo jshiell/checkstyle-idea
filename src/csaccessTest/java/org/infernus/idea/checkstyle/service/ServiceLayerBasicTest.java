@@ -17,9 +17,9 @@ import org.infernus.idea.checkstyle.CheckstyleActions;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.service.entities.InfernusConfigurationsObject;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -42,11 +42,13 @@ public class ServiceLayerBasicTest
     @BeforeClass
     public static void setUp() {
         sCheckstyleProjectService = new CheckstyleProjectService(PROJECT);
+        CheckstyleProjectService.activateMock4UnitTesting(sCheckstyleProjectService);
     }
 
     @AfterClass
     public static void tearDown() {
         sCheckstyleProjectService = null;
+        CheckstyleProjectService.activateMock4UnitTesting(null);
     }
 
 
@@ -125,14 +127,13 @@ public class ServiceLayerBasicTest
         final Module module = Mockito.mock(Module.class);
         Mockito.when(module.getProject()).thenReturn(PROJECT);
 
-        final Configurations configurations = Mockito.mock(Configurations.class);
-        Mockito.when(configurations.tabWidth(Mockito.any())).thenReturn(2);
-        Mockito.when(configurations.baseDir(Mockito.any())).thenReturn(  //
+        final TabWidthAndBaseDirProvider configurations = Mockito.mock(TabWidthAndBaseDirProvider.class);
+        Mockito.when(configurations.tabWidth()).thenReturn(2);
+        Mockito.when(configurations.baseDir()).thenReturn(  //
                 Optional.of(new File(getClass().getResource(pConfigXmlFile).toURI()).getParent()));
 
         final CheckstyleActions csInstance = sCheckstyleProjectService.getCheckstyleInstance();
-        return csInstance.createChecker(module, configLoc, Collections.emptyMap(), new InfernusConfigurationsObject
-                (configurations));
+        return csInstance.createChecker(module, configLoc, Collections.emptyMap(), configurations);
     }
 
 

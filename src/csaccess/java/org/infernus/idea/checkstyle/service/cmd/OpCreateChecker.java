@@ -8,12 +8,10 @@ import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
-import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.Configurations;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
-import org.infernus.idea.checkstyle.service.entities.HasInfernusConfigurations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,28 +28,15 @@ public class OpCreateChecker
 
     private final Map<String, String> variables;
 
-    private final Configurations configurations;
+    private final TabWidthAndBaseDirProvider configurations;
 
 
     public OpCreateChecker(@NotNull final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pVariables) {
-        this(pModule, pLocation, pVariables, null);
-    }
-
-    public OpCreateChecker(@NotNull final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pVariables, @Nullable final CheckstyleInternalObject pConfigurations) {
+            String> pVariables, @Nullable final TabWidthAndBaseDirProvider pConfigurations) {
         module = pModule;
         location = pLocation;
         variables = pVariables;
-
-        if (pConfigurations != null) {
-            if (!(pConfigurations instanceof HasInfernusConfigurations)) {
-                throw new CheckstyleVersionMixException(HasInfernusConfigurations.class, pConfigurations);
-            }
-            configurations = ((HasInfernusConfigurations) pConfigurations).getConfigurations();
-        } else {
-            configurations = null;
-        }
+        configurations = pConfigurations;
     }
 
 
@@ -62,12 +47,13 @@ public class OpCreateChecker
         final Configuration csConfig = loadConfig();
 
         final Checker checker = new Checker();
-        checker.setModuleClassLoader(Thread.currentThread().getContextClassLoader());
+        checker.setModuleClassLoader(getClass().getClassLoader());
         checker.configure(csConfig);
 
         CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
-        final Configurations configs = configurations != null ? configurations : new Configurations(module);
-        return new CheckStyleChecker(cwc, configs.tabWidth(csConfig), configs.baseDir(csConfig));
+        final TabWidthAndBaseDirProvider configs = configurations != null ? configurations : new Configurations
+                (module, csConfig);
+        return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir());
     }
 
 

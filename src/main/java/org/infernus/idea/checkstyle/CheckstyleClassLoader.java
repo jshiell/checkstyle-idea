@@ -50,9 +50,9 @@ public class CheckstyleClassLoader
 
 
     @NotNull
-    private Properties loadClassPathInfos() {
+    public static Properties loadClassPathInfos() {
         final Properties result = new Properties();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(PROP_FILE)) {
+        try (InputStream is = CheckstyleClassLoader.class.getClassLoader().getResourceAsStream(PROP_FILE)) {
             result.load(is);
         } catch (IOException e) {
             throw new CheckStylePluginException("Could not read plugin-internal file: " + PROP_FILE, e);
