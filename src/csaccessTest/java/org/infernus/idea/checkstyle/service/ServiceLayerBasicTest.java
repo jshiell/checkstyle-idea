@@ -3,10 +3,6 @@ package org.infernus.idea.checkstyle.service;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +118,7 @@ public class ServiceLayerBasicTest
     private CheckStyleChecker createChecker(@NotNull final String pConfigXmlFile) throws IOException,
             URISyntaxException {
 
-        final ConfigurationLocation configLoc = new StringConfigurationLocation(readFile(pConfigXmlFile));
+        final ConfigurationLocation configLoc = new StringConfigurationLocation(FileUtil.readFile(pConfigXmlFile));
 
         final Module module = Mockito.mock(Module.class);
         Mockito.when(module.getProject()).thenReturn(PROJECT);
@@ -148,15 +144,5 @@ public class ServiceLayerBasicTest
         final CheckstyleActions csInstance = sCheckstyleProjectService.getCheckstyleInstance();
         csInstance.scan(pChecker.getCheckerWithConfig4UnitTest(), filesToScan, false, 2, //
                 Optional.of(sourceFile.getParent()));
-    }
-
-
-    private String readFile(@NotNull final String pFilename) throws IOException, URISyntaxException {
-        URL url = getClass().getResource(pFilename);
-        if (url == null) {
-            url = Thread.currentThread().getContextClassLoader().getResource(pFilename);
-        }
-        Assert.assertNotNull(url);
-        return new String(Files.readAllBytes(Paths.get(url.toURI())), StandardCharsets.UTF_8);
     }
 }

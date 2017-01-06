@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
@@ -9,16 +10,11 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class ConfigurationsTest
 {
     private static final int CODE_STYLE_TAB_SIZE = 3;
@@ -30,10 +26,10 @@ public class ConfigurationsTest
         final ConfigurationLocation configurationLocation = Mockito.mock(ConfigurationLocation.class);
         final CodeStyleSettings codeStyleSettings = Mockito.mock(CodeStyleSettings.class);
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module)).thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module)).thenThrow(new IOException
-                ("aTriggeredIoException"));
-        when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
+        Mockito.when(configurationLocation.resolveAssociatedFile("aFileToResolve", module)).thenReturn("aResolvedFile");
+        Mockito.when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module)).thenThrow(new
+                IOException("aTriggeredIoException"));
+        Mockito.when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
 
         return new Configurations(module, pConfig)
         {
@@ -48,28 +44,63 @@ public class ConfigurationsTest
 
     @Test
     public void aDefaultTabWidthIsEightIsUsedWhenNoTabWidthPropertyIsPresent() throws IOException {
-        assertThat(createClassUnderTest(ConfigurationBuilder.checker().build()).tabWidth(), //
-                is(equalTo(CODE_STYLE_TAB_SIZE)));
+        final Configuration config = ConfigurationBuilder.checker().build();
+        Assert.assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
+    }
+
+
+    @Test
+    public void testNoTreeWalker_useDefault() throws IOException {
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("FileTabCharacter")).build();
+        Assert.assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
 
 
     @Test
     public void tabWidthPropertyValueIsReturnedWhenPresent() throws IOException {
-        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "7")).build()).tabWidth(), is(equalTo(7)));
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "7")).build();
+        Assert.assertEquals(7, createClassUnderTest(config).tabWidth());
     }
 
 
     @Test
     public void aTabWidthPropertyWithANonIntegerValueReturnsTheDefault() throws IOException {
-        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "dd")).build()).tabWidth(), is(equalTo(CODE_STYLE_TAB_SIZE)));
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "dd")).build();
+        Assert.assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
 
 
     @Test
     public void aTabWidthPropertyWithNoValueReturnsTheDefault() throws IOException {
-        assertThat(createClassUnderTest(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("TreeWalker").withAttribute("tabWidth", "")).build()).tabWidth(), is(equalTo(CODE_STYLE_TAB_SIZE)));
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "")).build();
+        Assert.assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
+    }
+
+
+    @Test
+    public void tabWidthNullAttribute() throws IOException {
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", null)).build();
+        Assert.assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
+    }
+
+
+    @Test
+    public void testBaseDir() throws IOException {
+        final Configuration config = ConfigurationBuilder.checker().withChild( //
+                ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "7")).build();
+        Assert.assertEquals(Optional.empty(), createClassUnderTest(config).baseDir());
+    }
+
+
+    @Test
+    public void testBaseDirFromAttribute() throws IOException {
+        final Configuration config = ConfigurationBuilder.checker().withAttribute("foo", "bar") //
+                .withAttribute("basedir", "/some/dir").build();
+        Assert.assertEquals(Optional.of("/some/dir"), createClassUnderTest(config).baseDir());
     }
 }

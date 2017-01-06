@@ -1,0 +1,219 @@
+package org.infernus.idea.checkstyle.csapi;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiInvalidElementAccessException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.checks.Check;
+import org.jetbrains.annotations.NotNull;
+
+
+public class ProcessResultsThread
+        implements Runnable
+{
+    private static final Log LOG = LogFactory.getLog(ProcessResultsThread.class);
+
+    private final boolean suppressErrors;
+    private final List<Check> checks;
+    private final int tabWidth;
+    private final Optional<String> baseDir;
+    private final List<Issue> errors;
+    private final Map<String, PsiFile> fileNamesToPsiFiles;
+
+    private final Map<PsiFile, List<Problem>> problems = new HashMap<>();
+
+
+    private static final class Position
+    {
+        private final boolean afterEndOfLine;
+        private final int offset;
+
+        public static Position at(final int offset, final boolean afterEndOfLine) {
+            return new Position(offset, afterEndOfLine);
+        }
+
+        public static Position at(final int offset) {
+            return new Position(offset, false);
+        }
+
+        private Position(final int offset, final boolean afterEndOfLine) {
+            this.offset = offset;
+            this.afterEndOfLine = afterEndOfLine;
+        }
+
+        private PsiElement element(final PsiFile psiFile) {
+            return psiFile.findElementAt(offset);
+        }
+    }
+
+
+    public ProcessResultsThread(final boolean pSuppressErrors, final List<Check> pChecks, final int pTabWidth, final
+    Optional<String> pBaseDir, final List<Issue> pErrors, final Map<String, PsiFile> pFileNamesToPsiFiles) {
+        suppressErrors = pSuppressErrors;
+        checks = pChecks;
+        tabWidth = pTabWidth;
+        baseDir = pBaseDir;
+        errors = pErrors;
+        fileNamesToPsiFiles = pFileNamesToPsiFiles;
+    }
+
+
+    @Override
+    public void run() {
+        final Map<PsiFile, List<Integer>> lineLengthCachesByFile = new HashMap<>();
+
+        for (final Issue event : errors) {
+            final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
+            if (psiFile == null) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Could not find mapping for file: " + event.getFileName() + " in " + fileNamesToPsiFiles);
+                }
+                return;
+            }
+
+            List<Integer> lineLengthCache = lineLengthCachesByFile.get(psiFile);
+            if (lineLengthCache == null) {
+                // we cache the offset of each line as it is created, so as to
+                // avoid retreating ground we've already covered.
+                lineLengthCache = new ArrayList<>();
+                lineLengthCache.add(0); // line 1 is offset 0
+
+                lineLengthCachesByFile.put(psiFile, lineLengthCache);
+            }
+
+            processEvent(psiFile, lineLengthCache, event);
+        }
+    }
+
+    private String filenameFrom(final Issue event) {
+        return baseDir.map(prefix -> withTrailingSeparator(prefix) + event.getFileName()).orElseGet(event::getFileName);
+    }
+
+    private String withTrailingSeparator(final String path) {
+        if (path != null && !path.endsWith(File.separator)) {
+            return path + File.separator;
+        }
+        return path;
+    }
+
+    private void processEvent(final PsiFile psiFile, final List<Integer> lineLengthCache, final Issue event) {
+        if (additionalChecksFail(psiFile, event)) {
+            return;
+        }
+
+        final Position position = findPosition(lineLengthCache, event, psiFile.textToCharArray());
+        final PsiElement victim = position.element(psiFile);
+
+        if (victim != null) {
+            addProblemTo(victim, psiFile, event, position.afterEndOfLine);
+        } else {
+            addProblemTo(psiFile, psiFile, event, false);
+            LOG.debug("Couldn't find victim for error: " + event.getFileName() + "(" + event.getLineNo() + ":" +
+                    event.getColumnNo() + ") " + event.getMessage());
+        }
+    }
+
+    private void addProblemTo(final PsiElement victim, final PsiFile psiFile, @NotNull final Issue event, final
+    boolean afterEndOfLine) {
+        try {
+            addProblem(psiFile, new Problem(victim, event.getMessage(), event.getSeverityLevel(), event.getLineNo(),
+                    event.getColumnNo(), afterEndOfLine, suppressErrors));
+        } catch (PsiInvalidElementAccessException e) {
+            LOG.error("Element access failed", e);
+        }
+    }
+
+    private boolean additionalChecksFail(final PsiFile psiFile, final Issue event) {
+        for (final Check check : checks) {
+            if (!check.process(psiFile, event.getSourceName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @NotNull
+    private Position findPosition(final List<Integer> lineLengthCache, final Issue event, final char[] text) {
+        if (event.getLineNo() == 0) {
+            return Position.at(event.getColumnNo());
+        } else if (event.getLineNo() <= lineLengthCache.size()) {
+            return Position.at(lineLengthCache.get(event.getLineNo() - 1) + event.getColumnNo());
+        } else {
+            return searchFromEndOfCachedData(lineLengthCache, event, text);
+        }
+    }
+
+    @NotNull
+    private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache, final Issue event, final char[]
+            text) {
+        final Position position;
+        int offset = lineLengthCache.get(lineLengthCache.size() - 1);
+        boolean afterEndOfLine = false;
+        int line = lineLengthCache.size();
+
+        int column = 0;
+        for (int i = offset; i < text.length; ++i) {
+            final char character = text[i];
+
+            // for linefeeds we need to handle CR, LF and CRLF,
+            // hence we accept either and only trigger a new
+            // line on the LF of CRLF.
+            final char nextChar = nextCharacter(text, i);
+            if (character == '\n' || character == '\r' && nextChar != '\n') {
+                ++line;
+                ++offset;
+                lineLengthCache.add(offset);
+                column = 0;
+            } else if (character == '\t') {
+                column += tabWidth;
+                ++offset;
+            } else {
+                ++column;
+                ++offset;
+            }
+
+            if (event.getLineNo() == line && event.getColumnNo() == column) {
+                if (column == 0 && Character.isWhitespace(nextChar)) {
+                    afterEndOfLine = true;
+                }
+                break;
+            }
+        }
+
+        position = Position.at(offset, afterEndOfLine);
+        return position;
+    }
+
+    private char nextCharacter(final char[] text, final int i) {
+        if ((i + 1) < text.length) {
+            return text[i + 1];
+        }
+        return '\0';
+    }
+
+
+    @NotNull
+    public Map<PsiFile, List<Problem>> getProblems() {
+        return Collections.unmodifiableMap(problems);
+    }
+
+    private void addProblem(final PsiFile psiFile, final Problem problem) {
+        List<Problem> problemsForFile = problems.get(psiFile);
+        if (problemsForFile == null) {
+            problemsForFile = new ArrayList<>();
+            problems.put(psiFile, problemsForFile);
+        }
+
+        problemsForFile.add(problem);
+    }
+}
