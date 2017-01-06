@@ -31,8 +31,8 @@ public class OpCreateChecker
     private final TabWidthAndBaseDirProvider configurations;
 
 
-    public OpCreateChecker(@NotNull final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pVariables, @Nullable final TabWidthAndBaseDirProvider pConfigurations) {
+    public OpCreateChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation pLocation, final
+    Map<String, String> pVariables, @Nullable final TabWidthAndBaseDirProvider pConfigurations) {
         module = pModule;
         location = pLocation;
         variables = pVariables;

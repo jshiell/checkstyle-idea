@@ -1,7 +1,10 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 
+import com.google.common.collect.ImmutableMap;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -9,14 +12,20 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBus;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.hamcrest.Matchers;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
 import org.infernus.idea.checkstyle.service.ConfigurationMatcher;
+import org.infernus.idea.checkstyle.service.FileUtil;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,6 +45,7 @@ public class OpLoadConfigurationTest
 {
     private ConfigurationLocation configurationLocation = Mockito.mock(ConfigurationLocation.class);
 
+    private Project project = Mockito.mock(Project.class);
     private Module module = Mockito.mock(Module.class);
 
     private Notifications notifications = Mockito.mock(Notifications.class);
@@ -169,8 +179,8 @@ public class OpLoadConfigurationTest
         final Notification notification = sentNotification();
         assertThat(notification, is(not(nullValue())));
         assertThat(notification.getType(), is(equalTo(NotificationType.WARNING)));
-        assertThat(notification.getContent(), is(equalTo(CheckStyleBundle.message("checkstyle.not-found" + "" +
-                ".RegexpHeader"))));
+        assertThat(notification.getContent(), is(equalTo(CheckStyleBundle.message("checkstyle.not-found" + "" + ""
+                + ".RegexpHeader"))));
     }
 
     @Test
@@ -243,5 +253,76 @@ public class OpLoadConfigurationTest
         underTest.resolveFilePaths(config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker")).build())));
+    }
+
+
+    @Test
+    public void testNoConfiguration() throws CheckstyleException {
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module)
+        {
+            @Override
+            Configuration callLoadConfiguration(final InputStream pInputStream) {
+                return null;
+            }
+        };
+        try {
+            testee.execute(project);
+        } catch (CheckstyleException e) {
+            // expected
+            Assert.assertTrue(e.getMessage().contains("Couldn't find root module"));
+        }
+    }
+
+
+    @Test
+    public void testWrongConfigurationClass() throws CheckstyleException {
+        Configuration config = new Configuration()
+        {
+            @Override
+            public String[] getAttributeNames() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String getAttribute(final String name) throws CheckstyleException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Configuration[] getChildren() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String getName() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ImmutableMap<String, String> getMessages() {
+                throw new UnsupportedOperationException();
+            }
+        };
+        underTest.resolveFilePaths(config);  // just log a warning and do nothing ... well ...
+    }
+
+
+    @Test
+    public void testConstructors() {
+        new OpLoadConfiguration(configurationLocation);
+        new OpLoadConfiguration(configurationLocation, null);
+        new OpLoadConfiguration(configurationLocation, null, module);
+        VirtualFile virtualFile = Mockito.mock(VirtualFile.class);
+        new OpLoadConfiguration((VirtualFile) virtualFile);
+        new OpLoadConfiguration((VirtualFile) virtualFile, null);
+        new OpLoadConfiguration("doesn't matter");
+    }
+
+
+    @Test
+    public void testLoadFromString() throws IOException, URISyntaxException {
+        final String configXml = FileUtil.readFile("cmd/config-ok.xml");
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(project).loadConfiguration(configXml);
+        Assert.assertNotNull(csConfig);
     }
 }

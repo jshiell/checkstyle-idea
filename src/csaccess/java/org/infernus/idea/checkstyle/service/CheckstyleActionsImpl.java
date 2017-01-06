@@ -43,14 +43,15 @@ public class CheckstyleActionsImpl
 
 
     @Override
-    public CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final
-    Map<String, String> pProperties) {
+    public CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation
+            pLocation, final Map<String, String> pProperties) {
         return createChecker(pModule, pLocation, pProperties, null);
     }
 
     @Override
-    public CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final
-    Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations) {
+    public CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation
+            pLocation, final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider
+            pConfigurations) {
         return executeCommand(new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations));
     }
 

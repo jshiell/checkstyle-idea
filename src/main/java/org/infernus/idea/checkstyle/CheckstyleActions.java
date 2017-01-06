@@ -29,8 +29,8 @@ public interface CheckstyleActions
      * @param pProperties property values needed in the configuration file
      * @return the new checker
      */
-    CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pProperties);
+    CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation pLocation,
+        final Map<String, String> pProperties);
 
     /**
      * Create a new Checkstyle checker.
@@ -41,8 +41,8 @@ public interface CheckstyleActions
      * @param pConfigurations an internal object, intended for mocking in unit tests
      * @return the new checker
      */
-    CheckStyleChecker createChecker(final Module pModule, final ConfigurationLocation pLocation, final Map<String,
-            String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations);
+    CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation pLocation,
+        final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations);
 
 
     /**
@@ -89,8 +89,8 @@ public interface CheckstyleActions
      * @param pModule the currently active module, used for resolving file paths
      * @return a Checkstyle configuration object
      */
-    CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile, @Nullable final
-    Map<String, String> pVariables, @NotNull final Module pModule);
+    CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile,
+        @Nullable final Map<String, String> pVariables, @NotNull final Module pModule);
 
     /**
      * Load a Checkstyle configuration file.
@@ -102,7 +102,7 @@ public interface CheckstyleActions
      * @return a Checkstyle configuration object
      */
     CheckstyleInternalObject loadConfiguration(@NotNull final VirtualFile pInputFile, final boolean pIgnoreVariables,
-                                               @Nullable final Map<String, String> pVariables);
+        @Nullable final Map<String, String> pVariables);
 
     /**
      * Load a Checkstyle configuration file.

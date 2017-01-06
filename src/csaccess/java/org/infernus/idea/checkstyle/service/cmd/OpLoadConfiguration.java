@@ -151,7 +151,7 @@ public class OpLoadConfiguration
     }
 
 
-    private Configuration callLoadConfiguration(final InputStream pIs) {
+    Configuration callLoadConfiguration(final InputStream pIs) {
         boolean inputSourceRequired = false;
         Method method = null;
         try {
