@@ -76,14 +76,15 @@ public class CheckStyleCodeStyleImporter
 
 
     @Nullable
-    private CheckstyleInternalObject loadConfiguration(@NotNull final Project project, @NotNull VirtualFile
+    private CheckstyleInternalObject loadConfiguration(@NotNull final Project project, @NotNull final VirtualFile
             selectedFile) {
         CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         return csService.getCheckstyleInstance().loadConfiguration(selectedFile, true, null);
     }
 
 
-    void importConfiguration(@NotNull CheckstyleInternalObject configuration, @NotNull CodeStyleSettings settings) {
+    void importConfiguration(@NotNull final CheckstyleInternalObject configuration,
+                             @NotNull final CodeStyleSettings settings) {
 
         checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, new ConfigVisitor()
         {

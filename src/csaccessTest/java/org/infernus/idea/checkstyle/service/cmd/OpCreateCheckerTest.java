@@ -1,11 +1,5 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Optional;
-
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
@@ -20,6 +14,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Optional;
 
 
 public class OpCreateCheckerTest
@@ -53,7 +53,7 @@ public class OpCreateCheckerTest
                 FileUtil.readFile("cmd/" + CONFIG_FILE));
 
         final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(sModuleMock, configLoc,
-                Collections.emptyMap(), sConfigurationsMock);
+                Collections.emptyMap(), sConfigurationsMock, getClass().getClassLoader());
         Assert.assertNotNull(checker);
     }
 
@@ -63,19 +63,20 @@ public class OpCreateCheckerTest
 
         //noinspection ConstantConditions
         new CheckstyleActionsImpl(PROJECT).createChecker(sModuleMock, null, Collections.emptyMap(),
-                sConfigurationsMock);
+                sConfigurationsMock, getClass().getClassLoader());
         Assert.fail("expected exception was not thrown");
     }
 
 
-    @Test(expected = CheckstyleServiceException.class)
+    @Test
     public void testCreateChecker_noModule() throws IOException, URISyntaxException {
 
         final ConfigurationLocation configLoc = new StringConfigurationLocation( //
                 FileUtil.readFile("cmd/" + CONFIG_FILE));
 
         //noinspection ConstantConditions
-        new CheckstyleActionsImpl(PROJECT).createChecker(null, configLoc, Collections.emptyMap(), sConfigurationsMock);
-        Assert.fail("expected exception was not thrown");
+        CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(null, configLoc, Collections
+                        .emptyMap(), sConfigurationsMock, getClass().getClassLoader());
+        Assert.assertNotNull(checker);
     }
 }

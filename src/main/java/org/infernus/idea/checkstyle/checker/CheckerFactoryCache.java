@@ -15,13 +15,14 @@ import com.intellij.concurrency.JobScheduler;
 import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CheckerFactoryCache
 {
     private static final int CLEANUP_PERIOD_SECONDS = 30;
 
     // TODO This may work more reliably if we just used a ConcurrentHashMap instead of our own reimplementation.
-    //      Also, we should check for expiration only when we return a Checker from the cache, so we don't need the
+    // TODO We should check for expiration only when we return a Checker from the cache, so that we don't need the
     //      backgroundCleanupTask.
     private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
     private final Map<CheckerFactoryCacheKey, CachedChecker> cache = new HashMap<>();
@@ -32,8 +33,9 @@ public class CheckerFactoryCache
         startBackgroundCleanupTask();
     }
 
-    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location, final Module module) {
-        final CheckerFactoryCacheKey key = new CheckerFactoryCacheKey(location, module, module.getProject().getName());
+    // TODO Why would a cache return Optionals? The value should either be present or not present.
+    public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location, @Nullable final Module module) {
+        final CheckerFactoryCacheKey key = new CheckerFactoryCacheKey(location, module);
         cacheLock.readLock().lock();
         try {
             if (cache.containsKey(key)) {
@@ -59,7 +61,7 @@ public class CheckerFactoryCache
 
     public void put(@NotNull final ConfigurationLocation location, final Module module, @NotNull final CachedChecker
             checker) {
-        writeToCache(() -> cache.put(new CheckerFactoryCacheKey(location, module, module.getProject().getName()),
+        writeToCache(() -> cache.put(new CheckerFactoryCacheKey(location, module),
                 checker));
     }
 

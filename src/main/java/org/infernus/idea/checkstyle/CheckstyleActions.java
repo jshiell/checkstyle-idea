@@ -27,10 +27,12 @@ public interface CheckstyleActions
      * @param pModule IntelliJ module
      * @param pLocation configuration location
      * @param pProperties property values needed in the configuration file
+     * @param pLoaderOfCheckedCode class loader which Checkstyle shall use to load classes and resources of the code
+     *      that it is checking - this is not for loading checks and modules, the module class loader is used for that
      * @return the new checker
      */
-    CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation pLocation,
-        final Map<String, String> pProperties);
+    CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation pLocation,
+        @Nullable final Map<String, String> pProperties, @NotNull final ClassLoader pLoaderOfCheckedCode);
 
     /**
      * Create a new Checkstyle checker.
@@ -39,10 +41,13 @@ public interface CheckstyleActions
      * @param pLocation configuration location
      * @param pProperties property values needed in the configuration file
      * @param pConfigurations an internal object, intended for mocking in unit tests
+     * @param pLoaderOfCheckedCode class loader which Checkstyle shall use to load classes and resources of the code
+     *      that it is checking - this is not for loading checks and modules, the module class loader is used for that
      * @return the new checker
      */
-    CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation pLocation,
-        final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations);
+    CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation pLocation,
+        @Nullable final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider pConfigurations,
+        @NotNull final ClassLoader pLoaderOfCheckedCode);
 
 
     /**
@@ -90,7 +95,7 @@ public interface CheckstyleActions
      * @return a Checkstyle configuration object
      */
     CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile,
-        @Nullable final Map<String, String> pVariables, @NotNull final Module pModule);
+        @Nullable final Map<String, String> pVariables, @Nullable final Module pModule);
 
     /**
      * Load a Checkstyle configuration file.

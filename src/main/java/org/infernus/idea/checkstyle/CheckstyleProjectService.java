@@ -1,9 +1,14 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -13,6 +18,8 @@ import java.util.concurrent.Callable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CheckstyleProjectService
 {
+    private static final Log LOG = LogFactory.getLog(CheckstyleProjectService.class);
+
     private static final String PROP_FILE = "checkstyle-idea.properties";
 
     private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
@@ -45,7 +54,7 @@ public class CheckstyleProjectService
     public CheckstyleProjectService(@NotNull final Project project) {
         this.project = project;
         supportedVersions = readSupportedVersions();
-        activateCheckstyleVersion(getDefaultVersion());
+        activateCheckstyleVersion(getDefaultVersion(), null);
     }
 
 
@@ -133,14 +142,31 @@ public class CheckstyleProjectService
     }
 
 
-    public void activateCheckstyleVersion(@Nullable final String pVersion) {
+    public void activateCheckstyleVersion(@Nullable final String pVersion, @Nullable final List<String>
+            pThirdPartyJars) {
         final String version = isSupportedVersion(pVersion) ? pVersion : getDefaultVersion();
         synchronized (project) {
             checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>()
             {
                 @Override
                 public CheckstyleClassLoader call() {
-                    return new CheckstyleClassLoader(project, version);
+                    final List<URL> thirdPartyClassPath = toListOfUrls(pThirdPartyJars);
+                    return new CheckstyleClassLoader(project, version, thirdPartyClassPath);
+                }
+
+                @NotNull
+                private List<URL> toListOfUrls(@Nullable final List<String> pThirdPartyJars) {
+                    List<URL> result = new ArrayList<>();
+                    if (pThirdPartyJars != null) {
+                        for (final String absolutePath : pThirdPartyJars) {
+                            try {
+                                result.add(new File(absolutePath).toURI().toURL());
+                            } catch (MalformedURLException e) {
+                                LOG.warn("Skipping malformed third party class path entry: " + absolutePath, e);
+                            }
+                        }
+                    }
+                    return result;
                 }
             };
             checkstyleClassLoader = null;

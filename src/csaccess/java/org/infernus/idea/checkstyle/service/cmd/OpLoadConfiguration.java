@@ -29,6 +29,7 @@ import org.infernus.idea.checkstyle.service.SimpleResolver;
 import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.InputSource;
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -78,7 +79,7 @@ public class OpLoadConfiguration
         module = null;
     }
 
-    public OpLoadConfiguration(final ConfigurationLocation pInput1, final Map<String, String> pVariables, final
+    public OpLoadConfiguration(final ConfigurationLocation pInput1, final Map<String, String> pVariables, @Nullable final
     Module pModule) {
         input1 = pInput1;
         input2 = null;

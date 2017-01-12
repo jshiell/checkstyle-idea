@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -19,6 +20,7 @@ import com.intellij.util.lang.UrlClassLoader;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -38,14 +40,16 @@ public class CheckstyleClassLoader
     private final Project project;
 
 
-    public CheckstyleClassLoader(@NotNull final Project pProject, @NotNull final String pCheckstyleVersion) {
+    public CheckstyleClassLoader(@NotNull final Project pProject, @NotNull final String pCheckstyleVersion, @Nullable
+    final List<URL> pThirdPartyClassPath) {
         project = pProject;
         final Properties classPathInfos = loadClassPathInfos();
         final String cpProp = classPathInfos.getProperty(pCheckstyleVersion);
         if (Strings.isBlank(cpProp)) {
             throw new CheckStylePluginException("Unsupported Checkstyle version: " + pCheckstyleVersion);
         }
-        classLoader = buildClassLoader(cpProp);
+        List<URL> thirdPartyClassPath = pThirdPartyClassPath != null ? pThirdPartyClassPath : Collections.emptyList();
+        classLoader = buildClassLoader(cpProp, thirdPartyClassPath);
     }
 
 
@@ -62,7 +66,8 @@ public class CheckstyleClassLoader
 
 
     @NotNull
-    private ClassLoader buildClassLoader(final String pClassPathFromProps) {
+    private ClassLoader buildClassLoader(@NotNull final String pClassPathFromProps, @NotNull final List<URL>
+            pThirdPartyClassPath) {
         final String basePath = getBasePath();
         final File classesDir4UnitTesting = new File(basePath, "classes/csaccess");
         final boolean unitTesting = classesDir4UnitTesting.exists();
@@ -83,6 +88,7 @@ public class CheckstyleClassLoader
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("internal error", e);
         }
+        urls.addAll(pThirdPartyClassPath);
         // The plugin classloader is the new classloader's parent classloader.
         return new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
     }

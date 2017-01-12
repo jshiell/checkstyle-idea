@@ -314,7 +314,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final LocationDialogue dialogue = new LocationDialogue(project, getThirdPartyClasspath());
+            final LocationDialogue dialogue = new LocationDialogue(project);
 
             dialogue.setVisible(true);
 

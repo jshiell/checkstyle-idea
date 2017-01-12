@@ -1,5 +1,22 @@
 package org.infernus.idea.checkstyle.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
@@ -11,13 +28,6 @@ import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Allows selection of the location of the CheckStyle file.
@@ -64,27 +74,18 @@ public class LocationDialogue extends JDialog {
     private final ErrorPanel errorPanel;
     private final CompletePanel completePanel;
 
-    private final List<String> thirdPartyClasspath;
-
     private JButton commitButton;
     private JButton previousButton;
     private Step currentStep = Step.SELECT;
     private boolean committed = true;
     private ConfigurationLocation configurationLocation;
 
-    /**
-     * Create a dialogue.
-     *
-     * @param project             the current project.
-     * @param thirdPartyClasspath the third-party classpath.
-     */
-    public LocationDialogue(@NotNull final Project project,
-                            final List<String> thirdPartyClasspath) {
+
+    public LocationDialogue(@NotNull final Project project) {
         super(WindowManager.getInstance().getFrame(project));
 
         this.project = project;
 
-        this.thirdPartyClasspath = thirdPartyClasspath;
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project);
         this.errorPanel = new ErrorPanel();
@@ -201,7 +202,7 @@ public class LocationDialogue extends JDialog {
         final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
             location.reset();
-            new CheckerFactory(project, cache).verify(location, thirdPartyClasspath);
+            new CheckerFactory(project, cache).verify(location);
             return Step.COMPLETE;
 
         } catch (Exception e) {

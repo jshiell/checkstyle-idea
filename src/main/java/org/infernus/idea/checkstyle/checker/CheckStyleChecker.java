@@ -14,17 +14,20 @@ import org.jetbrains.annotations.NotNull;
 public class CheckStyleChecker
 {
     /** checker with config */
-    private final CheckstyleInternalObject checkstyleInternalObjects;
+    private final CheckstyleInternalObject checkerWithConfig;
 
     private final int tabWidth;
     private final Optional<String> baseDir;
 
+    private final ClassLoader loaderOfCheckedCode;
 
-    public CheckStyleChecker(@NotNull final CheckstyleInternalObject pCheckstyleInternalObjects, final int tabWidth,
-                             @NotNull final Optional<String> baseDir) {
-        this.checkstyleInternalObjects = pCheckstyleInternalObjects;
+
+    public CheckStyleChecker(@NotNull final CheckstyleInternalObject pCheckerWithConfig, final int tabWidth, @NotNull
+    final Optional<String> baseDir, final ClassLoader pLoaderOfCheckedCode) {
+        this.checkerWithConfig = pCheckerWithConfig;
         this.tabWidth = tabWidth;
         this.baseDir = baseDir;
+        this.loaderOfCheckedCode = pLoaderOfCheckedCode;
     }
 
     @NotNull
@@ -32,18 +35,23 @@ public class CheckStyleChecker
     CheckStyleConfiguration pluginConfig) {
 
         final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(pluginConfig.getProject());
-        return csService.getCheckstyleInstance().scan(checkstyleInternalObjects, scannableFiles, pluginConfig
+        return csService.getCheckstyleInstance().scan(checkerWithConfig, scannableFiles, pluginConfig
                 .isSuppressingErrors(), tabWidth, baseDir);
     }
 
 
     public void destroy(@NotNull final Project pProject) {
         final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(pProject);
-        csService.getCheckstyleInstance().destroyChecker(checkstyleInternalObjects);
+        csService.getCheckstyleInstance().destroyChecker(checkerWithConfig);
+    }
+
+
+    public ClassLoader getLoaderOfCheckedCode() {
+        return loaderOfCheckedCode;
     }
 
 
     public CheckstyleInternalObject getCheckerWithConfig4UnitTest() {
-        return checkstyleInternalObjects;
+        return checkerWithConfig;
     }
 }
