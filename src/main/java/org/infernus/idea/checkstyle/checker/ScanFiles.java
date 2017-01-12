@@ -14,6 +14,7 @@ import com.intellij.openapi.application.RuntimeInterruptedException;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -194,16 +195,17 @@ public class ScanFiles
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
-            return checkerFactory(module).checker(module, configurationLocation).map(checker -> checker.scan
+            return checkerFactory(module.getProject()).checker(module, configurationLocation).map(checker -> checker.scan
                     (scannableFiles, plugin.getConfiguration())).orElseGet(Collections::emptyMap);
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 
-    private CheckerFactory checkerFactory(final Module project) {
-        return ServiceManager.getService(project.getProject(), CheckerFactory.class);
+    private CheckerFactory checkerFactory(final Project project) {
+        return ServiceManager.getService(project, CheckerFactory.class);
     }
+
 
     private class FindChildFiles
             extends VirtualFileVisitor

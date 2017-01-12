@@ -1,54 +1,59 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.util.Map;
-
 import com.intellij.openapi.module.Module;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 
 class CheckerFactoryWorker
         extends Thread
 {
-    // TODO Why use an array here?
-    private final Object[] threadReturn = new Object[1];
+    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private final ConfigurationLocation location;
     private final Map<String, String> properties;
     private final Module module;
+    private ClassLoader loaderOfCheckedCode;
+
+    private Object threadReturn = null;
 
 
-    // TODO The ClassLoader argument should be superfluous, as we use a custom classloader from here on, anyway.
-    CheckerFactoryWorker(@NotNull final ConfigurationLocation location, @NotNull Map<String, String> pProperties,
-                         @Nullable final Module pModule, @Nullable final ClassLoader contextClassLoader) {
+    CheckerFactoryWorker(@NotNull final ConfigurationLocation location, @Nullable Map<String, String> pProperties,
+                         @Nullable final Module pModule, @NotNull final ClassLoader pLoaderOfCheckedCode) {
         this.location = location;
-        properties = pProperties;
+        this.properties = pProperties;
         this.module = pModule;
-
-        if (contextClassLoader != null) {
-            setContextClassLoader(contextClassLoader);
-        } else {
-            setContextClassLoader(getClass().getClassLoader());
+        if (pLoaderOfCheckedCode == null) {
+            throw new IllegalArgumentException("internal error - class loader for loading checked code is unavailable");
         }
-    }
-
-
-    public Object getResult() {
-        return threadReturn[0];
+        this.loaderOfCheckedCode = pLoaderOfCheckedCode;
     }
 
 
     @Override
     public void run() {
-
         super.run();
+
+        setContextClassLoader(loaderOfCheckedCode);
+
         final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(module.getProject());
         try {
-            threadReturn[0] = csService.getCheckstyleInstance().createChecker(module, location, properties);
+            final CheckStyleChecker checker = csService.getCheckstyleInstance().createChecker(module, location,
+                    properties, loaderOfCheckedCode);
+            threadReturn = new CachedChecker(module.getProject(), checker);
         } catch (RuntimeException e) {
-            threadReturn[0] = e;
+            threadReturn = e;
         }
+    }
+
+
+    public Object getResult() {
+        return threadReturn;
     }
 }

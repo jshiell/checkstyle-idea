@@ -129,7 +129,8 @@ public class ServiceLayerBasicTest
                 Optional.of(new File(getClass().getResource(pConfigXmlFile).toURI()).getParent()));
 
         final CheckstyleActions csInstance = sCheckstyleProjectService.getCheckstyleInstance();
-        return csInstance.createChecker(module, configLoc, Collections.emptyMap(), configurations);
+        return csInstance.createChecker(module, configLoc, Collections.emptyMap(), configurations, getClass()
+                .getClassLoader());
     }
 
 

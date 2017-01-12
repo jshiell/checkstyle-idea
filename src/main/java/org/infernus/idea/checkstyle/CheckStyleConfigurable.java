@@ -11,7 +11,6 @@ import com.intellij.openapi.project.Project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.Notifications;
@@ -68,7 +67,6 @@ public class CheckStyleConfigurable
                 LOG.trace("isModified() - exit - result=" + result);
             }
             return result;
-
         } catch (IOException e) {
             LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
             Notifications.showError(project, CheckStyleBundle.message("checkstyle.file-not-found"));
@@ -112,20 +110,13 @@ public class CheckStyleConfigurable
         final List<String> thirdPartyClasspath = configPanel.getThirdPartyClasspath();
         configuration.setThirdPartyClassPath(thirdPartyClasspath);
 
-        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-        csService.activateCheckstyleVersion(configPanel.getCheckstyleVersion());
-
+        // Invalidate cache *before* activating the new Checkstyle version
         getCheckerFactoryCache().invalidate();
-        resetModuleClassBuilder();
-        LOG.trace("apply() - exit");
-    }
 
-    private void resetModuleClassBuilder() {
-        final ModuleClassPathBuilder moduleClassPathBuilder = ServiceManager.getService(project,
-                ModuleClassPathBuilder.class);
-        if (moduleClassPathBuilder != null) {
-            moduleClassPathBuilder.reset();
-        }
+        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
+        csService.activateCheckstyleVersion(configPanel.getCheckstyleVersion(), thirdPartyClasspath);
+
+        LOG.trace("apply() - exit");
     }
 
     CheckStyleConfiguration getConfiguration() {

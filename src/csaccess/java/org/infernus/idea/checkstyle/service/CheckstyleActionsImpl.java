@@ -43,16 +43,17 @@ public class CheckstyleActionsImpl
 
 
     @Override
-    public CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation
-            pLocation, final Map<String, String> pProperties) {
-        return createChecker(pModule, pLocation, pProperties, null);
+    public CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation
+            pLocation, final Map<String, String> pProperties, @NotNull final ClassLoader pLoaderOfCheckedCode) {
+        return createChecker(pModule, pLocation, pProperties, null, pLoaderOfCheckedCode);
     }
 
     @Override
-    public CheckStyleChecker createChecker(@NotNull final Module pModule, @NotNull final ConfigurationLocation
+    public CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation
             pLocation, final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider
-            pConfigurations) {
-        return executeCommand(new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations));
+            pConfigurations, @NotNull final ClassLoader pLoaderOfCheckedCode) {
+        return executeCommand(
+                new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations, pLoaderOfCheckedCode));
     }
 
     @Override
@@ -84,7 +85,7 @@ public class CheckstyleActionsImpl
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile, @Nullable
-    final Map<String, String> pVariables, @NotNull final Module pModule) {
+    final Map<String, String> pVariables, @Nullable final Module pModule) {
         return executeCommand(new OpLoadConfiguration(pInputFile, pVariables, pModule));
     }
 

@@ -46,7 +46,7 @@ public class VersionMixExceptionTest
     protected void setUp() throws Exception {
         super.setUp();
         csService = new CheckstyleProjectService(PROJECT);
-        csService.activateCheckstyleVersion(BASE_VERSION);
+        csService.activateCheckstyleVersion(BASE_VERSION, null);
         CheckstyleProjectService.activateMock4UnitTesting(csService);
     }
 
@@ -76,7 +76,7 @@ public class VersionMixExceptionTest
         runChecker(checker);
         try {
             Assert.assertNotEquals(OTHER_VERSION, BASE_VERSION);
-            csService.activateCheckstyleVersion(OTHER_VERSION);    // changes class loader, cause of error
+            csService.activateCheckstyleVersion(OTHER_VERSION, null);    // changes class loader, cause of error
             runChecker(checker);
             Assert.fail("expected exception was not thrown");
         } catch (CheckstyleVersionMixException e) {
@@ -86,7 +86,7 @@ public class VersionMixExceptionTest
                     internalClassName));
             // Yes! Error, even though both class names are identical (but class loaders differ).
         } finally {
-            csService.activateCheckstyleVersion(BASE_VERSION);
+            csService.activateCheckstyleVersion(BASE_VERSION, null);
         }
     }
 
@@ -106,12 +106,12 @@ public class VersionMixExceptionTest
 
         try {
             Assert.assertNotEquals(OTHER_VERSION, BASE_VERSION);
-            csService.activateCheckstyleVersion(OTHER_VERSION);
+            csService.activateCheckstyleVersion(OTHER_VERSION, null);
 
             checker = createChecker(module);
             runChecker(checker);
         } finally {
-            csService.activateCheckstyleVersion(BASE_VERSION);
+            csService.activateCheckstyleVersion(BASE_VERSION, null);
         }
     }
 
@@ -125,7 +125,7 @@ public class VersionMixExceptionTest
                 Optional.of(new File(getClass().getResource(CONFIG_FILE).toURI()).getParent()));
 
         final CheckStyleChecker checker = csService.getCheckstyleInstance().createChecker(pModule, configLoc,
-                Collections.emptyMap(), configurations);
+                Collections.emptyMap(), configurations, getClass().getClassLoader());
         return checker;
     }
 

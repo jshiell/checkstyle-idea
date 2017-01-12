@@ -16,10 +16,12 @@ class CheckerFactoryCacheKey
 
     private final ConfigurationLocation location;
 
+    // We can disregard Checkstyle version and third party jars as elements of the cache key, because the cache
+    // must be invalidated when any of these properties change anyway.
 
-    CheckerFactoryCacheKey(@NotNull final ConfigurationLocation location, @Nullable final Module module, @Nullable
-    final String pProjectName) {
-        this.projectName = pProjectName != null ? pProjectName : "noProject";
+
+    CheckerFactoryCacheKey(@NotNull final ConfigurationLocation location, @Nullable final Module module) {
+        this.projectName = module != null ? module.getProject().getName() : "noProject";
         this.moduleName = module != null ? module.getName() : "noModule";
         this.location = location;
     }
