@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;

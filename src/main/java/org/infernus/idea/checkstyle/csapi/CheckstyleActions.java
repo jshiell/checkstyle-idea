@@ -1,4 +1,4 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.csapi;
 
 
 import java.util.List;
@@ -11,9 +11,6 @@ import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
-import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
