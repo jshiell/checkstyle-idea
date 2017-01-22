@@ -1,13 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.util.lang.UrlClassLoader;
-import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.util.Strings;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +9,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.util.lang.UrlClassLoader;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.util.Strings;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -110,23 +115,50 @@ public class CheckstyleClassLoader {
     }
 
 
+    /**
+     * Determine the base path of the plugin. When running in IntelliJ, this is something like
+     * {@code C:/Users/jdoe/.IdeaIC2016.3/config/plugins/CheckStyle-IDEA} (on Windows). When running in a unit test,
+     * it is this project's build directory, for example {@code D:/Documents/Projects/checkstyle-idea/build} (again
+     * on Windows).
+     *
+     * @return the base path, as absolute path
+     */
     @NotNull
     private String getBasePath() {
         String result = null;
 
-        for (final URL url : getUrls(getClass().getClassLoader())) {
-            String path = url.getPath();
-            Matcher matcher = CLASSES_URL.matcher(path);
-            if (matcher.find()) {
-                result = matcher.group(1);
-                break;
+        try {
+            // plugin name must be identical to the String set in build.gradle at intellij.pluginName
+            File pluginDir = new File(PathManager.getPluginsPath(), "CheckStyle-IDEA");
+            if (pluginDir.exists()) {
+                result = pluginDir.getAbsolutePath();
+            }
+        } catch (RuntimeException e) {
+            // ok, if this fails, we are in a unit test situation where PathManager is not initialized, which is fine
+            result = null;
+        }
+
+        // If we could not get the base path from the path manager, deduce it from the current class path:
+        if (result == null) {
+            for (final URL url : getUrls(getClass().getClassLoader())) {
+                String path = url.getPath();
+                Matcher matcher = CLASSES_URL.matcher(path);
+                if (matcher.find()) {
+                    result = matcher.group(1);
+                    break;
+                }
+            }
+            if (result != null) {
+                result = urlDecode(result);
             }
         }
+
         if (result == null) {
             throw new CheckStylePluginException("Could not determine plugin directory");
         }
-        return urlDecode(result);
+        return result;
     }
+
 
     @NotNull
     private String urlDecode(final String urlEncodedString) {
