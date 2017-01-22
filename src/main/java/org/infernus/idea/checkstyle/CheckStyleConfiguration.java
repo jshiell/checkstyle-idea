@@ -97,7 +97,7 @@ public class CheckStyleConfiguration
 
     @NotNull
     public String getPresentableName() {
-        return "CheckStyle-IDEA Project Settings";
+        return CheckStylePlugin.ID_PLUGIN + " Project Settings";
     }
 
     public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
