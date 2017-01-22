@@ -1,20 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -23,26 +8,40 @@ import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * Loads Checkstyle classes from a given Checkstyle version.
  */
-public class CheckstyleClassLoader
-{
+public class CheckstyleClassLoader {
     private static final String PROP_FILE = "checkstyle-classpaths.properties";
 
     private static final String CSACTIONS_CLASS = "org.infernus.idea.checkstyle.service.CheckstyleActionsImpl";
 
-    /** <img src="doc-files/CheckstyleClassLoader-1.png"/> */
+    /**
+     * <img src="doc-files/CheckstyleClassLoader-1.png"/>
+     */
     private static final Pattern CLASSES_URL = Pattern.compile("^(.*?)[/\\\\]classes(?:[/\\\\]main)?[/\\\\]?$");
 
     private final ClassLoader classLoader;
 
     private final Project project;
 
-
-    public CheckstyleClassLoader(@NotNull final Project pProject, @NotNull final String pCheckstyleVersion, @Nullable
-    final List<URL> pThirdPartyClassPath) {
+    public CheckstyleClassLoader(@NotNull final Project pProject,
+                                 @NotNull final String pCheckstyleVersion,
+                                 @Nullable final List<URL> pThirdPartyClassPath) {
         project = pProject;
         final Properties classPathInfos = loadClassPathInfos();
         final String cpProp = classPathInfos.getProperty(pCheckstyleVersion);
@@ -55,7 +54,7 @@ public class CheckstyleClassLoader
 
 
     @NotNull
-    public static Properties loadClassPathInfos() {
+    private static Properties loadClassPathInfos() {
         final Properties result = new Properties();
         try (InputStream is = CheckstyleClassLoader.class.getClassLoader().getResourceAsStream(PROP_FILE)) {
             result.load(is);
@@ -90,6 +89,7 @@ public class CheckstyleClassLoader
             throw new CheckStylePluginException("internal error", e);
         }
         urls.addAll(pThirdPartyClassPath);
+
         // The plugin classloader is the new classloader's parent classloader.
         return new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
     }
@@ -97,14 +97,14 @@ public class CheckstyleClassLoader
 
     @NotNull
     private List<URL> getUrls(@NotNull final ClassLoader pClassLoader) {
-        List<URL> result = null;
+        List<URL> result;
         if (pClassLoader instanceof UrlClassLoader) {          // happens normally
             result = ((UrlClassLoader) pClassLoader).getUrls();
         } else if (pClassLoader instanceof URLClassLoader) {   // happens in test cases
             result = Arrays.asList(((URLClassLoader) pClassLoader).getURLs());
         } else {
-            throw new CheckStylePluginException("incompatible class loader: " + (pClassLoader != null ? pClassLoader
-                    .getClass().getName() : "null"));
+            throw new CheckStylePluginException("incompatible class loader: "
+                    + (pClassLoader != null ? pClassLoader.getClass().getName() : "null"));
         }
         return result;
     }
@@ -125,12 +125,21 @@ public class CheckstyleClassLoader
         if (result == null) {
             throw new CheckStylePluginException("Could not determine plugin directory");
         }
-        return result;
+        return urlDecode(result);
+    }
+
+    @NotNull
+    private String urlDecode(final String urlEncodedString) {
+        try {
+            return URLDecoder.decode(urlEncodedString, "UTF-8");
+        } catch (UnsupportedEncodingException ignored) {
+            return urlEncodedString;
+        }
     }
 
 
     @NotNull
-    public CheckstyleActions loadCheckstyleImpl() {
+    CheckstyleActions loadCheckstyleImpl() {
         try {
             Constructor<?> constructor = classLoader.loadClass(CSACTIONS_CLASS).getConstructor(Project.class);
             return (CheckstyleActions) constructor.newInstance(project);
