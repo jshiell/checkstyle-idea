@@ -78,18 +78,17 @@ offer instructions on setting them up with this plugin.
 
 Note that the plugin has been entirely developed on OS X - while it should be fine on Linux, I've no idea what result you'd get with Windows. YMMV.
 
-The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x.
+The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x. Make sure your `JAVA_HOME` environment variable is set correctly before invoking Gradle.
 
     git clone https://github.com/jshiell/checkstyle-idea.git checkstyle-idea
     cd checkstyle-idea
 
 You can then easily build via Gradle:
 
-    ./gradlew clean build buildPlugin
+    ./gradlew clean build
 
 To run it in a sandboxed IDEA, run:
 
-    ./gradlew prepareSandbox # only needed once
     ./gradlew runIdea
 
 To debug the plugin, import the plugin into IDEA as a Gradle project, and then use the `runIdea` Gradle target in debug mode. 
