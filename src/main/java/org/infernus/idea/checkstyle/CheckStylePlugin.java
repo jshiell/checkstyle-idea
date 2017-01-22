@@ -1,5 +1,13 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
@@ -11,16 +19,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.infernus.idea.checkstyle.checker.*;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
+import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.checker.ScanFiles;
+import org.infernus.idea.checkstyle.checker.ScannerListener;
+import org.infernus.idea.checkstyle.checker.UiFeedbackScannerListener;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.Future;
-
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
@@ -31,7 +39,9 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 public final class CheckStylePlugin
         implements ProjectComponent
 {
+    /** The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
+
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);

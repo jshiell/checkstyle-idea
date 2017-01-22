@@ -128,8 +128,7 @@ public class CheckstyleClassLoader {
         String result = null;
 
         try {
-            // plugin name must be identical to the String set in build.gradle at intellij.pluginName
-            File pluginDir = new File(PathManager.getPluginsPath(), "CheckStyle-IDEA");
+            File pluginDir = new File(PathManager.getPluginsPath(), CheckStylePlugin.ID_PLUGIN);
             if (pluginDir.exists()) {
                 result = pluginDir.getAbsolutePath();
             }
