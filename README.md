@@ -85,14 +85,14 @@ The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8
 
 You can then easily build via Gradle:
 
-    ./gradlew clean buildPlugin
+    ./gradlew clean build buildPlugin
 
 To run it in a sandboxed IDEA, run:
 
     ./gradlew prepareSandbox # only needed once
     ./gradlew runIdea
 
-You can also build (and more importantly work on) the plugin via IDEA. There is a project file supplied, however it is targetted at OS X so some paths may be incorrect. You'll also need to have set up an *IntelliJ Platform Plugin SDK* if you haven't before - you can do this in *Project Structure*, under *SDKs*, just as you would for a JVM. 
+To debug the plugin, import the plugin into IDEA as a Gradle project, and then use the `runIdea` Gradle target in debug mode. 
 
 ## Frequently Asked Questions
 
