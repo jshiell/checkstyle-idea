@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.0.0** New: You can now choose the version of Checkstyle to use. All credit to Thomas Jensen (@tsjensen) (#281).
 * **4.35.0** New: Updated to CheckStyle 7.4.
 * **4.35.0** Fixed: Improved error feedback when properties are missing from rules files (#275).
 * **4.34.0** New: Updated to CheckStyle 7.3.

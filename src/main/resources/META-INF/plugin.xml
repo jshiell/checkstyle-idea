@@ -7,11 +7,11 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle 7.4 from within IDEA.
+    of Java files with CheckStyle from within IDEA.
 </p>
         ]]>
     </description>
-    <version>4.35.0</version>
+    <version>5.0.0</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.0.0: New: You can now choose the version of Checkstyle to use. All credit to Thomas Jensen (@tsjensen) (#281).</li>
     <li>4.35.0: New: Updated to CheckStyle 7.4.</li>
     <li>4.35.0: Fixed: Improved error feedback when properties are missing from rules files (#275).</li>
     <li>4.34.0: New: Updated to CheckStyle 7.3.</li>
