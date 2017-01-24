@@ -95,19 +95,18 @@ public class ConfigurationLocationFactory {
         }
 
         final int typeSplitIndex = stringRepresentation.indexOf(':');
-        if (typeSplitIndex <= 0 || typeSplitIndex >= stringRepresentation.length() - 1) {
+        if (indexIsOutOfBounds(typeSplitIndex, stringRepresentation)) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
-
         final String typeString = stringRepresentation.substring(0, typeSplitIndex);
 
-
         final int descriptionSplitIndex = stringRepresentation.lastIndexOf(':');
-        if (descriptionSplitIndex <= 0) {
+        if (typeSplitIndex == descriptionSplitIndex
+                || indexIsOutOfBounds(descriptionSplitIndex, stringRepresentation)) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
-
         final String location = stringRepresentation.substring(typeSplitIndex + 1, descriptionSplitIndex);
+
         String description = "";
         if (descriptionSplitIndex < (stringRepresentation.length() - 1)) {
             description = stringRepresentation.substring(descriptionSplitIndex + 1);
@@ -116,5 +115,9 @@ public class ConfigurationLocationFactory {
         final ConfigurationType type = ConfigurationType.parse(typeString);
 
         return create(project, type, location, description);
+    }
+
+    private boolean indexIsOutOfBounds(final int index, final String stringRepresentation) {
+        return index <= 0 || index >= stringRepresentation.length() - 1;
     }
 }
