@@ -27,8 +27,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 /**
  * Creates Checkers. Registered as projectService in {@code plugin.xml}.
  */
-public class CheckerFactory
-{
+public class CheckerFactory {
     private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
 
     private final Project project;
@@ -46,8 +45,8 @@ public class CheckerFactory
     }
 
 
-    public Optional<CheckStyleChecker> checker(@Nullable final Module module, @NotNull final ConfigurationLocation
-            location) {
+    public Optional<CheckStyleChecker> checker(@Nullable final Module module,
+                                               @NotNull final ConfigurationLocation location) {
         LOG.debug("Getting CheckStyle checker with location " + location);
 
         if (location == null) {
@@ -66,8 +65,8 @@ public class CheckerFactory
     }
 
 
-    private CachedChecker getOrCreateCachedChecker(@NotNull final ConfigurationLocation location, @Nullable final
-    Module module) throws IOException {
+    private CachedChecker getOrCreateCachedChecker(@NotNull final ConfigurationLocation location,
+                                                   @Nullable final Module module) throws IOException {
         final Optional<CachedChecker> cachedChecker = cache.get(location, module);
         if (cachedChecker.isPresent()) {
             return cachedChecker.get();
@@ -94,8 +93,9 @@ public class CheckerFactory
         addIfAbsent("project_loc", project.getBasePath(), properties);
         addIfAbsent("workspace_loc", project.getBasePath(), properties);
 
-        final String locationBaseDir = Optional.ofNullable(location.getBaseDir()).map(File::toString).orElseGet
-                (project::getBasePath);
+        final String locationBaseDir = Optional.ofNullable(location.getBaseDir())
+                .map(File::toString)
+                .orElseGet(project::getBasePath);
         addIfAbsent("config_loc", locationBaseDir, properties);
         addIfAbsent("samedir", locationBaseDir, properties);
 
@@ -123,7 +123,8 @@ public class CheckerFactory
         return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
 
-    private CachedChecker createChecker(@NotNull final ConfigurationLocation location, @Nullable final Module module,
+    private CachedChecker createChecker(@NotNull final ConfigurationLocation location,
+                                        @Nullable final Module module,
                                         final ListPropertyResolver resolver) {
 
         final ClassLoader loaderOfCheckedCode = moduleClassPathBuilder().build(module);
@@ -150,10 +151,12 @@ public class CheckerFactory
     }
 
 
-    private Object executeWorker(@NotNull final ConfigurationLocation location, @Nullable final Module module, final
-    ListPropertyResolver resolver, @NotNull final ClassLoader pLoaderOfCheckedCode) {
-        final CheckerFactoryWorker worker = new CheckerFactoryWorker(location, resolver.getPropertyNamesToValues(),
-                module, pLoaderOfCheckedCode);
+    private Object executeWorker(@NotNull final ConfigurationLocation location,
+                                 @Nullable final Module module,
+                                 final ListPropertyResolver resolver,
+                                 @NotNull final ClassLoader loaderOfCheckedCode) {
+        final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
+                resolver.getPropertyNamesToValues(), project, module, loaderOfCheckedCode);
         worker.start();
 
         while (worker.isAlive()) {
@@ -186,8 +189,8 @@ public class CheckerFactory
     CheckstyleToolException checkstyleException) {
         if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
             return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
-        } else if (checkstyleException.getMessage().contains("unable to parse configuration stream") &&
-                checkstyleException.getCause() != null) {
+        } else if (checkstyleException.getMessage().contains("unable to parse configuration stream")
+                && checkstyleException.getCause() != null) {
             return blacklistAndShowMessage(location, module, checkstyleException.getCause().getMessage());
         }
 
