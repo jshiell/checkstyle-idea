@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 
 
 public class CheckStyleAuditListener
-        implements AuditListener
-{
+        implements AuditListener {
+
     private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
 
     private final boolean suppressErrors;
@@ -36,9 +36,11 @@ public class CheckStyleAuditListener
     private final List<Issue> errors = Collections.synchronizedList(new ArrayList<>());
     private Map<PsiFile, List<Problem>> problems = Collections.emptyMap();
 
-    public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles, final boolean
-            suppressErrors, final int tabWidth, @NotNull final Optional<String> baseDir, @NotNull final List<Check>
-            checks) {
+    public CheckStyleAuditListener(@NotNull final Map<String, PsiFile> fileNamesToPsiFiles,
+                                   final boolean suppressErrors,
+                                   final int tabWidth,
+                                   @NotNull final Optional<String> baseDir,
+                                   @NotNull final List<Check> checks) {
         this.fileNamesToPsiFiles = new HashMap<>(fileNamesToPsiFiles);
         this.checks = checks;
         this.suppressErrors = suppressErrors;
@@ -97,21 +99,21 @@ public class CheckStyleAuditListener
     }
 
 
-    private Issue toIssue(final AuditEvent pAuditEvent) {
-        String msg = pAuditEvent.getMessage();
-        if (pAuditEvent.getLocalizedMessage() != null) {
-            msg = pAuditEvent.getLocalizedMessage().getMessage();
+    private Issue toIssue(final AuditEvent auditEvent) {
+        String msg = auditEvent.getMessage();
+        if (auditEvent.getLocalizedMessage() != null) {
+            msg = auditEvent.getLocalizedMessage().getMessage();
         }
-        final SeverityLevel level = readSeverityLevel(pAuditEvent.getSeverityLevel());
-        return new Issue(pAuditEvent.getFileName(), pAuditEvent.getLine(), pAuditEvent.getColumn(), msg, level,
-                pAuditEvent.getSourceName());
+        final SeverityLevel level = readSeverityLevel(auditEvent.getSeverityLevel());
+        return new Issue(auditEvent.getFileName(), auditEvent.getLine(), auditEvent.getColumn(), msg, level,
+                auditEvent.getSourceName());
     }
 
 
-    private SeverityLevel readSeverityLevel(final com.puppycrawl.tools.checkstyle.api.SeverityLevel pSeverityLevel) {
+    private SeverityLevel readSeverityLevel(final com.puppycrawl.tools.checkstyle.api.SeverityLevel severityLevel) {
         SeverityLevel result = null;
-        if (pSeverityLevel != null) {
-            switch (pSeverityLevel) {
+        if (severityLevel != null) {
+            switch (severityLevel) {
                 case ERROR:
                     result = SeverityLevel.Error;
                     break;

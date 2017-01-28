@@ -1,9 +1,5 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -21,82 +17,87 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.service.cmd.CheckstyleCommand;
-import org.infernus.idea.checkstyle.service.cmd.OpCreateChecker;
-import org.infernus.idea.checkstyle.service.cmd.OpDestroyChecker;
-import org.infernus.idea.checkstyle.service.cmd.OpLoadConfiguration;
-import org.infernus.idea.checkstyle.service.cmd.OpPeruseConfiguration;
-import org.infernus.idea.checkstyle.service.cmd.OpScan;
+import org.infernus.idea.checkstyle.service.cmd.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class CheckstyleActionsImpl
-        implements CheckstyleActions
-{
+
+public class CheckstyleActionsImpl implements CheckstyleActions {
+
     private final Project project;
-
 
     public CheckstyleActionsImpl(@NotNull final Project pProject) {
         project = pProject;
     }
 
-
     @Override
-    public CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation
-            pLocation, final Map<String, String> pProperties, @NotNull final ClassLoader pLoaderOfCheckedCode) {
-        return createChecker(pModule, pLocation, pProperties, null, pLoaderOfCheckedCode);
+    public CheckStyleChecker createChecker(@Nullable final Module module,
+                                           @NotNull final ConfigurationLocation location,
+                                           final Map<String, String> properties,
+                                           @NotNull final ClassLoader loaderOfCheckedCode) {
+        return createChecker(module, location, properties, null, loaderOfCheckedCode);
     }
 
     @Override
-    public CheckStyleChecker createChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation
-            pLocation, final Map<String, String> pProperties, @Nullable final TabWidthAndBaseDirProvider
-            pConfigurations, @NotNull final ClassLoader pLoaderOfCheckedCode) {
+    public CheckStyleChecker createChecker(@Nullable final Module module,
+                                           @NotNull final ConfigurationLocation location,
+                                           final Map<String, String> properties,
+                                           @Nullable final TabWidthAndBaseDirProvider configurations,
+                                           @NotNull final ClassLoader loaderOfCheckedCode) {
         return executeCommand(
-                new OpCreateChecker(pModule, pLocation, pProperties, pConfigurations, pLoaderOfCheckedCode));
+                new OpCreateChecker(module, location, properties, configurations, loaderOfCheckedCode));
     }
 
     @Override
-    public void destroyChecker(@NotNull final CheckstyleInternalObject pCheckerWithConfig) {
-        executeCommand(new OpDestroyChecker(pCheckerWithConfig));
-    }
-
-
-    @Override
-    public Map<PsiFile, List<Problem>> scan(@NotNull final CheckstyleInternalObject pCheckerWithConfig, @NotNull
-    final List<ScannableFile> pScannableFiles, final boolean pIsSuppressingErrors, final int pTabWidth, final
-    Optional<String> pBaseDir) {
-        return executeCommand(new OpScan(pCheckerWithConfig, pScannableFiles, pIsSuppressingErrors, pTabWidth,
-                pBaseDir));
+    public void destroyChecker(@NotNull final CheckstyleInternalObject checkerWithConfig) {
+        executeCommand(new OpDestroyChecker(checkerWithConfig));
     }
 
 
     @Override
-    public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile, final boolean
-            pIgnoreVariables, @Nullable final Map<String, String> pVariables) {
-        OpLoadConfiguration cmd = null;
-        if (pIgnoreVariables) {
-            cmd = new OpLoadConfiguration(pInputFile);
+    public Map<PsiFile, List<Problem>> scan(@NotNull final CheckstyleInternalObject checkerWithConfig,
+                                            @NotNull final List<ScannableFile> scannableFiles,
+                                            final boolean isSuppressingErrors,
+                                            final int tabWidth,
+                                            final Optional<String> baseDir) {
+        return executeCommand(new OpScan(checkerWithConfig, scannableFiles, isSuppressingErrors, tabWidth,
+                baseDir));
+    }
+
+
+    @Override
+    public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
+                                                      final boolean ignoreVariables,
+                                                      @Nullable final Map<String, String> variables) {
+        OpLoadConfiguration cmd;
+        if (ignoreVariables) {
+            cmd = new OpLoadConfiguration(inputFile);
         } else {
-            cmd = new OpLoadConfiguration(pInputFile, pVariables);
+            cmd = new OpLoadConfiguration(inputFile, variables);
         }
         return executeCommand(cmd);
     }
 
     @Override
-    public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation pInputFile, @Nullable
-    final Map<String, String> pVariables, @Nullable final Module pModule) {
-        return executeCommand(new OpLoadConfiguration(pInputFile, pVariables, pModule));
+    public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
+                                                      @Nullable final Map<String, String> variables,
+                                                      @Nullable final Module module) {
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, module));
     }
 
     @Override
-    public CheckstyleInternalObject loadConfiguration(@NotNull final VirtualFile pInputFile, final boolean
-            pIgnoreVariables, @Nullable final Map<String, String> pVariables) {
-        OpLoadConfiguration cmd = null;
-        if (pIgnoreVariables) {
-            cmd = new OpLoadConfiguration(pInputFile);
+    public CheckstyleInternalObject loadConfiguration(@NotNull final VirtualFile inputFile,
+                                                      final boolean ignoreVariables,
+                                                      @Nullable final Map<String, String> variables) {
+        OpLoadConfiguration cmd;
+        if (ignoreVariables) {
+            cmd = new OpLoadConfiguration(inputFile);
         } else {
-            cmd = new OpLoadConfiguration(pInputFile, pVariables);
+            cmd = new OpLoadConfiguration(inputFile, variables);
         }
         return executeCommand(cmd);
     }
@@ -108,15 +109,14 @@ public class CheckstyleActionsImpl
 
 
     @Override
-    public void peruseConfiguration(@NotNull final CheckstyleInternalObject pConfiguration, @NotNull final
-    ConfigVisitor pVisitor) {
-        executeCommand(new OpPeruseConfiguration(pConfiguration, pVisitor));
+    public void peruseConfiguration(@NotNull final CheckstyleInternalObject configuration,
+                                    @NotNull final ConfigVisitor visitor) {
+        executeCommand(new OpPeruseConfiguration(configuration, visitor));
     }
 
 
     private <R> R executeCommand(@NotNull final CheckstyleCommand<R> pCommand) {
-
-        R result = null;
+        R result;
         try {
             result = pCommand.execute(project);
         } catch (CheckstyleException e) {
