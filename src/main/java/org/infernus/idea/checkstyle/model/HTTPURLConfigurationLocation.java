@@ -50,7 +50,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     }
 
     @NotNull
-    private URLConnection connectionTo(final String location) throws IOException {
+    URLConnection connectionTo(final String location) throws IOException {
         final URL url = new URL(location);
         final URLConnection urlConnection = url.openConnection();
         urlConnection.setDoInput(true);
