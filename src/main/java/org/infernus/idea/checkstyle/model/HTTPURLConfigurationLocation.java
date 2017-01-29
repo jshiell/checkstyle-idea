@@ -42,7 +42,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
-            LOG.error("Couldn't read URL: " + getLocation(), e);
+            LOG.info("Couldn't read URL: " + getLocation(), e);
             cachedContent = null;
             cacheExpiry = 0;
             throw e;

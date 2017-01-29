@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.0.1: Fixed: Improved handling of IOExceptions from rules files (#285).</li>
     <li>5.0.0: New: You can now choose the version of Checkstyle to use. All credit to Thomas Jensen (@tsjensen) (#281).</li>
     <li>4.35.0: New: Updated to CheckStyle 7.4.</li>
     <li>4.35.0: Fixed: Improved error feedback when properties are missing from rules files (#275).</li>

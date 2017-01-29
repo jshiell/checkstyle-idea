@@ -72,9 +72,7 @@ public class CheckerFactory {
             return cachedChecker.get();
         }
 
-        final ListPropertyResolver propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location,
-                module));
-        final CachedChecker checker = createChecker(location, module, propertyResolver);
+        final CachedChecker checker = createChecker(location, module);
         if (checker != null) {
             cache.put(location, module, checker);
             return checker;
@@ -124,17 +122,23 @@ public class CheckerFactory {
     }
 
     private CachedChecker createChecker(@NotNull final ConfigurationLocation location,
-                                        @Nullable final Module module,
-                                        final ListPropertyResolver resolver) {
+                                        @Nullable final Module module) {
+        final ListPropertyResolver propertyResolver;
+        try {
+            propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location, module));
+        } catch (IOException e) {
+            LOG.info("CheckStyle properties could not be loaded: " + location.getLocation(), e);
+            return blacklistAndShowMessage(location, module, "checkstyle.file-io-failed", location.getLocation());
+        }
 
         final ClassLoader loaderOfCheckedCode = moduleClassPathBuilder().build(module);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Call to create new checker.");
-            logProperties(resolver);
+            logProperties(propertyResolver);
             logClassLoaders(loaderOfCheckedCode);
         }
 
-        final Object workerResult = executeWorker(location, module, resolver, loaderOfCheckedCode);
+        final Object workerResult = executeWorker(location, module, propertyResolver, loaderOfCheckedCode);
 
         if (workerResult instanceof CheckstyleToolException) {
             return blacklistAndShowMessage(location, module, (CheckstyleToolException) workerResult);

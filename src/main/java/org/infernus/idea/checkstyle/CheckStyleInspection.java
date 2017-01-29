@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,12 +100,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (CheckStylePluginException e) {
-            if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
-                disableActiveConfiguration(plugin, manager.getProject());
-            } else {
-                LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
-                blacklist(configurationLocation);
-            }
+            handlePluginException(e, psiFile, plugin, configurationLocation, manager.getProject());
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
@@ -113,6 +109,24 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
+        }
+    }
+
+    private void handlePluginException(final CheckStylePluginException e,
+                                       final @NotNull PsiFile psiFile,
+                                       final CheckStylePlugin plugin,
+                                       final ConfigurationLocation configurationLocation,
+                                       final @NotNull Project project) {
+        if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
+            disableActiveConfiguration(plugin, project);
+
+        } else if (e.getCause() != null && e.getCause() instanceof IOException) {
+            showWarning(project, message("checkstyle.file-io-failed"));
+            blacklist(configurationLocation);
+
+        } else {
+            LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
+            blacklist(configurationLocation);
         }
     }
 
