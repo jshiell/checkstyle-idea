@@ -58,7 +58,7 @@ public final class CheckStylePlugin
      */
     public CheckStylePlugin(@NotNull final Project project) {
         this.project = project;
-        this.configuration = ServiceManager.getService(project, CheckStyleConfiguration.class);
+        this.configuration = CheckStyleConfiguration.getInstance(project);
 
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
 

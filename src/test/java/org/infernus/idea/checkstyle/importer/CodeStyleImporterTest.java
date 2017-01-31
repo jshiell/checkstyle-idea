@@ -6,8 +6,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
@@ -19,14 +21,31 @@ public class CodeStyleImporterTest
     private CommonCodeStyleSettings javaSettings;
 
     private final Project project = Mockito.mock(Project.class);
-    private final CheckstyleProjectService csService = new CheckstyleProjectService(project);
+    private CheckstyleProjectService csService = null;
 
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        CheckStyleConfiguration mockPluginConfig = null;
+        mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
+        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn("7.1.1");
+        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
+        Mockito.when(mockPluginConfig.getProject()).thenReturn(project);
+        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+
+        csService = new CheckstyleProjectService(project);
+
         codeStyleSettings = new CodeStyleSettings(false);
         javaSettings = codeStyleSettings.getCommonSettings(JavaLanguage.INSTANCE);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        CheckStyleConfiguration.activateMock4UnitTesting(null);
     }
 
     private final static String FILE_PREFIX =

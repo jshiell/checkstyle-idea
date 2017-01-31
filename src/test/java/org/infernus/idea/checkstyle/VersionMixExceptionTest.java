@@ -23,6 +23,7 @@ import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.mockito.Mockito;
@@ -46,6 +47,14 @@ public class VersionMixExceptionTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
+        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn(BASE_VERSION);
+        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
+        Mockito.when(mockPluginConfig.getProject()).thenReturn(PROJECT);
+        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+
         csService = new CheckstyleProjectService(PROJECT);
         csService.activateCheckstyleVersion(BASE_VERSION, null);
         CheckstyleProjectService.activateMock4UnitTesting(csService);
@@ -55,6 +64,7 @@ public class VersionMixExceptionTest
     protected void tearDown() throws Exception {
         try {
             CheckstyleProjectService.activateMock4UnitTesting(null);
+            CheckStyleConfiguration.activateMock4UnitTesting(null);
             csService = null;
         } finally {
             super.tearDown();

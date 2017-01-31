@@ -32,7 +32,7 @@ public class CheckStyleConfigurableTest {
 
             CheckStyleConfiguration mockConfig = Mockito.mock(CheckStyleConfiguration.class);
             when(mockConfig.getProject()).thenReturn(mockProject);
-            when(mockConfig.getCheckstyleVersion()).thenReturn("7.1.2");
+            when(mockConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn("7.1.2");
             when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
             when(mockConfig.getActiveConfiguration()).thenReturn(mockLocations.get(0));
             when(mockConfig.configurationLocations()).thenReturn(mockLocations);
