@@ -42,6 +42,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -102,6 +103,13 @@ public class CheckStyleConfigPanel extends JPanel {
         SortedSet<String> versions = CheckstyleProjectService.getInstance(project).getSupportedVersions();
         String[] supportedVersions = versions.toArray(new String[versions.size()]);
         return new ComboBox(supportedVersions);
+    }
+
+    private void activateCurrentClasspath() {
+        ServiceManager.getService(CheckerFactoryCache.class).invalidate();
+
+        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
+        csService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
     }
 
     private ConfigurationLocationFactory getConfigurationLocationFactory() {
@@ -422,6 +430,7 @@ public class CheckStyleConfigPanel extends JPanel {
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
+                activateCurrentClasspath();
             }
         }
     }
@@ -461,6 +470,7 @@ public class CheckStyleConfigPanel extends JPanel {
                 listModel.remove(selected);
                 listModel.add(selected, VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
                 pathList.setSelectedIndex(selected);
+                activateCurrentClasspath();
             }
         }
     }
@@ -490,6 +500,7 @@ public class CheckStyleConfigPanel extends JPanel {
             for (final int index : selected) {
                 (pathListModel()).remove(index);
             }
+            activateCurrentClasspath();
         }
     }
 

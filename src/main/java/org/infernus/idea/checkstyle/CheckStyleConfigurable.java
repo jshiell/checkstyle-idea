@@ -23,8 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * dialog. Registered in {@code plugin.xml} as a {@code projectConfigurable} extension.
  */
 public class CheckStyleConfigurable
-        implements Configurable
-{
+        implements Configurable {
     private static final Log LOG = LogFactory.getLog(CheckStyleConfigurable.class);
 
     private final Project project;
@@ -110,13 +109,17 @@ public class CheckStyleConfigurable
         final List<String> thirdPartyClasspath = configPanel.getThirdPartyClasspath();
         configuration.setThirdPartyClassPath(thirdPartyClasspath);
 
+        activateCurrentCheckstyleVersion(configPanel.getCheckstyleVersion(), thirdPartyClasspath);
+
+        LOG.trace("apply() - exit");
+    }
+
+    private void activateCurrentCheckstyleVersion(final String checkstyleVersion, final List<String> thirdPartyClasspath) {
         // Invalidate cache *before* activating the new Checkstyle version
         getCheckerFactoryCache().invalidate();
 
         CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-        csService.activateCheckstyleVersion(configPanel.getCheckstyleVersion(), thirdPartyClasspath);
-
-        LOG.trace("apply() - exit");
+        csService.activateCheckstyleVersion(checkstyleVersion, thirdPartyClasspath);
     }
 
     CheckStyleConfiguration getConfiguration() {
@@ -136,6 +139,11 @@ public class CheckStyleConfigurable
         configPanel.setScanScope(configuration.getScanScope());
         configPanel.setSuppressingErrors(configuration.isSuppressingErrors());
         configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
+
+        activateCurrentCheckstyleVersion(
+                configuration.getCheckstyleVersion(null),
+                configuration.getThirdPartyClassPath());
+
         LOG.trace("reset() - exit");
     }
 
