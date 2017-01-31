@@ -61,7 +61,7 @@ public class CheckStyleConfigurable
             boolean result = haveLocationsChanged(configuration) || hasActiveLocationChanged(configuration) ||
                     !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath()) ||
                     configuration.getScanScope() != configPanel.getScanScope() || configuration.isSuppressingErrors()
-                    != configPanel.isSuppressingErrors() || !configuration.getCheckstyleVersion().equals(configPanel
+                    != configPanel.isSuppressingErrors() || !configuration.getCheckstyleVersion(null).equals(configPanel
                     .getCheckstyleVersion());
             if (LOG.isTraceEnabled()) {
                 LOG.trace("isModified() - exit - result=" + result);
@@ -120,7 +120,7 @@ public class CheckStyleConfigurable
     }
 
     CheckStyleConfiguration getConfiguration() {
-        return ServiceManager.getService(project, CheckStyleConfiguration.class);
+        return CheckStyleConfiguration.getInstance(project);
     }
 
     private CheckerFactoryCache getCheckerFactoryCache() {
@@ -130,7 +130,7 @@ public class CheckStyleConfigurable
     public void reset() {
         LOG.trace("reset() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
-        configPanel.setCheckstyleVersion(configuration.getCheckstyleVersion());
+        configPanel.setCheckstyleVersion(configuration.getCheckstyleVersion(null));
         configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
         configPanel.setActiveLocation(configuration.getActiveConfiguration());
         configPanel.setScanScope(configuration.getScanScope());

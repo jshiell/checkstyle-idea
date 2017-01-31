@@ -1,14 +1,8 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
@@ -16,12 +10,20 @@ import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 
 public class ServiceLayerBasicTest
@@ -37,6 +39,14 @@ public class ServiceLayerBasicTest
 
     @BeforeClass
     public static void setUp() {
+        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
+        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn(CsVersionInfo
+                .getCurrentCsVersion());
+        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
+        Mockito.when(mockPluginConfig.getProject()).thenReturn(PROJECT);
+        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+
         sCheckstyleProjectService = new CheckstyleProjectService(PROJECT);
         CheckstyleProjectService.activateMock4UnitTesting(sCheckstyleProjectService);
     }
@@ -45,6 +55,7 @@ public class ServiceLayerBasicTest
     public static void tearDown() {
         sCheckstyleProjectService = null;
         CheckstyleProjectService.activateMock4UnitTesting(null);
+        CheckStyleConfiguration.activateMock4UnitTesting(null);
     }
 
 

@@ -65,6 +65,10 @@ public class CheckStyleConfiguration
 
     private final Project project;
 
+    /** mock instance which may be set and used by unit tests */
+    private static CheckStyleConfiguration sMock = null;
+
+
     /**
      * Create a new configuration bean.
      *
@@ -77,6 +81,7 @@ public class CheckStyleConfiguration
 
         this.project = project;
     }
+
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
         if (configurationListener != null) {
@@ -309,11 +314,15 @@ public class CheckStyleConfiguration
         storage.put(THIRDPARTY_CLASSPATH, valueString.toString());
     }
 
-    public String getCheckstyleVersion() {
+    public String getCheckstyleVersion(@Nullable final String defaultVersion) {
         String result = storage.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
-            CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-            result = csService.getDefaultVersion();
+            if (defaultVersion != null) {
+                result = defaultVersion;
+            } else {
+                CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
+                result = csService.getDefaultVersion();
+            }
         }
         return result;
     }
@@ -515,5 +524,19 @@ public class CheckStyleConfiguration
             }
             return configuration;
         }
+    }
+
+
+    public static CheckStyleConfiguration getInstance(@NotNull final Project pProject) {
+        CheckStyleConfiguration result = sMock;
+        if (result == null) {
+            result = ServiceManager.getService(pProject, CheckStyleConfiguration.class);
+        }
+        return result;
+    }
+
+
+    public static void activateMock4UnitTesting(@Nullable final CheckStyleConfiguration pMock) {
+        sMock = pMock;
     }
 }

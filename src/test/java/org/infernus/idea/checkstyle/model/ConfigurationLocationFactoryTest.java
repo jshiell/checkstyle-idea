@@ -16,7 +16,8 @@ public class ConfigurationLocationFactoryTest {
         assertThat(
                 underTest.create(mock(Project.class), "LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules"),
                 allOf(
-                        hasProperty("location", is("/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml")),
+                        hasProperty("location", isOneOf("/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml",
+                                "\\Users\\aUser\\Projects\\aProject\\checkstyle\\cs-rules.xml")),
                         hasProperty("description", is("Some checkstyle rules"))));
     }
 
