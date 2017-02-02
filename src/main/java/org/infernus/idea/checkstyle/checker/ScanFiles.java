@@ -196,7 +196,7 @@ public class ScanFiles
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
             return checkerFactory(module.getProject()).checker(module, configurationLocation).map(checker -> checker.scan
-                    (scannableFiles, plugin.getConfiguration())).orElseGet(Collections::emptyMap);
+                    (scannableFiles, plugin.getConfiguration().isSuppressingErrors())).orElseGet(Collections::emptyMap);
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
