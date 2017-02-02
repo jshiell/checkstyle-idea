@@ -2,14 +2,16 @@ package org.infernus.idea.checkstyle.service.cmd;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.StringConfigurationLocation;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +45,15 @@ public class OpCreateCheckerTest
         Mockito.when(sConfigurationsMock.tabWidth()).thenReturn(2);
         Mockito.when(sConfigurationsMock.baseDir()).thenReturn(  //
                 Optional.of(new File(OpCreateCheckerTest.class.getResource(CONFIG_FILE).toURI()).getParent()));
+
+        CheckstyleProjectService csServiceMock = Mockito.mock(CheckstyleProjectService.class);
+        Mockito.when(csServiceMock.getCheckstyleInstance()).thenReturn(Mockito.mock(CheckstyleActions.class));
+        CheckstyleProjectService.activateMock4UnitTesting(csServiceMock);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        CheckstyleProjectService.activateMock4UnitTesting(null);
     }
 
 
@@ -76,7 +87,7 @@ public class OpCreateCheckerTest
 
         //noinspection ConstantConditions
         CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(null, configLoc, Collections
-                        .emptyMap(), sConfigurationsMock, getClass().getClassLoader());
+                .emptyMap(), sConfigurationsMock, getClass().getClassLoader());
         Assert.assertNotNull(checker);
     }
 }

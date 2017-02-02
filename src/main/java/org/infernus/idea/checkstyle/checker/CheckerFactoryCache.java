@@ -45,10 +45,13 @@ public class CheckerFactoryCache
                 } else {
                     cacheLock.readLock().unlock();
                     writeToCache(() -> {
-                        if (cachedChecker != null) {
-                            cachedChecker.destroy(module.getProject());
+                        try {
+                            if (cachedChecker != null) {
+                                cachedChecker.destroy();
+                            }
+                        } finally {
+                            return cache.remove(key);
                         }
-                        return cache.remove(key);
                     });
                     cacheLock.readLock().lock();
                 }
@@ -67,14 +70,17 @@ public class CheckerFactoryCache
 
     public void invalidate() {
         writeToCache(() -> {
-            cache.values().forEach(this::destroyChecker);
-            cache.clear();
+            try {
+                cache.values().forEach(this::destroyChecker);
+            } finally {
+                cache.clear();
+            }
             return null;
         });
     }
 
     private void destroyChecker(@NotNull final CachedChecker pCachedChecker) {
-        pCachedChecker.destroy(pCachedChecker.getProject());
+        pCachedChecker.destroy();
     }
 
     private void startBackgroundCleanupTask() {

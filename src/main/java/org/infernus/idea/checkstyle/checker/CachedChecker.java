@@ -44,7 +44,7 @@ class CachedChecker {
         return (getTimeStamp() + CACHE_VALID_TIME) >= System.currentTimeMillis();
     }
 
-    public void destroy(@NotNull final Project pProject) {
-        checkStyleChecker.destroy(pProject);
+    public void destroy() {
+        checkStyleChecker.destroy();
     }
 }

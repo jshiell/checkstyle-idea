@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -59,7 +60,8 @@ public class OpCreateChecker
         CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
         final TabWidthAndBaseDirProvider configs = configurations != null ? configurations : new Configurations
                 (module, csConfig);
-        return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode);
+        return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode,
+                CheckstyleProjectService.getInstance(pProject).getCheckstyleInstance());
     }
 
 
