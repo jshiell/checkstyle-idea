@@ -168,6 +168,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.1.1** Fixed: Improved handling of cached checkers. Thanks to Thomas Jensen (@tsjensen) (#292). 
 * **5.1.0** Fixed: Third-party check now work again. Thanks to Thomas Jensen (@tsjensen) (#286). 
 * **5.1.0** New: Added CheckStyle 7.5. 
 * **5.0.1** Fixed: Improved handling of IOExceptions from rules files (#285).
