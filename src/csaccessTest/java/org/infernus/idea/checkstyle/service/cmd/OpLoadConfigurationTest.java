@@ -261,7 +261,7 @@ public class OpLoadConfigurationTest
         OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module)
         {
             @Override
-            Configuration callLoadConfiguration(final InputStream pInputStream) {
+            Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
             }
         };
