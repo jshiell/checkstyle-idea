@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.1.1</version>
+    <version>5.1.2</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.1.2: Fixed: Logging classes are now included in the local classpath to hopefully avoid oddities such as #294.</li>
     <li>5.1.1: Fixed: Improved handling of cached checkers. Thanks to Thomas Jensen (@tsjensen) (#292).</li>
     <li>5.1.0: Fixed: Third-party check now work again. Thanks to Thomas Jensen (@tsjensen) (#286).</li>
     <li>5.1.0: New: Added CheckStyle 7.5.</li>

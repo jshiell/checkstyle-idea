@@ -23,7 +23,7 @@ repositories {
 }
 
 sourceCompatibility = 1.8
-version = '5.1.1'
+version = '5.1.2'
 
 intellij {
     version = 'IC-15.0.6';
@@ -54,6 +54,8 @@ ext {
 
 dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.4';
+    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.22'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.22'
 
     csaccessCompileOnly ("com.puppycrawl.tools:checkstyle:${supportedCsVersions.getBaseVersion()}") {
         exclude group: 'commons-logging', module: 'commons-logging';
