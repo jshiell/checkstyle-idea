@@ -47,8 +47,8 @@ class ListPropertyResolver {
             return;
         }
 
-        for (final Map.Entry<String, String> propertieEntry : properties.entrySet()) {
-            setProperty(propertieEntry.getKey(), propertieEntry.getValue());
+        for (final Map.Entry<String, String> propertyEntry : properties.entrySet()) {
+            setProperty(propertyEntry.getKey(), propertyEntry.getValue());
         }
     }
 }

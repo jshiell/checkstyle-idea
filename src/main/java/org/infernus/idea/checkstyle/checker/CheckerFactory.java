@@ -82,9 +82,8 @@ public class CheckerFactory {
     }
 
 
-    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location, final Module module)
+    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location, final Module module, final Map<String, String> properties)
             throws IOException {
-        final Map<String, String> properties = new HashMap<>(location.getProperties());
 
         addIfAbsent("basedir", basePathFor(module), properties);
 
@@ -125,7 +124,9 @@ public class CheckerFactory {
                                         @Nullable final Module module) {
         final ListPropertyResolver propertyResolver;
         try {
-            propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location, module));
+            final Map<String, String> properties = removeEmptyProperties(location.getProperties());
+            propertyResolver = new ListPropertyResolver(
+                    addEclipseCsProperties(location, module, properties));
         } catch (IOException e) {
             LOG.info("CheckStyle properties could not be loaded: " + location.getLocation(), e);
             return blacklistAndShowMessage(location, module, "checkstyle.file-io-failed", location.getLocation());
@@ -152,6 +153,16 @@ public class CheckerFactory {
         }
 
         return (CachedChecker) workerResult;
+    }
+
+    private Map<String, String> removeEmptyProperties(final Map<String, String> properties) {
+        Map<String, String> cleanedProperties = new HashMap<>();
+        for (Map.Entry<String, String> property : properties.entrySet()) {
+            if (!isBlank(property.getValue())) {
+                cleanedProperties.put(property.getKey(), property.getValue());
+            }
+        }
+        return cleanedProperties;
     }
 
 
