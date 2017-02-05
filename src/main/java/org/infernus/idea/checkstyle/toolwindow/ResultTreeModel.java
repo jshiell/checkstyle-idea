@@ -1,20 +1,18 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileSystemItem;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.jetbrains.annotations.Nullable;
+
+import static java.util.Comparator.*;
 
 public class ResultTreeModel extends DefaultTreeModel {
 
@@ -155,35 +153,38 @@ public class ResultTreeModel extends DefaultTreeModel {
                          final SeverityLevel... levels) {
         visibleRootNode.removeAllChildren();
 
-        if (results == null || results.size() == 0) {
-            setRootMessage("plugin.results.scan-no-results");
+        int itemCount = 0;
+        for (final PsiFile file : sortedFileNames(results)) {
+            final TogglableTreeNode fileNode = new TogglableTreeNode();
+            final List<Problem> problems = results.get(file);
 
-        } else {
-            int itemCount = 0;
-            for (final PsiFile file : sortedFileNames(results)) {
-                final TogglableTreeNode fileNode = new TogglableTreeNode();
-                final List<Problem> problems = results.get(file);
-                if (problems != null) {
-                    for (final Problem problem : problems) {
+            int problemCount = 0;
+            if (problems != null) {
+                for (final Problem problem : problems) {
+                    if (problem.severityLevel() != SeverityLevel.Ignore) {
                         final ResultTreeNode problemObj = new ResultTreeNode(file, problem);
 
                         final TogglableTreeNode problemNode = new TogglableTreeNode(problemObj);
                         fileNode.add(problemNode);
+
+                        ++problemCount;
                     }
                 }
+            }
 
-                int problemCount = 0;
-                if (problems != null) {
-                    problemCount = problems.size();
-                }
-                itemCount += problemCount;
+            itemCount += problemCount;
 
+            if (problemCount > 0) {
                 final ResultTreeNode nodeObject = new ResultTreeNode(file.getName(), problemCount);
                 fileNode.setUserObject(nodeObject);
 
                 visibleRootNode.add(fileNode);
             }
+        }
 
+        if (itemCount == 0) {
+            setRootMessage("plugin.results.scan-no-results");
+        } else {
             setRootText(CheckStyleBundle.message("plugin.results.scan-results", itemCount, results.size()));
         }
 
@@ -192,8 +193,11 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<Problem>> results) {
+        if (results == null || results.isEmpty()) {
+            return Collections.emptyList();
+        }
         final List<PsiFile> sortedFiles = new ArrayList<>(results.keySet());
-        Collections.sort(sortedFiles, (file1, file2) -> file1.getName().compareTo(file2.getName()));
+        sortedFiles.sort(comparing(PsiFileSystemItem::getName));
         return sortedFiles;
     }
 }

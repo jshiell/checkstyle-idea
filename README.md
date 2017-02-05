@@ -168,6 +168,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.1.4** Fixed: Ignored problems no longer create phantom nodes in the results view (#287).
 * **5.1.3** Fixed: Supporting file lookup should be consistent when adding files (#293).
 * **5.1.2** Fixed: Property defaults should now work again.
 * **5.1.2** Fixed: Logging classes are now included in the local classpath to hopefully avoid oddities such as #294. 
