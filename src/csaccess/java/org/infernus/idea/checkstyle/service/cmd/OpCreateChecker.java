@@ -16,41 +16,36 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-
 /**
  * Command which creates new {@link CheckStyleChecker}s.
  */
 public class OpCreateChecker
-        implements CheckstyleCommand<CheckStyleChecker>
-{
+        implements CheckstyleCommand<CheckStyleChecker> {
+
     private final Module module;
-
     private final ConfigurationLocation location;
-
     private final Map<String, String> variables;
-
     private final TabWidthAndBaseDirProvider configurations;
-
     private final ClassLoader loaderOfCheckedCode;
 
-
-    public OpCreateChecker(@Nullable final Module pModule, @NotNull final ConfigurationLocation pLocation,
-                           final Map<String, String> pVariables, @Nullable final TabWidthAndBaseDirProvider pConfigurations,
-                           @NotNull final ClassLoader pLoaderOfCheckedCode) {
-        module = pModule;
-        location = pLocation;
-        variables = pVariables;
-        configurations = pConfigurations;
-        loaderOfCheckedCode = pLoaderOfCheckedCode;
+    public OpCreateChecker(@Nullable final Module module,
+                           @NotNull final ConfigurationLocation location,
+                           final Map<String, String> variables,
+                           @Nullable final TabWidthAndBaseDirProvider configurations,
+                           @NotNull final ClassLoader loaderOfCheckedCode) {
+        this.module = module;
+        this.location = location;
+        this.variables = variables;
+        this.configurations = configurations;
+        this.loaderOfCheckedCode = loaderOfCheckedCode;
     }
-
 
     @Override
     @NotNull
     @SuppressWarnings("deprecation")  // setClassloader() must be used for backwards compatibility
-    public CheckStyleChecker execute(@NotNull final Project pProject) throws CheckstyleException {
+    public CheckStyleChecker execute(@NotNull final Project project) throws CheckstyleException {
 
-        final Configuration csConfig = loadConfig(pProject);
+        final Configuration csConfig = loadConfig(project);
 
         final Checker checker = new Checker();
         checker.setModuleClassLoader(getClass().getClassLoader());   // for Checkstyle to load modules (checks)
@@ -58,14 +53,14 @@ public class OpCreateChecker
         checker.configure(csConfig);
 
         CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
-        final TabWidthAndBaseDirProvider configs = configurations != null ? configurations : new Configurations
-                (module, csConfig);
+        final TabWidthAndBaseDirProvider configs = configurations != null
+                ? configurations
+                : new Configurations(module, csConfig);
         return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode,
-                CheckstyleProjectService.getInstance(pProject).getCheckstyleInstance());
+                CheckstyleProjectService.getInstance(project).getCheckstyleInstance());
     }
 
-
-    private Configuration loadConfig(@NotNull final Project pProject) throws CheckstyleException {
-        return new OpLoadConfiguration(location, variables, module).execute(pProject).getConfiguration();
+    private Configuration loadConfig(@NotNull final Project project) throws CheckstyleException {
+        return new OpLoadConfiguration(location, variables, project, module).execute(project).getConfiguration();
     }
 }

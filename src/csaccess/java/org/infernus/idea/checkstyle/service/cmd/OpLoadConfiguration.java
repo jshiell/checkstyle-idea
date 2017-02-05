@@ -49,41 +49,50 @@ public class OpLoadConfiguration
 
     private final RulesContainer rulesContainer;
     private final PropertyResolver resolver;
+    private final Project project;
     private final Module module;
 
-    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation) {
-        this(configurationLocation, null, null);
+    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
+                               @NotNull final Project project) {
+        this(configurationLocation, null, project, null);
     }
 
     public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
-                               final Map<String, String> properties) {
-        this(configurationLocation, properties, null);
+                               final Map<String, String> properties,
+                               @NotNull final Project project) {
+        this(configurationLocation, properties, project, null);
     }
 
     public OpLoadConfiguration(final ConfigurationLocation configurationLocation,
                                final Map<String, String> properties,
+                               @NotNull final Project project,
                                final Module module) {
-        this(new ConfigurationLocationRulesContainer(configurationLocation), properties, module);
-    }
-
-    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile) {
-        this(rulesFile, null);
+        this(new ConfigurationLocationRulesContainer(configurationLocation, project), properties, project, module);
     }
 
     public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
-                               final Map<String, String> properties) {
-        this(new VirtualFileRulesContainer(rulesFile), properties, null);
+                               @NotNull final Project project) {
+        this(rulesFile, null, project);
     }
 
-    public OpLoadConfiguration(@NotNull final String fileContent) {
-        this(new ContentRulesContainer(fileContent), null, null);
+    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
+                               final Map<String, String> properties,
+                               @NotNull final Project project) {
+        this(new VirtualFileRulesContainer(rulesFile), properties, project, null);
+    }
+
+    public OpLoadConfiguration(@NotNull final String fileContent,
+                               @NotNull final Project project) {
+        this(new ContentRulesContainer(fileContent), null, project, null);
     }
 
     private OpLoadConfiguration(final RulesContainer rulesContainer,
                                 final Map<String, String> properties,
+                                final Project project,
                                 final Module module) {
         this.rulesContainer = rulesContainer;
         this.module = module;
+        this.project = project;
 
         if (properties != null) {
             resolver = new SimpleResolver(properties);
@@ -113,9 +122,7 @@ public class OpLoadConfiguration
                 // in the input stream
                 throw new CheckstyleException("Couldn't find root module in " + rulesContainer.filePath());
             }
-            if (module != null) {
-                resolveFilePaths(configuration);
-            }
+            resolveFilePaths(configuration);
             result = new CsConfigObject(configuration);
 
         } catch (IOException e) {
@@ -187,13 +194,10 @@ public class OpLoadConfiguration
             try {
                 resolveAndUpdateFile(configRoot, configModule, propertyName, fileName);
             } catch (IOException e) {
-                if (module != null) {
-                    showError(module.getProject(), message("checkstyle.checker-failed", e.getMessage()));
-                }
+                showError(project, message("checkstyle.checker-failed", e.getMessage()));
             }
         }
     }
-
 
     private void resolveAndUpdateFile(final DefaultConfiguration configRoot,
                                       final Configuration configModule,
@@ -204,17 +208,15 @@ public class OpLoadConfiguration
             configRoot.removeChild(configModule);
             if (resolvedFile != null) {
                 configRoot.addChild(elementWithUpdatedFile(resolvedFile, configModule, propertyName));
-            } else if (module != null && isNotOptional(configModule)) {
-                showWarning(module.getProject(), message(format("checkstyle.not-found.%s", configModule.getName())));
+            } else if (isNotOptional(configModule)) {
+                showWarning(project, message(format("checkstyle.not-found.%s", configModule.getName())));
             }
         }
     }
 
-
     private boolean isNotOptional(final Configuration configModule) {
         return !"true".equalsIgnoreCase(getAttributeOrNull(configModule, "optional"));
     }
-
 
     private String getAttributeOrNull(final Configuration element, final String attributeName) {
         try {
@@ -223,7 +225,6 @@ public class OpLoadConfiguration
             return null;
         }
     }
-
 
     private DefaultConfiguration elementWithUpdatedFile(@NotNull final String filename,
                                                         @NotNull final Configuration
@@ -287,9 +288,12 @@ public class OpLoadConfiguration
 
     private static class ConfigurationLocationRulesContainer implements RulesContainer {
         private final ConfigurationLocation configurationLocation;
+        private final Project project;
 
-        ConfigurationLocationRulesContainer(final ConfigurationLocation configurationLocation) {
+        ConfigurationLocationRulesContainer(final ConfigurationLocation configurationLocation,
+                                            final Project project) {
             this.configurationLocation = configurationLocation;
+            this.project = project;
         }
 
         @Override
@@ -303,7 +307,7 @@ public class OpLoadConfiguration
         }
 
         public String resolveAssociatedFile(final String fileName, final Module module) throws IOException {
-            return configurationLocation.resolveAssociatedFile(fileName, module);
+            return configurationLocation.resolveAssociatedFile(fileName, project, module);
         }
     }
 

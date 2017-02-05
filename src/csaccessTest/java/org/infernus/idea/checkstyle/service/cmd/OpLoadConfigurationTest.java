@@ -1,9 +1,5 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-
 import com.google.common.collect.ImmutableMap;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -29,45 +25,41 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 
-public class OpLoadConfigurationTest
-{
-    private ConfigurationLocation configurationLocation = Mockito.mock(ConfigurationLocation.class);
+public class OpLoadConfigurationTest {
 
-    private Project project = Mockito.mock(Project.class);
-    private Module module = Mockito.mock(Module.class);
-
-    private Notifications notifications = Mockito.mock(Notifications.class);
+    private final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
+    private final Project project = mock(Project.class);
+    private final Module module = mock(Module.class);
+    private final Notifications notifications = mock(Notifications.class);
 
     private OpLoadConfiguration underTest;
 
 
     @Before
     public void setUp() throws IOException {
-
         interceptApplicationNotifications();
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module)).thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module)).thenThrow(new IOException
+        when(configurationLocation.resolveAssociatedFile("aFileToResolve", project, module)).thenReturn("aResolvedFile");
+        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", project, module)).thenThrow(new IOException
                 ("aTriggeredIoException"));
 
-        underTest = new OpLoadConfiguration(configurationLocation, null, module);
+        underTest = new OpLoadConfiguration(configurationLocation, null, project, module);
     }
 
 
     private void interceptApplicationNotifications() {
         final MessageBus messageBus = mock(MessageBus.class);
+        when(project.getMessageBus()).thenReturn(messageBus);
         when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
 
         final Application application = mock(Application.class);
@@ -86,20 +78,22 @@ public class OpLoadConfigurationTest
 
     @Test
     public void childrenOfUpdatedElementsArePreserved() throws CheckstyleException {
-        Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
-                ("SuppressionFilter").withAttribute("file", "aFileToResolve").withChild(ConfigurationBuilder.config
-                ("aChildModule"))).build();
+        Configuration config = ConfigurationBuilder.checker()
+                .withChild(ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aFileToResolve")
+                        .withChild(ConfigurationBuilder.config("aChildModule"))).build();
         underTest.resolveFilePaths(config);
-        assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
-                (ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile").withChild
-                        (ConfigurationBuilder.config("aChildModule"))).build())));
+        assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker()
+                .withChild(ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile")
+                        .withChild(ConfigurationBuilder.config("aChildModule"))).build())));
     }
 
     @Test
     public void attributesOfUpdatedElementsArePreserved() throws CheckstyleException {
-        Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
-                .withChild(ConfigurationBuilder.config("ImportControl").withAttribute("file", "aFileToResolve")
-                        .withAttribute("anotherAttribute", "anotherValue"))).build();
+        Configuration config = ConfigurationBuilder.checker()
+                .withChild(ConfigurationBuilder.config("TreeWalker")
+                        .withChild(ConfigurationBuilder.config("ImportControl")
+                                .withAttribute("file", "aFileToResolve")
+                                .withAttribute("anotherAttribute", "anotherValue"))).build();
         underTest.resolveFilePaths(config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("ImportControl")
@@ -258,8 +252,7 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testNoConfiguration() throws CheckstyleException {
-        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module)
-        {
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, project, module) {
             @Override
             Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
@@ -276,8 +269,7 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testWrongConfigurationClass() throws CheckstyleException {
-        Configuration config = new Configuration()
-        {
+        Configuration config = new Configuration() {
             @Override
             public String[] getAttributeNames() {
                 throw new UnsupportedOperationException();
@@ -309,13 +301,13 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testConstructors() {
-        new OpLoadConfiguration(configurationLocation);
-        new OpLoadConfiguration(configurationLocation, null);
-        new OpLoadConfiguration(configurationLocation, null, module);
-        VirtualFile virtualFile = Mockito.mock(VirtualFile.class);
-        new OpLoadConfiguration((VirtualFile) virtualFile);
-        new OpLoadConfiguration((VirtualFile) virtualFile, null);
-        new OpLoadConfiguration("doesn't matter");
+        new OpLoadConfiguration(configurationLocation, project);
+        new OpLoadConfiguration(configurationLocation, null, project);
+        new OpLoadConfiguration(configurationLocation, null, project, module);
+        VirtualFile virtualFile = mock(VirtualFile.class);
+        new OpLoadConfiguration((VirtualFile) virtualFile, project);
+        new OpLoadConfiguration((VirtualFile) virtualFile, null, project);
+        new OpLoadConfiguration("doesn't matter", project);
     }
 
 

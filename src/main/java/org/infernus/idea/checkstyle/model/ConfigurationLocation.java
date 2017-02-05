@@ -1,16 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
 import org.apache.commons.logging.Log;
@@ -22,6 +13,12 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -198,11 +195,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            for (final Iterator<String> i = properties.keySet().iterator(); i.hasNext();) {
-                if (!propertiesInFile.contains(i.next())) {
-                    i.remove();
-                }
-            }
+            properties.keySet().removeIf(propertyName -> !propertiesInFile.contains(propertyName));
 
             try {
                 is.reset();
@@ -218,6 +211,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     @Nullable
     public String resolveAssociatedFile(final String filename,
+                                        final Project project,
                                         final Module module) throws IOException {
         if (filename == null) {
             return null;
@@ -225,10 +219,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             return filename;
         }
 
-        return findFile(filename, module);
+        return findFile(filename, project, module);
     }
 
-    private String findFile(final String fileName, final Module module) {
+    private String findFile(final String fileName,
+                            final Project project,
+                            final Module module) {
         if (fileName == null
                 || "".equals(fileName.trim())
                 || fileName.toLowerCase().startsWith("http://")
@@ -236,17 +232,30 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             return fileName;
         }
 
-        File suppressionFile = checkRelativeToRulesFile(fileName);
-        if (module != null) {
-            suppressionFile = checkProjectBaseDir(module, fileName,
-                    checkModuleFile(module, fileName,
-                            checkModuleContentRoots(fileName, suppressionFile, ModuleRootManager.getInstance(module))));
-        }
+        File targetFile = checkCommonPathsForTarget(fileName, project, module);
 
-        if (suppressionFile != null) {
-            return suppressionFile.getAbsolutePath();
+        if (targetFile != null) {
+            return targetFile.getAbsolutePath();
         }
         return null;
+    }
+
+    private File checkCommonPathsForTarget(final String fileName,
+                                           final Project project,
+                                           final Module module) {
+        File targetFile = checkRelativeToRulesFile(fileName);
+        if (module != null) {
+            if (targetFile == null) {
+                targetFile = checkModuleContentRoots(module, fileName);
+            }
+            if (targetFile == null) {
+                targetFile = checkModuleFile(module, fileName);
+            }
+        }
+        if (targetFile == null) {
+            targetFile = checkProjectBaseDir(project, fileName);
+        }
+        return targetFile;
     }
 
     private File checkRelativeToRulesFile(final String fileName) {
@@ -259,34 +268,31 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    private File checkProjectBaseDir(final Module module,
-                                     final String fileName,
-                                     final File suppressionFile) {
-        if (suppressionFile == null && module.getProject().getBaseDir() != null) {
-            final File projectRelativePath = new File(module.getProject().getBaseDir().getPath(), fileName);
+    private File checkProjectBaseDir(final Project project,
+                                     final String fileName) {
+        if (project.getBaseDir() != null) {
+            final File projectRelativePath = new File(project.getBaseDir().getPath(), fileName);
             if (projectRelativePath.exists()) {
                 return projectRelativePath;
             }
         }
-        return suppressionFile;
+        return null;
     }
 
     private File checkModuleFile(final Module module,
-                                 final String fileName,
-                                 final File suppressionFile) {
-        if (suppressionFile == null && module.getModuleFile() != null) {
+                                 final String fileName) {
+        if (module.getModuleFile() != null) {
             final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
             if (moduleRelativePath.exists()) {
                 return moduleRelativePath;
             }
         }
-        return suppressionFile;
+        return null;
     }
 
-    private File checkModuleContentRoots(final String fileName,
-                                         final File suppressionFile,
-                                         final ModuleRootManager rootManager) {
-        if (suppressionFile == null && rootManager.getContentEntries().length > 0) {
+    private File checkModuleContentRoots(final Module module, final String fileName) {
+        ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
+        if (rootManager.getContentEntries().length > 0) {
             for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
                 if (contentEntry.getFile() == null) {
                     continue;
@@ -298,7 +304,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
         }
-        return suppressionFile;
+        return null;
     }
 
     public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
@@ -390,7 +396,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
     }
 
-    public void  blacklist() {
+    public void blacklist() {
         blacklistedUntil = currentTimeMillis() + BLACKLIST_TIME_MS;
     }
 

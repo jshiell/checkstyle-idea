@@ -75,9 +75,9 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile);
+            cmd = new OpLoadConfiguration(inputFile, project);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables);
+            cmd = new OpLoadConfiguration(inputFile, variables, project);
         }
         return executeCommand(cmd);
     }
@@ -86,7 +86,7 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
                                                       @Nullable final Map<String, String> variables,
                                                       @Nullable final Module module) {
-        return executeCommand(new OpLoadConfiguration(inputFile, variables, module));
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, project, module));
     }
 
     @Override
@@ -95,16 +95,16 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile);
+            cmd = new OpLoadConfiguration(inputFile, project);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables);
+            cmd = new OpLoadConfiguration(inputFile, variables, project);
         }
         return executeCommand(cmd);
     }
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final String pXmlConfig) {
-        return executeCommand(new OpLoadConfiguration(pXmlConfig));
+        return executeCommand(new OpLoadConfiguration(pXmlConfig, project));
     }
 
 
@@ -134,8 +134,8 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
             if (csCause != null) {
                 throw new CheckstyleToolException(csCause);
             } else {
-                throw new CheckstyleServiceException("Error executing command '" + pCommand.getClass().getSimpleName
-                        () + "': " + e.getMessage(), e);
+                throw new CheckstyleServiceException("Error executing command '"
+                        + pCommand.getClass().getSimpleName() + "': " + e.getMessage(), e);
             }
         }
         return result;
