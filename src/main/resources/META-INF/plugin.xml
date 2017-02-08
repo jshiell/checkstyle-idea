@@ -20,7 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.2.0: New: Added CheckStyle 7.5 (#296).</li>
+    <li>5.2.0: New: Added CheckStyle 7.5.1 (#296).</li>
     <li>5.2.0: Fixed: Ignored problems are excluded from the inspection results (#287).</li>
     <li>5.1.4: Fixed: Ignored problems no longer create phantom nodes in the results view (#287).</li>
     <li>5.1.3: Fixed: Supporting file lookup should be consistent when adding files (#293).</li>
