@@ -168,7 +168,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.1.5** Fixed: Ignored problems are excluded from the inspection results (#287).
+* **5.2.0** New: Added CheckStyle 7.5 (#296).
+* **5.2.0** Fixed: Ignored problems are excluded from the inspection results (#287).
 * **5.1.4** Fixed: Ignored problems no longer create phantom nodes in the results view (#287).
 * **5.1.3** Fixed: Supporting file lookup should be consistent when adding files (#293).
 * **5.1.2** Fixed: Property defaults should now work again.
