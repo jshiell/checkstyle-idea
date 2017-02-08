@@ -123,8 +123,10 @@ public class ProcessResultsThread
         }
     }
 
-    private void addProblemTo(final PsiElement victim, final PsiFile psiFile, @NotNull final Issue event, final
-    boolean afterEndOfLine) {
+    private void addProblemTo(final PsiElement victim,
+                              final PsiFile psiFile,
+                              @NotNull final Issue event,
+                              final boolean afterEndOfLine) {
         try {
             addProblem(psiFile, new Problem(victim, event.getMessage(), event.getSeverityLevel(), event.getLineNo(),
                     event.getColumnNo(), afterEndOfLine, suppressErrors));

@@ -8,8 +8,7 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
 
-public class Problem
-{
+public class Problem {
     private final PsiElement target;
     private final SeverityLevel severityLevel;
     private final int line;
@@ -18,23 +17,27 @@ public class Problem
     private final boolean afterEndOfLine;
     private final boolean suppressErrors;
 
-    public Problem(@NotNull final PsiElement target, @NotNull final String pMessage, @NotNull final SeverityLevel
-            pSeverityLevel, final int pLine, final int pColumn, final boolean afterEndOfLine, final boolean
-            suppressErrors) {
-
+    public Problem(@NotNull final PsiElement target,
+                   @NotNull final String message,
+                   @NotNull final SeverityLevel severityLevel,
+                   final int line,
+                   final int column,
+                   final boolean afterEndOfLine,
+                   final boolean suppressErrors) {
         this.target = target;
-        this.message = pMessage;
-        this.severityLevel = pSeverityLevel;
-        this.line = pLine;
-        this.column = pColumn;
+        this.message = message;
+        this.severityLevel = severityLevel;
+        this.line = line;
+        this.column = column;
         this.afterEndOfLine = afterEndOfLine;
         this.suppressErrors = suppressErrors;
     }
 
     @NotNull
     public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager) {
-        return inspectionManager.createProblemDescriptor(target, CheckStyleBundle.message("inspection.message",
-                message()), null, problemHighlightType(), false, afterEndOfLine);
+        return inspectionManager.createProblemDescriptor(target,
+                CheckStyleBundle.message("inspection.message", message()),
+                null, problemHighlightType(), false, afterEndOfLine);
     }
 
     @NotNull

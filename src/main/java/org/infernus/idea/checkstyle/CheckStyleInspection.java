@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
@@ -89,6 +91,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     .checker(module, configurationLocation)
                     .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().isSuppressingErrors()))
                     .map(results -> results.get(psiFile))
+                    .map(this::dropIgnoredProblems)
                     .orElseGet(() -> NO_PROBLEMS_FOUND);
 
         } catch (ProcessCanceledException | AssertionError e) {
@@ -110,6 +113,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
+    }
+
+    private List<Problem> dropIgnoredProblems(final List<Problem> problems) {
+        return problems.stream()
+                .filter(problem -> problem.severityLevel() != SeverityLevel.Ignore)
+                .collect(toList());
     }
 
     private void handlePluginException(final CheckStylePluginException e,
