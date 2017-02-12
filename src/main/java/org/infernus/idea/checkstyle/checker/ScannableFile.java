@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -10,7 +9,6 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +22,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.checker.PsiFileValidator.isScannable;
 
 /**
@@ -52,8 +51,7 @@ public class ScannableFile {
             throws IOException {
         this.psiFile = psiFile;
 
-        if (!existsOnFilesystem(psiFile)
-                || documentIsModifiedAndUnsaved(psiFile.getVirtualFile())) {
+        if (!existsOnFilesystem(psiFile) || documentIsModifiedAndUnsaved(psiFile)) {
             baseTempDir = prepareBaseTmpDir();
             realFile = createTemporaryFileFor(psiFile, module, baseTempDir);
 
@@ -70,7 +68,7 @@ public class ScannableFile {
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
             return psiFiles.stream()
-                    .filter(psiFile -> isScannable(psiFile, Optional.ofNullable(module), plugin.getConfiguration()))
+                    .filter(psiFile -> isScannable(psiFile, ofNullable(module), plugin.getConfiguration()))
                     .map(psiFile -> ScannableFile.create(psiFile, module))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
@@ -101,10 +99,9 @@ public class ScannableFile {
     }
 
     private String pathOf(@NotNull final PsiFile file) {
-        if (file.getVirtualFile() != null) {
-            return file.getVirtualFile().getPath();
-        }
-        throw new IllegalStateException("PSIFile does not have associated virtual file: " + file);
+        return virtualFileOf(file)
+                .map(VirtualFile::getPath)
+                .orElseThrow(() -> new IllegalStateException("PSIFile does not have associated virtual file: " + file));
     }
 
     private File createTemporaryFileFor(@NotNull final PsiFile file,
@@ -160,35 +157,29 @@ public class ScannableFile {
     }
 
     private boolean existsOnFilesystem(@NotNull final PsiFile file) {
-        final VirtualFile virtualFile = file.getVirtualFile();
-        return virtualFile != null
-                && LocalFileSystem.getInstance().exists(virtualFile);
+        return virtualFileOf(file)
+                .map(virtualFile -> LocalFileSystem.getInstance().exists(virtualFile))
+                .orElseGet(() -> false);
     }
 
-    private boolean documentIsModifiedAndUnsaved(final VirtualFile virtualFile) {
-        if (virtualFile == null) {
-            return false;
-        }
+    private boolean documentIsModifiedAndUnsaved(final PsiFile file) {
         final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-        if (fileDocumentManager.isFileModified(virtualFile)) {
-            final Document document = fileDocumentManager.getDocument(virtualFile);
-            if (document != null) {
-                return fileDocumentManager.isDocumentUnsaved(document);
-            }
-        }
-        return false;
+        return virtualFileOf(file)
+                .filter(fileDocumentManager::isFileModified)
+                .map(fileDocumentManager::getDocument)
+                .map(fileDocumentManager::isDocumentUnsaved)
+                .orElseGet(() -> false);
     }
 
     private void writeContentsToFile(final PsiFile file,
                                      final File outFile)
             throws IOException {
-        final CodeStyleSettings codeStyleSettings
-                = CodeStyleSettingsManager.getSettings(file.getProject());
+        final String lineSeparator = CodeStyleSettingsManager.getSettings(file.getProject()).getLineSeparator();
 
-        final Writer tempFileOut = writerTo(outFile);
+        final Writer tempFileOut = writerTo(outFile, charSetOf(file));
         for (final char character : file.getText().toCharArray()) {
             if (character == '\n') { // IDEA uses \n internally
-                tempFileOut.write(codeStyleSettings.getLineSeparator());
+                tempFileOut.write(lineSeparator);
             } else {
                 tempFileOut.write(character);
             }
@@ -198,10 +189,21 @@ public class ScannableFile {
     }
 
     @NotNull
-    private Writer writerTo(final File outFile) throws FileNotFoundException {
+    private Charset charSetOf(final PsiFile file) {
+        return virtualFileOf(file)
+                .map(VirtualFile::getCharset)
+                .orElseGet(() -> Charset.forName("UTF-8"));
+    }
+
+    private Optional<VirtualFile> virtualFileOf(final PsiFile file) {
+        return ofNullable(file.getVirtualFile());
+    }
+
+    @NotNull
+    private Writer writerTo(final File outFile, final Charset charset) throws FileNotFoundException {
         return new BufferedWriter(
                 new OutputStreamWriter(
-                        new FileOutputStream(outFile), Charset.forName("UTF-8").newEncoder()));
+                        new FileOutputStream(outFile), charset.newEncoder()));
     }
 
     public File getFile() {
