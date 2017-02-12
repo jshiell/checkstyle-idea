@@ -20,10 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -75,7 +72,7 @@ public class ScannableFile {
             return psiFiles.stream()
                     .filter(psiFile -> isScannable(psiFile, Optional.ofNullable(module), plugin.getConfiguration()))
                     .map(psiFile -> ScannableFile.create(psiFile, module))
-                    .filter(psiFile -> psiFile != null)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
         } finally {
