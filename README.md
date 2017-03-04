@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 ## Version History
 
 * **5.3.0** New: Added CheckStyle 7.6 (#300).
+* **5.3.0** Fixed: Ignored problems are no longer counting for pre-checkin scan (#299).
 * **5.2.0** New: Added CheckStyle 7.5.1 (#296).
 * **5.2.0** Fixed: Ignored problems are excluded from the inspection results (#287).
 * **5.1.4** Fixed: Ignored problems no longer create phantom nodes in the results view (#287).

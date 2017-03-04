@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +28,10 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import static com.intellij.openapi.vcs.checkin.CheckinHandler.ReturnResult.*;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
@@ -72,13 +75,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         final Project project = checkinPanel.getProject();
         if (project == null) {
             LOG.error("Could not get project for check-in panel, skipping");
-            return ReturnResult.COMMIT;
+            return COMMIT;
         }
 
         final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
         if (plugin == null) {
             LOG.error("Could not get CheckStyle Plug-in, skipping");
-            return ReturnResult.COMMIT;
+            return COMMIT;
         }
 
         if (plugin.getConfiguration().isScanFilesBeforeCheckin()) {
@@ -92,17 +95,14 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                     }
                 }.queue();
 
-                if (!scanResults.isEmpty()) {
-                    return processScanResults(scanResults, executor, plugin);
-                }
-                return ReturnResult.COMMIT;
+                return processScanResults(scanResults, executor, plugin);
 
             } catch (ProcessCanceledException e) {
-                return ReturnResult.CANCEL;
+                return CANCEL;
             }
 
         } else {
-            return ReturnResult.COMMIT;
+            return COMMIT;
         }
     }
 
@@ -125,18 +125,36 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,
                                             final CommitExecutor executor,
                                             final CheckStylePlugin plugin) {
-        final int errorCount = results.keySet().size();
+        final int errorCount = errorCountOf(results);
+        if (errorCount == 0) {
+            return COMMIT;
+        }
 
         final int answer = promptUser(plugin, errorCount, executor);
         if (answer == Messages.OK) {
             showResultsInToolWindow(results, plugin);
-            return ReturnResult.CLOSE_WINDOW;
+            return CLOSE_WINDOW;
 
         } else if (answer == Messages.CANCEL || answer < 0) {
-            return ReturnResult.CANCEL;
+            return CANCEL;
         }
 
-        return ReturnResult.COMMIT;
+        return COMMIT;
+    }
+
+    private int errorCountOf(final Map<PsiFile, List<Problem>> results) {
+        return results.entrySet().stream()
+                .filter(this::hasProblemsThatAreNotIgnored)
+                .collect(toList())
+                .size();
+    }
+
+    private boolean hasProblemsThatAreNotIgnored(final Map.Entry<PsiFile, List<Problem>> entry) {
+        return entry.getValue()
+                .stream()
+                .filter(problem -> problem.severityLevel() != SeverityLevel.Ignore)
+                .collect(toList())
+                .size() > 0;
     }
 
     private int promptUser(final CheckStylePlugin plugin,
@@ -153,7 +171,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             commitButtonText = commitButtonText.substring(0, commitButtonText.length() - 3);
         }
 
-        final String[] buttons = new String[]{
+        final String[] buttons = new String[] {
                 message("handler.before.checkin.error.review"),
                 commitButtonText,
                 CommonBundle.getCancelButtonText()};
