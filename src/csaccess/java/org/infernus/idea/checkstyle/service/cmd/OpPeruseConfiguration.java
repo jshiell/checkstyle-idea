@@ -1,10 +1,5 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.intellij.openapi.project.Project;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
@@ -17,65 +12,64 @@ import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Iterate on the configuration modules recursively, calling a visitor on each one.
  */
-public class OpPeruseConfiguration
-        implements CheckstyleCommand<Void>
-{
+public class OpPeruseConfiguration implements CheckstyleCommand<Void> {
+
     private static final String TOKENS_PROP = "tokens";
 
     private final Configuration configuration;
-
     private final ConfigVisitor visitor;
 
-
-    public OpPeruseConfiguration(@NotNull final CheckstyleInternalObject pConfiguration, @NotNull final ConfigVisitor
-            pVisitor) {
-        if (!(pConfiguration instanceof HasCsConfig)) {
-            throw new CheckstyleVersionMixException(HasCsConfig.class, pConfiguration);
+    public OpPeruseConfiguration(@NotNull final CheckstyleInternalObject configuration,
+                                 @NotNull final ConfigVisitor visitor) {
+        if (!(configuration instanceof HasCsConfig)) {
+            throw new CheckstyleVersionMixException(HasCsConfig.class, configuration);
         }
-        configuration = ((HasCsConfig) pConfiguration).getConfiguration();
-        visitor = pVisitor;
+        this.configuration = ((HasCsConfig) configuration).getConfiguration();
+        this.visitor = visitor;
     }
 
 
     @Override
-    public Void execute(@NotNull final Project pProject) throws CheckstyleException {
-
+    public Void execute(@NotNull final Project project) throws CheckstyleException {
         runVisitor(configuration);
         return null;
     }
 
 
-    private void runVisitor(@Nullable final Configuration pConfiguration) throws CheckstyleException {
-
-        if (pConfiguration == null) {
+    private void runVisitor(@Nullable final Configuration currentConfig) throws CheckstyleException {
+        if (currentConfig == null) {
             return;
         }
-        final ConfigurationModule moduleInfo = buildModuleInfo(pConfiguration);
+        final ConfigurationModule moduleInfo = buildModuleInfo(currentConfig);
         if (moduleInfo != null) {
             visitor.visit(moduleInfo);
         }
-        for (Configuration childConfig : pConfiguration.getChildren()) {
+        for (Configuration childConfig : currentConfig.getChildren()) {
             runVisitor(childConfig);
         }
     }
 
 
     @Nullable
-    private ConfigurationModule buildModuleInfo(@NotNull final Configuration pConfiguration) throws
-            CheckstyleException {
-
-        final String name = pConfiguration.getName();
-        final Map<String, String> messages = pConfiguration.getMessages();
+    private ConfigurationModule buildModuleInfo(@NotNull final Configuration currentConfig)
+            throws CheckstyleException {
+        final String name = currentConfig.getName();
+        final Map<String, String> messages = currentConfig.getMessages();
 
         final Map<String, String> properties = new HashMap<>();
         Set<KnownTokenTypes> knownTokenTypes = EnumSet.noneOf(KnownTokenTypes.class);
-        for (String key : pConfiguration.getAttributeNames()) {
+        for (String key : currentConfig.getAttributeNames()) {
             if (key != null) {
-                String value = pConfiguration.getAttribute(key);
+                String value = currentConfig.getAttribute(key);
                 if (value != null) {
                     if (TOKENS_PROP.equals(key)) {
                         knownTokenTypes = buildKnownTokenTypesSet(value);
@@ -94,12 +88,12 @@ public class OpPeruseConfiguration
     }
 
 
-    private Set<KnownTokenTypes> buildKnownTokenTypesSet(final String pValue) {
+    private Set<KnownTokenTypes> buildKnownTokenTypesSet(final String value) {
 
         final Set<KnownTokenTypes> result = EnumSet.noneOf(KnownTokenTypes.class);
-        final String[] tokenStrings = pValue.split("\\s*,\\s*");
+        final String[] tokenStrings = value.split("\\s*,\\s*");
         for (String tokenStr : tokenStrings) {
-            KnownTokenTypes knownToken = null;
+            KnownTokenTypes knownToken;
             try {
                 knownToken = KnownTokenTypes.valueOf(tokenStr);
             } catch (IllegalArgumentException e) {

@@ -7,9 +7,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class NeedBracesImporter
-        extends ModuleImporter
-{
+public class NeedBracesImporter extends ModuleImporter {
+
     private static final String ALLOW_SINGLE_LINE_STATEMENT_PROP = "allowSingleLineStatement";
 
     private int forceBraces = CommonCodeStyleSettings.FORCE_BRACES_ALWAYS;

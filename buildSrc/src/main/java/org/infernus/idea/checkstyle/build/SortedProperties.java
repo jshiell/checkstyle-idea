@@ -10,9 +10,8 @@ import java.util.Properties;
 /**
  * Just so we generate a sorted property file with the classpath information.
  */
-class SortedProperties
-        extends Properties
-{
+class SortedProperties extends Properties {
+
     @Override
     public synchronized Enumeration<Object> keys() {
         List<Object> keyList = Collections.list(super.keys());

@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Visitor called by the PeruseConfiguration command.
  */
-public interface ConfigVisitor
-{
-    void visit(@NotNull final ConfigurationModule pModule);
+public interface ConfigVisitor {
+
+    void visit(@NotNull ConfigurationModule pModule);
+
 }

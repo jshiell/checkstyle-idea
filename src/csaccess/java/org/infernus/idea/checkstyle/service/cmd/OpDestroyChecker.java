@@ -13,22 +13,21 @@ import org.jetbrains.annotations.Nullable;
  * Destroy a checker instance.
  */
 public class OpDestroyChecker
-        implements CheckstyleCommand<Void>
-{
+        implements CheckstyleCommand<Void> {
+
     private final Checker checker;
 
-
-    public OpDestroyChecker(@NotNull final CheckstyleInternalObject pChecker) {
-        if (!(pChecker instanceof HasChecker)) {
-            throw new CheckstyleVersionMixException(HasChecker.class, pChecker);
+    public OpDestroyChecker(@NotNull final CheckstyleInternalObject checker) {
+        if (!(checker instanceof HasChecker)) {
+            throw new CheckstyleVersionMixException(HasChecker.class, checker);
         }
-        checker = ((HasChecker) pChecker).getChecker();
+        this.checker = ((HasChecker) checker).getChecker();
     }
 
 
     @Nullable
     @Override
-    public Void execute(@NotNull final Project pProject) {
+    public Void execute(@NotNull final Project project) {
         checker.destroy();
         return null;
     }

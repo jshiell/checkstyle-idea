@@ -15,9 +15,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Extra logic for the JavadocPackageCheck check.
  */
-public final class JavadocPackageCheck
-        implements Check
-{
+public final class JavadocPackageCheck implements Check {
+
     private static final String CHECK_PACKAGE_INFO =
             "com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocPackageCheck";
     private static final String MODULE_NAME = "JavadocPackage";
@@ -60,8 +59,8 @@ public final class JavadocPackageCheck
         while (currentSibling != null) {
             if (currentSibling.isPhysical() && currentSibling.isValid() && currentSibling instanceof PsiFile) {
                 final String siblingName = ((PsiFile) currentSibling).getName();
-                if (PACKAGE_INFO_FILE.equals(siblingName) || (usingLegacyPackage && PACKAGE_HTML_FILE.equals
-                        (siblingName))) {
+                if (PACKAGE_INFO_FILE.equals(siblingName)
+                        || (usingLegacyPackage && PACKAGE_HTML_FILE.equals(siblingName))) {
                     return false;
                 }
             }
@@ -97,8 +96,7 @@ public final class JavadocPackageCheck
         // once. Currently we don't care because there is only one such class.
         final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         final AtomicReference<String> value = new AtomicReference<>();
-        csService.getCheckstyleInstance().peruseConfiguration(config, new ConfigVisitor()
-        {
+        csService.getCheckstyleInstance().peruseConfiguration(config, new ConfigVisitor() {
             @Override
             public void visit(@NotNull final ConfigurationModule pModule) {
                 if (MODULE_NAME.equals(pModule.getName()) || CHECK_PACKAGE_INFO.equals(pModule.getName())) {

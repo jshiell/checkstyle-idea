@@ -24,11 +24,9 @@ import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 /**
  * Scan files in the current change-list.
  */
-public class ScanCurrentChangeList
-        extends BaseAction
-{
-    private static final Log LOG = LogFactory.getLog(ScanCurrentChangeList.class);
+public class ScanCurrentChangeList extends BaseAction {
 
+    private static final Log LOG = LogFactory.getLog(ScanCurrentChangeList.class);
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
@@ -39,8 +37,8 @@ public class ScanCurrentChangeList
                 return;
             }
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow
-                    (CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project)
+                    .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
             project.getComponent(CheckStylePlugin.class).asyncScanFiles(filesFor(changeListManager

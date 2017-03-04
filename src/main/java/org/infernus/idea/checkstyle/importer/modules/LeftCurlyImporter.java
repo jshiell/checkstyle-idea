@@ -10,9 +10,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class LeftCurlyImporter
-        extends ModuleImporter
-{
+public class LeftCurlyImporter extends ModuleImporter {
+
     private static final String OPTION_PROP = "option";
 
     private static final String LEFT_CURLY_POLICY_EOL = "eol";

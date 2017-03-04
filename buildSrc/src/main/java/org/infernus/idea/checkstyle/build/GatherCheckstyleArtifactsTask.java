@@ -25,19 +25,15 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * Download all supported versions of Checkstyle along with their transitive dependencies, for bundling with the
  * plugin.
  */
-public class GatherCheckstyleArtifactsTask
-    extends DefaultTask
-{
+public class GatherCheckstyleArtifactsTask extends DefaultTask {
+
     public static final String NAME = "gatherCheckstyleArtifacts";
 
     private final File bundledJarsDir;
 
     private final File classPathsInfoFile;
 
-
-
-    public GatherCheckstyleArtifactsTask()
-    {
+    public GatherCheckstyleArtifactsTask() {
         super();
         setGroup(LifecycleBasePlugin.BUILD_GROUP);
         setDescription("Gathers Checkstyle libraries and their dependencies for bundling");
@@ -59,21 +55,17 @@ public class GatherCheckstyleArtifactsTask
         mainSourceSet.getResources().srcDir(classPathsInfoFile.getParentFile());
 
         // 'processResources' now depends on this task
-        project.afterEvaluate(new Closure<Void>(this)
-        {
+        project.afterEvaluate(new Closure<Void>(this) {
             @Override
-            public Void call(final Object... args)
-            {
+            public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(getOwner());
                 return null;
             }
         });
 
-        doLast(new Closure<Void>(this)
-        {
+        doLast(new Closure<Void>(this) {
             @Override
-            public Void call()
-            {
+            public Void call() {
                 final Set<File> bundledFiles = new TreeSet<>();
                 final Properties classPaths = new SortedProperties();
 
@@ -89,22 +81,15 @@ public class GatherCheckstyleArtifactsTask
         });
     }
 
-
-
-    private Set<File> resolveDependencies(final Project pProject, final String pCheckstyleVersion)
-    {
-        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(pProject, pCheckstyleVersion);
-        final Configuration csConf = pProject.getConfigurations().detachedConfiguration(csDep);
-        final Set<File> files = csConf.resolve();
-        return files;
+    private Set<File> resolveDependencies(final Project project, final String checkstyleVersion) {
+        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
+        final Configuration csConf = project.getConfigurations().detachedConfiguration(csDep);
+        return csConf.resolve();
     }
 
-
-
-    private String convertToClassPath(final Set<File> pResolvedDependecy)
-    {
+    private String convertToClassPath(final Set<File> resolvedDependecy) {
         final StringBuilder sb = new StringBuilder();
-        for (final File f : pResolvedDependecy) {
+        for (final File f : resolvedDependecy) {
             sb.append(CopyCheckstyleArtifactsToSandboxTask.TARGET_SUBFOLDER);
             sb.append('/');
             sb.append(f.getName());
@@ -116,9 +101,8 @@ public class GatherCheckstyleArtifactsTask
 
 
 
-    private void copyFiles(final Set<File> pBundledJars)
-    {
-        for (final File bundledJar : pBundledJars) {
+    private void copyFiles(final Set<File> bundledJars) {
+        for (final File bundledJar : bundledJars) {
             try {
                 FileUtils.copyFileToDirectory(bundledJar, bundledJarsDir, true);
             }
@@ -128,17 +112,12 @@ public class GatherCheckstyleArtifactsTask
         }
     }
 
-
-
-    private void createClassPathsFile(final Properties pClassPaths)
-    {
+    private void createClassPathsFile(final Properties classPaths) {
         //noinspection ResultOfMethodCallIgnored
         classPathsInfoFile.getParentFile().mkdir();
 
-        try (
-            final OutputStream os = new FileOutputStream(classPathsInfoFile)
-        ) {
-            pClassPaths.store(os, " Class path information for Checkstyle artifacts bundled with Checkstyle_IDEA");
+        try (OutputStream os = new FileOutputStream(classPathsInfoFile)) {
+            classPaths.store(os, " Class path information for Checkstyle artifacts bundled with Checkstyle_IDEA");
         }
         catch (IOException e) {
             throw new GradleException("Unable to write classpath info file: " + classPathsInfoFile.getAbsolutePath(),
@@ -146,10 +125,7 @@ public class GatherCheckstyleArtifactsTask
         }
     }
 
-
-
-    public File getBundledJarsDir()
-    {
+    public File getBundledJarsDir() {
         return bundledJarsDir;
     }
 }

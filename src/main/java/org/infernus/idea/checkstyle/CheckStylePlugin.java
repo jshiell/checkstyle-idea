@@ -36,9 +36,8 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 /**
  * Main class for the CheckStyle scanning plug-in.
  */
-public final class CheckStylePlugin
-        implements ProjectComponent
-{
+public final class CheckStylePlugin implements ProjectComponent {
+
     /** The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
@@ -222,9 +221,8 @@ public final class CheckStylePlugin
     }
 
 
-    private class ScanCompletionTracker
-            implements ScannerListener
-    {
+    private class ScanCompletionTracker implements ScannerListener {
+
         private final Future<Map<PsiFile, List<Problem>>> future;
 
         ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
@@ -240,8 +238,8 @@ public final class CheckStylePlugin
         }
 
         @Override
-        public void scanComplete(final ConfigurationLocationResult configurationLocationResult, final Map<PsiFile,
-                List<Problem>> scanResults) {
+        public void scanComplete(final ConfigurationLocationResult configurationLocationResult,
+                                 final Map<PsiFile, List<Problem>> scanResults) {
             checkComplete(future);
         }
 

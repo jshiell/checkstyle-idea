@@ -12,7 +12,6 @@ package org.infernus.idea.checkstyle.csapi;
  * {@link org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException CheckstyleVersionMixException}s would
  * result.</p>
  */
-public interface CheckstyleInternalObject
-{
+public interface CheckstyleInternalObject {
     // tagging interface
 }

@@ -111,7 +111,7 @@ public class OpLoadConfiguration
     }
 
     @Override
-    public HasCsConfig execute(@NotNull final Project project) throws CheckstyleException {
+    public HasCsConfig execute(@NotNull final Project currentProject) throws CheckstyleException {
         HasCsConfig result;
         InputStream is = null;
         try {

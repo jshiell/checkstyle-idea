@@ -17,8 +17,8 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CheckerFactoryCache
-{
+public class CheckerFactoryCache {
+
     private static final int CLEANUP_PERIOD_SECONDS = 30;
 
     // TODO This may work more reliably if we just used a ConcurrentHashMap instead of our own reimplementation.

@@ -112,7 +112,7 @@ public final class FilePaths {
     public static class PathResolutionException extends RuntimeException {
         private static final long serialVersionUID = -8628071255737767040L;
 
-        PathResolutionException(String msg) {
+        PathResolutionException(final String msg) {
             super(msg);
         }
     }

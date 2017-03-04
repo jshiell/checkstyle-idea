@@ -10,9 +10,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Extra logic for the PackageHtmlCheck check.
  */
-public class PackageHtmlCheck
-        implements Check
-{
+public class PackageHtmlCheck implements Check {
+
     private static final String CHECK_PACKAGE_HTML = "com.puppycrawl.tools.checkstyle.checks.javadoc.PackageHtmlCheck";
     private static final String PACKAGE_HTML_FILE = "package.html";
 
@@ -45,8 +44,9 @@ public class PackageHtmlCheck
         PsiElement currentSibling = findFirstSibling(file);
 
         while (currentSibling != null) {
-            if (currentSibling.isPhysical() && currentSibling.isValid() && currentSibling instanceof PsiFile &&
-                    PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
+            if (currentSibling.isPhysical() && currentSibling.isValid()
+                    && currentSibling instanceof PsiFile
+                    && PACKAGE_HTML_FILE.equals(((PsiFile) currentSibling).getName())) {
                 return false;
             }
 

@@ -13,9 +13,8 @@ import org.gradle.api.tasks.SourceSet;
  * Make the compiled classes and resources from the 'csaccess' sourceset available to the plugin by copying it to the
  * sandbox. Test code not affected.
  */
-public class CopyClassesToSandboxTask
-        extends Copy
-{
+public class CopyClassesToSandboxTask extends Copy {
+
     private static final String TARGET_SUBFOLDER = "checkstyle/classes";
 
 
@@ -33,8 +32,8 @@ public class CopyClassesToSandboxTask
     private void configureTask(final boolean pIsTest) {
         setDescription("Copy classes from \'" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
                 + "\' sourceset into the prepared " + (pIsTest ? "test " : "") + "sandbox");
-        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "") +
-                "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
+        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
+                + "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
     }
 
 
@@ -43,8 +42,7 @@ public class CopyClassesToSandboxTask
         final Project project = getProject();
 
         // The 'test' and 'runCsaccessTests' tasks now depend on this one
-        project.afterEvaluate(new Closure(this)
-        {
+        project.afterEvaluate(new Closure(this) {
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());

@@ -25,15 +25,13 @@ import static java.util.Optional.ofNullable;
 /**
  * Base class for plug-in actions.
  */
-public abstract class BaseAction
-        extends AnAction
-{
-    private static final Log LOG = LogFactory.getLog(BaseAction.class);
+public abstract class BaseAction extends AnAction {
 
+    private static final Log LOG = LogFactory.getLog(BaseAction.class);
 
     @Override
     public void update(final AnActionEvent event) {
-        Project project = null;
+        Project project;
         try {
             project = DataKeys.PROJECT.getData(event.getDataContext());
             final Presentation presentation = event.getPresentation();
@@ -52,8 +50,8 @@ public abstract class BaseAction
             }
 
             // check if tool window is registered
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow
-                    (CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(
+                    CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);

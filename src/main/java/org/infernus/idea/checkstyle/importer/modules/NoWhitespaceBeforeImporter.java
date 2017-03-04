@@ -7,9 +7,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class NoWhitespaceBeforeImporter
-        extends ModuleImporter
-{
+public class NoWhitespaceBeforeImporter extends ModuleImporter {
+
     @Override
     protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         // nothing to do

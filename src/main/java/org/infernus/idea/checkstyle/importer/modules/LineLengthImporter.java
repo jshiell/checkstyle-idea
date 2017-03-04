@@ -6,9 +6,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class LineLengthImporter
-        extends ModuleImporter
-{
+public class LineLengthImporter extends ModuleImporter {
+
     private static final int DEFAULT_MAX_COLUMNS = 80;
     private static final String MAX_PROP = "max";
     private int maxColumns = DEFAULT_MAX_COLUMNS;
@@ -25,7 +24,7 @@ public class LineLengthImporter
     }
 
     @Override
-    public void importTo(@NotNull CodeStyleSettings settings) {
+    public void importTo(@NotNull final CodeStyleSettings settings) {
         settings.setRightMargin(JavaLanguage.INSTANCE, maxColumns);
     }
 }

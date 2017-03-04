@@ -24,8 +24,8 @@ import org.gradle.api.artifacts.ModuleDependency;
  * Read the {@code checkstyle.versions.*} and the {@code baseVersion} properties from <i>checkstyle-idea.properties</i>
  * and make them available to the build process.
  */
-public class CheckstyleVersions
-{
+public class CheckstyleVersions {
+
     private static final String PROP_FILE = "src/main/resources/checkstyle-idea.properties";
 
     private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
@@ -54,8 +54,8 @@ public class CheckstyleVersions
         theVersions.addAll(readVersions(pProperties, PROP_NAME_JAVA7));
         Set<String> versions8 = readVersions(pProperties, PROP_NAME_JAVA8);
         if (!Collections.disjoint(theVersions, versions8)) {
-            throw new GradleException("Properties '" + PROP_NAME_JAVA7 + "' and '" + PROP_NAME_JAVA8 + "' contain " +
-                    "duplicate entries in configuration file '" + PROP_FILE + "'");
+            throw new GradleException("Properties '" + PROP_NAME_JAVA7 + "' and '" + PROP_NAME_JAVA8 + "' contain "
+                    + "duplicate entries in configuration file '" + PROP_FILE + "'");
         }
         theVersions.addAll(versions8);
         return Collections.unmodifiableSortedSet(theVersions);
@@ -142,7 +142,7 @@ public class CheckstyleVersions
 
 
     public static Dependency createCheckstyleDependency(final Project pProject, final String pCheckstyleVersion) {
-        final ModuleDependency csDep = (ModuleDependency) pProject.getDependencies().create( //
+        final ModuleDependency csDep = (ModuleDependency) pProject.getDependencies().create(
                 "com.puppycrawl.tools:checkstyle:" + pCheckstyleVersion);
         final Map<String, String> ex = new HashMap<>();
         ex.put("group", "commons-logging");

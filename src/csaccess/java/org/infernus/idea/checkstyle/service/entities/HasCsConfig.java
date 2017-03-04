@@ -4,8 +4,8 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 
 
-public interface HasCsConfig
-    extends CheckstyleInternalObject
-{
+public interface HasCsConfig extends CheckstyleInternalObject {
+
     Configuration getConfiguration();
+
 }

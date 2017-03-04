@@ -36,9 +36,8 @@ import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.N
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.PRESENT;
 
 
-public class ScanFiles
-        implements Callable<Map<PsiFile, List<Problem>>>
-{
+public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
+
     private static final Log LOG = LogFactory.getLog(ScanFiles.class);
 
     private final List<PsiFile> files;
@@ -47,7 +46,8 @@ public class ScanFiles
     private final CheckStylePlugin plugin;
     private final ConfigurationLocation overrideConfigLocation;
 
-    public ScanFiles(@NotNull final CheckStylePlugin checkStylePlugin, @NotNull final List<VirtualFile> virtualFiles,
+    public ScanFiles(@NotNull final CheckStylePlugin checkStylePlugin,
+                     @NotNull final List<VirtualFile> virtualFiles,
                      @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.plugin = checkStylePlugin;
         this.overrideConfigLocation = overrideConfigLocation;
@@ -106,7 +106,7 @@ public class ScanFiles
         return filesToProblems;
     }
 
-    public void addListener(ScannerListener listener) {
+    public void addListener(final ScannerListener listener) {
         listeners.add(listener);
     }
 
@@ -114,8 +114,8 @@ public class ScanFiles
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult, Map<PsiFile,
-            List<Problem>> fileResults) {
+    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult,
+                                   final Map<PsiFile, List<Problem>> fileResults) {
         listeners.forEach(listener -> listener.scanComplete(configLocationResult, fileResults));
     }
 
@@ -195,8 +195,9 @@ public class ScanFiles
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
-            return checkerFactory(module.getProject()).checker(module, configurationLocation).map(checker -> checker.scan
-                    (scannableFiles, plugin.getConfiguration().isSuppressingErrors())).orElseGet(Collections::emptyMap);
+            return checkerFactory(module.getProject()).checker(module, configurationLocation)
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().isSuppressingErrors()))
+                    .orElseGet(Collections::emptyMap);
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
@@ -207,9 +208,8 @@ public class ScanFiles
     }
 
 
-    private class FindChildFiles
-            extends VirtualFileVisitor
-    {
+    private class FindChildFiles extends VirtualFileVisitor {
+
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 

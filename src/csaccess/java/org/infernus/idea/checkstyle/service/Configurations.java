@@ -14,16 +14,13 @@ import org.jetbrains.annotations.Nullable;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
-public class Configurations
-    implements TabWidthAndBaseDirProvider
-{
+public class Configurations implements TabWidthAndBaseDirProvider {
+
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final int DEFAULT_CHECKSTYLE_TAB_SIZE = 8;
 
     private final Module module;
-
     private final Configuration rootElement;
-
 
     public Configurations(@Nullable final Module module, @NotNull final Configuration rootElement) {
         this.module = module;

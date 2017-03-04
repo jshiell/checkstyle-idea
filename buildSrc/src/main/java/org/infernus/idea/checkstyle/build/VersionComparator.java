@@ -11,18 +11,16 @@ import java.util.regex.Pattern;
  * <i>m</i>, and <i>k</i> are integer numbers. Strings that do not match this format are sorted alphabetically at the
  * end. <code>null</code> values are sorted at the very end.
  */
-public final class VersionComparator
-    implements Comparator<String>, Serializable
-{
+public final class VersionComparator implements Comparator<String>, Serializable {
+
     private static final long serialVersionUID = 0L;
 
     private static final Pattern PATTERN = Pattern.compile("(\\d+)\\.(\\d+)(?:\\.(\\d+))?");
 
-
-
-    /** Matching groups of the above {@link #PATTERN}. */
-    private static enum VE
-    {
+    /**
+     * Matching groups of the above {@link #PATTERN}.
+     */
+    private enum VE {
         @SuppressWarnings("unused")
         All,
         Major,
@@ -31,21 +29,17 @@ public final class VersionComparator
     }
 
 
-
     @Override
-    public int compare(final String pStr1, final String pStr2)
-    {
+    public int compare(final String pStr1, final String pStr2) {
         int result = 0;
         if (pStr1 == null) {
             if (pStr2 != null) {
                 result = 1;
             }
-        }
-        else {
+        } else {
             if (pStr2 == null) {
                 result = -1;
-            }
-            else {
+            } else {
                 Matcher matcher1 = PATTERN.matcher(pStr1);
                 Matcher matcher2 = PATTERN.matcher(pStr2);
                 if (matcher1.matches() && matcher2.matches()) {
@@ -54,34 +48,28 @@ public final class VersionComparator
                     final int minor1 = Integer.parseInt(matcher1.group(VE.Minor.ordinal()));
                     final int minor2 = Integer.parseInt(matcher2.group(VE.Minor.ordinal()));
                     final int micro1 = matcher1.group(VE.Micro.ordinal()) != null ? Integer.parseInt(matcher1.group(
-                        VE.Micro.ordinal())) : 0;
+                            VE.Micro.ordinal())) : 0;
                     final int micro2 = matcher2.group(VE.Micro.ordinal()) != null ? Integer.parseInt(matcher2.group(
-                        VE.Micro.ordinal())) : 0;
+                            VE.Micro.ordinal())) : 0;
 
                     if (major1 > major2) {
                         result = 1;
-                    }
-                    else if (major1 < major2) {
+                    } else if (major1 < major2) {
                         result = -1;
-                    }
-                    else {
+                    } else {
                         if (minor1 > minor2) {
                             result = 1;
-                        }
-                        else if (minor1 < minor2) {
+                        } else if (minor1 < minor2) {
                             result = -1;
-                        }
-                        else {
+                        } else {
                             if (micro1 > micro2) {
                                 result = 1;
-                            }
-                            else if (micro1 < micro2) {
+                            } else if (micro1 < micro2) {
                                 result = -1;
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     result = pStr1.compareTo(pStr2);
                 }
             }

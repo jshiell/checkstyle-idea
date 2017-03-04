@@ -396,7 +396,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     protected class ToolWindowKeyboardListener extends KeyAdapter {
 
         @Override
-        public void keyPressed(KeyEvent e) {
+        public void keyPressed(final KeyEvent e) {
             if (e.getKeyCode() != KeyEvent.VK_ENTER) {
                 return;
             }

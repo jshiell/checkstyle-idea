@@ -9,13 +9,12 @@ import org.jetbrains.annotations.NotNull;
  * <p/>
  * Not a lot of extra logic at present, but it's a start.
  */
-public interface Check
-{
+public interface Check {
+
     String getShortName();
 
     // TODO This may not be enough, because Checkstyle accepts more forms (e.g. FQCN without "Check" postfix).
     String getFullyQualifiedName();
-
 
     /**
      * Configure the check given the CheckStyle configuration.

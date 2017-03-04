@@ -8,12 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-class CheckerFactoryCacheKey
-{
+class CheckerFactoryCacheKey {
+
     private final String projectName;
-
     private final String moduleName;
-
     private final ConfigurationLocation location;
 
     // We can disregard Checkstyle version and third party jars as elements of the cache key, because the cache
@@ -36,8 +34,9 @@ class CheckerFactoryCacheKey
             return false;
         }
         final CheckerFactoryCacheKey other = (CheckerFactoryCacheKey) pOther;
-        return Objects.equals(projectName, other.projectName) && Objects.equals(moduleName, other.moduleName) &&
-                Objects.equals(location, other.location);
+        return Objects.equals(projectName, other.projectName)
+                && Objects.equals(moduleName, other.moduleName)
+                && Objects.equals(location, other.location);
     }
 
 

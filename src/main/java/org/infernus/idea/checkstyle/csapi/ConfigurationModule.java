@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class ConfigurationModule
-{
+public class ConfigurationModule {
+
     private final String name;
 
     private final Map<String, String> properties;
@@ -20,27 +20,28 @@ public class ConfigurationModule
     private final Map<String, String> messages;
 
 
-    public ConfigurationModule(@NotNull final String pName, @Nullable final Map<String, String> pProperties,
-            @Nullable final Set<KnownTokenTypes> pKnownTokenTypes, @Nullable final Map<String, String> pMessages) {
+    public ConfigurationModule(@NotNull final String name,
+                               @Nullable final Map<String, String> properties,
+                               @Nullable final Set<KnownTokenTypes> knownTokenTypes,
+                               @Nullable final Map<String, String> messages) {
+        this.name = name;
 
-        name = pName;
-
-        if (pProperties != null) {
-            properties = Collections.unmodifiableMap(pProperties);
+        if (properties != null) {
+            this.properties = Collections.unmodifiableMap(properties);
         } else {
-            properties = Collections.emptyMap();
+            this.properties = Collections.emptyMap();
         }
 
-        if (pKnownTokenTypes != null) {
-            knownTokenTypes = Collections.unmodifiableSet(pKnownTokenTypes);
+        if (knownTokenTypes != null) {
+            this.knownTokenTypes = Collections.unmodifiableSet(knownTokenTypes);
         } else {
-            knownTokenTypes = Collections.emptySet();
+            this.knownTokenTypes = Collections.emptySet();
         }
 
-        if (pMessages != null) {
-            messages = Collections.unmodifiableMap(pMessages);
+        if (messages != null) {
+            this.messages = Collections.unmodifiableMap(messages);
         } else {
-            messages = Collections.emptyMap();
+            this.messages = Collections.emptyMap();
         }
     }
 

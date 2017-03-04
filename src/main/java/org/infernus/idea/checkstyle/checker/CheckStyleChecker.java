@@ -1,24 +1,24 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class CheckStyleChecker
-{
-    /** checker with config */
+
+public class CheckStyleChecker {
+    /**
+     * checker with config
+     */
     private final CheckstyleInternalObject checkerWithConfig;
 
-    /** the service instance that was current when this object is created */
+    /**
+     * the service instance that was current when this object is created
+     */
     private final CheckstyleActions csServiceInstance;
 
     private final int tabWidth;
@@ -27,14 +27,16 @@ public class CheckStyleChecker
     private final ClassLoader loaderOfCheckedCode;
 
 
-    public CheckStyleChecker(@NotNull final CheckstyleInternalObject pCheckerWithConfig, final int tabWidth,
-                             @NotNull final Optional<String> baseDir, final ClassLoader pLoaderOfCheckedCode,
+    public CheckStyleChecker(@NotNull final CheckstyleInternalObject checkerWithConfig,
+                             final int tabWidth,
+                             @NotNull final Optional<String> baseDir,
+                             final ClassLoader loaderOfCheckedCode,
                              @NotNull final CheckstyleActions csServiceInstance) {
         this.csServiceInstance = csServiceInstance;
-        this.checkerWithConfig = pCheckerWithConfig;
+        this.checkerWithConfig = checkerWithConfig;
         this.tabWidth = tabWidth;
         this.baseDir = baseDir;
-        this.loaderOfCheckedCode = pLoaderOfCheckedCode;
+        this.loaderOfCheckedCode = loaderOfCheckedCode;
     }
 
     @NotNull

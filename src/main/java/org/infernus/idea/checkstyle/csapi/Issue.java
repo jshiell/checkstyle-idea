@@ -4,8 +4,8 @@ package org.infernus.idea.checkstyle.csapi;
 /**
  * An issue as reported by the Checkstyle tool.
  */
-public class Issue
-{
+public class Issue {
+
     private final String fileName;
 
     private final int lineNo;

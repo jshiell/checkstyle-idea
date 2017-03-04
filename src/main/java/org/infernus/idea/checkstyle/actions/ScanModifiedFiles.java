@@ -20,23 +20,21 @@ import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
  * <p/>
  * If the project is not setup to use VCS then no files will be scanned.
  */
-public class ScanModifiedFiles
-        extends BaseAction
-{
-    private static final Log LOG = LogFactory.getLog(ScanModifiedFiles.class);
+public class ScanModifiedFiles extends BaseAction {
 
+    private static final Log LOG = LogFactory.getLog(ScanModifiedFiles.class);
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
-        Project project = null;
+        Project project;
         try {
             project = DataKeys.PROJECT.getData(event.getDataContext());
             if (project == null) {
                 return;
             }
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow
-                    (CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project)
+                    .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
 
             final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
             project.getComponent(CheckStylePlugin.class).asyncScanFiles(changeListManager.getAffectedFiles(),

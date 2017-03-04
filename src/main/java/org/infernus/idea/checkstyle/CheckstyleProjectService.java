@@ -31,8 +31,8 @@ import org.jetbrains.annotations.Nullable;
  * Makes the Checkstyle tool available to the plugin in the correct version. Registered in {@code plugin.xml}.
  * This must be a project-level service because the Checkstyle version is chosen per project.
  */
-public class CheckstyleProjectService
-{
+public class CheckstyleProjectService {
+
     private static final Log LOG = LogFactory.getLog(CheckstyleProjectService.class);
 
     private static final String PROP_FILE = "checkstyle-idea.properties";
@@ -92,14 +92,14 @@ public class CheckstyleProjectService
                 props.load(is);
             }
         } catch (IllegalArgumentException | IOException e) {
-            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '" +
-                    PROP_FILE + "'", e);
+            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
+                    + PROP_FILE + "'", e);
         } finally {
             IOUtils.closeQuietly(is);
         }
         if (props.isEmpty()) {
-            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '" +
-                    PROP_FILE + "'");
+            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
+                    + PROP_FILE + "'");
         }
         return props;
     }
@@ -108,8 +108,8 @@ public class CheckstyleProjectService
     private Set<String> readVersions(final Properties props, final String propertyName) {
         final String propertyValue = props.getProperty(propertyName);
         if (Strings.isBlank(propertyValue)) {
-            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' missing from " +
-                    "configuration file '" + PROP_FILE + "'");
+            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' missing from "
+                    + "configuration file '" + PROP_FILE + "'");
         }
 
         final String[] versions = propertyValue.trim().split("\\s*,\\s*");
@@ -121,8 +121,8 @@ public class CheckstyleProjectService
         }
 
         if (result.isEmpty()) {
-            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' was empty in " +
-                    "configuration file '" + PROP_FILE + "'");
+            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' was empty in "
+                    + "configuration file '" + PROP_FILE + "'");
         }
         return result;
     }
@@ -149,8 +149,7 @@ public class CheckstyleProjectService
             pThirdPartyJars) {
         final String version = isSupportedVersion(pVersion) ? pVersion : getDefaultVersion();
         synchronized (project) {
-            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>()
-            {
+            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>() {
                 @Override
                 public CheckstyleClassLoader call() {
                     final List<URL> thirdPartyClassPath = toListOfUrls(pThirdPartyJars);

@@ -18,9 +18,8 @@ import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
 
 
-public class ProcessResultsThread
-        implements Runnable
-{
+public class ProcessResultsThread implements Runnable {
+
     private static final Log LOG = LogFactory.getLog(ProcessResultsThread.class);
 
     private final boolean suppressErrors;
@@ -33,8 +32,7 @@ public class ProcessResultsThread
     private final Map<PsiFile, List<Problem>> problems = new HashMap<>();
 
 
-    private static final class Position
-    {
+    private static final class Position {
         private final boolean afterEndOfLine;
         private final int offset;
 
@@ -118,8 +116,8 @@ public class ProcessResultsThread
             addProblemTo(victim, psiFile, event, position.afterEndOfLine);
         } else {
             addProblemTo(psiFile, psiFile, event, false);
-            LOG.debug("Couldn't find victim for error: " + event.getFileName() + "(" + event.getLineNo() + ":" +
-                    event.getColumnNo() + ") " + event.getMessage());
+            LOG.debug("Couldn't find victim for error: " + event.getFileName() + "(" + event.getLineNo() + ":"
+                    + event.getColumnNo() + ") " + event.getMessage());
         }
     }
 

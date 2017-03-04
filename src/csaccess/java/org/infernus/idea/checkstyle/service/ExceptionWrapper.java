@@ -14,14 +14,14 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
 
-public class ExceptionWrapper
-{
-    private static final Set<Class<? extends Throwable>> PARSE_EXCEPTIONS = new HashSet<>(asList( //
-            RecognitionException.class, //
-            TokenStreamException.class, //
-            NullPointerException.class, //
-            ArrayIndexOutOfBoundsException.class, //
-            StringIndexOutOfBoundsException.class, //
+public class ExceptionWrapper {
+
+    private static final Set<Class<? extends Throwable>> PARSE_EXCEPTIONS = new HashSet<>(asList(
+            RecognitionException.class,
+            TokenStreamException.class,
+            NullPointerException.class,
+            ArrayIndexOutOfBoundsException.class,
+            StringIndexOutOfBoundsException.class,
             IllegalStateException.class));
 
 

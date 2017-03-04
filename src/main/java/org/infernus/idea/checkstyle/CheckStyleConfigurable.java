@@ -57,11 +57,12 @@ public class CheckStyleConfigurable
         LOG.trace("isModified() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
         try {
-            boolean result = haveLocationsChanged(configuration) || hasActiveLocationChanged(configuration) ||
-                    !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath()) ||
-                    configuration.getScanScope() != configPanel.getScanScope() || configuration.isSuppressingErrors()
-                    != configPanel.isSuppressingErrors() || !configuration.getCheckstyleVersion(null).equals(configPanel
-                    .getCheckstyleVersion());
+            boolean result = haveLocationsChanged(configuration)
+                    || hasActiveLocationChanged(configuration)
+                    || !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath())
+                    || configuration.getScanScope() != configPanel.getScanScope()
+                    || configuration.isSuppressingErrors() != configPanel.isSuppressingErrors()
+                    || !configuration.getCheckstyleVersion(null).equals(configPanel.getCheckstyleVersion());
             if (LOG.isTraceEnabled()) {
                 LOG.trace("isModified() - exit - result=" + result);
             }

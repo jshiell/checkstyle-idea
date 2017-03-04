@@ -14,8 +14,8 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.ModulePaths;
 
 
-public class ModuleClassPathBuilder
-{
+public class ModuleClassPathBuilder {
+
     private static final Log LOG = LogFactory.getLog(ModuleClassPathBuilder.class);
 
 

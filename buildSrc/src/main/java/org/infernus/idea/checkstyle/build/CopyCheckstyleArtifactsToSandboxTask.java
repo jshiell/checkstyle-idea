@@ -8,14 +8,11 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.Copy;
 
 
-public class CopyCheckstyleArtifactsToSandboxTask
-    extends Copy
-{
+public class CopyCheckstyleArtifactsToSandboxTask extends Copy {
+
     static final String TARGET_SUBFOLDER = "checkstyle/lib";
 
-
     public CopyCheckstyleArtifactsToSandboxTask() {
-
         super();
         setGroup("intellij");
         configureTask(false);
@@ -27,10 +24,10 @@ public class CopyCheckstyleArtifactsToSandboxTask
 
 
     private void configureTask(final boolean pIsTest) {
-        setDescription("Adds the gathered Checkstyle artifacts to the prepared " + (pIsTest ? "test " : "") +
-                "sandbox");
-        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "") +
-                "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
+        setDescription("Adds the gathered Checkstyle artifacts to the prepared " + (pIsTest ? "test " : "")
+                + "sandbox");
+        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
+                + "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
     }
 
 
@@ -39,8 +36,7 @@ public class CopyCheckstyleArtifactsToSandboxTask
         final Project project = getProject();
 
         // The 'test' task now depends on this one
-        project.afterEvaluate(new Closure(this)
-        {
+        project.afterEvaluate(new Closure(this) {
             @Override
             public Void call(final Object... args) {
                 project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(getOwner());

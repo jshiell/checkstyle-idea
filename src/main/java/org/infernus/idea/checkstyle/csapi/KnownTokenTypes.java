@@ -4,8 +4,7 @@ package org.infernus.idea.checkstyle.csapi;
  * TokenTypes which we use in this plugin somehow, a subset of the TokenTypes defined by Checkstyle.
  */
 //@formatter:off
-public enum KnownTokenTypes
-{
+public enum KnownTokenTypes {
     ASSIGN,
     BAND,
     BAND_ASSIGN,

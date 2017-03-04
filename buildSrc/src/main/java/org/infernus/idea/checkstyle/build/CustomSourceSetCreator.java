@@ -9,8 +9,8 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskContainer;
 
 
-public class CustomSourceSetCreator
-{
+public class CustomSourceSetCreator {
+
     public static final String CSACCESS_SOURCESET_NAME = "csaccess";
     public static final String CSACCESSTEST_SOURCESET_NAME = "csaccessTest";
 
@@ -41,8 +41,8 @@ public class CustomSourceSetCreator
         final Configuration runtimeConfig = configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
         configurations.getByName(csaccessSourceSet.getCompileConfigurationName()).extendsFrom(compileConfig);
         configurations.getByName(csaccessSourceSet.getCompileOnlyConfigurationName()).extendsFrom(compileOnlyConfig);
-        configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName()).extendsFrom
-                (compileClasspathConfig);
+        configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName())
+                .extendsFrom(compileClasspathConfig);
         configurations.getByName(csaccessSourceSet.getRuntimeConfigurationName()).extendsFrom(runtimeConfig);
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):
@@ -68,35 +68,37 @@ public class CustomSourceSetCreator
 
         // Create the 'csaccess' source set
         final SourceSet csaccessTestSourceSet = sourceSets.create(CSACCESSTEST_SOURCESET_NAME);
-        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath().  //
-                plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
-        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath().  //
-                plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
+        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(csaccessSourceSet.getOutput()));
+        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(csaccessSourceSet.getOutput()));
         sourceSets.add(csaccessTestSourceSet);
 
         // Derive all its configurations from 'test' and 'csaccess'
         final ConfigurationContainer configurations = project.getConfigurations();
-        final Configuration csaccessCompileConfig = configurations.getByName(  //
-                csaccessSourceSet.getCompileConfigurationName());
-        final Configuration csaccessCompileOnlyConfig = configurations.getByName(  //
+        final Configuration csaccessCompileConfig = configurations
+                .getByName(csaccessSourceSet.getCompileConfigurationName());
+        final Configuration csaccessCompileOnlyConfig = configurations.getByName(
                 csaccessSourceSet.getCompileOnlyConfigurationName());
-        final Configuration csaccessCompileClasspathConfig = configurations.getByName(  //
+        final Configuration csaccessCompileClasspathConfig = configurations.getByName(
                 csaccessSourceSet.getCompileClasspathConfigurationName());
-        final Configuration csaccessRuntimeConfig = configurations.getByName(  //
+        final Configuration csaccessRuntimeConfig = configurations.getByName(
                 csaccessSourceSet.getRuntimeConfigurationName());
         final Configuration testCompileConfig = configurations.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME);
-        final Configuration testCompileOnlyConfig = configurations.getByName(  //
+        final Configuration testCompileOnlyConfig = configurations.getByName(
                 JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME);
-        final Configuration testCompileClasspathConfig = configurations.getByName(  //
+        final Configuration testCompileClasspathConfig = configurations.getByName(
                 JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME);
         final Configuration testRuntimeConfig = configurations.getByName(JavaPlugin.TEST_RUNTIME_CONFIGURATION_NAME);
-        configurations.getByName(csaccessTestSourceSet.getCompileConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileConfigurationName()).
                 extendsFrom(csaccessCompileConfig, testCompileConfig);
-        configurations.getByName(csaccessTestSourceSet.getCompileOnlyConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileOnlyConfigurationName()).
                 extendsFrom(csaccessCompileOnlyConfig, testCompileOnlyConfig);
-        configurations.getByName(csaccessTestSourceSet.getCompileClasspathConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileClasspathConfigurationName()).
                 extendsFrom(csaccessCompileClasspathConfig, testCompileClasspathConfig);
-        configurations.getByName(csaccessTestSourceSet.getRuntimeConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getRuntimeConfigurationName()).
                 extendsFrom(csaccessRuntimeConfig, testRuntimeConfig);
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):

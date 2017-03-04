@@ -6,9 +6,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class IndentationImporter
-        extends ModuleImporter
-{
+public class IndentationImporter extends ModuleImporter {
+
     private static final String BASIC_OFFSET_PROP = "basicOffset";
     private static final String CASE_INDENT_PROP = "caseIndent";
     private static final String LINE_WRAP_INDENT_PROP = "lineWrappingIndentation";

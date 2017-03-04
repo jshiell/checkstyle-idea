@@ -22,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
  * Registered as {@code schemeImporter} in <em>plugin.xml</em>.
  */
 public class CheckStyleCodeStyleImporter
-        implements SchemeImporter<CodeStyleScheme>
-{
+        implements SchemeImporter<CodeStyleScheme> {
+
     private static final Log LOG = LogFactory.getLog(CheckStyleCodeStyleImporter.class);
 
     private CheckstyleProjectService checkstyleProjectService = null;
@@ -32,23 +32,25 @@ public class CheckStyleCodeStyleImporter
         super();
     }
 
-    public CheckStyleCodeStyleImporter(@NotNull final CheckstyleProjectService pCheckstyleProjectService) {
+    public CheckStyleCodeStyleImporter(@NotNull final CheckstyleProjectService checkstyleProjectService) {
         super();
-        checkstyleProjectService = pCheckstyleProjectService;
+        this.checkstyleProjectService = checkstyleProjectService;
     }
 
 
     @NotNull
     @Override
     public String[] getSourceExtensions() {
-        return new String[]{"xml"};
+        return new String[] {"xml"};
     }
 
     @Nullable
     @Override
-    public CodeStyleScheme importScheme(@NotNull final Project project, @NotNull final VirtualFile selectedFile,
-                                        @NotNull final CodeStyleScheme currentScheme, @NotNull final
-                                            SchemeFactory<CodeStyleScheme> schemeFactory) throws SchemeImportException {
+    public CodeStyleScheme importScheme(@NotNull final Project project,
+                                        @NotNull final VirtualFile selectedFile,
+                                        @NotNull final CodeStyleScheme currentScheme,
+                                        @NotNull final SchemeFactory<CodeStyleScheme> schemeFactory)
+            throws SchemeImportException {
         try {
             CodeStyleScheme targetScheme = currentScheme;
             if (currentScheme.isDefault()) {
@@ -76,8 +78,8 @@ public class CheckStyleCodeStyleImporter
 
 
     @Nullable
-    private CheckstyleInternalObject loadConfiguration(@NotNull final Project project, @NotNull final VirtualFile
-            selectedFile) {
+    private CheckstyleInternalObject loadConfiguration(@NotNull final Project project,
+                                                       @NotNull final VirtualFile selectedFile) {
         CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         return csService.getCheckstyleInstance().loadConfiguration(selectedFile, true, null);
     }
@@ -86,11 +88,10 @@ public class CheckStyleCodeStyleImporter
     void importConfiguration(@NotNull final CheckstyleInternalObject configuration,
                              @NotNull final CodeStyleSettings settings) {
 
-        checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, new ConfigVisitor()
-        {
+        checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, new ConfigVisitor() {
             @Override
             public void visit(@NotNull final ConfigurationModule pModule) {
-                ModuleImporter moduleImporter = null;
+                ModuleImporter moduleImporter;
                 try {
                     moduleImporter = ModuleImporterFactory.getModuleImporter(pModule);
                 } catch (InstantiationException | IllegalAccessException e) {

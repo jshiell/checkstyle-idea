@@ -9,7 +9,7 @@ class ModuleImporterFactory {
     private ModuleImporterFactory() {}
 
     @Nullable
-    static ModuleImporter getModuleImporter(@NotNull ConfigurationModule configuration)
+    static ModuleImporter getModuleImporter(@NotNull final ConfigurationModule configuration)
             throws InstantiationException, IllegalAccessException {
         String name = configuration.getName();
         ModuleImporter moduleImporter = createImporter(name);
@@ -20,7 +20,7 @@ class ModuleImporterFactory {
     }
 
     @Nullable
-    private static ModuleImporter createImporter(@NotNull String name)
+    private static ModuleImporter createImporter(@NotNull final String name)
             throws IllegalAccessException, InstantiationException {
         String fqn = getFullyQualifiedClassName(name);
         try {
@@ -32,7 +32,7 @@ class ModuleImporterFactory {
         }
     }
 
-    private static String getFullyQualifiedClassName(@NotNull String moduleName) {
+    private static String getFullyQualifiedClassName(@NotNull final String moduleName) {
         return ModuleImporterFactory.class.getPackage().getName() + ".modules." + moduleName + "Importer";
     }
 }

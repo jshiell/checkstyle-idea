@@ -99,8 +99,8 @@ public class CheckStyleConfigPanel extends JPanel {
         return Collections.unmodifiableList(result);
     }
 
-    private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project project) {
-        SortedSet<String> versions = CheckstyleProjectService.getInstance(project).getSupportedVersions();
+    private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project currentProject) {
+        SortedSet<String> versions = CheckstyleProjectService.getInstance(currentProject).getSupportedVersions();
         String[] supportedVersions = versions.toArray(new String[versions.size()]);
         return new ComboBox(supportedVersions);
     }

@@ -16,11 +16,11 @@ public abstract class ModuleImporter {
     private Set<KnownTokenTypes> tokens;
 
     @NotNull
-    protected CommonCodeStyleSettings getJavaSettings(@NotNull CodeStyleSettings settings) {
+    protected CommonCodeStyleSettings getJavaSettings(@NotNull final CodeStyleSettings settings) {
         return settings.getCommonSettings(JavaLanguage.INSTANCE);
     }
 
-    public void setFrom(@NotNull ConfigurationModule moduleConfig) {
+    public void setFrom(@NotNull final ConfigurationModule moduleConfig) {
         tokens = moduleConfig.getKnownTokenTypes();
         for (Map.Entry<String, String> entry : moduleConfig.getProperties().entrySet()) {
             handleAttribute(entry.getKey(), entry.getValue());
@@ -30,11 +30,11 @@ public abstract class ModuleImporter {
     protected abstract void handleAttribute(@NotNull String attrName, @NotNull String attrValue);
 
 
-    protected boolean appliesTo(KnownTokenTypes token) {
+    protected boolean appliesTo(final KnownTokenTypes token) {
         return tokens == null || tokens.isEmpty() || tokens.contains(token);
     }
 
-    protected boolean appliesToOneOf(Set<KnownTokenTypes> tokenSet) {
+    protected boolean appliesToOneOf(final Set<KnownTokenTypes> tokenSet) {
         return tokens == null || tokens.isEmpty() || !Collections.disjoint(tokens, tokenSet);
     }
 
@@ -42,7 +42,7 @@ public abstract class ModuleImporter {
     public abstract void importTo(@NotNull CodeStyleSettings settings);
 
 
-    protected int getIntOrDefault(@NotNull String intStr, int defaultValue) {
+    protected int getIntOrDefault(@NotNull final String intStr, final int defaultValue) {
         try {
             return Integer.parseInt(intStr);
         } catch (NumberFormatException e) {

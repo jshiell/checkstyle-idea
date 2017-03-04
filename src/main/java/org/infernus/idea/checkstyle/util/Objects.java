@@ -7,8 +7,7 @@ import com.intellij.util.lang.UrlClassLoader;
 import org.jetbrains.annotations.NotNull;
 
 
-public final class Objects
-{
+public final class Objects {
 
     private Objects() {
     }

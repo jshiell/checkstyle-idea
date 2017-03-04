@@ -7,16 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class SimpleResolver
-        implements PropertyResolver
-{
+public class SimpleResolver implements PropertyResolver {
+
     private final Map<String, String> properties;
 
-
-    public SimpleResolver(@NotNull final Map<String, String> pProperties) {
-        properties = pProperties;
+    public SimpleResolver(@NotNull final Map<String, String> properties) {
+        this.properties = properties;
     }
-
 
     @Override
     @Nullable

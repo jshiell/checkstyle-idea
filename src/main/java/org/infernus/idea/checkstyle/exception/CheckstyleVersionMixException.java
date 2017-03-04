@@ -16,27 +16,26 @@ import org.jetbrains.annotations.Nullable;
  * of the service layer has changed.
  * <p><b>Important:</b> Be sure to throw it <em>only</em> from the 'csaccess' sourceset!</p>
  */
-public class CheckstyleVersionMixException
-        extends CheckstyleServiceException
-{
-    public CheckstyleVersionMixException(@NotNull final Class<? extends CheckstyleInternalObject> pExpectedClass,
-                                         @Nullable final CheckstyleInternalObject pActualObject) {
-        super(buildMessage(pExpectedClass, pActualObject));
+public class CheckstyleVersionMixException extends CheckstyleServiceException {
+
+    public CheckstyleVersionMixException(@NotNull final Class<? extends CheckstyleInternalObject> expectedClass,
+                                         @Nullable final CheckstyleInternalObject actualObject) {
+        super(buildMessage(expectedClass, actualObject));
     }
 
 
     @NotNull
-    private static String buildMessage(@NotNull final Class<? extends CheckstyleInternalObject> pExpectedClass,
-                                       @Nullable final CheckstyleInternalObject pActualObject) {
+    private static String buildMessage(@NotNull final Class<? extends CheckstyleInternalObject> expectedClass,
+                                       @Nullable final CheckstyleInternalObject actualObject) {
         StringBuilder sb = new StringBuilder("internal error - A ");
         sb.append(CheckstyleInternalObject.class.getSimpleName());
         sb.append(" passed to the service layer could not be processed. Expected: ");
-        sb.append(pExpectedClass.getName());
+        sb.append(expectedClass.getName());
         sb.append(", actual: ");
-        if (pActualObject != null) {
-            sb.append(pActualObject.getClass().getName());
+        if (actualObject != null) {
+            sb.append(actualObject.getClass().getName());
             sb.append(" [interfaces: ");
-            for (Iterator<String> iter = getAllInterfaces(pActualObject.getClass()).iterator(); iter.hasNext(); ) {
+            for (Iterator<String> iter = getAllInterfaces(actualObject.getClass()).iterator(); iter.hasNext(); ) {
                 sb.append(iter.next());
                 if (iter.hasNext()) {
                     sb.append(", ");
@@ -55,9 +54,9 @@ public class CheckstyleVersionMixException
 
 
     @NotNull
-    private static SortedSet<String> getAllInterfaces(@Nullable final Class<?> pClass) {
+    private static SortedSet<String> getAllInterfaces(@Nullable final Class<?> theClass) {
         SortedSet<String> result = new TreeSet<>();
-        for (Class<?> c = pClass; c != null; c = c.getSuperclass()) {
+        for (Class<?> c = theClass; c != null; c = c.getSuperclass()) {
             for (Class<?> intf : c.getInterfaces()) {
                 result.add(intf.getName());
                 result.addAll(getAllInterfaces(intf));  // get super interfaces

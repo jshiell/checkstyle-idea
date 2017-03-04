@@ -7,9 +7,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class EmptyLineSeparatorImporter
-        extends ModuleImporter
-{
+public class EmptyLineSeparatorImporter extends ModuleImporter {
+
     private boolean noEmptyLinesBetweenFields = false;
     private static final String NO_EMPTY_LINES_BETWEEN_FIELDS_PROP = "allowNoEmptyLineBetweenFields";
 

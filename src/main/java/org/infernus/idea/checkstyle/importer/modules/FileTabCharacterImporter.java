@@ -8,9 +8,8 @@ import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class FileTabCharacterImporter
-        extends ModuleImporter
-{
+public class FileTabCharacterImporter extends ModuleImporter {
+
     private static final String FILE_EXTENSIONS_PROP = "fileExtensions";
     private String[] extensions;
 

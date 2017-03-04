@@ -36,12 +36,12 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
  */
-@State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage(id = "default", file = StoragePathMacros.PROJECT_FILE)
-        , @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme =
-        StorageScheme.DIRECTORY_BASED)})
+@State(name = CheckStylePlugin.ID_PLUGIN, storages = {
+        @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
+        @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme = StorageScheme.DIRECTORY_BASED)})
 public class CheckStyleConfiguration
-        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings>
-{
+        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
+
     public static final String PROJECT_DIR = "$PRJ_DIR$";
     public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
 
@@ -158,17 +158,18 @@ public class CheckStyleConfiguration
     public List<ConfigurationLocation> configurationLocations() {
         storageLock.lock();
         try {
-            final List<ConfigurationLocation> locations = storage.entrySet().stream().filter
-                    (this::propertyIsALocation).map(this::deserialiseLocation).filter(this::notNull).collect
-                    (Collectors.toList());
-            return locations;
+            return storage.entrySet().stream()
+                    .filter(this::propertyIsALocation)
+                    .map(this::deserialiseLocation)
+                    .filter(this::notNull)
+                    .collect(Collectors.toList());
 
         } finally {
             storageLock.unlock();
         }
     }
 
-    private boolean notNull(Object object) {
+    private boolean notNull(final Object object) {
         return object != null;
     }
 
@@ -253,8 +254,8 @@ public class CheckStyleConfiguration
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read properties from " + configurationLocation, e);
-                    Notifications.showError(getProject(), CheckStyleBundle.message("checkstyle" + "" +
-                            ".could-not-read-properties", configurationLocation.getLocation()));
+                    Notifications.showError(getProject(), CheckStyleBundle.message("checkstyle" + ""
+                            + ".could-not-read-properties", configurationLocation.getLocation()));
                 }
 
                 ++index;
@@ -494,8 +495,7 @@ public class CheckStyleConfiguration
      */
     private void convertSettingsFormat(final Map<String, String> pLoadedMap) {
         if (pLoadedMap != null && !pLoadedMap.isEmpty() && !pLoadedMap.containsKey(SCANSCOPE_SETTING)) {
-            ScanScope scope = ScanScope.fromFlags(booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf
-                    (CHECK_NONJAVA_FILES));
+            ScanScope scope = ScanScope.fromFlags(booleanValueOf(CHECK_TEST_CLASSES), booleanValueOf(CHECK_NONJAVA_FILES));
             pLoadedMap.put(SCANSCOPE_SETTING, scope.name());
             pLoadedMap.remove(CHECK_TEST_CLASSES);
             pLoadedMap.remove(CHECK_NONJAVA_FILES);
@@ -505,8 +505,8 @@ public class CheckStyleConfiguration
     /**
      * Wrapper class for IDEA state serialisation.
      */
-    public static class ProjectSettings
-    {
+    public static class ProjectSettings {
+
         // this must remain public for serialisation purposes
         public Map<String, String> configuration;
 
