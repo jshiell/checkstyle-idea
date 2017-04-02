@@ -31,9 +31,9 @@ intellij {
     updateSinceUntilBuild = false
 }
 
-new CustomSourceSetCreator(project)
-        .establishCsAccessSourceSet()
-        .establishCsAccessTestSourceSet();
+final CustomSourceSetCreator customBuild = new CustomSourceSetCreator(project);
+customBuild.establishCsAccessSourceSet();
+customBuild.establishCsAccessTestSourceSet();
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8';
@@ -101,46 +101,20 @@ tasks.test.dependsOn rct;
 //   Cross-check 'csaccessTest' unit tests against the different Checkstyle runtimes
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-task xtest {
-    setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
-    setDescription('Runs the \'' + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME +
+Task xtestTask = tasks.create(CsaccessTestTask.XTEST_TASK_NAME);
+xtestTask.setGroup(CsaccessTestTask.XTEST_GROUP_NAME);
+xtestTask.setDescription('Runs the \'' + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME +
             '\' unit tests against all supported Checkstyle runtimes.');
-}
-tasks.check.dependsOn tasks.xtest;
+
+tasks.check.dependsOn xtestTask;
 supportedCsVersions.versions.each { final String csVersion ->
     if (supportedCsVersions.baseVersion != csVersion) {
         CsaccessTestTask xt = tasks.create(CsaccessTestTask.getTaskName(csVersion), CsaccessTestTask.class);
         xt.setCheckstyleVersion(csVersion, false);
-        tasks.xtest.dependsOn(xt);
+        xtestTask.dependsOn(xt);
     }
 }
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Exclusive test coverage report for 'csaccess' classes
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-test.jacoco.enabled = false;
-task jacocoTestReport4csaccess(type: JacocoReport, dependsOn: tasks.withType(CsaccessTestTask)) {
-    description 'Generate exclusive JaCoCo test report on the \'' + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME +
-            '\' classes';
-    reports {
-        xml.enabled = true;
-        csv.enabled = false;
-        html.enabled = true;
-    }
-    def SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
-    classDirectories = files(csaccessSourceSet.output.classesDir);
-    sourceDirectories = csaccessSourceSet.java.sourceDirectories;
-    executionData = files(tasks.withType(CsaccessTestTask)*.name.collect {
-        new File("${buildDir}/jacoco", "${it}.exec")
-    });
-    // TODO We should fail the build if a certain coverage is not reached. This will be possible with Gradle 4.0 (see
-    // https://github.com/gradle/gradle/issues/824) or with a handcrafted workaround such as
-    // https://github.com/springfox/springfox/blob/fb780ee1f14627b239fba95730a69900b9b2313a/gradle/coverage.gradle
-}
-tasks.remove(tasks.jacocoTestReport);
-tasks.xtest.dependsOn tasks.jacocoTestReport4csaccess;
+customBuild.setupCoverageVerification();
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
