@@ -22,6 +22,7 @@ public class CsaccessTestTask
         extends Test
 {
     public static final String XTEST_GROUP_NAME = "xtest";
+    public static final String XTEST_TASK_NAME = "xtest";
 
     public static final String NAME = "runCsaccessTests";
 
@@ -40,7 +41,7 @@ public class CsaccessTestTask
 
         dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
 
-        configure((Closure) project.getProperties().get("testConfigClosure"));
+        configure((Closure<?>) project.getProperties().get("testConfigClosure"));
         setTestClassesDir(csaccessTestSourceSet.getOutput().getClassesDir());
     }
 
