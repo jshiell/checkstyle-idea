@@ -31,7 +31,7 @@ public class CustomSourceSetCreator
     public static final String JACOCO_VERIFICATION_TASK_NAME =
             "jacoco" + capitalize(CSACCESS_SOURCESET_NAME) + "CoverageVerification";
 
-    private static final double MINIMUM_CSACCESS_COVERAGE = 0.89d;
+    private static final double MINIMUM_CSACCESS_COVERAGE = 0.88d;
 
     private final Project project;
 
