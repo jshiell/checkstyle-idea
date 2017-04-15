@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.csapi;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,14 +56,18 @@ public class ProcessResultsThread implements Runnable {
     }
 
 
-    public ProcessResultsThread(final boolean pSuppressErrors, final List<Check> pChecks, final int pTabWidth, final
-    Optional<String> pBaseDir, final List<Issue> pErrors, final Map<String, PsiFile> pFileNamesToPsiFiles) {
-        suppressErrors = pSuppressErrors;
-        checks = pChecks;
-        tabWidth = pTabWidth;
-        baseDir = pBaseDir;
-        errors = pErrors;
-        fileNamesToPsiFiles = pFileNamesToPsiFiles;
+    public ProcessResultsThread(final boolean suppressErrors,
+                                final List<Check> checks,
+                                final int tabWidth,
+                                final Optional<String> baseDir,
+                                final List<Issue> errors,
+                                final Map<String, PsiFile> fileNamesToPsiFiles) {
+        this.suppressErrors = suppressErrors;
+        this.checks = checks;
+        this.tabWidth = tabWidth;
+        this.baseDir = baseDir;
+        this.errors = errors;
+        this.fileNamesToPsiFiles = fileNamesToPsiFiles;
     }
 
 
@@ -74,7 +79,7 @@ public class ProcessResultsThread implements Runnable {
             final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
             if (psiFile == null) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Could not find mapping for file: " + event.getFileName() + " in " + fileNamesToPsiFiles);
+                    LOG.info("Could not find mapping for file: " + event.fileName + " in " + fileNamesToPsiFiles);
                 }
                 return;
             }
@@ -94,7 +99,10 @@ public class ProcessResultsThread implements Runnable {
     }
 
     private String filenameFrom(final Issue event) {
-        return baseDir.map(prefix -> withTrailingSeparator(prefix) + event.getFileName()).orElseGet(event::getFileName);
+        final String fileName = baseDir
+                .map(prefix -> withTrailingSeparator(prefix) + event.fileName)
+                .orElseGet(() -> event.fileName);
+        return Paths.get(fileName).normalize().toString();
     }
 
     private String withTrailingSeparator(final String path) {
@@ -116,8 +124,8 @@ public class ProcessResultsThread implements Runnable {
             addProblemTo(victim, psiFile, event, position.afterEndOfLine);
         } else {
             addProblemTo(psiFile, psiFile, event, false);
-            LOG.debug("Couldn't find victim for error: " + event.getFileName() + "(" + event.getLineNo() + ":"
-                    + event.getColumnNo() + ") " + event.getMessage());
+            LOG.debug("Couldn't find victim for error: " + event.fileName + "(" + event.lineNumber + ":"
+                    + event.columnNumber + ") " + event.message);
         }
     }
 
@@ -126,8 +134,8 @@ public class ProcessResultsThread implements Runnable {
                               @NotNull final Issue event,
                               final boolean afterEndOfLine) {
         try {
-            addProblem(psiFile, new Problem(victim, event.getMessage(), event.getSeverityLevel(), event.getLineNo(),
-                    event.getColumnNo(), afterEndOfLine, suppressErrors));
+            addProblem(psiFile, new Problem(victim, event.message, event.severityLevel, event.lineNumber,
+                    event.columnNumber, afterEndOfLine, suppressErrors));
         } catch (PsiInvalidElementAccessException e) {
             LOG.error("Element access failed", e);
         }
@@ -135,7 +143,7 @@ public class ProcessResultsThread implements Runnable {
 
     private boolean additionalChecksFail(final PsiFile psiFile, final Issue event) {
         for (final Check check : checks) {
-            if (!check.process(psiFile, event.getSourceName())) {
+            if (!check.process(psiFile, event.sourceName)) {
                 return true;
             }
         }
@@ -144,18 +152,19 @@ public class ProcessResultsThread implements Runnable {
 
     @NotNull
     private Position findPosition(final List<Integer> lineLengthCache, final Issue event, final char[] text) {
-        if (event.getLineNo() == 0) {
-            return Position.at(event.getColumnNo());
-        } else if (event.getLineNo() <= lineLengthCache.size()) {
-            return Position.at(lineLengthCache.get(event.getLineNo() - 1) + event.getColumnNo());
+        if (event.lineNumber == 0) {
+            return Position.at(event.columnNumber);
+        } else if (event.lineNumber <= lineLengthCache.size()) {
+            return Position.at(lineLengthCache.get(event.lineNumber - 1) + event.columnNumber);
         } else {
             return searchFromEndOfCachedData(lineLengthCache, event, text);
         }
     }
 
     @NotNull
-    private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache, final Issue event, final char[]
-            text) {
+    private Position searchFromEndOfCachedData(final List<Integer> lineLengthCache,
+                                               final Issue event,
+                                               final char[] text) {
         final Position position;
         int offset = lineLengthCache.get(lineLengthCache.size() - 1);
         boolean afterEndOfLine = false;
@@ -182,7 +191,7 @@ public class ProcessResultsThread implements Runnable {
                 ++offset;
             }
 
-            if (event.getLineNo() == line && event.getColumnNo() == column) {
+            if (event.lineNumber == line && event.columnNumber == column) {
                 if (column == 0 && Character.isWhitespace(nextChar)) {
                     afterEndOfLine = true;
                 }

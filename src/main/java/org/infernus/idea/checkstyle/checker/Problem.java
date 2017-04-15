@@ -75,4 +75,48 @@ public class Problem {
         }
         return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Problem problem = (Problem) o;
+
+        if (line != problem.line) {
+            return false;
+        }
+        if (column != problem.column) {
+            return false;
+        }
+        if (afterEndOfLine != problem.afterEndOfLine) {
+            return false;
+        }
+        if (suppressErrors != problem.suppressErrors) {
+            return false;
+        }
+        if (!target.equals(problem.target)) {
+            return false;
+        }
+        if (severityLevel != problem.severityLevel) {
+            return false;
+        }
+        return message.equals(problem.message);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = target.hashCode();
+        result = 31 * result + severityLevel.hashCode();
+        result = 31 * result + line;
+        result = 31 * result + column;
+        result = 31 * result + message.hashCode();
+        result = 31 * result + (afterEndOfLine ? 1 : 0);
+        result = 31 * result + (suppressErrors ? 1 : 0);
+        return result;
+    }
 }

@@ -6,51 +6,25 @@ package org.infernus.idea.checkstyle.csapi;
  */
 public class Issue {
 
-    private final String fileName;
+    public final String fileName;
+    public final int lineNumber;
+    public final int columnNumber;
+    public final String message;
+    public final SeverityLevel severityLevel;
+    public final String sourceName;
 
-    private final int lineNo;
-
-    private final int columnNo;
-
-    private final String message;
-
-    private final SeverityLevel severityLevel;
-
-    private final String sourceName;
-
-
-    public Issue(final String pFileName, final int pLineNo, final int pColumnNo, final String pMessage, final
-    SeverityLevel pSeverityLevel, final String pSourceName) {
-        fileName = pFileName;
-        lineNo = pLineNo;
-        columnNo = pColumnNo;
-        message = pMessage;
-        severityLevel = pSeverityLevel;
-        sourceName = pSourceName;
+    public Issue(final String fileName,
+                 final int lineNumber,
+                 final int columnNumber,
+                 final String message,
+                 final SeverityLevel severityLevel,
+                 final String sourceName) {
+        this.fileName = fileName;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+        this.message = message;
+        this.severityLevel = severityLevel;
+        this.sourceName = sourceName;
     }
 
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public int getLineNo() {
-        return lineNo;
-    }
-
-    public int getColumnNo() {
-        return columnNo;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public SeverityLevel getSeverityLevel() {
-        return severityLevel;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
 }
