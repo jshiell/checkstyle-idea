@@ -11,14 +11,25 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -48,11 +59,11 @@ public class ScannableFile {
      */
     public ScannableFile(@NotNull final PsiFile psiFile,
                          @Nullable final Module module)
-            throws IOException {
+        throws IOException {
         this.psiFile = psiFile;
 
         if (!existsOnFilesystem(psiFile) || documentIsModifiedAndUnsaved(psiFile)) {
-            baseTempDir = prepareBaseTmpDir();
+            baseTempDir = prepareBaseTmpDirFor(psiFile);
             realFile = createTemporaryFileFor(psiFile, module, baseTempDir);
 
         } else {
@@ -68,10 +79,10 @@ public class ScannableFile {
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
             return psiFiles.stream()
-                    .filter(psiFile -> isScannable(psiFile, ofNullable(module), plugin.getConfiguration()))
-                    .map(psiFile -> ScannableFile.create(psiFile, module))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                .filter(psiFile -> isScannable(psiFile, ofNullable(module), plugin.getConfiguration()))
+                .map(psiFile -> ScannableFile.create(psiFile, module))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         } finally {
             readAccessToken.finish();
@@ -100,14 +111,14 @@ public class ScannableFile {
 
     private String pathOf(@NotNull final PsiFile file) {
         return virtualFileOf(file)
-                .map(VirtualFile::getPath)
-                .orElseThrow(() -> new IllegalStateException("PSIFile does not have associated virtual file: " + file));
+            .map(VirtualFile::getPath)
+            .orElseThrow(() -> new IllegalStateException("PSIFile does not have associated virtual file: " + file));
     }
 
     private File createTemporaryFileFor(@NotNull final PsiFile file,
                                         @Nullable final Module module,
                                         @NotNull final File tempDir)
-            throws IOException {
+        throws IOException {
         final File temporaryFile = new File(parentDirFor(file, module, tempDir), file.getName());
         temporaryFile.deleteOnExit();
 
@@ -135,7 +146,7 @@ public class ScannableFile {
             if (file instanceof PsiJavaFile) {
                 final String packageName = ((PsiJavaFile) file).getPackageName();
                 final String packagePath = packageName.replaceAll(
-                        "\\.", Matcher.quoteReplacement(File.separator));
+                    "\\.", Matcher.quoteReplacement(File.separator));
 
                 tmpDirForFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
             } else {
@@ -149,31 +160,47 @@ public class ScannableFile {
         return tmpDirForFile;
     }
 
-    private File prepareBaseTmpDir() {
-        final File baseTmpDir = new File(System.getProperty("java.io.tmpdir"),
-                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
+    private File prepareBaseTmpDirFor(PsiFile psiFile) {
+        final File baseTmpDir = new File(temporaryDirectory(psiFile),
+            TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
         baseTmpDir.deleteOnExit();
         return baseTmpDir;
     }
 
+    private String temporaryDirectory(PsiFile psiFile) {
+        String systemTempDir = System.getProperty("java.io.tmpdir");
+        if (OS.isWindows() && driveLetterOf(systemTempDir) != driveLetterOf(pathOf(psiFile))) {
+            // Checkstyle requires the files to be on the same drive
+            return new File(psiFile.getProject().getBasePath(), "csi-tmp").getAbsolutePath();
+        }
+        return systemTempDir;
+    }
+
+    private char driveLetterOf(String windowsPath) {
+        if (windowsPath != null && windowsPath.length() > 0) {
+            return windowsPath.charAt(0);
+        }
+        return '?';
+    }
+
     private boolean existsOnFilesystem(@NotNull final PsiFile file) {
         return virtualFileOf(file)
-                .map(virtualFile -> LocalFileSystem.getInstance().exists(virtualFile))
-                .orElseGet(() -> false);
+            .map(virtualFile -> LocalFileSystem.getInstance().exists(virtualFile))
+            .orElse(false);
     }
 
     private boolean documentIsModifiedAndUnsaved(final PsiFile file) {
         final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
         return virtualFileOf(file)
-                .filter(fileDocumentManager::isFileModified)
-                .map(fileDocumentManager::getDocument)
-                .map(fileDocumentManager::isDocumentUnsaved)
-                .orElseGet(() -> false);
+            .filter(fileDocumentManager::isFileModified)
+            .map(fileDocumentManager::getDocument)
+            .map(fileDocumentManager::isDocumentUnsaved)
+            .orElse(false);
     }
 
     private void writeContentsToFile(final PsiFile file,
                                      final File outFile)
-            throws IOException {
+        throws IOException {
         final String lineSeparator = CodeStyleSettingsManager.getSettings(file.getProject()).getLineSeparator();
 
         final Writer tempFileOut = writerTo(outFile, charSetOf(file));
@@ -191,8 +218,8 @@ public class ScannableFile {
     @NotNull
     private Charset charSetOf(final PsiFile file) {
         return virtualFileOf(file)
-                .map(VirtualFile::getCharset)
-                .orElseGet(() -> Charset.forName("UTF-8"));
+            .map(VirtualFile::getCharset)
+            .orElseGet(() -> Charset.forName("UTF-8"));
     }
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {
@@ -202,8 +229,8 @@ public class ScannableFile {
     @NotNull
     private Writer writerTo(final File outFile, final Charset charset) throws FileNotFoundException {
         return new BufferedWriter(
-                new OutputStreamWriter(
-                        new FileOutputStream(outFile), charset.newEncoder()));
+            new OutputStreamWriter(
+                new FileOutputStream(outFile), charset.newEncoder()));
     }
 
     public File getFile() {
@@ -218,7 +245,7 @@ public class ScannableFile {
 
     private void deleteIfRequired() {
         if (baseTempDir != null
-                && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
+            && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
             delete(baseTempDir);
         }
     }
