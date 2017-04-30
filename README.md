@@ -168,6 +168,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.4.0** New: Added CheckStyle 7.6.1 (#303).
 * **5.3.1** Fixed: Paths from Checkstyle are now normalised (#302).
 * **5.3.0** New: Added CheckStyle 7.6 (#300).
 * **5.3.0** Fixed: Ignored problems are no longer counting for pre-checkin scan (#299).
