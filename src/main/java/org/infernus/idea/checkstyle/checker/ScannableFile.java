@@ -171,7 +171,10 @@ public class ScannableFile {
         String systemTempDir = System.getProperty("java.io.tmpdir");
         if (OS.isWindows() && driveLetterOf(systemTempDir) != driveLetterOf(pathOf(psiFile))) {
             // Checkstyle requires the files to be on the same drive
-            return new File(psiFile.getProject().getBasePath(), "csi-tmp").getAbsolutePath();
+            final File projectTempDir = new File(psiFile.getProject().getBasePath(), "csi-tmp");
+            if (projectTempDir.mkdirs()) {
+                return projectTempDir.getAbsolutePath();
+            }
         }
         return systemTempDir;
     }
