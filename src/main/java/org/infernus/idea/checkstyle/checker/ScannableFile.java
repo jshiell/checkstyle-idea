@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -181,7 +183,8 @@ public class ScannableFile {
 
     private char driveLetterOf(String windowsPath) {
         if (windowsPath != null && windowsPath.length() > 0) {
-            return windowsPath.charAt(0);
+            final Path normalisedPath = Paths.get(windowsPath).normalize().toAbsolutePath();
+            return normalisedPath.toFile().toString().charAt(0);
         }
         return '?';
     }
