@@ -141,18 +141,33 @@ public class LocationPanel extends JPanel {
      */
     public ConfigurationLocation getConfigurationLocation() {
         if (fileLocationField.isEnabled()) {
-            if (isNotBlank(fileLocationField.getText())) {
+            if (isNotBlank(fileLocation())) {
                 return configurationLocationFactory().create(project, typeOfFile(),
-                        fileLocationField.getText(), descriptionField.getText());
+                        fileLocation(), descriptionField.getText());
             }
 
         } else if (urlLocationField.isEnabled()) {
-            if (isNotBlank(urlLocationField.getText())) {
+            if (isNotBlank(urlLocation())) {
                 return configurationLocationFactory().create(project, typeOfUrl(),
-                        urlLocationField.getText(), descriptionField.getText());
+                        urlLocation(), descriptionField.getText());
             }
         }
 
+        return null;
+    }
+
+    private String urlLocation() {
+        return trim(urlLocationField.getText());
+    }
+
+    private String fileLocation() {
+        return trim(fileLocationField.getText());
+    }
+
+    private String trim(final String text) {
+        if (text != null) {
+            return text.trim();
+        }
         return null;
     }
 
@@ -223,7 +238,7 @@ public class LocationPanel extends JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final VirtualFile toSelect;
-            final String configFilePath = fileLocationField.getText();
+            final String configFilePath = fileLocation();
             if (!isBlank(configFilePath)) {
                 toSelect = LocalFileSystem.getInstance().findFileByPath(configFilePath);
             } else {

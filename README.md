@@ -168,6 +168,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.5.1** New: File paths are now trimmed (#308).
 * **5.5.0** New: Added CheckStyle 7.7 (#305).
 * **5.4.0** New: Added CheckStyle 7.6.1 (#303).
 * **5.3.1** Fixed: Paths from Checkstyle are now normalised (#302).
