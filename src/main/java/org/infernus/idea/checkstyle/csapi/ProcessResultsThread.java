@@ -100,6 +100,7 @@ public class ProcessResultsThread implements Runnable {
 
     private String filenameFrom(final Issue event) {
         final String fileName = baseDir
+                .filter(prefix -> !new File(event.fileName).exists())
                 .map(prefix -> withTrailingSeparator(prefix) + event.fileName)
                 .orElseGet(() -> event.fileName);
         return Paths.get(fileName).normalize().toString();
