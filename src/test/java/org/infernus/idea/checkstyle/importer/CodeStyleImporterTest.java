@@ -5,6 +5,8 @@ import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import com.intellij.psi.codeStyle.PackageEntry;
+import com.intellij.psi.codeStyle.PackageEntryTable;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -238,5 +240,239 @@ public class CodeStyleImporterTest
         indentOptions.CONTINUATION_INDENT_SIZE = 4;
     }
 
+    public void testImportOrderImporter() throws Exception {
+        // group attribute
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,java,*\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    new PackageEntry(false, "java", true),
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY
+            };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // staticPosition attribute - top
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"top\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // staticPosition attribute - bottom
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"bottom\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // staticPosition attribute - above
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"above\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(true, "my.custom.package", true),
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // staticPosition attribute - under
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"under\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    new PackageEntry(true, "my.custom.package", true),
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // staticPosition attribute - inflow
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"inflow\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // separated attribute - top
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"top\"/>\n" +
+                            "            <property name=\"separated\" value=\"true\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // separate attribute - bottom
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"bottom\"/>\n" +
+                            "            <property name=\"separated\" value=\"true\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    };
+
+            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // separate attribute - above
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"above\"/>\n" +
+                            "            <property name=\"separated\" value=\"true\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(true, "my.custom.package", true),
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // separate attribute - under
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"under\"/>\n" +
+                            "            <property name=\"separated\" value=\"true\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    new PackageEntry(true, "my.custom.package", true),
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                    };
+
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+
+        // separate attribute - inflow
+        {
+            importConfiguration(
+                    inTreeWalker(
+                            " <module name=\"ImportOrder\">\n" +
+                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                            "            <property name=\"option\" value=\"inflow\"/>\n" +
+                            "            <property name=\"separated\" value=\"true\"/>\n" +
+                            "</module>"
+                    )
+            );
+            PackageEntry[] expected = new PackageEntry[]{
+                    new PackageEntry(false, "my.custom.package", true),
+                    PackageEntry.BLANK_LINE_ENTRY,
+                    PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
+                    };
+
+            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+        }
+    }
+
+    private static void comparePackageEntries(PackageEntry[] expected, PackageEntryTable actual) {
+        assertEquals(expected.length, actual.getEntryCount());
+        for (int x = 0; x < expected.length; x++) {
+            assertEquals(expected[x], actual.getEntries()[x]);
+        }
+    }
 
 }
