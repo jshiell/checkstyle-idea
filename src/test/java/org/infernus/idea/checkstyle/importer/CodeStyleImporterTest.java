@@ -475,4 +475,82 @@ public class CodeStyleImporterTest
         }
     }
 
+    public void testAvoidStartImportImporter() throws Exception {
+        resetAvoidStarImportSettings(codeStyleSettings);
+        importConfiguration(
+                inTreeWalker(
+                        " <module name=\"AvoidStarImport\">\n" +
+                        "</module>"
+                )
+        );
+
+        assertEquals(999, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(999, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+
+        resetAvoidStarImportSettings(codeStyleSettings);
+        importConfiguration(
+                inTreeWalker(
+                        " <module name=\"AvoidStarImport\">\n" +
+                        "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
+                        "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
+                        "</module>"
+                )
+        );
+
+        assertEquals(1, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(1, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+
+        resetAvoidStarImportSettings(codeStyleSettings);
+        importConfiguration(
+                inTreeWalker(
+                        " <module name=\"AvoidStarImport\">\n" +
+                        "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
+                        "</module>"
+                )
+        );
+
+        assertEquals(999, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(1, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+
+        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+
+        resetAvoidStarImportSettings(codeStyleSettings);
+        importConfiguration(
+                inTreeWalker(
+                        " <module name=\"AvoidStarImport\">\n" +
+                        "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
+                        "</module>"
+                )
+        );
+
+        assertEquals(1, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(999, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+
+        resetAvoidStarImportSettings(codeStyleSettings);
+        importConfiguration(
+                inTreeWalker(
+                        " <module name=\"AvoidStarImport\">\n" +
+                        "            <property name=\"excludes\" value=\"a.b.c,d.e.f\"/>\n" +
+                        "</module>"
+                )
+        );
+
+        PackageEntry[] expected = new PackageEntry[]{
+                new PackageEntry(false, "a.b.c", false),
+                new PackageEntry(false, "d.e.f", false),
+                };
+
+        comparePackageEntries(expected, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND);
+    }
+
+    private static void resetAvoidStarImportSettings(CodeStyleSettings settings) {
+        settings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+        settings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+        settings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(new PackageEntryTable());
+    }
+
 }
