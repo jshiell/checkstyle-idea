@@ -170,6 +170,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 ## Version History
 
 * **5.6.1** New: code style importer now supports import order - thanks to @zentol (#314).
+* **5.6.1** Fixed: code style importer now adds an extra line between leading content and the package declaration (#315).
 * **5.6.1** Fixed: improved housekeeping when Windows projects are not on the system drive (#313).
 * **5.6.0** New: Added CheckStyle 7.8.1.
 * **5.6.0** Fixed: we now try to use a temporary dir in the project folder when the projects is not on the system drive (#302).
