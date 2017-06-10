@@ -22,6 +22,7 @@ public class EmptyLineSeparatorImporter extends ModuleImporter {
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        javaSettings.BLANK_LINES_BEFORE_PACKAGE = 1;
         if (noEmptyLinesBetweenFields) {
             javaSettings.BLANK_LINES_AROUND_FIELD = 0;
         } else if (appliesTo(KnownTokenTypes.VARIABLE_DEF)) {
