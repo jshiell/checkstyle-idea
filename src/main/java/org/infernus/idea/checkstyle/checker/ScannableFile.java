@@ -2,8 +2,12 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceKt;
+import com.intellij.openapi.components.StorageScheme;
+import com.intellij.openapi.components.impl.stores.IProjectStore;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -162,26 +166,40 @@ public class ScannableFile {
         return tmpDirForFile;
     }
 
-    private File prepareBaseTmpDirFor(PsiFile psiFile) {
-        final File baseTmpDir = new File(temporaryDirectory(psiFile),
+    private File prepareBaseTmpDirFor(final PsiFile psiFile) {
+        final File baseTmpDir = new File(temporaryDirectoryFor(psiFile),
             TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
         baseTmpDir.deleteOnExit();
         return baseTmpDir;
     }
 
-    private String temporaryDirectory(PsiFile psiFile) {
+    private String temporaryDirectoryFor(final PsiFile psiFile) {
         String systemTempDir = System.getProperty("java.io.tmpdir");
         if (OS.isWindows() && driveLetterOf(systemTempDir) != driveLetterOf(pathOf(psiFile))) {
-            // Checkstyle requires the files to be on the same drive
-            final File projectTempDir = new File(psiFile.getProject().getBasePath(), "csi-tmp");
+            // Checkstyle on Windows requires the files to be on the same drive
+            final File projectTempDir = temporaryDirectoryLocationFor(psiFile.getProject());
             if (projectTempDir.exists() || projectTempDir.mkdirs()) {
+                projectTempDir.deleteOnExit();
                 return projectTempDir.getAbsolutePath();
             }
         }
         return systemTempDir;
     }
 
-    private char driveLetterOf(String windowsPath) {
+    @NotNull
+    private File temporaryDirectoryLocationFor(final Project project) {
+        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(project);
+        if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
+            final VirtualFile ideaStorageDir = project.getBaseDir().findChild(Project.DIRECTORY_STORE_FOLDER);
+            if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
+                return new File(ideaStorageDir.getPath(), "checkstyleidea.tmp");
+            }
+        }
+
+        return new File(project.getBasePath(), "checkstyleidea.tmp");
+    }
+
+    private char driveLetterOf(final String windowsPath) {
         if (windowsPath != null && windowsPath.length() > 0) {
             final Path normalisedPath = Paths.get(windowsPath).normalize().toAbsolutePath();
             return normalisedPath.toFile().toString().charAt(0);

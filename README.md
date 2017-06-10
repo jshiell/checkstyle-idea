@@ -168,6 +168,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.6.1** Fixed: improved housekeeping when Windows projects are not on the system drive (#313).
 * **5.6.0** New: Added CheckStyle 7.8.1.
 * **5.6.0** Fixed: we now try to use a temporary dir in the project folder when the projects is not on the system drive (#302).
 * **5.5.1** New: File paths are now trimmed (#308).
