@@ -14,6 +14,10 @@ import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.IgnoringResolver;
+import org.infernus.idea.checkstyle.service.RulesContainer;
+import org.infernus.idea.checkstyle.service.RulesContainer.ContentRulesContainer;
+import org.infernus.idea.checkstyle.service.RulesContainer.ConfigurationLocationRulesContainer;
+import org.infernus.idea.checkstyle.service.RulesContainer.VirtualFileRulesContainer;
 import org.infernus.idea.checkstyle.service.SimpleResolver;
 import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
@@ -30,7 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
@@ -42,6 +45,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  */
 public class OpLoadConfiguration
         implements CheckstyleCommand<HasCsConfig> {
+
     private static final Log LOG = LogFactory.getLog(OpLoadConfiguration.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
@@ -49,50 +53,42 @@ public class OpLoadConfiguration
 
     private final RulesContainer rulesContainer;
     private final PropertyResolver resolver;
-    private final Project project;
     private final Module module;
 
-    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
-                               @NotNull final Project project) {
-        this(configurationLocation, null, project, null);
+
+    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation) {
+        this(configurationLocation, null, null);
     }
 
     public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
-                               final Map<String, String> properties,
-                               @NotNull final Project project) {
-        this(configurationLocation, properties, project, null);
+                               final Map<String, String> properties) {
+        this(configurationLocation, properties, null);
     }
 
     public OpLoadConfiguration(final ConfigurationLocation configurationLocation,
                                final Map<String, String> properties,
-                               @NotNull final Project project,
                                final Module module) {
-        this(new ConfigurationLocationRulesContainer(configurationLocation, project), properties, project, module);
+        this(new ConfigurationLocationRulesContainer(configurationLocation), properties, module);
+    }
+
+    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile) {
+        this(rulesFile, null);
     }
 
     public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
-                               @NotNull final Project project) {
-        this(rulesFile, null, project);
+                               final Map<String, String> properties) {
+        this(new VirtualFileRulesContainer(rulesFile), properties, null);
     }
 
-    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
-                               final Map<String, String> properties,
-                               @NotNull final Project project) {
-        this(new VirtualFileRulesContainer(rulesFile), properties, project, null);
-    }
-
-    public OpLoadConfiguration(@NotNull final String fileContent,
-                               @NotNull final Project project) {
-        this(new ContentRulesContainer(fileContent), null, project, null);
+    public OpLoadConfiguration(@NotNull final String fileContent) {
+        this(new ContentRulesContainer(fileContent), null, null);
     }
 
     private OpLoadConfiguration(final RulesContainer rulesContainer,
                                 final Map<String, String> properties,
-                                final Project project,
                                 final Module module) {
         this.rulesContainer = rulesContainer;
         this.module = module;
-        this.project = project;
 
         if (properties != null) {
             resolver = new SimpleResolver(properties);
@@ -110,6 +106,7 @@ public class OpLoadConfiguration
         return Collections.unmodifiableMap(result);
     }
 
+
     @Override
     public HasCsConfig execute(@NotNull final Project currentProject) throws CheckstyleException {
         HasCsConfig result;
@@ -122,7 +119,7 @@ public class OpLoadConfiguration
                 // in the input stream
                 throw new CheckstyleException("Couldn't find root module in " + rulesContainer.filePath());
             }
-            resolveFilePaths(configuration);
+            resolveFilePaths(currentProject, configuration);
             result = new CsConfigObject(configuration);
 
         } catch (IOException e) {
@@ -169,7 +166,7 @@ public class OpLoadConfiguration
     }
 
 
-    void resolveFilePaths(@NotNull final Configuration rootElement) throws CheckstyleException {
+    void resolveFilePaths(final Project project, @NotNull final Configuration rootElement) throws CheckstyleException {
         if (!(rootElement instanceof DefaultConfiguration)) {
             LOG.warn("Root element is of unknown class: " + rootElement.getClass().getName());
             return;
@@ -177,33 +174,35 @@ public class OpLoadConfiguration
 
         for (final Configuration currentChild : rootElement.getChildren()) {
             if (FILENAME_REPLACEMENTS.containsKey(currentChild.getName())) {
-                checkFilenameForProperty((DefaultConfiguration) rootElement, currentChild,
+                checkFilenameForProperty(project, (DefaultConfiguration) rootElement, currentChild,
                         FILENAME_REPLACEMENTS.get(currentChild.getName()));
             } else if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
-                resolveFilePaths(currentChild);
+                resolveFilePaths(project, currentChild);
             }
         }
     }
 
 
-    private void checkFilenameForProperty(final DefaultConfiguration configRoot,
+    private void checkFilenameForProperty(final Project project,
+                                          final DefaultConfiguration configRoot,
                                           final Configuration configModule,
                                           final String propertyName) throws CheckstyleException {
         final String fileName = getAttributeOrNull(configModule, propertyName);
         if (!isBlank(fileName)) {
             try {
-                resolveAndUpdateFile(configRoot, configModule, propertyName, fileName);
+                resolveAndUpdateFile(project, configRoot, configModule, propertyName, fileName);
             } catch (IOException e) {
                 showError(project, message("checkstyle.checker-failed", e.getMessage()));
             }
         }
     }
 
-    private void resolveAndUpdateFile(final DefaultConfiguration configRoot,
+    private void resolveAndUpdateFile(final Project project,
+                                      final DefaultConfiguration configRoot,
                                       final Configuration configModule,
                                       final String propertyName,
                                       final String fileName) throws IOException {
-        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, module);
+        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, project, module);
         if (resolvedFile == null || !resolvedFile.equals(fileName)) {
             configRoot.removeChild(configModule);
             if (resolvedFile != null) {
@@ -271,74 +270,6 @@ public class OpLoadConfiguration
             for (Configuration child : source.getChildren()) {
                 target.addChild(child);
             }
-        }
-    }
-
-    private interface RulesContainer {
-        default String filePath() {
-            return null;
-        }
-
-        InputStream inputStream() throws IOException;
-
-        default String resolveAssociatedFile(final String fileName, final Module module) throws IOException {
-            return null;
-        }
-    }
-
-    private static class ConfigurationLocationRulesContainer implements RulesContainer {
-        private final ConfigurationLocation configurationLocation;
-        private final Project project;
-
-        ConfigurationLocationRulesContainer(final ConfigurationLocation configurationLocation,
-                                            final Project project) {
-            this.configurationLocation = configurationLocation;
-            this.project = project;
-        }
-
-        @Override
-        public String filePath() {
-            return configurationLocation.getLocation();
-        }
-
-        @Override
-        public InputStream inputStream() throws IOException {
-            return configurationLocation.resolve();
-        }
-
-        public String resolveAssociatedFile(final String fileName, final Module module) throws IOException {
-            return configurationLocation.resolveAssociatedFile(fileName, project, module);
-        }
-    }
-
-    private static class VirtualFileRulesContainer implements RulesContainer {
-        private final VirtualFile virtualFile;
-
-        VirtualFileRulesContainer(final VirtualFile virtualFile) {
-            this.virtualFile = virtualFile;
-        }
-
-        @Override
-        public String filePath() {
-            return virtualFile.getPath();
-        }
-
-        @Override
-        public InputStream inputStream() throws IOException {
-            return virtualFile.getInputStream();
-        }
-    }
-
-    private static class ContentRulesContainer implements RulesContainer {
-        private final String content;
-
-        ContentRulesContainer(final String content) {
-            this.content = content;
-        }
-
-        @Override
-        public InputStream inputStream() throws IOException {
-            return new ByteArrayInputStream(content.getBytes(UTF_8));
         }
     }
 }
