@@ -8,10 +8,7 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
-import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
-import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
+import org.infernus.idea.checkstyle.csapi.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
@@ -105,6 +102,11 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final String pXmlConfig) {
         return executeCommand(new OpLoadConfiguration(pXmlConfig));
+    }
+
+    @Override
+    public CheckstyleInternalObject loadConfiguration(@NotNull final BundledConfig bundledConfig) {
+        return executeCommand(new OpLoadConfiguration(bundledConfig));
     }
 
 
