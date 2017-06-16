@@ -1,15 +1,21 @@
 package org.infernus.idea.checkstyle.model;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -17,6 +23,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.assertThat;
+
 
 public class ConfigurationLocationTest {
 
@@ -209,4 +216,38 @@ public class ConfigurationLocationTest {
         }
     }
 
+
+    @Test
+    public void testSorting() {
+        final Project project = Mockito.mock(Project.class);
+        List<ConfigurationLocation> list = new ArrayList<>();
+        FileConfigurationLocation fcl = new FileConfigurationLocation(
+                Mockito.mock(Project.class), ConfigurationType.LOCAL_FILE);
+        fcl.setDescription("descB");
+        fcl.setLocation("locB");
+        list.add(fcl);
+        RelativeFileConfigurationLocation rfcl1 = new RelativeFileConfigurationLocation(project);
+        rfcl1.setDescription("descA");
+        rfcl1.setLocation("locA");
+        list.add(rfcl1);
+        list.add(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS));
+        RelativeFileConfigurationLocation rfcl2 = new RelativeFileConfigurationLocation(project);
+        rfcl2.setDescription("descC");
+        rfcl2.setLocation("locC");
+        list.add(rfcl2);
+        list.add(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS));
+
+        Collections.sort(list);
+
+        Assert.assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
+        Assert.assertTrue(list.get(0).getDescription().contains("Sun Checks"));
+        Assert.assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
+        Assert.assertTrue(list.get(1).getDescription().contains("Google Checks"));
+        Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
+        Assert.assertEquals("descA", list.get(2).getDescription());
+        Assert.assertEquals(FileConfigurationLocation.class, list.get(3).getClass());
+        Assert.assertEquals("descB", list.get(3).getDescription());
+        Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(4).getClass());
+        Assert.assertEquals("descC", list.get(4).getDescription());
+    }
 }

@@ -1,5 +1,14 @@
 package org.infernus.idea.checkstyle.model;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
@@ -13,12 +22,6 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -369,7 +372,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (location != null ? location.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
@@ -384,8 +387,30 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     @Override
-    public int compareTo(@NotNull final ConfigurationLocation configurationLocation) {
-        return Objects.compare(getDescription(), configurationLocation.getDescription());
+    public final int compareTo(@NotNull final ConfigurationLocation configurationLocation) {
+        // TODO should be consistent with equals()
+        int result = 0;
+        // bundled configs go first, ordered by their position in the BundledConfig enum
+        if (configurationLocation instanceof BundledConfigurationLocation) {
+            if (this instanceof BundledConfigurationLocation) {
+                final int o1 = ((BundledConfigurationLocation) this).getBundledConfig().ordinal();
+                final int o2 = ((BundledConfigurationLocation) configurationLocation).getBundledConfig().ordinal();
+                if (o1 < o2) {
+                    result = -1;
+                } else if (o1 > o2) {
+                    result = 1;
+                }
+            } else {
+                result = 1;
+            }
+        } else {
+            if (this instanceof BundledConfigurationLocation) {
+                result = -1;
+            } else {
+                result = Objects.compare(getDescription(), configurationLocation.getDescription());
+            }
+        }
+        return result;
     }
 
     public boolean isBlacklisted() {

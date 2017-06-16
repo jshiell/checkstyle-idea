@@ -1,5 +1,13 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -12,8 +20,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
+import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.service.IgnoringResolver;
 import org.infernus.idea.checkstyle.service.RulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.BundledRulesContainer;
@@ -25,15 +33,6 @@ import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
@@ -69,7 +68,9 @@ public class OpLoadConfiguration
     public OpLoadConfiguration(final ConfigurationLocation configurationLocation,
                                final Map<String, String> properties,
                                final Module module) {
-        this(new ConfigurationLocationRulesContainer(configurationLocation), properties, module);
+        this(configurationLocation instanceof BundledConfigurationLocation ?
+                new BundledRulesContainer(((BundledConfigurationLocation) configurationLocation).getBundledConfig()) :
+                new ConfigurationLocationRulesContainer(configurationLocation), properties, module);
     }
 
     public OpLoadConfiguration(@NotNull final VirtualFile rulesFile) {
@@ -83,10 +84,6 @@ public class OpLoadConfiguration
 
     public OpLoadConfiguration(@NotNull final String fileContent) {
         this(new ContentRulesContainer(fileContent), null, null);
-    }
-
-    public OpLoadConfiguration(@NotNull final BundledConfig bundledConfig) {
-        this(new BundledRulesContainer(bundledConfig), null, null);
     }
 
     private OpLoadConfiguration(final RulesContainer rulesContainer,

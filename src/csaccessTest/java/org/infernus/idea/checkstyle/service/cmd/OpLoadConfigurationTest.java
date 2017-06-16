@@ -1,5 +1,9 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+
 import com.google.common.collect.ImmutableMap;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -15,23 +19,24 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.hamcrest.Matchers;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ScanScope;
-import org.infernus.idea.checkstyle.service.*;
-import org.junit.*;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
+import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
+import org.infernus.idea.checkstyle.service.ConfigurationMatcher;
+import org.infernus.idea.checkstyle.service.FileUtil;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
 
 public class OpLoadConfigurationTest
@@ -325,16 +330,18 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testLoadBundledSunChecks() {
+        final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
-                .loadConfiguration(BundledConfig.SUN_CHECKS);
+                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS), true, null);
         Assert.assertNotNull(csConfig);
     }
 
 
     @Test
     public void testLoadBundledGoogleChecks() {
+        final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
-                .loadConfiguration(BundledConfig.GOOGLE_CHECKS);
+                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS), true, null);
         Assert.assertNotNull(csConfig);
     }
 }
