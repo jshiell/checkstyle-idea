@@ -75,9 +75,9 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile, project);
+            cmd = new OpLoadConfiguration(inputFile);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables, project);
+            cmd = new OpLoadConfiguration(inputFile, variables);
         }
         return executeCommand(cmd);
     }
@@ -86,7 +86,7 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
                                                       @Nullable final Map<String, String> variables,
                                                       @Nullable final Module module) {
-        return executeCommand(new OpLoadConfiguration(inputFile, variables, project, module));
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, module));
     }
 
     @Override
@@ -95,16 +95,16 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile, project);
+            cmd = new OpLoadConfiguration(inputFile);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables, project);
+            cmd = new OpLoadConfiguration(inputFile, variables);
         }
         return executeCommand(cmd);
     }
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final String pXmlConfig) {
-        return executeCommand(new OpLoadConfiguration(pXmlConfig, project));
+        return executeCommand(new OpLoadConfiguration(pXmlConfig));
     }
 
 

@@ -53,7 +53,7 @@ public class OpLoadConfigurationTest {
         when(configurationLocation.resolveAssociatedFile("triggersAnIoException", project, module)).thenThrow(new IOException
                 ("aTriggeredIoException"));
 
-        underTest = new OpLoadConfiguration(configurationLocation, null, project, module);
+        underTest = new OpLoadConfiguration(configurationLocation, null, module);
     }
 
 
@@ -81,7 +81,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aFileToResolve")
                         .withChild(ConfigurationBuilder.config("aChildModule"))).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile")
                         .withChild(ConfigurationBuilder.config("aChildModule"))).build())));
@@ -94,7 +94,7 @@ public class OpLoadConfigurationTest {
                         .withChild(ConfigurationBuilder.config("ImportControl")
                                 .withAttribute("file", "aFileToResolve")
                                 .withAttribute("anotherAttribute", "anotherValue"))).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("ImportControl")
                         .withAttribute("file", "aResolvedFile").withAttribute("anotherAttribute", "anotherValue")))
@@ -106,7 +106,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
                 ("SuppressionFilter").withAttribute("file", "aFileToResolve").withMessage("messageKey",
                 "messageValue").withMessage("anotherMessageKey", "anotherMessageValue")).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile").withMessage
                         ("messageKey", "messageValue").withMessage("anotherMessageKey", "anotherMessageValue")).build
@@ -120,7 +120,7 @@ public class OpLoadConfigurationTest {
                 ("TreeWalker").withChild(ConfigurationBuilder.config("ImportControl").withAttribute("file",
                 "anUnresolvableFile")).withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute
                 ("headerFile", "aFileToResolve"))).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile")).withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("RegexpHeader")
@@ -134,7 +134,7 @@ public class OpLoadConfigurationTest {
                 .config("TreeWalker").withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute
                         ("headerFile", "anUnresolvableFile")).withChild(ConfigurationBuilder.config("ConstantName")))
                 .build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("ConstantName")))
                 .build())));
@@ -145,7 +145,7 @@ public class OpLoadConfigurationTest {
             CheckstyleException {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
                 ("SuppressionFilter").withAttribute("file", "triggersAnIoException")).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "triggersAnIoException"))
                 .build())));
@@ -154,7 +154,7 @@ public class OpLoadConfigurationTest {
     @Test
     public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionTriggersAnErrorNotification() throws
             CheckstyleException {
-        underTest.resolveFilePaths(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
+        underTest.resolveFilePaths(project, ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
                 ("SuppressionFilter").withAttribute("file", "triggersAnIoException")).build());
 
         final Notification notification = sentNotification();
@@ -166,7 +166,7 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void aModuleWithAFilenameThatIsNotResolvesTriggersAWarningNotification() throws CheckstyleException {
-        underTest.resolveFilePaths(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
+        underTest.resolveFilePaths(project, ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute("headerFile",
                         "anUnresolvableFile"))).build());
 
@@ -179,7 +179,7 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void aModuleWithAFilenameThatIsBlankDoesNotHaveResolutionAttempted() throws CheckstyleException {
-        underTest.resolveFilePaths(ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
+        underTest.resolveFilePaths(project, ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("ImportControl").withAttribute("file", ""))).build());
         //verifyZeroInteractions(configurationLocation);
     }
@@ -194,7 +194,7 @@ public class OpLoadConfigurationTest {
     public void aSuppressionFilterWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
                 ("SuppressionFilter").withAttribute("file", "aFileToResolve")).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aResolvedFile")).build())));
     }
@@ -203,7 +203,7 @@ public class OpLoadConfigurationTest {
     public void aSuppressionFilterWithAnUnresolvableFilenameHasTheModuleRemoved() throws CheckstyleException {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config
                 ("SuppressionFilter").withAttribute("file", "anUnresolvableFile")).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().build())));
     }
 
@@ -212,7 +212,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute("headerFile", "aFileToResolve"))
         ).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("RegexpHeader")
                         .withAttribute("headerFile", "aResolvedFile"))).build())));
@@ -223,7 +223,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute("headerFile",
                         "anUnresolvableFile"))).build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker")).build())));
     }
@@ -233,7 +233,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("ImportControl").withAttribute("file", "aFileToResolve")))
                 .build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker").withChild(ConfigurationBuilder.config("ImportControl")
                         .withAttribute("file", "aResolvedFile"))).build())));
@@ -244,7 +244,7 @@ public class OpLoadConfigurationTest {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("ImportControl").withAttribute("file", "anUnresolvableFile")))
                 .build();
-        underTest.resolveFilePaths(config);
+        underTest.resolveFilePaths(project, config);
         assertThat(config, Matchers.is(ConfigurationMatcher.configEqualTo(ConfigurationBuilder.checker().withChild
                 (ConfigurationBuilder.config("TreeWalker")).build())));
     }
@@ -252,7 +252,7 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testNoConfiguration() throws CheckstyleException {
-        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, project, module) {
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module) {
             @Override
             Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
@@ -295,19 +295,19 @@ public class OpLoadConfigurationTest {
                 throw new UnsupportedOperationException();
             }
         };
-        underTest.resolveFilePaths(config);  // just log a warning and do nothing ... well ...
+        underTest.resolveFilePaths(project, config);  // just log a warning and do nothing ... well ...
     }
 
 
     @Test
     public void testConstructors() {
-        new OpLoadConfiguration(configurationLocation, project);
-        new OpLoadConfiguration(configurationLocation, null, project);
-        new OpLoadConfiguration(configurationLocation, null, project, module);
+        new OpLoadConfiguration(configurationLocation);
+        new OpLoadConfiguration(configurationLocation, null);
+        new OpLoadConfiguration(configurationLocation, null, module);
         VirtualFile virtualFile = mock(VirtualFile.class);
-        new OpLoadConfiguration((VirtualFile) virtualFile, project);
-        new OpLoadConfiguration((VirtualFile) virtualFile, null, project);
-        new OpLoadConfiguration("doesn't matter", project);
+        new OpLoadConfiguration((VirtualFile) virtualFile);
+        new OpLoadConfiguration((VirtualFile) virtualFile, null);
+        new OpLoadConfiguration("doesn't matter");
     }
 
 
