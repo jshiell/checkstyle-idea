@@ -13,10 +13,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.service.IgnoringResolver;
 import org.infernus.idea.checkstyle.service.RulesContainer;
-import org.infernus.idea.checkstyle.service.RulesContainer.ContentRulesContainer;
+import org.infernus.idea.checkstyle.service.RulesContainer.BundledRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.ConfigurationLocationRulesContainer;
+import org.infernus.idea.checkstyle.service.RulesContainer.ContentRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.VirtualFileRulesContainer;
 import org.infernus.idea.checkstyle.service.SimpleResolver;
 import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
@@ -24,7 +26,6 @@ import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -82,6 +83,10 @@ public class OpLoadConfiguration
 
     public OpLoadConfiguration(@NotNull final String fileContent) {
         this(new ContentRulesContainer(fileContent), null, null);
+    }
+
+    public OpLoadConfiguration(@NotNull final BundledConfig bundledConfig) {
+        this(new BundledRulesContainer(bundledConfig), null, null);
     }
 
     private OpLoadConfiguration(final RulesContainer rulesContainer,

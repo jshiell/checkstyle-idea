@@ -3,7 +3,9 @@ package org.infernus.idea.checkstyle.service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,6 +107,28 @@ public interface RulesContainer
         @Override
         public InputStream inputStream() throws IOException {
             return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+
+    public static class BundledRulesContainer implements RulesContainer
+    {
+        private final BundledConfig bundledConfig;
+
+        public BundledRulesContainer(@NotNull final BundledConfig bundledConfig) {
+            this.bundledConfig = bundledConfig;
+        }
+
+        @Override
+        @Nullable
+        public String filePath() {
+            return "(bundled " + bundledConfig.getPath() + ")";
+        }
+
+        @Override
+        public InputStream inputStream() throws IOException {
+            // using the csaccess classloader:
+            return getClass().getResourceAsStream(bundledConfig.getPath());
         }
     }
 }
