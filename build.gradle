@@ -76,17 +76,19 @@ ext {
     // testConfigClosure is used by all tasks of type Test (runCsaccessTests, test, xtest_*):
     testConfigClosure = {
         testLogging {
+            events 'failed';
             showStackTraces = true;
             showExceptions = true;
             showCauses = true;
             //showStandardStreams = true;
-            exceptionFormat 'full'
+            exceptionFormat 'full';
         }
         afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
             if (descriptor.getParent() == null) {
                 logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
                         testResult.successfulTestCount + ' successful, ' +
-                        testResult.skippedTestCount + ' skipped.');
+                        (testResult.testCount - testResult.successfulTestCount - testResult.skippedTestCount) +
+                        ' failed, ' + testResult.skippedTestCount + ' skipped.');
             }
         }
     }
