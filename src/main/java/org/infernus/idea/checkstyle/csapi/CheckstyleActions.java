@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.csapi;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -10,10 +13,6 @@ import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 
 public interface CheckstyleActions {
@@ -123,14 +122,6 @@ public interface CheckstyleActions {
      * @return a Checkstyle configuration object
      */
     CheckstyleInternalObject loadConfiguration(@NotNull String pXmlConfig);
-
-    /**
-     * Load a Checkstyle configuration file.
-     *
-     * @param bundledConfig which bundled configuration file to load
-     * @return a Checkstyle configuration object
-     */
-    CheckstyleInternalObject loadConfiguration(@NotNull final BundledConfig bundledConfig);
 
 
     /**

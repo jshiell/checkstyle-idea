@@ -1,14 +1,16 @@
 package org.infernus.idea.checkstyle.model;
 
+
 /**
  * Types of configuration supported.
  */
-public enum ConfigurationType {
-
+public enum ConfigurationType
+{
     /**
-     * Located on the IDE classpath.
+     * one of the configurations bundled with the Checkstyle tool, chosen from the
+     * {@link org.infernus.idea.checkstyle.csapi.BundledConfig} enum
      */
-    CLASSPATH,
+    BUNDLED,
 
     /**
      * Located on a HTTP URL.
@@ -29,6 +31,7 @@ public enum ConfigurationType {
      * Located in a local file where the path is project relative.
      */
     PROJECT_RELATIVE;
+
 
     /**
      * Parse a case-insensitive type string.

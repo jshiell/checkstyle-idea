@@ -43,6 +43,7 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -93,9 +94,8 @@ public class CheckStyleConfigPanel extends JPanel {
     private List<ConfigurationLocation> buildPresetLocations() {
         final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory();
         final List<ConfigurationLocation> result = new ArrayList<>();
-        final ConfigurationLocation checkStyleSunChecks = locationFactory.create(project, ConfigurationType.CLASSPATH,
-                SUN_CHECKS_CONFIG, CheckStyleBundle.message("file.default.description"));
-        result.add(checkStyleSunChecks);
+        result.add(locationFactory.create(BundledConfig.SUN_CHECKS));
+        result.add(locationFactory.create(BundledConfig.GOOGLE_CHECKS));
         return Collections.unmodifiableList(result);
     }
 

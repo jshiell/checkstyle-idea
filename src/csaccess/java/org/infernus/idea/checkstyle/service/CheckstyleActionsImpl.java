@@ -1,5 +1,9 @@
 package org.infernus.idea.checkstyle.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -8,19 +12,23 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.csapi.*;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
+import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.service.cmd.*;
+import org.infernus.idea.checkstyle.service.cmd.CheckstyleCommand;
+import org.infernus.idea.checkstyle.service.cmd.OpCreateChecker;
+import org.infernus.idea.checkstyle.service.cmd.OpDestroyChecker;
+import org.infernus.idea.checkstyle.service.cmd.OpLoadConfiguration;
+import org.infernus.idea.checkstyle.service.cmd.OpPeruseConfiguration;
+import org.infernus.idea.checkstyle.service.cmd.OpScan;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 
 public class CheckstyleActionsImpl implements CheckstyleActions {
@@ -102,11 +110,6 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final String pXmlConfig) {
         return executeCommand(new OpLoadConfiguration(pXmlConfig));
-    }
-
-    @Override
-    public CheckstyleInternalObject loadConfiguration(@NotNull final BundledConfig bundledConfig) {
-        return executeCommand(new OpLoadConfiguration(bundledConfig));
     }
 
 

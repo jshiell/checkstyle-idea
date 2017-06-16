@@ -1,11 +1,13 @@
 package org.infernus.idea.checkstyle.model;
 
-import com.intellij.openapi.project.Project;
-
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.jetbrains.annotations.NotNull;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 
 /**
  * Factory for configuration location objects.
@@ -56,8 +58,8 @@ public class ConfigurationLocationFactory {
                 configurationLocation = new InsecureHTTPURLConfigurationLocation();
                 break;
 
-            case CLASSPATH:
-                configurationLocation = new ClassPathConfigurationLocation();
+            case BUNDLED:
+                configurationLocation = new BundledConfigurationLocation(BundledConfig.valueOf(location));
                 break;
 
             default:
@@ -78,12 +80,14 @@ public class ConfigurationLocationFactory {
         return configurationLocation;
     }
 
+
     /**
-     * Create a new location from a string representation.
+     * Create a new location from a serialized string representation. For example when reading the plugin configuration
+     * XML.
      *
      * @param project              the project this location is associated with.
      * @param stringRepresentation the toString of another ConfigurationLocation.
-     * @return the location.
+     * @return the location
      */
     public ConfigurationLocation create(final Project project, final String stringRepresentation) {
         if (project == null) {
@@ -112,9 +116,15 @@ public class ConfigurationLocationFactory {
             description = stringRepresentation.substring(descriptionSplitIndex + 1);
         }
 
+        if ("CLASSPATH".equals(typeString)) {
+            return create(BundledConfig.SUN_CHECKS);   // backwards compatibility with old config files
+        }
         final ConfigurationType type = ConfigurationType.parse(typeString);
-
         return create(project, type, location, description);
+    }
+
+    public ConfigurationLocation create(@NotNull final BundledConfig bundledConfig) {
+        return new BundledConfigurationLocation(bundledConfig);
     }
 
     private boolean indexIsOutOfBounds(final int index, final String stringRepresentation) {

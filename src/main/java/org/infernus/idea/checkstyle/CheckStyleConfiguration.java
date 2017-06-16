@@ -33,6 +33,7 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 /**
  * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
  */
