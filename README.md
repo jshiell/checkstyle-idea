@@ -170,6 +170,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 ## Version History
 
 * **5.6.2** New: code style importer now support avoid star imports - thanks to @zentol (#319).
+* **5.6.2** New: temporary files are now created relative to the project base where possible (#321).
 * **5.6.1** New: code style importer now supports import order - thanks to @zentol (#314).
 * **5.6.1** Fixed: code style importer now adds an extra line between leading content and the package declaration (#315).
 * **5.6.1** Fixed: improved housekeeping when Windows projects are not on the system drive (#313).
