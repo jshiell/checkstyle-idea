@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.6.1</version>
+    <version>5.6.2</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.6.2: New: code style importer now support avoid star imports - thanks to @zentol (#319).</li>
     <li>5.6.1: New: code style importer now supports import order - thanks to @zentol (#314).</li>
     <li>5.6.1: Fixed: code style importer now adds an extra line between leading content and the package declaration (#315).</li>
     <li>5.6.1: Fixed: improved housekeeping when Windows projects are not on the system drive (#313).</li>
