@@ -1,5 +1,7 @@
 language: java
 
+sudo: false
+
 matrix:
   include:
     - os: linux
@@ -9,3 +11,7 @@ matrix:
 
 script:
   - ./gradlew check jacocoCsaccessCoverageVerification
+
+cache:
+  directories:
+  - ~/.gradle
