@@ -1,30 +1,21 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.Callable;
-
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
 
 
 /**
@@ -34,12 +25,6 @@ import org.jetbrains.annotations.Nullable;
 public class CheckstyleProjectService {
 
     private static final Log LOG = LogFactory.getLog(CheckstyleProjectService.class);
-
-    private static final String PROP_FILE = "checkstyle-idea.properties";
-
-    private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
-
-    private static final String PROP_NAME_JAVA8 = "checkstyle.versions.java8";
 
     /** mock instance which may be set and used by unit tests */
     private static CheckstyleProjectService sMock = null;
@@ -54,77 +39,10 @@ public class CheckstyleProjectService {
 
     public CheckstyleProjectService(@NotNull final Project project) {
         this.project = project;
-        supportedVersions = readSupportedVersions();
+        supportedVersions = new VersionListReader().getSupportedVersions();
         final CheckStyleConfiguration pluginConfig = CheckStyleConfiguration.getInstance(project);
-        activateCheckstyleVersion(pluginConfig.getCheckstyleVersion(getDefaultVersion()),
-                pluginConfig.getThirdPartyClassPath());
-    }
-
-
-    /**
-     * Read the supported Checkstyle versions from the config properties file.
-     *
-     * @return the supported versions which match the Java level of the current JVM
-     */
-    private SortedSet<String> readSupportedVersions() {
-        final Properties props = readProperties();
-        final String javaVersion = Runtime.class.getPackage().getSpecificationVersion();
-
-        final SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
-        theVersions.addAll(readVersions(props, PROP_NAME_JAVA7));
-        if (!javaVersion.startsWith("1.7")) {
-            theVersions.addAll(readVersions(props, PROP_NAME_JAVA8));
-        }
-        return Collections.unmodifiableSortedSet(theVersions);
-    }
-
-
-    private Properties readProperties() {
-        final Properties props = new Properties();
-        InputStream is = null;
-        try {
-            is = getClass().getClassLoader().getResourceAsStream(PROP_FILE);
-            if (is == null) {
-                // in unit tests, it seems we need this:
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(PROP_FILE);
-            }
-            if (is != null) {
-                props.load(is);
-            }
-        } catch (IllegalArgumentException | IOException e) {
-            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
-                    + PROP_FILE + "'", e);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
-        if (props.isEmpty()) {
-            throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
-                    + PROP_FILE + "'");
-        }
-        return props;
-    }
-
-
-    private Set<String> readVersions(final Properties props, final String propertyName) {
-        final String propertyValue = props.getProperty(propertyName);
-        if (Strings.isBlank(propertyValue)) {
-            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' missing from "
-                    + "configuration file '" + PROP_FILE + "'");
-        }
-
-        final String[] versions = propertyValue.trim().split("\\s*,\\s*");
-        final Set<String> result = new HashSet<>();
-        for (final String version : versions) {
-            if (!version.isEmpty()) {
-                result.add(version);
-            }
-        }
-
-        if (result.isEmpty()) {
-            throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' was empty in "
-                    + "configuration file '" + PROP_FILE + "'");
-        }
-        return result;
+        activateCheckstyleVersion(pluginConfig.getCurrentPluginConfig().getCheckstyleVersion(),
+                pluginConfig.getCurrentPluginConfig().getThirdPartyClasspath());
     }
 
 
@@ -141,7 +59,7 @@ public class CheckstyleProjectService {
 
     @NotNull
     public String getDefaultVersion() {
-        return supportedVersions.last();
+        return VersionListReader.getDefaultVersion(supportedVersions);
     }
 
 

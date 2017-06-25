@@ -59,7 +59,7 @@ public class ConfigurationLocationFactory {
                 break;
 
             case BUNDLED:
-                configurationLocation = new BundledConfigurationLocation(BundledConfig.valueOf(location));
+                configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description));
                 break;
 
             default:
@@ -123,7 +123,7 @@ public class ConfigurationLocationFactory {
         return create(project, type, location, description);
     }
 
-    public ConfigurationLocation create(@NotNull final BundledConfig bundledConfig) {
+    public BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig) {
         return new BundledConfigurationLocation(bundledConfig);
     }
 

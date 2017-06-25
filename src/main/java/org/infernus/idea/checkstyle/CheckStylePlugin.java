@@ -57,7 +57,7 @@ public final class CheckStylePlugin implements ProjectComponent {
      */
     public CheckStylePlugin(@NotNull final Project project) {
         this.project = project;
-        this.configuration = CheckStyleConfiguration.getInstance(project);
+        configuration = CheckStyleConfiguration.getInstance(project);
 
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
 
@@ -217,7 +217,7 @@ public final class CheckStylePlugin implements ProjectComponent {
             }
             return moduleConfiguration.getActiveConfiguration();
         }
-        return getConfiguration().getActiveConfiguration();
+        return getConfiguration().getCurrentPluginConfig().getActiveLocation();
     }
 
 

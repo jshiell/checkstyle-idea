@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
@@ -58,12 +59,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             }
 
             public void saveState() {
-                settings().ifPresent(settings -> settings.setScanFilesBeforeCheckin(checkBox.isSelected()));
+                settings().ifPresent(settings -> settings.setCurrentPluginConfig(
+                        new PluginConfigDto(settings.getCurrentPluginConfig(), checkBox.isSelected()), false));
             }
 
             public void restoreState() {
-                checkBox.setSelected(settings()
-                        .map(CheckStyleConfiguration::isScanFilesBeforeCheckin)
+                checkBox.setSelected(
+                        settings().map(c -> c.getCurrentPluginConfig().isScanBeforeCheckin())
                         .orElseGet(() -> Boolean.FALSE));
             }
         };
@@ -84,7 +86,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        if (plugin.getConfiguration().isScanFilesBeforeCheckin()) {
+        if (plugin.getConfiguration().getCurrentPluginConfig().isScanBeforeCheckin()) {
             try {
                 final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {

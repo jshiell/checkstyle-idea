@@ -89,7 +89,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             return checkerFactory(psiFile.getProject())
                     .checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().isSuppressingErrors()))
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrentPluginConfig().isSuppressErrors()))
                     .map(results -> results.get(psiFile))
                     .map(this::dropIgnoredProblems)
                     .orElseGet(() -> NO_PROBLEMS_FOUND);
@@ -140,7 +140,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     private void disableActiveConfiguration(final CheckStylePlugin plugin, final Project project) {
-        plugin.getConfiguration().setActiveConfiguration(null);
+        plugin.getConfiguration().disableActiveConfiguration();
         showWarning(project, message("checkstyle.configuration-disabled.file-not-found"));
     }
 

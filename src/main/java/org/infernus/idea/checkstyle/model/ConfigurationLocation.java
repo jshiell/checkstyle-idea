@@ -22,15 +22,18 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
  * Bean encapsulating a configuration source.
+ * <p>Note on identity: Configuration locations are considered equal if their descriptor matches. The descriptor
+ * consists of type, location, and description text. Properties are not considered.</p>
+ * <p>Note on order: Configuration locations are ordered by description text, followed by location and type, except that
+ * the bundled configurations (Sun and Google checks) always go first.</p>
  */
-public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation> {
-
+public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation>
+{
     private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
 
     private static final long BLACKLIST_TIME_MS = 1000 * 60;
@@ -111,6 +114,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         properties.putAll(newProperties);
 
         this.propertiesCheckedThisSession = false;
+    }
+
+    public boolean isEditableInConfigDialog() {
+        return true;
     }
 
     public void reset() {
@@ -347,59 +354,45 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return cloned;
     }
 
+
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public final boolean equals(final Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(other instanceof ConfigurationLocation)) {
             return false;
         }
-
-        final ConfigurationLocation that = (ConfigurationLocation) o;
-
-        if (description != null ? !description.equals(that.description) : that.description != null) {
-            return false;
-        }
-        if (location != null ? !location.equals(that.location) : that.location != null) {
-            return false;
-        }
-        if (type != that.type) {
-            return false;
-        }
-
-        return true;
+        final ConfigurationLocation that = (ConfigurationLocation) other;
+        return compareTo(that) == 0;
     }
 
     @Override
-    public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
+    public final int hashCode() {
+        int result = java.util.Objects.hash(getDescription(), getLocation(), getType());
+        if (this instanceof BundledConfigurationLocation) {
+            result = java.util.Objects.hash(result, ((BundledConfigurationLocation) this).getBundledConfig());
+        }
         return result;
     }
+
 
     @Override
     public String toString() {
         assert description != null;
-
         return description;
     }
 
+
     @Override
-    public final int compareTo(@NotNull final ConfigurationLocation configurationLocation) {
-        // TODO should be consistent with equals()
+    public final int compareTo(@NotNull final ConfigurationLocation other) {
         int result = 0;
         // bundled configs go first, ordered by their position in the BundledConfig enum
-        if (configurationLocation instanceof BundledConfigurationLocation) {
+        if (other instanceof BundledConfigurationLocation) {
             if (this instanceof BundledConfigurationLocation) {
                 final int o1 = ((BundledConfigurationLocation) this).getBundledConfig().ordinal();
-                final int o2 = ((BundledConfigurationLocation) configurationLocation).getBundledConfig().ordinal();
-                if (o1 < o2) {
-                    result = -1;
-                } else if (o1 > o2) {
-                    result = 1;
-                }
+                final int o2 = ((BundledConfigurationLocation) other).getBundledConfig().ordinal();
+                result = Integer.compare(o1, o2);
             } else {
                 result = 1;
             }
@@ -407,18 +400,40 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             if (this instanceof BundledConfigurationLocation) {
                 result = -1;
             } else {
-                result = Objects.compare(getDescription(), configurationLocation.getDescription());
+                result = compareStrings(getDescription(), other.getDescription());
+                if (result == 0) {
+                    result = compareStrings(getLocation(), other.getLocation());
+                    if (result == 0) {
+                        result = Objects.compare(getType(), other.getType());
+                    }
+                }
             }
         }
         return result;
     }
+
+    private int compareStrings(@Nullable final String pStr1, @Nullable final String pStr2)
+    {
+        int result = 0;
+        if (pStr1 != null) {
+            if (pStr2 != null) {
+                result = pStr1.compareTo(pStr2);
+            } else {
+                result = -1;
+            }
+        } else if (pStr2 != null) {
+            result = 1;
+        }
+        return result;
+    }
+
 
     public boolean isBlacklisted() {
         return blacklistedUntil > currentTimeMillis();
     }
 
     public long blacklistedForSeconds() {
-        return max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
+        return Math.max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
     }
 
     public void blacklist() {

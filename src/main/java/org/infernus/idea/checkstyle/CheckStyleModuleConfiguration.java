@@ -96,15 +96,15 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     private ConfigurationLocation getProjectConfiguration() {
-        return checkstylePlugin().getConfiguration().getActiveConfiguration();
+        return checkstylePlugin().getConfiguration().getCurrentPluginConfig().getActiveLocation();
     }
 
     public List<ConfigurationLocation> configurationLocations() {
-        return checkstylePlugin().getConfiguration().configurationLocations();
+        return new ArrayList<>(checkstylePlugin().getConfiguration().getCurrentPluginConfig().getLocations());
     }
 
     public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
-        return checkstylePlugin().getConfiguration().getAndResolveConfigurationLocations();
+        return new ArrayList<>(checkstylePlugin().getConfiguration().getCurrentPluginConfig().getLocations());
     }
 
     @NotNull

@@ -9,28 +9,49 @@ import org.jetbrains.annotations.NotNull;
 public enum BundledConfig
 {
     /** the Sun checks */
-    SUN_CHECKS("/sun_checks.xml", "Sun Checks"),
+    SUN_CHECKS("(bundled)", "Sun Checks", "/sun_checks.xml"),
 
     /** the Google checks */
-    GOOGLE_CHECKS("/google_checks.xml", "Google Checks");
+    GOOGLE_CHECKS("(bundled)", "Google Checks", "/google_checks.xml");
 
 
-    private final String path;
+    private final String location;
 
     private final String description;
 
+    private final String path;
 
-    private BundledConfig(@NotNull final String path, @NotNull final String description) {
-        this.path = path;
+
+    private BundledConfig(@NotNull final String location, @NotNull final String description,
+                          @NotNull final String path) {
+        this.location = location;
         this.description = description;
+        this.path = path;
     }
 
 
+    @NotNull
+    public String getLocation() {
+        return location;
+    }
+
+    @NotNull
+    public String getDescription() {
+        return description;
+    }
+
+    @NotNull
     public String getPath() {
         return path;
     }
 
-    public String getDescription() {
-        return description;
+
+    @NotNull
+    public static BundledConfig fromDescription(@NotNull final String pDescription) {
+        BundledConfig result = GOOGLE_CHECKS;
+        if (pDescription.contains("Sun")) {
+            result = SUN_CHECKS;
+        }
+        return result;
     }
 }

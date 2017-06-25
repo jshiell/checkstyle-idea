@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.model;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation
 
     BundledConfigurationLocation(@NotNull final BundledConfig pBundledConfig) {
         super(ConfigurationType.BUNDLED);
-        super.setLocation(pBundledConfig.getPath());
+        super.setLocation(pBundledConfig.getLocation());
         super.setDescription(pBundledConfig.getDescription());
         bundledConfig = pBundledConfig;
     }
@@ -54,25 +53,8 @@ public class BundledConfigurationLocation extends ConfigurationLocation
         throw new UnsupportedOperationException("load via CheckstyleActions.loadConfiguration() instead");
     }
 
-
-    @Override
-    public boolean equals(final Object pOther) {
-        if (this == pOther) {
-            return true;
-        }
-        if (pOther == null || getClass() != pOther.getClass()) {
-            return false;
-        }
-        if (!super.equals(pOther)) {
-            return false;
-        }
-        final BundledConfigurationLocation other = (BundledConfigurationLocation) pOther;
-        return Objects.equals(bundledConfig, other.bundledConfig);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), bundledConfig);
+    public boolean isEditableInConfigDialog() {
+        return false;
     }
 
 

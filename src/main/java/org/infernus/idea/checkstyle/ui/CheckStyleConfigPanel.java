@@ -7,9 +7,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
@@ -42,21 +42,20 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
-import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 
 /**
- * Provides a configuration panel for project-level configuration.
+ * Provides a configuration panel (dialog) for project-level configuration.
  */
-public class CheckStyleConfigPanel extends JPanel {
+public class CheckStyleConfigPanel extends JPanel
+{
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private static final int ACTIVE_COL_MIN_WIDTH = 40;
     private static final int ACTIVE_COL_MAX_WIDTH = 50;
@@ -64,12 +63,10 @@ public class CheckStyleConfigPanel extends JPanel {
     private static final int DESC_COL_MAX_WIDTH = 200;
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
 
-    private static final String SUN_CHECKS_CONFIG = "/sun_checks.xml";
-    private final List<ConfigurationLocation> presetLocations;
+    private final JList<?> pathList = new JBList(new DefaultListModel<String>());
 
-    private final JList pathList = new JBList(new DefaultListModel<String>());
-
-    private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") + ":");
+    private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") +
+            ":");
     private final ComboBox csVersionDropdown;
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
     private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
@@ -85,19 +82,11 @@ public class CheckStyleConfigPanel extends JPanel {
         super(new BorderLayout());
 
         this.project = project;
-        this.presetLocations = buildPresetLocations();
-        this.csVersionDropdown = buildCheckstyleVersionComboBox(project);
+        csVersionDropdown = buildCheckstyleVersionComboBox(project);
 
         initialise();
     }
 
-    private List<ConfigurationLocation> buildPresetLocations() {
-        final ConfigurationLocationFactory locationFactory = getConfigurationLocationFactory();
-        final List<ConfigurationLocation> result = new ArrayList<>();
-        result.add(locationFactory.create(BundledConfig.SUN_CHECKS));
-        result.add(locationFactory.create(BundledConfig.GOOGLE_CHECKS));
-        return Collections.unmodifiableList(result);
-    }
 
     private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project currentProject) {
         SortedSet<String> versions = CheckstyleProjectService.getInstance(currentProject).getSupportedVersions();
@@ -110,10 +99,6 @@ public class CheckStyleConfigPanel extends JPanel {
 
         CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         csService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
-    }
-
-    private ConfigurationLocationFactory getConfigurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     private void initialise() {
@@ -205,34 +190,11 @@ public class CheckStyleConfigPanel extends JPanel {
         column.setWidth(preferredSize);
         column.setPreferredWidth(preferredSize);
         if (maxSize != null) {
-            column.setMaxWidth(maxSize);
+            column.setMaxWidth(maxSize.intValue());
         }
     }
 
-    public void setScanScope(@Nullable final ScanScope pScanScope) {
-        scopeDropdown.setSelectedItem(pScanScope != null ? pScanScope : ScanScope.getDefaultValue());
-    }
-
-    @NotNull
-    public ScanScope getScanScope() {
-        ScanScope scope = (ScanScope) scopeDropdown.getSelectedItem();
-        return scope != null ? scope : ScanScope.getDefaultValue();
-    }
-
-    public void setSuppressingErrors(final boolean suppressingErrors) {
-        suppressErrorsCheckbox.setSelected(suppressingErrors);
-    }
-
-    public boolean isSuppressingErrors() {
-        return suppressErrorsCheckbox.isSelected();
-    }
-
-    /**
-     * Set the third party classpath.
-     *
-     * @param classpath the third party classpath.
-     */
-    public void setThirdPartyClasspath(final List<String> classpath) {
+    private void setThirdPartyClasspath(final List<String> classpath) {
         List<String> thirdPartyClasspath;
         if (classpath == null) {
             thirdPartyClasspath = new ArrayList<>();
@@ -250,12 +212,8 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    public String getCheckstyleVersion() {
+    private String getCheckstyleVersion() {
         return (String) csVersionDropdown.getSelectedItem();
-    }
-
-    public void setCheckstyleVersion(@NotNull final String pVersion) {
-        csVersionDropdown.setSelectedItem(pVersion);
     }
 
 
@@ -264,54 +222,52 @@ public class CheckStyleConfigPanel extends JPanel {
         return (DefaultListModel<String>) pathList.getModel();
     }
 
-    /**
-     * Get the third party classpath.
-     *
-     * @return the third party classpath.
-     */
+
     @NotNull
-    public List<String> getThirdPartyClasspath() {
+    private List<String> getThirdPartyClasspath() {
         final List<String> classpath = new ArrayList<>();
 
-        final DefaultListModel listModel = pathListModel();
+        final DefaultListModel<String> listModel = pathListModel();
         for (int i = 0; i < listModel.size(); ++i) {
-            final String path = (String) listModel.get(i);
+            final String path = listModel.get(i);
             classpath.add(path);
         }
 
         return classpath;
     }
 
-    public List<ConfigurationLocation> getConfigurationLocations() {
-        return Collections.unmodifiableList(locationModel.getLocations());
+
+    public void showPluginConfiguration(@NotNull final PluginConfigDto pluginConfig) {
+        csVersionDropdown.setSelectedItem(pluginConfig.getCheckstyleVersion());
+        scopeDropdown.setSelectedItem(pluginConfig.getScanScope());
+        suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
+        locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
+        setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
+        locationModel.setActiveLocation(pluginConfig.getActiveLocation());
     }
 
-    public void setConfigurationLocations(final List<ConfigurationLocation> newLocations) {
-        final List<ConfigurationLocation> modelLocations = new ArrayList<>(newLocations);
-        Collections.sort(modelLocations);
-        ensurePresetLocations(modelLocations);
-        locationModel.setLocations(modelLocations);
-    }
+    public PluginConfigDto getPluginConfiguration() {
+        final String checkstyleVersion = (String) csVersionDropdown.getSelectedItem();
+        ScanScope scanScope = (ScanScope) scopeDropdown.getSelectedItem();
+        if (scanScope == null) {
+            scanScope = ScanScope.getDefaultValue();
+        }
+        final boolean suppressErrors = suppressErrorsCheckbox.isSelected();
+        final SortedSet<ConfigurationLocation> locations = new TreeSet<>(locationModel.getLocations());
+        final List<String> thirdPartyClasspath = getThirdPartyClasspath();
+        final ConfigurationLocation activeLocation = locationModel.getActiveLocation();
 
-    private void ensurePresetLocations(final List<ConfigurationLocation> locations) {
-        presetLocations.stream()
-                .filter(presetLocation -> !locations.contains(presetLocation))
-                .forEach(presetLocation -> locations.add(0, presetLocation));
-    }
-
-    public void setActiveLocation(final ConfigurationLocation activeLocation) {
-        locationModel.setActiveLocation(activeLocation);
-    }
-
-    public ConfigurationLocation getActiveLocation() {
-        return locationModel.getActiveLocation();
+        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, locations,
+                thirdPartyClasspath, activeLocation, false); // we don't know the scanBeforeCheckin flag at this point
+        return result;
     }
 
 
     /**
      * Process the addition of a configuration location.
      */
-    private final class AddLocationAction extends ToolbarAction {
+    private final class AddLocationAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -7266120887003483814L;
 
         AddLocationAction() {
@@ -343,7 +299,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a configuration location.
      */
-    private final class RemoveLocationAction extends ToolbarAction {
+    private final class RemoveLocationAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -799542186049804472L;
 
         RemoveLocationAction() {
@@ -366,7 +323,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Edit the properties of a configuration location.
      */
-    private final class EditPropertiesAction extends ToolbarAction {
+    private final class EditPropertiesAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -799542186049804472L;
 
         EditPropertiesAction() {
@@ -396,7 +354,8 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
+    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable
+    {
         private static final long serialVersionUID = 7091312536206510956L;
 
         @Override
@@ -408,7 +367,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the addition of a path element.
      */
-    private final class AddPathAction extends ToolbarAction {
+    private final class AddPathAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -1389576037231727360L;
 
         /**
@@ -438,7 +398,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the editing of a path element.
      */
-    private final class EditPathAction extends ToolbarAction {
+    private final class EditPathAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -1455378231580505750L;
 
         /**
@@ -478,7 +439,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a path element.
      */
-    private final class RemovePathAction extends ToolbarAction {
+    private final class RemovePathAction extends ToolbarAction
+    {
         private static final long serialVersionUID = 7339136485307147623L;
 
         /**
@@ -507,7 +469,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move up of a path element.
      */
-    private final class MoveUpPathAction extends ToolbarAction {
+    private final class MoveUpPathAction extends ToolbarAction
+    {
         private static final long serialVersionUID = -1230778908605654344L;
 
         /**
@@ -537,7 +500,8 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move down of a path element.
      */
-    private final class MoveDownPathAction extends ToolbarAction {
+    private final class MoveDownPathAction extends ToolbarAction
+    {
         private static final long serialVersionUID = 1222511743014969175L;
 
         /**
@@ -564,12 +528,12 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    private class DisableForDefaultUpdater implements AnActionButtonUpdater {
+    private class DisableForDefaultUpdater implements AnActionButtonUpdater
+    {
         @Override
         public boolean isEnabled(final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem == -1
-                    || !presetLocations.contains(locationModel.getLocationAt(selectedItem));
+            return selectedItem >= 0 && locationModel.getLocationAt(selectedItem).isEditableInConfigDialog();
         }
     }
 }

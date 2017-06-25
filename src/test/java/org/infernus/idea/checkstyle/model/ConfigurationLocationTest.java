@@ -241,8 +241,10 @@ public class ConfigurationLocationTest {
 
         Assert.assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
         Assert.assertTrue(list.get(0).getDescription().contains("Sun Checks"));
+        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS)));
         Assert.assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
         Assert.assertTrue(list.get(1).getDescription().contains("Google Checks"));
+        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS)));
         Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
         Assert.assertEquals("descA", list.get(2).getDescription());
         Assert.assertEquals(FileConfigurationLocation.class, list.get(3).getClass());
