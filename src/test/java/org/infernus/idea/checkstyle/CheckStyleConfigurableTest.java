@@ -1,7 +1,8 @@
 package org.infernus.idea.checkstyle;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -26,46 +27,43 @@ public class CheckStyleConfigurableTest {
             mockProject = project;
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         CheckStyleConfiguration getConfiguration() {
             final ConfigurationLocationFactory mockLocFactory = new ConfigurationLocationFactory();
-            final List<ConfigurationLocation> mockLocations = buildMockLocations(mockProject, mockLocFactory);
+            final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject, mockLocFactory);
 
+            final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false,
+                    mockLocations, Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
             CheckStyleConfiguration mockConfig = Mockito.mock(CheckStyleConfiguration.class);
-            when(mockConfig.getProject()).thenReturn(mockProject);
-            when(mockConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn("7.1.2");
             when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
-            when(mockConfig.getActiveConfiguration()).thenReturn(mockLocations.get(0));
-            when(mockConfig.configurationLocations()).thenReturn(mockLocations);
-            when(mockConfig.getThirdPartyClassPath()).thenReturn(Arrays.asList("cp1", "cp2"));
-            when(mockConfig.getScanScope()).thenReturn(ScanScope.AllSources);
-            when(mockConfig.isSuppressingErrors()).thenReturn(Boolean.FALSE);
+            when(mockConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
             return mockConfig;
         }
     }
 
-    private static List<ConfigurationLocation> buildMockLocations(final Project mockProject,
-                                                                  final ConfigurationLocationFactory mockLocFactory) {
+    private static SortedSet<ConfigurationLocation> buildMockLocations(final Project mockProject,
+                                                                       final ConfigurationLocationFactory mockLocFactory) {
         ConfigurationLocation mockLocation1 = mockLocFactory.create(mockProject, ConfigurationType.PROJECT_RELATIVE,
                 "src/test/resources/emptyFile1.xml", "description1");
         ConfigurationLocation mockLocation2 = mockLocFactory.create(mockProject, ConfigurationType.PROJECT_RELATIVE,
                 "src/test/resources/emptyFile2.xml", "description2");
-        return Arrays.asList(mockLocation1, mockLocation2);
+        SortedSet<ConfigurationLocation> result = new TreeSet<>();
+        result.add(mockLocation1);
+        result.add(mockLocation2);
+        return result;
     }
 
     private CheckStyleConfigPanel buildMockPanel(final Project mockProject) {
         CheckStyleConfigPanel mockPanel = Mockito.mock(CheckStyleConfigPanel.class);
-        final List<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
+        final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
                 new ConfigurationLocationFactory());
 
-        when(mockPanel.getCheckstyleVersion()).thenReturn("7.1.2");
-        when(mockPanel.getActiveLocation()).thenReturn(mockLocations.get(0));
-        when(mockPanel.getConfigurationLocations()).thenReturn(mockLocations);
-        when(mockPanel.getThirdPartyClasspath()).thenReturn(Arrays.asList("cp1", "cp2"));
-        when(mockPanel.getScanScope()).thenReturn(ScanScope.AllSources);
-        when(mockPanel.isSuppressingErrors()).thenReturn(Boolean.FALSE);
-
+        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, mockLocations,
+                Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
+        when(mockPanel.getPluginConfiguration()).thenReturn(mockConfigDto);
         return mockPanel;
     }
+
 
     @Test
     public void testIsModified() {

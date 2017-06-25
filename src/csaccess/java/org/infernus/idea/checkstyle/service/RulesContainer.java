@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

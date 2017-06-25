@@ -1,9 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.IOException;
-import java.util.List;
-import javax.swing.JComponent;
-
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -17,18 +13,25 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * The "configurable component" required by IntelliJ IDEA to provide a Swing form for inclusion into the 'Settings'
  * dialog. Registered in {@code plugin.xml} as a {@code projectConfigurable} extension.
  */
 public class CheckStyleConfigurable
-        implements Configurable {
+        implements Configurable
+{
     private static final Log LOG = LogFactory.getLog(CheckStyleConfigurable.class);
 
     private final Project project;
 
     private final CheckStyleConfigPanel configPanel;
+
 
     public CheckStyleConfigurable(@NotNull final Project project) {
         this(project, new CheckStyleConfigPanel(project));
@@ -38,6 +41,7 @@ public class CheckStyleConfigurable
         this.project = project;
         this.configPanel = configPanel;
     }
+
 
     public String getDisplayName() {
         return CheckStyleBundle.message("plugin.configuration-name");
@@ -56,66 +60,33 @@ public class CheckStyleConfigurable
     public boolean isModified() {
         LOG.trace("isModified() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
-        try {
-            boolean result = haveLocationsChanged(configuration)
-                    || hasActiveLocationChanged(configuration)
-                    || !configuration.getThirdPartyClassPath().equals(configPanel.getThirdPartyClasspath())
-                    || configuration.getScanScope() != configPanel.getScanScope()
-                    || configuration.isSuppressingErrors() != configPanel.isSuppressingErrors()
-                    || !configuration.getCheckstyleVersion(null).equals(configPanel.getCheckstyleVersion());
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("isModified() - exit - result=" + result);
-            }
-            return result;
-        } catch (IOException e) {
-            LOG.error("Failed to read properties from one of " + configPanel.getConfigurationLocations(), e);
-            Notifications.showError(project, CheckStyleBundle.message("checkstyle.file-not-found"));
-            LOG.trace("isModified() - exit - result=true");
-            return true;
-        }
-    }
+        final PluginConfigDto oldConfig = configuration.getCurrentPluginConfig();
+        final PluginConfigDto newConfig = new PluginConfigDto(
+                configPanel.getPluginConfiguration(), oldConfig.isScanBeforeCheckin());
 
-    private boolean hasActiveLocationChanged(final CheckStyleConfiguration pConfiguration) throws IOException {
-        final ConfigurationLocation configActiveLocation = pConfiguration.getActiveConfiguration();
-        final ConfigurationLocation panelActiveLocation = configPanel.getActiveLocation();
-        boolean result = false;
-        if (configActiveLocation == null) {
-            result = panelActiveLocation != null;
-        } else {
-            result = configActiveLocation.hasChangedFrom(panelActiveLocation);
-        }
-        return result;
-    }
-
-    private boolean haveLocationsChanged(final CheckStyleConfiguration pCurrentConfiguration) {
-        LOG.trace("haveLocationsChanged() - enter");
-        final List<ConfigurationLocation> configLocations = pCurrentConfiguration.configurationLocations();
-        final List<ConfigurationLocation> panelLocations = configPanel.getConfigurationLocations();
-        boolean result = !Objects.equals(configLocations, panelLocations);
+        boolean result = !oldConfig.equals(newConfig);
         if (LOG.isTraceEnabled()) {
-            LOG.trace("haveLocationsChanged() - exit - result=" + result);
+            LOG.trace("isModified() - exit - result=" + result);
         }
         return result;
     }
+
 
     public void apply() throws ConfigurationException {
         LOG.trace("apply() - enter");
+
         final CheckStyleConfiguration configuration = getConfiguration();
-        configuration.setCheckstyleVersion(configPanel.getCheckstyleVersion());
-        configuration.setConfigurationLocations(configPanel.getConfigurationLocations());
-        configuration.setActiveConfiguration(configPanel.getActiveLocation());
-        configuration.setScanScope(configPanel.getScanScope());
-        configuration.setSuppressingErrors(configPanel.isSuppressingErrors());
+        final PluginConfigDto newConfig = new PluginConfigDto(configPanel.getPluginConfiguration(),
+                configuration.getCurrentPluginConfig().isScanBeforeCheckin());
+        configuration.setCurrentPluginConfig(newConfig, true);
 
-        final List<String> thirdPartyClasspath = configPanel.getThirdPartyClasspath();
-        configuration.setThirdPartyClassPath(thirdPartyClasspath);
-
-        activateCurrentCheckstyleVersion(configPanel.getCheckstyleVersion(), thirdPartyClasspath);
+        activateCurrentCheckstyleVersion(newConfig.getCheckstyleVersion(), newConfig.getThirdPartyClasspath());
 
         LOG.trace("apply() - exit");
     }
 
-    private void activateCurrentCheckstyleVersion(final String checkstyleVersion, final List<String> thirdPartyClasspath) {
+    private void activateCurrentCheckstyleVersion(final String checkstyleVersion, final List<String>
+            thirdPartyClasspath) {
         // Invalidate cache *before* activating the new Checkstyle version
         getCheckerFactoryCache().invalidate();
 
@@ -131,22 +102,18 @@ public class CheckStyleConfigurable
         return ServiceManager.getService(CheckerFactoryCache.class);
     }
 
+
     public void reset() {
         LOG.trace("reset() - enter");
-        final CheckStyleConfiguration configuration = getConfiguration();
-        configPanel.setCheckstyleVersion(configuration.getCheckstyleVersion(null));
-        configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
-        configPanel.setActiveLocation(configuration.getActiveConfiguration());
-        configPanel.setScanScope(configuration.getScanScope());
-        configPanel.setSuppressingErrors(configuration.isSuppressingErrors());
-        configPanel.setThirdPartyClasspath(configuration.getThirdPartyClassPath());
 
-        activateCurrentCheckstyleVersion(
-                configuration.getCheckstyleVersion(null),
-                configuration.getThirdPartyClassPath());
+        final PluginConfigDto pluginConfig = getConfiguration().getCurrentPluginConfig();
+        configPanel.showPluginConfiguration(pluginConfig);
+
+        activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());
 
         LOG.trace("reset() - exit");
     }
+
 
     public void disposeUIResources() {
         // do nothing

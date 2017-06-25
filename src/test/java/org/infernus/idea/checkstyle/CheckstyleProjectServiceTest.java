@@ -1,13 +1,15 @@
 package org.infernus.idea.checkstyle;
 
+import java.util.Collections;
+import java.util.SortedSet;
+
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.model.ScanScope;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.SortedSet;
 
 
 public class CheckstyleProjectServiceTest
@@ -18,9 +20,9 @@ public class CheckstyleProjectServiceTest
     @BeforeClass
     public static void setUp() {
         CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn("7.1.1");
-        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
-        Mockito.when(mockPluginConfig.getProject()).thenReturn(PROJECT);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false,
+                Collections.emptySortedSet(), Collections.emptyList(), null, false);
+        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
     }
 

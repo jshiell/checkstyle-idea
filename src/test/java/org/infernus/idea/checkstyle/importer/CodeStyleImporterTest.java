@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle.importer;
 
+import java.util.Collections;
+
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.project.Project;
@@ -10,6 +12,7 @@ import com.intellij.psi.codeStyle.PackageEntryTable;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.PluginConfigDto;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
@@ -30,12 +33,10 @@ public class CodeStyleImporterTest
     protected void setUp() throws Exception {
         super.setUp();
 
-        CheckStyleConfiguration mockPluginConfig = null;
-        mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn("7.1.1");
-        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
-        Mockito.when(mockPluginConfig.getProject()).thenReturn(project);
-        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false,
+                Collections.emptySortedSet(), Collections.emptyList(), null, false);
+        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(project);

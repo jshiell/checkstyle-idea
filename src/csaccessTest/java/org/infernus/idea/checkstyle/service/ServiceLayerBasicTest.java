@@ -1,9 +1,17 @@
 package org.infernus.idea.checkstyle.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -12,15 +20,12 @@ import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 
 public class ServiceLayerBasicTest {
@@ -36,11 +41,9 @@ public class ServiceLayerBasicTest {
     @BeforeClass
     public static void setUp() {
         CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn(CsVersionInfo
-                .getCurrentCsVersion());
-        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
-        Mockito.when(mockPluginConfig.getProject()).thenReturn(PROJECT);
-        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto(CsVersionInfo.getCurrentCsVersion(),
+                ScanScope.AllSources, false, Collections.emptySortedSet(), Collections.emptyList(), null, false);
+        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         sCheckstyleProjectService = new CheckstyleProjectService(PROJECT);

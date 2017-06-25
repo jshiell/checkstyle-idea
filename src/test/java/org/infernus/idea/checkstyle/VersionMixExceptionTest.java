@@ -49,10 +49,9 @@ public class VersionMixExceptionTest
         super.setUp();
 
         CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        Mockito.when(mockPluginConfig.getCheckstyleVersion(Mockito.anyString())).thenReturn(BASE_VERSION);
-        Mockito.when(mockPluginConfig.getThirdPartyClassPath()).thenReturn(null);
-        Mockito.when(mockPluginConfig.getProject()).thenReturn(PROJECT);
-        Mockito.when(mockPluginConfig.getScanScope()).thenReturn(ScanScope.AllSources);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto(BASE_VERSION, ScanScope.AllSources, false,
+                Collections.emptySortedSet(), Collections.emptyList(), null, false);
+        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(PROJECT);

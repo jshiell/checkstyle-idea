@@ -237,7 +237,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         configurationOverrideModel.removeAllElements();
 
         configurationOverrideModel.addElement(DEFAULT_OVERRIDE);
-        checkStylePlugin.getConfiguration().configurationLocations().forEach(configurationOverrideModel::addElement);
+        checkStylePlugin.getConfiguration().getCurrentPluginConfig().getLocations().forEach(configurationOverrideModel::addElement);
         configurationOverrideModel.setSelectedItem(DEFAULT_OVERRIDE);
     }
 

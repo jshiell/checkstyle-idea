@@ -42,13 +42,13 @@ final class PsiFileValidator {
 
     private static boolean isValidFileType(final PsiFile psiFile,
                                            final CheckStyleConfiguration pluginConfig) {
-        return pluginConfig.getScanScope().includeNonJavaSources()
+        return pluginConfig.getCurrentPluginConfig().getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
                                              final CheckStyleConfiguration pluginConfig) {
-        return pluginConfig.getScanScope().includeTestClasses()
+        return pluginConfig.getCurrentPluginConfig().getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
 
@@ -57,7 +57,7 @@ final class PsiFileValidator {
     }
 
     private static boolean isInSource(@NotNull final PsiFile psiFile, final CheckStyleConfiguration pluginConfig) {
-        return pluginConfig.getScanScope() == ScanScope.Everything
+        return pluginConfig.getCurrentPluginConfig().getScanScope() == ScanScope.Everything
             || ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile());
     }
 

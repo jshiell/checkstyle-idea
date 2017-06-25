@@ -57,26 +57,28 @@ public class ConfigurationLocationFactoryTest
     @Test
     public void testBundledConfigSun()
     {
-        ConfigurationLocation cls = underTest.create(PROJECT, "BUNDLED:SUN_CHECKS:ignored description");
+        ConfigurationLocation cls = underTest.create(PROJECT, "BUNDLED:(bundled):Sun Checks");
         Assert.assertNotNull(cls);
         Assert.assertEquals(BundledConfigurationLocation.class, cls.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;
         Assert.assertEquals(BundledConfig.SUN_CHECKS, bcl.getBundledConfig());
         Assert.assertEquals(BundledConfig.SUN_CHECKS.getDescription(), bcl.getDescription());
-        Assert.assertEquals(BundledConfig.SUN_CHECKS.getPath(), bcl.getLocation());
+        Assert.assertEquals(BundledConfig.SUN_CHECKS.getLocation(), bcl.getLocation());
+        Assert.assertEquals(BundledConfig.SUN_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         Assert.assertTrue(bcl.getProperties().isEmpty());
     }
 
     @Test
     public void testBundledConfigGoogle()
     {
-        ConfigurationLocation clg = underTest.create(PROJECT, "BUNDLED:GOOGLE_CHECKS:ignored description");
+        ConfigurationLocation clg = underTest.create(PROJECT, "BUNDLED:(bundled):Google Checks");
         Assert.assertNotNull(clg);
         Assert.assertEquals(BundledConfigurationLocation.class, clg.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) clg;
         Assert.assertEquals(BundledConfig.GOOGLE_CHECKS, bcl.getBundledConfig());
         Assert.assertEquals(BundledConfig.GOOGLE_CHECKS.getDescription(), bcl.getDescription());
-        Assert.assertEquals(BundledConfig.GOOGLE_CHECKS.getPath(), bcl.getLocation());
+        Assert.assertEquals(BundledConfig.GOOGLE_CHECKS.getLocation(), bcl.getLocation());
+        Assert.assertEquals(BundledConfig.GOOGLE_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         Assert.assertTrue(bcl.getProperties().isEmpty());
     }
 }
