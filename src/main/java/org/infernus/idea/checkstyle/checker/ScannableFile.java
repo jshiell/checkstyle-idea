@@ -25,7 +25,12 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntUnaryOperator;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -39,6 +44,9 @@ public class ScannableFile {
     private static final Logger LOG = LoggerFactory.getLogger(ScannableFile.class);
 
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
+
+    private static final AtomicInteger TEMP_FILE_SOURCE = new AtomicInteger();
+    private static final int MAX_TEMP_FILE_SUFFIX = 999;
 
     private final File realFile;
     private final File baseTempDir;
@@ -183,9 +191,24 @@ public class ScannableFile {
 
     private File prepareBaseTmpDirFor(final PsiFile tempPsiFile) {
         final File baseTmpDir = new File(temporaryDirectoryFor(tempPsiFile),
-                TEMPFILE_DIR_PREFIX + UUID.randomUUID().toString());
+                tempFileDirectoryName());
         baseTmpDir.deleteOnExit();
         return baseTmpDir;
+    }
+
+    private String tempFileDirectoryName() {
+        return String.format("%s%03d", TEMPFILE_DIR_PREFIX,
+                TEMP_FILE_SOURCE.getAndUpdate(incrementUntil(MAX_TEMP_FILE_SUFFIX)));
+    }
+
+    @NotNull
+    private IntUnaryOperator incrementUntil(final int maxValue) {
+        return operand -> {
+            if (operand >= maxValue) {
+                return 0;
+            }
+            return operand + 1;
+        };
     }
 
     private String temporaryDirectoryFor(final PsiFile tempPsiFile) {

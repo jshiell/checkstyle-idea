@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.6.3** Fixed: short identifiers are used in temporary file names to assist with path limits on Windows.
 * **5.6.2** New: code style importer now support avoid star imports - thanks to @zentol (#319).
 * **5.6.2** New: temporary files are now created relative to the project base where possible (#321).
 * **5.6.1** New: code style importer now supports import order - thanks to @zentol (#314).
