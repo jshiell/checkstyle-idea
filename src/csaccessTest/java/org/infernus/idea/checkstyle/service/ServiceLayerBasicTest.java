@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import jdk.nashorn.internal.runtime.OptimisticReturnFilters;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
@@ -12,10 +13,7 @@ import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -109,6 +107,8 @@ public class ServiceLayerBasicTest
      */
     @Test
     public void testConfig3() throws IOException, URISyntaxException {
+        Assume.assumeTrue(CsVersionInfo.isLessThan("8.0"));
+
         //noinspection ThrowableNotThrown
         CustomCheck3.popErrorOccurred4UnitTest();
 

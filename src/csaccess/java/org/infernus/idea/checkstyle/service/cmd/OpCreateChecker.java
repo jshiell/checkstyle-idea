@@ -14,6 +14,8 @@ import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -49,7 +51,7 @@ public class OpCreateChecker
 
         final Checker checker = new Checker();
         checker.setModuleClassLoader(getClass().getClassLoader());   // for Checkstyle to load modules (checks)
-        checker.setClassloader(loaderOfCheckedCode);  // for checks to load the classes and resources to be analyzed
+        setClassLoader(checker, loaderOfCheckedCode); // for checks to load the classes and resources to be analyzed
         checker.configure(csConfig);
 
         CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
@@ -58,6 +60,21 @@ public class OpCreateChecker
                 : new Configurations(module, csConfig);
         return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode,
                 CheckstyleProjectService.getInstance(project).getCheckstyleInstance());
+    }
+
+    private void setClassLoader(final Checker checker, final ClassLoader classLoader) {
+        try {
+            Method classLoaderMethod;
+            try {
+                classLoaderMethod = Checker.class.getMethod("setClassloader", ClassLoader.class);
+            } catch (NoSuchMethodException | SecurityException e) {
+                classLoaderMethod = Checker.class.getMethod("setClassLoader", ClassLoader.class); // 8.0 and above
+            }
+            classLoaderMethod.invoke(checker, classLoader);
+
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
     }
 
     private Configuration loadConfig(@NotNull final Project project) throws CheckstyleException {

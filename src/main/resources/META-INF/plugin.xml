@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.6.3</version>
+    <version>5.7.0</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,7 +20,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.6.3: Fixed: short identifiers are used in temporary file names to assist with path limits on Windows.</li>
+    <li>5.7.0: New: Added CheckStyle 8.0.</li>
+    <li>5.7.0: Fixed: short identifiers are used in temporary file names to assist with path limits on Windows.</li>
     <li>5.6.2: New: code style importer now support avoid star imports - thanks to @zentol (#319).</li>
     <li>5.6.2: New: temporary files are now created relative to the project base where possible (#321).</li>
     <li>5.6.1: New: code style importer now supports import order - thanks to @zentol (#314).</li>
