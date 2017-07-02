@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import jdk.nashorn.internal.runtime.OptimisticReturnFilters;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
@@ -24,8 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class ServiceLayerBasicTest
-{
+public class ServiceLayerBasicTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     private static CheckstyleProjectService sCheckstyleProjectService = null;
