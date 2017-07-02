@@ -8,6 +8,7 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
+import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.Configurations;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
@@ -73,7 +74,7 @@ public class OpCreateChecker
             classLoaderMethod.invoke(checker, classLoader);
 
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new CheckstyleServiceException("Failed to set classloader", e);
         }
     }
 
