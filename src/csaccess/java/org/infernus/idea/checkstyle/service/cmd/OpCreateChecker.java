@@ -45,7 +45,6 @@ public class OpCreateChecker
 
     @Override
     @NotNull
-    @SuppressWarnings("deprecation")  // setClassloader() must be used for backwards compatibility
     public CheckStyleChecker execute(@NotNull final Project project) throws CheckstyleException {
 
         final Configuration csConfig = loadConfig(project);
