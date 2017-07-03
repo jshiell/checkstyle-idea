@@ -9,6 +9,7 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
+import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.Configurations;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
@@ -52,7 +53,13 @@ public class OpCreateChecker
         final Checker checker = new Checker();
         checker.setModuleClassLoader(getClass().getClassLoader());   // for Checkstyle to load modules (checks)
         setClassLoader(checker, loaderOfCheckedCode); // for checks to load the classes and resources to be analyzed
-        checker.configure(csConfig);
+
+        try {
+            checker.configure(csConfig);
+        } catch (Error e) {
+            // e.g. java.lang.NoClassDefFoundError thrown by Checkstyle for pre-8.0 custom checks
+            throw new CheckstyleToolException(e);
+        }
 
         CheckerWithConfig cwc = new CheckerWithConfig(checker, csConfig);
         final TabWidthAndBaseDirProvider configs = configurations != null
