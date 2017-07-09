@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.8.0** New: Bundled Sun/Google checks are now read from selected version of Checkstyle. Thanks to Thomas Jensen (@tsjensen) (#320).
 * **5.7.0** New: Added CheckStyle 8.0.
 * **5.7.0** Fixed: short identifiers are used in temporary file names to assist with path limits on Windows.
 * **5.6.2** New: code style importer now support avoid star imports - thanks to @zentol (#319).
