@@ -1,18 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightPlatformTestCase;
@@ -26,13 +13,27 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
-public class VersionMixExceptionTest
-        extends LightPlatformTestCase
-{
-    private static final Project PROJECT = Mockito.mock(Project.class);
+public class VersionMixExceptionTest extends LightPlatformTestCase {
+    private static final Project PROJECT = mock(Project.class);
 
     private static final String CONFIG_FILE = "config-ok.xml";
 
@@ -48,10 +49,10 @@ public class VersionMixExceptionTest
     protected void setUp() throws Exception {
         super.setUp();
 
-        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
+        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
         final PluginConfigDto mockConfigDto = new PluginConfigDto(BASE_VERSION, ScanScope.AllSources, false,
                 Collections.emptySortedSet(), Collections.emptyList(), null, false);
-        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+        when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(PROJECT);
@@ -78,21 +79,21 @@ public class VersionMixExceptionTest
      */
     public void testVersionMixException() throws IOException, URISyntaxException {
 
-        Module module = Mockito.mock(Module.class);
-        Mockito.when(module.getProject()).thenReturn(PROJECT);
+        Module module = mock(Module.class);
+        when(module.getProject()).thenReturn(PROJECT);
 
         final CheckStyleChecker checker = createChecker(module);
 
         runChecker(checker);
         try {
-            Assert.assertNotEquals(OTHER_VERSION, BASE_VERSION);
+            assertNotEquals(OTHER_VERSION, BASE_VERSION);
             csService.activateCheckstyleVersion(OTHER_VERSION, null);    // changes class loader, cause of error
             runChecker(checker);
-            Assert.fail("expected exception was not thrown");
+            fail("expected exception was not thrown");
         } catch (CheckstyleVersionMixException e) {
             // expected
             final String internalClassName = "org.infernus.idea.checkstyle.service.entities.CheckerWithConfig";
-            Assert.assertTrue(e.getMessage().contains("Expected: " + internalClassName + ", actual: " +
+            assertTrue(e.getMessage().contains("Expected: " + internalClassName + ", actual: " +
                     internalClassName));
             // Yes! Error, even though both class names are identical (but class loaders differ).
         } finally {
@@ -108,14 +109,14 @@ public class VersionMixExceptionTest
      */
     public void testSunnyDay() throws IOException, URISyntaxException {
 
-        Module module = Mockito.mock(Module.class);
-        Mockito.when(module.getProject()).thenReturn(PROJECT);
+        Module module = mock(Module.class);
+        when(module.getProject()).thenReturn(PROJECT);
 
         CheckStyleChecker checker = createChecker(module);
         runChecker(checker);
 
         try {
-            Assert.assertNotEquals(OTHER_VERSION, BASE_VERSION);
+            assertNotEquals(OTHER_VERSION, BASE_VERSION);
             csService.activateCheckstyleVersion(OTHER_VERSION, null);
 
             checker = createChecker(module);
@@ -129,27 +130,26 @@ public class VersionMixExceptionTest
     private CheckStyleChecker createChecker(@NotNull final Module pModule) throws URISyntaxException, IOException {
         final ConfigurationLocation configLoc = new StringConfigurationLocation(readFile(CONFIG_FILE));
 
-        final TabWidthAndBaseDirProvider configurations = Mockito.mock(TabWidthAndBaseDirProvider.class);
-        Mockito.when(configurations.tabWidth()).thenReturn(2);
-        Mockito.when(configurations.baseDir()).thenReturn(  //
+        final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
+        when(configurations.tabWidth()).thenReturn(2);
+        when(configurations.baseDir()).thenReturn(  //
                 Optional.of(new File(getClass().getResource(CONFIG_FILE).toURI()).getParent()));
 
-        final CheckStyleChecker checker = csService.getCheckstyleInstance().createChecker(pModule, configLoc,
+        return csService.getCheckstyleInstance().createChecker(pModule, configLoc,
                 Collections.emptyMap(), configurations, getClass().getClassLoader());
-        return checker;
     }
 
 
-    private void runChecker(@NotNull final CheckStyleChecker pChecker) throws URISyntaxException {
+    private void runChecker(@NotNull final CheckStyleChecker checker) throws URISyntaxException {
 
         final File sourceFile = new File(getClass().getResource("SourceFile.java").toURI());
 
-        final ScannableFile file1 = Mockito.mock(ScannableFile.class);
-        Mockito.when(file1.getFile()).thenReturn(sourceFile);
+        final ScannableFile file1 = mock(ScannableFile.class);
+        when(file1.getFile()).thenReturn(sourceFile);
         final List<ScannableFile> filesToScan = Collections.singletonList(file1);
 
         final CheckstyleActions csInstance = csService.getCheckstyleInstance();
-        csInstance.scan(pChecker.getCheckerWithConfig4UnitTest(), filesToScan, false, 2, //
+        csInstance.scan(checker.getCheckerWithConfig4UnitTest(), filesToScan, false, 2, //
                 Optional.of(sourceFile.getParent()));
     }
 
@@ -159,14 +159,14 @@ public class VersionMixExceptionTest
         if (url == null) {
             url = Thread.currentThread().getContextClassLoader().getResource(pFilename);
         }
-        Assert.assertNotNull(url);
+        assertNotNull(url);
         return new String(Files.readAllBytes(Paths.get(url.toURI())), StandardCharsets.UTF_8);
     }
 
 
     @NotNull
     private static String readBaseVersion() {
-        String result = null;
+        String result;
         try (InputStream is = VersionMixExceptionTest.class.getResourceAsStream(PROPS_FILE_NAME)) {
             Properties props = new Properties();
             props.load(is);

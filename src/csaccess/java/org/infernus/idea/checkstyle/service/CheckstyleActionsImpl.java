@@ -120,10 +120,10 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     }
 
 
-    private <R> R executeCommand(@NotNull final CheckstyleCommand<R> pCommand) {
+    private <R> R executeCommand(@NotNull final CheckstyleCommand<R> command) {
         R result;
         try {
-            result = pCommand.execute(project);
+            result = command.execute(project);
         } catch (CheckstyleException e) {
             CheckStylePluginException wrapped = new ExceptionWrapper().wrap(null, e);
             if (wrapped instanceof CheckStylePluginParseException) {
@@ -140,7 +140,7 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                 throw new CheckstyleToolException(csCause);
             } else {
                 throw new CheckstyleServiceException("Error executing command '"
-                        + pCommand.getClass().getSimpleName() + "': " + e.getMessage(), e);
+                        + command.getClass().getSimpleName() + "': " + e.getMessage(), e);
             }
         }
         return result;

@@ -1,17 +1,18 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
 
-public class SimpleResolverTest
-{
-    private Map<String, String> props = null;
+import static java.util.Collections.emptyMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+
+public class SimpleResolverTest {
+    private Map<String, String> props;
 
     @Before
     public void beforeTest() {
@@ -20,25 +21,23 @@ public class SimpleResolverTest
         props.put("key2", "value2");
     }
 
-
     @Test
     public void testResolve1() {
-        Assert.assertEquals("value1", new SimpleResolver(props).resolve("key1"));
-        Assert.assertEquals("value2", new SimpleResolver(props).resolve("key2"));
+        assertEquals("value1", new SimpleResolver(props).resolve("key1"));
+        assertEquals("value2", new SimpleResolver(props).resolve("key2"));
     }
-
 
     @Test
     public void testNotFound() {
-        Assert.assertNull(new SimpleResolver(props).resolve("unknownKey"));
-        Assert.assertNull(new SimpleResolver(props).resolve(null));
+        assertNull(new SimpleResolver(props).resolve("unknownKey"));
+        assertNull(new SimpleResolver(props).resolve(null));
     }
-
 
     @SuppressWarnings("ConstantConditions")
     @Test
     public void testNoProps() {
-        Assert.assertNull(new SimpleResolver(null).resolve("key1"));
-        Assert.assertNull(new SimpleResolver(null).resolve(null));
+        assertNull(new SimpleResolver(emptyMap()).resolve("key1"));
+        assertNull(new SimpleResolver(emptyMap()).resolve(null));
+        assertNull(new SimpleResolver(null).resolve(null));
     }
 }

@@ -14,7 +14,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.intellij' version '0.1.10'
+    id 'org.jetbrains.intellij' version '0.2.13'
 }
 
 repositories {
@@ -29,6 +29,7 @@ intellij {
     version = 'IC-15.0.6';
     pluginName 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
+    instrumentCode = false
 }
 
 final CustomSourceSetCreator customBuild = new CustomSourceSetCreator(project);
@@ -131,7 +132,7 @@ task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
 
 // Defer some of the wiring until after the intellij plugin's tasks have been created:
 tasks.all { final Task task ->
-    if ('buildPlugin' == task.name || 'runIdea' == task.name) {
+    if ('buildPlugin' == task.name || 'runIdea' == task.name || 'runIde' == task.name) {
         task.dependsOn(tasks.copyCheckstyleArtifactsToSandbox);
         task.dependsOn tasks['copyClassesToSandbox'];
     }

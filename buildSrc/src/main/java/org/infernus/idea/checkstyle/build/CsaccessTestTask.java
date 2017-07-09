@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle.build;
 
-import java.io.File;
-import java.util.Set;
-
 import groovy.lang.Closure;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -14,13 +11,15 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
+import java.io.File;
+import java.util.Set;
+
 
 /**
  * Gradle task that runs the unit tests in 'csaccessTest' against one of the supported Checkstyle versions.
  */
 public class CsaccessTestTask
-        extends Test
-{
+        extends Test {
     public static final String XTEST_GROUP_NAME = "xtest";
     public static final String XTEST_TASK_NAME = "xtest";
 
@@ -103,17 +102,17 @@ public class CsaccessTestTask
             final Set<File> csJars = configurations.detachedConfiguration(csDep).getFiles();
 
             effectiveClasspath = project.files( //
-                        csaccessTestSrcSet.getOutput().getClassesDir(),   //
-                        csaccessTestSrcSet.getOutput().getResourcesDir(), //
-                        csaccessSourceSet.getOutput().getClassesDir(),    //
-                        csaccessSourceSet.getOutput().getResourcesDir(),  //
-                        mainSourceSet.getOutput().getClassesDir(),        //
-                        mainSourceSet.getOutput().getResourcesDir())      //
+                    csaccessTestSrcSet.getOutput().getClassesDir(),   //
+                    csaccessTestSrcSet.getOutput().getResourcesDir(), //
+                    csaccessSourceSet.getOutput().getClassesDir(),    //
+                    csaccessSourceSet.getOutput().getResourcesDir(),  //
+                    mainSourceSet.getOutput().getClassesDir(),        //
+                    mainSourceSet.getOutput().getResourcesDir())      //
                     .plus(project.files(csJars)) //
                     .plus(originalClasspath) //
                     .minus(project.files( //
-                        testSourceSet.getOutput().getClassesDir(), //
-                        testSourceSet.getOutput().getResourcesDir()));
+                            testSourceSet.getOutput().getClassesDir(), //
+                            testSourceSet.getOutput().getResourcesDir()));
 
             //getLogger().lifecycle("--------------------------------------------------------------------------");
             //getLogger().lifecycle("Effective classpath of " + getName() + ":");

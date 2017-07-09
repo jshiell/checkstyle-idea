@@ -22,8 +22,7 @@ import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 
-public class CustomSourceSetCreator
-{
+public class CustomSourceSetCreator {
     public static final String CSACCESS_SOURCESET_NAME = "csaccess";
     public static final String CSACCESSTEST_SOURCESET_NAME = "csaccessTest";
     public static final String JACOCO_REPORT_TASK_NAME =
@@ -36,8 +35,7 @@ public class CustomSourceSetCreator
     private final Project project;
 
 
-    public CustomSourceSetCreator(final Project pProject)
-    {
+    public CustomSourceSetCreator(final Project pProject) {
         project = pProject;
     }
 
@@ -55,8 +53,7 @@ public class CustomSourceSetCreator
     }
 
 
-    public CustomSourceSetCreator establishCsAccessSourceSet()
-    {
+    public CustomSourceSetCreator establishCsAccessSourceSet() {
 
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -77,8 +74,7 @@ public class CustomSourceSetCreator
         final Configuration runtimeConfig = configurations.getByName(mainSourceSet.getRuntimeConfigurationName());
         configurations.getByName(csaccessSourceSet.getCompileConfigurationName()).extendsFrom(compileConfig);
         configurations.getByName(csaccessSourceSet.getCompileOnlyConfigurationName()).extendsFrom(compileOnlyConfig);
-        configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName()).extendsFrom
-                (compileClasspathConfig);
+        configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName()).extendsFrom(compileClasspathConfig);
         configurations.getByName(csaccessSourceSet.getRuntimeConfigurationName()).extendsFrom(runtimeConfig);
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):
@@ -96,8 +92,7 @@ public class CustomSourceSetCreator
     }
 
 
-    public CustomSourceSetCreator establishCsAccessTestSourceSet()
-    {
+    public CustomSourceSetCreator establishCsAccessTestSourceSet() {
 
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -106,35 +101,35 @@ public class CustomSourceSetCreator
 
         // Create the 'csaccess' source set
         final SourceSet csaccessTestSourceSet = sourceSets.create(CSACCESSTEST_SOURCESET_NAME);
-        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath().  //
+        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath().
                 plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
-        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath().  //
+        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath().
                 plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
         sourceSets.add(csaccessTestSourceSet);
 
         // Derive all its configurations from 'test' and 'csaccess'
         final ConfigurationContainer configurations = project.getConfigurations();
-        final Configuration csaccessCompileConfig = configurations.getByName(  //
+        final Configuration csaccessCompileConfig = configurations.getByName(
                 csaccessSourceSet.getCompileConfigurationName());
-        final Configuration csaccessCompileOnlyConfig = configurations.getByName(  //
+        final Configuration csaccessCompileOnlyConfig = configurations.getByName(
                 csaccessSourceSet.getCompileOnlyConfigurationName());
-        final Configuration csaccessCompileClasspathConfig = configurations.getByName(  //
+        final Configuration csaccessCompileClasspathConfig = configurations.getByName(
                 csaccessSourceSet.getCompileClasspathConfigurationName());
-        final Configuration csaccessRuntimeConfig = configurations.getByName(  //
+        final Configuration csaccessRuntimeConfig = configurations.getByName(
                 csaccessSourceSet.getRuntimeConfigurationName());
         final Configuration testCompileConfig = configurations.getByName(testSourceSet.getCompileConfigurationName());
-        final Configuration testCompileOnlyConfig = configurations.getByName(  //
+        final Configuration testCompileOnlyConfig = configurations.getByName(
                 testSourceSet.getCompileOnlyConfigurationName());
-        final Configuration testCompileClasspathConfig = configurations.getByName(  //
+        final Configuration testCompileClasspathConfig = configurations.getByName(
                 testSourceSet.getCompileClasspathConfigurationName());
         final Configuration testRuntimeConfig = configurations.getByName(testSourceSet.getRuntimeConfigurationName());
-        configurations.getByName(csaccessTestSourceSet.getCompileConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileConfigurationName()).
                 extendsFrom(csaccessCompileConfig, testCompileConfig);
-        configurations.getByName(csaccessTestSourceSet.getCompileOnlyConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileOnlyConfigurationName()).
                 extendsFrom(csaccessCompileOnlyConfig, testCompileOnlyConfig);
-        configurations.getByName(csaccessTestSourceSet.getCompileClasspathConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getCompileClasspathConfigurationName()).
                 extendsFrom(csaccessCompileClasspathConfig, testCompileClasspathConfig);
-        configurations.getByName(csaccessTestSourceSet.getRuntimeConfigurationName()).  //
+        configurations.getByName(csaccessTestSourceSet.getRuntimeConfigurationName()).
                 extendsFrom(csaccessRuntimeConfig, testRuntimeConfig);
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):
@@ -150,9 +145,7 @@ public class CustomSourceSetCreator
     }
 
 
-
-    public void setupCoverageVerification()
-    {
+    public void setupCoverageVerification() {
         final TaskContainer tasks = project.getTasks();
 
         // Disable JaCoCo for 'test' source set
@@ -191,8 +184,7 @@ public class CustomSourceSetCreator
     }
 
 
-    private void configureJacocoTask(final JacocoReportBase pJacocoTask)
-    {
+    private void configureJacocoTask(final JacocoReportBase pJacocoTask) {
         pJacocoTask.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet csaccessSourceSet = sourceSets.getByName(CSACCESS_SOURCESET_NAME);
@@ -200,9 +192,9 @@ public class CustomSourceSetCreator
         pJacocoTask.setSourceDirectories(csaccessSourceSet.getJava().getSourceDirectories());
 
         final FileCollection execFiles = project.files(project.getTasks().withType(CsaccessTestTask.class).stream()
-            .map((final CsaccessTestTask task) -> { //
-                return new File(project.getBuildDir() + "/jacoco", task.getName() + ".exec");
-            }).collect(Collectors.toList()));
+                .map((final CsaccessTestTask task) -> { //
+                    return new File(project.getBuildDir() + "/jacoco", task.getName() + ".exec");
+                }).collect(Collectors.toList()));
         pJacocoTask.setExecutionData(execFiles);
     }
 }

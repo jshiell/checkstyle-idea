@@ -52,8 +52,8 @@ public class CheckstyleProjectService {
     }
 
 
-    public boolean isSupportedVersion(@Nullable final String pVersion) {
-        return pVersion != null && supportedVersions.contains(pVersion);
+    public boolean isSupportedVersion(@Nullable final String version) {
+        return version != null && supportedVersions.contains(version);
     }
 
 
@@ -63,14 +63,14 @@ public class CheckstyleProjectService {
     }
 
 
-    public void activateCheckstyleVersion(@Nullable final String pVersion, @Nullable final List<String>
-            pThirdPartyJars) {
-        final String version = isSupportedVersion(pVersion) ? pVersion : getDefaultVersion();
+    public void activateCheckstyleVersion(@Nullable final String requestedVersion,
+                                          @Nullable final List<String> thirdPartyJars) {
+        final String version = isSupportedVersion(requestedVersion) ? requestedVersion : getDefaultVersion();
         synchronized (project) {
             checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>() {
                 @Override
                 public CheckstyleClassLoader call() {
-                    final List<URL> thirdPartyClassPath = toListOfUrls(pThirdPartyJars);
+                    final List<URL> thirdPartyClassPath = toListOfUrls(thirdPartyJars);
                     return new CheckstyleClassLoader(project, version, thirdPartyClassPath);
                 }
 

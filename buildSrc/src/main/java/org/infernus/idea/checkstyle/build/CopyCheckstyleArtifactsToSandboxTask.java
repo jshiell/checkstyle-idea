@@ -10,7 +10,7 @@ import org.gradle.api.tasks.Copy;
 
 public class CopyCheckstyleArtifactsToSandboxTask extends Copy {
 
-    static final String TARGET_SUBFOLDER = "checkstyle/lib";
+    static final String TARGET_SUBFOLDER = "lib";
 
     public CopyCheckstyleArtifactsToSandboxTask() {
         super();
@@ -19,14 +19,15 @@ public class CopyCheckstyleArtifactsToSandboxTask extends Copy {
         final GatherCheckstyleArtifactsTask gatherTask = (GatherCheckstyleArtifactsTask) getProject().getTasks()
                 .getByName(GatherCheckstyleArtifactsTask.NAME);
         dependsOn(gatherTask);
+        dependsOn(getProject().getTasks().getByName("prepareTestingSandbox"));
         from(gatherTask.getBundledJarsDir());
     }
 
 
-    private void configureTask(final boolean pIsTest) {
-        setDescription("Adds the gathered Checkstyle artifacts to the prepared " + (pIsTest ? "test " : "")
+    private void configureTask(final boolean test) {
+        setDescription("Adds the gathered Checkstyle artifacts to the prepared " + (test ? "test " : "")
                 + "sandbox");
-        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
+        into(new File(getProject().getBuildDir(), "idea-sandbox/plugins" + (test ? "-test" : "")
                 + "/CheckStyle-IDEA/" + TARGET_SUBFOLDER));
     }
 
