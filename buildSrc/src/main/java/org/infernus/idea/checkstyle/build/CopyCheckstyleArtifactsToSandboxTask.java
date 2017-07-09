@@ -10,7 +10,7 @@ import org.gradle.api.tasks.Copy;
 
 public class CopyCheckstyleArtifactsToSandboxTask extends Copy {
 
-    static final String TARGET_SUBFOLDER = "lib";
+    static final String TARGET_SUBFOLDER = "checkstyle/lib";
 
     public CopyCheckstyleArtifactsToSandboxTask() {
         super();

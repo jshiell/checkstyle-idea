@@ -86,13 +86,16 @@ public class CheckstyleClassLoader {
             }
             for (String jar : pClassPathFromProps.trim().split("\\s*;\\s*")) {
                 if (unitTesting) {
-                    jar = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
+                    String testJarLocation = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
+                    urls.add(new File(basePath, testJarLocation).toURI().toURL());
+                } else {
+                    urls.add(new File(basePath, jar).toURI().toURL());
                 }
-                urls.add(new File(basePath, jar).toURI().toURL());
             }
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("internal error", e);
         }
+
         urls.addAll(pThirdPartyClassPath);
 
         // The plugin classloader is the new classloader's parent classloader.
