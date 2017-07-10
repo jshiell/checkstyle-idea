@@ -1,7 +1,25 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.*;
+import com.intellij.openapi.components.ExportableComponent;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.components.StoragePathMacros;
+import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.logging.Log;
@@ -14,11 +32,6 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -355,8 +368,7 @@ public class CheckStyleConfiguration
     private String readCheckstyleVersion(@NotNull final Map<String, String> pLoadedMap) {
         String result = pLoadedMap.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
-            CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-            result = csService.getDefaultVersion();
+            result = new VersionListReader().getDefaultVersion();
         }
         return result;
     }
