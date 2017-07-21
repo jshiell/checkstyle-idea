@@ -200,16 +200,24 @@ public class CheckerFactory {
         return null;
     }
 
-    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location, final Module module, final
-    CheckstyleToolException checkstyleException) {
+    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
+                                                  final Module module,
+                                                  final CheckstyleToolException checkstyleException) {
         if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
             return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
         } else if (checkstyleException.getMessage().contains("unable to parse configuration stream")
                 && checkstyleException.getCause() != null) {
-            return blacklistAndShowMessage(location, module, checkstyleException.getCause().getMessage());
+            return blacklistAndShowMessage(location, module, "checkstyle.parse-failed", rootCauseOf(checkstyleException.getCause()).getMessage());
         }
 
         return blacklistAndShowMessage(location, module, "checkstyle.parse-failed", checkstyleException.getMessage());
+    }
+
+    private Throwable rootCauseOf(Throwable t) {
+        if (t.getCause() != null && t.getCause() != t) {
+            return rootCauseOf(t.getCause());
+        }
+        return t;
     }
 
 

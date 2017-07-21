@@ -21,6 +21,7 @@
         <![CDATA[
 <ul>
     <li>5.8.2: Fixed: Parent of properties dialogue is now correct (#334).</li>
+    <li>5.8.2: Fixed: Parse stream errors now correctly show the root exception (#331).</li>
     <li>5.8.1: Fixed: Resolved cyclic dependency issue. Thanks to Thomas Jensen (@tsjensen) (#327).</li>
     <li>5.8.0: New: Bundled Sun/Google checks are now read from selected version of Checkstyle. Thanks to Thomas Jensen (@tsjensen) (#320).</li>
     <li>5.7.0: New: Added CheckStyle 8.0.</li>
