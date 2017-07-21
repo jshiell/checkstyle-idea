@@ -1,11 +1,10 @@
 package org.infernus.idea.checkstyle;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.SortedSet;
+import java.io.IOException;
+import java.util.*;
 
 import net.jcip.annotations.Immutable;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
@@ -113,10 +112,27 @@ public class PluginConfigDto
         return Objects.equals(checkstyleVersion, other.checkstyleVersion)
                 && Objects.equals(scanScope, other.scanScope)
                 && Objects.equals(suppressErrors, other.suppressErrors)
-                && Objects.equals(locations, other.locations)
+                && locationsAreEqual(other)
                 && Objects.equals(thirdPartyClasspath, other.thirdPartyClasspath)
                 && Objects.equals(activeLocation, other.activeLocation)
                 && Objects.equals(scanBeforeCheckin, other.scanBeforeCheckin);
+    }
+
+    private boolean locationsAreEqual(PluginConfigDto other) {
+        Iterator<ConfigurationLocation> locationIterator = locations.iterator();
+        Iterator<ConfigurationLocation> otherLocationIterator = other.locations.iterator();
+
+        while (locationIterator.hasNext() && otherLocationIterator.hasNext()) {
+            try {
+                if (locationIterator.next().hasChangedFrom(otherLocationIterator.next())) {
+                    return false;
+                }
+            } catch (IOException e) {
+                throw new CheckStylePluginException("Unable to test configuration properties for changes", e);
+            }
+        }
+
+        return locations.size() == other.locations.size();
     }
 
     @Override
