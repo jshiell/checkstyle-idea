@@ -172,6 +172,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **5.8.2** Fixed: Parent of properties dialogue is now correct (#334).
 * **5.8.2** Fixed: Parse stream errors now correctly show the root exception (#331).
 * **5.8.2** Fixed: Property-only changes are now correctly detected when checking configuration modification state (#331).
+* **5.8.2** New: We attempt to resolve rules files as project relative in the configuration dialogue (#333).
 * **5.8.1** Fixed: Resolved cyclic dependency issue. Thanks to Thomas Jensen (@tsjensen) (#327).
 * **5.8.0** New: Bundled Sun/Google checks are now read from selected version of Checkstyle. Thanks to Thomas Jensen (@tsjensen) (#320).
 * **5.7.0** New: Added CheckStyle 8.0.

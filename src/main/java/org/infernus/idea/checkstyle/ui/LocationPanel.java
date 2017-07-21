@@ -19,6 +19,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Paths;
 
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
@@ -161,7 +162,25 @@ public class LocationPanel extends JPanel {
     }
 
     private String fileLocation() {
-        return trim(fileLocationField.getText());
+        final String filename = trim(fileLocationField.getText());
+
+        if (new File(filename).exists()) {
+            return filename;
+        }
+
+        final File projectRelativePath = projectRelativeFileOf(filename);
+        if (projectRelativePath.exists()) {
+            return projectRelativePath.getAbsolutePath();
+        }
+
+        return filename;
+    }
+
+    private File projectRelativeFileOf(String filename) {
+        return Paths.get(new File(project.getBasePath(), filename).getAbsolutePath())
+                .normalize()
+                .toAbsolutePath()
+                .toFile();
     }
 
     private String trim(final String text) {
