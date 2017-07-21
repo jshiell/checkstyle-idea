@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -20,8 +19,8 @@ public class PropertiesDialogue extends JDialog {
 
     private boolean committed = true;
 
-    public PropertiesDialogue(final Project project) {
-        super(WindowManager.getInstance().getFrame(project));
+    public PropertiesDialogue(final Project project, final Window parent) {
+        super(parent);
 
         if (project == null) {
             throw new IllegalArgumentException("Project is required");

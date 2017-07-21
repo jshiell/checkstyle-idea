@@ -1,27 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableColumn;
-
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -32,11 +10,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.AnActionButton;
-import com.intellij.ui.AnActionButtonRunnable;
-import com.intellij.ui.AnActionButtonUpdater;
-import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
@@ -50,12 +24,21 @@ import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 
 /**
  * Provides a configuration panel (dialog) for project-level configuration.
  */
-public class CheckStyleConfigPanel extends JPanel
-{
+public class CheckStyleConfigPanel extends JPanel {
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private static final int ACTIVE_COL_MIN_WIDTH = 40;
     private static final int ACTIVE_COL_MAX_WIDTH = 50;
@@ -266,8 +249,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the addition of a configuration location.
      */
-    private final class AddLocationAction extends ToolbarAction
-    {
+    private final class AddLocationAction extends ToolbarAction {
         private static final long serialVersionUID = -7266120887003483814L;
 
         AddLocationAction() {
@@ -299,8 +281,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the removal of a configuration location.
      */
-    private final class RemoveLocationAction extends ToolbarAction
-    {
+    private final class RemoveLocationAction extends ToolbarAction {
         private static final long serialVersionUID = -799542186049804472L;
 
         RemoveLocationAction() {
@@ -323,8 +304,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Edit the properties of a configuration location.
      */
-    private final class EditPropertiesAction extends ToolbarAction
-    {
+    private final class EditPropertiesAction extends ToolbarAction {
         private static final long serialVersionUID = -799542186049804472L;
 
         EditPropertiesAction() {
@@ -342,7 +322,7 @@ public class CheckStyleConfigPanel extends JPanel
 
             final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
 
-            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project);
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project, parentWindow(parent()));
             propertiesDialogue.setConfigurationLocation(location);
 
             propertiesDialogue.setVisible(true);
@@ -352,10 +332,20 @@ public class CheckStyleConfigPanel extends JPanel
                 locationModel.updateLocation(location, editedLocation);
             }
         }
+
+        private Container parent() {
+            return CheckStyleConfigPanel.this.getParent();
+        }
+
+        private Window parentWindow(Container window) {
+            if (window instanceof Window) {
+                return (Window) window;
+            }
+            return parentWindow(window.getParent());
+        }
     }
 
-    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable
-    {
+    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
         private static final long serialVersionUID = 7091312536206510956L;
 
         @Override
@@ -367,8 +357,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the addition of a path element.
      */
-    private final class AddPathAction extends ToolbarAction
-    {
+    private final class AddPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1389576037231727360L;
 
         /**
@@ -398,8 +387,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the editing of a path element.
      */
-    private final class EditPathAction extends ToolbarAction
-    {
+    private final class EditPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1455378231580505750L;
 
         /**
@@ -439,8 +427,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the removal of a path element.
      */
-    private final class RemovePathAction extends ToolbarAction
-    {
+    private final class RemovePathAction extends ToolbarAction {
         private static final long serialVersionUID = 7339136485307147623L;
 
         /**
@@ -469,8 +456,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the move up of a path element.
      */
-    private final class MoveUpPathAction extends ToolbarAction
-    {
+    private final class MoveUpPathAction extends ToolbarAction {
         private static final long serialVersionUID = -1230778908605654344L;
 
         /**
@@ -500,8 +486,7 @@ public class CheckStyleConfigPanel extends JPanel
     /**
      * Process the move down of a path element.
      */
-    private final class MoveDownPathAction extends ToolbarAction
-    {
+    private final class MoveDownPathAction extends ToolbarAction {
         private static final long serialVersionUID = 1222511743014969175L;
 
         /**
@@ -528,8 +513,7 @@ public class CheckStyleConfigPanel extends JPanel
         }
     }
 
-    private class DisableForDefaultUpdater implements AnActionButtonUpdater
-    {
+    private class DisableForDefaultUpdater implements AnActionButtonUpdater {
         @Override
         public boolean isEnabled(final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
