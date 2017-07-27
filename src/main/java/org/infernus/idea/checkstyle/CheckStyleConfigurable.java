@@ -64,7 +64,7 @@ public class CheckStyleConfigurable
         final PluginConfigDto newConfig = new PluginConfigDto(
                 configPanel.getPluginConfiguration(), oldConfig.isScanBeforeCheckin());
 
-        boolean result = !oldConfig.equals(newConfig);
+        boolean result = !oldConfig.hasChangedFrom(newConfig);
         if (LOG.isTraceEnabled()) {
             LOG.trace("isModified() - exit - result=" + result);
         }
