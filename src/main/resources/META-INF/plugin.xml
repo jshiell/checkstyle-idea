@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.8.2</version>
+    <version>5.9.0</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.9.0: New: Added CheckStyle 8.1 (#338).</li>
     <li>5.8.2: Fixed: Parent of properties dialogue is now correct (#334).</li>
     <li>5.8.2: Fixed: Parse stream errors now correctly show the root exception (#331).</li>
     <li>5.8.2: Fixed: Property-only changes are now correctly detected when checking configuration modification state (#331).</li>
