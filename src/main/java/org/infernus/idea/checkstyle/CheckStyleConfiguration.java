@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -153,7 +154,7 @@ public class CheckStyleConfiguration
         List<ConfigurationLocation> result = pLoadedMap.entrySet().stream()
                 .filter(this::propertyIsALocation)
                 .map(e -> deserialiseLocation(pLoadedMap, e.getKey()))
-                .filter(cl -> cl != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         ensureBundledConfigs(result);  // useful for migration, or when config file edited manually
         return result;
@@ -365,10 +366,14 @@ public class CheckStyleConfiguration
         return null;
     }
 
+    @NotNull
     private String readCheckstyleVersion(@NotNull final Map<String, String> pLoadedMap) {
+        final VersionListReader vlr = new VersionListReader();
         String result = pLoadedMap.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
-            result = new VersionListReader().getDefaultVersion();
+            result = vlr.getDefaultVersion();
+        } else {
+            result = vlr.getReplacementMap().getOrDefault(result, result);
         }
         return result;
     }
