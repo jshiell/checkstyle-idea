@@ -11,3 +11,4 @@ CheckStyle-IDEA.zip
 gradle-app.setting
 /.gradletasknamecache
 _support/
+out/
