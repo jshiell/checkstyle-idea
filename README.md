@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.10.0** New: Added CheckStyle 8.2 (#343).
 * **5.9.1** New: Cleaned up patch releases of Checkstyle (#340). Thanks, again, to Thomas Jenson (@tsjenson).
 * **5.9.0** New: Added CheckStyle 8.1 (#338).
 * **5.8.2** Fixed: Parent of properties dialogue is now correct (#334).
