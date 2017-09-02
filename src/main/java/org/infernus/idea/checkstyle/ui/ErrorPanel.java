@@ -9,6 +9,9 @@ import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import static javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS;
+import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
+
 public class ErrorPanel extends JPanel {
     private final JTextArea errorField = new JTextArea();
 
@@ -30,7 +33,7 @@ public class ErrorPanel extends JPanel {
         errorField.setEditable(false);
         errorField.setTabSize(2);
 
-        final JScrollPane errorScrollPane = new JBScrollPane(errorField);
+        final JScrollPane errorScrollPane = new JBScrollPane(errorField, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_ALWAYS);
         add(errorScrollPane, BorderLayout.CENTER);
     }
 
