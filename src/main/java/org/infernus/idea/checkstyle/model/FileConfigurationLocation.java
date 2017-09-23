@@ -1,10 +1,9 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +20,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  */
 public class FileConfigurationLocation extends ConfigurationLocation {
 
-    private static final Log LOG = LogFactory.getLog(FileConfigurationLocation.class);
+    private static final Logger LOG = Logger.getInstance(FileConfigurationLocation.class);
     private static final int BUFFER_SIZE = 4096;
 
     private final Project project;

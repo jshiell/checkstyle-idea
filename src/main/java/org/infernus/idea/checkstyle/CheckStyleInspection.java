@@ -4,13 +4,12 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
@@ -38,7 +37,7 @@ import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 public class CheckStyleInspection extends LocalInspectionTool {
 
-    private static final Log LOG = LogFactory.getLog(CheckStyleInspection.class);
+    private static final Logger LOG = Logger.getInstance(CheckStyleInspection.class);
     private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
 
     private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
@@ -134,7 +133,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             blacklist(configurationLocation);
 
         } else {
-            LOG.error("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
+            LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
             blacklist(configurationLocation);
         }
     }

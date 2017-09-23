@@ -1,5 +1,10 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
+import org.infernus.idea.checkstyle.util.ModulePaths;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -7,16 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.util.ModulePaths;
-
 
 public class ModuleClassPathBuilder {
 
-    private static final Log LOG = LogFactory.getLog(ModuleClassPathBuilder.class);
+    private static final Logger LOG = Logger.getInstance(ModuleClassPathBuilder.class);
 
 
     public ClassLoader build(final Module baseModule) {

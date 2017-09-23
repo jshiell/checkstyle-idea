@@ -1,14 +1,13 @@
 package org.infernus.idea.checkstyle.checks;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.intellij.openapi.project.Project;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class CheckFactory {
 
-    private static final Log LOG = LogFactory.getLog(CheckFactory.class);
+    private static final Logger LOG = Logger.getInstance(CheckFactory.class);
 
     private static final Class<?>[] CHECK_CLASSES = {JavadocPackageCheck.class, PackageHtmlCheck.class};
 
@@ -34,7 +33,7 @@ public final class CheckFactory {
                 check.configure(config);
                 checks.add(check);
             } catch (Exception e) {
-                LOG.error("Couldn't instantiate check class " + checkClass, e);
+                LOG.warn("Couldn't instantiate check class " + checkClass, e);
             }
         }
 

@@ -1,8 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.FilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,7 @@ import java.io.File;
  */
 public class RelativeFileConfigurationLocation extends FileConfigurationLocation {
 
-    private static final Log LOG = LogFactory.getLog(RelativeFileConfigurationLocation.class);
+    private static final Logger LOG = Logger.getInstance(RelativeFileConfigurationLocation.class);
 
     RelativeFileConfigurationLocation(final Project project) {
         super(project, ConfigurationType.PROJECT_RELATIVE);

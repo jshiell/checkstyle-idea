@@ -1,11 +1,10 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PropertiesPanel extends JPanel {
-    private static final Log LOG = LogFactory.getLog(PropertiesPanel.class);
+    private static final Logger LOG = Logger.getInstance(PropertiesPanel.class);
 
     private final PropertiesTableModel propertiesModel = new PropertiesTableModel();
 
@@ -98,7 +97,7 @@ public class PropertiesPanel extends JPanel {
             propertiesModel.setProperties(configurationLocation.getProperties());
 
         } catch (IOException e) {
-            LOG.error("Couldn't resolve properties file", e);
+            LOG.warn("Couldn't resolve properties file", e);
 
             Messages.showErrorDialog(project, CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()),
                     CheckStyleBundle.message("config.file.error.title"));

@@ -1,17 +1,9 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.RuntimeInterruptedException;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
@@ -21,24 +13,24 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.concurrent.Callable;
+
 import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.resultOf;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.BLACKLISTED;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.NOT_PRESENT;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.PRESENT;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.*;
 
 
 public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
-    private static final Log LOG = LogFactory.getLog(ScanFiles.class);
+    private static final Logger LOG = Logger.getInstance(ScanFiles.class);
 
     private final List<PsiFile> files;
     private final Map<Module, Set<PsiFile>> moduleToFiles;
@@ -90,11 +82,11 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             LOG.debug("Scan cancelled by IDEA", e);
             return checkComplete(resultOf(PRESENT), emptyMap());
         } catch (final CheckStylePluginException e) {
-            LOG.error("An error occurred while scanning a file.", e);
+            LOG.warn("An error occurred while scanning a file.", e);
             fireErrorCaught(e);
             return checkComplete(resultOf(PRESENT), emptyMap());
         } catch (final Throwable e) {
-            LOG.error("An error occurred while scanning a file.", e);
+            LOG.warn("An error occurred while scanning a file.", e);
             fireErrorCaught(new CheckStylePluginException("An error occurred while scanning a file.", e));
             return checkComplete(resultOf(PRESENT), emptyMap());
         }

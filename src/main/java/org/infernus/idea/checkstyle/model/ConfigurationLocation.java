@@ -1,20 +1,10 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
@@ -22,6 +12,12 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
@@ -32,9 +28,8 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  * <p>Note on order: Configuration locations are ordered by description text, followed by location and type, except that
  * the bundled configurations (Sun and Google checks) always go first.</p>
  */
-public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation>
-{
-    private static final Log LOG = LogFactory.getLog(ConfigurationLocation.class);
+public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation> {
+    private static final Logger LOG = Logger.getInstance(ConfigurationLocation.class);
 
     private static final long BLACKLIST_TIME_MS = 1000 * 60;
 
@@ -412,8 +407,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return result;
     }
 
-    private int compareStrings(@Nullable final String pStr1, @Nullable final String pStr2)
-    {
+    private int compareStrings(@Nullable final String pStr1, @Nullable final String pStr2) {
         int result = 0;
         if (pStr1 != null) {
             if (pStr2 != null) {

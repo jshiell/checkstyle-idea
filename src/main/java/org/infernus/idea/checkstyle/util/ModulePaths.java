@@ -1,13 +1,12 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.libraries.LibraryUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.impl.jar.JarFileSystemImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -22,7 +21,7 @@ import static java.util.Optional.empty;
 
 public final class ModulePaths {
 
-    private static final Log LOG = LogFactory.getLog(ModulePaths.class);
+    private static final Logger LOG = Logger.getInstance(ModulePaths.class);
 
     private ModulePaths() {
         // utility class
@@ -50,7 +49,7 @@ public final class ModulePaths {
             try {
                 outputPaths.add(urlFor(pathOf(file)));
             } catch (MalformedURLException e) {
-                LOG.error("Malformed virtual file URL: " + file, e);
+                LOG.warn("Malformed virtual file URL: " + file, e);
             }
         }
         return outputPaths;

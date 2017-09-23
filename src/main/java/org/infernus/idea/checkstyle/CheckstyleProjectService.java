@@ -1,9 +1,8 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
@@ -24,9 +23,11 @@ import java.util.concurrent.Callable;
  */
 public class CheckstyleProjectService {
 
-    private static final Log LOG = LogFactory.getLog(CheckstyleProjectService.class);
+    private static final Logger LOG = Logger.getInstance(CheckstyleProjectService.class);
 
-    /** mock instance which may be set and used by unit tests */
+    /**
+     * mock instance which may be set and used by unit tests
+     */
     private static CheckstyleProjectService sMock = null;
 
     private final Project project;

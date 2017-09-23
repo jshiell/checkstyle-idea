@@ -1,13 +1,6 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -17,8 +10,6 @@ import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -33,6 +24,15 @@ import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
@@ -46,7 +46,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 public class OpLoadConfiguration
         implements CheckstyleCommand<HasCsConfig> {
 
-    private static final Log LOG = LogFactory.getLog(OpLoadConfiguration.class);
+    private static final Logger LOG = Logger.getInstance(OpLoadConfiguration.class);
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final Map<String, String> FILENAME_REPLACEMENTS = buildReplacementsMap();

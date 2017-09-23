@@ -1,21 +1,15 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
-import org.infernus.idea.checkstyle.util.Notifications;
-import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,9 +18,8 @@ import java.util.List;
  * dialog. Registered in {@code plugin.xml} as a {@code projectConfigurable} extension.
  */
 public class CheckStyleConfigurable
-        implements Configurable
-{
-    private static final Log LOG = LogFactory.getLog(CheckStyleConfigurable.class);
+        implements Configurable {
+    private static final Logger LOG = Logger.getInstance(CheckStyleConfigurable.class);
 
     private final Project project;
 
@@ -58,22 +51,22 @@ public class CheckStyleConfigurable
 
     @Override
     public boolean isModified() {
-        LOG.trace("isModified() - enter");
+        LOG.debug("isModified() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
         final PluginConfigDto oldConfig = configuration.getCurrentPluginConfig();
         final PluginConfigDto newConfig = new PluginConfigDto(
                 configPanel.getPluginConfiguration(), oldConfig.isScanBeforeCheckin());
 
         boolean result = !oldConfig.hasChangedFrom(newConfig);
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("isModified() - exit - result=" + result);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("isModified() - exit - result=" + result);
         }
         return result;
     }
 
 
     public void apply() throws ConfigurationException {
-        LOG.trace("apply() - enter");
+        LOG.debug("apply() - enter");
 
         final CheckStyleConfiguration configuration = getConfiguration();
         final PluginConfigDto newConfig = new PluginConfigDto(configPanel.getPluginConfiguration(),
@@ -82,7 +75,7 @@ public class CheckStyleConfigurable
 
         activateCurrentCheckstyleVersion(newConfig.getCheckstyleVersion(), newConfig.getThirdPartyClasspath());
 
-        LOG.trace("apply() - exit");
+        LOG.debug("apply() - exit");
     }
 
     private void activateCurrentCheckstyleVersion(final String checkstyleVersion, final List<String>
@@ -104,14 +97,14 @@ public class CheckStyleConfigurable
 
 
     public void reset() {
-        LOG.trace("reset() - enter");
+        LOG.debug("reset() - enter");
 
         final PluginConfigDto pluginConfig = getConfiguration().getCurrentPluginConfig();
         configPanel.showPluginConfiguration(pluginConfig);
 
         activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());
 
-        LOG.trace("reset() - exit");
+        LOG.debug("reset() - exit");
     }
 
 

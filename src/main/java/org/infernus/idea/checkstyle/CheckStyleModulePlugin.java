@@ -1,9 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleComponent;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CheckStyleModulePlugin implements ModuleComponent {
 
-    private static final Log LOG = LogFactory.getLog(CheckStyleModulePlugin.class);
+    private static final Logger LOG = Logger.getInstance(CheckStyleModulePlugin.class);
 
     public CheckStyleModulePlugin(@NotNull final Module module) {
         LOG.info("CheckStyle Module Plugin loaded for module: \"" + module.getName() + "\"");

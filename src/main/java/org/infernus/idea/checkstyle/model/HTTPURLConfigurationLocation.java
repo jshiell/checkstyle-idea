@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.DatatypeConverter;
@@ -14,7 +13,7 @@ import java.net.URLConnection;
  */
 public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
-    private static final Log LOG = LogFactory.getLog(HTTPURLConfigurationLocation.class);
+    private static final Logger LOG = Logger.getInstance(HTTPURLConfigurationLocation.class);
 
     private static final int CONTENT_CACHE_SECONDS = 2;
     private static final int ONE_SECOND = 1000;

@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceKt;
 import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.components.impl.stores.IProjectStore;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -18,8 +19,6 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -41,7 +40,7 @@ import static org.infernus.idea.checkstyle.checker.PsiFileValidator.isScannable;
  * A representation of a file able to be scanned.
  */
 public class ScannableFile {
-    private static final Logger LOG = LoggerFactory.getLogger(ScannableFile.class);
+    private static final Logger LOG = Logger.getInstance(ScannableFile.class);
 
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
 
@@ -108,7 +107,7 @@ public class ScannableFile {
             return fileAction.getFile();
 
         } catch (IOException e) {
-            LOG.error("Failure when creating temporary file", e);
+            LOG.warn("Failure when creating temporary file", e);
             return null;
         }
     }

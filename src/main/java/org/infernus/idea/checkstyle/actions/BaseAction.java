@@ -1,24 +1,24 @@
 package org.infernus.idea.checkstyle.actions;
 
-import java.util.Optional;
-import javax.swing.JComponent;
-
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import java.util.Optional;
+
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 import static java.util.Optional.ofNullable;
 
@@ -27,7 +27,7 @@ import static java.util.Optional.ofNullable;
  */
 public abstract class BaseAction extends AnAction {
 
-    private static final Log LOG = LogFactory.getLog(BaseAction.class);
+    private static final Logger LOG = Logger.getInstance(BaseAction.class);
 
     @Override
     public void update(final AnActionEvent event) {
@@ -63,7 +63,7 @@ public abstract class BaseAction extends AnAction {
             presentation.setEnabled(toolWindow.isAvailable());
             presentation.setVisible(true);
         } catch (Throwable e) {
-            LOG.error("Action update failed", e);
+            LOG.warn("Action update failed", e);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.importer;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.SchemeFactory;
 import com.intellij.openapi.options.SchemeImportException;
 import com.intellij.openapi.options.SchemeImporter;
@@ -7,8 +8,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.codeStyle.CodeStyleScheme;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class CheckStyleCodeStyleImporter
         implements SchemeImporter<CodeStyleScheme> {
 
-    private static final Log LOG = LogFactory.getLog(CheckStyleCodeStyleImporter.class);
+    private static final Logger LOG = Logger.getInstance(CheckStyleCodeStyleImporter.class);
 
     private CheckstyleProjectService checkstyleProjectService = null;
 
@@ -41,7 +40,7 @@ public class CheckStyleCodeStyleImporter
     @NotNull
     @Override
     public String[] getSourceExtensions() {
-        return new String[] {"xml"};
+        return new String[]{"xml"};
     }
 
     @Nullable
@@ -63,7 +62,7 @@ public class CheckStyleCodeStyleImporter
                 return targetScheme;
             }
         } catch (Exception e) {
-            LOG.error("Failed to import style", e);
+            LOG.warn("Failed to import style", e);
             throw new SchemeImportException(e);
         }
         return null;

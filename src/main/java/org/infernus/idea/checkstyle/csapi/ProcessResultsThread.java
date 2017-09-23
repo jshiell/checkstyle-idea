@@ -1,27 +1,21 @@
 package org.infernus.idea.checkstyle.csapi;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiInvalidElementAccessException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.*;
+
 
 public class ProcessResultsThread implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(ProcessResultsThread.class);
+    private static final Logger LOG = Logger.getInstance(ProcessResultsThread.class);
 
     private final boolean suppressErrors;
     private final List<Check> checks;
@@ -78,9 +72,7 @@ public class ProcessResultsThread implements Runnable {
         for (final Issue event : errors) {
             final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
             if (psiFile == null) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Could not find mapping for file: " + event.fileName + " in " + fileNamesToPsiFiles);
-                }
+                LOG.info("Could not find mapping for file: " + event.fileName + " in " + fileNamesToPsiFiles);
                 return;
             }
 
@@ -138,7 +130,7 @@ public class ProcessResultsThread implements Runnable {
             addProblem(psiFile, new Problem(victim, event.message, event.severityLevel, event.lineNumber,
                     event.columnNumber, afterEndOfLine, suppressErrors));
         } catch (PsiInvalidElementAccessException e) {
-            LOG.error("Element access failed", e);
+            LOG.warn("Element access failed", e);
         }
     }
 

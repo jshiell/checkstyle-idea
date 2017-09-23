@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.util.Collections;
-import java.util.Optional;
-
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.LocalizedMessage;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
@@ -10,11 +7,12 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.Optional;
 
-public class CheckStyleAuditListenerTest
-{
+
+public class CheckStyleAuditListenerTest {
     private int counter = 0;
-
 
     @Test
     public void testSeverityLevels() {
@@ -27,7 +25,6 @@ public class CheckStyleAuditListenerTest
         underTest.addError(createDummyEvent(null));
     }
 
-
     @Test
     public void testAddException() {
         final CheckStyleAuditListener underTest = new CheckStyleAuditListener(Collections.emptyMap(), false, 2,
@@ -35,7 +32,6 @@ public class CheckStyleAuditListenerTest
         underTest.addException(createDummyEvent(SeverityLevel.ERROR), //
                 new IllegalArgumentException("Exception for unit testing only - not a real exception"));
     }
-
 
     @Test
     public void testWithoutLocalizedMessage() {
@@ -48,7 +44,6 @@ public class CheckStyleAuditListenerTest
             // expected
         }
     }
-
 
     private AuditEvent createDummyEvent(@Nullable final SeverityLevel pSeverityLevel) {
         LocalizedMessage localizedMessage = new LocalizedMessage(42 + (counter++), 21, "bundle", "message text",

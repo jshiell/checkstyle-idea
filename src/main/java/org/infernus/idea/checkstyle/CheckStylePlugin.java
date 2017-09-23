@@ -1,34 +1,24 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
-
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
-import org.infernus.idea.checkstyle.checker.Problem;
-import org.infernus.idea.checkstyle.checker.ScanFiles;
-import org.infernus.idea.checkstyle.checker.ScannerListener;
-import org.infernus.idea.checkstyle.checker.UiFeedbackScannerListener;
+import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.Future;
+
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
@@ -38,12 +28,14 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
  */
 public final class CheckStylePlugin implements ProjectComponent {
 
-    /** The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName */
+    /**
+     * The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName
+     */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
-    private static final Log LOG = LogFactory.getLog(CheckStylePlugin.class);
+    private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(CheckStylePlugin.class);
 
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
@@ -69,9 +61,9 @@ public final class CheckStylePlugin implements ProjectComponent {
         try {
             // This is a nasty hack to get around IDEA's DialogAppender sending any errors to the Event Log,
             // which would result in CheckStyle parse errors spamming the Event Log.
-            Logger.getLogger("com.puppycrawl.tools.checkstyle.TreeWalker").setLevel(Level.OFF);
+            org.apache.log4j.Logger.getLogger("com.puppycrawl.tools.checkstyle.TreeWalker").setLevel(Level.OFF);
         } catch (Exception e) {
-            LOG.error("Unable to suppress logging from CheckStyle's TreeWalker", e);
+            LOG.warn("Unable to suppress logging from CheckStyle's TreeWalker", e);
         }
     }
 
@@ -138,7 +130,7 @@ public final class CheckStylePlugin implements ProjectComponent {
     }
 
     public static void processErrorAndLog(@NotNull final String action, @NotNull final Throwable e) {
-        LOG.error(action + " failed", e);
+        LOG.warn(action + " failed", e);
     }
 
     private <T> Future<T> checkInProgress(final Future<T> checkFuture) {
@@ -188,7 +180,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         try {
             return whenFinished(runAsyncCheck(new ScanFiles(this, files, null))).get();
         } catch (final Throwable e) {
-            LOG.error("Error scanning files", e);
+            LOG.warn("Error scanning files", e);
             return Collections.emptyMap();
         }
     }

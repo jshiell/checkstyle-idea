@@ -1,10 +1,9 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -28,7 +27,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  * Creates Checkers. Registered as projectService in {@code plugin.xml}.
  */
 public class CheckerFactory {
-    private static final Log LOG = LogFactory.getLog(CheckerFactory.class);
+    private static final Logger LOG = Logger.getInstance(CheckerFactory.class);
 
     private final Project project;
     private final CheckerFactoryCache cache;

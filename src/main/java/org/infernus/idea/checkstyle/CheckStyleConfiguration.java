@@ -1,30 +1,10 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.ExportableComponent;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.components.StoragePathMacros;
-import com.intellij.openapi.components.StorageScheme;
+import com.intellij.openapi.components.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -33,6 +13,11 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -43,9 +28,8 @@ import org.jetbrains.annotations.Nullable;
         @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme =
                 StorageScheme.DIRECTORY_BASED)})
 public class CheckStyleConfiguration
-        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings>
-{
-    private static final Log LOG = LogFactory.getLog(CheckStyleConfiguration.class);
+        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
+    private static final Logger LOG = Logger.getInstance(CheckStyleConfiguration.class);
 
     public static final String PROJECT_DIR = "$PRJ_DIR$";
     public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
@@ -181,7 +165,7 @@ public class CheckStyleConfiguration
             return location;
 
         } catch (IllegalArgumentException e) {
-            LOG.error("Could not parse location: " + serialisedLocation, e);
+            LOG.warn("Could not parse location: " + serialisedLocation, e);
             return null;
         }
     }
@@ -382,11 +366,12 @@ public class CheckStyleConfiguration
     /**
      * Wrapper class for IDEA state serialisation.
      */
-    static class ProjectSettings
-    {
+    static class ProjectSettings {
         private Map<String, String> configuration;
 
-        /** No-args constructor for deserialization. */
+        /**
+         * No-args constructor for deserialization.
+         */
         public ProjectSettings() {
             super();
         }
@@ -442,7 +427,7 @@ public class CheckStyleConfiguration
                         }
                     }
                 } catch (IOException e) {
-                    LOG.error("Failed to read properties from " + configurationLocation, e);
+                    LOG.warn("Failed to read properties from " + configurationLocation, e);
                     Notifications.showError(pProject, CheckStyleBundle.message("checkstyle" + ""
                             + ".could-not-read-properties", configurationLocation.getLocation()));
                 }

@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.handlers;
 
 import com.intellij.CommonBundle;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -13,8 +14,6 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.PluginConfigDto;
@@ -36,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
-    private static final Log LOG = LogFactory.getLog(ScanFilesBeforeCheckinHandler.class);
+    private static final Logger LOG = Logger.getInstance(ScanFilesBeforeCheckinHandler.class);
 
     private final CheckinProjectPanel checkinPanel;
 
@@ -66,7 +65,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             public void restoreState() {
                 checkBox.setSelected(
                         settings().map(c -> c.getCurrentPluginConfig().isScanBeforeCheckin())
-                        .orElseGet(() -> Boolean.FALSE));
+                                .orElseGet(() -> Boolean.FALSE));
             }
         };
     }
@@ -76,13 +75,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                                       final PairConsumer<Object, Object> additionalDataConsumer) {
         final Project project = checkinPanel.getProject();
         if (project == null) {
-            LOG.error("Could not get project for check-in panel, skipping");
+            LOG.warn("Could not get project for check-in panel, skipping");
             return COMMIT;
         }
 
         final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
         if (plugin == null) {
-            LOG.error("Could not get CheckStyle Plug-in, skipping");
+            LOG.warn("Could not get CheckStyle Plug-in, skipping");
             return COMMIT;
         }
 
@@ -111,13 +110,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private Optional<CheckStyleConfiguration> settings() {
         final Project project = checkinPanel.getProject();
         if (project == null) {
-            LOG.error("Could not get project for check-in panel");
+            LOG.warn("Could not get project for check-in panel");
             return empty();
         }
 
         final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
         if (plugin == null) {
-            LOG.error("Could not get CheckStyle Plug-in, skipping");
+            LOG.warn("Could not get CheckStyle Plug-in, skipping");
             return empty();
         }
 
@@ -173,7 +172,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             commitButtonText = commitButtonText.substring(0, commitButtonText.length() - 3);
         }
 
-        final String[] buttons = new String[] {
+        final String[] buttons = new String[]{
                 message("handler.before.checkin.error.review"),
                 commitButtonText,
                 CommonBundle.getCancelButtonText()};

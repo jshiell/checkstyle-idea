@@ -1,19 +1,11 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.AuditListener;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.infernus.idea.checkstyle.csapi.Issue;
@@ -21,11 +13,13 @@ import org.infernus.idea.checkstyle.csapi.ProcessResultsThread;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.*;
+
 
 public class CheckStyleAuditListener
         implements AuditListener {
 
-    private static final Log LOG = LogFactory.getLog(CheckStyleAuditListener.class);
+    private static final Logger LOG = Logger.getInstance(CheckStyleAuditListener.class);
 
     private final boolean suppressErrors;
     private final List<Check> checks;
@@ -88,7 +82,7 @@ public class CheckStyleAuditListener
     }
 
     public void addException(final AuditEvent auditEvent, final Throwable throwable) {
-        LOG.error("Exception during CheckStyle execution", throwable);
+        LOG.warn("Exception during CheckStyle execution", throwable);
         errors.add(toIssue(auditEvent));
     }
 
