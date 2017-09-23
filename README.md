@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.10.1** Fixed: Modified file results not shown when basedir was configured (#345).
 * **5.10.0** New: Added CheckStyle 8.2 (#343).
 * **5.9.1** New: Cleaned up patch releases of Checkstyle (#340). Thanks, again, to Thomas Jenson (@tsjenson).
 * **5.9.0** New: Added CheckStyle 8.1 (#338).

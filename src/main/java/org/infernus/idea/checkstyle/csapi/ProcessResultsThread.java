@@ -91,11 +91,15 @@ public class ProcessResultsThread implements Runnable {
     }
 
     private String filenameFrom(final Issue event) {
-        final String fileName = baseDir
-                .filter(prefix -> !new File(event.fileName).exists())
+        return baseDir
                 .map(prefix -> withTrailingSeparator(prefix) + event.fileName)
-                .orElseGet(() -> event.fileName);
-        return Paths.get(fileName).normalize().toString();
+                .map(this::normalisePath)
+                .filter(normalisedFileName -> new File(normalisedFileName).exists())
+                .orElseGet(() -> normalisePath(event.fileName));
+    }
+
+    private String normalisePath(String prefixedFileName) {
+        return Paths.get(prefixedFileName).normalize().toString();
     }
 
     private String withTrailingSeparator(final String path) {

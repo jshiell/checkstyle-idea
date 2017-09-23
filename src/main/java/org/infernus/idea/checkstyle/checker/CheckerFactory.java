@@ -101,7 +101,9 @@ public class CheckerFactory {
     private String basePathFor(final Module module) {
         if (module != null) {
             final File moduleFile = new File(module.getModuleFilePath());
-            if (moduleFile.getParent() != null && moduleFile.getParentFile().exists()) {
+            if (moduleFile.getParent() != null
+                    && moduleFile.getParentFile().exists()
+                    && !moduleFile.getParentFile().getName().equals("modules")) {
                 return moduleFile.getParentFile().getAbsolutePath();
             }
         }
