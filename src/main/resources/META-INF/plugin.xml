@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.10.1: Fixed: Version check should now work on Java 9 (#346).</li>
     <li>5.10.1: Fixed: Modified file results not shown when basedir was configured (#345).</li>
     <li>5.10.0: New: Added CheckStyle 8.2 (#343).</li>
     <li>5.9.1: New: Cleaned up patch releases of Checkstyle (#340). Thanks, again, to Thomas Jenson (@tsjenson).</li>

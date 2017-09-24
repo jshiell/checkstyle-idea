@@ -82,7 +82,7 @@ class VersionListReader
     @NotNull
     private SortedSet<String> readSupportedVersions(@NotNull final String pPropertyFile,
                                                     @NotNull final Properties props) {
-        final String javaVersion = Runtime.class.getPackage().getSpecificationVersion();
+        final String javaVersion = System.getProperty("java.version");
 
         final SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
         theVersions.addAll(readVersions(pPropertyFile, props, PROP_NAME_JAVA7));
