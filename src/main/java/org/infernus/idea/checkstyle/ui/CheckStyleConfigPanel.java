@@ -30,6 +30,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -73,7 +74,9 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project currentProject) {
         SortedSet<String> versions = CheckstyleProjectService.getInstance(currentProject).getSupportedVersions();
-        String[] supportedVersions = versions.toArray(new String[versions.size()]);
+        SortedSet<String> reversedVersions = new TreeSet<>(Collections.reverseOrder(versions.comparator()));
+        reversedVersions.addAll(versions);
+        String[] supportedVersions = reversedVersions.toArray(new String[reversedVersions.size()]);
         return new ComboBox(supportedVersions);
     }
 

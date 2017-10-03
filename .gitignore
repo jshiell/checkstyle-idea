@@ -6,6 +6,7 @@ CheckStyle-IDEA.zip
 .idea/
 /build/
 /buildSrc/build/
+/buildSrc/out/
 /test-configs/
 .gradle/
 gradle-app.setting
