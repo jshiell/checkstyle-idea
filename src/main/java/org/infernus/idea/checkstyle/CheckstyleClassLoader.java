@@ -36,9 +36,18 @@ public class CheckstyleClassLoader {
     private static final String CSACTIONS_CLASS = "org.infernus.idea.checkstyle.service.CheckstyleActionsImpl";
 
     /**
+     * First pattern we can use to guess the build dir, valid for IntelliJ 2017.2 and later. {@code /build} must be
+     * appended to the result afterwards.
      * <img src="doc-files/CheckstyleClassLoader-1.png"/>
      */
-    private static final Pattern CLASSES_URL = Pattern.compile("^(.*?)[/\\\\]classes(?:[/\\\\]main)?[/\\\\]?$");
+    private static final Pattern CLASSES_URL1 = Pattern.compile("^(.*?)"
+            + "[/\\\\]out[/\\\\]production[/\\\\]classes[/\\\\]?$");
+
+    /**
+     * Second pattern we can use to guess the build dir, valid for IntelliJ 2017.1 or earlier:
+     * <img src="doc-files/CheckstyleClassLoader-2.png"/>
+     */
+    private static final Pattern CLASSES_URL2 = Pattern.compile("^(.*?)[/\\\\]classes(?:[/\\\\]main)?[/\\\\]?$");
 
     private final ClassLoader classLoader;
 
@@ -111,6 +120,7 @@ public class CheckstyleClassLoader {
         } else if (pClassLoader instanceof URLClassLoader) {   // happens in test cases
             result = Arrays.asList(((URLClassLoader) pClassLoader).getURLs());
         } else {
+            //noinspection ConstantConditions
             throw new CheckStylePluginException("incompatible class loader: "
                     + (pClassLoader != null ? pClassLoader.getClass().getName() : "null"));
         }
@@ -142,13 +152,12 @@ public class CheckstyleClassLoader {
 
         // If we could not get the base path from the path manager, deduce it from the current class path:
         if (result == null) {
-            for (final URL url : getUrls(getClass().getClassLoader())) {
-                String path = url.getPath();
-                Matcher matcher = CLASSES_URL.matcher(path);
-                if (matcher.find()) {
-                    result = matcher.group(1);
-                    break;
-                }
+            final List<URL> urls = getUrls(getClass().getClassLoader());
+            result = guessFromClassPath(urls, CLASSES_URL1);
+            if (result != null) {
+                result += "/build";
+            } else {
+                result = guessFromClassPath(urls, CLASSES_URL2);
             }
             if (result != null) {
                 result = urlDecode(result);
@@ -157,6 +166,19 @@ public class CheckstyleClassLoader {
 
         if (result == null) {
             throw new CheckStylePluginException("Could not determine plugin directory");
+        }
+        return result;
+    }
+
+    @Nullable
+    private String guessFromClassPath(@NotNull final List<URL> pUrls, @NotNull final Pattern pPattern) {
+        String result = null;
+        for (final URL url : pUrls) {
+            Matcher matcher = pPattern.matcher(url.getPath());
+            if (matcher.find()) {
+                result = matcher.group(1);
+                break;
+            }
         }
         return result;
     }
