@@ -9,6 +9,7 @@ import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -99,7 +100,11 @@ public class ProcessResultsThread implements Runnable {
     }
 
     private String normalisePath(String prefixedFileName) {
-        return Paths.get(prefixedFileName).normalize().toString();
+        try {
+            return Paths.get(prefixedFileName).normalize().toString();
+        } catch (InvalidPathException e) {
+            return prefixedFileName;  // cannot normalize
+        }
     }
 
     private String withTrailingSeparator(final String path) {
