@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.10.1</version>
+    <version>5.10.2</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,9 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.10.2: New: Checkstyle version numbers now descend, leaving the most useful versions at the top - thanks to @tsjensen (#351).</li>
+    <li>5.10.2: Fixed: File normalisation was broken on Windows - thanks to @tsjensen (#351).</li>
+    <li>5.10.2: Fixed: Test paths on newer versions of IntelliJ should be corrected detected - thanks to @tsjensen  (#351).</li>
     <li>5.10.1: Fixed: Version check should now work on Java 9 (#346).</li>
     <li>5.10.1: Fixed: Modified file results not shown when basedir was configured (#345).</li>
     <li>5.10.0: New: Added CheckStyle 8.2 (#343).</li>

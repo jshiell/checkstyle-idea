@@ -169,6 +169,9 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.10.2** New: Checkstyle version numbers now descend, leaving the most useful versions at the top - thanks to @tsjensen (#351).
+* **5.10.2** Fixed: File normalisation was broken on Windows - thanks to @tsjensen (#351).
+* **5.10.2** Fixed: Test paths on newer versions of IntelliJ should be corrected detected - thanks to @tsjensen  (#351).
 * **5.10.1** Fixed: Version check should now work on Java 9 (#346).
 * **5.10.1** Fixed: Modified file results not shown when basedir was configured (#345).
 * **5.10.0** New: Added CheckStyle 8.2 (#343).
