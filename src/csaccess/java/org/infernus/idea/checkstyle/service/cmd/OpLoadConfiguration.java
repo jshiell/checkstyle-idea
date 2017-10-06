@@ -102,9 +102,13 @@ public class OpLoadConfiguration
     private static Map<String, String> buildReplacementsMap() {
         Map<String, String> result = new HashMap<>();
         result.put("RegexpHeader", "headerFile");
+        result.put("com.puppycrawl.tools.checkstyle.checks.RegexpHeaderCheck", "headerFile");
         result.put("Header", "headerFile");
+        result.put("com.puppycrawl.tools.checkstyle.checks.header.HeaderCheck", "headerFile");
         result.put("SuppressionFilter", "file");
+        result.put("com.puppycrawl.tools.checkstyle.filters.SuppressionFilter", "file");
         result.put("ImportControl", "file");
+        result.put("com.puppycrawl.tools.checkstyle.checks.imports.ImportControlCheck", "file");
         return Collections.unmodifiableMap(result);
     }
 
