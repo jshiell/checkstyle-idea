@@ -6,7 +6,7 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
 [![Build Status](https://travis-ci.org/jshiell/checkstyle-idea.svg?branch=master)](https://travis-ci.org/jshiell/checkstyle-idea)
 
-A plug-in for JetBrains' IntelliJ IDEA 15/2016 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
+A plug-in for JetBrains' IntelliJ IDEA 15/2016/2017 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.11.0** New: Added CheckStyle 8.3.
 * **5.10.2** New: Checkstyle version numbers now descend, leaving the most useful versions at the top - thanks to @tsjensen (#351).
 * **5.10.2** Fixed: Fully qualified checks with paths are now resolved properly (#349).
 * **5.10.2** Fixed: File normalisation was broken on Windows - thanks to @tsjensen (#351).
