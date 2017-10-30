@@ -77,24 +77,27 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             fireCheckStarting(files);
             final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult =
                     processFilesForModuleInfoAndScan();
-            return checkComplete(scanResult.first, scanResult.second);
+            return scanCompletedSuccessfully(scanResult.first, scanResult.second);
         } catch (final RuntimeInterruptedException e) {
             LOG.debug("Scan cancelled by IDEA", e);
-            return checkComplete(resultOf(PRESENT), emptyMap());
+            return scanCompletedSuccessfully(resultOf(PRESENT), emptyMap());
         } catch (final CheckStylePluginException e) {
             LOG.warn("An error occurred while scanning a file.", e);
-            fireErrorCaught(e);
-            return checkComplete(resultOf(PRESENT), emptyMap());
+            return scanFailedWithError(e);
         } catch (final Throwable e) {
             LOG.warn("An error occurred while scanning a file.", e);
-            fireErrorCaught(new CheckStylePluginException("An error occurred while scanning a file.", e));
-            return checkComplete(resultOf(PRESENT), emptyMap());
+            return scanFailedWithError(new CheckStylePluginException("An error occurred while scanning a file.", e));
         }
     }
 
-    private Map<PsiFile, List<Problem>> checkComplete(final ConfigurationLocationResult configurationLocationResult,
-                                                      final Map<PsiFile, List<Problem>> filesToProblems) {
-        fireCheckComplete(configurationLocationResult, filesToProblems);
+    private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e) {
+        fireScanFailedWithError(e);
+        return emptyMap();
+    }
+
+    private Map<PsiFile, List<Problem>> scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
+                                                                  final Map<PsiFile, List<Problem>> filesToProblems) {
+        fireScanCompletedSuccessfully(configurationLocationResult, filesToProblems);
         return filesToProblems;
     }
 
@@ -106,13 +109,13 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireCheckComplete(final ConfigurationLocationResult configLocationResult,
-                                   final Map<PsiFile, List<Problem>> fileResults) {
-        listeners.forEach(listener -> listener.scanComplete(configLocationResult, fileResults));
+    private void fireScanCompletedSuccessfully(final ConfigurationLocationResult configLocationResult,
+                                               final Map<PsiFile, List<Problem>> fileResults) {
+        listeners.forEach(listener -> listener.scanCompletedSuccessfully(configLocationResult, fileResults));
     }
 
-    private void fireErrorCaught(final CheckStylePluginException error) {
-        listeners.forEach(listener -> listener.errorCaught(error));
+    private void fireScanFailedWithError(final CheckStylePluginException error) {
+        listeners.forEach(listener -> listener.scanFailedWithError(error));
     }
 
     private void fireFilesScanned(final int count) {
@@ -147,8 +150,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
-            fileResults.putAll(filesWithProblems(filesForModule, checkFiles(module, filesForModule, locationResult
-                    .location)));
+            fileResults.putAll(filesWithProblems(filesForModule,
+                    checkFiles(module, filesForModule, locationResult.location)));
             fireFilesScanned(filesForModule.size());
         }
 
@@ -156,8 +159,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private Map<PsiFile, List<Problem>> filesWithProblems(final Set<PsiFile> filesForModule, final Map<PsiFile,
-            List<Problem>> moduleFileResults) {
+    private Map<PsiFile, List<Problem>> filesWithProblems(final Set<PsiFile> filesForModule,
+                                                          final Map<PsiFile, List<Problem>> moduleFileResults) {
         final Map<PsiFile, List<Problem>> moduleResults = new HashMap<>();
         for (final PsiFile psiFile : filesForModule) {
             final List<Problem> resultsForFile = moduleFileResults.get(psiFile);
@@ -169,8 +172,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override, final Module
-            module) {
+    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override,
+                                                              final Module module) {
         final ConfigurationLocation location = plugin.getConfigurationLocation(module, override);
         if (location == null) {
             return resultOf(NOT_PRESENT);
@@ -181,15 +184,16 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         return resultOf(location, PRESENT);
     }
 
-    private Map<PsiFile, List<Problem>> checkFiles(final Module module, final Set<PsiFile> filesToScan, final
-    ConfigurationLocation configurationLocation) {
+    private Map<PsiFile, List<Problem>> checkFiles(final Module module,
+                                                   final Set<PsiFile> filesToScan,
+                                                   final ConfigurationLocation configurationLocation) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
             return checkerFactory(module.getProject()).checker(module, configurationLocation)
                     .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrentPluginConfig().isSuppressErrors()))
-                    .orElseGet(Collections::emptyMap);
+                    .orElseThrow(() -> new CheckStylePluginException("Could not create checker"));
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
@@ -205,7 +209,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 
-        public final List<PsiFile> locatedFiles = new ArrayList<>();
+        final List<PsiFile> locatedFiles = new ArrayList<>();
 
         FindChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
             this.virtualFile = virtualFile;

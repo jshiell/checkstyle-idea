@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.11.0</version>
+    <version>5.12.0</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.12.0: Fixed: Improved feedback when checker cannot be created.</li>
     <li>5.11.0: New: Added CheckStyle 8.3.</li>
     <li>5.10.2: New: Checkstyle version numbers now descend, leaving the most useful versions at the top - thanks to @tsjensen (#351).</li>
     <li>5.10.2: Fixed: Fully qualified checks with paths are now resolved properly (#349).</li>

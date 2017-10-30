@@ -39,8 +39,8 @@ public class UiFeedbackScannerListener implements ScannerListener {
     }
 
     @Override
-    public void scanComplete(final ConfigurationLocationResult configurationLocationResult,
-                             final Map<PsiFile, List<Problem>> scanResults) {
+    public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
+                                          final Map<PsiFile, List<Problem>> scanResults) {
         SwingUtilities.invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
@@ -60,7 +60,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
     }
 
     @Override
-    public void errorCaught(final CheckStylePluginException error) {
+    public void scanFailedWithError(final CheckStylePluginException error) {
         SwingUtilities.invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {

@@ -12,9 +12,9 @@ public interface ScannerListener {
 
     void filesScanned(int count);
 
-    void scanComplete(ConfigurationLocationResult configurationLocationResult,
-                      Map<PsiFile, List<Problem>> scanResults);
+    void scanCompletedSuccessfully(ConfigurationLocationResult configurationLocationResult,
+                                   Map<PsiFile, List<Problem>> scanResults);
 
-    void errorCaught(CheckStylePluginException error);
+    void scanFailedWithError(CheckStylePluginException error);
 
 }

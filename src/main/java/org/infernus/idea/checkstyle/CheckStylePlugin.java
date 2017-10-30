@@ -230,13 +230,14 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         @Override
-        public void scanComplete(final ConfigurationLocationResult configurationLocationResult,
-                                 final Map<PsiFile, List<Problem>> scanResults) {
+        public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
+                                              final Map<PsiFile, List<Problem>> scanResults) {
             checkComplete(future);
         }
 
         @Override
-        public void errorCaught(final CheckStylePluginException error) {
+        public void scanFailedWithError(final CheckStylePluginException error) {
+            checkComplete(future);
         }
     }
 }
