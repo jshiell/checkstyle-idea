@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.12.0** New: Added CheckStyle 8.4.
 * **5.12.0** Fixed: Improved feedback when checker cannot be created.
 * **5.11.0** New: Added CheckStyle 8.3.
 * **5.10.2** New: Checkstyle version numbers now descend, leaving the most useful versions at the top - thanks to @tsjensen (#351).
