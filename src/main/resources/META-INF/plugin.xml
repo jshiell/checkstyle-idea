@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.12.0</version>
+    <version>5.12.1</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.12.1: Fixed: Class loading issues that broke JavaDoc checks in Android Studio 3 should now be resolved (#352).</li>
     <li>5.12.0: New: Added CheckStyle 8.4.</li>
     <li>5.12.0: Fixed: Improved feedback when checker cannot be created.</li>
     <li>5.11.0: New: Added CheckStyle 8.3.</li>

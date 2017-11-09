@@ -22,6 +22,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.util.ChildFirstURLClassLoader;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -108,7 +109,7 @@ public class CheckstyleClassLoader {
         urls.addAll(pThirdPartyClassPath);
 
         // The plugin classloader is the new classloader's parent classloader.
-        return new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+        return new ChildFirstURLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
     }
 
 

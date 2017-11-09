@@ -169,6 +169,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.12.1** Fixed: Class loading issues that broke JavaDoc checks in Android Studio 3 should now be resolved (#352).
 * **5.12.0** New: Added CheckStyle 8.4.
 * **5.12.0** Fixed: Improved feedback when checker cannot be created.
 * **5.11.0** New: Added CheckStyle 8.3.
