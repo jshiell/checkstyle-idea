@@ -92,6 +92,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
     private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e) {
         fireScanFailedWithError(e);
+
         return emptyMap();
     }
 

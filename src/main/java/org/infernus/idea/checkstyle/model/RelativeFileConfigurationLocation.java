@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.util.FilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,11 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
     }
 
     @Override
+    public boolean canBeResolvedInDefaultProject() {
+        return false;
+    }
+
+    @Override
     public void setLocation(final String location) {
         if (Strings.isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
@@ -30,6 +36,10 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
     }
 
     private String makeProjectRelative(@NotNull final String path) {
+        if (getProject().isDefault()) {
+            return path;
+        }
+
         final File projectPath = getProjectPath();
         if (projectPath == null) {
             LOG.debug("Couldn't find project path, returning full path: " + path);

@@ -81,7 +81,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     private void activateCurrentClasspath() {
-        ServiceManager.getService(CheckerFactoryCache.class).invalidate();
+        ServiceManager.getService(project, CheckerFactoryCache.class).invalidate();
 
         CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         csService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());

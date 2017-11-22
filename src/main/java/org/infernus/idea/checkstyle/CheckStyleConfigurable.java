@@ -57,7 +57,7 @@ public class CheckStyleConfigurable
         final PluginConfigDto newConfig = new PluginConfigDto(
                 configPanel.getPluginConfiguration(), oldConfig.isScanBeforeCheckin());
 
-        boolean result = !oldConfig.hasChangedFrom(newConfig);
+        boolean result = !oldConfig.hasChangedFrom(newConfig, project.isDefault());
         if (LOG.isDebugEnabled()) {
             LOG.debug("isModified() - exit - result=" + result);
         }
@@ -92,7 +92,7 @@ public class CheckStyleConfigurable
     }
 
     private CheckerFactoryCache getCheckerFactoryCache() {
-        return ServiceManager.getService(CheckerFactoryCache.class);
+        return ServiceManager.getService(project, CheckerFactoryCache.class);
     }
 
 

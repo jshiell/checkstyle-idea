@@ -105,7 +105,7 @@ public class ConfigurationLocationTest {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
-        assertThat(location1.hasChangedFrom(location2), is(false));
+        assertThat(location1.hasChangedFrom(location2, false), is(false));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ConfigurationLocationTest {
 
         location1.setLocation("aNewLocation");
 
-        assertThat(location1.hasChangedFrom(location2), is(true));
+        assertThat(location1.hasChangedFrom(location2, false), is(true));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ConfigurationLocationTest {
 
         location1.setDescription("aNewDescription");
 
-        assertThat(location1.hasChangedFrom(location2), is(true));
+        assertThat(location1.hasChangedFrom(location2, false), is(true));
     }
 
     @Test
@@ -135,7 +135,17 @@ public class ConfigurationLocationTest {
 
         updatePropertyOn(location1, "property-two", "aValue");
 
-        assertThat(location1.hasChangedFrom(location2), is(true));
+        assertThat(location1.hasChangedFrom(location2, false), is(true));
+    }
+
+    @Test
+    public void aLocationsPropertiesAreIgnoredIfInTheDefaultProjectAndItCannotBeResolvedInTheDefaultProject() throws IOException {
+        final DefaultProjectTestConfigurationLocation location1 = new DefaultProjectTestConfigurationLocation(TEST_FILE);
+        final DefaultProjectTestConfigurationLocation location2 = new DefaultProjectTestConfigurationLocation(TEST_FILE);
+
+        updatePropertyOn(location1, "property-two", "aValue");
+
+        assertThat(location1.hasChangedFrom(location2, true), is(false));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -195,6 +205,23 @@ public class ConfigurationLocationTest {
         final Map<String,String> properties = new HashMap<>(underTest.getProperties());
         properties.put(propertyKey, propertyValue);
         configurationLocation.setProperties(properties);
+    }
+
+    private class DefaultProjectTestConfigurationLocation extends TestConfigurationLocation {
+        public DefaultProjectTestConfigurationLocation(String content) {
+            super(content);
+        }
+
+        @Override
+        public boolean canBeResolvedInDefaultProject() {
+            return false;
+        }
+
+        @NotNull
+        @Override
+        protected InputStream resolveFile() throws IOException {
+            throw new RuntimeException("Can't be called in default project");
+        }
     }
 
     private class TestConfigurationLocation extends ConfigurationLocation {

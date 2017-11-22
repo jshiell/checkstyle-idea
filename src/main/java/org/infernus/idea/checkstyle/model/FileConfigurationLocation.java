@@ -279,11 +279,20 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             return null;
         }
 
+        if (getProject().isDefault()) {
+            if (new File(path).exists() || path.startsWith(CheckStyleConfiguration.PROJECT_DIR)) {
+                return toUnixPath(path);
+            } else {
+                return CheckStyleConfiguration.PROJECT_DIR + toUnixPath(separatorChar() + path);
+            }
+        }
+
         final File projectPath = getProjectPath();
         if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
             return CheckStyleConfiguration.PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
+
         return toUnixPath(path);
     }
 

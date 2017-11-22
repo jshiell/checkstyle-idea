@@ -18,6 +18,7 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,6 +135,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } else {
             LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
+            Notifications.showException(project, e);
             blacklist(configurationLocation);
         }
     }

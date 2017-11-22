@@ -49,6 +49,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.type = type;
     }
 
+    public boolean canBeResolvedInDefaultProject() {
+        return true;
+    }
+
     /**
      * Get the base directory for this checkstyle file. If null then the project directory is assumed.
      *
@@ -312,11 +316,20 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
+    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation,
+                                        final boolean defaultProject) throws IOException {
         return configurationLocation == null
                 || !equals(configurationLocation)
-                || !getProperties().equals(configurationLocation.getProperties());
+                || propertiesHaveChanged(configurationLocation, defaultProject);
 
+    }
+
+    private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation,
+                                          final boolean defaultProject) throws IOException {
+        if (defaultProject && !configurationLocation.canBeResolvedInDefaultProject()) {
+            return false;
+        }
+        return !getProperties().equals(configurationLocation.getProperties());
     }
 
     public String getDescriptor() {

@@ -176,7 +176,7 @@ public class LocationPanel extends JPanel {
         return filename;
     }
 
-    private File projectRelativeFileOf(String filename) {
+    private File projectRelativeFileOf(final String filename) {
         return Paths.get(new File(project.getBasePath(), filename).getAbsolutePath())
                 .normalize()
                 .toAbsolutePath()

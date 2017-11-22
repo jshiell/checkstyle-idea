@@ -208,8 +208,12 @@ public class LocationDialogue extends JDialog {
         } catch (Exception e) {
             errorPanel.setError(e);
             return Step.ERROR;
-
         }
+    }
+
+    private Step continueWithoutLoadOfFile(final ConfigurationLocation location) {
+        configurationLocation = location;
+        return Step.COMPLETE;
     }
 
     private class NextAction extends AbstractAction {
@@ -234,20 +238,25 @@ public class LocationDialogue extends JDialog {
                     }
 
                     Map<String, String> properties;
-                    try {
-                        location.resolve();
-                        properties = location.getProperties();
+                    if (location.canBeResolvedInDefaultProject()) {
+                        try {
+                            location.resolve();
+                            properties = location.getProperties();
 
-                    } catch (IOException e) {
-                        showError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
-                        return;
-                    }
+                        } catch (IOException e) {
+                            showError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
+                            return;
+                        }
 
-                    if (properties == null || properties.isEmpty()) {
-                        moveToStep(attemptLoadOfFile(location));
+                        if (properties == null || properties.isEmpty()) {
+                            moveToStep(attemptLoadOfFile(location));
+                        } else {
+                            propertiesPanel.setConfigurationLocation(location);
+                            moveToStep(Step.PROPERTIES);
+                        }
                     } else {
-                        propertiesPanel.setConfigurationLocation(location);
-                        moveToStep(Step.PROPERTIES);
+                        moveToStep(continueWithoutLoadOfFile(location));
+                        return;
                     }
                     return;
 

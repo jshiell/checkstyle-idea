@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -18,7 +20,6 @@ public class ResetLoadedRulesFiles extends BaseAction {
         project(event).ifPresent(project -> getService(project, CheckStyleConfiguration.class)
                 .getCurrentPluginConfig().getLocations()
                 .forEach(ConfigurationLocation::removeFromBlacklist));
-
-        getService(CheckerFactoryCache.class).invalidate();
+        project(event).ifPresent(project -> getService(project, CheckerFactoryCache.class).invalidate());
     }
 }
