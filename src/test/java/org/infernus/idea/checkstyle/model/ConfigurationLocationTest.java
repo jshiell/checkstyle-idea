@@ -144,22 +144,6 @@ public class ConfigurationLocationTest {
         assertThat(location1.hasChangedFrom(location2), is(false));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void aLocationCannotBeCreatedWithANullType() {
-        new ConfigurationLocation(null, mock(Project.class)) {
-            @NotNull
-            @Override
-            protected InputStream resolveFile() throws IOException {
-                return null;
-            }
-
-            @Override
-            public Object clone() {
-                return this;
-            }
-        };
-    }
-
     @Test
     public void aDescriptorContainsTheLocationDescriptionAndType() {
         final ConfigurationLocation location = new TestConfigurationLocation("aLocation");
