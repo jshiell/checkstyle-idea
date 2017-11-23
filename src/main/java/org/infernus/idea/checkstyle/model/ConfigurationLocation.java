@@ -99,7 +99,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public Map<String, String> getProperties() throws IOException {
-        if (!propertiesCheckedThisSession) {
+        if (!propertiesCheckedThisSession
+                && (!project.isDefault() || canBeResolvedInDefaultProject())) {
             resolveFile();
         }
 
