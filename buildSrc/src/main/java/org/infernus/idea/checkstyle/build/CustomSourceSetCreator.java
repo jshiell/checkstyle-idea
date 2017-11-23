@@ -188,7 +188,7 @@ public class CustomSourceSetCreator {
         pJacocoTask.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet csaccessSourceSet = sourceSets.getByName(CSACCESS_SOURCESET_NAME);
-        pJacocoTask.setClassDirectories(project.files(csaccessSourceSet.getOutput().getClassesDir()));
+        pJacocoTask.setClassDirectories(csaccessSourceSet.getOutput().getClassesDirs());
         pJacocoTask.setSourceDirectories(csaccessSourceSet.getJava().getSourceDirectories());
 
         final FileCollection execFiles = project.files(project.getTasks().withType(CsaccessTestTask.class).stream()

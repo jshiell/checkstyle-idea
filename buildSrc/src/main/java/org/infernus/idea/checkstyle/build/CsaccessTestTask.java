@@ -41,7 +41,7 @@ public class CsaccessTestTask
         dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
 
         configure((Closure<?>) project.getProperties().get("testConfigClosure"));
-        setTestClassesDir(csaccessTestSourceSet.getOutput().getClassesDir());
+        setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
     }
 
 
@@ -101,18 +101,17 @@ public class CsaccessTestTask
             final ConfigurationContainer configurations = project.getConfigurations();
             final Set<File> csJars = configurations.detachedConfiguration(csDep).getFiles();
 
-            effectiveClasspath = project.files( //
-                    csaccessTestSrcSet.getOutput().getClassesDir(),   //
-                    csaccessTestSrcSet.getOutput().getResourcesDir(), //
-                    csaccessSourceSet.getOutput().getClassesDir(),    //
-                    csaccessSourceSet.getOutput().getResourcesDir(),  //
-                    mainSourceSet.getOutput().getClassesDir(),        //
-                    mainSourceSet.getOutput().getResourcesDir())      //
-                    .plus(project.files(csJars)) //
-                    .plus(originalClasspath) //
-                    .minus(project.files( //
-                            testSourceSet.getOutput().getClassesDir(), //
-                            testSourceSet.getOutput().getResourcesDir()));
+            effectiveClasspath = project.files(
+                    csaccessTestSrcSet.getOutput().getResourcesDir(),
+                    csaccessSourceSet.getOutput().getResourcesDir(),
+                    mainSourceSet.getOutput().getResourcesDir())
+                    .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
+                    .plus(csaccessSourceSet.getOutput().getClassesDirs())
+                    .plus(mainSourceSet.getOutput().getClassesDirs())
+                    .plus(project.files(csJars))
+                    .plus(originalClasspath)
+                    .minus(testSourceSet.getOutput().getClassesDirs())
+                    .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
 
             //getLogger().lifecycle("--------------------------------------------------------------------------");
             //getLogger().lifecycle("Effective classpath of " + getName() + ":");
