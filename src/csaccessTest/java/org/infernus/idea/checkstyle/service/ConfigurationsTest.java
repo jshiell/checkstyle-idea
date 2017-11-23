@@ -28,8 +28,8 @@ public class ConfigurationsTest {
         final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
         final CodeStyleSettings codeStyleSettings = mock(CodeStyleSettings.class);
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", project, module)).thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", project, module)).thenThrow(new
+        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module)).thenReturn("aResolvedFile");
+        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module)).thenThrow(new
                 IOException("aTriggeredIoException"));
         when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
 

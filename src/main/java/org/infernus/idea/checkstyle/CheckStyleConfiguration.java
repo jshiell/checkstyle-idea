@@ -77,8 +77,8 @@ public class CheckStyleConfiguration
         final String csDefaultVersion = new VersionListReader().getDefaultVersion();
 
         final SortedSet<ConfigurationLocation> defaultLocations = new TreeSet<>();
-        defaultLocations.add(configurationLocationFactory().create(BundledConfig.SUN_CHECKS));
-        defaultLocations.add(configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS));
+        defaultLocations.add(configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project));
+        defaultLocations.add(configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project));
 
         final PluginConfigDto result = new PluginConfigDto(csDefaultVersion, ScanScope.getDefaultValue(), false,
                 defaultLocations, Collections.emptyList(), null, false);
@@ -145,8 +145,8 @@ public class CheckStyleConfiguration
     }
 
     private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> pConfigurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS);
-        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS);
+        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
+        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
         if (!pConfigurationLocations.contains(sunChecks)) {
             pConfigurationLocations.add(sunChecks);
         }

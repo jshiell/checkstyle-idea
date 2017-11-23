@@ -57,8 +57,8 @@ public class OpCreateCheckerTest {
     @Test
     public void testCreateCheckerWithConfigsMock() throws IOException, URISyntaxException {
 
-        final ConfigurationLocation configLoc = new StringConfigurationLocation( //
-                FileUtil.readFile("cmd/" + CONFIG_FILE));
+        final ConfigurationLocation configLoc = new StringConfigurationLocation(
+                FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
 
         final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(moduleMock, configLoc,
                 emptyMap(), configurationsMock, getClass().getClassLoader());
@@ -79,8 +79,8 @@ public class OpCreateCheckerTest {
     @Test
     public void testCreateChecker_noModule() throws IOException, URISyntaxException {
 
-        final ConfigurationLocation configLoc = new StringConfigurationLocation( //
-                FileUtil.readFile("cmd/" + CONFIG_FILE));
+        final ConfigurationLocation configLoc = new StringConfigurationLocation(
+                FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
 
         //noinspection ConstantConditions
         CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(null, configLoc,

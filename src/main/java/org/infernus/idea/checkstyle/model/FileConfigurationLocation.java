@@ -23,8 +23,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     private static final Logger LOG = Logger.getInstance(FileConfigurationLocation.class);
     private static final int BUFFER_SIZE = 4096;
 
-    private final Project project;
-
     /**
      * Create a new file configuration.
      *
@@ -34,14 +32,9 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         this(project, ConfigurationType.LOCAL_FILE);
     }
 
-    FileConfigurationLocation(final Project project, final ConfigurationType configurationType) {
-        super(configurationType);
-
-        if (project == null) {
-            throw new IllegalArgumentException("A project is required");
-        }
-
-        this.project = project;
+    FileConfigurationLocation(final Project project,
+                              final ConfigurationType configurationType) {
+        super(configurationType, project);
     }
 
     @Override
@@ -98,9 +91,8 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     @Nullable
     @Override
     public String resolveAssociatedFile(final String filename,
-                                        final Project project,
                                         final Module module) throws IOException {
-        final String associatedFile = super.resolveAssociatedFile(filename, project, module);
+        final String associatedFile = super.resolveAssociatedFile(filename, module);
         if (associatedFile != null) {
             return associatedFile;
         }
@@ -217,12 +209,8 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      */
     @Nullable
     File getProjectPath() {
-        if (project == null) {
-            return null;
-        }
-
         try {
-            final VirtualFile baseDir = project.getBaseDir();
+            final VirtualFile baseDir = getProject().getBaseDir();
             if (baseDir == null) {
                 return null;
             }
@@ -318,12 +306,8 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         return path.replace('/', separatorChar());
     }
 
-    Project getProject() {
-        return project;
-    }
-
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new FileConfigurationLocation(project));
+        return cloneCommonPropertiesTo(new FileConfigurationLocation(getProject()));
     }
 }

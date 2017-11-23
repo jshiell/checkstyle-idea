@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -16,8 +17,8 @@ import java.security.cert.X509Certificate;
  */
 public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
 
-    public InsecureHTTPURLConfigurationLocation() {
-        super(ConfigurationType.INSECURE_HTTP_URL);
+    public InsecureHTTPURLConfigurationLocation(@NotNull final Project project) {
+        super(ConfigurationType.INSECURE_HTTP_URL, project);
     }
 
     @NotNull

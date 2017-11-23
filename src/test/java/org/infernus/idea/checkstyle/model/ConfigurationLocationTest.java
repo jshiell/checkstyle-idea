@@ -1,28 +1,24 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class ConfigurationLocationTest {
@@ -105,7 +101,7 @@ public class ConfigurationLocationTest {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
-        assertThat(location1.hasChangedFrom(location2, false), is(false));
+        assertThat(location1.hasChangedFrom(location2), is(false));
     }
 
     @Test
@@ -115,7 +111,7 @@ public class ConfigurationLocationTest {
 
         location1.setLocation("aNewLocation");
 
-        assertThat(location1.hasChangedFrom(location2, false), is(true));
+        assertThat(location1.hasChangedFrom(location2), is(true));
     }
 
     @Test
@@ -125,7 +121,7 @@ public class ConfigurationLocationTest {
 
         location1.setDescription("aNewDescription");
 
-        assertThat(location1.hasChangedFrom(location2, false), is(true));
+        assertThat(location1.hasChangedFrom(location2), is(true));
     }
 
     @Test
@@ -135,22 +131,22 @@ public class ConfigurationLocationTest {
 
         updatePropertyOn(location1, "property-two", "aValue");
 
-        assertThat(location1.hasChangedFrom(location2, false), is(true));
+        assertThat(location1.hasChangedFrom(location2), is(true));
     }
 
     @Test
     public void aLocationsPropertiesAreIgnoredIfInTheDefaultProjectAndItCannotBeResolvedInTheDefaultProject() throws IOException {
-        final DefaultProjectTestConfigurationLocation location1 = new DefaultProjectTestConfigurationLocation(TEST_FILE);
-        final DefaultProjectTestConfigurationLocation location2 = new DefaultProjectTestConfigurationLocation(TEST_FILE);
+        final DefaultProjectTestConfigurationLocation location1 = new DefaultProjectTestConfigurationLocation();
+        final DefaultProjectTestConfigurationLocation location2 = new DefaultProjectTestConfigurationLocation();
 
         updatePropertyOn(location1, "property-two", "aValue");
 
-        assertThat(location1.hasChangedFrom(location2, true), is(false));
+        assertThat(location1.hasChangedFrom(location2), is(false));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void aLocationCannotBeCreatedWithANullType() {
-        new ConfigurationLocation(null) {
+        new ConfigurationLocation(null, mock(Project.class)) {
             @NotNull
             @Override
             protected InputStream resolveFile() throws IOException {
@@ -199,17 +195,19 @@ public class ConfigurationLocationTest {
         assertThat(underTest.toString(), is(equalTo("aDescription")));
     }
 
-    private void updatePropertyOn(final TestConfigurationLocation configurationLocation,
+    private void updatePropertyOn(final ConfigurationLocation configurationLocation,
                                   final String propertyKey,
                                   final String propertyValue) throws IOException {
-        final Map<String,String> properties = new HashMap<>(underTest.getProperties());
+        final Map<String, String> properties = new HashMap<>(underTest.getProperties());
         properties.put(propertyKey, propertyValue);
         configurationLocation.setProperties(properties);
     }
 
-    private class DefaultProjectTestConfigurationLocation extends TestConfigurationLocation {
-        public DefaultProjectTestConfigurationLocation(String content) {
-            super(content);
+    private class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
+        public DefaultProjectTestConfigurationLocation() {
+            super(ConfigurationType.LOCAL_FILE, mock(Project.class));
+
+            when(getProject().isDefault()).thenReturn(true);
         }
 
         @Override
@@ -222,11 +220,16 @@ public class ConfigurationLocationTest {
         protected InputStream resolveFile() throws IOException {
             throw new RuntimeException("Can't be called in default project");
         }
+
+        @Override
+        public Object clone() {
+            return new DefaultProjectTestConfigurationLocation();
+        }
     }
 
     private class TestConfigurationLocation extends ConfigurationLocation {
         public TestConfigurationLocation(final String content) {
-            super(ConfigurationType.LOCAL_FILE);
+            super(ConfigurationType.LOCAL_FILE, mock(Project.class));
 
             setLocation(content);
         }
@@ -246,10 +249,10 @@ public class ConfigurationLocationTest {
 
     @Test
     public void testSorting() {
-        final Project project = Mockito.mock(Project.class);
+        final Project project = mock(Project.class);
         List<ConfigurationLocation> list = new ArrayList<>();
         FileConfigurationLocation fcl = new FileConfigurationLocation(
-                Mockito.mock(Project.class), ConfigurationType.LOCAL_FILE);
+                mock(Project.class), ConfigurationType.LOCAL_FILE);
         fcl.setDescription("descB");
         fcl.setLocation("locB");
         list.add(fcl);
@@ -257,21 +260,21 @@ public class ConfigurationLocationTest {
         rfcl1.setDescription("descA");
         rfcl1.setLocation("locA");
         list.add(rfcl1);
-        list.add(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS));
+        list.add(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project));
         RelativeFileConfigurationLocation rfcl2 = new RelativeFileConfigurationLocation(project);
         rfcl2.setDescription("descC");
         rfcl2.setLocation("locC");
         list.add(rfcl2);
-        list.add(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS));
+        list.add(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project));
 
         Collections.sort(list);
 
         Assert.assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
         Assert.assertTrue(list.get(0).getDescription().contains("Sun Checks"));
-        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS)));
+        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project)));
         Assert.assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
         Assert.assertTrue(list.get(1).getDescription().contains("Google Checks"));
-        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS)));
+        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project)));
         Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
         Assert.assertEquals("descA", list.get(2).getDescription());
         Assert.assertEquals(FileConfigurationLocation.class, list.get(3).getClass());

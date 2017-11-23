@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.project.Project;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -20,6 +21,7 @@ import java.util.Scanner;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 
 public class HTTPURLConfigurationLocationTest {
 
@@ -71,7 +73,7 @@ public class HTTPURLConfigurationLocationTest {
 
     @NotNull
     private HTTPURLConfigurationLocation aLocationWithPath(final String path) {
-        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation();
+        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(mock(Project.class));
         location.setDescription("aTestLocation");
         location.setLocation(format("http://localhost:%s%s", serverPort, path));
         return location;
@@ -125,6 +127,10 @@ public class HTTPURLConfigurationLocationTest {
     }
 
     private class TimingOutHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
+        TimingOutHTTPURLConfigurationLocation() {
+            super(mock(Project.class));
+        }
+
         @NotNull
         @Override
         URLConnection connectionTo(final String location) throws IOException {

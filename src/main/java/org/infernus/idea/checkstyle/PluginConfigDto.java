@@ -95,20 +95,18 @@ public class PluginConfigDto {
         return scanBeforeCheckin;
     }
 
-    boolean hasChangedFrom(final Object other,
-                           final boolean defaultProject) {
+    boolean hasChangedFrom(final Object other) {
         return this.equals(other)
-                && locationsAreEqual((PluginConfigDto) other, defaultProject);
+                && locationsAreEqual((PluginConfigDto) other);
     }
 
-    private boolean locationsAreEqual(final PluginConfigDto other,
-                                      final boolean defaultProject) {
+    private boolean locationsAreEqual(final PluginConfigDto other) {
         Iterator<ConfigurationLocation> locationIterator = locations.iterator();
         Iterator<ConfigurationLocation> otherLocationIterator = other.locations.iterator();
 
         while (locationIterator.hasNext() && otherLocationIterator.hasNext()) {
             try {
-                if (locationIterator.next().hasChangedFrom(otherLocationIterator.next(), defaultProject)) {
+                if (locationIterator.next().hasChangedFrom(otherLocationIterator.next())) {
                     return false;
                 }
             } catch (IOException e) {

@@ -35,22 +35,25 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private final Map<String, String> properties = new HashMap<>();
     private final ConfigurationType type;
+    private final Project project;
     private String location;
     private String description;
 
     private boolean propertiesCheckedThisSession;
     private long blacklistedUntil;
 
-    public ConfigurationLocation(final ConfigurationType type) {
-        if (type == null) {
-            throw new IllegalArgumentException("A type is required");
-        }
-
+    public ConfigurationLocation(@NotNull final ConfigurationType type,
+                                 @NotNull final Project project) {
         this.type = type;
+        this.project = project;
     }
 
     public boolean canBeResolvedInDefaultProject() {
         return true;
+    }
+
+    protected final Project getProject() {
+        return project;
     }
 
     /**
@@ -134,7 +137,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         if (inputStream != null) {
             try {
                 final SAXBuilder saxBuilder = new SAXBuilder();
-                saxBuilder.setEntityResolver(new CheckStyleEntityResolver());
+                saxBuilder.setEntityResolver(new CheckStyleEntityResolver(this));
                 final Document configDoc = saxBuilder.build(inputStream);
                 return extractProperties(configDoc.getRootElement());
 
@@ -220,7 +223,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     @Nullable
     public String resolveAssociatedFile(final String filename,
-                                        final Project project,
                                         final Module module) throws IOException {
         if (filename == null) {
             return null;
@@ -228,11 +230,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             return filename;
         }
 
-        return findFile(filename, project, module);
+        return findFile(filename, module);
     }
 
     private String findFile(final String fileName,
-                            final Project project,
                             final Module module) {
         if (fileName == null
                 || "".equals(fileName.trim())
@@ -241,7 +242,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             return fileName;
         }
 
-        File targetFile = checkCommonPathsForTarget(fileName, project, module);
+        File targetFile = checkCommonPathsForTarget(fileName, module);
 
         if (targetFile != null) {
             return targetFile.getAbsolutePath();
@@ -250,7 +251,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     private File checkCommonPathsForTarget(final String fileName,
-                                           final Project project,
                                            final Module module) {
         File targetFile = checkRelativeToRulesFile(fileName);
         if (module != null) {
@@ -262,7 +262,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             }
         }
         if (targetFile == null) {
-            targetFile = checkProjectBaseDir(project, fileName);
+            targetFile = checkProjectBaseDir(fileName);
         }
         return targetFile;
     }
@@ -277,8 +277,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    private File checkProjectBaseDir(final Project project,
-                                     final String fileName) {
+    private File checkProjectBaseDir(final String fileName) {
         if (project.getBaseDir() != null) {
             final File projectRelativePath = new File(project.getBaseDir().getPath(), fileName);
             if (projectRelativePath.exists()) {
@@ -316,17 +315,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation,
-                                        final boolean defaultProject) throws IOException {
+    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
         return configurationLocation == null
                 || !equals(configurationLocation)
-                || propertiesHaveChanged(configurationLocation, defaultProject);
+                || propertiesHaveChanged(configurationLocation);
 
     }
 
-    private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation,
-                                          final boolean defaultProject) throws IOException {
-        if (defaultProject && !configurationLocation.canBeResolvedInDefaultProject()) {
+    private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation) throws IOException {
+        if (project.isDefault() && !configurationLocation.canBeResolvedInDefaultProject()) {
             return false;
         }
         return !getProperties().equals(configurationLocation.getProperties());

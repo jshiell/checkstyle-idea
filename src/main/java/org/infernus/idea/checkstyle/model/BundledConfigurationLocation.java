@@ -4,23 +4,24 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
+import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
 @SuppressWarnings("MethodDoesntCallSuperMethod")
-public class BundledConfigurationLocation extends ConfigurationLocation
-{
+public class BundledConfigurationLocation extends ConfigurationLocation {
     @NotNull
     private final BundledConfig bundledConfig;
 
 
-    BundledConfigurationLocation(@NotNull final BundledConfig pBundledConfig) {
-        super(ConfigurationType.BUNDLED);
-        super.setLocation(pBundledConfig.getLocation());
-        super.setDescription(pBundledConfig.getDescription());
-        bundledConfig = pBundledConfig;
+    BundledConfigurationLocation(@NotNull final BundledConfig bundledConfig,
+                                 @NotNull final Project project) {
+        super(ConfigurationType.BUNDLED, project);
+        super.setLocation(bundledConfig.getLocation());
+        super.setDescription(bundledConfig.getDescription());
+        this.bundledConfig = bundledConfig;
     }
 
 
@@ -61,6 +62,6 @@ public class BundledConfigurationLocation extends ConfigurationLocation
     @Override
     @NotNull
     public BundledConfigurationLocation clone() {
-        return new BundledConfigurationLocation(bundledConfig);
+        return new BundledConfigurationLocation(bundledConfig, getProject());
     }
 }

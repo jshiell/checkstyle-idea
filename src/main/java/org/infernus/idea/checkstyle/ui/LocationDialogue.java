@@ -238,7 +238,7 @@ public class LocationDialogue extends JDialog {
                     }
 
                     Map<String, String> properties;
-                    if (project.isDefault() && location.canBeResolvedInDefaultProject()) {
+                    if (!project.isDefault() || location.canBeResolvedInDefaultProject()) {
                         try {
                             location.resolve();
                             properties = location.getProperties();

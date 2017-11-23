@@ -44,8 +44,7 @@ public interface RulesContainer
     }
 
 
-    public static class ConfigurationLocationRulesContainer implements RulesContainer
-    {
+    public static class ConfigurationLocationRulesContainer implements RulesContainer {
         private final ConfigurationLocation configurationLocation;
 
         public ConfigurationLocationRulesContainer(final ConfigurationLocation configurationLocation) {
@@ -63,15 +62,14 @@ public interface RulesContainer
         }
 
         public String resolveAssociatedFile(final String fileName,
-                                            final Project project,
+                                            @NotNull final Project project,
                                             final Module module) throws IOException {
-            return configurationLocation.resolveAssociatedFile(fileName, project, module);
+            return configurationLocation.resolveAssociatedFile(fileName, module);
         }
     }
 
 
-    public static class VirtualFileRulesContainer implements RulesContainer
-    {
+    public static class VirtualFileRulesContainer implements RulesContainer {
         private final VirtualFile virtualFile;
 
         public VirtualFileRulesContainer(final VirtualFile virtualFile) {
@@ -90,8 +88,7 @@ public interface RulesContainer
     }
 
 
-    public static class ContentRulesContainer implements RulesContainer
-    {
+    public static class ContentRulesContainer implements RulesContainer {
         private final String content;
 
         public ContentRulesContainer(final String content) {
@@ -110,8 +107,7 @@ public interface RulesContainer
     }
 
 
-    public static class BundledRulesContainer implements RulesContainer
-    {
+    public static class BundledRulesContainer implements RulesContainer {
         private final BundledConfig bundledConfig;
 
         public BundledRulesContainer(@NotNull final BundledConfig bundledConfig) {

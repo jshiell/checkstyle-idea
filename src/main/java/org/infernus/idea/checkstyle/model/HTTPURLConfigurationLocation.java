@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.DatatypeConverter;
@@ -22,12 +23,13 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private byte[] cachedContent;
     private long cacheExpiry;
 
-    HTTPURLConfigurationLocation() {
-        super(ConfigurationType.HTTP_URL);
+    HTTPURLConfigurationLocation(@NotNull final Project project) {
+        super(ConfigurationType.HTTP_URL, project);
     }
 
-    HTTPURLConfigurationLocation(final ConfigurationType configurationType) {
-        super(configurationType);
+    HTTPURLConfigurationLocation(final ConfigurationType configurationType,
+                                 @NotNull final Project project) {
+        super(configurationType, project);
     }
 
     @NotNull
@@ -90,6 +92,6 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new HTTPURLConfigurationLocation());
+        return cloneCommonPropertiesTo(new HTTPURLConfigurationLocation(getProject()));
     }
 }

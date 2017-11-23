@@ -1,9 +1,5 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-
 import com.google.common.collect.ImmutableMap;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -32,19 +28,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.mock;
 
 
-public class OpLoadConfigurationTest
-{
-    private static final Project PROJECT = Mockito.mock(Project.class);
-    private final ConfigurationLocation configurationLocation = Mockito.mock(ConfigurationLocation.class);
-    private final Module module = Mockito.mock(Module.class);
-    private final Notifications notifications = Mockito.mock(Notifications.class);
+public class OpLoadConfigurationTest {
+    private static final Project PROJECT = mock(Project.class);
+    private final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
+    private final Module module = mock(Module.class);
+    private final Notifications notifications = mock(Notifications.class);
 
     private OpLoadConfiguration underTest;
 
@@ -53,9 +51,9 @@ public class OpLoadConfigurationTest
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        Mockito.when(configurationLocation.resolveAssociatedFile("aFileToResolve", PROJECT, module))
+        Mockito.when(configurationLocation.resolveAssociatedFile("aFileToResolve", module))
                 .thenReturn("aResolvedFile");
-        Mockito.when(configurationLocation.resolveAssociatedFile("triggersAnIoException", PROJECT, module))
+        Mockito.when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
                 .thenThrow(new IOException("aTriggeredIoException"));
 
         underTest = new OpLoadConfiguration(configurationLocation, null, module);
@@ -63,20 +61,20 @@ public class OpLoadConfigurationTest
 
 
     private void interceptApplicationNotifications() {
-        final MessageBus messageBus = Mockito.mock(MessageBus.class);
+        final MessageBus messageBus = mock(MessageBus.class);
         Mockito.when(PROJECT.getMessageBus()).thenReturn(messageBus);
         Mockito.when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
 
-        final Application application = Mockito.mock(Application.class);
+        final Application application = mock(Application.class);
         Mockito.when(application.isUnitTestMode()).thenReturn(true);
         Mockito.when(application.getMessageBus()).thenReturn(messageBus);
-        ApplicationManager.setApplication(application, Mockito.mock(Disposable.class));
+        ApplicationManager.setApplication(application, mock(Disposable.class));
     }
 
 
     @Test
     public void filePathsAreNotResolvedOnANonDefaultImplementationOfConfiguration() throws CheckstyleException {
-        final Configuration config = Mockito.mock(Configuration.class);
+        final Configuration config = mock(Configuration.class);
         Mockito.verifyZeroInteractions(config);
     }
 
@@ -259,8 +257,7 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testNoConfiguration() throws CheckstyleException {
-        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module)
-        {
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module) {
             @Override
             Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
@@ -277,8 +274,7 @@ public class OpLoadConfigurationTest
 
     @Test
     public void testWrongConfigurationClass() throws CheckstyleException {
-        Configuration config = new Configuration()
-        {
+        Configuration config = new Configuration() {
             @Override
             public String[] getAttributeNames() {
                 throw new UnsupportedOperationException();
@@ -313,9 +309,9 @@ public class OpLoadConfigurationTest
         new OpLoadConfiguration(configurationLocation);
         new OpLoadConfiguration(configurationLocation, null);
         new OpLoadConfiguration(configurationLocation, null, module);
-        VirtualFile virtualFile = Mockito.mock(VirtualFile.class);
-        new OpLoadConfiguration((VirtualFile) virtualFile);
-        new OpLoadConfiguration((VirtualFile) virtualFile, null);
+        VirtualFile virtualFile = mock(VirtualFile.class);
+        new OpLoadConfiguration(virtualFile);
+        new OpLoadConfiguration(virtualFile, null);
         new OpLoadConfiguration("doesn't matter");
     }
 
@@ -332,7 +328,7 @@ public class OpLoadConfigurationTest
     public void testLoadBundledSunChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
-                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS), true, null);
+                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }
 
@@ -341,7 +337,7 @@ public class OpLoadConfigurationTest
     public void testLoadBundledGoogleChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
-                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS), true, null);
+                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }
 }

@@ -51,15 +51,15 @@ public class ConfigurationLocationFactory {
                 break;
 
             case HTTP_URL:
-                configurationLocation = new HTTPURLConfigurationLocation();
+                configurationLocation = new HTTPURLConfigurationLocation(project);
                 break;
 
             case INSECURE_HTTP_URL:
-                configurationLocation = new InsecureHTTPURLConfigurationLocation();
+                configurationLocation = new InsecureHTTPURLConfigurationLocation(project);
                 break;
 
             case BUNDLED:
-                configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description));
+                configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description), project);
                 break;
 
             default:
@@ -117,14 +117,15 @@ public class ConfigurationLocationFactory {
         }
 
         if ("CLASSPATH".equals(typeString)) {
-            return create(BundledConfig.SUN_CHECKS);   // backwards compatibility with old config files
+            return create(BundledConfig.SUN_CHECKS, project);   // backwards compatibility with old config files
         }
         final ConfigurationType type = ConfigurationType.parse(typeString);
         return create(project, type, location, description);
     }
 
-    public BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig) {
-        return new BundledConfigurationLocation(bundledConfig);
+    public BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
+                                               @NotNull final Project project) {
+        return new BundledConfigurationLocation(bundledConfig, project);
     }
 
     private boolean indexIsOutOfBounds(final int index, final String stringRepresentation) {
