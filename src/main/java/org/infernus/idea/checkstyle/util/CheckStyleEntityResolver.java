@@ -89,21 +89,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
         try {
             URI systemIdUrl = new URI(systemId);
             if ("file".equals(systemIdUrl.getScheme())) {
-                File file = new File(systemIdUrl.getPath());
-                if (file.exists()) {
-                    return sourceFromFile(file.getAbsolutePath());
-                }
-
-                String normalisedFilePath = Paths.get(systemIdUrl).normalize().toAbsolutePath().toString();
-                String cwd = System.getProperties().getProperty("user.dir");
-                if (normalisedFilePath.startsWith(cwd)) {
-                    String relativePath = normalisedFilePath.substring(cwd.length() + 1);
-                    final String resolvedFile = configurationLocation.resolveAssociatedFile(relativePath, null);
-                    if (resolvedFile != null) {
-                        return sourceFromFile(resolvedFile);
-                    }
-                }
-                return null;
+                return loadFromLocalFile(systemIdUrl);
             } else {
                 return new InputSource(systemId);
             }
@@ -113,8 +99,27 @@ public class CheckStyleEntityResolver implements EntityResolver {
         }
     }
 
+    @Nullable
+    private InputSource loadFromLocalFile(final URI systemIdUrl) throws IOException {
+        File file = new File(systemIdUrl.getPath());
+        if (file.exists()) {
+            return sourceFromFile(file.getAbsolutePath());
+        }
+
+        String normalisedFilePath = Paths.get(systemIdUrl).normalize().toAbsolutePath().toString();
+        String cwd = System.getProperties().getProperty("user.dir");
+        if (normalisedFilePath.startsWith(cwd)) {
+            String relativePath = normalisedFilePath.substring(cwd.length() + 1);
+            final String resolvedFile = configurationLocation.resolveAssociatedFile(relativePath, null);
+            if (resolvedFile != null) {
+                return sourceFromFile(resolvedFile);
+            }
+        }
+        return null;
+    }
+
     @NotNull
-    private InputSource sourceFromFile(String filePath) throws FileNotFoundException {
+    private InputSource sourceFromFile(final String filePath) throws FileNotFoundException {
         return new InputSource(new BufferedInputStream(new FileInputStream(filePath)));
     }
 
