@@ -239,11 +239,12 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         LOG.debug("Processing file: " + path);
 
         for (String prefix : new String[]{CheckStyleConfiguration.PROJECT_DIR, CheckStyleConfiguration.LEGACY_PROJECT_DIR}) {
-            if (path.startsWith(prefix)) {
+            int prefixLocation = path.indexOf(prefix);
+            if (prefixLocation >= 0) {
                 // path is relative to project dir
                 final File projectPath = getProjectPath();
                 if (projectPath != null) {
-                    final String projectRelativePath = fromUnixPath(path.substring(prefix.length()));
+                    final String projectRelativePath = fromUnixPath(path.substring(prefixLocation + prefix.length()));
                     final String completePath = projectPath + File.separator + projectRelativePath;
                     return absolutePathOf(new File(completePath));
 
