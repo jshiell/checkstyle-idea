@@ -1,5 +1,16 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.util.lang.UrlClassLoader;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.util.ChildFirstURLClassLoader;
+import org.infernus.idea.checkstyle.util.Notifications;
+import org.infernus.idea.checkstyle.util.Strings;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,23 +20,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.util.lang.UrlClassLoader;
-import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.util.ChildFirstURLClassLoader;
-import org.infernus.idea.checkstyle.util.Strings;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 
 /**
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CheckstyleClassLoader {
     private static final String PROP_FILE = "checkstyle-classpaths.properties";
-
     private static final String CSACTIONS_CLASS = "org.infernus.idea.checkstyle.service.CheckstyleActionsImpl";
 
     /**
@@ -109,7 +107,21 @@ public class CheckstyleClassLoader {
         urls.addAll(pThirdPartyClassPath);
 
         // The plugin classloader is the new classloader's parent classloader.
-        return new ChildFirstURLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+        final ChildFirstURLClassLoader newClassLoader = new ChildFirstURLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+        if (weAreDebuggingADifferentVersionOfIdea(newClassLoader)) {
+            // if we're debugging from another version of IDEA then child-first will do nasty things to the IDEA classpath
+            Notifications.showWarning(project, message("plugin.debugging"));
+            return new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+        }
+        return newClassLoader;
+    }
+
+    private boolean weAreDebuggingADifferentVersionOfIdea(final ClassLoader classLoaderToTest) {
+        try {
+            return Project.class != classLoaderToTest.loadClass("com.intellij.openapi.project.Project");
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 
