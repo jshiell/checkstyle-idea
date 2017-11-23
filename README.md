@@ -169,6 +169,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.12.2** New: Project-relative configurations in the default settings aren't loaded until we're in a project (#333).
+* **5.12.2** Fixed: More errors should be logged to the event log.
 * **5.12.1** Fixed: Class loading issues that broke JavaDoc checks in Android Studio 3 should now be resolved (#352).
 * **5.12.0** New: Added CheckStyle 8.4.
 * **5.12.0** Fixed: Improved feedback when checker cannot be created.

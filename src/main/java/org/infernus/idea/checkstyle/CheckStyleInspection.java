@@ -14,11 +14,9 @@ import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
-import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +32,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
+import static org.infernus.idea.checkstyle.util.Notifications.showException;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
 public class CheckStyleInspection extends LocalInspectionTool {
@@ -92,7 +91,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrentPluginConfig().isSuppressErrors()))
                     .map(results -> results.get(psiFile))
                     .map(this::dropIgnoredProblems)
-                    .orElseGet(() -> NO_PROBLEMS_FOUND);
+                    .orElse(NO_PROBLEMS_FOUND);
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
@@ -102,12 +101,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
             LOG.debug("Parse exception caught when scanning: " + psiFile.getName(), e);
             return NO_PROBLEMS_FOUND;
 
-        } catch (CheckStylePluginException e) {
-            handlePluginException(e, psiFile, plugin, configurationLocation, manager.getProject());
-            return NO_PROBLEMS_FOUND;
-
         } catch (Throwable e) {
-            LOG.warn("The inspection could not be executed.", e);
+            handlePluginException(e, psiFile, plugin, configurationLocation, manager.getProject());
             return NO_PROBLEMS_FOUND;
 
         } finally {
@@ -121,7 +116,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 .collect(toList());
     }
 
-    private void handlePluginException(final CheckStylePluginException e,
+    private void handlePluginException(final Throwable e,
                                        final @NotNull PsiFile psiFile,
                                        final CheckStylePlugin plugin,
                                        final ConfigurationLocation configurationLocation,
@@ -135,7 +130,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } else {
             LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
-            Notifications.showException(project, e);
+            showException(project, e);
             blacklist(configurationLocation);
         }
     }

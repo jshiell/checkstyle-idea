@@ -12,7 +12,6 @@ import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -169,7 +168,6 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         final ScanFiles checkFiles = new ScanFiles(this, files, overrideConfigLocation);
-        checkFiles.addListener(new ErrorEventListener());
         checkFiles.addListener(new UiFeedbackScannerListener(this));
         runAsyncCheck(checkFiles);
     }
@@ -212,26 +210,6 @@ public final class CheckStylePlugin implements ProjectComponent {
             return moduleConfiguration.getActiveConfiguration();
         }
         return getConfiguration().getCurrentPluginConfig().getActiveLocation();
-    }
-
-    private class ErrorEventListener implements ScannerListener {
-        @Override
-        public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
-                                              final Map<PsiFile, List<Problem>> scanResults) {
-        }
-
-        @Override
-        public void scanFailedWithError(final CheckStylePluginException e) {
-            Notifications.showException(project, e);
-        }
-
-        @Override
-        public void scanStarting(final List<PsiFile> filesToScan) {
-        }
-
-        @Override
-        public void filesScanned(final int count) {
-        }
     }
 
     private class ScanCompletionTracker implements ScannerListener {

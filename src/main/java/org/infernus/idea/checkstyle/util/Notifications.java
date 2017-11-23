@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
+import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 
 public final class Notifications {
 
@@ -42,16 +43,9 @@ public final class Notifications {
     @NotNull
     private static String messageFor(final Throwable t) {
         if (t.getCause() != null) {
-            return message("checkstyle.exception-with-root-cause", t.getMessage(), rootCauseOf(t));
+            return message("checkstyle.exception-with-root-cause", t.getMessage(), traceOf(rootCauseOf(t)));
         }
         return message("checkstyle.exception", traceOf(t));
-    }
-
-    private static String rootCauseOf(final Throwable t) {
-        if (t.getCause() == null || t.getCause() == t) {
-            return traceOf(t);
-        }
-        return rootCauseOf(t.getCause());
     }
 
     private static String traceOf(final Throwable t) {

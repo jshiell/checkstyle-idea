@@ -4,7 +4,6 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -20,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
+import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 
@@ -116,7 +117,6 @@ public class CheckerFactory {
         }
     }
 
-
     private ModuleClassPathBuilder moduleClassPathBuilder() {
         return ServiceManager.getService(project, ModuleClassPathBuilder.class);
     }
@@ -145,12 +145,11 @@ public class CheckerFactory {
         if (workerResult instanceof CheckstyleToolException) {
             return blacklistAndShowMessage(location, module, (CheckstyleToolException) workerResult);
         } else if (workerResult instanceof IOException) {
-            LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), (IOException)
-                    workerResult);
+            LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(),
+                    (IOException) workerResult);
             return blacklistAndShowMessage(location, module, "checkstyle.file-not-found", location.getLocation());
         } else if (workerResult instanceof Throwable) {
-            location.blacklist();
-            throw new CheckStylePluginException("Could not load configuration", (Throwable) workerResult);
+            return blacklistAndShowException(location, module, (Throwable) workerResult);
         }
 
         return (CachedChecker) workerResult;
@@ -186,17 +185,39 @@ public class CheckerFactory {
         return worker.getResult();
     }
 
+    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
+                                                  final Module module,
+                                                  final String messageKey,
+                                                  final Object... messageArgs) {
+        return blacklistAnd(location, () -> {
+            if (module != null) {
+                Notifications.showError(module.getProject(), message(messageKey, messageArgs));
+            } else {
+                throw new CheckStylePluginException(message(messageKey, messageArgs));
+            }
+        });
+    }
 
-    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location, final Module module, final
-    String messageKey, final Object... messageArgs) {
+    private CachedChecker blacklistAndShowException(final ConfigurationLocation location,
+                                                    final Module module,
+                                                    final Throwable t) {
+        return blacklistAnd(location, () -> {
+            if (module != null) {
+                Notifications.showException(module.getProject(), t);
+            } else if (t instanceof CheckStylePluginException) {
+                throw (CheckStylePluginException) t;
+            } else {
+                throw new CheckStylePluginException(message("checkstyle.parse-failed", rootCauseOf(t).getMessage()));
+            }
+        });
+    }
+
+    @Nullable
+    private CachedChecker blacklistAnd(final ConfigurationLocation location,
+                                       final Runnable ifNotBlacklisted) {
         if (!location.isBlacklisted()) {
             location.blacklist();
-
-            if (module != null) {
-                Notifications.showError(module.getProject(), CheckStyleBundle.message(messageKey, messageArgs));
-            } else {
-                throw new CheckStylePluginException(CheckStyleBundle.message(messageKey, messageArgs));
-            }
+            ifNotBlacklisted.run();
         }
         return null;
     }
@@ -208,19 +229,13 @@ public class CheckerFactory {
             return blacklistAndShowMessage(location, module, "checkstyle.double-checked-locking");
         } else if (checkstyleException.getMessage().contains("unable to parse configuration stream")
                 && checkstyleException.getCause() != null) {
-            return blacklistAndShowMessage(location, module, "checkstyle.parse-failed", rootCauseOf(checkstyleException.getCause()).getMessage());
+            return blacklistAndShowMessage(location, module, "checkstyle.parse-failed",
+                    rootCauseOf(checkstyleException.getCause()).getMessage());
         }
 
-        return blacklistAndShowMessage(location, module, "checkstyle.parse-failed", checkstyleException.getMessage());
+        return blacklistAndShowMessage(location, module, "checkstyle.parse-failed",
+                checkstyleException.getMessage());
     }
-
-    private Throwable rootCauseOf(Throwable t) {
-        if (t.getCause() != null && t.getCause() != t) {
-            return rootCauseOf(t.getCause());
-        }
-        return t;
-    }
-
 
     private void logClassLoaders(final ClassLoader pClassLoader) {
         if (pClassLoader != null) {
