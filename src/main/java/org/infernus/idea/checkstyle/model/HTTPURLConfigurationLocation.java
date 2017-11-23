@@ -17,6 +17,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     private static final int CONTENT_CACHE_SECONDS = 2;
     private static final int ONE_SECOND = 1000;
+    private static final int HTTP_TIMEOUT_IN_MS = 5000;
 
     private byte[] cachedContent;
     private long cacheExpiry;
@@ -52,6 +53,8 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     URLConnection connectionTo(final String location) throws IOException {
         final URL url = new URL(location);
         final URLConnection urlConnection = url.openConnection();
+        urlConnection.setConnectTimeout(HTTP_TIMEOUT_IN_MS);
+        urlConnection.setReadTimeout(HTTP_TIMEOUT_IN_MS);
         urlConnection.setDoInput(true);
         urlConnection.setDoOutput(false);
         urlConnection.setAllowUserInteraction(false);
