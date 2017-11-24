@@ -151,7 +151,6 @@ Thanks to those who have contributed work and effort directly to this project:
 * Klaus Tannenberg (@KTannenberg)
 * Nikolay Bespalov (@nikolaybespalov)
 * @zentol
-* Mohamed Hashi (@mqzry)
 
 And also thanks are due to the authors and contributors of:
 
@@ -171,7 +170,6 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 ## Version History
 
 * **5.13.0** New: Project-relative configurations in the default settings aren't loaded until we're in a project (#333).
-* **5.13.0** New: Import order module added. Thanks to @mqzry (#363).
 * **5.13.0** Fixed: HTTP reader now has a 5s timeout (#360).
 * **5.13.0** Fixed: More errors should be logged to the event log.
 * **5.12.1** Fixed: Class loading issues that broke JavaDoc checks in Android Studio 3 should now be resolved (#352).
