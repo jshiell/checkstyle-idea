@@ -1,29 +1,13 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.application.AccessToken;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceKt;
-import com.intellij.openapi.components.StorageScheme;
-import com.intellij.openapi.components.impl.stores.IProjectStore;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.util.OS;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -33,13 +17,29 @@ import java.util.function.IntUnaryOperator;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import com.intellij.openapi.application.AccessToken;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import static java.util.Optional.ofNullable;
-import static org.infernus.idea.checkstyle.checker.PsiFileValidator.isScannable;
+
 
 /**
  * A representation of a file able to be scanned.
  */
-public class ScannableFile {
+public class ScannableFile
+{
     private static final Logger LOG = Logger.getInstance(ScannableFile.class);
 
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
@@ -57,44 +57,36 @@ public class ScannableFile {
      * If required this will create a temporary copy of the file.
      *
      * @param psiFile the psiFile to create the file from.
-     * @param module  the module the file belongs to.
+     * @param module the module the file belongs to.
      * @throws IOException if file creation is required and fails.
      */
-    public ScannableFile(@NotNull final PsiFile psiFile,
-                         @Nullable final Module module)
-            throws IOException {
+    public ScannableFile(@NotNull final PsiFile psiFile, @Nullable final Module module) throws IOException {
         this.psiFile = psiFile;
 
         if (!existsOnFilesystem(psiFile) || documentIsModifiedAndUnsaved(psiFile)) {
             baseTempDir = prepareBaseTmpDirFor(psiFile);
             realFile = createTemporaryFileFor(psiFile, module, baseTempDir);
-
         } else {
             baseTempDir = null;
             realFile = new File(pathOf(psiFile));
         }
     }
 
-    public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
-                                                        @NotNull final CheckStylePlugin plugin,
-                                                        @Nullable final Module module) {
+    public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles, @NotNull final
+    CheckStylePlugin plugin, @Nullable final Module module) {
 
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
-            return psiFiles.stream()
-                    .filter(psiFile -> isScannable(psiFile, ofNullable(module), plugin.getConfiguration()))
-                    .map(psiFile -> ScannableFile.create(psiFile, module))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
+            return psiFiles.stream().filter(psiFile -> PsiFileValidator.isScannable(psiFile, ofNullable(module),
+                    plugin.getConfiguration())).map(psiFile -> ScannableFile.create(psiFile, module)).filter
+                    (Objects::nonNull).collect(Collectors.toList());
         } finally {
             readAccessToken.finish();
         }
     }
 
     @Nullable
-    private static ScannableFile create(@NotNull final PsiFile psiFile,
-                                        @Nullable final Module module) {
+    private static ScannableFile create(@NotNull final PsiFile psiFile, @Nullable final Module module) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile, module);
             ApplicationManager.getApplication().runReadAction(fileAction);
@@ -105,7 +97,6 @@ public class ScannableFile {
             }
 
             return fileAction.getFile();
-
         } catch (IOException e) {
             LOG.warn("Failure when creating temporary file", e);
             return null;
@@ -113,15 +104,12 @@ public class ScannableFile {
     }
 
     private String pathOf(@NotNull final PsiFile file) {
-        return virtualFileOf(file)
-                .map(VirtualFile::getPath)
-                .orElseThrow(() -> new IllegalStateException("PSIFile does not have associated virtual file: " + file));
+        return virtualFileOf(file).map(VirtualFile::getPath).orElseThrow(() -> new IllegalStateException("PSIFile "
+                + "does not have associated virtual file: " + file));
     }
 
-    private File createTemporaryFileFor(@NotNull final PsiFile file,
-                                        @Nullable final Module module,
-                                        @NotNull final File tempDir)
-            throws IOException {
+    private File createTemporaryFileFor(@NotNull final PsiFile file, @Nullable final Module module, @NotNull final
+    File tempDir) throws IOException {
         final File temporaryFile = new File(parentDirFor(file, module, tempDir), file.getName());
         temporaryFile.deleteOnExit();
 
@@ -130,9 +118,8 @@ public class ScannableFile {
         return temporaryFile;
     }
 
-    private File parentDirFor(@NotNull final PsiFile file,
-                              @Nullable final Module module,
-                              @NotNull final File baseTmpDir) {
+    private File parentDirFor(@NotNull final PsiFile file, @Nullable final Module module, @NotNull final File
+            baseTmpDir) {
         File tmpDirForFile = relativePathToProjectRoot(file, baseTmpDir);
 
         if (tmpDirForFile == null && module != null) {
@@ -155,14 +142,12 @@ public class ScannableFile {
 
     @NotNull
     private File classPackagePath(final @NotNull PsiJavaFile file, final @NotNull File baseTmpDir) {
-        final String packagePath = file.getPackageName().replaceAll(
-                "\\.", Matcher.quoteReplacement(File.separator));
+        final String packagePath = file.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File.separator));
 
         return new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
     }
 
-    private File relativePathToProjectRoot(final @NotNull PsiFile file,
-                                           final @NotNull File baseTmpDir) {
+    private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
             final String baseDirUrl = file.getProject().getBaseDir().getUrl();
 
@@ -174,9 +159,8 @@ public class ScannableFile {
         return null;
     }
 
-    private File relativePathToModuleContentRoots(final @NotNull PsiFile file,
-                                                  final @NotNull Module module,
-                                                  final @NotNull File baseTmpDir) {
+    private File relativePathToModuleContentRoots(final @NotNull PsiFile file, final @NotNull Module module, final
+    @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
             final String parentUrl = file.getParent().getVirtualFile().getUrl();
             for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
@@ -189,15 +173,14 @@ public class ScannableFile {
     }
 
     private File prepareBaseTmpDirFor(final PsiFile tempPsiFile) {
-        final File baseTmpDir = new File(temporaryDirectoryFor(tempPsiFile),
-                tempFileDirectoryName());
+        final File baseTmpDir = new File(new TempDirProvider().forPersistedPsiFile(tempPsiFile), tempFileDirectoryName());
         baseTmpDir.deleteOnExit();
         return baseTmpDir;
     }
 
     private String tempFileDirectoryName() {
-        return String.format("%s%03d", TEMPFILE_DIR_PREFIX,
-                TEMP_FILE_SOURCE.getAndUpdate(incrementUntil(MAX_TEMP_FILE_SUFFIX)));
+        return String.format("%s%03d", TEMPFILE_DIR_PREFIX, TEMP_FILE_SOURCE.getAndUpdate(incrementUntil
+                (MAX_TEMP_FILE_SUFFIX)));
     }
 
     @NotNull
@@ -210,58 +193,17 @@ public class ScannableFile {
         };
     }
 
-    private String temporaryDirectoryFor(final PsiFile tempPsiFile) {
-        String systemTempDir = System.getProperty("java.io.tmpdir");
-        if (OS.isWindows() && driveLetterOf(systemTempDir) != driveLetterOf(pathOf(tempPsiFile))) {
-            // Checkstyle on Windows requires the files to be on the same drive
-            final File projectTempDir = temporaryDirectoryLocationFor(tempPsiFile.getProject());
-            if (projectTempDir.exists() || projectTempDir.mkdirs()) {
-                projectTempDir.deleteOnExit();
-                return projectTempDir.getAbsolutePath();
-            }
-        }
-        return systemTempDir;
-    }
-
-    @NotNull
-    private File temporaryDirectoryLocationFor(final Project project) {
-        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(project);
-        if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            final VirtualFile ideaStorageDir = project.getBaseDir().findChild(Project.DIRECTORY_STORE_FOLDER);
-            if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
-                return new File(ideaStorageDir.getPath(), "checkstyleidea.tmp");
-            }
-        }
-
-        return new File(project.getBasePath(), "checkstyleidea.tmp");
-    }
-
-    private char driveLetterOf(final String windowsPath) {
-        if (windowsPath != null && windowsPath.length() > 0) {
-            final Path normalisedPath = Paths.get(windowsPath).normalize().toAbsolutePath();
-            return normalisedPath.toFile().toString().charAt(0);
-        }
-        return '?';
-    }
-
     private boolean existsOnFilesystem(@NotNull final PsiFile file) {
-        return virtualFileOf(file)
-                .map(virtualFile -> LocalFileSystem.getInstance().exists(virtualFile))
-                .orElse(false);
+        return virtualFileOf(file).map(virtualFile -> LocalFileSystem.getInstance().exists(virtualFile)).orElse(false);
     }
 
     private boolean documentIsModifiedAndUnsaved(final PsiFile file) {
         final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-        return virtualFileOf(file)
-                .filter(fileDocumentManager::isFileModified)
-                .map(fileDocumentManager::getDocument)
-                .map(fileDocumentManager::isDocumentUnsaved)
-                .orElse(false);
+        return virtualFileOf(file).filter(fileDocumentManager::isFileModified).map(fileDocumentManager::getDocument)
+                .map(fileDocumentManager::isDocumentUnsaved).orElse(false);
     }
 
-    private void writeContentsToFile(final PsiFile file,
-                                     final File outFile)
-            throws IOException {
+    private void writeContentsToFile(final PsiFile file, final File outFile) throws IOException {
         final String lineSeparator = CodeStyleSettingsManager.getSettings(file.getProject()).getLineSeparator();
 
         final Writer tempFileOut = writerTo(outFile, charSetOf(file));
@@ -278,9 +220,7 @@ public class ScannableFile {
 
     @NotNull
     private Charset charSetOf(final PsiFile file) {
-        return virtualFileOf(file)
-                .map(VirtualFile::getCharset)
-                .orElseGet(() -> Charset.forName("UTF-8"));
+        return virtualFileOf(file).map(VirtualFile::getCharset).orElseGet(() -> Charset.forName("UTF-8"));
     }
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {
@@ -289,9 +229,7 @@ public class ScannableFile {
 
     @NotNull
     private Writer writerTo(final File outFile, final Charset charset) throws FileNotFoundException {
-        return new BufferedWriter(
-                new OutputStreamWriter(
-                        new FileOutputStream(outFile), charset.newEncoder()));
+        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), charset.newEncoder()));
     }
 
     public File getFile() {
@@ -305,8 +243,7 @@ public class ScannableFile {
     }
 
     private void deleteIfRequired() {
-        if (baseTempDir != null
-                && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
+        if (baseTempDir != null && baseTempDir.getName().startsWith(TEMPFILE_DIR_PREFIX)) {
             delete(baseTempDir);
         }
     }
