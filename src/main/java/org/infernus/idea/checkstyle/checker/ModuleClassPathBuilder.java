@@ -3,17 +3,19 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.util.ModulePaths;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Paths;
+import java.util.*;
 
 
-public class ModuleClassPathBuilder {
+public class ModuleClassPathBuilder
+{
 
     private static final Logger LOG = Logger.getInstance(ModuleClassPathBuilder.class);
 
@@ -24,6 +26,7 @@ public class ModuleClassPathBuilder {
             return getClass().getClassLoader();
         }
 
+        final Project project = baseModule.getProject();
         final List<URL> outputPaths = new ArrayList<>();
 
         final Set<Module> transitiveDependencies = new HashSet<>();
@@ -40,6 +43,10 @@ public class ModuleClassPathBuilder {
             LOG.debug("Creating class-loader with URLs: " + outputPaths);
         }
 
-        return new URLClassLoader(outputPaths.toArray(new URL[outputPaths.size()]), getClass().getClassLoader());
+        final Optional<File> tempDir = new TempDirProvider().forCopiedLibraries(project);
+        // TODO only stabilize when enabled in the options (default on Windows)
+        final URL[] stabilizedCp = tempDir.map(t -> new ClasspathStabilizer(project, Paths.get(t.toURI())).stabilize
+                (outputPaths)).orElse(outputPaths.toArray(new URL[outputPaths.size()]));
+        return new URLClassLoader(stabilizedCp, getClass().getClassLoader());
     }
 }
