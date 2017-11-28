@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import java.util.List;
+import javax.swing.JComponent;
+
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
@@ -7,10 +10,8 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.util.List;
 
 
 /**
@@ -74,6 +75,9 @@ public class CheckStyleConfigurable
         configuration.setCurrentPluginConfig(newConfig, true);
 
         activateCurrentCheckstyleVersion(newConfig.getCheckstyleVersion(), newConfig.getThirdPartyClasspath());
+        if (!newConfig.isCopyLibs()) {
+            new TempDirProvider().deleteCopiedLibrariesDir(project);
+        }
 
         LOG.debug("apply() - exit");
     }

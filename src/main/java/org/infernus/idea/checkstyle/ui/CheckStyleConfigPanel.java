@@ -1,5 +1,30 @@
 package org.infernus.idea.checkstyle.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableColumn;
+
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -10,7 +35,11 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.*;
+import com.intellij.ui.AnActionButton;
+import com.intellij.ui.AnActionButtonRunnable;
+import com.intellij.ui.AnActionButtonUpdater;
+import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
@@ -23,17 +52,6 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableColumn;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 
 /**
@@ -55,6 +73,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
     private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
+    private final JCheckBox copyLibsCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
@@ -98,6 +117,9 @@ public class CheckStyleConfigPanel extends JPanel {
         suppressErrorsCheckbox.setText(CheckStyleBundle.message("config.suppress-errors.checkbox.text"));
         suppressErrorsCheckbox.setToolTipText(CheckStyleBundle.message("config.suppress-errors.checkbox.tooltip"));
 
+        copyLibsCheckbox.setText(CheckStyleBundle.message("config.stabilize-classpath.text"));
+        copyLibsCheckbox.setToolTipText(CheckStyleBundle.message("config.stabilize-classpath.tooltip"));
+
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
@@ -114,13 +136,16 @@ public class CheckStyleConfigPanel extends JPanel {
                 3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
-                4, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                0, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
+                2, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 1, 5, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 2, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 2, 5, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 3, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
@@ -227,6 +252,7 @@ public class CheckStyleConfigPanel extends JPanel {
         csVersionDropdown.setSelectedItem(pluginConfig.getCheckstyleVersion());
         scopeDropdown.setSelectedItem(pluginConfig.getScanScope());
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
+        copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
         locationModel.setActiveLocation(pluginConfig.getActiveLocation());
@@ -239,12 +265,14 @@ public class CheckStyleConfigPanel extends JPanel {
             scanScope = ScanScope.getDefaultValue();
         }
         final boolean suppressErrors = suppressErrorsCheckbox.isSelected();
+        final boolean copyLibs = copyLibsCheckbox.isSelected();
         final SortedSet<ConfigurationLocation> locations = new TreeSet<>(locationModel.getLocations());
         final List<String> thirdPartyClasspath = getThirdPartyClasspath();
         final ConfigurationLocation activeLocation = locationModel.getActiveLocation();
 
-        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, locations,
-                thirdPartyClasspath, activeLocation, false); // we don't know the scanBeforeCheckin flag at this point
+        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, copyLibs,
+                locations, thirdPartyClasspath, activeLocation, false);
+                // we don't know the scanBeforeCheckin flag at this point
         return result;
     }
 

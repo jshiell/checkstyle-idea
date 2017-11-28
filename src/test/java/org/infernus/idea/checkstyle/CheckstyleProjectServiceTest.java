@@ -20,7 +20,7 @@ public class CheckstyleProjectServiceTest
     @BeforeClass
     public static void setUp() {
         CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false,
+        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false, false,
                 Collections.emptySortedSet(), Collections.emptyList(), null, false);
         Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
