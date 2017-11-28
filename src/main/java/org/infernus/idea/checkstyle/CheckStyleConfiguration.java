@@ -1,7 +1,26 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.*;
+import com.intellij.openapi.components.ExportableComponent;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.components.StoragePathMacros;
+import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -10,14 +29,10 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Notifications;
+import org.infernus.idea.checkstyle.util.OS;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -29,6 +44,7 @@ import java.util.stream.Collectors;
                 StorageScheme.DIRECTORY_BASED)})
 public class CheckStyleConfiguration
         implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
+
     private static final Logger LOG = Logger.getInstance(CheckStyleConfiguration.class);
 
     public static final String PROJECT_DIR = "$PRJ_DIR$";
@@ -40,6 +56,7 @@ public class CheckStyleConfiguration
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
     private static final String SCANSCOPE_SETTING = "scanscope";
     private static final String SUPPRESS_ERRORS = "suppress-errors";
+    private static final String COPY_LIBS = "copy-libs";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String SCAN_BEFORE_CHECKIN = "scan-before-checkin";
 
@@ -80,8 +97,10 @@ public class CheckStyleConfiguration
         defaultLocations.add(configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project));
         defaultLocations.add(configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project));
 
+        final boolean copyLibs = OS.isWindows();
+
         final PluginConfigDto result = new PluginConfigDto(csDefaultVersion, ScanScope.getDefaultValue(), false,
-                defaultLocations, Collections.emptyList(), null, false);
+                copyLibs, defaultLocations, Collections.emptyList(), null, false);
         return result;
     }
 
@@ -115,7 +134,8 @@ public class CheckStyleConfiguration
     public void disableActiveConfiguration() {
         final PluginConfigDto old = getCurrentPluginConfig();
         final PluginConfigDto newCfg = new PluginConfigDto(old.getCheckstyleVersion(), old.getScanScope(),
-                old.isSuppressErrors(), old.getLocations(), old.getThirdPartyClasspath(), null,  // no location active
+                old.isSuppressErrors(), old.isCopyLibs(), old.getLocations(), old.getThirdPartyClasspath(),
+                null,  /* no location active */
                 old.isScanBeforeCheckin());
         setCurrentPluginConfig(newCfg, true);
     }
@@ -220,6 +240,12 @@ public class CheckStyleConfiguration
 
     private boolean booleanValueOf(@NotNull final Map<String, String> loadedMap, final String propertyName) {
         return Boolean.parseBoolean(loadedMap.get(propertyName));
+    }
+
+    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> loadedMap, final String propertyName,
+                                              final boolean defaultValue) {
+        final String v = loadedMap.get(propertyName);
+        return v != null ? Boolean.parseBoolean(v) : defaultValue;
     }
 
     @NotNull
@@ -330,13 +356,14 @@ public class CheckStyleConfiguration
         final String checkstyleVersion = readCheckstyleVersion(pLoadedMap);
         final ScanScope scanScope = scopeValueOf(pLoadedMap);
         final boolean suppressErrors = booleanValueOf(pLoadedMap, SUPPRESS_ERRORS);
+        final boolean copyLibs = booleanValueOfWithDefault(pLoadedMap, COPY_LIBS, OS.isWindows());
         final SortedSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(pLoadedMap));
         final List<String> thirdPartyClasspath = readThirdPartyClassPath(pLoadedMap);
         final boolean scanBeforeCheckin = booleanValueOf(pLoadedMap, SCAN_BEFORE_CHECKIN);
         final ConfigurationLocation activeLocation = readActiveLocation(pLoadedMap, locations);
 
-        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, locations,
-                thirdPartyClasspath, activeLocation, scanBeforeCheckin);
+        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, copyLibs,
+                locations, thirdPartyClasspath, activeLocation, scanBeforeCheckin);
         return result;
     }
 
@@ -382,6 +409,7 @@ public class CheckStyleConfiguration
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
+            mapForSerialization.put(COPY_LIBS, String.valueOf(currentPluginConfig.isCopyLibs()));
 
             serializeLocations(pProject, mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
 

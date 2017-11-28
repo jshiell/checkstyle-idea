@@ -1,5 +1,12 @@
 package org.infernus.idea.checkstyle.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
@@ -16,17 +23,19 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.infernus.idea.checkstyle.service.CsVersionInfo.*;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.csVersionIsGreaterThan;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.csVersionIsLessThan;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.csVersionIsOneOf;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.currentCsVersion;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.isGreaterThanOrEqualTo;
+import static org.infernus.idea.checkstyle.service.CsVersionInfo.isLessThan;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
@@ -46,8 +55,8 @@ public class ServiceLayerBasicTest {
     @BeforeClass
     public static void setUp() {
         CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto(currentCsVersion(),
-                ScanScope.AllSources, false, Collections.emptySortedSet(), Collections.emptyList(), null, false);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto(currentCsVersion(), ScanScope.AllSources, false,
+                false, Collections.emptySortedSet(), Collections.emptyList(), null, false);
         when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 

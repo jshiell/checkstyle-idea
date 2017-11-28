@@ -32,7 +32,7 @@ public class CheckStyleConfigurableTest {
             final ConfigurationLocationFactory mockLocFactory = new ConfigurationLocationFactory();
             final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject, mockLocFactory);
 
-            final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false,
+            final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, false,
                     mockLocations, Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
             CheckStyleConfiguration mockConfig = Mockito.mock(CheckStyleConfiguration.class);
             when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
@@ -58,8 +58,8 @@ public class CheckStyleConfigurableTest {
         final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
                 new ConfigurationLocationFactory());
 
-        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, mockLocations,
-                Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
+        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, false,
+                mockLocations, Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
         when(mockPanel.getPluginConfiguration()).thenReturn(mockConfigDto);
         return mockPanel;
     }
