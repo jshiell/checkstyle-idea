@@ -1,5 +1,22 @@
 package org.infernus.idea.checkstyle;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
@@ -10,20 +27,6 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 
@@ -82,7 +85,7 @@ public class CheckstyleClassLoader {
     private ClassLoader buildClassLoader(@NotNull final String pClassPathFromProps, @NotNull final List<URL>
             pThirdPartyClassPath) {
         final String basePath = getBasePath();
-        final File classesDir4UnitTesting = new File(basePath, "classes/csaccess");
+        final File classesDir4UnitTesting = new File(basePath, "classes/java/csaccess");
         final boolean unitTesting = classesDir4UnitTesting.exists();
 
         List<URL> urls = new ArrayList<>();
