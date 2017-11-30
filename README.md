@@ -6,7 +6,8 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
 [![Build Status](https://travis-ci.org/jshiell/checkstyle-idea.svg?branch=master)](https://travis-ci.org/jshiell/checkstyle-idea)
 
-A plug-in for JetBrains' IntelliJ IDEA 15/2016/2017 which provides real-time feedback against a given [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
+A plug-in for JetBrains' IntelliJ IDEA 15/2016/2017 which provides real-time feedback against a given
+[CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
@@ -26,23 +27,30 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 
 ## Use
 
-Once installed, a new inspection will be available in the group 'CheckStyle'. The 'Inspections' item in the preferences panel will allow you to turn this on and to configure it.
+Once installed, a new inspection will be available in the group 'CheckStyle'. The 'Inspections' item in the preferences
+panel will allow you to turn this on and to configure it.
 
-Project exceptions are treated a little oddly. Because CheckStyle demands these
-to be on the current classpath errors will appear if these have not as yet been compiled. Further, because we cache the real-time checkers for performance reasons, real-time scans may continue to show the errors after a compilation. A static scan will force a reload of the Checker and should resolve this.
+Project exceptions are treated a little oddly. Because CheckStyle demands these to be on the current classpath, errors
+will appear if these have not as yet been compiled. Further, because we cache the real-time checkers for performance
+reasons, real-time scans may continue to show the errors after a compilation. A static scan will force a reload of the
+Checker and should resolve this.
 
 
 ## Configuration
 
-Configuration is available under the *Settings* dialogue. This controls configuration for both the inspection and static scanning.
+Configuration is available under the *Settings* dialogue. This controls configuration for both the inspection and static
+scanning.
 
 ### Configuration Files
 
-The main configuration option is that of the CheckStyle file. Multiple CheckStyle file may be added, and swapped between by using the checkbox. Files may be added using the 'Add' button.
+The main configuration option is that of the CheckStyle file. Multiple CheckStyle file may be added, and swapped between
+by using the checkbox. Files may be added using the 'Add' button.
 
-The *Scan Test Classes* checkbox will enable scanning of Java files under test source roots. If disabled, these files will be ignored.
+The *Scan Test Classes* checkbox will enable scanning of Java files under test source roots. If disabled, these files
+will be ignored.
 
-If a custom file is being used and properties are available for definition then these will accessible using the 'Edit Properties' button.
+If a custom file is being used and properties are available for definition then these will accessible using the 'Edit
+Properties' button.
 
 ### Eclipse-CS Variable Support
 
@@ -50,35 +58,57 @@ The following variables will be available if you have not otherwise overridden t
 
 * **basedir** - mapped to the location of the current module file, or the project directory as a fallback. 
 * **project_loc**, **workspace_loc** - mapped to the project directory.
-* **config_loc**, **samedir** - mapped to the directory the rules file is in, or the project directory for remote rules files (e.g. HTTP).
+* **config_loc**, **samedir** - mapped to the directory the rules file is in, or the project directory for remote rules
+  files (e.g. HTTP).
 
 ### Third Party Checks 
 
-This tab allows you to specify any third-party checks which your configuration file makes use of. All selected directories/JAR files will be added to CheckStyle's classpath.
+This tab allows you to specify any third-party checks which your configuration file makes use of. All selected
+directories/JAR files will be added to CheckStyle's classpath.
+
+### Copy libraries from project directory
+
+The option "Copy libraries from project directory" will tell Checkstyle-IDEA to do the following when creating custom
+classloaders:
+
+- scan a module's classpath and select those library entries which reside somewhere below the project directory
+- copy those libraries to a separate temporary directory (normally under `.idea`, if there is no `.idea` directory,
+  the system temp directory is used)
+
+The internal classloaders will then use those copied libraries, thus preventing them from getting locked in the file
+system. Since this is mainly a problem on Windows, this feature is activated by default on Windows. If you know that
+all your libraries reside outside of the project (as is often the case when build tools such as Maven or Gradle are
+used), then you can disable this feature. Since it slows down checker creation, you might want to keep it disabled
+until necessary. After changing this option, it may be necessary to restart IDEA to see the effects.
 
 
 ## Troubleshooting
 
-If an error occurs during the check an exception will be thrown, which IDEA will then catch and display in the standard exceptions dialogue. If you're unsure as to why things are awry this would be your best bet - chances are it's a missing property or classpath pre-requisite.
+If an error occurs during the check an exception will be thrown, which IDEA will then catch and display in the standard
+exceptions dialogue. If you're unsure as to why things are awry this would be your best bet - chances are it's a missing
+property or classpath pre-requisite.
 
 
 ## Notable Extensions
 
 ### [sevntu.checkstyle](http://sevntu-checkstyle.github.io/sevntu.checkstyle/)
 
-*sevntu.checkstyle* offers a number of useful checks written by students of the Sevastopol National Technical University (SevNTU). They're also kind enough to
-offer instructions on setting them up with this plugin.
+*sevntu.checkstyle* offers a number of useful checks written by students of the Sevastopol National Technical University
+(SevNTU). They're also kind enough to offer instructions on setting them up with this plugin.
 
 ### [Checkstyle Addons](http://checkstyle-addons.thomasjensen.com/)
 
-*Checkstyle Addons* offers additional Checkstyle checks not found in other Checkstyle extensions, and it's easy to [set up in Checkstyle-IDEA](http://checkstyle-addons.thomasjensen.com/run.html#run-intellij).
+*Checkstyle Addons* offers additional Checkstyle checks not found in other Checkstyle extensions, and it's easy to
+[set up in Checkstyle-IDEA](http://checkstyle-addons.thomasjensen.com/run.html#run-intellij).
 
 
 ## Development
 
-Note that the plugin has been entirely developed on OS X - while it should be fine on Linux, I've no idea what result you'd get with Windows. YMMV.
+Note that the plugin has been entirely developed on OS X - while it should be fine on Linux, I've no idea what result
+you'd get with Windows. YMMV.
 
-The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x. Make sure your `JAVA_HOME` environment variable is set correctly before invoking Gradle.
+The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x. Make sure your `JAVA_HOME`
+environment variable is set correctly before invoking Gradle.
 
     git clone https://github.com/jshiell/checkstyle-idea.git checkstyle-idea
     cd checkstyle-idea
@@ -91,28 +121,40 @@ To run it in a sandboxed IDEA, run:
 
     ./gradlew runIdea
 
-To debug the plugin, import the plugin into IDEA as a Gradle project, and then use the `runIdea` Gradle target in debug mode. 
+To debug the plugin, import the plugin into IDEA as a Gradle project, and then use the `runIdea` Gradle target in debug
+mode. 
 
 ## Frequently Asked Questions
 
 ### I see a *Cannot Load Project* error stating *Unsupported major.minor version 52.0*.
  
-The plugin is compiled using language level 1.8, and hence must be run on Java 8. This is because CheckStyle 6.2 and above require at least JVM 1.7, and because I like lambdas.
+The plugin is compiled using language level 1.8, and hence must be run on Java 8. This is because CheckStyle 6.2 and
+above require at least JVM 1.7, and because I like lambdas.
  
-If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 8 or later. [Jetbrains offer a support document on this subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
+If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 8 or later.
+[Jetbrains offer a support document on this
+subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
 
 ### I see 'Got an exception - java.lang.RuntimeException: Unable to get class information for <Exception Class>. (0:0)'
 
-CheckStyle is unable to retrieve information on exceptions in your project until you have built it. Build your project in IDEA and then rescan.
+CheckStyle is unable to retrieve information on exceptions in your project until you have built it. Build your project
+in IDEA and then rescan.
 
 
 ## Limitations
 
-* If you import Gradle project withs **Create separate module per source set** active in IDEA 2016 or above then the module source paths are truncated. This means relative paths (e.g. suppressions on `src/test/.+`) may not work as expected.
-* The plugin will throw exceptions if used with class files targeted at a later version than that of the JDK used by IDEA. Please run IDEA on the latest available JVM, ideally the bundled version from JetBrains where available.
-* If you change the configuration options the real-time scan will not be updated until the file is either changed or reopened.
-* We do not check if a property definition is required for a given file. Hence you can exit configuration without setting required properties. Given, however, that CheckStyle files can change without the plug-in being aware this is something we'll always have to live with to some degree.
-* CheckStyle errors and warnings from the inspection are both shown at a single level, as IDEA will only allow one warning level for an inspection.
+* If you import Gradle project withs **Create separate module per source set** active in IDEA 2016 or above then the
+  module source paths are truncated. This means relative paths (e.g. suppressions on `src/test/.+`) may not work as
+  expected.
+* The plugin will throw exceptions if used with class files targeted at a later version than that of the JDK used by
+  IDEA. Please run IDEA on the latest available JVM, ideally the bundled version from JetBrains where available.
+* If you change the configuration options the real-time scan will not be updated until the file is either changed or
+  reopened.
+* We do not check if a property definition is required for a given file. Hence you can exit configuration without
+  setting required properties. Given, however, that CheckStyle files can change without the plug-in being aware this is
+  something we'll always have to live with to some degree.
+* CheckStyle errors and warnings from the inspection are both shown at a single level, as IDEA will only allow one
+  warning level for an inspection.
 
 
 ## Feedback
@@ -123,8 +165,9 @@ the project website on [GitHub](https://github.com/jshiell/checkstyle-idea/).
 
 ## Acknowledgements
 
-This plug-in owes its existence to both the style-overlords at work mandating compliance with a CheckStyle configuration, and the [Eclipse-CS](http://eclipse-cs.sourceforge.net/)
-authors for making me jealous of the real-time scan support available for Eclipse.
+This plug-in owes its existence to both the style-overlords at work mandating compliance with a CheckStyle
+configuration, and the [Eclipse-CS](http://eclipse-cs.sourceforge.net/) authors for making me jealous of the real-time
+scan support available for Eclipse.
 
 Thanks to those who have contributed work and effort directly to this project:
 
@@ -199,7 +242,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **5.6.1** Fixed: code style importer now adds an extra line between leading content and the package declaration (#315).
 * **5.6.1** Fixed: improved housekeeping when Windows projects are not on the system drive (#313).
 * **5.6.0** New: Added CheckStyle 7.8.1.
-* **5.6.0** Fixed: we now try to use a temporary dir in the project folder when the projects is not on the system drive (#302).
+* **5.6.0** Fixed: we now try to use a temporary dir in the project folder when the projects is not on the system drive
+  (#302).
 * **5.5.1** New: File paths are now trimmed (#308).
 * **5.5.0** New: Added CheckStyle 7.7 (#305).
 * **5.4.0** New: Added CheckStyle 7.6.1 (#303).
@@ -223,8 +267,10 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.34.0** Fixed: Added (hopefully) a workaround for #278.
 * **4.33.0** New: Updated to CheckStyle 7.2.
 * **4.32.2** Fixed: Victim location errors are now at debug level.
-* **4.32.2** Fixed: The default tab width is now set from the IDEA Java Code Style, rather than defaulting to the Checkstyle default.
-* **4.32.1** Fixed: `tabWidth` is now read properly, improving element matching for errors (#259, #265). Thanks to Klaus Tannenberg (@KTannenberg).
+* **4.32.2** Fixed: The default tab width is now set from the IDEA Java Code Style, rather than defaulting to the
+  Checkstyle default.
+* **4.32.1** Fixed: `tabWidth` is now read properly, improving element matching for errors (#259, #265). Thanks to Klaus
+  Tannenberg (@KTannenberg).
 * **4.32.0** New: Errors for which we cannot find a matching element are now displayed at the top of the file (#265).
 * **4.32.0** New: Updated to CheckStyle 7.1.1.
 * **4.32.0** New: Scan scopes expanded and improved (#268). Thanks to Thomas Jensen (@tsjensen).
@@ -234,7 +280,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.30.1** Fixed: Style importer no longer errors on missing properties (#256).
 * **4.30.0** New: Updated to CheckStyle 7.0.
 * **4.29.2** Fixed: Corrected cleanup thread pooling (#239). Thanks to Baron Roberts.
-* **4.29.2** Fixed: If the rules file for a configuration is deleted, we continue to show errors. It will now be deactivated (#240). Thanks to Victor Alenkov.
+* **4.29.2** Fixed: If the rules file for a configuration is deleted, we continue to show errors. It will now be
+  deactivated (#240). Thanks to Victor Alenkov.
 * **4.29.1** Fixed: Default property values should now be applied (#237).
 * **4.29.0** New: Updated to CheckStyle 6.19.
 * **4.29.0** Fixed: Optional suppression files should no longer generate errors (#231).
@@ -275,7 +322,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.17.1** Fixed: Properties are properly reloaded after hitting previous in the add file wizard (#170).
 * **4.17.0** New: Updated to CheckStyle 6.8.1.
 * **4.17.0** Fixed: TreeWalker logs are now suppressed, reducing event log spam when editing files (#169).
-* **4.17.0** Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a ShortName change (#173).
+* **4.17.0** Fixed: Inspection no longer overrides getShortName as per the IDEA source docs - this has resulted in a
+  ShortName change (#173).
 * **4.17.0** Fixed: Only files in the project content source are scanned (#172).
 * **4.17.0** Fixed: Mirrored JAR files are now used when available (#141).
 * **4.17.0** Fixed: Modernised resource bundle usage.
@@ -287,9 +335,11 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.14.1** Fixed: HTTP rules files should result in fewer temporary files (#149).
 * **4.14.1** Fixed: findFile now uses ReadAction (#140).
 * **4.14.0** New: Moved to CheckStyle 6.5, which requires Java 7 or above.
-* **4.14.0** New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with the bundled JDK.
+* **4.14.0** New: Moved to Java 8. Please make sure IDEA is running on JDK 8. OS X users must use the 14.1 build with
+  the bundled JDK.
 * **4.14.0** New: As such, we now use the IDEA 14.1 SDK.
-* **4.13.2** New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK update anyway.
+* **4.13.2** New: Reverted to IDEA 13 SDK, as when IDEA 14.1 drops with Java 8 for OS X users there's going to be an SDK
+  update anyway.
 * **4.13.2** Fixed: Third party classes were not available in dialogue editors. (#133).
 * **4.13.1** Fixed: Became paranoid about ToolWindow implementation classes to avoid ClassCastExceptions (#131).
 * **4.13.0** New: Moved to IDEA 14 SDK.
@@ -327,12 +377,14 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.4.1** Fixed: ScanCurrentFile now works from the editor if the tool window has not yet been shown (#82).
 * **4.4.1** Fixed: File paths in ImportControl statements are now filtered (#77).
 * **4.4.1** Fixed: File choosers now work with Darcula; thanks to Simon Billingsley (#74).
-* **4.4.1** Fixed: Use configured third-party classpath when creating a test checker to validate the configuration; thanks to Simon Billingsley (#79).
+* **4.4.1** Fixed: Use configured third-party classpath when creating a test checker to validate the configuration;
+  thanks to Simon Billingsley (#79).
 * **4.4** Improved: Adding rules files now validates the file before committing.
 * **4.4** Improved: Preferences UI improved.
 * **4.4** New: Scan toolwindow now allows quick selection of a configured rules file.
 * **4.3.1** Fixed: Error with ToolWindows on project load.
-* **4.3** New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in 99b786ddb if you're nosy).
+* **4.3** New: IDEA build 129.677 or above is required, due to breaking changes in the API (ProblemDescriptor in
+  99b786ddb if you're nosy).
 * **4.3** Fixed: Scan option should now appear but once in the check-in dialogue (#68).
 * **4.3** Fixed: Better handling of IDEA exceptions during background scanning (#62).
 * **4.3** Plug-in modernisation work.
@@ -387,20 +439,23 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **3.3** Improved: Closed and saved files are no longer copied to temporary files.
 * **3.2** New: Updated CheckStyle to 5.3.
 * **3.2** Improved: Temporary files now use original filename. Thanks to Benjy W.
-* **3.2** Improved: Removed deprecated calls to IDEA SDK. This may break compatibility with older versions, but as the SDK isn't annotated with @since, who knows?
+* **3.2** Improved: Removed deprecated calls to IDEA SDK. This may break compatibility with older versions, but as the
+  SDK isn't annotated with @since, who knows?
 * **3.2** Improved: Introduced setup thread to project scans to improve responsiveness.
 * **3.1.2** Fixed: Property names trimmed.
 * **3.1.2** Fixed: Cache is now invalidated when settings are changed.
 * **3.1.2** Fixed: Files downloaded via HTTP are now scheduled for deletion of JVM termination.
 * **3.1.1** Fixed: NPE on notifications.
 * **3.1** New: Upgraded to CheckStyle 5.1.
-* **3.1** Improved: Suppression files are now searched for relative to the project if they are not present relative to the config file.
+* **3.1** Improved: Suppression files are now searched for relative to the project if they are not present relative to
+  the config file.
 * **3.1** Improved: If a suppression file is not found then it will be ignored and the user will be warned.
 * **3.1** Fixed: Concurrency issues. Thanks to Gerhard Radatz.
 * **3.0.13** Fixed: File location fixes galore! Thanks to Gerhard Radatz.
 * **3.0.13** Fixed: Removing active configuration no longer causes an exception. Thanks to Gerhard Radatz.
 * **3.0.12** Fixed: Inspection ID now correctly conforms to rules. Apologies if this breaks inspection config.
-* **3.0.11** Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited, however.
+* **3.0.11** Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited,
+  however.
 * **3.0.10** Fixed: Partial property detection. Thanks to LightGuard.JP.
 * **3.0.9** Fixed: Cache sychronisation problem.
 * **3.0.8** Fixed: Null property in configuration hash-table resulting in NPE.
@@ -413,9 +468,11 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **3.0.2** Fixed: File configuration column headings were incorrect.
 * **3.0.1** Fixed: Rule files added with no description cause an exception.
 * **3.0** New: Module-specific configuration support.
-* **3.0** New: CheckStyle 5.0 support. Thanks to jicken. Note that CheckStyle 5.0 is not entirely backwards compatible. A quick guide to many of the changes can be found here: http://checkstyle.sourceforge.net/releasenotes.html
+* **3.0** New: CheckStyle 5.0 support. Thanks to jicken. Note that CheckStyle 5.0 is not entirely backwards compatible.
+  A quick guide to many of the changes can be found here: http://checkstyle.sourceforge.net/releasenotes.html
 * **3.0** New: Result list may be filtered on severity.
-* **3.0** New: Back-end re-written to support multiple CheckStyle files. You will need to set your configuration once again I'm afraid.
+* **3.0** New: Back-end re-written to support multiple CheckStyle files. You will need to set your configuration once
+  again I'm afraid.
 * **2.4** New: Default CheckStyle file now has generics patch applied.
 * **2.4** New: Scans in progress may be aborted.
 * **2.4** Fixed: Null Pointer Exception with package HTML check.
@@ -429,7 +486,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **2.2** Fixed: Now works with IDEA8.0.
 * **2.2** New: Ability to scan on check-in. Thanks to J. G. Christopher.
 * **2.2** Experimental: Ability to load CheckStyle configuration from a URL. This is NOT robust at present.
-* **2.1** New: Ability to scan only modified files if project uses VCS. If the project does not use VCS then this action will have no effect. Thanks to J. G. Christopher for this patch.
+* **2.1** New: Ability to scan only modified files if project uses VCS. If the project does not use VCS then this action
+  will have no effect. Thanks to J. G. Christopher for this patch.
 * **2.1** New: Ability to suppress checks on test classes.
 * **2.1** New: Updated CheckStyle to 4.4.
 * **2.1** Fixed: Suppression filters with relative paths now load correctly.
@@ -454,7 +512,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **0.5.2** New: Settings are now stored in project, not workspace.
 * **0.5.1** Fixed: NullPointer when a null PSI element is encountered during scanning.
 * **0.5** Improved: Localisation support.
-* **0.5** Improved: Config file locations under the project root are now stored as relative rather than the system-specific absolute path.
+* **0.5** Improved: Config file locations under the project root are now stored as relative rather than the
+  system-specific absolute path.
 * **0.5** New: CheckStyle icons added.
 * **0.4** New: Added static scanning support.
 * **0.4** New: Updated CheckStyle to 4.3.
