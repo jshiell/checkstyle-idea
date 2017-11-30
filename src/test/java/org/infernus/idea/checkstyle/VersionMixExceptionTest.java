@@ -131,8 +131,8 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
 
         final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
         when(configurations.tabWidth()).thenReturn(2);
-        when(configurations.baseDir()).thenReturn(  //
-                Optional.of(new File(getClass().getResource(CONFIG_FILE).toURI()).getParent()));
+        final String baseDir = new File(getClass().getResource(CONFIG_FILE).toURI()).getParent();
+        when(configurations.baseDir()).thenReturn(Optional.of(baseDir));
 
         return csService.getCheckstyleInstance().createChecker(pModule, configLoc,
                 Collections.emptyMap(), configurations, getClass().getClassLoader());
