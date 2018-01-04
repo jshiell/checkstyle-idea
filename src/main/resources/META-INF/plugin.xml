@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.15.0</version>
+    <version>5.15.1</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.15.1: Fixed: Plugin will now work if in the pre-installed plugin dir (#368).</li>
     <li>5.15.0: New: Added CheckStyle 8.5 (#366).</li>
     <li>5.14.0: New: Libraries can now be copied, to solve locking issues on Windows (#263). Thanks, yet again, to Thomas Jenson (@tsjenson).</li>
     <li>5.13.0: New: Project-relative configurations in the default settings aren't loaded until we're in a project (#333).</li>
