@@ -212,7 +212,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.15.1** Fixed: Plugin will now work if in the pre-installed plugin dir (#368).
+* **5.16.0** New: Added CheckStyle 8.6, 8.7.
+* **5.16.0** Fixed: Plugin will now work if in the pre-installed plugin dir (#368).
 * **5.15.0** New: Added CheckStyle 8.5 (#366).
 * **5.14.0** New: Libraries can now be copied, to solve locking issues on Windows (#263). Thanks, yet again, to Thomas Jenson (@tsjenson).
 * **5.13.0** New: Project-relative configurations in the default settings aren't loaded until we're in a project (#333).

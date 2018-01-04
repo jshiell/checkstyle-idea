@@ -1,14 +1,16 @@
 package org.infernus.idea.checkstyle.service;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+import static org.infernus.idea.checkstyle.service.cmd.CheckstyleBridge.messagesFrom;
 
 public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     private static final int INDENT_SIZE = 2;
@@ -44,7 +46,7 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     }
 
     private boolean messagesAreNotEqual(final Configuration config1, final Configuration config2) {
-        return !Objects.equals(config1.getMessages(), config2.getMessages());
+        return !Objects.equals(messagesFrom(config1), messagesFrom(config2));
     }
 
     private boolean attributesAreNotEqual(final Configuration config1, final Configuration config2) {

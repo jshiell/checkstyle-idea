@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.infernus.idea.checkstyle.service.cmd.CheckstyleBridge.messagesFrom;
+
 
 /**
  * Iterate on the configuration modules recursively, calling a visitor on each one.
@@ -63,7 +65,7 @@ public class OpPeruseConfiguration implements CheckstyleCommand<Void> {
     private ConfigurationModule buildModuleInfo(@NotNull final Configuration currentConfig)
             throws CheckstyleException {
         final String name = currentConfig.getName();
-        final Map<String, String> messages = currentConfig.getMessages();
+        final Map<String, String> messages = messagesFrom(currentConfig);
 
         final Map<String, String> properties = new HashMap<>();
         Set<KnownTokenTypes> knownTokenTypes = EnumSet.noneOf(KnownTokenTypes.class);

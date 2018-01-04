@@ -233,7 +233,7 @@ public class OpLoadConfiguration
 
     private DefaultConfiguration elementWithUpdatedFile(@NotNull final String filename,
                                                         @NotNull final Configuration
-            originalElement, @NotNull final String propertyName) {
+                                                                originalElement, @NotNull final String propertyName) {
         // The CheckStyle API won't allow attribute values to be changed, only appended to,
         // hence we must recreate the node.
 
@@ -263,9 +263,10 @@ public class OpLoadConfiguration
 
     private void copyMessages(@NotNull final Configuration source,
                               @NotNull final DefaultConfiguration target) {
-        if (source.getMessages() != null) {
-            for (String messageKey : source.getMessages().keySet()) {
-                target.addMessage(messageKey, source.getMessages().get(messageKey));
+        final Map<String, String> messages = CheckstyleBridge.messagesFrom(source);
+        if (messages != null) {
+            for (String messageKey : messages.keySet()) {
+                target.addMessage(messageKey, messages.get(messageKey));
             }
         }
     }
