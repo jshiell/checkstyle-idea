@@ -13,6 +13,7 @@ public class Problem {
     private final SeverityLevel severityLevel;
     private final int line;
     private final int column;
+    private final String sourceName;
     private final String message;
     private final boolean afterEndOfLine;
     private final boolean suppressErrors;
@@ -22,6 +23,7 @@ public class Problem {
                    @NotNull final SeverityLevel severityLevel,
                    final int line,
                    final int column,
+                   final String sourceName,
                    final boolean afterEndOfLine,
                    final boolean suppressErrors) {
         this.target = target;
@@ -29,6 +31,7 @@ public class Problem {
         this.severityLevel = severityLevel;
         this.line = line;
         this.column = column;
+        this.sourceName = sourceName;
         this.afterEndOfLine = afterEndOfLine;
         this.suppressErrors = suppressErrors;
     }
@@ -43,6 +46,22 @@ public class Problem {
     @NotNull
     public String message() {
         return message;
+    }
+
+    @NotNull
+    public String sourceCheck() {
+        if (sourceName != null) {
+            return shortenClassName(sourceName);
+        }
+        return CheckStyleBundle.message("plugin.results.unknown-source");
+    }
+
+    private String shortenClassName(final String className) {
+        final int lastPackageIndex = className.lastIndexOf(".");
+        if (lastPackageIndex >= 0) {
+            return className.substring(lastPackageIndex + 1);
+        }
+        return className;
     }
 
     @NotNull

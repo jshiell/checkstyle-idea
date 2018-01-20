@@ -137,7 +137,7 @@ public class ProcessResultsThread implements Runnable {
                               final boolean afterEndOfLine) {
         try {
             addProblem(psiFile, new Problem(victim, event.message, event.severityLevel, event.lineNumber,
-                    event.columnNumber, afterEndOfLine, suppressErrors));
+                    event.columnNumber, event.sourceName, afterEndOfLine, suppressErrors));
         } catch (PsiInvalidElementAccessException e) {
             LOG.warn("Element access failed", e);
         }

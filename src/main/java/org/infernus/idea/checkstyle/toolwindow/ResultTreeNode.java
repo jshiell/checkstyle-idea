@@ -199,6 +199,6 @@ public class ResultTreeNode {
         }
 
         return CheckStyleBundle.message("plugin.results.file-result", file.getName(),
-                problem.message(), problem.line(), Integer.toString(problem.column()));
+                problem.message(), problem.line(), Integer.toString(problem.column()), problem.sourceCheck());
     }
 }

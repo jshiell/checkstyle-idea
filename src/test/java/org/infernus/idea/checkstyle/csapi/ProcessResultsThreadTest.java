@@ -64,7 +64,7 @@ public class ProcessResultsThreadTest {
     }
 
     private Problem aProblemFor(final PsiFile expectedFile) {
-        return new Problem(expectedFile, "aMessage", SeverityLevel.Error, 1, 7, false, false);
+        return new Problem(expectedFile, "aMessage", SeverityLevel.Error, 1, 7, "com.checkstyle.rules.aCheck", false, false);
     }
 
 }

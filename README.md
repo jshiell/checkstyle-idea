@@ -212,6 +212,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.16.2** Fixed: Violations now include rule name in the static scan only (#371).
 * **5.16.1** Fixed: DTDs pointing at sourceforge no longer trigger a live lookup (#280).
 * **5.16.0** New: Added CheckStyle 8.6, 8.7.
 * **5.16.0** Fixed: Plugin will now work if in the pre-installed plugin dir (#368).

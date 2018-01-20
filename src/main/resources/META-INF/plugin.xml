@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.16.1</version>
+    <version>5.16.2</version>
     <idea-version since-build="143.2370.31"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.16.2: Fixed: Violations now include rule name in the static scan only (#371).</li>
     <li>5.16.1: Fixed: DTDs pointing at sourceforge no longer trigger a live lookup (#280).</li>
     <li>5.16.0: New: Added CheckStyle 8.6, 8.7.</li>
     <li>5.16.0: Fixed: Plugin will now work if in the pre-installed plugin dir (#368).</li>
