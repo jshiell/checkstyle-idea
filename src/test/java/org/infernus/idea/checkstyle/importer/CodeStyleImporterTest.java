@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.importer;
 
-import java.util.Collections;
-
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.project.Project;
@@ -12,20 +10,21 @@ import com.intellij.psi.codeStyle.PackageEntryTable;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class CodeStyleImporterTest
-        extends LightPlatformTestCase
-{
+        extends LightPlatformTestCase {
     private CodeStyleSettings codeStyleSettings;
     private CommonCodeStyleSettings javaSettings;
 
-    private final Project project = Mockito.mock(Project.class);
+    private final Project project = mock(Project.class);
     private CheckstyleProjectService csService = null;
 
 
@@ -33,10 +32,9 @@ public class CodeStyleImporterTest
     protected void setUp() throws Exception {
         super.setUp();
 
-        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false, false,
-                Collections.emptySortedSet(), Collections.emptyList(), null, false);
-        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
+        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.1").build();
+        when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(project);
@@ -53,14 +51,14 @@ public class CodeStyleImporterTest
 
     private final static String FILE_PREFIX =
             "<?xml version=\"1.0\"?>\n" +
-            "<!DOCTYPE module PUBLIC\n" +
-            "          \"-//Puppy Crawl//DTD Check Configuration 1.3//EN\"\n" +
-            "          \"http://www.puppycrawl.com/dtds/configuration_1_3.dtd\">\n" +
-            "<module name = \"Checker\">\n";
+                    "<!DOCTYPE module PUBLIC\n" +
+                    "          \"-//Puppy Crawl//DTD Check Configuration 1.3//EN\"\n" +
+                    "          \"http://www.puppycrawl.com/dtds/configuration_1_3.dtd\">\n" +
+                    "<module name = \"Checker\">\n";
     private final static String FILE_SUFFIX =
             "</module>";
 
-    private void importConfiguration(@NotNull String configuration) throws Exception {
+    private void importConfiguration(@NotNull String configuration) {
         configuration = FILE_PREFIX + configuration + FILE_SUFFIX;
         new CheckStyleCodeStyleImporter(csService).importConfiguration(
                 loadConfiguration(configuration), codeStyleSettings);
@@ -74,32 +72,32 @@ public class CodeStyleImporterTest
         return csService.getCheckstyleInstance().loadConfiguration(configuration);
     }
 
-    public void testImportRightMargin() throws Exception {
+    public void testImportRightMargin() {
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"LineLength\">\n" +
-                        "    <property name=\"max\" value=\"100\"/>\n" +
-                        "</module>"
+                                "    <property name=\"max\" value=\"100\"/>\n" +
+                                "</module>"
                 )
         );
         assertEquals(100, javaSettings.RIGHT_MARGIN);
     }
 
-    public void testEmptyLineSeparator() throws Exception {
+    public void testEmptyLineSeparator() {
         javaSettings.BLANK_LINES_AROUND_FIELD = 0;
         javaSettings.BLANK_LINES_AROUND_METHOD = 0;
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"EmptyLineSeparator\">\n" +
-                        "    <property name=\"tokens\" value=\"VARIABLE_DEF, METHOD_DEF\"/>\n" +
-                        "</module>"
+                                "    <property name=\"tokens\" value=\"VARIABLE_DEF, METHOD_DEF\"/>\n" +
+                                "</module>"
                 )
         );
         assertEquals(1, javaSettings.BLANK_LINES_AROUND_FIELD);
         assertEquals(1, javaSettings.BLANK_LINES_AROUND_METHOD);
     }
 
-    public void testImportFileTabCharacter() throws Exception {
+    public void testImportFileTabCharacter() {
         CommonCodeStyleSettings xmlSettings = codeStyleSettings.getCommonSettings(XMLLanguage.INSTANCE);
         CommonCodeStyleSettings.IndentOptions javaIndentOptions = javaSettings.getIndentOptions();
         assertNotNull(javaIndentOptions);
@@ -110,16 +108,16 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"FileTabCharacter\">\n" +
-                        "    <property name=\"eachLine\" value=\"true\" />\n" +
-                        "    <property name=\"fileExtensions\" value=\"java,xml\" />\n" +
-                        "</module>"
+                                "    <property name=\"eachLine\" value=\"true\" />\n" +
+                                "    <property name=\"fileExtensions\" value=\"java,xml\" />\n" +
+                                "</module>"
                 )
         );
         assertFalse(javaIndentOptions.USE_TAB_CHARACTER);
         assertFalse(xmlIndentOptions.USE_TAB_CHARACTER);
     }
 
-    public void testImportFileTabCharacterNoExplicitExtensions() throws Exception {
+    public void testImportFileTabCharacterNoExplicitExtensions() {
         CommonCodeStyleSettings xmlSettings = codeStyleSettings.getCommonSettings(XMLLanguage.INSTANCE);
         CommonCodeStyleSettings.IndentOptions javaIndentOptions = javaSettings.getIndentOptions();
         assertNotNull(javaIndentOptions);
@@ -136,15 +134,15 @@ public class CodeStyleImporterTest
         assertFalse(xmlIndentOptions.USE_TAB_CHARACTER);
     }
 
-    public void testImportWhitespaceAfter() throws Exception {
+    public void testImportWhitespaceAfter() {
         javaSettings.SPACE_AFTER_COMMA = false;
         javaSettings.SPACE_AFTER_SEMICOLON = false;
         javaSettings.SPACE_AFTER_TYPE_CAST = false;
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"WhitespaceAfter\">\n" +
-                        "    <property name=\"tokens\" value=\"COMMA, SEMI\"/>\n" +
-                        "</module>"
+                                "    <property name=\"tokens\" value=\"COMMA, SEMI\"/>\n" +
+                                "</module>"
                 )
         );
         assertTrue(javaSettings.SPACE_AFTER_COMMA);
@@ -152,16 +150,16 @@ public class CodeStyleImporterTest
         assertFalse(javaSettings.SPACE_AFTER_TYPE_CAST);
     }
 
-    public void testImportWhitespaceAround() throws Exception {
+    public void testImportWhitespaceAround() {
         javaSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS = false;
         javaSettings.SPACE_AROUND_EQUALITY_OPERATORS = false;
         javaSettings.SPACE_AROUND_BITWISE_OPERATORS = false;
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"WhitespaceAround\">\n" +
-                        "    <property name=\"tokens\" value=\"ASSIGN\"/>\n" +
-                        "    <property name=\"tokens\" value=\"EQUAL\"/>\n" +
-                        "</module>"
+                                "    <property name=\"tokens\" value=\"ASSIGN\"/>\n" +
+                                "    <property name=\"tokens\" value=\"EQUAL\"/>\n" +
+                                "</module>"
                 )
         );
         assertTrue(javaSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS);
@@ -169,7 +167,7 @@ public class CodeStyleImporterTest
         assertFalse(javaSettings.SPACE_AROUND_BITWISE_OPERATORS);
     }
 
-    public void testNoWhitespaceBeforeImporter() throws Exception {
+    public void testNoWhitespaceBeforeImporter() {
         javaSettings.SPACE_BEFORE_SEMICOLON = true;
         javaSettings.SPACE_BEFORE_COMMA = true;
         importConfiguration(
@@ -181,20 +179,20 @@ public class CodeStyleImporterTest
         assertFalse(javaSettings.SPACE_BEFORE_COMMA);
     }
 
-    public void testLeftCurlyImporter() throws Exception {
+    public void testLeftCurlyImporter() {
         javaSettings.CLASS_BRACE_STYLE = CommonCodeStyleSettings.NEXT_LINE_SHIFTED;
-        javaSettings.METHOD_BRACE_STYLE =  CommonCodeStyleSettings.NEXT_LINE_SHIFTED;
+        javaSettings.METHOD_BRACE_STYLE = CommonCodeStyleSettings.NEXT_LINE_SHIFTED;
         javaSettings.BRACE_STYLE = CommonCodeStyleSettings.NEXT_LINE_SHIFTED;
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"LeftCurly\">\n" +
-                        "    <property name=\"option\" value=\"nl\"/>\n" +
-                        "    <property name=\"tokens\" value=\"CLASS_DEF,INTERFACE_DEF\"/>\n" +
-                        "</module>\n" +
-                        "<module name=\"LeftCurly\">\n" +
-                        "    <property name=\"option\" value=\"eol\"/>\n" +
-                        "    <property name=\"tokens\" value=\"METHOD_DEF,LITERAL_IF\"/>\n" +
-                        "</module>"
+                                "    <property name=\"option\" value=\"nl\"/>\n" +
+                                "    <property name=\"tokens\" value=\"CLASS_DEF,INTERFACE_DEF\"/>\n" +
+                                "</module>\n" +
+                                "<module name=\"LeftCurly\">\n" +
+                                "    <property name=\"option\" value=\"eol\"/>\n" +
+                                "    <property name=\"tokens\" value=\"METHOD_DEF,LITERAL_IF\"/>\n" +
+                                "</module>"
                 )
         );
         assertEquals(CommonCodeStyleSettings.NEXT_LINE, javaSettings.CLASS_BRACE_STYLE);
@@ -202,15 +200,15 @@ public class CodeStyleImporterTest
         assertEquals(CommonCodeStyleSettings.END_OF_LINE, javaSettings.BRACE_STYLE);
     }
 
-    public void testNeedBracesImporter() throws Exception {
+    public void testNeedBracesImporter() {
         javaSettings.DOWHILE_BRACE_FORCE = CommonCodeStyleSettings.DO_NOT_FORCE;
         javaSettings.IF_BRACE_FORCE = CommonCodeStyleSettings.DO_NOT_FORCE;
         javaSettings.FOR_BRACE_FORCE = CommonCodeStyleSettings.DO_NOT_FORCE;
         importConfiguration(
                 inTreeWalker(
                         "<module name=\"NeedBraces\">\n" +
-                        "    <property name=\"allowSingleLineStatement\" value=\"true\"/>\n" +
-                        "</module>"
+                                "    <property name=\"allowSingleLineStatement\" value=\"true\"/>\n" +
+                                "</module>"
                 )
         );
         assertEquals(CommonCodeStyleSettings.FORCE_BRACES_IF_MULTILINE, javaSettings.DOWHILE_BRACE_FORCE);
@@ -218,7 +216,7 @@ public class CodeStyleImporterTest
         assertEquals(CommonCodeStyleSettings.FORCE_BRACES_IF_MULTILINE, javaSettings.FOR_BRACE_FORCE);
     }
 
-    public void testIndentationImporter() throws Exception {
+    public void testIndentationImporter() {
         javaSettings.INDENT_BREAK_FROM_CASE = false;
         CommonCodeStyleSettings.IndentOptions indentOptions = javaSettings.getIndentOptions();
         assertNotNull(indentOptions);
@@ -227,13 +225,13 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"Indentation\">\n" +
-                        "            <property name=\"basicOffset\" value=\"2\"/>\n" +
-                        "            <property name=\"braceAdjustment\" value=\"0\"/>\n" +
-                        "            <property name=\"caseIndent\" value=\"2\"/>\n" +
-                        "            <property name=\"throwsIndent\" value=\"4\"/>\n" +
-                        "            <property name=\"lineWrappingIndentation\" value=\"4\"/>\n" +
-                        "            <property name=\"arrayInitIndent\" value=\"2\"/>\n" +
-                        "</module>"
+                                "            <property name=\"basicOffset\" value=\"2\"/>\n" +
+                                "            <property name=\"braceAdjustment\" value=\"0\"/>\n" +
+                                "            <property name=\"caseIndent\" value=\"2\"/>\n" +
+                                "            <property name=\"throwsIndent\" value=\"4\"/>\n" +
+                                "            <property name=\"lineWrappingIndentation\" value=\"4\"/>\n" +
+                                "            <property name=\"arrayInitIndent\" value=\"2\"/>\n" +
+                                "</module>"
                 )
         );
         javaSettings.INDENT_BREAK_FROM_CASE = true;
@@ -241,14 +239,14 @@ public class CodeStyleImporterTest
         indentOptions.CONTINUATION_INDENT_SIZE = 4;
     }
 
-    public void testImportOrderImporter() throws Exception {
+    public void testImportOrderImporter() {
         // group attribute
         {
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,java,*\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,java,*\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -265,16 +263,16 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"top\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"top\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -284,16 +282,16 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"bottom\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"bottom\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -303,9 +301,9 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"above\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"above\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -313,7 +311,7 @@ public class CodeStyleImporterTest
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -323,9 +321,9 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"under\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"under\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -333,7 +331,7 @@ public class CodeStyleImporterTest
                     new PackageEntry(true, "my.custom.package", true),
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -343,15 +341,15 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"inflow\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"inflow\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
@@ -362,10 +360,10 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"top\"/>\n" +
-                            "            <property name=\"separated\" value=\"true\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"top\"/>\n" +
+                                    "            <property name=\"separated\" value=\"true\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -374,7 +372,7 @@ public class CodeStyleImporterTest
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.BLANK_LINE_ENTRY,
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
@@ -385,10 +383,10 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"bottom\"/>\n" +
-                            "            <property name=\"separated\" value=\"true\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"bottom\"/>\n" +
+                                    "            <property name=\"separated\" value=\"true\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -397,7 +395,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
                     PackageEntry.BLANK_LINE_ENTRY,
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
-                    };
+            };
 
             assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
@@ -408,10 +406,10 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"above\"/>\n" +
-                            "            <property name=\"separated\" value=\"true\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"above\"/>\n" +
+                                    "            <property name=\"separated\" value=\"true\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -420,7 +418,7 @@ public class CodeStyleImporterTest
                     PackageEntry.BLANK_LINE_ENTRY,
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -430,10 +428,10 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"under\"/>\n" +
-                            "            <property name=\"separated\" value=\"true\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"under\"/>\n" +
+                                    "            <property name=\"separated\" value=\"true\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
@@ -442,7 +440,7 @@ public class CodeStyleImporterTest
                     PackageEntry.BLANK_LINE_ENTRY,
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
-                    };
+            };
 
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
         }
@@ -452,17 +450,17 @@ public class CodeStyleImporterTest
             importConfiguration(
                     inTreeWalker(
                             " <module name=\"ImportOrder\">\n" +
-                            "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
-                            "            <property name=\"option\" value=\"inflow\"/>\n" +
-                            "            <property name=\"separated\" value=\"true\"/>\n" +
-                            "</module>"
+                                    "            <property name=\"groups\" value=\"my.custom.package,*\"/>\n" +
+                                    "            <property name=\"option\" value=\"inflow\"/>\n" +
+                                    "            <property name=\"separated\" value=\"true\"/>\n" +
+                                    "</module>"
                     )
             );
             PackageEntry[] expected = new PackageEntry[]{
                     new PackageEntry(false, "my.custom.package", true),
                     PackageEntry.BLANK_LINE_ENTRY,
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
-                    };
+            };
 
             assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
             comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
@@ -476,12 +474,12 @@ public class CodeStyleImporterTest
         }
     }
 
-    public void testAvoidStartImportImporter() throws Exception {
+    public void testAvoidStartImportImporter() {
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"AvoidStarImport\">\n" +
-                        "</module>"
+                                "</module>"
                 )
         );
 
@@ -493,9 +491,9 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"AvoidStarImport\">\n" +
-                        "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
-                        "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
-                        "</module>"
+                                "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
+                                "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
+                                "</module>"
                 )
         );
 
@@ -507,8 +505,8 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"AvoidStarImport\">\n" +
-                        "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
-                        "</module>"
+                                "            <property name=\"allowStaticMemberImports\" value=\"true\"/>\n" +
+                                "</module>"
                 )
         );
 
@@ -522,8 +520,8 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"AvoidStarImport\">\n" +
-                        "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
-                        "</module>"
+                                "            <property name=\"allowClassImports\" value=\"true\"/>\n" +
+                                "</module>"
                 )
         );
 
@@ -535,15 +533,15 @@ public class CodeStyleImporterTest
         importConfiguration(
                 inTreeWalker(
                         " <module name=\"AvoidStarImport\">\n" +
-                        "            <property name=\"excludes\" value=\"a.b.c,d.e.f\"/>\n" +
-                        "</module>"
+                                "            <property name=\"excludes\" value=\"a.b.c,d.e.f\"/>\n" +
+                                "</module>"
                 )
         );
 
         PackageEntry[] expected = new PackageEntry[]{
                 new PackageEntry(false, "a.b.c", false),
                 new PackageEntry(false, "d.e.f", false),
-                };
+        };
 
         comparePackageEntries(expected, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND);
     }

@@ -11,9 +11,10 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -55,9 +56,8 @@ public class ServiceLayerBasicTest {
     @BeforeClass
     public static void setUp() {
         CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto(currentCsVersion(), ScanScope.AllSources, false,
-                false, Collections.emptySortedSet(), Collections.emptyList(), null, false);
-        when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance(currentCsVersion()).build();
+        when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         checkstyleProjectService = new CheckstyleProjectService(PROJECT);

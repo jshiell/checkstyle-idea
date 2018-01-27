@@ -44,9 +44,11 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
@@ -67,8 +69,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private final JList<?> pathList = new JBList(new DefaultListModel<String>());
 
-    private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") +
-            ":");
+    private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") + ":");
     private final ComboBox csVersionDropdown;
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
     private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
@@ -264,16 +265,17 @@ public class CheckStyleConfigPanel extends JPanel {
         if (scanScope == null) {
             scanScope = ScanScope.getDefaultValue();
         }
-        final boolean suppressErrors = suppressErrorsCheckbox.isSelected();
-        final boolean copyLibs = copyLibsCheckbox.isSelected();
-        final SortedSet<ConfigurationLocation> locations = new TreeSet<>(locationModel.getLocations());
-        final List<String> thirdPartyClasspath = getThirdPartyClasspath();
-        final ConfigurationLocation activeLocation = locationModel.getActiveLocation();
 
-        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, copyLibs,
-                locations, thirdPartyClasspath, activeLocation, false);
-                // we don't know the scanBeforeCheckin flag at this point
-        return result;
+        // we don't know the scanBeforeCheckin flag at this point
+        return PluginConfigDtoBuilder.defaultConfiguration(project)
+                .withCheckstyleVersion(checkstyleVersion)
+                .withScanScope(scanScope)
+                .withSuppressErrors(suppressErrorsCheckbox.isSelected())
+                .withCopyLibraries(copyLibsCheckbox.isSelected())
+                .withLocations(new TreeSet<>(locationModel.getLocations()))
+                .withThirdPartyClassPath(getThirdPartyClasspath())
+                .withActiveLocation(locationModel.getActiveLocation())
+                .build();
     }
 
 
@@ -368,7 +370,7 @@ public class CheckStyleConfigPanel extends JPanel {
             return CheckStyleConfigPanel.this.getParent();
         }
 
-        private Window parentWindow(Container window) {
+        private Window parentWindow(final Container window) {
             if (window instanceof Window) {
                 return (Window) window;
             }

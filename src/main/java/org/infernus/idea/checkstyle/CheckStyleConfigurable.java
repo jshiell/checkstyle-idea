@@ -9,6 +9,8 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -54,9 +56,11 @@ public class CheckStyleConfigurable
     public boolean isModified() {
         LOG.debug("isModified() - enter");
         final CheckStyleConfiguration configuration = getConfiguration();
-        final PluginConfigDto oldConfig = configuration.getCurrentPluginConfig();
-        final PluginConfigDto newConfig = new PluginConfigDto(
-                configPanel.getPluginConfiguration(), oldConfig.isScanBeforeCheckin());
+        final PluginConfigDto oldConfig = configuration.getCurrent();
+        final PluginConfigDto newConfig = PluginConfigDtoBuilder
+                .from(configPanel.getPluginConfiguration())
+                .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
+                .build();
 
         boolean result = !oldConfig.hasChangedFrom(newConfig);
         if (LOG.isDebugEnabled()) {
@@ -70,9 +74,10 @@ public class CheckStyleConfigurable
         LOG.debug("apply() - enter");
 
         final CheckStyleConfiguration configuration = getConfiguration();
-        final PluginConfigDto newConfig = new PluginConfigDto(configPanel.getPluginConfiguration(),
-                configuration.getCurrentPluginConfig().isScanBeforeCheckin());
-        configuration.setCurrentPluginConfig(newConfig, true);
+        final PluginConfigDto newConfig = PluginConfigDtoBuilder.from(configPanel.getPluginConfiguration())
+                .withScanBeforeCheckin(configuration.getCurrent().isScanBeforeCheckin())
+                .build();
+        configuration.setCurrent(newConfig, true);
 
         activateCurrentCheckstyleVersion(newConfig.getCheckstyleVersion(), newConfig.getThirdPartyClasspath());
         if (!newConfig.isCopyLibs()) {
@@ -103,7 +108,7 @@ public class CheckStyleConfigurable
     public void reset() {
         LOG.debug("reset() - enter");
 
-        final PluginConfigDto pluginConfig = getConfiguration().getCurrentPluginConfig();
+        final PluginConfigDto pluginConfig = getConfiguration().getCurrent();
         configPanel.showPluginConfiguration(pluginConfig);
 
         activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());

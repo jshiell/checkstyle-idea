@@ -1,28 +1,28 @@
 package org.infernus.idea.checkstyle;
 
-import java.util.Collections;
-import java.util.SortedSet;
-
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.model.ScanScope;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import java.util.SortedSet;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
-public class CheckstyleProjectServiceTest
-{
-    private static final Project PROJECT = Mockito.mock(Project.class);
+public class CheckstyleProjectServiceTest {
+    private static final Project PROJECT = mock(Project.class);
 
 
     @BeforeClass
     public static void setUp() {
-        CheckStyleConfiguration mockPluginConfig = Mockito.mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.1", ScanScope.AllSources, false, false,
-                Collections.emptySortedSet(), Collections.emptyList(), null, false);
-        Mockito.when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
+        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.1").build();
+        when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
     }
 
@@ -36,9 +36,9 @@ public class CheckstyleProjectServiceTest
     public void testReadVersions() {
         CheckstyleProjectService service = new CheckstyleProjectService(PROJECT);
         SortedSet<String> versions = service.getSupportedVersions();
-        Assert.assertNotNull(versions);
-        Assert.assertTrue(versions.size() > 0);
-        Assert.assertNotNull(versions.comparator());
-        Assert.assertEquals(VersionComparator.class, versions.comparator().getClass());
+        assertNotNull(versions);
+        assertTrue(versions.size() > 0);
+        assertNotNull(versions.comparator());
+        assertEquals(VersionComparator.class, versions.comparator().getClass());
     }
 }

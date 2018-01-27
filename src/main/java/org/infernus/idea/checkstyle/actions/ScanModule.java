@@ -51,7 +51,7 @@ public class ScanModule extends BaseAction {
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
-            final ScanScope scope = checkStylePlugin.getConfiguration().getCurrentPluginConfig().getScanScope();
+            final ScanScope scope = checkStylePlugin.getConfiguration().getCurrent().getScanScope();
 
             toolWindow.activate(() -> {
                 try {
@@ -111,7 +111,7 @@ public class ScanModule extends BaseAction {
             if (checkStylePlugin == null) {
                 throw new IllegalStateException("Couldn't get checkstyle plugin");
             }
-            final ScanScope scope = checkStylePlugin.getConfiguration().getCurrentPluginConfig().getScanScope();
+            final ScanScope scope = checkStylePlugin.getConfiguration().getCurrent().getScanScope();
 
             VirtualFile[] moduleFiles = null;
             final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);

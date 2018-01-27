@@ -1,5 +1,20 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
+import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
+import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
+import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,19 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
-import com.intellij.testFramework.LightPlatformTestCase;
-import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
-import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
-import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ScanScope;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,9 +51,8 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         super.setUp();
 
         CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = new PluginConfigDto(BASE_VERSION, ScanScope.AllSources, false, false,
-                Collections.emptySortedSet(), Collections.emptyList(), null, false);
-        when(mockPluginConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance(BASE_VERSION).build();
+        when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(PROJECT);

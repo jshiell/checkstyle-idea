@@ -16,8 +16,8 @@ import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
 import org.infernus.idea.checkstyle.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.PluginConfigDto;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -58,14 +58,15 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             }
 
             public void saveState() {
-                settings().ifPresent(settings -> settings.setCurrentPluginConfig(
-                        new PluginConfigDto(settings.getCurrentPluginConfig(), checkBox.isSelected()), false));
+                settings().ifPresent(settings -> settings.setCurrent(
+                        PluginConfigDtoBuilder.from(settings.getCurrent()).withScanBeforeCheckin(checkBox.isSelected()).build(),
+                        false));
             }
 
             public void restoreState() {
                 checkBox.setSelected(
-                        settings().map(c -> c.getCurrentPluginConfig().isScanBeforeCheckin())
-                                .orElseGet(() -> Boolean.FALSE));
+                        settings().map(c -> c.getCurrent().isScanBeforeCheckin())
+                                .orElse(Boolean.FALSE));
             }
         };
     }
@@ -85,7 +86,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        if (plugin.getConfiguration().getCurrentPluginConfig().isScanBeforeCheckin()) {
+        if (plugin.getConfiguration().getCurrent().isScanBeforeCheckin()) {
             try {
                 final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {

@@ -1,8 +1,11 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.project.Project;
@@ -10,8 +13,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +24,7 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.Future;
 
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
@@ -56,7 +62,6 @@ public final class CheckStylePlugin implements ProjectComponent {
         disableCheckStyleLogging();
     }
 
-
     private void disableCheckStyleLogging() {
         try {
             // This is a nasty hack to get around IDEA's DialogAppender sending any errors to the Event Log,
@@ -66,7 +71,6 @@ public final class CheckStylePlugin implements ProjectComponent {
             LOG.warn("Unable to suppress logging from CheckStyle's TreeWalker", e);
         }
     }
-
 
     public Project getProject() {
         return project;
@@ -106,6 +110,28 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     public void projectOpened() {
         LOG.debug("Project opened.");
+        notifyUserIfPluginUpdated();
+    }
+
+    private void notifyUserIfPluginUpdated() {
+        if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion())) {
+            Notifications.showInfo(project, message("plugin.update", currentPluginVersion()));
+            configuration.setCurrent(PluginConfigDtoBuilder.from(configuration.getCurrent())
+                    .withLastActivePluginVersion(currentPluginVersion())
+                    .build(), false);
+        }
+    }
+
+    private String lastActivePluginVersion() {
+        return configuration.getCurrent().getLastActivePluginVersion();
+    }
+
+    public static String currentPluginVersion() {
+        final IdeaPluginDescriptor plugin = PluginManager.getPlugin(PluginId.getId(ID_PLUGIN));
+        if (plugin != null) {
+            return plugin.getVersion();
+        }
+        return "unknown";
     }
 
     public void projectClosed() {
@@ -209,7 +235,7 @@ public final class CheckStylePlugin implements ProjectComponent {
             }
             return moduleConfiguration.getActiveConfiguration();
         }
-        return getConfiguration().getCurrentPluginConfig().getActiveLocation();
+        return getConfiguration().getCurrent().getActiveLocation();
     }
 
     private class ScanCompletionTracker implements ScannerListener {

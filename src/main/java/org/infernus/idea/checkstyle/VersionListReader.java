@@ -22,8 +22,7 @@ import org.jetbrains.annotations.NotNull;
  * Reads the list of supported Checkstyle versions from the <tt>checkstyle-idea.properties</tt> and provides it to
  * the Java code.
  */
-class VersionListReader
-{
+public class VersionListReader {
     private static final String PROP_FILE = "checkstyle-idea.properties";
 
     private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
@@ -34,7 +33,7 @@ class VersionListReader
     private final SortedMap<String, String> replacementMap;
 
 
-    VersionListReader() {
+    public VersionListReader() {
         this(PROP_FILE);
     }
 

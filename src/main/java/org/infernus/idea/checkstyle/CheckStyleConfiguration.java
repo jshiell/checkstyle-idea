@@ -1,29 +1,12 @@
 package org.infernus.idea.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.ExportableComponent;
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.components.StoragePathMacros;
-import com.intellij.openapi.components.StorageScheme;
+import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -33,6 +16,13 @@ import org.infernus.idea.checkstyle.util.OS;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder.defaultConfiguration;
 
 
 /**
@@ -59,6 +49,7 @@ public class CheckStyleConfiguration
     private static final String COPY_LIBS = "copy-libs";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String SCAN_BEFORE_CHECKIN = "scan-before-checkin";
+    private static final String LAST_ACTIVE_PLUGIN_VERSION = "last-active-plugin-version";
 
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
@@ -72,7 +63,7 @@ public class CheckStyleConfiguration
     /**
      * mock instance which may be set and used by unit tests
      */
-    private static CheckStyleConfiguration sMock = null;
+    private static CheckStyleConfiguration testInstance = null;
 
 
     public CheckStyleConfiguration(final Project project) {
@@ -81,27 +72,6 @@ public class CheckStyleConfiguration
         }
 
         this.project = project;
-    }
-
-
-    /**
-     * Create a default configuration.
-     *
-     * @return the default configuration
-     */
-    @NotNull
-    private PluginConfigDto buildDefaultConfig() {
-        final String csDefaultVersion = new VersionListReader().getDefaultVersion();
-
-        final SortedSet<ConfigurationLocation> defaultLocations = new TreeSet<>();
-        defaultLocations.add(configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project));
-        defaultLocations.add(configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project));
-
-        final boolean copyLibs = OS.isWindows();
-
-        final PluginConfigDto result = new PluginConfigDto(csDefaultVersion, ScanScope.getDefaultValue(), false,
-                copyLibs, defaultLocations, Collections.emptyList(), null, false);
-        return result;
     }
 
 
@@ -119,7 +89,6 @@ public class CheckStyleConfiguration
         }
     }
 
-
     @NotNull
     public File[] getExportFiles() {
         return new File[]{PathManager.getOptionsFile("checkstyle-idea_project_settings")};
@@ -132,22 +101,19 @@ public class CheckStyleConfiguration
 
 
     public void disableActiveConfiguration() {
-        final PluginConfigDto old = getCurrentPluginConfig();
-        final PluginConfigDto newCfg = new PluginConfigDto(old.getCheckstyleVersion(), old.getScanScope(),
-                old.isSuppressErrors(), old.isCopyLibs(), old.getLocations(), old.getThirdPartyClasspath(),
-                null,  /* no location active */
-                old.isScanBeforeCheckin());
-        setCurrentPluginConfig(newCfg, true);
+        setCurrent(PluginConfigDtoBuilder.from(getCurrent())
+                .withActiveLocation(null)
+                .build(), true);
     }
 
 
     @NotNull
-    public PluginConfigDto getCurrentPluginConfig() {
-        return currentPluginConfig != null ? currentPluginConfig : buildDefaultConfig();
+    public PluginConfigDto getCurrent() {
+        return currentPluginConfig != null ? currentPluginConfig : defaultConfiguration(project).build();
     }
 
-    public void setCurrentPluginConfig(@NotNull final PluginConfigDto pConfigFromPanel, final boolean fireEvents) {
-        currentPluginConfig = pConfigFromPanel;
+    public void setCurrent(@NotNull final PluginConfigDto updatedConfiguration, final boolean fireEvents) {
+        currentPluginConfig = updatedConfiguration;
         if (fireEvents) {
             fireConfigurationChanged();
         }
@@ -320,7 +286,7 @@ public class CheckStyleConfiguration
         if (currentPluginConfig != null) {
             return new ProjectSettings(project, currentPluginConfig);
         }
-        return new ProjectSettings(project, buildDefaultConfig());
+        return new ProjectSettings(project, defaultConfiguration(project).build());
     }
 
     /**
@@ -340,31 +306,30 @@ public class CheckStyleConfiguration
      * Needed when a setting written by a previous version of this plugin gets loaded by a newer version; converts
      * the scan scope settings based on flags to the enum value.
      *
-     * @param pLoadedMap the loaded settings
+     * @param deserialisedMap the loaded settings
      */
-    private void convertSettingsFormat(final Map<String, String> pLoadedMap) {
-        if (pLoadedMap != null && !pLoadedMap.isEmpty() && !pLoadedMap.containsKey(SCANSCOPE_SETTING)) {
-            ScanScope scope = ScanScope.fromFlags(booleanValueOf(pLoadedMap, CHECK_TEST_CLASSES),
-                    booleanValueOf(pLoadedMap, CHECK_NONJAVA_FILES));
-            pLoadedMap.put(SCANSCOPE_SETTING, scope.name());
-            pLoadedMap.remove(CHECK_TEST_CLASSES);
-            pLoadedMap.remove(CHECK_NONJAVA_FILES);
+    private void convertSettingsFormat(final Map<String, String> deserialisedMap) {
+        if (deserialisedMap != null && !deserialisedMap.isEmpty() && !deserialisedMap.containsKey(SCANSCOPE_SETTING)) {
+            ScanScope scope = ScanScope.fromFlags(booleanValueOf(deserialisedMap, CHECK_TEST_CLASSES),
+                    booleanValueOf(deserialisedMap, CHECK_NONJAVA_FILES));
+            deserialisedMap.put(SCANSCOPE_SETTING, scope.name());
+            deserialisedMap.remove(CHECK_TEST_CLASSES);
+            deserialisedMap.remove(CHECK_NONJAVA_FILES);
         }
     }
 
-    private PluginConfigDto toDto(Map<String, String> pLoadedMap) {
-        final String checkstyleVersion = readCheckstyleVersion(pLoadedMap);
-        final ScanScope scanScope = scopeValueOf(pLoadedMap);
-        final boolean suppressErrors = booleanValueOf(pLoadedMap, SUPPRESS_ERRORS);
-        final boolean copyLibs = booleanValueOfWithDefault(pLoadedMap, COPY_LIBS, OS.isWindows());
-        final SortedSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(pLoadedMap));
-        final List<String> thirdPartyClasspath = readThirdPartyClassPath(pLoadedMap);
-        final boolean scanBeforeCheckin = booleanValueOf(pLoadedMap, SCAN_BEFORE_CHECKIN);
-        final ConfigurationLocation activeLocation = readActiveLocation(pLoadedMap, locations);
-
-        final PluginConfigDto result = new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, copyLibs,
-                locations, thirdPartyClasspath, activeLocation, scanBeforeCheckin);
-        return result;
+    private PluginConfigDto toDto(final Map<String, String> deserialisedMap) {
+        return PluginConfigDtoBuilder.defaultConfiguration(project)
+                .withCheckstyleVersion(readCheckstyleVersion(deserialisedMap))
+                .withScanScope(scopeValueOf(deserialisedMap))
+                .withSuppressErrors(booleanValueOf(deserialisedMap, SUPPRESS_ERRORS))
+                .withCopyLibraries(booleanValueOfWithDefault(deserialisedMap, COPY_LIBS, OS.isWindows()))
+                .withLocations(new TreeSet<>(readConfigurationLocations(deserialisedMap)))
+                .withThirdPartyClassPath(readThirdPartyClassPath(deserialisedMap))
+                .withActiveLocation(readActiveLocation(deserialisedMap, new TreeSet<>(readConfigurationLocations(deserialisedMap))))
+                .withScanBeforeCheckin(booleanValueOf(deserialisedMap, SCAN_BEFORE_CHECKIN))
+                .withLastActivePluginVersion(deserialisedMap.get(LAST_ACTIVE_PLUGIN_VERSION))
+                .build();
     }
 
     private ConfigurationLocation readActiveLocation(@NotNull final Map<String, String> pLoadedMap,
@@ -403,17 +368,17 @@ public class CheckStyleConfiguration
             super();
         }
 
-        public ProjectSettings(@NotNull final Project pProject, @NotNull final PluginConfigDto currentPluginConfig) {
-
+        public ProjectSettings(@NotNull final Project project,
+                               @NotNull final PluginConfigDto currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
             mapForSerialization.put(COPY_LIBS, String.valueOf(currentPluginConfig.isCopyLibs()));
 
-            serializeLocations(pProject, mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
+            serializeLocations(project, mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
 
-            String s = serializeThirdPartyClasspath(pProject, currentPluginConfig.getThirdPartyClasspath());
+            String s = serializeThirdPartyClasspath(project, currentPluginConfig.getThirdPartyClasspath());
             if (!Strings.isBlank(s)) {
                 mapForSerialization.put(THIRDPARTY_CLASSPATH, s);
             }
@@ -422,11 +387,14 @@ public class CheckStyleConfiguration
             if (currentPluginConfig.getActiveLocation() != null) {
                 mapForSerialization.put(ACTIVE_CONFIG, currentPluginConfig.getActiveLocation().getDescriptor());
             }
+
+            mapForSerialization.put(LAST_ACTIVE_PLUGIN_VERSION, currentPluginConfig.getLastActivePluginVersion());
+
             configuration = mapForSerialization;
         }
 
-        public void setConfiguration(final Map<String, String> pConfigurationFromDeserializer) {
-            configuration = pConfigurationFromDeserializer;
+        public void setConfiguration(final Map<String, String> deserialisedConfiguration) {
+            configuration = deserialisedConfiguration;
         }
 
         @NotNull
@@ -437,12 +405,12 @@ public class CheckStyleConfiguration
             return configuration;
         }
 
-        private void serializeLocations(@NotNull final Project pProject,
-                                        @NotNull final Map<String, String> pStorage,
+        private void serializeLocations(@NotNull final Project project,
+                                        @NotNull final Map<String, String> storage,
                                         @NotNull final List<ConfigurationLocation> configurationLocations) {
             int index = 0;
             for (final ConfigurationLocation configurationLocation : configurationLocations) {
-                pStorage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
+                storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
                 try {
                     final Map<String, String> properties = configurationLocation.getProperties();
                     if (properties != null) {
@@ -451,12 +419,12 @@ public class CheckStyleConfiguration
                             if (value == null) {
                                 value = "";
                             }
-                            pStorage.put(PROPERTIES_PREFIX + index + "." + prop.getKey(), value);
+                            storage.put(PROPERTIES_PREFIX + index + "." + prop.getKey(), value);
                         }
                     }
                 } catch (IOException e) {
                     LOG.warn("Failed to read properties from " + configurationLocation, e);
-                    Notifications.showError(pProject, CheckStyleBundle.message("checkstyle" + ""
+                    Notifications.showError(project, CheckStyleBundle.message("checkstyle" + ""
                             + ".could-not-read-properties", configurationLocation.getLocation()));
                 }
 
@@ -464,14 +432,14 @@ public class CheckStyleConfiguration
             }
         }
 
-        private String serializeThirdPartyClasspath(@NotNull final Project pProject, @NotNull final List<String>
-                pThirdPartyClasspath) {
+        private String serializeThirdPartyClasspath(@NotNull final Project project,
+                                                    @NotNull final List<String> thirdPartyClasspath) {
             final StringBuilder sb = new StringBuilder();
-            for (final String part : pThirdPartyClasspath) {
+            for (final String part : thirdPartyClasspath) {
                 if (sb.length() > 0) {
                     sb.append(";");
                 }
-                sb.append(tokenisePath(pProject, part));
+                sb.append(tokenisePath(project, part));
             }
             return sb.toString();
         }
@@ -482,12 +450,12 @@ public class CheckStyleConfiguration
          * @param path the path to processed.
          * @return the tokenised path.
          */
-        private String tokenisePath(@NotNull final Project pProject, final String path) {
+        private String tokenisePath(@NotNull final Project project, final String path) {
             if (path == null) {
                 return null;
             }
 
-            final File projectPath = getProjectPath(pProject);
+            final File projectPath = getProjectPath(project);
             if (projectPath != null) {
                 final String projectPathAbs = projectPath.getAbsolutePath();
                 if (path.startsWith(projectPathAbs)) {
@@ -500,16 +468,16 @@ public class CheckStyleConfiguration
     }
 
 
-    public static CheckStyleConfiguration getInstance(@NotNull final Project pProject) {
-        CheckStyleConfiguration result = sMock;
+    public static CheckStyleConfiguration getInstance(@NotNull final Project project) {
+        CheckStyleConfiguration result = testInstance;
         if (result == null) {
-            result = ServiceManager.getService(pProject, CheckStyleConfiguration.class);
+            result = ServiceManager.getService(project, CheckStyleConfiguration.class);
         }
         return result;
     }
 
 
-    public static void activateMock4UnitTesting(@Nullable final CheckStyleConfiguration pMock) {
-        sMock = pMock;
+    public static void activateMock4UnitTesting(@Nullable final CheckStyleConfiguration testingInstance) {
+        CheckStyleConfiguration.testInstance = testingInstance;
     }
 }

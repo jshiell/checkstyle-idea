@@ -1,10 +1,8 @@
 package org.infernus.idea.checkstyle;
 
-import java.util.Arrays;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -12,8 +10,13 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -32,11 +35,14 @@ public class CheckStyleConfigurableTest {
             final ConfigurationLocationFactory mockLocFactory = new ConfigurationLocationFactory();
             final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject, mockLocFactory);
 
-            final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, false,
-                    mockLocations, Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
-            CheckStyleConfiguration mockConfig = Mockito.mock(CheckStyleConfiguration.class);
+            final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.2")
+                    .withLocations(mockLocations)
+                    .withThirdPartyClassPath(Arrays.asList("cp1", "cp2"))
+                    .withActiveLocation(mockLocations.first())
+                    .build();
+            CheckStyleConfiguration mockConfig = mock(CheckStyleConfiguration.class);
             when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
-            when(mockConfig.getCurrentPluginConfig()).thenReturn(mockConfigDto);
+            when(mockConfig.getCurrent()).thenReturn(mockConfigDto);
             return mockConfig;
         }
     }
@@ -54,12 +60,15 @@ public class CheckStyleConfigurableTest {
     }
 
     private CheckStyleConfigPanel buildMockPanel(final Project mockProject) {
-        CheckStyleConfigPanel mockPanel = Mockito.mock(CheckStyleConfigPanel.class);
+        CheckStyleConfigPanel mockPanel = mock(CheckStyleConfigPanel.class);
         final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
                 new ConfigurationLocationFactory());
 
-        final PluginConfigDto mockConfigDto = new PluginConfigDto("7.1.2", ScanScope.AllSources, false, false,
-                mockLocations, Arrays.asList("cp1", "cp2"), mockLocations.first(), false);
+        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.2")
+                .withLocations(mockLocations)
+                .withThirdPartyClassPath(Arrays.asList("cp1", "cp2"))
+                .withActiveLocation(mockLocations.first())
+                .build();
         when(mockPanel.getPluginConfiguration()).thenReturn(mockConfigDto);
         return mockPanel;
     }
@@ -67,7 +76,7 @@ public class CheckStyleConfigurableTest {
 
     @Test
     public void testIsModified() {
-        Project mockProject = Mockito.mock(Project.class);
+        Project mockProject = mock(Project.class);
         CheckStyleConfigPanel mockPanel = buildMockPanel(mockProject);
 
         CheckStyleConfigurable classUnderTest = new CheckStyleConfigurable4Test(mockProject, mockPanel);

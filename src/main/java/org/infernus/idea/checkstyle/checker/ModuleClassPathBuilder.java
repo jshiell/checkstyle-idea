@@ -63,6 +63,6 @@ public class ModuleClassPathBuilder
 
     private boolean wantsCopyLibs(@NotNull final Project pProject) {
         final CheckStyleConfiguration config = CheckStyleConfiguration.getInstance(pProject);
-        return config != null && config.getCurrentPluginConfig().isCopyLibs();
+        return config != null && config.getCurrent().isCopyLibs();
     }
 }

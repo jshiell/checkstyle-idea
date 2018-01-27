@@ -193,7 +193,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
 
             return checkerFactory(module.getProject()).checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrentPluginConfig().isSuppressErrors()))
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrent().isSuppressErrors()))
                     .orElseThrow(() -> new CheckStylePluginException("Could not create checker"));
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);

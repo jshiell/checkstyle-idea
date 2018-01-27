@@ -88,7 +88,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
             return checkerFactory(psiFile.getProject())
                     .checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrentPluginConfig().isSuppressErrors()))
+                    .map(checker -> checker.scan(scannableFiles, plugin.getConfiguration().getCurrent().isSuppressErrors()))
                     .map(results -> results.get(psiFile))
                     .map(this::dropIgnoredProblems)
                     .orElse(NO_PROBLEMS_FOUND);

@@ -42,8 +42,8 @@ public class CheckstyleProjectService {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
         final CheckStyleConfiguration pluginConfig = CheckStyleConfiguration.getInstance(project);
-        activateCheckstyleVersion(pluginConfig.getCurrentPluginConfig().getCheckstyleVersion(),
-                pluginConfig.getCurrentPluginConfig().getThirdPartyClasspath());
+        activateCheckstyleVersion(pluginConfig.getCurrent().getCheckstyleVersion(),
+                pluginConfig.getCurrent().getThirdPartyClasspath());
     }
 
 
