@@ -194,6 +194,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Klaus Tannenberg (@KTannenberg)
 * Nikolay Bespalov (@nikolaybespalov)
 * @zentol
+* Joey Lee (@yeoji)
 
 And also thanks are due to the authors and contributors of:
 
@@ -212,6 +213,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.16.3** New: Improved support for CustomImportOrder (#362). Thanks to Joey Lee (@yeoji).
 * **5.16.3** New: Plugin will notify user on update and point at release notes (#373). 
 * **5.16.2** Fixed: Violations now include rule name in the static scan only (#371).
 * **5.16.1** Fixed: DTDs pointing at sourceforge no longer trigger a live lookup (#280).

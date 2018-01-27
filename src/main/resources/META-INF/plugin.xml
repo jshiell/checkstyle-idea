@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.16.3: New: Improved support for CustomImportOrder (#362). Thanks to Joey Lee (@yeoji).</li>
     <li>5.16.3: New: Plugin will notify user on update and point at release notes (#373).</li>
     <li>5.16.2: Fixed: Violations now include rule name in the static scan only (#371).</li>
     <li>5.16.1: Fixed: DTDs pointing at sourceforge no longer trigger a live lookup (#280).</li>
