@@ -28,10 +28,7 @@ import static org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder.default
 /**
  * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
  */
-@State(name = CheckStylePlugin.ID_PLUGIN, storages = {
-        @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
-        @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/checkstyle-idea.xml", scheme =
-                StorageScheme.DIRECTORY_BASED)})
+@State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class CheckStyleConfiguration
         implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
 
