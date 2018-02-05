@@ -14,7 +14,7 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;

@@ -9,7 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;

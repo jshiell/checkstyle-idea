@@ -1,12 +1,12 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigDto;
 import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
-import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -41,7 +41,6 @@ public class CheckStyleConfigurableTest {
                     .withActiveLocation(mockLocations.first())
                     .build();
             CheckStyleConfiguration mockConfig = mock(CheckStyleConfiguration.class);
-            when(mockConfig.configurationLocationFactory()).thenReturn(mockLocFactory);
             when(mockConfig.getCurrent()).thenReturn(mockConfigDto);
             return mockConfig;
         }

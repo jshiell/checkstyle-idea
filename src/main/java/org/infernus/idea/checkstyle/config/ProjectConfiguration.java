@@ -1,12 +1,13 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -22,20 +23,15 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.infernus.idea.checkstyle.config.CheckStyleConfiguration.LEGACY_PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.CheckStyleConfiguration.PROJECT_DIR;
 import static org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder.defaultConfiguration;
 
-
-/**
- * A manager for the persistent CheckStyle plug-in configuration. Registered in {@code plugin.xml}.
- */
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
-public class CheckStyleConfiguration
-        implements ExportableComponent, PersistentStateComponent<CheckStyleConfiguration.ProjectSettings> {
+public class ProjectConfiguration
+        implements ExportableComponent, PersistentStateComponent<ProjectConfiguration.ProjectSettings> {
 
-    private static final Logger LOG = Logger.getInstance(CheckStyleConfiguration.class);
-
-    public static final String PROJECT_DIR = "$PRJ_DIR$";
-    public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
+    private static final Logger LOG = Logger.getInstance(ProjectConfiguration.class);
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String CHECKSTYLE_VERSION_SETTING = "checkstyle-version";
@@ -47,43 +43,22 @@ public class CheckStyleConfiguration
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String SCAN_BEFORE_CHECKIN = "scan-before-checkin";
     private static final String LAST_ACTIVE_PLUGIN_VERSION = "last-active-plugin-version";
-
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
 
-    private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
-
     private final Project project;
 
-    private PluginConfigDto currentPluginConfig = null;
+    private ProjectSettings projectSettings;
 
-    /**
-     * mock instance which may be set and used by unit tests
-     */
-    private static CheckStyleConfiguration testInstance = null;
-
-
-    public CheckStyleConfiguration(final Project project) {
-        if (project == null) {
-            throw new IllegalArgumentException("Project is required");
-        }
-
+    public ProjectConfiguration(@NotNull final Project project) {
         this.project = project;
+
+        projectSettings = defaultProjectSettings();
     }
 
-
-    public void addConfigurationListener(final ConfigurationListener configurationListener) {
-        if (configurationListener != null) {
-            configurationListeners.add(configurationListener);
-        }
-    }
-
-    private void fireConfigurationChanged() {
-        synchronized (configurationListeners) {
-            for (ConfigurationListener configurationListener : configurationListeners) {
-                configurationListener.configurationChanged();
-            }
-        }
+    @NotNull
+    private ProjectSettings defaultProjectSettings() {
+        return new ProjectSettings(project, defaultConfiguration(project).build());
     }
 
     @NotNull
@@ -96,93 +71,74 @@ public class CheckStyleConfiguration
         return CheckStylePlugin.ID_PLUGIN + " Project Settings";
     }
 
-
-    public void disableActiveConfiguration() {
-        setCurrent(PluginConfigDtoBuilder.from(getCurrent())
-                .withActiveLocation(null)
-                .build(), true);
+    public ProjectSettings getState() {
+        return projectSettings;
     }
 
-
-    @NotNull
-    public PluginConfigDto getCurrent() {
-        return currentPluginConfig != null ? currentPluginConfig : defaultConfiguration(project).build();
-    }
-
-    public void setCurrent(@NotNull final PluginConfigDto updatedConfiguration, final boolean fireEvents) {
-        currentPluginConfig = updatedConfiguration;
-        if (fireEvents) {
-            fireConfigurationChanged();
+    public void loadState(final ProjectSettings sourceProjectSettings) {
+        if (sourceProjectSettings != null) {
+            projectSettings = sourceProjectSettings;
+        } else {
+            projectSettings = defaultProjectSettings();
         }
     }
 
+    @NotNull
+    PluginConfigDtoBuilder populate(@NotNull final PluginConfigDtoBuilder builder) {
+        Map<String, String> settingsMap = projectSettings.getConfiguration();
+        convertSettingsFormat(settingsMap);
+        return builder
+                .withCheckstyleVersion(readCheckstyleVersion(settingsMap))
+                .withScanScope(scopeValueOf(settingsMap))
+                .withSuppressErrors(booleanValueOf(settingsMap, SUPPRESS_ERRORS))
+                .withCopyLibraries(booleanValueOfWithDefault(settingsMap, COPY_LIBS, OS.isWindows()))
+                .withLocations(new TreeSet<>(readConfigurationLocations(settingsMap)))
+                .withThirdPartyClassPath(readThirdPartyClassPath(settingsMap))
+                .withActiveLocation(readActiveLocation(settingsMap, new TreeSet<>(readConfigurationLocations(settingsMap))))
+                .withScanBeforeCheckin(booleanValueOf(settingsMap, SCAN_BEFORE_CHECKIN))
+                .withLastActivePluginVersion(settingsMap.get(LAST_ACTIVE_PLUGIN_VERSION));
+    }
 
-    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> pLoadedMap) {
-        List<ConfigurationLocation> result = pLoadedMap.entrySet().stream()
-                .filter(this::propertyIsALocation)
-                .map(e -> deserialiseLocation(pLoadedMap, e.getKey()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        ensureBundledConfigs(result);  // useful for migration, or when config file edited manually
+    void setCurrentConfig(@NotNull final PluginConfigDto currentPluginConfig) {
+        projectSettings = new ProjectSettings(project, currentPluginConfig);
+    }
+
+    /**
+     * Needed when a setting written by a previous version of this plugin gets loaded by a newer version; converts
+     * the scan scope settings based on flags to the enum value.
+     *
+     * @param deserialisedMap the loaded settings
+     */
+    private void convertSettingsFormat(final Map<String, String> deserialisedMap) {
+        if (deserialisedMap != null && !deserialisedMap.isEmpty() && !deserialisedMap.containsKey(SCANSCOPE_SETTING)) {
+            ScanScope scope = ScanScope.fromFlags(booleanValueOf(deserialisedMap, CHECK_TEST_CLASSES),
+                    booleanValueOf(deserialisedMap, CHECK_NONJAVA_FILES));
+            deserialisedMap.put(SCANSCOPE_SETTING, scope.name());
+            deserialisedMap.remove(CHECK_TEST_CLASSES);
+            deserialisedMap.remove(CHECK_NONJAVA_FILES);
+        }
+    }
+
+    private ConfigurationLocation readActiveLocation(@NotNull final Map<String, String> pLoadedMap,
+                                                     @NotNull final SortedSet<ConfigurationLocation> pLocations) {
+        String serializedLocation = pLoadedMap.get(ACTIVE_CONFIG);
+        if (serializedLocation != null && !serializedLocation.trim().isEmpty()) {
+            ConfigurationLocation activeLocation = configurationLocationFactory().create(project, serializedLocation);
+            return pLocations.stream().filter(cl -> cl.equals(activeLocation)).findFirst().orElse(null);
+        }
+        return null;
+    }
+
+    @NotNull
+    private String readCheckstyleVersion(@NotNull final Map<String, String> pLoadedMap) {
+        final VersionListReader vlr = new VersionListReader();
+        String result = pLoadedMap.get(CHECKSTYLE_VERSION_SETTING);
+        if (result == null) {
+            result = vlr.getDefaultVersion();
+        } else {
+            result = vlr.getReplacementMap().getOrDefault(result, result);
+        }
         return result;
-    }
-
-    private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> pConfigurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
-        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
-        if (!pConfigurationLocations.contains(sunChecks)) {
-            pConfigurationLocations.add(sunChecks);
-        }
-        if (!pConfigurationLocations.contains(googleChecks)) {
-            pConfigurationLocations.add(googleChecks);
-        }
-    }
-
-    @Nullable
-    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> pLoadedMap,
-                                                      @NotNull final String pKey) {
-        final String serialisedLocation = pLoadedMap.get(pKey);
-        try {
-            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
-            location.setProperties(propertiesFor(pLoadedMap, pKey));
-            return location;
-
-        } catch (IllegalArgumentException e) {
-            LOG.warn("Could not parse location: " + serialisedLocation, e);
-            return null;
-        }
-    }
-
-    private boolean propertyIsALocation(final Map.Entry<String, String> property) {
-        return property.getKey().startsWith(LOCATION_PREFIX);
-    }
-
-    @NotNull
-    private Map<String, String> propertiesFor(@NotNull final Map<String, String> pLoadedMap,
-                                              @NotNull final String pKey) {
-        final Map<String, String> properties = new HashMap<>();
-
-        final String propertyPrefix = propertyPrefix(pKey);
-
-        // loop again over all settings to find the properties belonging to this configuration
-        // not the best solution, but since there are only few items it doesn't hurt too much...
-        pLoadedMap.entrySet().stream()
-                .filter(property -> property.getKey().startsWith(propertyPrefix))
-                .forEach(property -> {
-                    final String propertyName = property.getKey().substring(propertyPrefix.length());
-                    properties.put(propertyName, property.getValue());
-                });
-        return properties;
-    }
-
-    @NotNull
-    private String propertyPrefix(final String key) {
-        final int index = Integer.parseInt(key.substring(LOCATION_PREFIX.length()));
-        return PROPERTIES_PREFIX + index + ".";
-    }
-
-    ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
 
@@ -257,6 +213,26 @@ public class CheckStyleConfiguration
         return path;
     }
 
+    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> pLoadedMap) {
+        List<ConfigurationLocation> result = pLoadedMap.entrySet().stream()
+                .filter(this::propertyIsALocation)
+                .map(e -> deserialiseLocation(pLoadedMap, e.getKey()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        ensureBundledConfigs(result);  // useful for migration, or when config file edited manually
+        return result;
+    }
+
+    private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
+        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
+        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
+        if (!configurationLocations.contains(sunChecks)) {
+            configurationLocations.add(sunChecks);
+        }
+        if (!configurationLocations.contains(googleChecks)) {
+            configurationLocations.add(googleChecks);
+        }
+    }
 
     /**
      * Get the base path of the project.
@@ -273,84 +249,52 @@ public class CheckStyleConfiguration
         return new File(baseDir.getPath());
     }
 
+    @Nullable
+    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> pLoadedMap,
+                                                      @NotNull final String pKey) {
+        final String serialisedLocation = pLoadedMap.get(pKey);
+        try {
+            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            location.setProperties(propertiesFor(pLoadedMap, pKey));
+            return location;
 
-    /**
-     * Create a copy of the current configuration.
-     *
-     * @return a copy of the current configuration settings
-     */
-    public ProjectSettings getState() {
-        if (currentPluginConfig != null) {
-            return new ProjectSettings(project, currentPluginConfig);
-        }
-        return new ProjectSettings(project, defaultConfiguration(project).build());
-    }
-
-    /**
-     * Load the state from the given settings beans.
-     *
-     * @param projectSettings the project settings to load.
-     */
-    public void loadState(final ProjectSettings projectSettings) {
-        if (projectSettings != null) {
-            Map<String, String> loadedMap = projectSettings.getConfiguration();
-            convertSettingsFormat(loadedMap);
-            currentPluginConfig = toDto(loadedMap);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not parse location: " + serialisedLocation, e);
+            return null;
         }
     }
 
-    /**
-     * Needed when a setting written by a previous version of this plugin gets loaded by a newer version; converts
-     * the scan scope settings based on flags to the enum value.
-     *
-     * @param deserialisedMap the loaded settings
-     */
-    private void convertSettingsFormat(final Map<String, String> deserialisedMap) {
-        if (deserialisedMap != null && !deserialisedMap.isEmpty() && !deserialisedMap.containsKey(SCANSCOPE_SETTING)) {
-            ScanScope scope = ScanScope.fromFlags(booleanValueOf(deserialisedMap, CHECK_TEST_CLASSES),
-                    booleanValueOf(deserialisedMap, CHECK_NONJAVA_FILES));
-            deserialisedMap.put(SCANSCOPE_SETTING, scope.name());
-            deserialisedMap.remove(CHECK_TEST_CLASSES);
-            deserialisedMap.remove(CHECK_NONJAVA_FILES);
-        }
+    private boolean propertyIsALocation(final Map.Entry<String, String> property) {
+        return property.getKey().startsWith(LOCATION_PREFIX);
     }
 
-    private PluginConfigDto toDto(final Map<String, String> deserialisedMap) {
-        return PluginConfigDtoBuilder.defaultConfiguration(project)
-                .withCheckstyleVersion(readCheckstyleVersion(deserialisedMap))
-                .withScanScope(scopeValueOf(deserialisedMap))
-                .withSuppressErrors(booleanValueOf(deserialisedMap, SUPPRESS_ERRORS))
-                .withCopyLibraries(booleanValueOfWithDefault(deserialisedMap, COPY_LIBS, OS.isWindows()))
-                .withLocations(new TreeSet<>(readConfigurationLocations(deserialisedMap)))
-                .withThirdPartyClassPath(readThirdPartyClassPath(deserialisedMap))
-                .withActiveLocation(readActiveLocation(deserialisedMap, new TreeSet<>(readConfigurationLocations(deserialisedMap))))
-                .withScanBeforeCheckin(booleanValueOf(deserialisedMap, SCAN_BEFORE_CHECKIN))
-                .withLastActivePluginVersion(deserialisedMap.get(LAST_ACTIVE_PLUGIN_VERSION))
-                .build();
-    }
-
-    private ConfigurationLocation readActiveLocation(@NotNull final Map<String, String> pLoadedMap,
-                                                     @NotNull final SortedSet<ConfigurationLocation> pLocations) {
-        String serializedLocation = pLoadedMap.get(ACTIVE_CONFIG);
-        if (serializedLocation != null && !serializedLocation.trim().isEmpty()) {
-            ConfigurationLocation activeLocation = configurationLocationFactory().create(project, serializedLocation);
-            return pLocations.stream().filter(cl -> cl.equals(activeLocation)).findFirst().orElse(null);
-        }
-        return null;
+    private ConfigurationLocationFactory configurationLocationFactory() {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     @NotNull
-    private String readCheckstyleVersion(@NotNull final Map<String, String> pLoadedMap) {
-        final VersionListReader vlr = new VersionListReader();
-        String result = pLoadedMap.get(CHECKSTYLE_VERSION_SETTING);
-        if (result == null) {
-            result = vlr.getDefaultVersion();
-        } else {
-            result = vlr.getReplacementMap().getOrDefault(result, result);
-        }
-        return result;
+    private Map<String, String> propertiesFor(@NotNull final Map<String, String> pLoadedMap,
+                                              @NotNull final String pKey) {
+        final Map<String, String> properties = new HashMap<>();
+
+        final String propertyPrefix = propertyPrefix(pKey);
+
+        // loop again over all settings to find the properties belonging to this configuration
+        // not the best solution, but since there are only few items it doesn't hurt too much...
+        pLoadedMap.entrySet().stream()
+                .filter(property -> property.getKey().startsWith(propertyPrefix))
+                .forEach(property -> {
+                    final String propertyName = property.getKey().substring(propertyPrefix.length());
+                    properties.put(propertyName, property.getValue());
+                });
+        return properties;
     }
 
+    @NotNull
+    private String propertyPrefix(final String key) {
+        final int index = Integer.parseInt(key.substring(LOCATION_PREFIX.length()));
+        return PROPERTIES_PREFIX + index + ".";
+    }
 
     /**
      * Wrapper class for IDEA state serialisation.
@@ -464,17 +408,4 @@ public class CheckStyleConfiguration
         }
     }
 
-
-    public static CheckStyleConfiguration getInstance(@NotNull final Project project) {
-        CheckStyleConfiguration result = testInstance;
-        if (result == null) {
-            result = ServiceManager.getService(project, CheckStyleConfiguration.class);
-        }
-        return result;
-    }
-
-
-    public static void activateMock4UnitTesting(@Nullable final CheckStyleConfiguration testingInstance) {
-        CheckStyleConfiguration.testInstance = testingInstance;
-    }
 }

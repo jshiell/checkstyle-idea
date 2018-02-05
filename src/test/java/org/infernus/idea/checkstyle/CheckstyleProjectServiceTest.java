@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigDto;
 import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.junit.AfterClass;

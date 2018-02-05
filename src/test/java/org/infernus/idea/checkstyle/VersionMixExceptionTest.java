@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigDto;
 import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;

@@ -2,7 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.util.FilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;

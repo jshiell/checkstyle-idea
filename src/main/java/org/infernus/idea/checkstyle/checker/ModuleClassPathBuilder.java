@@ -15,14 +15,13 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
 import org.infernus.idea.checkstyle.util.ModulePaths;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 
 
-public class ModuleClassPathBuilder
-{
+public class ModuleClassPathBuilder {
     private static final Logger LOG = Logger.getInstance(ModuleClassPathBuilder.class);
 
 
