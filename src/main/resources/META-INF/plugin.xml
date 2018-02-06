@@ -246,6 +246,8 @@
                         serviceImplementation="org.infernus.idea.checkstyle.config.CheckStyleConfiguration"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.config.ProjectConfiguration"
                         serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfiguration"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.config.WorkspaceConfiguration"
+                        serviceImplementation="org.infernus.idea.checkstyle.config.WorkspaceConfiguration"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 

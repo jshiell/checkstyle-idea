@@ -18,6 +18,7 @@ public class CheckStyleConfiguration {
 
     private final Project project;
     private final ProjectConfiguration projectConfiguration;
+    private final WorkspaceConfiguration workspaceConfiguration;
 
     /**
      * mock instance which may be set and used by unit tests
@@ -26,9 +27,11 @@ public class CheckStyleConfiguration {
 
 
     public CheckStyleConfiguration(@NotNull final Project project,
-                                   @NotNull final ProjectConfiguration projectConfiguration) {
+                                   @NotNull final ProjectConfiguration projectConfiguration,
+                                   @NotNull final WorkspaceConfiguration workspaceConfiguration) {
         this.project = project;
         this.projectConfiguration = projectConfiguration;
+        this.workspaceConfiguration = workspaceConfiguration;
     }
 
 
@@ -55,13 +58,14 @@ public class CheckStyleConfiguration {
     @NotNull
     public PluginConfigDto getCurrent() {
         final PluginConfigDtoBuilder defaultConfig = PluginConfigDtoBuilder.defaultConfiguration(project);
-        return projectConfiguration
-                .populate(defaultConfig)
+        return workspaceConfiguration
+                .populate(projectConfiguration.populate(defaultConfig))
                 .build();
     }
 
     public void setCurrent(@NotNull final PluginConfigDto updatedConfiguration, final boolean fireEvents) {
         projectConfiguration.setCurrentConfig(updatedConfiguration);
+        workspaceConfiguration.setCurrentConfig(updatedConfiguration);
         if (fireEvents) {
             fireConfigurationChanged();
         }

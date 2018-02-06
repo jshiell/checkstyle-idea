@@ -42,7 +42,6 @@ public class ProjectConfiguration
     private static final String COPY_LIBS = "copy-libs";
     private static final String THIRDPARTY_CLASSPATH = "thirdparty-classpath";
     private static final String SCAN_BEFORE_CHECKIN = "scan-before-checkin";
-    private static final String LAST_ACTIVE_PLUGIN_VERSION = "last-active-plugin-version";
     private static final String LOCATION_PREFIX = "location-";
     private static final String PROPERTIES_PREFIX = "property-";
 
@@ -95,8 +94,7 @@ public class ProjectConfiguration
                 .withLocations(new TreeSet<>(readConfigurationLocations(settingsMap)))
                 .withThirdPartyClassPath(readThirdPartyClassPath(settingsMap))
                 .withActiveLocation(readActiveLocation(settingsMap, new TreeSet<>(readConfigurationLocations(settingsMap))))
-                .withScanBeforeCheckin(booleanValueOf(settingsMap, SCAN_BEFORE_CHECKIN))
-                .withLastActivePluginVersion(settingsMap.get(LAST_ACTIVE_PLUGIN_VERSION));
+                .withScanBeforeCheckin(booleanValueOf(settingsMap, SCAN_BEFORE_CHECKIN));
     }
 
     void setCurrentConfig(@NotNull final PluginConfigDto currentPluginConfig) {
@@ -328,8 +326,6 @@ public class ProjectConfiguration
             if (currentPluginConfig.getActiveLocation() != null) {
                 mapForSerialization.put(ACTIVE_CONFIG, currentPluginConfig.getActiveLocation().getDescriptor());
             }
-
-            mapForSerialization.put(LAST_ACTIVE_PLUGIN_VERSION, currentPluginConfig.getLastActivePluginVersion());
 
             configuration = mapForSerialization;
         }
