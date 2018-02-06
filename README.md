@@ -213,6 +213,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.17.1** Fixed: Moved update tracking to workspace.
 * **5.17.0** New: Now built against IDEA 2016.1 (was 15.0.6).
 * **5.16.3** New: Improved support for CustomImportOrder (#362). Thanks to Joey Lee (@yeoji).
 * **5.16.3** New: Plugin will notify user on update and point at release notes (#373). 
