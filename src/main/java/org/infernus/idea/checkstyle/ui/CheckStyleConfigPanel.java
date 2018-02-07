@@ -44,11 +44,10 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
@@ -249,7 +248,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
 
-    public void showPluginConfiguration(@NotNull final PluginConfigDto pluginConfig) {
+    public void showPluginConfiguration(@NotNull final PluginConfiguration pluginConfig) {
         csVersionDropdown.setSelectedItem(pluginConfig.getCheckstyleVersion());
         scopeDropdown.setSelectedItem(pluginConfig.getScanScope());
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
@@ -259,7 +258,7 @@ public class CheckStyleConfigPanel extends JPanel {
         locationModel.setActiveLocation(pluginConfig.getActiveLocation());
     }
 
-    public PluginConfigDto getPluginConfiguration() {
+    public PluginConfiguration getPluginConfiguration() {
         final String checkstyleVersion = (String) csVersionDropdown.getSelectedItem();
         ScanScope scanScope = (ScanScope) scopeDropdown.getSelectedItem();
         if (scanScope == null) {
@@ -267,7 +266,7 @@ public class CheckStyleConfigPanel extends JPanel {
         }
 
         // we don't know the scanBeforeCheckin flag at this point
-        return PluginConfigDtoBuilder.defaultConfiguration(project)
+        return PluginConfigurationBuilder.defaultConfiguration(project)
                 .withCheckstyleVersion(checkstyleVersion)
                 .withScanScope(scanScope)
                 .withSuppressErrors(suppressErrorsCheckbox.isSelected())

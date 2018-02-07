@@ -13,8 +13,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
@@ -46,7 +46,7 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
-    private final CheckStyleConfiguration configuration;
+    private final PluginConfigurationManager configurationManager;
 
 
     /**
@@ -54,9 +54,10 @@ public final class CheckStylePlugin implements ProjectComponent {
      *
      * @param project the current project.
      */
-    public CheckStylePlugin(@NotNull final Project project) {
+    public CheckStylePlugin(@NotNull final Project project,
+                            @NotNull final PluginConfigurationManager configurationManager) {
         this.project = project;
-        configuration = CheckStyleConfiguration.getInstance(project);
+        this.configurationManager = configurationManager;
 
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
 
@@ -92,8 +93,8 @@ public final class CheckStylePlugin implements ProjectComponent {
      *
      * @return the plug-in configuration.
      */
-    public CheckStyleConfiguration getConfiguration() {
-        return configuration;
+    public PluginConfigurationManager configurationManager() {
+        return configurationManager;
     }
 
     /**
@@ -117,14 +118,14 @@ public final class CheckStylePlugin implements ProjectComponent {
     private void notifyUserIfPluginUpdated() {
         if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion())) {
             Notifications.showInfo(project, message("plugin.update", currentPluginVersion()));
-            configuration.setCurrent(PluginConfigDtoBuilder.from(configuration.getCurrent())
+            configurationManager.setCurrent(PluginConfigurationBuilder.from(configurationManager.getCurrent())
                     .withLastActivePluginVersion(currentPluginVersion())
                     .build(), false);
         }
     }
 
     private String lastActivePluginVersion() {
-        return configuration.getCurrent().getLastActivePluginVersion();
+        return configurationManager.getCurrent().getLastActivePluginVersion();
     }
 
     public static String currentPluginVersion() {
@@ -236,7 +237,7 @@ public final class CheckStylePlugin implements ProjectComponent {
             }
             return moduleConfiguration.getActiveConfiguration();
         }
-        return getConfiguration().getCurrent().getActiveLocation();
+        return configurationManager().getCurrent().getActiveLocation();
     }
 
     private class ScanCompletionTracker implements ScannerListener {

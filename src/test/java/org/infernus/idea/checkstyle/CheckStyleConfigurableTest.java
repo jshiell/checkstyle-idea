@@ -1,9 +1,9 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -31,16 +31,16 @@ public class CheckStyleConfigurableTest {
         }
 
         @SuppressWarnings("MethodDoesntCallSuperMethod")
-        CheckStyleConfiguration getConfiguration() {
+        PluginConfigurationManager getConfiguration() {
             final ConfigurationLocationFactory mockLocFactory = new ConfigurationLocationFactory();
             final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject, mockLocFactory);
 
-            final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.2")
+            final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.2")
                     .withLocations(mockLocations)
                     .withThirdPartyClassPath(Arrays.asList("cp1", "cp2"))
                     .withActiveLocation(mockLocations.first())
                     .build();
-            CheckStyleConfiguration mockConfig = mock(CheckStyleConfiguration.class);
+            PluginConfigurationManager mockConfig = mock(PluginConfigurationManager.class);
             when(mockConfig.getCurrent()).thenReturn(mockConfigDto);
             return mockConfig;
         }
@@ -63,7 +63,7 @@ public class CheckStyleConfigurableTest {
         final SortedSet<ConfigurationLocation> mockLocations = buildMockLocations(mockProject,
                 new ConfigurationLocationFactory());
 
-        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.2")
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.2")
                 .withLocations(mockLocations)
                 .withThirdPartyClassPath(Arrays.asList("cp1", "cp2"))
                 .withActiveLocation(mockLocations.first())

@@ -8,10 +8,10 @@ import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
 import com.intellij.testFramework.LightPlatformTestCase;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,10 +32,10 @@ public class CodeStyleImporterTest
     protected void setUp() throws Exception {
         super.setUp();
 
-        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.1").build();
+        PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.1").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(project);
 
@@ -46,7 +46,7 @@ public class CodeStyleImporterTest
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        CheckStyleConfiguration.activateMock4UnitTesting(null);
+        PluginConfigurationManager.activateMock4UnitTesting(null);
     }
 
     private final static String FILE_PREFIX =

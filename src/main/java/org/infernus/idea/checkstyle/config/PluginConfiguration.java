@@ -16,7 +16,7 @@ import java.util.*;
  * This is intended to be a simple DTO without any business logic.
  */
 @Immutable
-public class PluginConfigDto {
+public class PluginConfiguration {
     private final String checkstyleVersion;
     private final ScanScope scanScope;
     private final boolean suppressErrors;
@@ -27,15 +27,15 @@ public class PluginConfigDto {
     private final boolean scanBeforeCheckin;
     private final String lastActivePluginVersion;
 
-    PluginConfigDto(@NotNull final String checkstyleVersion,
-                    @NotNull final ScanScope scanScope,
-                    final boolean suppressErrors,
-                    final boolean copyLibs,
-                    @NotNull final SortedSet<ConfigurationLocation> locations,
-                    @NotNull final List<String> thirdPartyClasspath,
-                    @Nullable final ConfigurationLocation activeLocation,
-                    final boolean scanBeforeCheckin,
-                    @Nullable final String lastActivePluginVersion) {
+    PluginConfiguration(@NotNull final String checkstyleVersion,
+                        @NotNull final ScanScope scanScope,
+                        final boolean suppressErrors,
+                        final boolean copyLibs,
+                        @NotNull final SortedSet<ConfigurationLocation> locations,
+                        @NotNull final List<String> thirdPartyClasspath,
+                        @Nullable final ConfigurationLocation activeLocation,
+                        final boolean scanBeforeCheckin,
+                        @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -102,10 +102,10 @@ public class PluginConfigDto {
     }
 
     public boolean hasChangedFrom(final Object other) {
-        return this.equals(other) && locationsAreEqual((PluginConfigDto) other);
+        return this.equals(other) && locationsAreEqual((PluginConfiguration) other);
     }
 
-    private boolean locationsAreEqual(final PluginConfigDto other) {
+    private boolean locationsAreEqual(final PluginConfiguration other) {
         Iterator<ConfigurationLocation> locationIterator = locations.iterator();
         Iterator<ConfigurationLocation> otherLocationIterator = other.locations.iterator();
 
@@ -130,7 +130,7 @@ public class PluginConfigDto {
         if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        final PluginConfigDto otherDto = (PluginConfigDto) other;
+        final PluginConfiguration otherDto = (PluginConfiguration) other;
         return Objects.equals(checkstyleVersion, otherDto.checkstyleVersion)
                 && Objects.equals(scanScope, otherDto.scanScope)
                 && Objects.equals(suppressErrors, otherDto.suppressErrors)

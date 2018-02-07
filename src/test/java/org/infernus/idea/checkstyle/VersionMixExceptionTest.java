@@ -5,9 +5,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
@@ -51,10 +51,10 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance(BASE_VERSION).build();
+        PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(BASE_VERSION).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
 
         csService = new CheckstyleProjectService(PROJECT);
         csService.activateCheckstyleVersion(BASE_VERSION, null);
@@ -65,7 +65,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     protected void tearDown() throws Exception {
         try {
             CheckstyleProjectService.activateMock4UnitTesting(null);
-            CheckStyleConfiguration.activateMock4UnitTesting(null);
+            PluginConfigurationManager.activateMock4UnitTesting(null);
             csService = null;
         } finally {
             super.tearDown();

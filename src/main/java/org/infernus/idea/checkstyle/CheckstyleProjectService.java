@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public class CheckstyleProjectService {
     public CheckstyleProjectService(@NotNull final Project project) {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
-        final CheckStyleConfiguration pluginConfig = CheckStyleConfiguration.getInstance(project);
+        final PluginConfigurationManager pluginConfig = PluginConfigurationManager.getInstance(project);
         activateCheckstyleVersion(pluginConfig.getCurrent().getCheckstyleVersion(),
                 pluginConfig.getCurrent().getThirdPartyClasspath());
     }

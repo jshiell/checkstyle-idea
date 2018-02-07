@@ -14,10 +14,10 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +59,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
             public void saveState() {
                 settings().ifPresent(settings -> settings.setCurrent(
-                        PluginConfigDtoBuilder.from(settings.getCurrent()).withScanBeforeCheckin(checkBox.isSelected()).build(),
+                        PluginConfigurationBuilder.from(settings.getCurrent()).withScanBeforeCheckin(checkBox.isSelected()).build(),
                         false));
             }
 
@@ -86,7 +86,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        if (plugin.getConfiguration().getCurrent().isScanBeforeCheckin()) {
+        if (plugin.configurationManager().getCurrent().isScanBeforeCheckin()) {
             try {
                 final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
@@ -108,7 +108,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         }
     }
 
-    private Optional<CheckStyleConfiguration> settings() {
+    private Optional<PluginConfigurationManager> settings() {
         final Project project = checkinPanel.getProject();
         if (project == null) {
             LOG.warn("Could not get project for check-in panel");
@@ -121,7 +121,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return empty();
         }
 
-        return ofNullable(plugin.getConfiguration());
+        return ofNullable(plugin.configurationManager());
     }
 
     private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,

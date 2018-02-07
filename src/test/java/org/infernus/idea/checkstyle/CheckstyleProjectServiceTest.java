@@ -1,9 +1,9 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,15 +21,15 @@ public class CheckstyleProjectServiceTest {
 
     @BeforeClass
     public static void setUp() {
-        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance("7.1.1").build();
+        PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.1").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
     }
 
     @AfterClass
     public static void tearDown() {
-        CheckStyleConfiguration.activateMock4UnitTesting(null);
+        PluginConfigurationManager.activateMock4UnitTesting(null);
     }
 
 

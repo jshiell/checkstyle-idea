@@ -21,7 +21,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.ConfigurationListener;
+import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -113,7 +113,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         }
 
         configurationChanged();
-        checkStylePlugin.getConfiguration().addConfigurationListener(this);
+        checkStylePlugin.configurationManager().addConfigurationListener(this);
 
         final ActionGroup mainActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
@@ -224,7 +224,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         configurationOverrideModel.removeAllElements();
 
         configurationOverrideModel.addElement(DEFAULT_OVERRIDE);
-        checkStylePlugin.getConfiguration().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
+        checkStylePlugin.configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
         configurationOverrideModel.setSelectedItem(DEFAULT_OVERRIDE);
     }
 

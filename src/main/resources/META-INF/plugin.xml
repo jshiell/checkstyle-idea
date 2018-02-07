@@ -243,12 +243,12 @@
                         serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstyleProjectService"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckstyleProjectService"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.CheckStyleConfiguration"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.CheckStyleConfiguration"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.ProjectConfiguration"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfiguration"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.WorkspaceConfiguration"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.WorkspaceConfiguration"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.config.PluginConfigurationManager"
+                        serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.config.ProjectConfigurationState"
+                        serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"
+                        serviceImplementation="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 

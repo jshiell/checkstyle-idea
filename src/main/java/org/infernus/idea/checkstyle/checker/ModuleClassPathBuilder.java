@@ -15,7 +15,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.util.ModulePaths;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public class ModuleClassPathBuilder {
 
 
     private boolean wantsCopyLibs(@NotNull final Project pProject) {
-        final CheckStyleConfiguration config = CheckStyleConfiguration.getInstance(pProject);
+        final PluginConfigurationManager config = PluginConfigurationManager.getInstance(pProject);
         return config != null && config.getCurrent().isCopyLibs();
     }
 }

@@ -4,7 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -238,7 +238,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
         LOG.debug("Processing file: " + path);
 
-        for (String prefix : new String[]{CheckStyleConfiguration.PROJECT_DIR, CheckStyleConfiguration.LEGACY_PROJECT_DIR}) {
+        for (String prefix : new String[]{PluginConfigurationManager.PROJECT_DIR, PluginConfigurationManager.LEGACY_PROJECT_DIR}) {
             int prefixLocation = path.indexOf(prefix);
             if (prefixLocation >= 0) {
                 // path is relative to project dir
@@ -269,16 +269,16 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         if (getProject().isDefault()) {
-            if (new File(path).exists() || path.startsWith(CheckStyleConfiguration.PROJECT_DIR)) {
+            if (new File(path).exists() || path.startsWith(PluginConfigurationManager.PROJECT_DIR)) {
                 return toUnixPath(path);
             } else {
-                return CheckStyleConfiguration.PROJECT_DIR + toUnixPath(separatorChar() + path);
+                return PluginConfigurationManager.PROJECT_DIR + toUnixPath(separatorChar() + path);
             }
         }
 
         final File projectPath = getProjectPath();
         if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
-            return CheckStyleConfiguration.PROJECT_DIR
+            return PluginConfigurationManager.PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
 

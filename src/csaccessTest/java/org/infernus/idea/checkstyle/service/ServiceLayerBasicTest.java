@@ -2,12 +2,12 @@ package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -45,10 +45,10 @@ public class ServiceLayerBasicTest {
 
     @BeforeClass
     public static void setUp() {
-        CheckStyleConfiguration mockPluginConfig = mock(CheckStyleConfiguration.class);
-        final PluginConfigDto mockConfigDto = PluginConfigDtoBuilder.testInstance(currentCsVersion()).build();
+        PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(currentCsVersion()).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        CheckStyleConfiguration.activateMock4UnitTesting(mockPluginConfig);
+        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
 
         checkstyleProjectService = new CheckstyleProjectService(PROJECT);
         CheckstyleProjectService.activateMock4UnitTesting(checkstyleProjectService);
@@ -58,7 +58,7 @@ public class ServiceLayerBasicTest {
     public static void tearDown() {
         checkstyleProjectService = null;
         CheckstyleProjectService.activateMock4UnitTesting(null);
-        CheckStyleConfiguration.activateMock4UnitTesting(null);
+        PluginConfigurationManager.activateMock4UnitTesting(null);
     }
 
     @Test

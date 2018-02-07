@@ -9,9 +9,9 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigDto;
-import org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -56,9 +56,9 @@ public class CheckStyleConfigurable
     @Override
     public boolean isModified() {
         LOG.debug("isModified() - enter");
-        final CheckStyleConfiguration configuration = getConfiguration();
-        final PluginConfigDto oldConfig = configuration.getCurrent();
-        final PluginConfigDto newConfig = PluginConfigDtoBuilder
+        final PluginConfigurationManager configuration = getConfiguration();
+        final PluginConfiguration oldConfig = configuration.getCurrent();
+        final PluginConfiguration newConfig = PluginConfigurationBuilder
                 .from(configPanel.getPluginConfiguration())
                 .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
                 .build();
@@ -74,8 +74,8 @@ public class CheckStyleConfigurable
     public void apply() throws ConfigurationException {
         LOG.debug("apply() - enter");
 
-        final CheckStyleConfiguration configuration = getConfiguration();
-        final PluginConfigDto newConfig = PluginConfigDtoBuilder.from(configPanel.getPluginConfiguration())
+        final PluginConfigurationManager configuration = getConfiguration();
+        final PluginConfiguration newConfig = PluginConfigurationBuilder.from(configPanel.getPluginConfiguration())
                 .withScanBeforeCheckin(configuration.getCurrent().isScanBeforeCheckin())
                 .build();
         configuration.setCurrent(newConfig, true);
@@ -97,8 +97,8 @@ public class CheckStyleConfigurable
         csService.activateCheckstyleVersion(checkstyleVersion, thirdPartyClasspath);
     }
 
-    CheckStyleConfiguration getConfiguration() {
-        return CheckStyleConfiguration.getInstance(project);
+    PluginConfigurationManager getConfiguration() {
+        return PluginConfigurationManager.getInstance(project);
     }
 
     private CheckerFactoryCache getCheckerFactoryCache() {
@@ -109,7 +109,7 @@ public class CheckStyleConfigurable
     public void reset() {
         LOG.debug("reset() - enter");
 
-        final PluginConfigDto pluginConfig = getConfiguration().getCurrent();
+        final PluginConfiguration pluginConfig = getConfiguration().getCurrent();
         configPanel.showPluginConfiguration(pluginConfig);
 
         activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());

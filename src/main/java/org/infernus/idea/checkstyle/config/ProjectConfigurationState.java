@@ -23,15 +23,15 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.infernus.idea.checkstyle.config.CheckStyleConfiguration.LEGACY_PROJECT_DIR;
-import static org.infernus.idea.checkstyle.config.CheckStyleConfiguration.PROJECT_DIR;
-import static org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder.defaultConfiguration;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
-public class ProjectConfiguration
-        implements ExportableComponent, PersistentStateComponent<ProjectConfiguration.ProjectSettings> {
+public class ProjectConfigurationState
+        implements ExportableComponent, PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
 
-    private static final Logger LOG = Logger.getInstance(ProjectConfiguration.class);
+    private static final Logger LOG = Logger.getInstance(ProjectConfigurationState.class);
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String CHECKSTYLE_VERSION_SETTING = "checkstyle-version";
@@ -49,7 +49,7 @@ public class ProjectConfiguration
 
     private ProjectSettings projectSettings;
 
-    public ProjectConfiguration(@NotNull final Project project) {
+    public ProjectConfigurationState(@NotNull final Project project) {
         this.project = project;
 
         projectSettings = defaultProjectSettings();
@@ -83,7 +83,7 @@ public class ProjectConfiguration
     }
 
     @NotNull
-    PluginConfigDtoBuilder populate(@NotNull final PluginConfigDtoBuilder builder) {
+    PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
         Map<String, String> settingsMap = projectSettings.getConfiguration();
         convertSettingsFormat(settingsMap);
         return builder
@@ -97,7 +97,7 @@ public class ProjectConfiguration
                 .withScanBeforeCheckin(booleanValueOf(settingsMap, SCAN_BEFORE_CHECKIN));
     }
 
-    void setCurrentConfig(@NotNull final PluginConfigDto currentPluginConfig) {
+    void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
         projectSettings = new ProjectSettings(project, currentPluginConfig);
     }
 
@@ -308,7 +308,7 @@ public class ProjectConfiguration
         }
 
         public ProjectSettings(@NotNull final Project project,
-                               @NotNull final PluginConfigDto currentPluginConfig) {
+                               @NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());

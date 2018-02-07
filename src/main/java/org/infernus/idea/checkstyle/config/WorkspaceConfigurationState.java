@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.infernus.idea.checkstyle.config.PluginConfigDtoBuilder.defaultConfiguration;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
 
 @State(name = CheckStylePlugin.ID_PLUGIN + "-workspace", storages = {@Storage(StoragePathMacros.WORKSPACE_FILE)})
-public class WorkspaceConfiguration
-        implements PersistentStateComponent<WorkspaceConfiguration.WorkspaceSettings> {
+public class WorkspaceConfigurationState
+        implements PersistentStateComponent<WorkspaceConfigurationState.WorkspaceSettings> {
 
     private static final String LAST_ACTIVE_PLUGIN_VERSION = "last-active-plugin-version";
 
@@ -23,7 +23,7 @@ public class WorkspaceConfiguration
 
     private WorkspaceSettings workspaceSettings;
 
-    public WorkspaceConfiguration(@NotNull final Project project) {
+    public WorkspaceConfigurationState(@NotNull final Project project) {
         this.project = project;
 
         workspaceSettings = defaultWorkspaceSettings();
@@ -47,13 +47,13 @@ public class WorkspaceConfiguration
     }
 
     @NotNull
-    PluginConfigDtoBuilder populate(@NotNull final PluginConfigDtoBuilder builder) {
+    PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
         Map<String, String> settingsMap = workspaceSettings.getConfiguration();
         return builder
                 .withLastActivePluginVersion(settingsMap.get(LAST_ACTIVE_PLUGIN_VERSION));
     }
 
-    void setCurrentConfig(@NotNull final PluginConfigDto currentPluginConfig) {
+    void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
         workspaceSettings = new WorkspaceSettings(currentPluginConfig);
     }
 
@@ -67,7 +67,7 @@ public class WorkspaceConfiguration
             super();
         }
 
-        public WorkspaceSettings(@NotNull final PluginConfigDto currentPluginConfig) {
+        public WorkspaceSettings(@NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
 
             mapForSerialization.put(LAST_ACTIVE_PLUGIN_VERSION, currentPluginConfig.getLastActivePluginVersion());

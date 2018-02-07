@@ -9,7 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.config.CheckStyleConfiguration;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ final class PsiFileValidator {
 
     public static boolean isScannable(@Nullable final PsiFile psiFile,
                                       @NotNull final Optional<Module> module,
-                                      @NotNull final CheckStyleConfiguration pluginConfig) {
+                                      @NotNull final PluginConfigurationManager pluginConfig) {
         return psiFile != null
                 && psiFile.isValid()
                 && psiFile.isPhysical()
@@ -41,13 +41,13 @@ final class PsiFileValidator {
     }
 
     private static boolean isValidFileType(final PsiFile psiFile,
-                                           final CheckStyleConfiguration pluginConfig) {
+                                           final PluginConfigurationManager pluginConfig) {
         return pluginConfig.getCurrent().getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
-                                             final CheckStyleConfiguration pluginConfig) {
+                                             final PluginConfigurationManager pluginConfig) {
         return pluginConfig.getCurrent().getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
@@ -56,7 +56,7 @@ final class PsiFileValidator {
         return JavaProjectRootsUtil.isInGeneratedCode(psiFile.getVirtualFile(), psiFile.getProject());
     }
 
-    private static boolean isInSource(@NotNull final PsiFile psiFile, final CheckStyleConfiguration pluginConfig) {
+    private static boolean isInSource(@NotNull final PsiFile psiFile, final PluginConfigurationManager pluginConfig) {
         return pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
             || ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile());
     }

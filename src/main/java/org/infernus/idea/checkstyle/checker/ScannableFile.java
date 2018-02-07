@@ -78,7 +78,7 @@ public class ScannableFile
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
             return psiFiles.stream().filter(psiFile -> PsiFileValidator.isScannable(psiFile, ofNullable(module),
-                    plugin.getConfiguration())).map(psiFile -> ScannableFile.create(psiFile, module)).filter
+                    plugin.configurationManager())).map(psiFile -> ScannableFile.create(psiFile, module)).filter
                     (Objects::nonNull).collect(Collectors.toList());
         } finally {
             readAccessToken.finish();

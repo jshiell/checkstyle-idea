@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public final class PluginConfigDtoBuilder {
+public final class PluginConfigurationBuilder {
     private String checkstyleVersion;
     private ScanScope scanScope;
     private boolean suppressErrors;
@@ -28,15 +28,15 @@ public final class PluginConfigDtoBuilder {
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
 
-    private PluginConfigDtoBuilder(@NotNull final String checkstyleVersion,
-                                   @NotNull final ScanScope scanScope,
-                                   final boolean suppressErrors,
-                                   final boolean copyLibraries,
-                                   @NotNull final SortedSet<ConfigurationLocation> locations,
-                                   @NotNull final List<String> thirdPartyClasspath,
-                                   @Nullable final ConfigurationLocation activeLocation,
-                                   final boolean scanBeforeCheckin,
-                                   @Nullable final String lastActivePluginVersion) {
+    private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
+                                       @NotNull final ScanScope scanScope,
+                                       final boolean suppressErrors,
+                                       final boolean copyLibraries,
+                                       @NotNull final SortedSet<ConfigurationLocation> locations,
+                                       @NotNull final List<String> thirdPartyClasspath,
+                                       @Nullable final ConfigurationLocation activeLocation,
+                                       final boolean scanBeforeCheckin,
+                                       @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -48,7 +48,7 @@ public final class PluginConfigDtoBuilder {
         this.lastActivePluginVersion = lastActivePluginVersion;
     }
 
-    public static PluginConfigDtoBuilder defaultConfiguration(final Project project) {
+    public static PluginConfigurationBuilder defaultConfiguration(final Project project) {
         final String csDefaultVersion = new VersionListReader().getDefaultVersion();
 
         final SortedSet<ConfigurationLocation> defaultLocations = new TreeSet<>();
@@ -57,18 +57,18 @@ public final class PluginConfigDtoBuilder {
 
         final boolean copyLibs = OS.isWindows();
 
-        return new PluginConfigDtoBuilder(csDefaultVersion, ScanScope.getDefaultValue(), false,
+        return new PluginConfigurationBuilder(csDefaultVersion, ScanScope.getDefaultValue(), false,
                 copyLibs, defaultLocations, Collections.emptyList(), null, false,
                 CheckStylePlugin.currentPluginVersion());
     }
 
-    public static PluginConfigDtoBuilder testInstance(final String checkstyleVersion) {
-        return new PluginConfigDtoBuilder(checkstyleVersion, ScanScope.AllSources, false, false,
+    public static PluginConfigurationBuilder testInstance(final String checkstyleVersion) {
+        return new PluginConfigurationBuilder(checkstyleVersion, ScanScope.AllSources, false, false,
                 Collections.emptySortedSet(), Collections.emptyList(), null, false, "aVersion");
     }
 
-    public static PluginConfigDtoBuilder from(final PluginConfigDto source) {
-        return new PluginConfigDtoBuilder(source.getCheckstyleVersion(),
+    public static PluginConfigurationBuilder from(final PluginConfiguration source) {
+        return new PluginConfigurationBuilder(source.getCheckstyleVersion(),
                 source.getScanScope(),
                 source.isSuppressErrors(),
                 source.isCopyLibs(),
@@ -79,53 +79,53 @@ public final class PluginConfigDtoBuilder {
                 source.getLastActivePluginVersion());
     }
 
-    public PluginConfigDtoBuilder withCheckstyleVersion(@Nullable final String newCheckstyleVersion) {
+    public PluginConfigurationBuilder withCheckstyleVersion(@Nullable final String newCheckstyleVersion) {
         this.checkstyleVersion = newCheckstyleVersion;
         return this;
     }
 
-    public PluginConfigDtoBuilder withActiveLocation(@Nullable final ConfigurationLocation newActiveLocation) {
+    public PluginConfigurationBuilder withActiveLocation(@Nullable final ConfigurationLocation newActiveLocation) {
         this.activeLocation = newActiveLocation;
         return this;
     }
 
-    public PluginConfigDtoBuilder withSuppressErrors(final boolean newSuppressErrors) {
+    public PluginConfigurationBuilder withSuppressErrors(final boolean newSuppressErrors) {
         this.suppressErrors = newSuppressErrors;
         return this;
     }
 
-    public PluginConfigDtoBuilder withCopyLibraries(final boolean newCopyLibraries) {
+    public PluginConfigurationBuilder withCopyLibraries(final boolean newCopyLibraries) {
         this.copyLibraries = newCopyLibraries;
         return this;
     }
 
-    public PluginConfigDtoBuilder withScanBeforeCheckin(final boolean newScanBeforeCheckin) {
+    public PluginConfigurationBuilder withScanBeforeCheckin(final boolean newScanBeforeCheckin) {
         this.scanBeforeCheckin = newScanBeforeCheckin;
         return this;
     }
 
-    public PluginConfigDtoBuilder withLocations(final SortedSet<ConfigurationLocation> newLocations) {
+    public PluginConfigurationBuilder withLocations(final SortedSet<ConfigurationLocation> newLocations) {
         this.locations = newLocations;
         return this;
     }
 
-    public PluginConfigDtoBuilder withThirdPartyClassPath(final List<String> newThirdPartyClassPath) {
+    public PluginConfigurationBuilder withThirdPartyClassPath(final List<String> newThirdPartyClassPath) {
         this.thirdPartyClasspath = newThirdPartyClassPath;
         return this;
     }
 
-    public PluginConfigDtoBuilder withScanScope(@NotNull final ScanScope newScanScope) {
+    public PluginConfigurationBuilder withScanScope(@NotNull final ScanScope newScanScope) {
         this.scanScope = newScanScope;
         return this;
     }
 
-    public PluginConfigDtoBuilder withLastActivePluginVersion(final String newLastActivePluginVersion) {
+    public PluginConfigurationBuilder withLastActivePluginVersion(final String newLastActivePluginVersion) {
         this.lastActivePluginVersion = newLastActivePluginVersion;
         return this;
     }
 
-    public PluginConfigDto build() {
-        return new PluginConfigDto(checkstyleVersion, scanScope, suppressErrors, copyLibraries,
+    public PluginConfiguration build() {
+        return new PluginConfiguration(checkstyleVersion, scanScope, suppressErrors, copyLibraries,
                 locations, thirdPartyClasspath, activeLocation,
                 scanBeforeCheckin, lastActivePluginVersion);
     }

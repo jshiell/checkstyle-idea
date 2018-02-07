@@ -32,40 +32,39 @@ public class VersionListReader {
     private final SortedSet<String> supportedVersions;
     private final SortedMap<String, String> replacementMap;
 
-
     public VersionListReader() {
         this(PROP_FILE);
     }
 
-    VersionListReader(@NotNull final String pPropertyFile) {
-        final Properties props = readProperties(pPropertyFile);
-        supportedVersions = readSupportedVersions(pPropertyFile, props);
-        replacementMap = readVersionMap(pPropertyFile, props, supportedVersions);
+    VersionListReader(@NotNull final String propertyFile) {
+        final Properties props = readProperties(propertyFile);
+        supportedVersions = readSupportedVersions(propertyFile, props);
+        replacementMap = readVersionMap(propertyFile, props, supportedVersions);
     }
 
 
     @NotNull
-    private Properties readProperties(@NotNull final String pPropertyFile) {
+    private Properties readProperties(@NotNull final String propertyFile) {
         final Properties props = new Properties();
         InputStream is = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(pPropertyFile);
+            is = getClass().getClassLoader().getResourceAsStream(propertyFile);
             if (is == null) {
                 // in unit tests, it seems we need this:
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(pPropertyFile);
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyFile);
             }
             if (is != null) {
                 props.load(is);
             }
         } catch (IllegalArgumentException | IOException e) {
             throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
-                    + pPropertyFile + "'", e);
+                    + propertyFile + "'", e);
         } finally {
             IOUtils.closeQuietly(is);
         }
         if (props.isEmpty()) {
             throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
-                    + pPropertyFile + "'");
+                    + propertyFile + "'");
         }
         return props;
     }
@@ -74,31 +73,32 @@ public class VersionListReader {
     /**
      * Read the supported Checkstyle versions from the config properties file.
      *
-     * @param pPropertyFile file name of the property file to be passed to {@link ClassLoader#getResourceAsStream}
+     * @param propertyFile file name of the property file to be passed to {@link ClassLoader#getResourceAsStream}
      * @param props the properties read from the property file
      * @return the supported versions which match the Java level of the current JVM
      */
     @NotNull
-    private SortedSet<String> readSupportedVersions(@NotNull final String pPropertyFile,
+    private SortedSet<String> readSupportedVersions(@NotNull final String propertyFile,
                                                     @NotNull final Properties props) {
         final String javaVersion = System.getProperty("java.version");
 
         final SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
-        theVersions.addAll(readVersions(pPropertyFile, props, PROP_NAME_JAVA7));
+        theVersions.addAll(readVersions(propertyFile, props, PROP_NAME_JAVA7));
         if (!javaVersion.startsWith("1.7")) {
-            theVersions.addAll(readVersions(pPropertyFile, props, PROP_NAME_JAVA8));
+            theVersions.addAll(readVersions(propertyFile, props, PROP_NAME_JAVA8));
         }
         return Collections.unmodifiableSortedSet(theVersions);
     }
 
 
     @NotNull
-    private Set<String> readVersions(@NotNull final String pPropertyFile, @NotNull final Properties props,
+    private Set<String> readVersions(@NotNull final String propertyFile,
+                                     @NotNull final Properties props,
                                      @NotNull final String propertyName) {
         final String propertyValue = props.getProperty(propertyName);
         if (Strings.isBlank(propertyValue)) {
             throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' missing from "
-                    + "configuration file '" + pPropertyFile + "'");
+                    + "configuration file '" + propertyFile + "'");
         }
 
         final String[] versions = propertyValue.trim().split("\\s*,\\s*");
@@ -111,30 +111,30 @@ public class VersionListReader {
 
         if (result.isEmpty()) {
             throw new CheckStylePluginException("Internal error: Property '" + propertyName + "' was empty in "
-                    + "configuration file '" + pPropertyFile + "'");
+                    + "configuration file '" + propertyFile + "'");
         }
         return result;
     }
 
 
     @NotNull
-    private SortedMap<String, String> readVersionMap(@NotNull final String pPropertyFile,
+    private SortedMap<String, String> readVersionMap(@NotNull final String propertyFile,
                                                      @NotNull final Properties props,
                                                      @NotNull final SortedSet<String> pSupportedVersions) {
         final String propertyValue = props.getProperty(PROP_VERSION_MAP);
         if (Strings.isBlank(propertyValue)) {
             throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' missing from "
-                    + "configuration file '" + pPropertyFile + "'");
+                    + "configuration file '" + propertyFile + "'");
         }
 
         final String[] mappings = propertyValue.trim().split("\\s*,\\s*");
         final SortedMap<String, String> result = new TreeMap<>(new VersionComparator());
         for (final String mapping : mappings) {
             if (!mapping.isEmpty()) {
-                final Pair<String, String> validMapping = readValidMapping(pPropertyFile, mapping, pSupportedVersions);
+                final Pair<String, String> validMapping = readValidMapping(propertyFile, mapping, pSupportedVersions);
                 if (result.containsKey(validMapping.getFirst())) {
                     throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' "
-                            + "contains duplicate mapping \"" + mapping + "\" in configuration file '" + pPropertyFile
+                            + "contains duplicate mapping \"" + mapping + "\" in configuration file '" + propertyFile
                             + "'");
                 }
                 result.put(validMapping.getFirst(), validMapping.getSecond());
@@ -144,31 +144,32 @@ public class VersionListReader {
     }
 
 
-    private Pair<String, String> readValidMapping(@NotNull final String pPropertyFile, @NotNull final String
-            pMapping, @NotNull final SortedSet<String> pSupportedVersions) {
+    private Pair<String, String> readValidMapping(@NotNull final String propertyFile,
+                                                  @NotNull final String mapping,
+                                                  @NotNull final SortedSet<String> pSupportedVersions) {
 
-        final String[] kv = pMapping.split("\\s*->\\s*");
+        final String[] kv = mapping.split("\\s*->\\s*");
         if (kv.length != 2) {
             throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' contains "
-                    + "invalid mapping '" + pMapping + "' in configuration file '" + pPropertyFile + "'");
+                    + "invalid mapping '" + mapping + "' in configuration file '" + propertyFile + "'");
         }
 
         final String unsupportedVersion = kv[0];
         final String goodVersion = kv[1];
         if (unsupportedVersion.isEmpty() || goodVersion.isEmpty()) {
             throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' contains "
-                    + "invalid mapping '" + pMapping + "' in configuration file '" + pPropertyFile + "'");
+                    + "invalid mapping '" + mapping + "' in configuration file '" + propertyFile + "'");
         }
 
         if (!pSupportedVersions.contains(goodVersion)) {
             throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' contains "
-                    + "invalid mapping '" + pMapping + "'. Target version " + goodVersion + " is not a supported "
-                    + "version in configuration file '" + pPropertyFile + "'");
+                    + "invalid mapping '" + mapping + "'. Target version " + goodVersion + " is not a supported "
+                    + "version in configuration file '" + propertyFile + "'");
         }
         if (pSupportedVersions.contains(unsupportedVersion)) {
             throw new CheckStylePluginException("Internal error: Property '" + PROP_VERSION_MAP + "' contains "
-                    + "invalid mapping '" + pMapping + "'. Checkstyle version " + unsupportedVersion + " is in "
-                    + "fact supported in configuration file '" + pPropertyFile + "'");
+                    + "invalid mapping '" + mapping + "'. Checkstyle version " + unsupportedVersion + " is in "
+                    + "fact supported in configuration file '" + propertyFile + "'");
         }
         return new Pair<>(unsupportedVersion, goodVersion);
     }
