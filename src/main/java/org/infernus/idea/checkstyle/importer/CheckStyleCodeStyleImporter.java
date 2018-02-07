@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.importer;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.SchemeFactory;
 import com.intellij.openapi.options.SchemeImportException;
@@ -10,8 +11,6 @@ import com.intellij.psi.codeStyle.CodeStyleScheme;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
-import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,17 +24,14 @@ public class CheckStyleCodeStyleImporter
 
     private static final Logger LOG = Logger.getInstance(CheckStyleCodeStyleImporter.class);
 
-    private CheckstyleProjectService checkstyleProjectService = null;
+    private CheckstyleProjectService overrideCheckstyleProjectService;
 
     public CheckStyleCodeStyleImporter() {
-        super();
     }
 
-    public CheckStyleCodeStyleImporter(@NotNull final CheckstyleProjectService checkstyleProjectService) {
-        super();
-        this.checkstyleProjectService = checkstyleProjectService;
+    CheckStyleCodeStyleImporter(@NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this.overrideCheckstyleProjectService = checkstyleProjectService;
     }
-
 
     @NotNull
     @Override
@@ -57,8 +53,7 @@ public class CheckStyleCodeStyleImporter
             }
             CheckstyleInternalObject configuration = loadConfiguration(project, selectedFile);
             if (configuration != null) {
-                checkstyleProjectService = CheckstyleProjectService.getInstance(project);
-                importConfiguration(configuration, targetScheme.getCodeStyleSettings());
+                importConfiguration(checkstyleProjectService(project), configuration, targetScheme.getCodeStyleSettings());
                 return targetScheme;
             }
         } catch (Exception e) {
@@ -68,6 +63,12 @@ public class CheckStyleCodeStyleImporter
         return null;
     }
 
+    private CheckstyleProjectService checkstyleProjectService(@NotNull final Project project) {
+        if (overrideCheckstyleProjectService != null) {
+            return overrideCheckstyleProjectService;
+        }
+        return ServiceManager.getService(project, CheckstyleProjectService.class);
+    }
 
     @Nullable
     @Override
@@ -79,26 +80,25 @@ public class CheckStyleCodeStyleImporter
     @Nullable
     private CheckstyleInternalObject loadConfiguration(@NotNull final Project project,
                                                        @NotNull final VirtualFile selectedFile) {
-        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-        return csService.getCheckstyleInstance().loadConfiguration(selectedFile, true, null);
+        return checkstyleProjectService(project)
+                .getCheckstyleInstance()
+                .loadConfiguration(selectedFile, true, null);
     }
 
 
-    void importConfiguration(@NotNull final CheckstyleInternalObject configuration,
+    void importConfiguration(@NotNull final CheckstyleProjectService checkstyleProjectService,
+                             @NotNull final CheckstyleInternalObject configuration,
                              @NotNull final CodeStyleSettings settings) {
 
-        checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, new ConfigVisitor() {
-            @Override
-            public void visit(@NotNull final ConfigurationModule pModule) {
-                ModuleImporter moduleImporter;
-                try {
-                    moduleImporter = ModuleImporterFactory.getModuleImporter(pModule);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new CheckStylePluginException("error creating module importer", e);
-                }
-                if (moduleImporter != null) {
-                    moduleImporter.importTo(settings);
-                }
+        checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, module -> {
+            ModuleImporter moduleImporter;
+            try {
+                moduleImporter = ModuleImporterFactory.getModuleImporter(module);
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new CheckStylePluginException("error creating module importer", e);
+            }
+            if (moduleImporter != null) {
+                moduleImporter.importTo(settings);
             }
         });
     }

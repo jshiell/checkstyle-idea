@@ -31,17 +31,20 @@ public class OpCreateChecker
     private final Map<String, String> variables;
     private final TabWidthAndBaseDirProvider configurations;
     private final ClassLoader loaderOfCheckedCode;
+    private final CheckstyleProjectService checkstyleProjectService;
 
     public OpCreateChecker(@Nullable final Module module,
                            @NotNull final ConfigurationLocation location,
                            final Map<String, String> variables,
                            @Nullable final TabWidthAndBaseDirProvider configurations,
-                           @NotNull final ClassLoader loaderOfCheckedCode) {
+                           @NotNull final ClassLoader loaderOfCheckedCode,
+                           @NotNull final CheckstyleProjectService checkstyleProjectService) {
         this.module = module;
         this.location = location;
         this.variables = variables;
         this.configurations = configurations;
         this.loaderOfCheckedCode = loaderOfCheckedCode;
+        this.checkstyleProjectService = checkstyleProjectService;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class OpCreateChecker
                 ? configurations
                 : new Configurations(module, csConfig);
         return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode,
-                CheckstyleProjectService.getInstance(project).getCheckstyleInstance());
+                checkstyleProjectService.getCheckstyleInstance());
     }
 
     private void setClassLoader(final Checker checker, final ClassLoader classLoader) {

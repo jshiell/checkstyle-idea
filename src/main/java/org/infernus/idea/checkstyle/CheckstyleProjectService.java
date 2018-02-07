@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -26,11 +25,6 @@ public class CheckstyleProjectService {
 
     private static final Logger LOG = Logger.getInstance(CheckstyleProjectService.class);
 
-    /**
-     * mock instance which may be set and used by unit tests
-     */
-    private static CheckstyleProjectService sMock = null;
-
     private final Project project;
 
     private Callable<CheckstyleClassLoader> checkstyleClassLoaderFactory = null;
@@ -39,12 +33,12 @@ public class CheckstyleProjectService {
     private final SortedSet<String> supportedVersions;
 
 
-    public CheckstyleProjectService(@NotNull final Project project) {
+    public CheckstyleProjectService(@NotNull final Project project,
+                                    @NotNull final PluginConfigurationManager configurationManager) {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
-        final PluginConfigurationManager pluginConfig = PluginConfigurationManager.getInstance(project);
-        activateCheckstyleVersion(pluginConfig.getCurrent().getCheckstyleVersion(),
-                pluginConfig.getCurrent().getThirdPartyClasspath());
+        activateCheckstyleVersion(configurationManager.getCurrent().getCheckstyleVersion(),
+                configurationManager.getCurrent().getThirdPartyClasspath());
     }
 
 
@@ -58,12 +52,10 @@ public class CheckstyleProjectService {
         return version != null && supportedVersions.contains(version);
     }
 
-
     @NotNull
     public String getDefaultVersion() {
         return VersionListReader.getDefaultVersion(supportedVersions);
     }
-
 
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
@@ -73,7 +65,8 @@ public class CheckstyleProjectService {
                 @Override
                 public CheckstyleClassLoader call() {
                     final List<URL> thirdPartyClassPath = toListOfUrls(thirdPartyJars);
-                    return new CheckstyleClassLoader(project, version, thirdPartyClassPath);
+                    return new CheckstyleClassLoader(
+                            project, CheckstyleProjectService.this, version, thirdPartyClassPath);
                 }
 
                 @NotNull
@@ -110,19 +103,5 @@ public class CheckstyleProjectService {
         } catch (Exception e) {
             throw new CheckStylePluginException("internal error", e);
         }
-    }
-
-
-    public static CheckstyleProjectService getInstance(@NotNull final Project pProject) {
-        CheckstyleProjectService result = sMock;
-        if (result == null) {
-            result = ServiceManager.getService(pProject, CheckstyleProjectService.class);
-        }
-        return result;
-    }
-
-
-    public static void activateMock4UnitTesting(@Nullable final CheckstyleProjectService pMock) {
-        sMock = pMock;
     }
 }

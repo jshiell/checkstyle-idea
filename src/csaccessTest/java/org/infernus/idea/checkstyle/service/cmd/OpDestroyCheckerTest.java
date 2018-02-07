@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.service.cmd;
 import com.intellij.openapi.project.Project;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
@@ -22,7 +23,7 @@ public class OpDestroyCheckerTest {
     @Test
     public void testDestroyChecker() {
         CheckerWithConfig checkerWithConfig = new CheckerWithConfig(new Checker(), new DefaultConfiguration("testConfig"));
-        new CheckstyleActionsImpl(PROJECT).destroyChecker(checkerWithConfig);
+        new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class)).destroyChecker(checkerWithConfig);
     }
 
     @Test(expected = CheckstyleVersionMixException.class)

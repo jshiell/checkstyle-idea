@@ -1,20 +1,19 @@
 package org.infernus.idea.checkstyle;
 
-import java.util.List;
-import javax.swing.JComponent;
-
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import java.util.List;
 
 
 /**
@@ -28,17 +27,25 @@ public class CheckStyleConfigurable
     private final Project project;
 
     private final CheckStyleConfigPanel configPanel;
+    private final CheckstyleProjectService checkstyleProjectService;
+    private final PluginConfigurationManager pluginConfigurationManager;
 
-
-    public CheckStyleConfigurable(@NotNull final Project project) {
-        this(project, new CheckStyleConfigPanel(project));
+    public CheckStyleConfigurable(@NotNull final Project project,
+                                  @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                  @NotNull final PluginConfigurationManager pluginConfigurationManager) {
+        this(project, new CheckStyleConfigPanel(project, checkstyleProjectService),
+                checkstyleProjectService, pluginConfigurationManager);
     }
 
-    CheckStyleConfigurable(@NotNull final Project project, @NotNull final CheckStyleConfigPanel configPanel) {
+    CheckStyleConfigurable(@NotNull final Project project,
+                           @NotNull final CheckStyleConfigPanel configPanel,
+                           @NotNull final CheckstyleProjectService checkstyleProjectService,
+                           @NotNull final PluginConfigurationManager pluginConfigurationManager) {
         this.project = project;
         this.configPanel = configPanel;
+        this.checkstyleProjectService = checkstyleProjectService;
+        this.pluginConfigurationManager = pluginConfigurationManager;
     }
-
 
     public String getDisplayName() {
         return CheckStyleBundle.message("plugin.configuration-name");
@@ -56,8 +63,7 @@ public class CheckStyleConfigurable
     @Override
     public boolean isModified() {
         LOG.debug("isModified() - enter");
-        final PluginConfigurationManager configuration = getConfiguration();
-        final PluginConfiguration oldConfig = configuration.getCurrent();
+        final PluginConfiguration oldConfig = pluginConfigurationManager.getCurrent();
         final PluginConfiguration newConfig = PluginConfigurationBuilder
                 .from(configPanel.getPluginConfiguration())
                 .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
@@ -70,15 +76,13 @@ public class CheckStyleConfigurable
         return result;
     }
 
-
-    public void apply() throws ConfigurationException {
+    public void apply() {
         LOG.debug("apply() - enter");
 
-        final PluginConfigurationManager configuration = getConfiguration();
         final PluginConfiguration newConfig = PluginConfigurationBuilder.from(configPanel.getPluginConfiguration())
-                .withScanBeforeCheckin(configuration.getCurrent().isScanBeforeCheckin())
+                .withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin())
                 .build();
-        configuration.setCurrent(newConfig, true);
+        pluginConfigurationManager.setCurrent(newConfig, true);
 
         activateCurrentCheckstyleVersion(newConfig.getCheckstyleVersion(), newConfig.getThirdPartyClasspath());
         if (!newConfig.isCopyLibs()) {
@@ -93,30 +97,23 @@ public class CheckStyleConfigurable
         // Invalidate cache *before* activating the new Checkstyle version
         getCheckerFactoryCache().invalidate();
 
-        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-        csService.activateCheckstyleVersion(checkstyleVersion, thirdPartyClasspath);
-    }
-
-    PluginConfigurationManager getConfiguration() {
-        return PluginConfigurationManager.getInstance(project);
+        checkstyleProjectService.activateCheckstyleVersion(checkstyleVersion, thirdPartyClasspath);
     }
 
     private CheckerFactoryCache getCheckerFactoryCache() {
         return ServiceManager.getService(project, CheckerFactoryCache.class);
     }
 
-
     public void reset() {
         LOG.debug("reset() - enter");
 
-        final PluginConfiguration pluginConfig = getConfiguration().getCurrent();
+        final PluginConfiguration pluginConfig = pluginConfigurationManager.getCurrent();
         configPanel.showPluginConfiguration(pluginConfig);
 
         activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());
 
         LOG.debug("reset() - exit");
     }
-
 
     public void disposeUIResources() {
         // do nothing

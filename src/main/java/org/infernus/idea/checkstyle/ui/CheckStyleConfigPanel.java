@@ -1,30 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableColumn;
-
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -35,24 +10,27 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.AnActionButton;
-import com.intellij.ui.AnActionButtonRunnable;
-import com.intellij.ui.AnActionButtonUpdater;
-import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.*;
+import java.util.List;
 
 
 /**
@@ -79,20 +57,22 @@ public class CheckStyleConfigPanel extends JPanel {
     private final JBTable locationTable = new JBTable(locationModel);
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
 
-
-    public CheckStyleConfigPanel(@NotNull final Project project) {
+    public CheckStyleConfigPanel(@NotNull final Project project,
+                                 @NotNull final CheckstyleProjectService checkstyleProjectService) {
         super(new BorderLayout());
 
         this.project = project;
-        csVersionDropdown = buildCheckstyleVersionComboBox(project);
+        this.checkstyleProjectService = checkstyleProjectService;
+
+        csVersionDropdown = buildCheckstyleVersionComboBox();
 
         initialise();
     }
 
-
-    private ComboBox buildCheckstyleVersionComboBox(@NotNull final Project currentProject) {
-        SortedSet<String> versions = CheckstyleProjectService.getInstance(currentProject).getSupportedVersions();
+    private ComboBox buildCheckstyleVersionComboBox() {
+        SortedSet<String> versions = checkstyleProjectService.getSupportedVersions();
         SortedSet<String> reversedVersions = new TreeSet<>(Collections.reverseOrder(versions.comparator()));
         reversedVersions.addAll(versions);
         String[] supportedVersions = reversedVersions.toArray(new String[reversedVersions.size()]);
@@ -102,8 +82,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private void activateCurrentClasspath() {
         ServiceManager.getService(project, CheckerFactoryCache.class).invalidate();
 
-        CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
-        csService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
+        checkstyleProjectService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
     }
 
     private void initialise() {
@@ -171,7 +150,7 @@ public class CheckStyleConfigPanel extends JPanel {
         container.add(tableDecorator.createPanel(), BorderLayout.CENTER);
         final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.description"),
                 Icons.icon("/general/information.png"), SwingConstants.LEFT);
-        infoLabel.setBorder(new EmptyBorder(8, 0, 4, 0));
+        infoLabel.setBorder(JBUI.Borders.empty(8, 0, 4, 0));
         container.add(infoLabel, BorderLayout.SOUTH);
         return container;
     }
@@ -201,7 +180,7 @@ public class CheckStyleConfigPanel extends JPanel {
         column.setWidth(preferredSize);
         column.setPreferredWidth(preferredSize);
         if (maxSize != null) {
-            column.setMaxWidth(maxSize.intValue());
+            column.setMaxWidth(maxSize);
         }
     }
 
@@ -292,7 +271,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final LocationDialogue dialogue = new LocationDialogue(project);
+            final LocationDialogue dialogue = new LocationDialogue(project, checkstyleProjectService);
 
             dialogue.setVisible(true);
 

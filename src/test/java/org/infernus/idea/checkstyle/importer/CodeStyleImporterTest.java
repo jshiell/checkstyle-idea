@@ -27,7 +27,6 @@ public class CodeStyleImporterTest
     private final Project project = mock(Project.class);
     private CheckstyleProjectService csService = null;
 
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -35,18 +34,11 @@ public class CodeStyleImporterTest
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.1").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
 
-        csService = new CheckstyleProjectService(project);
+        csService = new CheckstyleProjectService(project, mockPluginConfig);
 
         codeStyleSettings = new CodeStyleSettings(false);
         javaSettings = codeStyleSettings.getCommonSettings(JavaLanguage.INSTANCE);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        PluginConfigurationManager.activateMock4UnitTesting(null);
     }
 
     private final static String FILE_PREFIX =
@@ -61,7 +53,7 @@ public class CodeStyleImporterTest
     private void importConfiguration(@NotNull String configuration) {
         configuration = FILE_PREFIX + configuration + FILE_SUFFIX;
         new CheckStyleCodeStyleImporter(csService).importConfiguration(
-                loadConfiguration(configuration), codeStyleSettings);
+                csService, loadConfiguration(configuration), codeStyleSettings);
     }
 
     private String inTreeWalker(@NotNull String configuration) {

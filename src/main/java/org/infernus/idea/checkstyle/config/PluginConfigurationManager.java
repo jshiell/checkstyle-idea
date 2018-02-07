@@ -19,12 +19,6 @@ public class PluginConfigurationManager {
     private final ProjectConfigurationState projectConfigurationState;
     private final WorkspaceConfigurationState workspaceConfigurationState;
 
-    /**
-     * mock instance which may be set and used by unit tests
-     */
-    private static PluginConfigurationManager testInstance = null;
-
-
     public PluginConfigurationManager(@NotNull final Project project,
                                       @NotNull final ProjectConfigurationState projectConfigurationState,
                                       @NotNull final WorkspaceConfigurationState workspaceConfigurationState) {
@@ -71,14 +65,6 @@ public class PluginConfigurationManager {
     }
 
     public static PluginConfigurationManager getInstance(@NotNull final Project project) {
-        PluginConfigurationManager result = testInstance;
-        if (result == null) {
-            result = ServiceManager.getService(project, PluginConfigurationManager.class);
-        }
-        return result;
-    }
-
-    public static void activateMock4UnitTesting(@Nullable final PluginConfigurationManager testingInstance) {
-        PluginConfigurationManager.testInstance = testingInstance;
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 }

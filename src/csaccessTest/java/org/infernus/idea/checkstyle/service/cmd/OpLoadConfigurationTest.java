@@ -15,6 +15,7 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.hamcrest.Matchers;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -27,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 
 public class OpLoadConfigurationTest {
@@ -51,9 +51,9 @@ public class OpLoadConfigurationTest {
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        Mockito.when(configurationLocation.resolveAssociatedFile("aFileToResolve", module))
+        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module))
                 .thenReturn("aResolvedFile");
-        Mockito.when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
+        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
                 .thenThrow(new IOException("aTriggeredIoException"));
 
         underTest = new OpLoadConfiguration(configurationLocation, null, module);
@@ -62,12 +62,12 @@ public class OpLoadConfigurationTest {
 
     private void interceptApplicationNotifications() {
         final MessageBus messageBus = mock(MessageBus.class);
-        Mockito.when(PROJECT.getMessageBus()).thenReturn(messageBus);
-        Mockito.when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
+        when(PROJECT.getMessageBus()).thenReturn(messageBus);
+        when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
 
         final Application application = mock(Application.class);
-        Mockito.when(application.isUnitTestMode()).thenReturn(true);
-        Mockito.when(application.getMessageBus()).thenReturn(messageBus);
+        when(application.isUnitTestMode()).thenReturn(true);
+        when(application.getMessageBus()).thenReturn(messageBus);
         ApplicationManager.setApplication(application, mock(Disposable.class));
     }
 
@@ -75,7 +75,7 @@ public class OpLoadConfigurationTest {
     @Test
     public void filePathsAreNotResolvedOnANonDefaultImplementationOfConfiguration() throws CheckstyleException {
         final Configuration config = mock(Configuration.class);
-        Mockito.verifyZeroInteractions(config);
+        verifyZeroInteractions(config);
     }
 
 
@@ -191,7 +191,7 @@ public class OpLoadConfigurationTest {
 
     private Notification sentNotification() {
         final ArgumentCaptor<Notification> notificationCaptor = ArgumentCaptor.forClass(Notification.class);
-        Mockito.verify(notifications).notify(notificationCaptor.capture());
+        verify(notifications).notify(notificationCaptor.capture());
         return notificationCaptor.getValue();
     }
 
@@ -319,7 +319,7 @@ public class OpLoadConfigurationTest {
     @Test
     public void testLoadFromString() throws IOException, URISyntaxException {
         final String configXml = FileUtil.readFile("cmd/config-ok.xml");
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT).loadConfiguration(configXml);
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class)).loadConfiguration(configXml);
         Assert.assertNotNull(csConfig);
     }
 
@@ -327,7 +327,7 @@ public class OpLoadConfigurationTest {
     @Test
     public void testLoadBundledSunChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class))
                 .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }
@@ -336,7 +336,7 @@ public class OpLoadConfigurationTest {
     @Test
     public void testLoadBundledGoogleChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT)
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class))
                 .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }

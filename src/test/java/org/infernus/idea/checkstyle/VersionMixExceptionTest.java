@@ -54,24 +54,19 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(BASE_VERSION).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        PluginConfigurationManager.activateMock4UnitTesting(mockPluginConfig);
 
-        csService = new CheckstyleProjectService(PROJECT);
+        csService = new CheckstyleProjectService(PROJECT, mockPluginConfig);
         csService.activateCheckstyleVersion(BASE_VERSION, null);
-        CheckstyleProjectService.activateMock4UnitTesting(csService);
     }
 
     @Override
     protected void tearDown() throws Exception {
         try {
-            CheckstyleProjectService.activateMock4UnitTesting(null);
-            PluginConfigurationManager.activateMock4UnitTesting(null);
             csService = null;
         } finally {
             super.tearDown();
         }
     }
-
 
     /**
      * Test that a {@link CheckstyleVersionMixException} is thrown when a

@@ -1,16 +1,13 @@
 package org.infernus.idea.checkstyle.checks;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
-import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
-import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Extra logic for the JavadocPackageCheck check.
@@ -25,10 +22,10 @@ public final class JavadocPackageCheck implements Check {
 
     private boolean usingLegacyPackage;
 
-    private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
 
-    public JavadocPackageCheck(@NotNull final Project pProject) {
-        project = pProject;
+    public JavadocPackageCheck(@NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this.checkstyleProjectService = checkstyleProjectService;
     }
 
     @Override
@@ -94,16 +91,12 @@ public final class JavadocPackageCheck implements Check {
 
         // TODO Going through the whole config is somewhat inefficient here; might do this centrally and only
         // once. Currently we don't care because there is only one such class.
-        final CheckstyleProjectService csService = CheckstyleProjectService.getInstance(project);
         final AtomicReference<String> value = new AtomicReference<>();
-        csService.getCheckstyleInstance().peruseConfiguration(config, new ConfigVisitor() {
-            @Override
-            public void visit(@NotNull final ConfigurationModule pModule) {
-                if (MODULE_NAME.equals(pModule.getName()) || CHECK_PACKAGE_INFO.equals(pModule.getName())) {
-                    value.set(pModule.getProperties().get("allowLegacy"));
-                    // TODO This means that if for some reasons this attribute appears multiple times, the last
-                    // occurrence wins. Instead, we should check if 'allowLegacy' is true anywhere.
-                }
+        checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(config, module -> {
+            if (MODULE_NAME.equals(module.getName()) || CHECK_PACKAGE_INFO.equals(module.getName())) {
+                value.set(module.getProperties().get("allowLegacy"));
+                // TODO This means that if for some reasons this attribute appears multiple times, the last
+                // occurrence wins. Instead, we should check if 'allowLegacy' is true anywhere.
             }
         });
         return value.get();

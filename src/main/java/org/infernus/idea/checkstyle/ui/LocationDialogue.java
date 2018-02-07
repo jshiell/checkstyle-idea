@@ -23,6 +23,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -71,6 +72,7 @@ public class LocationDialogue extends JDialog {
 
     private final LocationPanel locationPanel;
     private final PropertiesPanel propertiesPanel;
+    private final CheckstyleProjectService checkstyleProjectService;
     private final ErrorPanel errorPanel;
     private final CompletePanel completePanel;
 
@@ -81,10 +83,12 @@ public class LocationDialogue extends JDialog {
     private ConfigurationLocation configurationLocation;
 
 
-    public LocationDialogue(@NotNull final Project project) {
+    public LocationDialogue(@NotNull final Project project,
+                            @NotNull final CheckstyleProjectService checkstyleProjectService) {
         super(WindowManager.getInstance().getFrame(project));
 
         this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
 
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project);
@@ -202,7 +206,7 @@ public class LocationDialogue extends JDialog {
         final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
             location.reset();
-            new CheckerFactory(project, cache).verify(location);
+            new CheckerFactory(project, checkstyleProjectService, cache).verify(location);
             return Step.COMPLETE;
 
         } catch (Exception e) {

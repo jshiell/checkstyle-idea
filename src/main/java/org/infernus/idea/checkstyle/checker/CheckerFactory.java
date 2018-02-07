@@ -4,6 +4,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -31,19 +32,20 @@ public class CheckerFactory {
     private static final Logger LOG = Logger.getInstance(CheckerFactory.class);
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache cache;
 
-
-    public CheckerFactory(@NotNull final Project project, @NotNull final CheckerFactoryCache cache) {
+    public CheckerFactory(@NotNull final Project project,
+                          @NotNull final CheckstyleProjectService checkstyleProjectService,
+                          @NotNull final CheckerFactoryCache cache) {
         this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
         this.cache = cache;
     }
 
-
-    public void verify(final ConfigurationLocation location) throws IOException {
+    public void verify(final ConfigurationLocation location) {
         checker(null, location);
     }
-
 
     public Optional<CheckStyleChecker> checker(@Nullable final Module module,
                                                @NotNull final ConfigurationLocation location) {
@@ -171,7 +173,7 @@ public class CheckerFactory {
                                  final ListPropertyResolver resolver,
                                  @NotNull final ClassLoader loaderOfCheckedCode) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
-                resolver.getPropertyNamesToValues(), project, module, loaderOfCheckedCode);
+                resolver.getPropertyNamesToValues(), project, module, checkstyleProjectService, loaderOfCheckedCode);
         worker.start();
 
         while (worker.isAlive()) {

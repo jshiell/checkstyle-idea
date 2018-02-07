@@ -11,7 +11,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.StringConfigurationLocation;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,6 +32,7 @@ public class OpCreateCheckerTest {
 
     private static Module moduleMock;
     private static TabWidthAndBaseDirProvider configurationsMock;
+    private static CheckstyleProjectService checkstyleProjectServiceMock;
 
     @BeforeClass
     public static void setUp() throws URISyntaxException {
@@ -44,14 +44,8 @@ public class OpCreateCheckerTest {
         when(configurationsMock.baseDir()).thenReturn(  //
                 Optional.of(new File(OpCreateCheckerTest.class.getResource(CONFIG_FILE).toURI()).getParent()));
 
-        CheckstyleProjectService csServiceMock = mock(CheckstyleProjectService.class);
-        when(csServiceMock.getCheckstyleInstance()).thenReturn(mock(CheckstyleActions.class));
-        CheckstyleProjectService.activateMock4UnitTesting(csServiceMock);
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        CheckstyleProjectService.activateMock4UnitTesting(null);
+        checkstyleProjectServiceMock = mock(CheckstyleProjectService.class);
+        when(checkstyleProjectServiceMock.getCheckstyleInstance()).thenReturn(mock(CheckstyleActions.class));
     }
 
     @Test
@@ -60,17 +54,17 @@ public class OpCreateCheckerTest {
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
                 FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
 
-        final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(moduleMock, configLoc,
+        final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, configLoc,
                 emptyMap(), configurationsMock, getClass().getClassLoader());
         assertNotNull(checker);
     }
 
 
     @Test(expected = CheckStylePluginException.class)
-    public void testCreateChecker_noConfigLoc() throws IOException, URISyntaxException {
+    public void testCreateChecker_noConfigLoc() {
 
         //noinspection ConstantConditions
-        new CheckstyleActionsImpl(PROJECT).createChecker(moduleMock, null, emptyMap(),
+        new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, null, emptyMap(),
                 configurationsMock, getClass().getClassLoader());
         fail("expected exception was not thrown");
     }
@@ -83,7 +77,7 @@ public class OpCreateCheckerTest {
                 FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
 
         //noinspection ConstantConditions
-        CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT).createChecker(null, configLoc,
+        CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(null, configLoc,
                 emptyMap(), configurationsMock, getClass().getClassLoader());
         assertNotNull(checker);
     }

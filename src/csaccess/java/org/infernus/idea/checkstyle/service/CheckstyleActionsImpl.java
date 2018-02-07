@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
@@ -34,9 +35,12 @@ import org.jetbrains.annotations.Nullable;
 public class CheckstyleActionsImpl implements CheckstyleActions {
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
 
-    public CheckstyleActionsImpl(@NotNull final Project pProject) {
-        project = pProject;
+    public CheckstyleActionsImpl(@NotNull final Project project,
+                                 @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
     }
 
     @Override
@@ -53,8 +57,8 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                            final Map<String, String> properties,
                                            @Nullable final TabWidthAndBaseDirProvider configurations,
                                            @NotNull final ClassLoader loaderOfCheckedCode) {
-        return executeCommand(
-                new OpCreateChecker(module, location, properties, configurations, loaderOfCheckedCode));
+        return executeCommand(new OpCreateChecker(
+                module, location, properties, configurations, loaderOfCheckedCode, checkstyleProjectService));
     }
 
     @Override

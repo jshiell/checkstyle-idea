@@ -52,11 +52,15 @@ public class CheckstyleClassLoader {
     private final ClassLoader classLoader;
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
 
     public CheckstyleClassLoader(@NotNull final Project project,
+                                 @NotNull final CheckstyleProjectService checkstyleProjectService,
                                  @NotNull final String checkstyleVersion,
                                  @Nullable final List<URL> thirdPartyClassPath) {
         this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
+
         final Properties classPathInfos = loadClassPathInfos();
         final String cpProp = classPathInfos.getProperty(checkstyleVersion);
         if (isBlank(cpProp)) {
@@ -239,8 +243,10 @@ public class CheckstyleClassLoader {
     @NotNull
     CheckstyleActions loadCheckstyleImpl() {
         try {
-            Constructor<?> constructor = classLoader.loadClass(CSACTIONS_CLASS).getConstructor(Project.class);
-            return (CheckstyleActions) constructor.newInstance(project);
+            Constructor<?> constructor = classLoader
+                    .loadClass(CSACTIONS_CLASS)
+                    .getConstructor(Project.class, CheckstyleProjectService.class);
+            return (CheckstyleActions) constructor.newInstance(project, checkstyleProjectService);
         } catch (ReflectiveOperationException e) {
             throw new CheckStylePluginException("internal error", e);
         }

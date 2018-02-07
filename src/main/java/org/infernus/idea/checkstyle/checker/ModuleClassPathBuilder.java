@@ -24,9 +24,13 @@ import org.jetbrains.annotations.NotNull;
 public class ModuleClassPathBuilder {
     private static final Logger LOG = Logger.getInstance(ModuleClassPathBuilder.class);
 
+    private final PluginConfigurationManager pluginConfigurationManager;
+
+    public ModuleClassPathBuilder(@NotNull final PluginConfigurationManager pluginConfigurationManager) {
+        this.pluginConfigurationManager = pluginConfigurationManager;
+    }
 
     public ClassLoader build(final Module baseModule) {
-
         if (baseModule == null) {
             return getClass().getClassLoader();
         }
@@ -49,7 +53,7 @@ public class ModuleClassPathBuilder {
         }
 
         URL[] effectiveClasspath = outputPaths.toArray(new URL[outputPaths.size()]);
-        if (wantsCopyLibs(project)) {
+        if (wantsCopyLibs()) {
             final Optional<File> tempDir = new TempDirProvider().forCopiedLibraries(project);
             if (tempDir.isPresent()) {
                 final Path t = Paths.get(tempDir.get().toURI());
@@ -59,9 +63,7 @@ public class ModuleClassPathBuilder {
         return new URLClassLoader(effectiveClasspath, getClass().getClassLoader());
     }
 
-
-    private boolean wantsCopyLibs(@NotNull final Project pProject) {
-        final PluginConfigurationManager config = PluginConfigurationManager.getInstance(pProject);
-        return config != null && config.getCurrent().isCopyLibs();
+    private boolean wantsCopyLibs() {
+        return pluginConfigurationManager.getCurrent().isCopyLibs();
     }
 }
