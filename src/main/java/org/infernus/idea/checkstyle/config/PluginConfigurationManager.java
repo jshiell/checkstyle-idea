@@ -3,14 +3,12 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class PluginConfigurationManager {
-    public static final String LEGACY_PROJECT_DIR = "$PROJECT_DIR$";
     public static final String PROJECT_DIR = "$PRJ_DIR$";
 
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());

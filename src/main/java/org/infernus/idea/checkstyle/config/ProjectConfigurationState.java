@@ -23,9 +23,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class ProjectConfigurationState
@@ -192,10 +191,8 @@ public class ProjectConfigurationState
 
         LOG.debug("Processing file: " + path);
 
-        for (String prefix : new String[]{PROJECT_DIR, LEGACY_PROJECT_DIR}) {
-            if (path.startsWith(prefix)) {
-                return untokeniseForPrefix(path, prefix, getProjectPath(project));
-            }
+        if (path.startsWith(PROJECT_DIR)) {
+            return untokeniseForPrefix(path, PROJECT_DIR, getProjectPath(project));
         }
 
         return path;

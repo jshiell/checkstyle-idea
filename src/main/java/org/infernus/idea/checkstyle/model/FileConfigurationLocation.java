@@ -4,7 +4,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +12,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -238,19 +238,17 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
         LOG.debug("Processing file: " + path);
 
-        for (String prefix : new String[]{PluginConfigurationManager.PROJECT_DIR, PluginConfigurationManager.LEGACY_PROJECT_DIR}) {
-            int prefixLocation = path.indexOf(prefix);
-            if (prefixLocation >= 0) {
-                // path is relative to project dir
-                final File projectPath = getProjectPath();
-                if (projectPath != null) {
-                    final String projectRelativePath = fromUnixPath(path.substring(prefixLocation + prefix.length()));
-                    final String completePath = projectPath + File.separator + projectRelativePath;
-                    return absolutePathOf(new File(completePath));
+        int prefixLocation = path.indexOf(PROJECT_DIR);
+        if (prefixLocation >= 0) {
+            // path is relative to project dir
+            final File projectPath = getProjectPath();
+            if (projectPath != null) {
+                final String projectRelativePath = fromUnixPath(path.substring(prefixLocation + PROJECT_DIR.length()));
+                final String completePath = projectPath + File.separator + projectRelativePath;
+                return absolutePathOf(new File(completePath));
 
-                } else {
-                    LOG.warn("Could not untokenise path as project dir is unset: " + path);
-                }
+            } else {
+                LOG.warn("Could not untokenise path as project dir is unset: " + path);
             }
         }
 
@@ -269,16 +267,16 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         if (getProject().isDefault()) {
-            if (new File(path).exists() || path.startsWith(PluginConfigurationManager.PROJECT_DIR)) {
+            if (new File(path).exists() || path.startsWith(PROJECT_DIR)) {
                 return toUnixPath(path);
             } else {
-                return PluginConfigurationManager.PROJECT_DIR + toUnixPath(separatorChar() + path);
+                return PROJECT_DIR + toUnixPath(separatorChar() + path);
             }
         }
 
         final File projectPath = getProjectPath();
         if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
-            return PluginConfigurationManager.PROJECT_DIR
+            return PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
 
