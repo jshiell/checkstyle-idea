@@ -23,7 +23,7 @@ repositories {
 }
 
 sourceCompatibility = 1.8
-version = '5.17.1'
+version = '5.18.0'
 
 intellij {
     version = 'IC-2016.1';
