@@ -54,13 +54,22 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Import Control 1.1//EN",
                                 format("%s://%s/dtds/import_control_1_1.dtd", protocol, host)),
                         "/dtd/import_control_1_1.dtd");
+                DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Import Control 1.2//EN",
+                                format("%s://%s/dtds/import_control_1_2.dtd", protocol, host)),
+                        "/dtd/import_control_1_2.dtd");
+                DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Import Control 1.3//EN",
+                                format("%s://%s/dtds/import_control_1_3.dtd", protocol, host)),
+                        "/dtd/import_control_1_3.dtd");
 
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.0//EN",
                                 format("%s://%s/dtds/suppressions_1_0.dtd", protocol, host)),
                         "/dtd/suppressions_1_0.dtd");
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.1//EN",
                                 format("%s://%s/dtds/suppressions_1_1.dtd", protocol, host)),
-                        "/dtd/suppressions_1_0.dtd");
+                        "/dtd/suppressions_1_1.dtd");
+                DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.2//EN",
+                                format("%s://%s/dtds/suppressions_1_2.dtd", protocol, host)),
+                        "/dtd/suppressions_1_2.dtd");
 
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Package Names 1.0//EN",
                                 format("%s://%s/dtds/packages_1_0.dtd", protocol, host)),
