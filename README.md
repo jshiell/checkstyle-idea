@@ -213,6 +213,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.18.1** Fixed: Exceptions caught by scan action should now appear in the event log (#383).
 * **5.18.1** Fixed: Added missing DTDs (#381).
 * **5.18.0** New: Added Checkstyle 8.8.
 * **5.17.1** Fixed: Moved update tracking to workspace.

@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.18.1: Fixed: Exceptions caught by scan action should now appear in the event log (#383).</li>
     <li>5.18.1: Fixed: Added missing DTDs (#381).</li>
     <li>5.18.0: New: Added Checkstyle 8.8.</li>
     <li>5.17.1: Fixed: Moved update tracking to workspace.</li>
