@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<idea-plugin version="2" url="https://github.com/jshiell/checkstyle-idea">
+<idea-plugin url="https://github.com/jshiell/checkstyle-idea">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
     <resource-bundle>org.infernus.idea.checkstyle.CheckStyleBundle</resource-bundle>
