@@ -15,12 +15,6 @@ public class PackageHtmlCheck implements Check {
     private static final String CHECK_PACKAGE_HTML = "com.puppycrawl.tools.checkstyle.checks.javadoc.PackageHtmlCheck";
     private static final String PACKAGE_HTML_FILE = "package.html";
 
-    private final Project project;
-
-    public PackageHtmlCheck(@NotNull final Project pProject) {
-        project = pProject;
-    }
-
     @Override
     public String getShortName() {
         return "PackageHtml";

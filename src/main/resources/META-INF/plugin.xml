@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.18.1</version>
+    <version>5.18.2</version>
     <idea-version since-build="145.2070"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.18.2: Fixed: JavadocPackageCheck should work again (#385).</li>
     <li>5.18.1: Fixed: Exceptions caught by scan action should now appear in the event log (#383).</li>
     <li>5.18.1: Fixed: Added missing DTDs (#381).</li>
     <li>5.18.0: New: Added Checkstyle 8.8.</li>
