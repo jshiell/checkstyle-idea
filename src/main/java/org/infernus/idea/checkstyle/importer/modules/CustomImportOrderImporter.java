@@ -78,27 +78,30 @@ public class CustomImportOrderImporter extends ModuleImporter {
         PackageEntryTable table = new PackageEntryTable();
         Consumer<String> createPackageEntry = p -> table.addEntry(new PackageEntry(false, p, true));
 
-        for(ImportGroup group : customImportOrder) {
-            switch(group) {
-                case STATIC:
-                    table.addEntry(PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY);
-                    break;
-                case THIRD_PARTY_PACKAGE:
-                    thirdPartyPackageRegExp.forEach(createPackageEntry);
-                    break;
-                case SPECIAL_IMPORTS:
-                    specialImportsRegExp.forEach(createPackageEntry);
-                    break;
-                case STANDARD_JAVA_PACKAGE:
-                    standardPackageRegExp.forEach(createPackageEntry);
-                    break;
-                default:
-                    // IntelliJ does not support this option or group does not exist
-                    break;
-            }
+        if (customImportOrder != null) {
+            for (ImportGroup group : customImportOrder) {
+                switch (group) {
+                    case STATIC:
+                        table.addEntry(PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY);
+                        break;
+                    case THIRD_PARTY_PACKAGE:
+                        thirdPartyPackageRegExp.forEach(createPackageEntry);
+                        break;
+                    case SPECIAL_IMPORTS:
+                        specialImportsRegExp.forEach(createPackageEntry);
+                        break;
+                    case STANDARD_JAVA_PACKAGE:
+                        standardPackageRegExp.forEach(createPackageEntry);
+                        break;
+                    default:
+                        // IntelliJ does not support this option or group does not exist
+                        break;
+                }
 
-            addBlankLineBetweenGroups(table);
+                addBlankLineBetweenGroups(table);
+            }
         }
+
         table.addEntry(PackageEntry.ALL_OTHER_IMPORTS_ENTRY);
         return table;
     }
