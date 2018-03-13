@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import org.hamcrest.Matchers;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -9,6 +10,7 @@ import org.junit.Test;
 
 import java.util.SortedSet;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,21 +33,20 @@ public class CheckstyleProjectServiceTest {
     @Test
     public void testReadVersions() {
         SortedSet<String> versions = underTest.getSupportedVersions();
-        assertNotNull(versions);
-        assertTrue(versions.size() > 0);
-        assertNotNull(versions.comparator());
-        assertEquals(VersionComparator.class, versions.comparator().getClass());
+        assertThat(versions, is(not(empty())));
+        assertThat(versions.comparator(), is(instanceOf(VersionComparator.class)));
     }
 
     @Test
     public void testCanLoadClassLoader() {
         underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
-        assertNotNull(underTest.getUnderlyingClassLoader());
+        assertThat(underTest.getUnderlyingClassLoader(), is(not(nullValue())));
     }
 
     @Test
     public void classLoaderCanLoadCheckStyleInternalClasses() throws ClassNotFoundException {
         underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
-        assertNotNull(underTest.getUnderlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"));
+        assertThat(underTest.getUnderlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
+                is(not(nullValue())));
     }
 }
