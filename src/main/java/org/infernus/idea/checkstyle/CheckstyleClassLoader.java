@@ -251,4 +251,8 @@ public class CheckstyleClassLoader {
             throw new CheckStylePluginException("internal error", e);
         }
     }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
 }

@@ -104,4 +104,20 @@ public class CheckstyleProjectService {
             throw new CheckStylePluginException("internal error", e);
         }
     }
+
+    public ClassLoader getUnderlyingClassLoader() {
+        try {
+            synchronized (project) {
+                if (checkstyleClassLoader == null) {
+                    checkstyleClassLoader = checkstyleClassLoaderFactory.call();
+                }
+                // Don't worry about caching, class loaders do lots of caching.
+                return checkstyleClassLoader.getClassLoader();
+            }
+        } catch (CheckStylePluginException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CheckStylePluginException("internal error", e);
+        }
+    }
 }
