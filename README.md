@@ -195,6 +195,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Nikolay Bespalov (@nikolaybespalov)
 * @zentol
 * Joey Lee (@yeoji)
+* Tim van der Lippe (@TimvdLippe)
 
 And also thanks are due to the authors and contributors of:
 
@@ -213,6 +214,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.18.4** New: added external API class (#388).
 * **5.18.3** Fixed: the CustomImportOrder importer now deals with the absence of customImportOrderRules (#387).
 * **5.18.2** Fixed: JavadocPackageCheck should work again (#385).
 * **5.18.1** Fixed: Exceptions caught by scan action should now appear in the event log (#383).

@@ -88,36 +88,35 @@ public class CheckstyleProjectService {
         }
     }
 
-
     public CheckstyleActions getCheckstyleInstance() {
         try {
             synchronized (project) {
-                if (checkstyleClassLoader == null) {
-                    checkstyleClassLoader = checkstyleClassLoaderFactory.call();
-                }
-                // Don't worry about caching, class loaders do lots of caching.
-                return checkstyleClassLoader.loadCheckstyleImpl();
+                return checkstyleClassLoader().loadCheckstyleImpl();
             }
         } catch (CheckStylePluginException e) {
             throw e;
         } catch (Exception e) {
-            throw new CheckStylePluginException("internal error", e);
+            throw new CheckStylePluginException("Internal error", e);
         }
     }
 
-    public ClassLoader getUnderlyingClassLoader() {
+    ClassLoader underlyingClassLoader() {
         try {
             synchronized (project) {
-                if (checkstyleClassLoader == null) {
-                    checkstyleClassLoader = checkstyleClassLoaderFactory.call();
-                }
-                // Don't worry about caching, class loaders do lots of caching.
-                return checkstyleClassLoader.getClassLoader();
+                return checkstyleClassLoader().getClassLoader();
             }
         } catch (CheckStylePluginException e) {
             throw e;
         } catch (Exception e) {
-            throw new CheckStylePluginException("internal error", e);
+            throw new CheckStylePluginException("Internal error", e);
         }
+    }
+
+    private CheckstyleClassLoader checkstyleClassLoader() throws Exception {
+        if (checkstyleClassLoader == null) {
+            checkstyleClassLoader = checkstyleClassLoaderFactory.call();
+        }
+        // Don't worry about caching, class loaders do lots of caching.
+        return this.checkstyleClassLoader;
     }
 }

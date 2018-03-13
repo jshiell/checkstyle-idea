@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.18.3</version>
+    <version>5.18.4</version>
     <idea-version since-build="145.2070"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.18.4: New: added external API class (#388).</li>
     <li>5.18.3: Fixed: the CustomImportOrder importer now deals with the absence of customImportOrderRules (#387).</li>
     <li>5.18.2: Fixed: JavadocPackageCheck should work again (#385).</li>
     <li>5.18.1: Fixed: Exceptions caught by scan action should now appear in the event log (#383).</li>
@@ -254,6 +255,8 @@
                         serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"
                         serviceImplementation="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"/>
+        <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstylePluginApi"
+                        serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 

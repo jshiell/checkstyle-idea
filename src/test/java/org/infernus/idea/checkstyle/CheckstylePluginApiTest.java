@@ -1,50 +1,42 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.SortedSet;
-
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
-public class CheckstyleProjectServiceTest {
+public class CheckstylePluginApiTest {
     private static final String CHECKSTYLE_VERSION = "7.1.1";
 
-    private CheckstyleProjectService underTest;
+    private CheckstylePluginApi underTest;
+    private CheckstyleProjectService checkstyleProjectService;
 
     @Before
     public void setUp() {
         PluginConfigurationManager pluginConfigManager = mock(PluginConfigurationManager.class);
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder.testInstance(CHECKSTYLE_VERSION).build());
-        underTest = new CheckstyleProjectService(mock(Project.class), pluginConfigManager);
-    }
-
-    @Test
-    public void readingSupportedVersionsReturnsASetOfVersions() {
-        SortedSet<String> versions = underTest.getSupportedVersions();
-        assertThat(versions, hasItem(CHECKSTYLE_VERSION));
-        assertThat(versions.comparator(), is(instanceOf(VersionComparator.class)));
+        checkstyleProjectService = new CheckstyleProjectService(mock(Project.class), pluginConfigManager);
+        underTest = new CheckstylePluginApi(checkstyleProjectService);
     }
 
     @Test
     public void classLoaderCanBeRetrievedByExternalTools() {
-        underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
-        assertThat(underTest.underlyingClassLoader(), is(not(nullValue())));
+        checkstyleProjectService.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
+        assertThat(underTest.currentCheckstyleClassLoader(), is(not(nullValue())));
     }
 
     @Test
     public void classLoaderCanLoadCheckStyleInternalClasses() throws ClassNotFoundException {
-        underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
-        assertThat(underTest.underlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
+        checkstyleProjectService.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
+        assertThat(underTest.currentCheckstyleClassLoader(), is(not(nullValue())));
+        assertThat(underTest.currentCheckstyleClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
                 is(not(nullValue())));
     }
 }
