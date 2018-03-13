@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 
 public class CheckstyleProjectServiceTest {
+    private static final String CHECKSTYLE_VERSION = "7.1.1";
     private static final Project PROJECT = mock(Project.class);
 
     private CheckstyleProjectService underTest;
@@ -22,7 +23,7 @@ public class CheckstyleProjectServiceTest {
     @Before
     public void setUp() {
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
-        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.1").build();
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(CHECKSTYLE_VERSION).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         underTest = new CheckstyleProjectService(PROJECT, mockPluginConfig);
     }
@@ -34,5 +35,17 @@ public class CheckstyleProjectServiceTest {
         assertTrue(versions.size() > 0);
         assertNotNull(versions.comparator());
         assertEquals(VersionComparator.class, versions.comparator().getClass());
+    }
+
+    @Test
+    public void testCanLoadClassLoader() {
+        underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
+        assertNotNull(underTest.getUnderlyingClassLoader());
+    }
+
+    @Test
+    public void classLoaderCanLoadCheckStyleInternalClasses() throws ClassNotFoundException {
+        underTest.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
+        assertNotNull(underTest.getUnderlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"));
     }
 }
