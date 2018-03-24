@@ -214,6 +214,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.18.5** New: extensions to API to support TestRoots Watchdog (#388).
 * **5.18.4** New: added external API class (#388).
 * **5.18.3** Fixed: the CustomImportOrder importer now deals with the absence of customImportOrderRules (#387).
 * **5.18.2** Fixed: JavadocPackageCheck should work again (#385).

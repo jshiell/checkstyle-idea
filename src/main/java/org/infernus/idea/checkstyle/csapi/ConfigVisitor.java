@@ -8,6 +8,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface ConfigVisitor {
 
-    void visit(@NotNull ConfigurationModule pModule);
+    void visit(@NotNull ConfigurationModule module);
 
 }
