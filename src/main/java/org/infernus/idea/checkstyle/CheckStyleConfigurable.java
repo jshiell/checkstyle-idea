@@ -62,7 +62,6 @@ public class CheckStyleConfigurable
 
     @Override
     public boolean isModified() {
-        LOG.debug("isModified() - enter");
         final PluginConfiguration oldConfig = pluginConfigurationManager.getCurrent();
         final PluginConfiguration newConfig = PluginConfigurationBuilder
                 .from(configPanel.getPluginConfiguration())
@@ -71,14 +70,12 @@ public class CheckStyleConfigurable
 
         boolean result = !oldConfig.hasChangedFrom(newConfig);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("isModified() - exit - result=" + result);
+            LOG.debug("Has config changed? " + result);
         }
         return result;
     }
 
     public void apply() {
-        LOG.debug("apply() - enter");
-
         final PluginConfiguration newConfig = PluginConfigurationBuilder.from(configPanel.getPluginConfiguration())
                 .withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin())
                 .build();
@@ -88,12 +85,10 @@ public class CheckStyleConfigurable
         if (!newConfig.isCopyLibs()) {
             new TempDirProvider().deleteCopiedLibrariesDir(project);
         }
-
-        LOG.debug("apply() - exit");
     }
 
-    private void activateCurrentCheckstyleVersion(final String checkstyleVersion, final List<String>
-            thirdPartyClasspath) {
+    private void activateCurrentCheckstyleVersion(final String checkstyleVersion,
+                                                  final List<String> thirdPartyClasspath) {
         // Invalidate cache *before* activating the new Checkstyle version
         getCheckerFactoryCache().invalidate();
 
@@ -105,14 +100,10 @@ public class CheckStyleConfigurable
     }
 
     public void reset() {
-        LOG.debug("reset() - enter");
-
         final PluginConfiguration pluginConfig = pluginConfigurationManager.getCurrent();
         configPanel.showPluginConfiguration(pluginConfig);
 
         activateCurrentCheckstyleVersion(pluginConfig.getCheckstyleVersion(), pluginConfig.getThirdPartyClasspath());
-
-        LOG.debug("reset() - exit");
     }
 
     public void disposeUIResources() {

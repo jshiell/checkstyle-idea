@@ -32,21 +32,31 @@ public class CheckstyleProjectService {
 
     private final SortedSet<String> supportedVersions;
 
-
     public CheckstyleProjectService(@NotNull final Project project,
                                     @NotNull final PluginConfigurationManager configurationManager) {
-        this.project = project;
-        supportedVersions = new VersionListReader().getSupportedVersions();
-        activateCheckstyleVersion(configurationManager.getCurrent().getCheckstyleVersion(),
+        this(project, configurationManager.getCurrent().getCheckstyleVersion(),
                 configurationManager.getCurrent().getThirdPartyClasspath());
     }
 
+    private CheckstyleProjectService(@NotNull final Project project,
+                                     @Nullable final String requestedVersion,
+                                     @Nullable final List<String> thirdPartyJars) {
+        this.project = project;
+        supportedVersions = new VersionListReader().getSupportedVersions();
+        activateCheckstyleVersion(requestedVersion, thirdPartyJars);
+    }
+
+    @NotNull
+    public static CheckstyleProjectService forVersion(@NotNull final Project project,
+                                                      @Nullable final String requestedVersion,
+                                                      @Nullable final List<String> thirdPartyJars) {
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars);
+    }
 
     @NotNull
     public SortedSet<String> getSupportedVersions() {
         return supportedVersions;
     }
-
 
     public boolean isSupportedVersion(@Nullable final String version) {
         return version != null && supportedVersions.contains(version);

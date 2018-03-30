@@ -1,22 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.util.Map;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
@@ -28,6 +11,14 @@ import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -69,10 +60,11 @@ public class LocationDialogue extends JDialog {
     }
 
     private final Project project;
+    private final String checkstyleVersion;
+    private final List<String> thirdPartyClasspath;
 
     private final LocationPanel locationPanel;
     private final PropertiesPanel propertiesPanel;
-    private final CheckstyleProjectService checkstyleProjectService;
     private final ErrorPanel errorPanel;
     private final CompletePanel completePanel;
 
@@ -84,11 +76,13 @@ public class LocationDialogue extends JDialog {
 
 
     public LocationDialogue(@NotNull final Project project,
-                            @NotNull final CheckstyleProjectService checkstyleProjectService) {
+                            @Nullable final String checkstyleVersion,
+                            @Nullable final List<String> thirdPartyClasspath) {
         super(WindowManager.getInstance().getFrame(project));
 
         this.project = project;
-        this.checkstyleProjectService = checkstyleProjectService;
+        this.checkstyleVersion = checkstyleVersion;
+        this.thirdPartyClasspath = thirdPartyClasspath;
 
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project);
@@ -108,7 +102,7 @@ public class LocationDialogue extends JDialog {
         final JButton cancelButton = new JButton(new CancelAction());
 
         final JPanel bottomPanel = new JPanel(new GridBagLayout());
-        bottomPanel.setBorder(new EmptyBorder(4, 8, 8, 8));
+        bottomPanel.setBorder(JBUI.Borders.empty(4, 8, 8, 8));
 
         if (SystemInfo.isMac) {
             bottomPanel.add(cancelButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
@@ -203,16 +197,22 @@ public class LocationDialogue extends JDialog {
     private Step attemptLoadOfFile(final ConfigurationLocation location) {
         configurationLocation = location;
 
-        final CheckerFactoryCache cache = new CheckerFactoryCache();
         try {
             location.reset();
-            new CheckerFactory(project, checkstyleProjectService, cache).verify(location);
+            checkerFactory().verify(location);
             return Step.COMPLETE;
 
         } catch (Exception e) {
             errorPanel.setError(e);
             return Step.ERROR;
         }
+    }
+
+    @NotNull
+    private CheckerFactory checkerFactory() {
+        final CheckstyleProjectService editedConfigProjectService = CheckstyleProjectService.forVersion(
+                project, checkstyleVersion, thirdPartyClasspath);
+        return new CheckerFactory(project, editedConfigProjectService, new CheckerFactoryCache());
     }
 
     private Step continueWithoutLoadOfFile(final ConfigurationLocation location) {
