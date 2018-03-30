@@ -72,8 +72,9 @@ public class ScannableFile
         }
     }
 
-    public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles, @NotNull final
-    CheckStylePlugin plugin, @Nullable final Module module) {
+    public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
+                                                        @NotNull final CheckStylePlugin plugin,
+                                                        @Nullable final Module module) {
 
         final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
         try {
@@ -104,12 +105,14 @@ public class ScannableFile
     }
 
     private String pathOf(@NotNull final PsiFile file) {
-        return virtualFileOf(file).map(VirtualFile::getPath).orElseThrow(() -> new IllegalStateException("PSIFile "
-                + "does not have associated virtual file: " + file));
+        return virtualFileOf(file)
+                .map(VirtualFile::getPath)
+                .orElseThrow(() -> new IllegalStateException("PSIFile " + "does not have associated virtual file: " + file));
     }
 
-    private File createTemporaryFileFor(@NotNull final PsiFile file, @Nullable final Module module, @NotNull final
-    File tempDir) throws IOException {
+    private File createTemporaryFileFor(@NotNull final PsiFile file,
+                                        @Nullable final Module module,
+                                        @NotNull final File tempDir) throws IOException {
         final File temporaryFile = new File(parentDirFor(file, module, tempDir), file.getName());
         temporaryFile.deleteOnExit();
 
@@ -118,8 +121,9 @@ public class ScannableFile
         return temporaryFile;
     }
 
-    private File parentDirFor(@NotNull final PsiFile file, @Nullable final Module module, @NotNull final File
-            baseTmpDir) {
+    private File parentDirFor(@NotNull final PsiFile file,
+                              @Nullable final Module module,
+                              @NotNull final File baseTmpDir) {
         File tmpDirForFile = relativePathToProjectRoot(file, baseTmpDir);
 
         if (tmpDirForFile == null && module != null) {
