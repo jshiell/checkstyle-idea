@@ -14,6 +14,7 @@ import java.util.function.BiConsumer;
  * <p/>
  * We guarantee nothing, but try to keep compatibility :-)
  */
+@SuppressWarnings("unused")
 public class CheckstylePluginApi {
     private final CheckStylePlugin checkstylePlugin;
     private final CheckstyleProjectService checkstyleProjectService;
