@@ -214,6 +214,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.19.1** Fixed: Exception when rules file deleted (#396).
 * **5.19.0** New: Added Checkstyle 8.9, 8.10.
 * **5.18.6** Fixed: adding a new location should now use the Checkstyle version selected in the configuration panel.
 * **5.18.5** New: extensions to API to support TestRoots Watchdog (#388).

@@ -316,18 +316,22 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) throws IOException {
+    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
         return configurationLocation == null
                 || !equals(configurationLocation)
                 || propertiesHaveChanged(configurationLocation);
 
     }
 
-    private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation) throws IOException {
+    private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation) {
         if (project.isDefault() && !configurationLocation.canBeResolvedInDefaultProject()) {
             return false;
         }
-        return !getProperties().equals(configurationLocation.getProperties());
+        try {
+            return !getProperties().equals(configurationLocation.getProperties());
+        } catch (IOException e) {
+            return true;
+        }
     }
 
     public String getDescriptor() {

@@ -110,12 +110,8 @@ public class PluginConfiguration {
         Iterator<ConfigurationLocation> otherLocationIterator = other.locations.iterator();
 
         while (locationIterator.hasNext() && otherLocationIterator.hasNext()) {
-            try {
-                if (locationIterator.next().hasChangedFrom(otherLocationIterator.next())) {
-                    return false;
-                }
-            } catch (IOException e) {
-                throw new CheckStylePluginException("Unable to test configuration properties for changes", e);
+            if (locationIterator.next().hasChangedFrom(otherLocationIterator.next())) {
+                return false;
             }
         }
 
