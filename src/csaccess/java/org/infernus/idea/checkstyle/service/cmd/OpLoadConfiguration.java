@@ -107,6 +107,8 @@ public class OpLoadConfiguration
         result.put("com.puppycrawl.tools.checkstyle.checks.header.HeaderCheck", "headerFile");
         result.put("SuppressionFilter", "file");
         result.put("com.puppycrawl.tools.checkstyle.filters.SuppressionFilter", "file");
+        result.put("SuppressionXpathFilter", "file");
+        result.put("com.puppycrawl.tools.checkstyle.filters.SuppressionXpathFilter", "file");
         result.put("ImportControl", "file");
         result.put("com.puppycrawl.tools.checkstyle.checks.imports.ImportControlCheck", "file");
         return Collections.unmodifiableMap(result);
