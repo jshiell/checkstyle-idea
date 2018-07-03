@@ -29,7 +29,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
     private static final Map<DTDKey, String> DTD_MAP = new HashMap<>();
 
     static {
-        for (String host : asList("www.puppycrawl.com", "checkstyle.sourceforge.net")) {
+        for (String host : asList("www.puppycrawl.com", "checkstyle.sourceforge.net", "checkstyle.org")) {
             for (String protocol : asList("http", "https")) {
                 DTD_MAP.put(new DTDKey(
                                 "-//Puppy Crawl//DTD Check Configuration 1.0//EN",
@@ -70,6 +70,9 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.2//EN",
                                 format("%s://%s/dtds/suppressions_1_2.dtd", protocol, host)),
                         "/dtd/suppressions_1_2.dtd");
+                DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions Xpath Experimental 1.2//EN",
+                        format("%s://%s/dtds/suppressions_1_2_xpath_experimental.dtd", protocol, host)),
+                    "/dtd/suppressions_1_2_xpath_experimental.dtd");
 
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Package Names 1.0//EN",
                                 format("%s://%s/dtds/packages_1_0.dtd", protocol, host)),
