@@ -196,6 +196,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * @zentol
 * Joey Lee (@yeoji)
 * Tim van der Lippe (@TimvdLippe)
+* @tduehr
 
 And also thanks are due to the authors and contributors of:
 
@@ -214,6 +215,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.20.0** Fixed: Prevents the plugin from crashing when using SuppressionXpathFilter - thanks to @tduehr (#397).
+* **5.20.0** New: Added Checkstyle 8.11.
 * **5.19.1** Fixed: Exception when rules file deleted (#396).
 * **5.19.0** New: Added Checkstyle 8.9, 8.10.
 * **5.18.6** Fixed: adding a new location should now use the Checkstyle version selected in the configuration panel.
