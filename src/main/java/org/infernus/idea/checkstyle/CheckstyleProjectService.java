@@ -110,7 +110,7 @@ public class CheckstyleProjectService {
         }
     }
 
-    ClassLoader underlyingClassLoader() {
+    public ClassLoader underlyingClassLoader() {
         try {
             synchronized (project) {
                 return checkstyleClassLoader().getClassLoader();

@@ -1,20 +1,13 @@
 package org.infernus.idea.checkstyle.model;
 
 
-/**
- * Types of configuration supported.
- */
-public enum ConfigurationType
-{
+public enum ConfigurationType {
     /**
      * one of the configurations bundled with the Checkstyle tool, chosen from the
      * {@link org.infernus.idea.checkstyle.csapi.BundledConfig} enum
      */
     BUNDLED,
 
-    /**
-     * Located on a HTTP URL.
-     */
     HTTP_URL,
 
     /**
@@ -22,15 +15,14 @@ public enum ConfigurationType
      */
     INSECURE_HTTP_URL,
 
-    /**
-     * Located in a local file.
-     */
     LOCAL_FILE,
 
     /**
      * Located in a local file where the path is project relative.
      */
-    PROJECT_RELATIVE;
+    PROJECT_RELATIVE,
+
+    PLUGIN_CLASSPATH;
 
 
     /**

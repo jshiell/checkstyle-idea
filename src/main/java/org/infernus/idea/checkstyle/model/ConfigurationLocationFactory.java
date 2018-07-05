@@ -58,6 +58,10 @@ public class ConfigurationLocationFactory {
                 configurationLocation = new InsecureHTTPURLConfigurationLocation(project);
                 break;
 
+            case PLUGIN_CLASSPATH:
+                configurationLocation = new ClasspathConfigurationLocation(project);
+                break;
+
             case BUNDLED:
                 configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description), project);
                 break;

@@ -14,23 +14,31 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Paths;
 
+import static org.infernus.idea.checkstyle.model.ConfigurationType.*;
+import static org.infernus.idea.checkstyle.ui.LocationPanel.LocationType.*;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 public class LocationPanel extends JPanel {
 
+    enum LocationType {
+        FILE, HTTP, CLASSPATH
+    }
+
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
+
     private final JButton browseButton = new JButton(new BrowseAction());
     private final JTextField fileLocationField = new JTextField(20);
     private final JTextField urlLocationField = new JTextField(20);
+    private final JTextField classpathLocationField = new JTextField(20);
     private final JRadioButton fileLocationRadio = new JRadioButton();
     private final JRadioButton urlLocationRadio = new JRadioButton();
+    private final JRadioButton classpathLocationRadio = new JRadioButton();
     private final JTextField descriptionField = new JTextField();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
     private final JCheckBox insecureHttpCheckbox = new JCheckBox();
@@ -58,21 +66,25 @@ public class LocationPanel extends JPanel {
         fileLocationRadio.addActionListener(new RadioButtonActionListener());
         urlLocationRadio.setText(CheckStyleBundle.message("config.file.url.text"));
         urlLocationRadio.addActionListener(new RadioButtonActionListener());
+        classpathLocationRadio.setText(CheckStyleBundle.message("config.file.classpath.text"));
+        classpathLocationRadio.addActionListener(new RadioButtonActionListener());
 
         final ButtonGroup locationGroup = new ButtonGroup();
         locationGroup.add(fileLocationRadio);
         locationGroup.add(urlLocationRadio);
+        locationGroup.add(classpathLocationRadio);
 
         fileLocationRadio.setSelected(true);
-        enabledFileLocation();
+        enabledLocation(FILE);
 
         final JLabel descriptionLabel = new JLabel(CheckStyleBundle.message("config.file.description.text"));
         descriptionField.setToolTipText(CheckStyleBundle.message("config.file.description.tooltip"));
 
         final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
         final JLabel urlLocationlabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
+        final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
 
-        setBorder(new EmptyBorder(8, 8, 4, 8));
+        setBorder(JBUI.Borders.empty(8, 8, 4, 8));
 
         add(descriptionLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
@@ -103,36 +115,39 @@ public class LocationPanel extends JPanel {
         add(insecureHttpCheckbox, new GridBagConstraints(1, 6, 2, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
-        add(Box.createVerticalGlue(), new GridBagConstraints(0, 7, 3, 1, 0.0, 1.0,
+        add(classpathLocationRadio, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE, JBUI.insets(8, 4, 4, 4), 0, 0));
+
+        add(classpathLocationLabel, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
+        add(classpathLocationField, new GridBagConstraints(1, 8, 2, 1, 1.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+
+        add(Box.createVerticalGlue(), new GridBagConstraints(0, 9, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
     }
 
-    private void enabledFileLocation() {
-        fileLocationField.setEnabled(true);
-        browseButton.setEnabled(true);
+    private void enabledLocation(final LocationType locationType) {
+        fileLocationField.setEnabled(locationType == FILE);
+        browseButton.setEnabled(locationType == FILE);
 
-        urlLocationField.setEnabled(false);
-    }
+        urlLocationField.setEnabled(locationType == HTTP);
 
-    private void enabledURLLocation() {
-        fileLocationField.setEnabled(false);
-        browseButton.setEnabled(false);
-
-        urlLocationField.setEnabled(true);
+        classpathLocationField.setEnabled(locationType == CLASSPATH);
     }
 
     private ConfigurationType typeOfFile() {
         if (relativeFileCheckbox.isSelected()) {
-            return ConfigurationType.PROJECT_RELATIVE;
+            return PROJECT_RELATIVE;
         }
-        return ConfigurationType.LOCAL_FILE;
+        return LOCAL_FILE;
     }
 
     private ConfigurationType typeOfUrl() {
         if (insecureHttpCheckbox.isSelected()) {
-            return ConfigurationType.INSECURE_HTTP_URL;
+            return INSECURE_HTTP_URL;
         }
-        return ConfigurationType.HTTP_URL;
+        return HTTP_URL;
     }
 
     /**
@@ -152,6 +167,12 @@ public class LocationPanel extends JPanel {
                 return configurationLocationFactory().create(project, typeOfUrl(),
                         urlLocation(), descriptionField.getText());
             }
+
+        } else if (classpathLocationField.isEnabled()) {
+            if (isNotBlank(classpathLocation())) {
+                return configurationLocationFactory().create(project, PLUGIN_CLASSPATH,
+                        classpathLocation(), descriptionField.getText());
+            }
         }
 
         return null;
@@ -159,6 +180,10 @@ public class LocationPanel extends JPanel {
 
     private String urlLocation() {
         return trim(urlLocationField.getText());
+    }
+
+    private String classpathLocation() {
+        return trim(classpathLocationField.getText());
     }
 
     private String fileLocation() {
@@ -225,17 +250,21 @@ public class LocationPanel extends JPanel {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(null);
 
-        } else if (configurationLocation.getType() == ConfigurationType.LOCAL_FILE
-                || configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE) {
+        } else if (configurationLocation.getType() == LOCAL_FILE
+                || configurationLocation.getType() == PROJECT_RELATIVE) {
             fileLocationRadio.setEnabled(true);
             fileLocationField.setText(configurationLocation.getLocation());
-            relativeFileCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.PROJECT_RELATIVE);
+            relativeFileCheckbox.setSelected(configurationLocation.getType() == PROJECT_RELATIVE);
 
-        } else if (configurationLocation.getType() == ConfigurationType.HTTP_URL
-                || configurationLocation.getType() == ConfigurationType.INSECURE_HTTP_URL) {
+        } else if (configurationLocation.getType() == HTTP_URL
+                || configurationLocation.getType() == INSECURE_HTTP_URL) {
             urlLocationRadio.setEnabled(true);
             urlLocationField.setText(configurationLocation.getLocation());
-            insecureHttpCheckbox.setSelected(configurationLocation.getType() == ConfigurationType.INSECURE_HTTP_URL);
+            insecureHttpCheckbox.setSelected(configurationLocation.getType() == INSECURE_HTTP_URL);
+
+        } else if (configurationLocation.getType() == PLUGIN_CLASSPATH) {
+            classpathLocationField.setEnabled(true);
+            classpathLocationField.setText(configurationLocation.getLocation());
 
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());
@@ -283,10 +312,13 @@ public class LocationPanel extends JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             if (urlLocationRadio.isSelected()) {
-                enabledURLLocation();
+                enabledLocation(HTTP);
 
             } else if (fileLocationRadio.isSelected()) {
-                enabledFileLocation();
+                enabledLocation(FILE);
+
+            } else if (classpathLocationRadio.isSelected()) {
+                enabledLocation(CLASSPATH);
 
             } else {
                 throw new IllegalStateException("Unknown radio button state");
