@@ -90,9 +90,10 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @Nullable
     @Override
-    public String resolveAssociatedFile(final String filename,
-                                        final Module module) throws IOException {
-        final String associatedFile = super.resolveAssociatedFile(filename, module);
+    public String resolveAssociatedFile(@Nullable final String filename,
+                                        @Nullable final Module module,
+                                        @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+        final String associatedFile = super.resolveAssociatedFile(filename, module, checkstyleClassLoader);
         if (associatedFile != null) {
             return associatedFile;
         }

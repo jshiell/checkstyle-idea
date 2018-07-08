@@ -84,9 +84,9 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile);
+            cmd = new OpLoadConfiguration(inputFile, checkstyleProjectService);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables);
+            cmd = new OpLoadConfiguration(inputFile, variables, checkstyleProjectService);
         }
         return executeCommand(cmd);
     }
@@ -95,7 +95,7 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
                                                       @Nullable final Map<String, String> variables,
                                                       @Nullable final Module module) {
-        return executeCommand(new OpLoadConfiguration(inputFile, variables, module));
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, module, checkstyleProjectService));
     }
 
     @Override
@@ -104,16 +104,16 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                                                       @Nullable final Map<String, String> variables) {
         OpLoadConfiguration cmd;
         if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile);
+            cmd = new OpLoadConfiguration(inputFile, checkstyleProjectService);
         } else {
-            cmd = new OpLoadConfiguration(inputFile, variables);
+            cmd = new OpLoadConfiguration(inputFile, variables, checkstyleProjectService);
         }
         return executeCommand(cmd);
     }
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final String pXmlConfig) {
-        return executeCommand(new OpLoadConfiguration(pXmlConfig));
+        return executeCommand(new OpLoadConfiguration(pXmlConfig, checkstyleProjectService));
     }
 
 

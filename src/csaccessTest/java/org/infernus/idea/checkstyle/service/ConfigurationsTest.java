@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.service;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,12 +25,11 @@ public class ConfigurationsTest {
     private TabWidthAndBaseDirProvider createClassUnderTest(final Configuration pConfig) throws IOException {
 
         final Module module = mock(Module.class);
-        final Project project = mock(Project.class);
         final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
         final CodeStyleSettings codeStyleSettings = mock(CodeStyleSettings.class);
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module)).thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module)).thenThrow(new
+        when(configurationLocation.resolveAssociatedFile(eq("aFileToResolve"), eq(module), any(ClassLoader.class))).thenReturn("aResolvedFile");
+        when(configurationLocation.resolveAssociatedFile(eq("triggersAnIoException"), eq(module), any(ClassLoader.class))).thenThrow(new
                 IOException("aTriggeredIoException"));
         when(codeStyleSettings.getTabSize(JavaFileType.INSTANCE)).thenReturn(CODE_STYLE_TAB_SIZE);
 

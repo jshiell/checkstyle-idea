@@ -10,6 +10,7 @@ import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.apache.commons.io.IOUtils;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -54,43 +55,52 @@ public class OpLoadConfiguration
     private final RulesContainer rulesContainer;
     private final PropertyResolver resolver;
     private final Module module;
+    private final CheckstyleProjectService checkstyleProjectService;
 
 
-    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation) {
-        this(configurationLocation, null, null);
+    public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(configurationLocation, null, null, checkstyleProjectService);
     }
 
     public OpLoadConfiguration(@NotNull final ConfigurationLocation configurationLocation,
-                               final Map<String, String> properties) {
-        this(configurationLocation, properties, null);
+                               final Map<String, String> properties,
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(configurationLocation, properties, null, checkstyleProjectService);
     }
 
     public OpLoadConfiguration(final ConfigurationLocation configurationLocation,
                                final Map<String, String> properties,
-                               final Module module) {
-        this(configurationLocation instanceof BundledConfigurationLocation ?
-                new BundledRulesContainer(((BundledConfigurationLocation) configurationLocation).getBundledConfig()) :
-                new ConfigurationLocationRulesContainer(configurationLocation), properties, module);
-    }
-
-    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile) {
-        this(rulesFile, null);
+                               final Module module,
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(configurationLocation instanceof BundledConfigurationLocation
+                ? new BundledRulesContainer(((BundledConfigurationLocation) configurationLocation).getBundledConfig())
+                : new ConfigurationLocationRulesContainer(configurationLocation), properties, module, checkstyleProjectService);
     }
 
     public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
-                               final Map<String, String> properties) {
-        this(new VirtualFileRulesContainer(rulesFile), properties, null);
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(rulesFile, null, checkstyleProjectService);
     }
 
-    public OpLoadConfiguration(@NotNull final String fileContent) {
-        this(new ContentRulesContainer(fileContent), null, null);
+    public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
+                               final Map<String, String> properties,
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(new VirtualFileRulesContainer(rulesFile), properties, null, checkstyleProjectService);
+    }
+
+    public OpLoadConfiguration(@NotNull final String fileContent,
+                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        this(new ContentRulesContainer(fileContent), null, null, checkstyleProjectService);
     }
 
     private OpLoadConfiguration(final RulesContainer rulesContainer,
                                 final Map<String, String> properties,
-                                final Module module) {
+                                final Module module,
+                                final CheckstyleProjectService checkstyleProjectService) {
         this.rulesContainer = rulesContainer;
         this.module = module;
+        this.checkstyleProjectService = checkstyleProjectService;
 
         if (properties != null) {
             resolver = new SimpleResolver(properties);
@@ -120,7 +130,7 @@ public class OpLoadConfiguration
         HasCsConfig result;
         InputStream is = null;
         try {
-            is = rulesContainer.inputStream();
+            is = rulesContainer.inputStream(checkstyleClassLoader());
             Configuration configuration = callLoadConfiguration(is);
             if (configuration == null) {
                 // from the CS code this state appears to occur when there's no <module> element found
@@ -210,7 +220,7 @@ public class OpLoadConfiguration
                                       final Configuration configModule,
                                       final String propertyName,
                                       final String fileName) throws IOException {
-        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, project, module);
+        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, project, module, checkstyleClassLoader());
         if (resolvedFile == null || !resolvedFile.equals(fileName)) {
             configRoot.removeChild(configModule);
             if (resolvedFile != null) {
@@ -219,6 +229,11 @@ public class OpLoadConfiguration
                 showWarning(project, message(format("checkstyle.not-found.%s", configModule.getName())));
             }
         }
+    }
+
+    @NotNull
+    private ClassLoader checkstyleClassLoader() {
+        return checkstyleProjectService.underlyingClassLoader();
     }
 
     private boolean isNotOptional(final Configuration configModule) {

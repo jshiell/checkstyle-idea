@@ -272,7 +272,7 @@ public class CheckStyleConfigPanel extends JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final LocationDialogue dialogue = new LocationDialogue(
-                    project, getCheckstyleVersion(), getThirdPartyClasspath());
+                    project, getCheckstyleVersion(), getThirdPartyClasspath(), checkstyleProjectService);
 
             dialogue.setVisible(true);
 
@@ -334,7 +334,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
             final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
 
-            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project, parentWindow(parent()));
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project, checkstyleProjectService, parentWindow(parent()));
             propertiesDialogue.setConfigurationLocation(location);
 
             propertiesDialogue.setVisible(true);

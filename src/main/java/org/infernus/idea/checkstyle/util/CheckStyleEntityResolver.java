@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URI;
@@ -82,15 +81,17 @@ public class CheckStyleEntityResolver implements EntityResolver {
     }
 
     private final ConfigurationLocation configurationLocation;
+    private final ClassLoader checkstyleClassLoader;
 
-    public CheckStyleEntityResolver(final ConfigurationLocation configurationLocation) {
+    public CheckStyleEntityResolver(final ConfigurationLocation configurationLocation, ClassLoader checkstyleClassLoader) {
         this.configurationLocation = configurationLocation;
+        this.checkstyleClassLoader = checkstyleClassLoader;
     }
 
     @Override
     public InputSource resolveEntity(final String publicId,
                                      final String systemId)
-            throws SAXException, IOException {
+            throws IOException {
         final String resource = DTD_MAP.get(new DTDKey(publicId, systemId));
         if (resource != null) {
             return loadFromResource(resource);
@@ -129,7 +130,7 @@ public class CheckStyleEntityResolver implements EntityResolver {
         String cwd = System.getProperties().getProperty("user.dir");
         if (normalisedFilePath.startsWith(cwd)) {
             String relativePath = normalisedFilePath.substring(cwd.length() + 1);
-            final String resolvedFile = configurationLocation.resolveAssociatedFile(relativePath, null);
+            final String resolvedFile = configurationLocation.resolveAssociatedFile(relativePath, null, checkstyleClassLoader);
             if (resolvedFile != null) {
                 return sourceFromFile(resolvedFile);
             }

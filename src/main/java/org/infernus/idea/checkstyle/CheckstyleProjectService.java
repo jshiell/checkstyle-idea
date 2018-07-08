@@ -110,6 +110,7 @@ public class CheckstyleProjectService {
         }
     }
 
+    @NotNull
     public ClassLoader underlyingClassLoader() {
         try {
             synchronized (project) {

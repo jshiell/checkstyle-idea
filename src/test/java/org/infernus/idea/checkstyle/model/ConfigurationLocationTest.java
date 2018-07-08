@@ -49,7 +49,7 @@ public class ConfigurationLocationTest {
 
     @Test
     public void whenReadPropertiesAreExtracted() throws IOException {
-        underTest.resolve();
+        underTest.resolve(getClass().getClassLoader());
 
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", ""));
@@ -58,10 +58,10 @@ public class ConfigurationLocationTest {
 
     @Test
     public void propertiesAreRereadWhenTheLocationIsChanged() throws IOException {
-        underTest.resolve();
+        underTest.resolve(getClass().getClassLoader());
 
         underTest.setLocation(TEST_FILE_2);
-        underTest.resolve();
+        underTest.resolve(getClass().getClassLoader());
 
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", ""));
@@ -71,12 +71,12 @@ public class ConfigurationLocationTest {
 
     @Test
     public void propertyValuesAreRetainedWhenThePropertiesAreReread() throws IOException {
-        underTest.resolve();
+        underTest.resolve(getClass().getClassLoader());
 
         updatePropertyOn(underTest, "property-two", "aValue");
 
         underTest.setLocation(TEST_FILE_2);
-        underTest.resolve();
+        underTest.resolve(getClass().getClassLoader());
 
         assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
     }

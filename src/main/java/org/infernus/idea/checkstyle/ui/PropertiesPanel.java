@@ -5,7 +5,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,22 +38,22 @@ public class PropertiesPanel extends JPanel {
     };
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
 
     private ConfigurationLocation configurationLocation;
 
-    public PropertiesPanel(final Project project) {
+    public PropertiesPanel(@NotNull final Project project,
+                           @NotNull final CheckstyleProjectService checkstyleProjectService) {
         super(new BorderLayout());
 
-        if (project == null) {
-            throw new IllegalArgumentException("Project may not be null");
-        }
         this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
 
         initialise();
     }
 
     private void initialise() {
-        setBorder(new EmptyBorder(8, 8, 4, 8));
+        setBorder(JBUI.Borders.empty(8, 8, 4, 8));
         setPreferredSize(new Dimension(500, 400));
 
         propertiesTable.setToolTipText(CheckStyleBundle.message("config.file.properties.tooltip"));
@@ -93,7 +95,7 @@ public class PropertiesPanel extends JPanel {
         // get latest properties from file
         InputStream configInputStream = null;
         try {
-            configInputStream = configurationLocation.resolve();
+            configInputStream = configurationLocation.resolve(checkstyleProjectService.underlyingClassLoader());
             propertiesModel.setProperties(configurationLocation.getProperties());
 
         } catch (IOException e) {

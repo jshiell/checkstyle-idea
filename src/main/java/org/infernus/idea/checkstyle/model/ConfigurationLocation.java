@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 import static java.lang.System.currentTimeMillis;
@@ -128,17 +129,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         blacklistedUntil = 0L;
     }
 
-    /**
-     * Extract all settable properties from the given configuration file.
-     *
-     * @param inputStream the configuration file.
-     * @return the property names.
-     */
-    private List<String> extractProperties(final InputStream inputStream) {
+    private List<String> extractProperties(@Nullable final InputStream inputStream,
+                                           @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
                 final SAXBuilder saxBuilder = new SAXBuilder();
-                saxBuilder.setEntityResolver(new CheckStyleEntityResolver(this));
+                saxBuilder.setEntityResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
                 final Document configDoc = saxBuilder.build(inputStream);
                 return extractProperties(configDoc.getRootElement());
 
@@ -190,17 +186,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
     }
 
-    /**
-     * Resolve this location to a file.
-     *
-     * @return the file to load.
-     * @throws IOException if the file cannot be loaded.
-     */
-    public InputStream resolve() throws IOException {
+    public InputStream resolve(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         InputStream is = resolveFile();
 
         if (!propertiesCheckedThisSession) {
-            final List<String> propertiesInFile = extractProperties(is);
+            final List<String> propertiesInFile = extractProperties(is, checkstyleClassLoader);
 
             for (final String propertyName : propertiesInFile) {
                 if (!properties.containsKey(propertyName)) {
@@ -223,19 +213,21 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     @Nullable
-    public String resolveAssociatedFile(final String filename,
-                                        final Module module) throws IOException {
+    public String resolveAssociatedFile(@Nullable final String filename,
+                                        @Nullable final Module module,
+                                        @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         if (filename == null) {
             return null;
         } else if (new File(filename).exists()) {
             return filename;
         }
 
-        return findFile(filename, module);
+        return findFile(filename, module, checkstyleClassLoader);
     }
 
     private String findFile(final String fileName,
-                            final Module module) {
+                            final Module module,
+                            final ClassLoader checkstyleClassLoader) {
         if (fileName == null
                 || "".equals(fileName.trim())
                 || fileName.toLowerCase().startsWith("http://")
@@ -248,6 +240,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         if (targetFile != null) {
             return targetFile.getAbsolutePath();
         }
+
+        final URL classPathResource = checkstyleClassLoader.getResource(fileName);
+        if (classPathResource != null) {
+            return fileName;
+        }
+
         return null;
     }
 

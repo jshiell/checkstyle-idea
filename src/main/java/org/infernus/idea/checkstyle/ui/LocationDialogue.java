@@ -60,6 +60,7 @@ public class LocationDialogue extends JDialog {
     }
 
     private final Project project;
+    private final CheckstyleProjectService checkstyleProjectService;
     private final String checkstyleVersion;
     private final List<String> thirdPartyClasspath;
 
@@ -77,15 +78,17 @@ public class LocationDialogue extends JDialog {
 
     public LocationDialogue(@NotNull final Project project,
                             @Nullable final String checkstyleVersion,
-                            @Nullable final List<String> thirdPartyClasspath) {
+                            @Nullable final List<String> thirdPartyClasspath,
+                            @NotNull CheckstyleProjectService checkstyleProjectService) {
         super(WindowManager.getInstance().getFrame(project));
 
         this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
         this.checkstyleVersion = checkstyleVersion;
         this.thirdPartyClasspath = thirdPartyClasspath;
 
         this.locationPanel = new LocationPanel(project);
-        this.propertiesPanel = new PropertiesPanel(project);
+        this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);
         this.errorPanel = new ErrorPanel();
         this.completePanel = new CompletePanel();
 
@@ -244,7 +247,7 @@ public class LocationDialogue extends JDialog {
                     Map<String, String> properties;
                     if (!project.isDefault() || location.canBeResolvedInDefaultProject()) {
                         try {
-                            location.resolve();
+                            location.resolve(checkstyleProjectService.underlyingClassLoader());
                             properties = location.getProperties();
 
                         } catch (IOException e) {

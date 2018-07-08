@@ -42,9 +42,7 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
     }
 
     private byte[] asBytes(final String classpathLocation) throws IOException {
-        CheckstyleProjectService checkstyleProjectService = ServiceManager.getService(getProject(), CheckstyleProjectService.class);
-
-        InputStream resourceStream = checkstyleProjectService.underlyingClassLoader().getResourceAsStream(classpathLocation);
+        InputStream resourceStream = checkstyleClassLoader().getResourceAsStream(classpathLocation);
         if (resourceStream == null) {
             throw new FileNotFoundException("Couldn't read classpath resource: " + classpathLocation);
         }
@@ -61,6 +59,12 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
 
             return responseBody.toByteArray();
         }
+    }
+
+    @NotNull
+    private ClassLoader checkstyleClassLoader() {
+        // TODO it'd be good to get this lookup out of here, but the clone() usage complicates this refactoring
+        return ServiceManager.getService(getProject(), CheckstyleProjectService.class).underlyingClassLoader();
     }
 
     @Override

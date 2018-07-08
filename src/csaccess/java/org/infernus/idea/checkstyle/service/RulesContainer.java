@@ -33,18 +33,20 @@ public interface RulesContainer
      *
      * @return input stream
      * @throws IOException failed creating the stream
+     * @param checkstyleClassLoader
      */
-    InputStream inputStream() throws IOException;
+    InputStream inputStream(ClassLoader checkstyleClassLoader) throws IOException;
 
     @Nullable
     default String resolveAssociatedFile(@Nullable final String fileName,
                                          @NotNull final Project project,
-                                         @Nullable final Module module) throws IOException {
+                                         @Nullable final Module module,
+                                         @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         return null;
     }
 
 
-    public static class ConfigurationLocationRulesContainer implements RulesContainer {
+    class ConfigurationLocationRulesContainer implements RulesContainer {
         private final ConfigurationLocation configurationLocation;
 
         public ConfigurationLocationRulesContainer(final ConfigurationLocation configurationLocation) {
@@ -57,19 +59,20 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream() throws IOException {
-            return configurationLocation.resolve();
+        public InputStream inputStream(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+            return configurationLocation.resolve(checkstyleClassLoader);
         }
 
         public String resolveAssociatedFile(final String fileName,
                                             @NotNull final Project project,
-                                            final Module module) throws IOException {
-            return configurationLocation.resolveAssociatedFile(fileName, module);
+                                            final Module module,
+                                            @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+            return configurationLocation.resolveAssociatedFile(fileName, module, checkstyleClassLoader);
         }
     }
 
 
-    public static class VirtualFileRulesContainer implements RulesContainer {
+    class VirtualFileRulesContainer implements RulesContainer {
         private final VirtualFile virtualFile;
 
         public VirtualFileRulesContainer(final VirtualFile virtualFile) {
@@ -82,13 +85,13 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream() throws IOException {
+        public InputStream inputStream(ClassLoader checkstyleClassLoader) throws IOException {
             return virtualFile.getInputStream();
         }
     }
 
 
-    public static class ContentRulesContainer implements RulesContainer {
+    class ContentRulesContainer implements RulesContainer {
         private final String content;
 
         public ContentRulesContainer(final String content) {
@@ -101,13 +104,13 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream() throws IOException {
+        public InputStream inputStream(ClassLoader checkstyleClassLoader) {
             return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         }
     }
 
 
-    public static class BundledRulesContainer implements RulesContainer {
+    class BundledRulesContainer implements RulesContainer {
         private final BundledConfig bundledConfig;
 
         public BundledRulesContainer(@NotNull final BundledConfig bundledConfig) {
@@ -121,7 +124,7 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream() throws IOException {
+        public InputStream inputStream(ClassLoader checkstyleClassLoader) {
             // using the csaccess classloader:
             return getClass().getResourceAsStream(bundledConfig.getPath());
         }

@@ -88,6 +88,6 @@ public class OpCreateChecker
     }
 
     private Configuration loadConfig(@NotNull final Project project) throws CheckstyleException {
-        return new OpLoadConfiguration(location, variables, module).execute(project).getConfiguration();
+        return new OpLoadConfiguration(location, variables, module, checkstyleProjectService).execute(project).getConfiguration();
     }
 }

@@ -51,12 +51,16 @@ public class OpLoadConfigurationTest {
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module))
+        final ClassLoader checkstyleClassloader = mock(ClassLoader.class);
+        final CheckstyleProjectService checkstyleProjectService = mock(CheckstyleProjectService.class);
+        when(checkstyleProjectService.underlyingClassLoader()).thenReturn(checkstyleClassloader);
+
+        when(configurationLocation.resolveAssociatedFile("aFileToResolve", module, checkstyleClassloader))
                 .thenReturn("aResolvedFile");
-        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module))
+        when(configurationLocation.resolveAssociatedFile("triggersAnIoException", module, checkstyleClassloader))
                 .thenThrow(new IOException("aTriggeredIoException"));
 
-        underTest = new OpLoadConfiguration(configurationLocation, null, module);
+        underTest = new OpLoadConfiguration(configurationLocation, null, module, checkstyleProjectService);
     }
 
 
@@ -257,7 +261,7 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testNoConfiguration() throws CheckstyleException {
-        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module) {
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module, mock(CheckstyleProjectService.class)) {
             @Override
             Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
@@ -306,13 +310,15 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testConstructors() {
-        new OpLoadConfiguration(configurationLocation);
-        new OpLoadConfiguration(configurationLocation, null);
-        new OpLoadConfiguration(configurationLocation, null, module);
+        final CheckstyleProjectService checkstyleProjectService = mock(CheckstyleProjectService.class);
+
+        new OpLoadConfiguration(configurationLocation, checkstyleProjectService);
+        new OpLoadConfiguration(configurationLocation, null, checkstyleProjectService);
+        new OpLoadConfiguration(configurationLocation, null, module, checkstyleProjectService);
         VirtualFile virtualFile = mock(VirtualFile.class);
-        new OpLoadConfiguration(virtualFile);
-        new OpLoadConfiguration(virtualFile, null);
-        new OpLoadConfiguration("doesn't matter");
+        new OpLoadConfiguration(virtualFile, checkstyleProjectService);
+        new OpLoadConfiguration(virtualFile, null, checkstyleProjectService);
+        new OpLoadConfiguration("doesn't matter", checkstyleProjectService);
     }
 
 

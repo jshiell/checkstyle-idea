@@ -4,10 +4,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -19,14 +20,12 @@ public class PropertiesDialogue extends JDialog {
 
     private boolean committed = true;
 
-    public PropertiesDialogue(final Project project, final Window parent) {
+    public PropertiesDialogue(@NotNull final Project project,
+                              @NotNull final CheckstyleProjectService checkstyleProjectService,
+                              final Window parent) {
         super(parent);
 
-        if (project == null) {
-            throw new IllegalArgumentException("Project is required");
-        }
-
-        this.propertiesPanel = new PropertiesPanel(project);
+        this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);
 
         initialise();
     }
@@ -40,7 +39,7 @@ public class PropertiesDialogue extends JDialog {
         final JButton cancelButton = new JButton(new CancelAction());
 
         final JPanel bottomPanel = new JPanel(new GridBagLayout());
-        bottomPanel.setBorder(new EmptyBorder(4, 8, 8, 8));
+        bottomPanel.setBorder(JBUI.Borders.empty(4, 8, 8, 8));
 
         bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, JBUI.insets(4), 0, 0));
