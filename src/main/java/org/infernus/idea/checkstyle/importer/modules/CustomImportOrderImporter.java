@@ -20,6 +20,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
     private static final String SPECIAL_IMPORTS_REG_EXP_PROP = "specialImportsRegExp";
     private static final String SEPARATE_LINE_BETWEEN_GROUPS_PROP = "separateLineBetweenGroups";
     private static final String SORT_IMPORTS_IN_GROUP_ALPHABETICALLY_PROP = "sortImportsInGroupAlphabetically";
+    private static final String SEVERITY = "severity";
     private static final String IMPORT_GROUP_SEPARATOR = "###";
 
     private List<ImportGroup> customImportOrder;
@@ -61,6 +62,9 @@ public class CustomImportOrderImporter extends ModuleImporter {
                 break;
             case SORT_IMPORTS_IN_GROUP_ALPHABETICALLY_PROP:
                 sortImportsInGroupAlphabetically = Boolean.parseBoolean(attrValue);
+                break;
+            case SEVERITY:
+                // ignored, but valid
                 break;
             default:
                 String message = "No CustomImportOrder property with name " + attrName + ".";
@@ -130,7 +134,10 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
     private void parseImportOrderRules(@NotNull String value) {
         String[] groups = value.split(IMPORT_GROUP_SEPARATOR);
-        customImportOrder = Arrays.stream(groups).map(ImportGroup::valueOf).collect(Collectors.toList());
+        customImportOrder = Arrays.stream(groups)
+                .map(group -> group.replaceAll("\\(\\d+\\)", ""))
+                .map(ImportGroup::valueOf)
+                .collect(Collectors.toList());
     }
 
     public enum ImportGroup {
