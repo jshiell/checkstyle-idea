@@ -193,19 +193,20 @@ public class ProjectConfigurationState
         LOG.debug("Processing file: " + path);
 
         if (path.startsWith(LEGACY_PROJECT_DIR)) {
-            return detokeniseForPrefix(path, getProjectPath(project));
+            return detokeniseForPrefix(path, getProjectPath(project), LEGACY_PROJECT_DIR);
+        } else if (path.startsWith(IDEA_PROJECT_DIR)) {
+            return detokeniseForPrefix(path, getProjectPath(project), IDEA_PROJECT_DIR);
         }
 
         return path;
     }
 
-    private String detokeniseForPrefix(final String path, final File projectPath) {
+    private String detokeniseForPrefix(final String path, final File projectPath, final String prefix) {
         if (projectPath != null) {
-            final File fullConfigFile = new File(projectPath, path.substring(LEGACY_PROJECT_DIR.length()));
-            return fullConfigFile.getAbsolutePath();
+            return new File(projectPath, path.substring(prefix.length())).getAbsolutePath();
         }
 
-        LOG.warn("Could not untokenise path as project dir is unset: " + path);
+        LOG.warn("Could not detokenise path as project dir is unset: " + path);
         return path;
     }
 

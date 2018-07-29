@@ -249,7 +249,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         String detokenisedPath = replaceProjectToken(path, LEGACY_PROJECT_DIR);
 
         if (detokenisedPath == null) {
-            // needed to handle transition from old format; IDEA will handle this after this point
             detokenisedPath = replaceProjectToken(path, IDEA_PROJECT_DIR);
         }
 
