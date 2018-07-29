@@ -24,7 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDEA_PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class ProjectConfigurationState
@@ -147,7 +148,7 @@ public class ProjectConfigurationState
             final String[] parts = value.split(";");
             for (final String part : parts) {
                 if (part.length() > 0) {
-                    thirdPartyClasspath.add(untokenisePath(part));
+                    thirdPartyClasspath.add(detokenisePath(part));
                 }
             }
         }
@@ -184,23 +185,23 @@ public class ProjectConfigurationState
      * @param path the path to process.
      * @return the processed path.
      */
-    private String untokenisePath(final String path) {
+    private String detokenisePath(final String path) {
         if (path == null) {
             return null;
         }
 
         LOG.debug("Processing file: " + path);
 
-        if (path.startsWith(PROJECT_DIR)) {
-            return untokeniseForPrefix(path, PROJECT_DIR, getProjectPath(project));
+        if (path.startsWith(LEGACY_PROJECT_DIR)) {
+            return detokeniseForPrefix(path, getProjectPath(project));
         }
 
         return path;
     }
 
-    private String untokeniseForPrefix(final String path, final String prefix, final File projectPath) {
+    private String detokeniseForPrefix(final String path, final File projectPath) {
         if (projectPath != null) {
-            final File fullConfigFile = new File(projectPath, path.substring(prefix.length()));
+            final File fullConfigFile = new File(projectPath, path.substring(LEGACY_PROJECT_DIR.length()));
             return fullConfigFile.getAbsolutePath();
         }
 
@@ -393,7 +394,7 @@ public class ProjectConfigurationState
             if (projectPath != null) {
                 final String projectPathAbs = projectPath.getAbsolutePath();
                 if (path.startsWith(projectPathAbs)) {
-                    return PROJECT_DIR + path.substring(projectPathAbs.length());
+                    return IDEA_PROJECT_DIR + path.substring(projectPathAbs.length());
                 }
             }
 

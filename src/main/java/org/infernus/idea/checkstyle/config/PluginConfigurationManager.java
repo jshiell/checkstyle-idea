@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class PluginConfigurationManager {
-    public static final String PROJECT_DIR = "$PRJ_DIR$";
+    public static final String LEGACY_PROJECT_DIR = "$PRJ_DIR$"; // no longer output, supported for backwards compatibility
+    public static final String IDEA_PROJECT_DIR = "$PROJECT_DIR$";
 
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
 

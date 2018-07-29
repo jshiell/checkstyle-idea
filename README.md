@@ -215,7 +215,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.21.0** Fixed: SAME_PACKAGE(n) is now handled when importing code styles (#377).
+* **5.21.1** Fixed: Removed project path detokentisation, instead relying on IDEA's built-in support (#404).
+* **5.21.0** Fixed: SAME_PACKAGE(n) is now handled when importing code styles (#377)
 * **5.21.0** New: Rules files can now be loaded from the Checkstyle classpath (i.e. third-party JARs) (#400).
 * **5.20.0** Fixed: Prevents the plugin from crashing when using SuppressionXpathFilter - thanks to @tduehr (#397).
 * **5.20.0** New: Added Checkstyle 8.10.1, 8.11.

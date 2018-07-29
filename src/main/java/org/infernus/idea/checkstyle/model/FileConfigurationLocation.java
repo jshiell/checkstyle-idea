@@ -12,7 +12,8 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDEA_PROJECT_DIR;
+import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -61,7 +62,15 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             throw new IllegalArgumentException("A non-blank location is required");
         }
 
-        super.setLocation(tokenisePath(location));
+        super.setLocation(tokenisePath(migrateLegacyProjectDir(location)));
+    }
+
+    @NotNull
+    private String migrateLegacyProjectDir(final String location) {
+        if (location.startsWith(LEGACY_PROJECT_DIR)) {
+            return IDEA_PROJECT_DIR + location.substring(LEGACY_PROJECT_DIR.length());
+        }
+        return location;
     }
 
     @NotNull
@@ -237,23 +246,34 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             return null;
         }
 
-        LOG.debug("Processing file: " + path);
+        String detokenisedPath = replaceProjectToken(path, LEGACY_PROJECT_DIR);
 
-        int prefixLocation = path.indexOf(PROJECT_DIR);
+        if (detokenisedPath == null) {
+            // needed to handle transition from old format; IDEA will handle this after this point
+            detokenisedPath = replaceProjectToken(path, IDEA_PROJECT_DIR);
+        }
+
+        if (detokenisedPath == null) {
+            detokenisedPath = fromUnixPath(path);
+        }
+
+        return detokenisedPath;
+    }
+
+    private String replaceProjectToken(String path, String projectToken) {
+        int prefixLocation = path.indexOf(projectToken);
         if (prefixLocation >= 0) {
-            // path is relative to project dir
             final File projectPath = getProjectPath();
             if (projectPath != null) {
-                final String projectRelativePath = fromUnixPath(path.substring(prefixLocation + PROJECT_DIR.length()));
+                final String projectRelativePath = fromUnixPath(path.substring(prefixLocation + projectToken.length()));
                 final String completePath = projectPath + File.separator + projectRelativePath;
                 return absolutePathOf(new File(completePath));
 
             } else {
-                LOG.warn("Could not untokenise path as project dir is unset: " + path);
+                LOG.warn("Could not detokenise path as project dir is unset: " + path);
             }
         }
-
-        return fromUnixPath(path);
+        return null;
     }
 
     /**
@@ -268,16 +288,16 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         if (getProject().isDefault()) {
-            if (new File(path).exists() || path.startsWith(PROJECT_DIR)) {
+            if (new File(path).exists() || path.startsWith(LEGACY_PROJECT_DIR) || path.startsWith(IDEA_PROJECT_DIR)) {
                 return toUnixPath(path);
             } else {
-                return PROJECT_DIR + toUnixPath(separatorChar() + path);
+                return IDEA_PROJECT_DIR + toUnixPath(separatorChar() + path);
             }
         }
 
         final File projectPath = getProjectPath();
         if (projectPath != null && path.startsWith(absolutePathOf(projectPath) + separatorChar())) {
-            return PROJECT_DIR
+            return IDEA_PROJECT_DIR
                     + toUnixPath(path.substring(absolutePathOf(projectPath).length()));
         }
 
