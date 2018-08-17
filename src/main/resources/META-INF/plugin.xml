@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.21.1</version>
+    <version>5.22.0</version>
     <idea-version since-build="145.258"/>
     <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.22.0: New: Added Checkstyle 8.12.</li>
     <li>5.21.1: Fixed: Removed project path detokentisation, instead relying on IDEA's built-in support (#404).</li>
     <li>5.21.0: Fixed: SAME_PACKAGE(n) is now handled when importing code styles (#377).</li>
     <li>5.21.0: New: Rules files can now be loaded from the Checkstyle classpath (i.e. third-party JARs) (#400).</li>
