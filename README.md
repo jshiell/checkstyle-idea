@@ -5,6 +5,8 @@
 Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
 [![Build Status](https://travis-ci.org/jshiell/checkstyle-idea.svg?branch=master)](https://travis-ci.org/jshiell/checkstyle-idea)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
 A plug-in for JetBrains' IntelliJ IDEA 15/2016/2017 which provides real-time feedback against a given
 [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
