@@ -14,7 +14,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.intellij' version '0.2.18'
+    id 'org.jetbrains.intellij' version '0.3.9'
 }
 
 repositories {
