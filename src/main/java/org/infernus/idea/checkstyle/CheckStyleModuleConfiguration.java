@@ -138,7 +138,7 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public synchronized boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -155,7 +155,7 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     @Override
-    public int hashCode() {
+    public synchronized int hashCode() {
         return 31 * super.hashCode() + module.hashCode();
     }
 
