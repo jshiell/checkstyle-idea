@@ -8,24 +8,12 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
-A plug-in for JetBrains' IntelliJ IDEA 15/2016/2017 which provides real-time feedback against a given
+A plug-in for JetBrains' IntelliJ IDEA 2016-18 which provides real-time feedback against a given
 [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 
-> OS X users of IDEA 15 please note - CheckStyle 6.2 and above require Java 8. 
-> As the default IDEA package for OS X runs on Java 6, please make use of the versions
-> with the bundled JDK, e.g.
->
-> * [Community Edition (15.0.6)](https://download.jetbrains.com/idea/ideaIC-15.0.6-custom-jdk-bundled.dmg)
-> * [Ultimate Edition (15.0.6)](https://download.jetbrains.com/idea/ideaIU-15.0.6-custom-jdk-bundled.dmg)
->
-> or, for Brew Cask users,
->
-> * brew cask install intellij-idea-ce-bundled-jdk
-> * brew cask install intellij-idea-bundled-jdk
->
-> All other users please note - we require IDEA to be running on JDK 8. AFAIK this is the default as of IDEA 2016.1.
+We require IDEA to be running on JDK 8. AFAIK this is the default as of IDEA 2016.1.
 
 ## Use
 
