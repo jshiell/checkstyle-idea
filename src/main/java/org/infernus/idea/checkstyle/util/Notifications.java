@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.util;
 
 import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
@@ -46,16 +47,37 @@ public final class Notifications {
     public static void showException(final Project project,
                                      final Throwable t) {
         LOG_ONLY_GROUP
-                .createNotification(message("plugin.exception"), messageFor(t), ERROR, URL_OPENING_LISTENER)
+                .createNotification(titleFor(t), messageFor(t), ERROR, URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     @NotNull
-    private static String messageFor(final Throwable t) {
-        if (t.getCause() != null) {
-            return message("checkstyle.exception-with-root-cause", t.getMessage(), traceOf(rootCauseOf(t)));
+    private static String titleFor(final Throwable t) {
+        if (isParseException(t)) {
+            return message("plugin.exception.parse");
         }
-        return message("checkstyle.exception", traceOf(t));
+        return message("plugin.exception");
+    }
+
+    private static boolean isParseException(final Throwable t) {
+        return t instanceof CheckStylePluginParseException;
+    }
+
+    @NotNull
+    private static String messageFor(final Throwable t) {
+        String detailSuffix = detailSuffixOf(t);
+        if (t.getCause() != null) {
+            return message("checkstyle.exception-with-root-cause" + detailSuffix, t.getMessage(), traceOf(rootCauseOf(t)));
+        }
+        return message("checkstyle.exception" + detailSuffix, traceOf(t));
+    }
+
+    @NotNull
+    private static String detailSuffixOf(final Throwable t) {
+        if (isParseException(t)) {
+            return  ".parse";
+        }
+        return "";
     }
 
     private static String traceOf(final Throwable t) {
