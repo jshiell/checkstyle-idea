@@ -19,11 +19,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -60,7 +61,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
     private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
-    private static final String DEFAULT_OVERRIDE = CheckStyleBundle.message("plugin.toolwindow.default-file");
+    private static final String DEFAULT_OVERRIDE = message("plugin.toolwindow.default-file");
 
     private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
             = new HashMap<>();
@@ -174,7 +175,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         progressPanel = new JToolBar(JToolBar.HORIZONTAL);
         progressPanel.add(Box.createHorizontalStrut(4));
-        progressPanel.add(new JLabel(CheckStyleBundle.message("plugin.toolwindow.override")));
+        progressPanel.add(new JLabel(message("plugin.toolwindow.override")));
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(configurationOverrideCombo);
         progressPanel.add(Box.createHorizontalStrut(4));
@@ -505,13 +506,17 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                         args[i] = errorMatcher.group(i + 1);
                     }
 
-                    errorText = CheckStyleBundle.message(errorPatternEntry.getValue(), args);
+                    errorText = message(errorPatternEntry.getValue(), args);
                 }
             }
         }
 
         if (errorText == null) {
-            errorText = CheckStyleBundle.message("plugin.results.error");
+            if (error instanceof CheckStylePluginParseException) {
+                errorText = message("plugin.results.unparseable");
+            } else {
+                errorText = message("plugin.results.error");
+            }
         }
 
         treeModel.clear();
