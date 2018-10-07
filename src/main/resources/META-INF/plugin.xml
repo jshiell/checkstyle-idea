@@ -11,15 +11,17 @@
 </p>
         ]]>
     </description>
-    <version>5.22.1</version>
+    <version>5.23.0</version>
     <idea-version since-build="145.258"/>
-    <vendor url="https://infernus.org/" email="james@infernus.org">James Shiell</vendor>
+    <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
 
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.23.0: New: Added Checkstyle 8.13.</li>
+    <li>5.23.0: Fixed: Error highlighting should be better mapped to IDEA settings (#411).</li>
     <li>5.22.1: New: Parse error messages are now displayed more sensibly (#409).</li>
     <li>5.22.0: New: Added Checkstyle 8.12.</li>
     <li>5.21.1: Fixed: Removed project path detokentisation, instead relying on IDEA's built-in support (#404).</li>
