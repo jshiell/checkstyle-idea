@@ -81,7 +81,7 @@ public class Problem {
         if (!suppressErrors) {
             switch (severityLevel()) {
                 case Error:
-                    return ProblemHighlightType.ERROR;
+                    return ProblemHighlightType.GENERIC_ERROR;
                 case Warning:
                     return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
                 case Info:
