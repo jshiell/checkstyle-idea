@@ -9,7 +9,6 @@ import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
-import org.apache.commons.io.IOUtils;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
@@ -127,10 +126,7 @@ public class OpLoadConfiguration
 
     @Override
     public HasCsConfig execute(@NotNull final Project currentProject) throws CheckstyleException {
-        HasCsConfig result;
-        InputStream is = null;
-        try {
-            is = rulesContainer.inputStream(checkstyleClassLoader());
+        try (InputStream is = rulesContainer.inputStream(checkstyleClassLoader())) {
             Configuration configuration = callLoadConfiguration(is);
             if (configuration == null) {
                 // from the CS code this state appears to occur when there's no <module> element found
@@ -138,14 +134,11 @@ public class OpLoadConfiguration
                 throw new CheckstyleException("Couldn't find root module in " + rulesContainer.filePath());
             }
             resolveFilePaths(currentProject, configuration);
-            result = new CsConfigObject(configuration);
+            return new CsConfigObject(configuration);
 
         } catch (IOException e) {
             throw new CheckstyleException("Error loading file", e);
-        } finally {
-            IOUtils.closeQuietly(is);
         }
-        return result;
     }
 
 
@@ -204,7 +197,7 @@ public class OpLoadConfiguration
     private void checkFilenameForProperty(final Project project,
                                           final DefaultConfiguration configRoot,
                                           final Configuration configModule,
-                                          final String propertyName) throws CheckstyleException {
+                                          final String propertyName) {
         final String fileName = getAttributeOrNull(configModule, propertyName);
         if (!isBlank(fileName)) {
             try {

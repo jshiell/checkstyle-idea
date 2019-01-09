@@ -1,17 +1,5 @@
 package org.infernus.idea.checkstyle.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.text.MessageFormat;
-import java.util.Optional;
-
 import com.intellij.openapi.components.ServiceKt;
 import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.components.impl.stores.IProjectStore;
@@ -25,18 +13,27 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.MessageFormat;
+import java.util.Optional;
+
 
 /**
  * Locate and/or create temporary directories for use by this plugin.
  */
-public class TempDirProvider
-{
+public class TempDirProvider {
     private static final Logger LOG = Logger.getInstance(TempDirProvider.class);
 
     private static final String README_TEMPLATE = "copylibs-readme.template.txt";
 
     public static final String README_FILE = "readme.txt";
-
 
 
     public String forPersistedPsiFile(final PsiFile tempPsiFile) {
@@ -54,9 +51,8 @@ public class TempDirProvider
 
     @NotNull
     private File temporaryDirectoryLocationFor(final Project project) {
-        File result = getIdeaFolder(project).map(vf -> new File(vf.getPath(), "checkstyleidea.tmp")).orElse(new File
-                (project.getBasePath(), "checkstyleidea.tmp"));
-        return result;
+        return getIdeaFolder(project).map(vf -> new File(vf.getPath(), "checkstyleidea.tmp"))
+                .orElse(new File(project.getBasePath(), "checkstyleidea.tmp"));
     }
 
     Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
@@ -79,8 +75,8 @@ public class TempDirProvider
     }
 
     private String pathOf(@NotNull final PsiFile file) {
-        return virtualFileOf(file).map(VirtualFile::getPath).orElseThrow(() -> new IllegalStateException("PSIFile " +
-                "does not have associated virtual file: " + file));
+        return virtualFileOf(file).map(VirtualFile::getPath).orElseThrow(() ->
+                new IllegalStateException("PSIFile does not have associated virtual file: " + file));
     }
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {
@@ -106,7 +102,7 @@ public class TempDirProvider
             if (tempDir.isDirectory()) {
                 result = Optional.of(tempDir);
             }
-        } catch (IOException | URISyntaxException | RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             LOG.warn("Unable to create suitable temporary directory. Library unlock unavailable.", e);
         }
         return result;
@@ -114,10 +110,9 @@ public class TempDirProvider
 
     @NotNull
     private File determineCopiedLibrariesDir(@NotNull final Project pProject) {
-        File result = getIdeaFolder(pProject).map(pVirtualFile -> new File(pVirtualFile.getPath(),
-                "checkstyleidea-libs")).orElseGet(() -> new File(System.getProperty("java.io.tmpdir"), "csi-" +
-                projectUnique(pProject) + "-libs"));
-        return result;
+        return getIdeaFolder(pProject).map(pVirtualFile -> new File(pVirtualFile.getPath(),
+                "checkstyleidea-libs")).orElseGet(() -> new File(System.getProperty("java.io.tmpdir"),
+                "csi-" + projectUnique(pProject) + "-libs"));
     }
 
     @NotNull
@@ -125,31 +120,25 @@ public class TempDirProvider
         return pProject.getLocationHash().replaceAll(" ", "_");
     }
 
-    private void putReadmeFile(@NotNull final Project pProject, @NotNull final File pTempDir)
-            throws URISyntaxException, IOException {
+    private void putReadmeFile(@NotNull final Project project, @NotNull final File pTempDir)
+            throws IOException {
         final Path tempDir = Paths.get(pTempDir.toURI());
         final Path readme = tempDir.resolve(README_FILE);
         if (!Files.isRegularFile(readme)) {
-            String s = readTemplate();
-            if (s != null) {
-                s = MessageFormat.format(s, pProject.getName(), CheckStylePlugin.ID_PLUGIN);
-                s = s.replaceAll("[\r\n]+", System.lineSeparator());
-                Files.write(readme, s.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+            String template = readTemplate();
+            if (template != null) {
+                template = MessageFormat.format(template, project.getName(), CheckStylePlugin.ID_PLUGIN);
+                template = template.replaceAll("[\r\n]+", System.lineSeparator());
+                Files.write(readme, template.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
             }
         }
     }
 
     @Nullable
     private String readTemplate() throws IOException {
-        String result = null;
-        InputStream is = null;
-        try {
-            is = getClass().getResourceAsStream(README_TEMPLATE);
-            result = IOUtils.toString(is, StandardCharsets.UTF_8);
-        } finally {
-            IOUtils.closeQuietly(is);
+        try (InputStream is = getClass().getResourceAsStream(README_TEMPLATE)) {
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
         }
-        return result;
     }
 
 

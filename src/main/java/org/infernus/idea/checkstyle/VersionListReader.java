@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.intellij.openapi.util.Pair;
-import org.apache.commons.io.IOUtils;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -46,22 +45,19 @@ public class VersionListReader {
     @NotNull
     private Properties readProperties(@NotNull final String propertyFile) {
         final Properties props = new Properties();
-        InputStream is = null;
-        try {
-            is = getClass().getClassLoader().getResourceAsStream(propertyFile);
-            if (is == null) {
-                // in unit tests, it seems we need this:
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyFile);
-            }
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(propertyFile)) {
+//            if (is == null) {
+//                // in unit tests, it seems we need this:
+//                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyFile);
+//            }
             if (is != null) {
                 props.load(is);
             }
         } catch (IllegalArgumentException | IOException e) {
             throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
                     + propertyFile + "'", e);
-        } finally {
-            IOUtils.closeQuietly(is);
         }
+
         if (props.isEmpty()) {
             throw new CheckStylePluginException("Internal error: Could not read internal configuration file '"
                     + propertyFile + "'");
