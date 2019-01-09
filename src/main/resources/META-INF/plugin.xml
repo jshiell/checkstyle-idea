@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.24.0: New: Several versions of Checkstyle that have no reported compatibility options with newer versions have been dropped so as to reduce plugin size</li>
     <li>5.24.0: New: Added Checkstyle 8.14, 8.16.</li>
     <li>5.23.0: New: Added Checkstyle 8.13.</li>
     <li>5.23.0: Fixed: Error highlighting should be better mapped to IDEA settings (#411).</li>
