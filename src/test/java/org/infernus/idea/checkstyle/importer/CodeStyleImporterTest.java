@@ -32,7 +32,7 @@ public class CodeStyleImporterTest
         super.setUp();
 
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
-        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.1").build();
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.2").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
 
         csService = new CheckstyleProjectService(project, mockPluginConfig);

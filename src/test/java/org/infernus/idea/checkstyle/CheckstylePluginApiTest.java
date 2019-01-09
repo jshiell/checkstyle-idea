@@ -22,7 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
-    private static final String CHECKSTYLE_VERSION = "7.1.1";
+    private static final String CHECKSTYLE_VERSION = "7.1.2";
 
     private CheckstylePluginApi underTest;
 
