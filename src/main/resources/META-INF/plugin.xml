@@ -20,7 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.24.0: New: Added Checkstyle 8.14, 8.15, 8.16.</li>
+    <li>5.24.0: New: Added Checkstyle 8.14, 8.16.</li>
     <li>5.23.0: New: Added Checkstyle 8.13.</li>
     <li>5.23.0: Fixed: Error highlighting should be better mapped to IDEA settings (#411).</li>
     <li>5.22.1: New: Parse error messages are now displayed more sensibly (#409).</li>

@@ -205,7 +205,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.24.0** New: Added Checkstyle 8.14, 8.15, 8.16.
+* **5.24.0** New: Added Checkstyle 8.14, 8.16.
 * **5.23.0** New: Added Checkstyle 8.13.
 * **5.23.0** Fixed: Error highlighting should be better mapped to IDEA settings (#411).
 * **5.22.1** New: Parse error messages are now displayed more sensibly (#409).
