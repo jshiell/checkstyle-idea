@@ -20,7 +20,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.24.0: New: Several versions of Checkstyle that have no reported compatibility options with newer versions have been dropped so as to reduce plugin size</li>
+    <li>5.24.0: Fixed: New version dialogue display is now tracked at application level.</li>
+    <li>5.24.0: New: Several versions of Checkstyle that have no reported compatibility options with newer versions have been dropped so as to reduce plugin size.</li>
     <li>5.24.0: New: Added Checkstyle 8.14, 8.16.</li>
     <li>5.23.0: New: Added Checkstyle 8.13.</li>
     <li>5.23.0: Fixed: Error highlighting should be better mapped to IDEA settings (#411).</li>
@@ -254,6 +255,9 @@
 
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceInterface="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"
+                            serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
+
         <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"
                         serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
@@ -268,8 +272,6 @@
                         serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.config.ProjectConfigurationState"
                         serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.WorkspaceConfigurationState"/>
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstylePluginApi"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
 

@@ -16,16 +16,15 @@ public class PluginConfigurationManager {
 
     private final Project project;
     private final ProjectConfigurationState projectConfigurationState;
-    private final WorkspaceConfigurationState workspaceConfigurationState;
+    private final ApplicationConfigurationState applicationConfigurationState;
 
     public PluginConfigurationManager(@NotNull final Project project,
                                       @NotNull final ProjectConfigurationState projectConfigurationState,
-                                      @NotNull final WorkspaceConfigurationState workspaceConfigurationState) {
+                                      @NotNull final ApplicationConfigurationState applicationConfigurationState) {
         this.project = project;
         this.projectConfigurationState = projectConfigurationState;
-        this.workspaceConfigurationState = workspaceConfigurationState;
+        this.applicationConfigurationState = applicationConfigurationState;
     }
-
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
         if (configurationListener != null) {
@@ -50,14 +49,15 @@ public class PluginConfigurationManager {
     @NotNull
     public PluginConfiguration getCurrent() {
         final PluginConfigurationBuilder defaultConfig = PluginConfigurationBuilder.defaultConfiguration(project);
-        return workspaceConfigurationState
-                .populate(projectConfigurationState.populate(defaultConfig))
+        return projectConfigurationState
+                .populate(applicationConfigurationState
+                        .populate(defaultConfig))
                 .build();
     }
 
     public void setCurrent(@NotNull final PluginConfiguration updatedConfiguration, final boolean fireEvents) {
         projectConfigurationState.setCurrentConfig(updatedConfiguration);
-        workspaceConfigurationState.setCurrentConfig(updatedConfiguration);
+        applicationConfigurationState.setCurrentConfig(updatedConfiguration);
         if (fireEvents) {
             fireConfigurationChanged();
         }
