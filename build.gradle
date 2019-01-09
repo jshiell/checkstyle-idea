@@ -54,7 +54,7 @@ ext {
 }
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.4';
+    compile group: 'commons-io', name: 'commons-io', version: '2.6';
     compile group: 'commons-codec', name: 'commons-codec', version: '1.11';
     compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.22'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.22'
