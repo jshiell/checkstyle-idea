@@ -4,13 +4,13 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Base64;
 
 import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
@@ -73,7 +73,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private URLConnection withBasicAuth(final URL url, final URLConnection urlConnection) {
         if (url.getUserInfo() != null) {
             urlConnection.setRequestProperty("Authorization",
-                    "Basic " + DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes()));
+                    "Basic " + Base64.getEncoder().encodeToString(url.getUserInfo().getBytes()));
         }
         return urlConnection;
     }
