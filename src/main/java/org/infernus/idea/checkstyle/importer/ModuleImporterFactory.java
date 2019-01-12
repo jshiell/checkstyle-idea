@@ -4,6 +4,8 @@ import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+
 class ModuleImporterFactory {
 
     private ModuleImporterFactory() {}
@@ -25,9 +27,9 @@ class ModuleImporterFactory {
         String fqn = getFullyQualifiedClassName(name);
         try {
             Class c = Class.forName(fqn);
-            Object o = c.newInstance();
+            Object o = c.getDeclaredConstructor().newInstance();
             return o instanceof ModuleImporter ? (ModuleImporter) o : null;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             return null;
         }
     }
