@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
@@ -47,6 +46,7 @@ public final class CheckStylePlugin implements ProjectComponent {
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
     private final PluginConfigurationManager configurationManager;
+    private final CheckerFactoryCache checkerFactoryCache;
 
 
     /**
@@ -55,9 +55,11 @@ public final class CheckStylePlugin implements ProjectComponent {
      * @param project the current project.
      */
     public CheckStylePlugin(@NotNull final Project project,
-                            @NotNull final PluginConfigurationManager configurationManager) {
+                            @NotNull final PluginConfigurationManager configurationManager,
+                            @NotNull final CheckerFactoryCache checkerFactoryCache) {
         this.project = project;
         this.configurationManager = configurationManager;
+        this.checkerFactoryCache = checkerFactoryCache;
 
         LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
 
@@ -143,7 +145,7 @@ public final class CheckStylePlugin implements ProjectComponent {
     }
 
     private void invalidateCheckerCache() {
-        ServiceManager.getService(project, CheckerFactoryCache.class).invalidate();
+        checkerFactoryCache.invalidate();
     }
 
     @NotNull

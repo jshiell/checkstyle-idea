@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
@@ -38,7 +39,9 @@ public class CheckstylePluginApiTest {
                 .thenReturn(PluginConfigurationBuilder.testInstance(CHECKSTYLE_VERSION).build());
 
         checkstyleProjectService = new CheckstyleProjectService(project, pluginConfigManager);
-        underTest = new CheckstylePluginApi(new CheckStylePlugin(project, pluginConfigManager), checkstyleProjectService);
+        underTest = new CheckstylePluginApi(
+                new CheckStylePlugin(project, pluginConfigManager, mock(CheckerFactoryCache.class)),
+                checkstyleProjectService);
     }
 
     @Test

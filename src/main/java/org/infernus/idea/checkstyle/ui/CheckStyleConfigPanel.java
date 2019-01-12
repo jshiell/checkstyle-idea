@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
@@ -58,13 +57,16 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private final Project project;
     private final CheckstyleProjectService checkstyleProjectService;
+    private final CheckerFactoryCache checkerFactoryCache;
 
     public CheckStyleConfigPanel(@NotNull final Project project,
-                                 @NotNull final CheckstyleProjectService checkstyleProjectService) {
+                                 @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                 @NotNull final CheckerFactoryCache checkerFactoryCache) {
         super(new BorderLayout());
 
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
+        this.checkerFactoryCache = checkerFactoryCache;
 
         csVersionDropdown = buildCheckstyleVersionComboBox();
 
@@ -80,7 +82,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     private void activateCurrentClasspath() {
-        ServiceManager.getService(project, CheckerFactoryCache.class).invalidate();
+        checkerFactoryCache.invalidate();
 
         checkstyleProjectService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
     }

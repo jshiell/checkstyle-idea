@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -69,7 +70,9 @@ public class CheckStyleConfigurableTest {
         CheckStyleConfigPanel mockPanel = buildMockPanel(mockProject);
 
         CheckStyleConfigurable classUnderTest = new CheckStyleConfigurable(
-                mockProject, mockPanel, mock(CheckstyleProjectService.class), mockPluginConfigurationManager(mockProject));
+                mockProject, mockPanel, mock(CheckstyleProjectService.class),
+                mockPluginConfigurationManager(mockProject),
+                mock(CheckerFactoryCache.class));
 
         assertFalse(classUnderTest.isModified());
     }
