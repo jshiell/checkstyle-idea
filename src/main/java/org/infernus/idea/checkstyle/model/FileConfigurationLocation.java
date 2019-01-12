@@ -23,7 +23,10 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 public class FileConfigurationLocation extends ConfigurationLocation {
 
     private static final Logger LOG = Logger.getInstance(FileConfigurationLocation.class);
+
     private static final int BUFFER_SIZE = 4096;
+    private static final String JAR_DELIMITER = ".jar!/";
+    private static final String JAR_DELIMITER_REGEX = "\\.[jJ][aA][rR]!/";
 
     /**
      * Create a new file configuration.
@@ -90,7 +93,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     private InputStream readLocationFromJar(final String detokenisedLocation) throws IOException {
-        final String[] fileParts = detokenisedLocation.split("!/");
+        final String[] fileParts = detokenisedLocation.split(JAR_DELIMITER_REGEX);
         final InputStream fileStream = readFileFromJar(fileParts[0], fileParts[1]);
         if (fileStream == null) {
             throw new FileNotFoundException("File does not exist: " + fileParts[0] + " containing " + fileParts[1]);
@@ -111,7 +114,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         final String detokenisedLocation = getLocation();
         if (isInJarFile(detokenisedLocation)) {
             return writeStreamToTemporaryFile(
-                    readFileFromJar(detokenisedLocation.split("!/")[0], filename),
+                    readFileFromJar(detokenisedLocation.split(JAR_DELIMITER_REGEX)[0], filename),
                     extensionOf(filename));
         }
 
@@ -148,12 +151,12 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     private boolean isInJarFile(final String detokenisedLocation) {
-        return detokenisedLocation != null && detokenisedLocation.toLowerCase().contains(".jar!/");
+        return detokenisedLocation != null && detokenisedLocation.toLowerCase().contains(JAR_DELIMITER);
     }
 
     private InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {
         try (ZipFile jarFile = new ZipFile(jarPath)) {
-            for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
+            for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements();) {
                 final ZipEntry entry = e.nextElement();
 
                 if (!entry.isDirectory() && entry.getName().equals(filePath)) {

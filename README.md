@@ -205,9 +205,12 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.24.0** Fixed: New version dialogue display is now tracked at application level.
+* **5.24.0** Fixed: The plugin should now build & run on JDK 11.
+* **5.24.0** Fixed: We now handle exclamation marks in JAR paths (#412).
+* **5.24.0** Fixed: Rules files are more consistently cached in memory to hopefully alleviate Windows file-locking issues (#417).
+* **5.24.0** Fixed: New version dialogue display is now tracked at application level (#415).
 * **5.24.0** New: Several versions of Checkstyle that have no reported compatibility options with newer versions have been dropped so as to reduce plugin size.
-* **5.24.0** New: Added Checkstyle 8.14, 8.16.
+* **5.24.0** New: Added Checkstyle 8.14, 8.16 (#420).
 * **5.23.0** New: Added Checkstyle 8.13.
 * **5.23.0** Fixed: Error highlighting should be better mapped to IDEA settings (#411).
 * **5.22.1** New: Parse error messages are now displayed more sensibly (#409).
