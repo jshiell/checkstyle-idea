@@ -1,11 +1,12 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 

@@ -5,9 +5,14 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
+import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
 /**
  * A configuration file accessible via a HTTP URL.
@@ -39,7 +44,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         }
 
         try {
-            cachedContent = asBytes(connectionTo(getLocation()));
+            cachedContent = readContentOf(streamFrom(connectionTo(getLocation())));
             cacheExpiry = System.currentTimeMillis() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
             return new ByteArrayInputStream(cachedContent);
 
@@ -54,6 +59,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     @NotNull
     URLConnection connectionTo(final String location) throws IOException {
         final URL url = new URL(location);
+
         final URLConnection urlConnection = url.openConnection();
         urlConnection.setConnectTimeout(HTTP_TIMEOUT_IN_MS);
         urlConnection.setReadTimeout(HTTP_TIMEOUT_IN_MS);
@@ -61,33 +67,20 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         urlConnection.setDoOutput(false);
         urlConnection.setAllowUserInteraction(false);
 
-        addBasicAuth(url, urlConnection);
-
-        return urlConnection;
+        return withBasicAuth(url, urlConnection);
     }
 
-    private void addBasicAuth(final URL url, final URLConnection urlConnection) {
+    private URLConnection withBasicAuth(final URL url, final URLConnection urlConnection) {
         if (url.getUserInfo() != null) {
             urlConnection.setRequestProperty("Authorization",
                     "Basic " + DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes()));
         }
+        return urlConnection;
     }
 
-    private byte[] asBytes(final URLConnection urlConnection) throws IOException {
+    private InputStream streamFrom(final URLConnection urlConnection) throws IOException {
         urlConnection.connect();
-
-        final ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(responseBody));
-             Reader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
-            int readChar;
-            while ((readChar = reader.read()) != -1) {
-                writer.write(readChar);
-            }
-
-            writer.flush();
-
-            return responseBody.toByteArray();
-        }
+        return new BufferedInputStream(urlConnection.getInputStream());
     }
 
     @Override

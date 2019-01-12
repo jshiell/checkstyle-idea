@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.infernus.idea.checkstyle.util.Streams;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +86,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             throw new FileNotFoundException("File does not exist: " + absolutePathOf(locationFile));
         }
 
-        return new FileInputStream(locationFile);
+        return Streams.inMemoryCopyOf(new FileInputStream(locationFile));
     }
 
     private InputStream readLocationFromJar(final String detokenisedLocation) throws IOException {
@@ -131,15 +132,10 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         final File tempFile = File.createTempFile("csidea-", fileSuffix);
-        BufferedOutputStream out = null;
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(tempFile));
+        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile))) {
             writeTo(fileStream, out);
             tempFile.deleteOnExit();
             return tempFile.getAbsolutePath();
-
-        } finally {
-            closeQuietly(out, fileStream);
         }
     }
 
@@ -155,61 +151,18 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         return detokenisedLocation != null && detokenisedLocation.toLowerCase().contains(".jar!/");
     }
 
-    public InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {
-        ZipFile jarFile = null;
-        try {
-            jarFile = new ZipFile(jarPath);
+    private InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {
+        try (ZipFile jarFile = new ZipFile(jarPath)) {
             for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                 final ZipEntry entry = e.nextElement();
 
                 if (!entry.isDirectory() && entry.getName().equals(filePath)) {
-                    BufferedInputStream bis = null;
-
-                    try {
-                        bis = new BufferedInputStream(jarFile.getInputStream(entry));
-                        return new ByteArrayInputStream(readFrom(bis));
-
-                    } finally {
-                        closeQuietly(bis);
-                    }
+                    return Streams.inMemoryCopyOf(jarFile.getInputStream(entry));
                 }
             }
-
-        } finally {
-            closeQuietly(jarFile);
         }
 
         return null;
-    }
-
-    private byte[] readFrom(final BufferedInputStream bis) throws IOException {
-        final ByteArrayOutputStream rulesFile = new ByteArrayOutputStream();
-        final byte[] readBuffer = new byte[BUFFER_SIZE];
-        int count;
-        while ((count = bis.read(readBuffer, 0, BUFFER_SIZE)) != -1) {
-            rulesFile.write(readBuffer, 0, count);
-        }
-        return rulesFile.toByteArray();
-    }
-
-    private static void closeQuietly(final ZipFile jarFile) {
-        if (jarFile != null) {
-            try {
-                jarFile.close();
-            } catch (IOException ignored) {
-            }
-        }
-    }
-
-    private static void closeQuietly(final Closeable... closeables) {
-        for (Closeable closeable : closeables) {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
     }
 
     /**
@@ -259,7 +212,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         return detokenisedPath;
     }
 
-    private String replaceProjectToken(String path, String projectToken) {
+    private String replaceProjectToken(final String path, final String projectToken) {
         int prefixLocation = path.indexOf(projectToken);
         if (prefixLocation >= 0) {
             final File projectPath = getProjectPath();

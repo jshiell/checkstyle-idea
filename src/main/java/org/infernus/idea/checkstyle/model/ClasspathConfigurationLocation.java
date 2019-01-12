@@ -6,7 +6,12 @@ import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
 public class ClasspathConfigurationLocation extends ConfigurationLocation {
 
@@ -29,7 +34,7 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
         }
 
         try {
-            cachedContent = asBytes(getLocation());
+            cachedContent = readContentOf(streamOf(getLocation()));
             cacheExpiry = System.currentTimeMillis() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
             return new ByteArrayInputStream(cachedContent);
 
@@ -41,30 +46,21 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
         }
     }
 
-    private byte[] asBytes(final String classpathLocation) throws IOException {
+    private InputStream streamOf(final String classpathLocation) throws IOException {
         InputStream resourceStream = checkstyleClassLoader().getResourceAsStream(classpathLocation);
         if (resourceStream == null) {
             throw new FileNotFoundException("Couldn't read classpath resource: " + classpathLocation);
         }
-
-        final ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(responseBody));
-             Reader reader = new BufferedReader(new InputStreamReader(resourceStream))) {
-            int readChar;
-            while ((readChar = reader.read()) != -1) {
-                writer.write(readChar);
-            }
-
-            writer.flush();
-
-            return responseBody.toByteArray();
-        }
+        return resourceStream;
     }
 
-    @NotNull
     private ClassLoader checkstyleClassLoader() {
-        // TODO it'd be good to get this lookup out of here, but the clone() usage complicates this refactoring
-        return ServiceManager.getService(getProject(), CheckstyleProjectService.class).underlyingClassLoader();
+        return checkstyleProjectService(getProject()).underlyingClassLoader();
+    }
+
+    private CheckstyleProjectService checkstyleProjectService(@NotNull final Project project) {
+        // we can't bring this in at construction time due to a cyclic dep
+        return ServiceManager.getService(project, CheckstyleProjectService.class);
     }
 
     @Override

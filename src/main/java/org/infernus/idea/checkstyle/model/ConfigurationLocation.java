@@ -152,7 +152,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
      * @param element the configuration element.
      * @return the settable property names.
      */
-    @SuppressWarnings("unchecked")
     private List<String> extractProperties(final Element element) {
         final List<String> propertyNames = new ArrayList<>();
 
@@ -394,7 +393,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     @Override
     public final int compareTo(@NotNull final ConfigurationLocation other) {
-        int result = 0;
+        int result;
         // bundled configs go first, ordered by their position in the BundledConfig enum
         if (other instanceof BundledConfigurationLocation) {
             if (this instanceof BundledConfigurationLocation) {

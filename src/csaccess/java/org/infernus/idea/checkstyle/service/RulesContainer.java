@@ -8,18 +8,17 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+
+import static org.infernus.idea.checkstyle.util.Streams.inMemoryCopyOf;
 
 
 /**
  * Describes how rules may be passed to the {@link org.infernus.idea.checkstyle.service.cmd.OpLoadConfiguration}
  * command.
  */
-public interface RulesContainer
-{
+public interface RulesContainer {
     /**
      * Getter.
      *
@@ -31,9 +30,9 @@ public interface RulesContainer
     /**
      * Creates an input stream to the rules file.
      *
+     * @param checkstyleClassLoader the Checkstyle class loader.
      * @return input stream
      * @throws IOException failed creating the stream
-     * @param checkstyleClassLoader
      */
     InputStream inputStream(ClassLoader checkstyleClassLoader) throws IOException;
 
@@ -85,7 +84,7 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream(ClassLoader checkstyleClassLoader) throws IOException {
+        public InputStream inputStream(final ClassLoader checkstyleClassLoader) throws IOException {
             return virtualFile.getInputStream();
         }
     }
@@ -104,7 +103,7 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream(ClassLoader checkstyleClassLoader) {
+        public InputStream inputStream(final ClassLoader checkstyleClassLoader) {
             return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         }
     }
@@ -124,9 +123,9 @@ public interface RulesContainer
         }
 
         @Override
-        public InputStream inputStream(ClassLoader checkstyleClassLoader) {
+        public InputStream inputStream(final ClassLoader checkstyleClassLoader) throws IOException {
             // using the csaccess classloader:
-            return getClass().getResourceAsStream(bundledConfig.getPath());
+            return inMemoryCopyOf(getClass().getResourceAsStream(bundledConfig.getPath()));
         }
     }
 }

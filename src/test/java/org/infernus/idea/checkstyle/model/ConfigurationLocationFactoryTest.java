@@ -4,12 +4,9 @@ import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.junit.Test;
 import org.mockito.Mockito;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.oneOf;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 
 
 public class ConfigurationLocationFactoryTest {
