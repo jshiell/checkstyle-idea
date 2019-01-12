@@ -1,7 +1,10 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.*;
+import com.intellij.openapi.components.ExportableComponent;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -46,11 +49,14 @@ public class ProjectConfigurationState
     private static final String PROPERTIES_PREFIX = "property-";
 
     private final Project project;
+    private final ConfigurationLocationFactory configurationLocationFactory;
 
     private ProjectSettings projectSettings;
 
-    public ProjectConfigurationState(@NotNull final Project project) {
+    public ProjectConfigurationState(@NotNull final Project project,
+                                     @NotNull final ConfigurationLocationFactory configurationLocationFactory) {
         this.project = project;
+        this.configurationLocationFactory = configurationLocationFactory;
 
         projectSettings = defaultProjectSettings();
     }
@@ -121,7 +127,7 @@ public class ProjectConfigurationState
                                                      @NotNull final SortedSet<ConfigurationLocation> pLocations) {
         String serializedLocation = pLoadedMap.get(ACTIVE_CONFIG);
         if (serializedLocation != null && !serializedLocation.trim().isEmpty()) {
-            ConfigurationLocation activeLocation = configurationLocationFactory().create(project, serializedLocation);
+            ConfigurationLocation activeLocation = configurationLocationFactory.create(project, serializedLocation);
             return pLocations.stream().filter(cl -> cl.equals(activeLocation)).findFirst().orElse(null);
         }
         return null;
@@ -159,7 +165,8 @@ public class ProjectConfigurationState
         return Boolean.parseBoolean(loadedMap.get(propertyName));
     }
 
-    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> loadedMap, final String propertyName,
+    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> loadedMap,
+                                              final String propertyName,
                                               final boolean defaultValue) {
         final String v = loadedMap.get(propertyName);
         return v != null ? Boolean.parseBoolean(v) : defaultValue;
@@ -221,8 +228,8 @@ public class ProjectConfigurationState
     }
 
     private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
-        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
+        final ConfigurationLocation sunChecks = configurationLocationFactory.create(BundledConfig.SUN_CHECKS, project);
+        final ConfigurationLocation googleChecks = configurationLocationFactory.create(BundledConfig.GOOGLE_CHECKS, project);
         if (!configurationLocations.contains(sunChecks)) {
             configurationLocations.add(sunChecks);
         }
@@ -251,7 +258,7 @@ public class ProjectConfigurationState
                                                       @NotNull final String pKey) {
         final String serialisedLocation = pLoadedMap.get(pKey);
         try {
-            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            final ConfigurationLocation location = configurationLocationFactory.create(project, serialisedLocation);
             location.setProperties(propertiesFor(pLoadedMap, pKey));
             return location;
 
@@ -263,10 +270,6 @@ public class ProjectConfigurationState
 
     private boolean propertyIsALocation(final Map.Entry<String, String> property) {
         return property.getKey().startsWith(LOCATION_PREFIX);
-    }
-
-    private ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     @NotNull
