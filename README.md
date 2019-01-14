@@ -205,6 +205,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.24.1** Fixed: Some tweaks to the supported Checkstyle versions for better compatibility - thanks to @tsjensen (#424).
 * **5.24.0** Fixed: The plugin should now build & run on JDK 11.
 * **5.24.0** Fixed: We now handle exclamation marks in JAR paths (#412).
 * **5.24.0** Fixed: Rules files are more consistently cached in memory to hopefully alleviate Windows file-locking issues (#417).
