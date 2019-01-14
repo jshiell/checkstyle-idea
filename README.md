@@ -485,7 +485,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **3.0.11** Improved: Module/Project scans are properly batched and a lot faster. Progress feedback is more limited,
   however.
 * **3.0.10** Fixed: Partial property detection. Thanks to LightGuard.JP.
-* **3.0.9** Fixed: Cache sychronisation problem.
+* **3.0.9** Fixed: Cache synchronisation problem.
 * **3.0.8** Fixed: Null property in configuration hash-table resulting in NPE.
 * **3.0.7** Fixed: Module scan results are no longer shared between files.
 * **3.0.6** Fixed: IDEA 9 compatibility.
