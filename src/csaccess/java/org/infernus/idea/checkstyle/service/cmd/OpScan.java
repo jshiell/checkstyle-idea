@@ -69,7 +69,8 @@ public class OpScan implements CheckstyleCommand<Map<PsiFile, List<Problem>>> {
                                                     final CheckStyleAuditListener auditListener)
             throws CheckstyleException {
         final Checker checker = checkerWithConfig.getChecker();
-        synchronized (checkerWithConfig.getChecker()) {
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (checker) {
             checker.addListener(auditListener);
             try {
                 checker.process(files);

@@ -28,7 +28,9 @@ public class OpDestroyChecker
     @Nullable
     @Override
     public Void execute(@NotNull final Project project) {
-        checker.destroy();
+        synchronized (checker) {
+            checker.destroy();
+        }
         return null;
     }
 }
