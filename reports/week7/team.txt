@@ -1,0 +1,32 @@
+﻿Team Status Report Week 7
+Plans and Goals from Previous Week:
+* Finish user testing for our CLI
+* Revise the proposal
+* Build the IDE Adapter
+   * Implement Flint to run on every file save
+* Implement the feedback in the IDE
+* Create more premade rules for users
+
+
+Progress Report:
+        This week we revised our presentation slides and presented our Flint project. Based on the feedback for Flint we received last week we have rethought the problem we want to solve and have come up with a solution to it. Our new problem is focused on the CheckStyle plugin for Intellij IDEA. Checkstyle-IDEA, is a widely-used IDE extension that, within its own GUI ecosystem, allows users to scan Java code for style violations according to a configuration (custom or default). However, it lacks the ability to create custom configurations within this ecosystem. We propose adding this functionality to Checkstyle-IDEA through a GUI Configuration Editor. To account for this shift in our project we have rewritten our project proposal, created a new repository for our project, and updated CheckStyle-IDEA’s user manual to show how to use the GUI Configuration Editor we are adding. We are currently working on making an ADT to represent configuration files, and once that step is complete we plan building the XML generator and reader this week. So far we have not run into any problems with our new idea.
+
+
+Plans and Goals for the Week:
+* Build the XML configuration file generator
+* Build the XML file reader
+* Build an ADT to represent XML configuration files
+* Create the base for our GUI
+   * A window that is displaced when a given button in the IDE is clicked and a button to generate a blank configuration file
+
+
+Agenda for Weekly Meeting:
+* Questions for Manager:
+   * Does our new timeline look reasonable in within current class scope?
+   * Is our motivation strong enough to make this project intriguing to users as well as for CheckStyle-IDEA to accept it as a pull request?
+* Questions for Customer:
+   * Is the User Manual clear and easy to understand, specifically for the GUI we are adding to CheckStyle-IDEA?
+   * What parts of the Configuration GUI do you like?
+      * Are there features in it that are not needed?
+      * Are there features that it does not have and you would find useful if they were added?
+   * Does the GUI seem like it has an intuitive, easy to use design?
