@@ -1,10 +1,15 @@
 package org.infernus.idea.checkstyle.model;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * An ADT to represent a CheckStyle rule
+ */
 public class ConfigRule {
-
     /** The name of the rule */
     private String ruleName;
 
@@ -14,15 +19,15 @@ public class ConfigRule {
     /** The set of parameters */
     private Set<String> parameters;
 
-
     /**
      * Creates a new ConfigRule, with the rule's name as the name of it's java file,
-     * its description as the first comment within "<p><p/>" tags, and parameters as
+     * its description as the first multiline comment, and parameters as
      * the name of the parameters needed to initialize the rule
      *
      * @param path the path to the rule's corresponding java file
+     * @throws FileNotFoundException if the given filepath cannot be found
      */
-    public ConfigRule(String path) {
+    public ConfigRule(String path) throws FileNotFoundException {
         String filename = path.substring(path.lastIndexOf('/') + 1);
         this.ruleName = filename.substring(0, filename.indexOf('.'));
         this.parameters = parseParameters(path);
@@ -33,9 +38,30 @@ public class ConfigRule {
      * Parses the java file for the given rule and the description of the rule
      *
      * @param path the path to the rule's corresponding java file
-     * @return the description of the rule
+     * @return the description of the rule, null if the file does not contain a description
+     * @throws FileNotFoundException if the given filepath cannot be found
      */
-    private String parseDescription(String path) {
+    private String parseDescription(String path) throws FileNotFoundException {
+        String description = "";
+        File ruleFile = new File(path);
+        Scanner readFile = new Scanner(ruleFile);
+        boolean foundDescription = false;
+        while (readFile.hasNextLine()) {
+            String line = readFile.nextLine();
+            if (!foundDescription) {
+                if (line.contains("/**")) {
+                    foundDescription = true;
+                }
+            } else {
+                if (line.contains("*/")) {
+                    System.out.println(description);
+                    return description;
+                }
+                if (!line.contains("<")) {
+                    description += line + "\n";
+                }
+            }
+        }
         return null;
     }
 
@@ -44,9 +70,14 @@ public class ConfigRule {
      * of parameters needed to initialize the rule
      *
      * @param path the path to the rule's corresponding java file
-     * @return
+     * @return a set of names of parameters needed to initialize
+     * the rule
+     * @throws FileNotFoundException if the given filepath cannot be found
      */
-    private Set<String> parseParameters(String path) {
+    private Set<String> parseParameters(String path) throws FileNotFoundException {
+        File ruleFile = new File(path);
+        Scanner readFile = new Scanner(ruleFile);
+        Set<String> params = new HashSet<>();
         return null;
     }
 
