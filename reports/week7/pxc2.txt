@@ -1,9 +1,0 @@
-Goals from last week:
-  * User testing
-  * Write up user manual
-
-Progress over the week:
-  * Write up user manual
-
-Goals for next week:
-  * Finish XML parsing for Java and GUI for the new project

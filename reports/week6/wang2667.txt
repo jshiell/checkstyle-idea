@@ -1,8 +1,0 @@
-Goal:
-	Build and Test CLI.
-
-Progress:
-	Built and tested CLI, although it would mostly work on unix shell, it seemed to have to issues to fix on the Windows shell.
-
-Next Goal:
-	do user testing and improve the base line feature according to the feedback
