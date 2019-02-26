@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class ConfigRule {
      * @param path the path to the rule's corresponding java file
      * @throws FileNotFoundException if the given filepath cannot be found
      */
-    public ConfigRule(String path) throws FileNotFoundException {
+    public ConfigRule(String path) throws IOException {
         String filename = path.substring(path.lastIndexOf('/') + 1);
         this.ruleName = filename.substring(0, filename.indexOf('.'));
         this.parameters = parseParameters(path);
@@ -41,7 +42,7 @@ public class ConfigRule {
      * @return the description of the rule, null if the file does not contain a description
      * @throws FileNotFoundException if the given filepath cannot be found
      */
-    private String parseDescription(String path) throws FileNotFoundException {
+    private String parseDescription(String path) throws IOException {
         String description = "";
         File ruleFile = new File(path);
         Scanner readFile = new Scanner(ruleFile);
@@ -54,7 +55,6 @@ public class ConfigRule {
                 }
             } else {
                 if (line.contains("*/")) {
-                    System.out.println(description);
                     return description;
                 }
                 if (!line.contains("<")) {
