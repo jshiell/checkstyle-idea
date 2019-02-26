@@ -3,9 +3,7 @@ package org.infernus.idea.checkstyle.model;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 /**
  * An ADT to represent a CheckStyle rule
@@ -18,7 +16,7 @@ public class ConfigRule {
     private String ruleDescription;
 
     /** The set of parameters */
-    private Set<String> parameters;
+    private Map<String, String> parameters;
 
     /**
      * Creates a new ConfigRule, with the rule's name as the name of it's java file,
@@ -74,11 +72,52 @@ public class ConfigRule {
      * the rule
      * @throws FileNotFoundException if the given filepath cannot be found
      */
-    private Set<String> parseParameters(String path) throws FileNotFoundException {
+    private Map<String, String> parseParameters(String path) throws FileNotFoundException {
         File ruleFile = new File(path);
         Scanner readFile = new Scanner(ruleFile);
-        Set<String> params = new HashSet<>();
-        return null;
+        Map<String, String> params = new HashMap<>();
+        while (readFile.hasNextLine()) {
+            String line = readFile.nextLine();
+            if (line.contains("public void set")) {
+                String name = line.replaceFirst("public void set", "");
+                System.out.println(name.substring(0, name.lastIndexOf("(")));
+                params.put(name.substring(0, name.lastIndexOf("(")).trim(), "");
+            }
+        }
+        readFile = new Scanner(ruleFile);
+        boolean foundDescription = false;
+        boolean addToMap = false;
+        String description = "";
+
+        while (readFile.hasNextLine()) {
+            String line = readFile.nextLine();
+            if (addToMap) {
+                for (String param : params.keySet()) {
+                    if (line.toLowerCase().contains(param.toLowerCase())) {
+                        params.put(param, description);
+                        description = "";
+                        addToMap = false;
+                        break;
+                    }
+                }
+            }
+            if (!foundDescription) {
+                if (line.contains("/**")) {
+                    foundDescription = true;
+                }
+            } else {
+                if (line.contains("*/")) {
+                    addToMap = true;
+                    foundDescription = false;
+                }
+                if (!line.contains("<")) {
+                    description += line + "\n";
+                }
+            }
+        }
+
+
+        return params;
     }
 
     /**
@@ -106,7 +145,7 @@ public class ConfigRule {
      * @return a set of names of parameters needed to initialize
      * the rule
      */
-    public Set<String> getParameters() {
-        return new HashSet<>(parameters);
+    public Map<String, String> getParameters() {
+        return new HashMap<>(parameters);
     }
 }

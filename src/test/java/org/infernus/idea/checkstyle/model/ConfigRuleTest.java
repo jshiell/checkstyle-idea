@@ -14,8 +14,13 @@ public class ConfigRuleTest {
     public void ConfigRuleGetNameTest() throws IOException {
 
         String path = Paths.get(".").toAbsolutePath().normalize().toString();
-        ConfigRule rule = new ConfigRule(path + "/src/test/java/org/infernus/idea/checkstyle/model/ConfigurationLocationFactoryTest.java");
-        assertEquals("ConfigurationLocationFactoryTest", rule.getRuleName());
+        ConfigRule rule = new ConfigRule(path + "/src/test/java/org/infernus/idea/checkstyle/model/ExampleCheck.java");
+       //System.out.println(rule.getRuleDescription());
+       // System.out.println(rule.getParameters().keySet());
+       // for (String param : rule.getParameters().keySet()) {
+       //     System.out.println(param + ": " + rule.getParameters().get(param));
+       // }
+        assertEquals("ExampleCheck", rule.getRuleName());
     }
 
     @Test
