@@ -1,8 +1,0 @@
-Goal:
-	User testing
-
-Progress:
-	Come up with a new proposal for our project since we can't come up with any better motivation that the insturction team can accept.
-
-Next Goal:
-	Finish XML reader and parser for our new project by the end of the week.

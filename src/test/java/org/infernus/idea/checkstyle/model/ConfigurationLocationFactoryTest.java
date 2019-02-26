@@ -8,7 +8,26 @@ import org.mockito.Mockito;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-
+/**
+ * <p>
+ * Checks that overload methods are grouped together. Example:
+ * </p>
+ * <pre>
+ * {@code
+ * public void foo(int i) {}
+ * public void foo(String s) {}
+ * public void notFoo() {} // Have to be after foo(int i, String s)
+ * public void foo(int i, String s) {}
+ * }
+ * </pre>
+ * <p>
+ * An example of how to configure the check is:
+ * </p>
+ *
+ * <pre>
+ * &lt;module name="OverloadMethodsDeclarationOrder"/&gt;
+ * </pre>
+ */
 public class ConfigurationLocationFactoryTest {
 
     private static final Project PROJECT = Mockito.mock(Project.class);

@@ -3,8 +3,7 @@
 &copy; Copyright 2006-2019 CheckStyle-IDEA Contributors
 
 Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
-
-[![Build Status](https://travis-ci.org/jshiell/checkstyle-idea.svg?branch=master)](https://travis-ci.org/jshiell/checkstyle-idea)
+[![Build Status](https://travis-ci.com/s92025592025/checkstyle-idea.svg?branch=master)](https://travis-ci.com/s92025592025/checkstyle-idea)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
@@ -41,6 +40,34 @@ will be ignored.
 
 If a custom file is being used and properties are available for definition then these will accessible using the 'Edit
 Properties' button.
+
+### Generating Configuration Files
+
+To generate a new CheckStyle file click on the 'Generate Configuration' button, to the right of the dropdown menu used 
+to select the configuration file to run. Once selected a window will be displayed that looks like the image below:
+
+![GUI mockup](reports/GUImockup.jpeg)
+
+In the top left of the larger window there is an 'Import' button, which when clicked will allow the user to import an existing 
+CheckStyle configuration file to the Configuration Generator. To the right of the 'Import' button we have a search bar that allows 
+you to search CheckStyles rule database for a specific rule, which will be displayed in the section below the search bar. 
+
+On the left side of the window there is a list of categories. Checkstyle has a large set of premade rules that are divided into categories 
+and each category will be displayed on the left, including a *Custom Rule* category, which will contain any custom rules you 
+write. Clicking on a category will display all the rules contained in that category in the boxes to the left that contain small plus 
+boxes. Clicking on a rule will display another small window to the right of the main window and will display the description and 
+parameters for the selected rule and an 'Add' button. 
+
+To add a rule to your new configuration file click the plus box or the 'Add' button in the smaller window. When a new rule is added 
+you will be prompted to input any parameters required by the rule and the rule will then be displayed in the *Added Rules* section. 
+
+At the bottom of the GUI window there is a box to define the file name for the new configuration file. If a configuration file is imported 
+all rules in that file will appear in the *Added Rules* section and the filename will be auto-filled with the imported file’s filename. If the 
+file name already exists, the existing configuration file will be overwritten by the new configuration file. There is then a 'Preview' button 
+which will display a preview of what the XML file will look like given all the rules that have been added thus far. 
+
+Finally the 'Generate' button in the bottom right corner will generate the new configuration file under the specified name.
+
 
 ### Eclipse-CS Variable Support
 
