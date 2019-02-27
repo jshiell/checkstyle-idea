@@ -41,7 +41,7 @@ public class CheckStyleRuleProvider {
    * @throws IllegalArgumentException - When path doesn't lead to xml file.
    */
   public CheckStyleRuleProvider(String path) throws FileNotFoundException, IllegalArgumentException {
-    this.defaultRules = new File("src/main/java/org/infernus/idea/checkstyle/available-rules.xml");
+    this();
     this.customRules = new File(path);
 
     if (!this.customRules.exists() || !this.customRules.isFile()) {
@@ -51,6 +51,10 @@ public class CheckStyleRuleProvider {
     if (!Pattern.matches(".+\\.xml$", path)) {
       throw new IllegalArgumentException(path + "is not a xml file");
     }
+  }
+
+  public CheckStyleRuleProvider() {
+    this.defaultRules = new File("src/main/resources/org/infernus/idea/checkstyle/available-rules.xml");
 
     this.defuleRuleByCatagory = new HashMap<String, List<ConfigRule>>();
     this.allDefaultRule = new HashMap<String, ConfigRule>();
@@ -101,7 +105,11 @@ public class CheckStyleRuleProvider {
       }
 
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      System.out.println("In here");
+      StackTraceElement[] eles = e.getStackTrace();
+      for (int j = 0; j < eles.length; j++) {
+        System.out.println(eles[j].toString());
+      }
     }
   }
 
@@ -110,10 +118,10 @@ public class CheckStyleRuleProvider {
    * @param module - The module DOM
    * @return The ConfigRule converted from module
    */
-  private ConfigRule singleRuleMaker(Element module) {
+  public ConfigRule singleRuleMaker(Element module) {
     ConfigRule output = new ConfigRule(module.getAttribute("name"));
 
-    Element description = (Element) module.getElementsByTagName("description").item(1);
+    Element description = (Element) module.getElementsByTagName("description").item(0);
     output.setRuleDescription(description.getAttribute("value"));
 
     NodeList properties = module.getElementsByTagName("property");
@@ -130,6 +138,28 @@ public class CheckStyleRuleProvider {
     }
 
     return output;
+  }
+
+  /**
+   * @return The map containing all default rules, key is the catagory of the rules
+   */
+  public Map<String, List<ConfigRule>> getDefaultRuleByCatatog() {
+    return new HashMap<String, List<ConfigRule>>(this.defuleRuleByCatagory);
+  }
+
+  /**
+   * @param catagory - The catagory to search
+   * @return A List of rules under one catagory.
+   */
+  public List<ConfigRule> getDefaultRulesByCatagory(String catagory) {
+    return new ArrayList<ConfigRule>(this.defuleRuleByCatagory.get(catagory));
+  }
+
+  /**
+   * @return The map containing all the default rules, key is the name of the rule.
+   */
+  public Map<String, ConfigRule> GetAllConfigRuleByName() {
+    return new HashMap<String, ConfigRule>(this.allDefaultRule);
   }
 
   /**
