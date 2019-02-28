@@ -184,7 +184,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         progressPanel.add(progressLabel);
         progressPanel.add(Box.createHorizontalGlue());
         progressPanel.setFloatable(false);
-        progressPanel.setBackground(UIManager.getColor("Panel.background"));
+        progressPanel.setOpaque(false);
         progressPanel.setBorder(null);
 
         final JPanel toolPanel = new JPanel(new BorderLayout());
