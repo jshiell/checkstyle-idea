@@ -59,4 +59,11 @@
                       default="null"/>
         </module>
     </catagory>
+
+    <catagory name="Block Checks">
+        <module name="AvoidNestedBlocks">
+            <description value="Finds nested blocks, i.e. blocks that are used freely in the code."/>
+            <property name=""/>
+        </module>
+    </catagory>
 </root>
