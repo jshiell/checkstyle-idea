@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -12,15 +9,14 @@ public class ConfigRule {
     private String ruleName;
     /** The description of the rule */
     private String ruleDescription;
-    private String catagory;
+    private String category;
 
     /**
      * Stores the available properties of the rule. The key is the
-     * name of the property, and the value will be a map containing
-     * the property information. Including the type and default in
-     * key.
+     * name of the property, and the value will be a ADT that stores
+     * the metadata of the property.
      */
-    private Map<String, Map<String, String>> parameters;
+    private Map<String, PropertyMetadata> parameters;
 
     /**
      * Creates a new ConfigRule, with the rule's name
@@ -28,7 +24,7 @@ public class ConfigRule {
      */
     public ConfigRule(String name) {
         this.ruleName = name;
-        this.parameters = new HashMap<String, Map<String, String>>();
+        this.parameters = new HashMap<String, PropertyMetadata>();
     }
 
     /**
@@ -49,19 +45,19 @@ public class ConfigRule {
     }
 
     /***
-     * Gets the catagory name of this rule
-     * @return The catagory name of this rule
+     * Gets the category name of this rule
+     * @return The category name of this rule
      */
-    public String getCatagory() {
-        return this.catagory;
+    public String getCategory() {
+        return this.category;
     }
 
     /***
-     * Sets the catagory to catagory.
-     * @param catagory - The catagory name of this rule
+     * Sets the category to category.
+     * @param category - The category name of this rule
      */
-    public void setCatagory(String catagory) {
-         this.catagory = catagory;
+    public void setCategory(String category) {
+         this.category = category;
     }
 
     /**
@@ -88,17 +84,16 @@ public class ConfigRule {
      * @return a set of names of parameters needed to initialize
      * the rule
      */
-    public Map<String, Map<String, String>> getParameters() {
-        return new HashMap<>(this.parameters);
+    public Map<String, PropertyMetadata> getParameters() {
+        return new HashMap<String, PropertyMetadata>(this.parameters);
     }
 
     /***
      * Adds the parameter for this rule
      * @param name - The name of the properties
-     * @param info - The information of the type. For example, key
-     *               would be the "type" and key would be the actual type name.
+     * @param metadata - The information of the property.
      */
-    public void addParameter(String name, Map<String, String> info) {
-        this.parameters.put(name, info);
+    public void addParameter(String name, PropertyMetadata metadata) {
+        this.parameters.put(name, metadata);
     }
 }

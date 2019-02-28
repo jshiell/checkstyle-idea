@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.util;
 
 import org.infernus.idea.checkstyle.model.ConfigRule;
+import org.infernus.idea.checkstyle.model.PropertyMetadata;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,7 +30,7 @@ public class CheckStyleRuleProvider {
   private File defaultRules;
   private File customRules;
 
-  private Map<String, List<ConfigRule>> defuleRuleByCatagory;
+  private Map<String, List<ConfigRule>> defuleRuleByCategory;
   private Map<String, ConfigRule> allDefaultRule;
 
   // TODO: read custom rules
@@ -56,7 +57,7 @@ public class CheckStyleRuleProvider {
   public CheckStyleRuleProvider() {
     this.defaultRules = new File("src/main/resources/org/infernus/idea/checkstyle/available-rules.xml");
 
-    this.defuleRuleByCatagory = new HashMap<String, List<ConfigRule>>();
+    this.defuleRuleByCategory = new HashMap<String, List<ConfigRule>>();
     this.allDefaultRule = new HashMap<String, ConfigRule>();
 
     this.parseDefaultRules();
@@ -79,25 +80,25 @@ public class CheckStyleRuleProvider {
         if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
           Element child = (Element) children.item(i);
           if (child.getTagName().equals("module")) {
-            if (!this.defuleRuleByCatagory.containsKey("Checker")) {
-              this.defuleRuleByCatagory.put("Checker", new ArrayList<ConfigRule>());
+            if (!this.defuleRuleByCategory.containsKey("Checker")) {
+              this.defuleRuleByCategory.put("Checker", new ArrayList<ConfigRule>());
             }
 
             ConfigRule rule = singleRuleMaker(child);
-            this.defuleRuleByCatagory.get("Checker").add(rule);
+            this.defuleRuleByCategory.get("Checker").add(rule);
             this.allDefaultRule.put("Checker", rule);
           } else {
-            // rules in catagory
-            Element catagory = (Element) children.item(i);
-            if (!this.defuleRuleByCatagory.containsKey(catagory.getAttribute("name"))) {
-              this.defuleRuleByCatagory.put(catagory.getAttribute("name"), new ArrayList<ConfigRule>());
+            // rules in category
+            Element category = (Element) children.item(i);
+            if (!this.defuleRuleByCategory.containsKey(category.getAttribute("name"))) {
+              this.defuleRuleByCategory.put(category.getAttribute("name"), new ArrayList<ConfigRule>());
             }
 
-            NodeList grandChildren = catagory.getElementsByTagName("module");
+            NodeList grandChildren = category.getElementsByTagName("module");
             for (int s = 0; s < grandChildren.getLength(); s++) {
               Element grandChild = (Element) grandChildren.item(s);
               ConfigRule rule = this.singleRuleMaker(grandChild);
-              this.defuleRuleByCatagory.get(catagory.getAttribute("name")).add(rule);
+              this.defuleRuleByCategory.get(category.getAttribute("name")).add(rule);
               this.allDefaultRule.put(rule.getRuleName(), rule);
             }
           }
@@ -127,39 +128,51 @@ public class CheckStyleRuleProvider {
     NodeList properties = module.getElementsByTagName("property");
     for (int i = 0; i < properties.getLength(); i++) {
       Element property = (Element) properties.item(i);
-      Map<String, String> info = new HashMap<String, String>();
+      PropertyMetadata info = new PropertyMetadata(property.getAttribute("name"));
 
-      info.put("name", property.getAttribute("name"));
-      info.put("type", property.getAttribute("type"));
-      info.put("default", property.getAttribute("default"));
-      info.put("id", "Not Set");
+      info.setType(property.getAttribute("type"));
+      info.setDefaultValue(property.getAttribute("default"));
 
       output.addParameter(property.getAttribute("name"), info);
     }
+
+    PropertyMetadata id = new PropertyMetadata("id");
+    id.setType("String");
+    id.setDefaultValue("null");
+
+    output.addParameter("id", id);
 
     return output;
   }
 
   /**
-   * @return The map containing all default rules, key is the catagory of the rules
+   * @return The map containing all default rules, key is the category of the rules
    */
-  public Map<String, List<ConfigRule>> getDefaultRuleByCatatog() {
-    return new HashMap<String, List<ConfigRule>>(this.defuleRuleByCatagory);
+  public Map<String, List<ConfigRule>> getDefaultCategorizedRule() {
+    return new HashMap<String, List<ConfigRule>>(this.defuleRuleByCategory);
   }
 
   /**
-   * @param catagory - The catagory to search
-   * @return A List of rules under one catagory.
+   * @param category - The category to search
+   * @return A List of rules under one category.
    */
-  public List<ConfigRule> getDefaultRulesByCatagory(String catagory) {
-    return new ArrayList<ConfigRule>(this.defuleRuleByCatagory.get(catagory));
+  public List<ConfigRule> getDefaultRulesByCategory(String category) {
+    return new ArrayList<ConfigRule>(this.defuleRuleByCategory.get(category));
   }
 
   /**
    * @return The map containing all the default rules, key is the name of the rule.
    */
-  public Map<String, ConfigRule> getAllConfigRuleByName() {
+  public Map<String, ConfigRule> getDefaultRules() {
     return new HashMap<String, ConfigRule>(this.allDefaultRule);
+  }
+
+  /**
+   * @param name - The name of the config
+   * @return The ConfigRule having the name
+   */
+  public ConfigRule getDefaultRuleByName(String name) {
+    return this.allDefaultRule.get(name);
   }
 
   /**

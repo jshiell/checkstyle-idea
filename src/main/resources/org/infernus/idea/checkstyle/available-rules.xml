@@ -14,7 +14,7 @@
         <property name="haltOnException" type="Boolean" default="true"/>
     </module>
 
-    <catagory name="Annotations">
+    <category name="Annotations">
         <module name="AnnotationLocation">
             <description value="Check location of annotation on language elements."/>
             <property name="allowSamelineMultipleAnnotations" type="Boolean" default="false"/>
@@ -58,12 +58,12 @@
             <property name="aliasList" type="String Set in a format of comma separated attribute=value entries. The attribute is the fully qualified name of the Check and value is its alias."
                       default="null"/>
         </module>
-    </catagory>
+    </category>
 
-    <catagory name="Block Checks">
+    <category name="Block Checks">
         <module name="AvoidNestedBlocks">
             <description value="Finds nested blocks, i.e. blocks that are used freely in the code."/>
             <property name=""/>
         </module>
-    </catagory>
+    </category>
 </root>

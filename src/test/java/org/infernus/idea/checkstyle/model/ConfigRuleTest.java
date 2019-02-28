@@ -1,11 +1,8 @@
 package org.infernus.idea.checkstyle.model;
 
 import org.junit.Test;
-import java.nio.file.Paths;
 
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,12 +33,12 @@ public class ConfigRuleTest {
     String ruleName = "rule1";
     ConfigRule rule = new ConfigRule(ruleName);
 
-    assertEquals(null, rule.getCatagory());
+    assertEquals(null, rule.getCategory());
 
     String catagory = "a";
-    rule.setCatagory(catagory);
+    rule.setCategory(catagory);
 
-    assertEquals(catagory, rule.getCatagory());
+    assertEquals(catagory, rule.getCategory());
   }
 
   @Test
@@ -66,13 +63,15 @@ public class ConfigRuleTest {
 
     String propertyName = "property";
     String type = "String";
-    Map<String, String> info = new HashMap<>();
+    String defaultValue = "null";
+    PropertyMetadata metadata = new PropertyMetadata(propertyName);
 
-    info.put("type", type);
+    metadata.setType(type);
+    metadata.setDefaultValue(defaultValue);
 
-    rule.addParameter(propertyName, info);
+    rule.addParameter(propertyName, metadata);
 
-    assertEquals(1, rule.getParameters().size());
-    assertEquals(type, rule.getParameters().get(propertyName).get("type"));
+    assertEquals(type, rule.getParameters().get(propertyName).getType());
+    assertEquals(defaultValue, rule.getParameters().get(propertyName).getDefaultValue());
   }
 }
