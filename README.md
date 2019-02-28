@@ -187,6 +187,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Joey Lee (@yeoji)
 * Tim van der Lippe (@TimvdLippe)
 * @tduehr
+* Mark Brown (@embee1981)
 
 And also thanks are due to the authors and contributors of:
 
@@ -205,6 +206,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.24.3** Fixed: Blatant white areas in the panel when Darcula in use - thanks to @embee1981 (#432).
 * **5.24.2** Fixed: Fixed a synchronisation edge-case (#425).
 * **5.24.1** Fixed: Some tweaks to the supported Checkstyle versions for better compatibility - thanks to @tsjensen (#424).
 * **5.24.0** Fixed: The plugin should now build & run on JDK 11.
