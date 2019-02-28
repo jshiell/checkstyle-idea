@@ -25,7 +25,7 @@
                       default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
         </module>
         <module name="AnnotationOnSameLine">
-            <despcription value="The check does verifying that annotations are located on the same line with their targets. Verifying with this check is not good practice, but it is using by some style guides."/>
+            <description value="The check does verifying that annotations are located on the same line with their targets. Verifying with this check is not good practice, but it is using by some style guides."/>
             <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, TYPECAST, LITERAL_THROWS, IMPLEMENTS_CLAUSE, TYPE_ARGUMENT, LITERAL_NEW, DOT, ANNOTATION_FIELD_DEF."
                 default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
         </module>

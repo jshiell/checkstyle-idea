@@ -95,7 +95,7 @@ public class CheckStyleRuleProvider {
 
             NodeList grandChildren = catagory.getElementsByTagName("module");
             for (int s = 0; s < grandChildren.getLength(); s++) {
-              Element grandChild = (Element) grandChildren.item(i);
+              Element grandChild = (Element) grandChildren.item(s);
               ConfigRule rule = this.singleRuleMaker(grandChild);
               this.defuleRuleByCatagory.get(catagory.getAttribute("name")).add(rule);
               this.allDefaultRule.put(rule.getRuleName(), rule);
@@ -106,6 +106,7 @@ public class CheckStyleRuleProvider {
 
     } catch (Exception e) {
       System.out.println("In here");
+      System.out.println(e.getClass());
       StackTraceElement[] eles = e.getStackTrace();
       for (int j = 0; j < eles.length; j++) {
         System.out.println(eles[j].toString());
@@ -120,7 +121,6 @@ public class CheckStyleRuleProvider {
    */
   public ConfigRule singleRuleMaker(Element module) {
     ConfigRule output = new ConfigRule(module.getAttribute("name"));
-
     Element description = (Element) module.getElementsByTagName("description").item(0);
     output.setRuleDescription(description.getAttribute("value"));
 
@@ -158,7 +158,7 @@ public class CheckStyleRuleProvider {
   /**
    * @return The map containing all the default rules, key is the name of the rule.
    */
-  public Map<String, ConfigRule> GetAllConfigRuleByName() {
+  public Map<String, ConfigRule> getAllConfigRuleByName() {
     return new HashMap<String, ConfigRule>(this.allDefaultRule);
   }
 
