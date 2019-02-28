@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!DOCTYPE root>
+
+<root>
+    <module name="Checker">
+        <description value="All configurations have root module Checker."/>
+        <property name="basedir" type="String" default="null"/>
+        <property name="cacheFile" type="File" default="null"/>
+        <property name="localeCountry" type="String" default="default locale country for the Java Virtual Machine"/>
+        <property name="localeLanguage" type="String" default="default locale language for the Java Virtual Machine"/>
+        <property name="charset" type="String" default="System property &quot;file.encoding&quot;"/>
+        <property name="fileExtensions" type="String Set" default="all files"/>
+        <property name="severity" type="Severity" default="error"/>
+        <property name="haltOnException" type="Boolean" default="true"/>
+    </module>
+
+    <category name="Annotations">
+        <module name="AnnotationLocation">
+            <description value="Check location of annotation on language elements."/>
+            <property name="allowSamelineMultipleAnnotations" type="Boolean" default="false"/>
+            <property name="allowSamelineSingleParameterlessAnnotation" type="Boolean" default="true"/>
+            <property name="allowSamelineParameterizedAnnotation" type="Boolean" default="false"/>
+            <property name="tokens"
+                      type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF."
+                      default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
+        </module>
+        <module name="AnnotationOnSameLine">
+            <description value="The check does verifying that annotations are located on the same line with their targets. Verifying with this check is not good practice, but it is using by some style guides."/>
+            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, TYPECAST, LITERAL_THROWS, IMPLEMENTS_CLAUSE, TYPE_ARGUMENT, LITERAL_NEW, DOT, ANNOTATION_FIELD_DEF."
+                default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
+        </module>
+        <module name="AnnotationUseStyle">
+            <description value="This check controls the style with the usage of annotations."/>
+            <property name="elementStyle" type="Element Style" default="compact_no_array"/>
+            <property name="closingParens" type="Closing Parens" default="never"/>
+            <property name="trailingArrayComma" type="Trailing Comma" default="never"/>
+        </module>
+        <module name="MissingDeprecated">
+            <description value="Verifies that both the java.lang.Deprecated annotation is present and the @deprecated Javadoc tag is present when either is present."/>
+            <property name="skipNoJavadoc" type="Boolean" default="false"/>
+        </module>
+        <module name="MissingOverride">
+            <description value="Verifies that the java.lang.Override annotation is present when the {@inheritDoc} javadoc tag is present."/>
+            <property name="javaFiveCompatibility" type="Boolean" default="false"/>
+        </module>
+        <module name="PackageAnnotation">
+            <description value="This check makes sure that all package annotations are in the package-info.java file."/>
+        </module>
+        <module name="SuppressWarnings">
+            <description value="This check allows you to specify what warnings that SuppressWarnings is not allowed to suppress."/>
+            <property name="format" type="Regular Expression" default="^$|^\s+$"/>
+            <property name="tokens"
+                      type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF."
+                      default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF."/>
+        </module>
+        <module name="SuppressWarningsHolder">
+            <description value="Maintains a set of check suppressions from @SuppressWarnings annotations. It allows to prevent Checkstyle from reporting errors from parts of code that were annotated with @SuppressWarnings and using name of the check to be excluded. You can also define aliases for check names that need to be suppressed."/>
+            <property name="aliasList" type="String Set in a format of comma separated attribute=value entries. The attribute is the fully qualified name of the Check and value is its alias."
+                      default="null"/>
+        </module>
+    </category>
+</root>
