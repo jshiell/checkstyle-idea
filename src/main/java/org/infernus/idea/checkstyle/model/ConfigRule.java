@@ -6,7 +6,6 @@ import java.util.*;
  * An ADT to represent a CheckStyle rule
  */
 public class ConfigRule {
-    /** The name of the rule */
     private String ruleName;
     /** The description of the rule */
     private String ruleDescription;
