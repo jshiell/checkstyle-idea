@@ -58,6 +58,9 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: '1.11';
     compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    // https://mvnrepository.com/artifact/commons-validator/commons-validator
+    compile group: 'commons-validator', name: 'commons-validator', version: '1.4.0'
+
 
     csaccessCompileOnly ("com.puppycrawl.tools:checkstyle:${supportedCsVersions.getBaseVersion()}") {
         exclude group: 'commons-logging', module: 'commons-logging';
