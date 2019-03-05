@@ -45,4 +45,15 @@ public class PropertyMetadataTest {
 
     assertEquals(defaultValue, property.getDefaultValue());
   }
+
+  @Test
+  public void PropertyMetadataSetDescriptionTest() {
+    String name = "property";
+    PropertyMetadata property = new PropertyMetadata(name);
+
+    String description = "description";
+    property.setDescription(description);
+
+    assertEquals(description, property.getDescription());
+  }
 }

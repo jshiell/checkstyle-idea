@@ -10,6 +10,7 @@ public class ConfigRule {
     /** The description of the rule */
     private String ruleDescription;
     private String category;
+    private String parent;
 
     /**
      * Stores the available properties of the rule. The key is the
@@ -95,5 +96,20 @@ public class ConfigRule {
      */
     public void addParameter(String name, PropertyMetadata metadata) {
         this.parameters.put(name, metadata);
+    }
+
+    /**
+     * @return The parent module of this rule
+     */
+    public String getParent() {
+        return this.parent;
+    }
+
+    /**
+     * Sets the parent module of this rule
+     * @param parent - The parent of this rule
+     */
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 }

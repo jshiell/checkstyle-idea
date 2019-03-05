@@ -4,6 +4,8 @@ public class PropertyMetadata {
   private String name;
   private String type;
   private String defaultValue;
+  private String description;
+  private String parent;
 
   /**
    * @param name - The name of the property
@@ -57,5 +59,20 @@ public class PropertyMetadata {
    */
   public void setDefaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
+  }
+
+  /**
+   * @return The description of this rule
+   */
+  public String getDescription() {
+    return this.description;
+  }
+
+  /**
+   * Sets the description for the property
+   * @param description - The description of the metadata
+   */
+  public void setDescription(String description) {
+    this.description = description;
   }
 }

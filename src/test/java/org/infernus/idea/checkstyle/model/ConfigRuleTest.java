@@ -74,4 +74,17 @@ public class ConfigRuleTest {
     assertEquals(type, rule.getParameters().get(propertyName).getType());
     assertEquals(defaultValue, rule.getParameters().get(propertyName).getDefaultValue());
   }
+
+  @Test
+  public void ConfigRuleSetParentTest() {
+    String ruleName = "rule1";
+    ConfigRule rule = new ConfigRule(ruleName);
+
+    assertEquals(null, rule.getParent());
+
+    String parent = "I am parent";
+    rule.setParent(parent);
+
+    assertEquals(parent, rule.getParent());
+  }
 }

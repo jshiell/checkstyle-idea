@@ -86,7 +86,7 @@ public class CheckStyleRuleProvider {
 
             ConfigRule rule = singleRuleMaker(child);
             this.defuleRuleByCategory.get("Checker").add(rule);
-            this.allDefaultRule.put("Checker", rule);
+            this.allDefaultRule.put("Checker", rule); // Checker itself has no parent
           } else {
             // rules in category
             Element category = (Element) children.item(i);
@@ -122,8 +122,8 @@ public class CheckStyleRuleProvider {
    */
   public ConfigRule singleRuleMaker(Element module) {
     ConfigRule output = new ConfigRule(module.getAttribute("name"));
-    Element description = (Element) module.getElementsByTagName("description").item(0);
-    output.setRuleDescription(description.getAttribute("value"));
+    output.setRuleDescription(module.getAttribute("description"));
+    output.setParent(module.getAttribute("parent"));
 
     NodeList properties = module.getElementsByTagName("property");
     for (int i = 0; i < properties.getLength(); i++) {
@@ -132,6 +132,7 @@ public class CheckStyleRuleProvider {
 
       info.setType(property.getAttribute("type"));
       info.setDefaultValue(property.getAttribute("default"));
+      info.setDescription(property.getAttribute("description"));
 
       output.addParameter(property.getAttribute("name"), info);
     }

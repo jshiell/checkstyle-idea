@@ -1,886 +1,741 @@
 <?xml version="1.0"?>
 <!DOCTYPE root>
-
 <root>
-    <module name="Checker">
-        <description value="All configurations have root module Checker."/>
-        <property name="basedir" type="String" default="null"/>
-        <property name="cacheFile" type="File" default="null"/>
-        <property name="localeCountry" type="String" default="default locale country for the Java Virtual Machine"/>
-        <property name="localeLanguage" type="String" default="default locale language for the Java Virtual Machine"/>
-        <property name="charset" type="String" default="System property &quot;file.encoding&quot;"/>
-        <property name="fileExtensions" type="String Set" default="all files"/>
-        <property name="severity" type="Severity" default="error"/>
-        <property name="haltOnException" type="Boolean" default="true"/>
-    </module>
-    <category name="Annotations">
-        <module name="AnnotationLocation">
-            <description value="Check location of annotation on language elements."/>
-            <property name="allowSamelineMultipleAnnotations" type="Boolean" default="false"/>
-            <property name="allowSamelineSingleParameterlessAnnotation" type="Boolean" default="true"/>
-            <property name="allowSamelineParameterizedAnnotation" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
-        </module>
-        <module name="AnnotationOnSameLine">
-            <description value="The check does verifying that annotations are located on the same line with their targets."/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, TYPECAST, LITERAL_THROWS, IMPLEMENTS_CLAUSE, TYPE_ARGUMENT, LITERAL_NEW, DOT, ANNOTATION_FIELD_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
-        </module>
-        <module name="AnnotationUseStyle">
-            <description value="This check controls the style with the usage of annotations."/>
-            <property name="elementStyle" type="Element Style" default="compact_no_array"/>
-            <property name="closingParens" type="Closing Parens" default="never"/>
-            <property name="trailingArrayComma" type="Trailing Comma" default="never"/>
-        </module>
-        <module name="MissingDeprecated">
-            <description value="Verifies that both the java.lang.Deprecated annotation is present and the @deprecated Javadoc tag is present when either is present."/>
-            <property name="skipNoJavadoc" type="Boolean" default="false"/>
-        </module>
-        <module name="MissingOverride">
-            <description value="Verifies that the java.lang.Override annotation is present when the {@inheritDoc} javadoc tag is present."/>
-            <property name="javaFiveCompatibility" type="Boolean" default="false"/>
-        </module>
-        <module name="PackageAnnotation">
-            <description value="This check makes sure that all package annotations are in the package-info.java file."/>
-        </module>
-        <module name="SuppressWarnings">
-            <description value="This check allows you to specify what warnings that SuppressWarnings is not allowed to suppress."/>
-            <property name="format" type="Regular Expression" default="^$|^\s+$"/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF."/>
-        </module>
-        <module name="SuppressWarningsHolder">
-            <description value="Maintains a set of check suppressions from @SuppressWarnings annotations."/>
-            <property name="aliasList" type="String Set in a format of comma separated attribute=value entries. The attribute is the fully qualified name of the Check and value is its alias." default="null"/>
-        </module>
-    </category>
-    <category name="Block Checks">
-        <module name="AvoidNestedBlocks">
-            <description value="Finds nested blocks, i."/>
-            <property name="allowInSwitchCase" type="Boolean" default="false"/>
-        </module>
-        <module name="EmptyBlock">
-            <description value="Checks for empty blocks."/>
-            <property name="option" type="Block Policy" default="statement"/>
-            <property name="tokens" type="subset of tokens LITERAL_WHILE, LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_DO, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, INSTANCE_INIT, STATIC_INIT, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_CASE, LITERAL_DEFAULT, ARRAY_INIT." default="LITERAL_WHILE, LITERAL_TRY, LITERAL_FINALLY, LITERAL_DO, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, INSTANCE_INIT, STATIC_INIT, LITERAL_SWITCH, LITERAL_SYNCHRONIZED."/>
-        </module>
-        <module name="EmptyCatchBlock">
-            <description value="Checks for empty catch blocks."/>
-            <property name="exceptionVariableName" type="String" default="^$"/>
-            <property name="commentFormat" type="String" default=".*"/>
-        </module>
-        <module name="LeftCurly">
-            <description value="Checks for the placement of left curly braces ('{') for code blocks."/>
-            <property name="option" type="Left Curly Brace Policy" default="eol"/>
-            <property name="ignoreEnums" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens ANNOTATION_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, LAMBDA, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF, OBJBLOCK, STATIC_INIT." default="ANNOTATION_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, LAMBDA, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF, OBJBLOCK, STATIC_INIT."/>
-        </module>
-        <module name="NeedBraces">
-            <description value="Checks for braces around code blocks."/>
-            <property name="allowSingleLineStatement" type="Boolean" default="false"/>
-            <property name="allowEmptyLoopBody" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE, LITERAL_CASE, LITERAL_DEFAULT, LAMBDA." default="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE."/>
-        </module>
-        <module name="RightCurly">
-            <description value="Checks the placement of right curly braces ('}') for if-else, try-catch-finally blocks, while-loops, for-loops, method definitions, class definitions, constructor definitions, instance and static initialization blocks."/>
-            <property name="option" type="Right Curly Brace Policy" default="same"/>
-            <property name="tokens" type="subset of tokens LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT." default="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE."/>
-        </module>
-    </category>
-    <category name="Class Design">
-        <module name="DesignForExtension">
-            <description value="The check finds classes that are designed for extension (subclass creation)."/>
-            <property name="ignoredAnnotations" type="String Set" default="Before, BeforeClass, Test, After, AfterClass"/>
-        </module>
-        <module name="FinalClass">
-            <description value="Checks that a class which has only private constructors is declared as final."/>
-        </module>
-        <module name="HideUtilityClassConstructor">
-            <description value="Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a public constructor."/>
-        </module>
-        <module name="InnerTypeLast">
-            <description value="Check nested (inner) classes/interfaces are declared at the bottom of the class after all method and field declarations."/>
-        </module>
-        <module name="InterfaceIsType">
-            <description value="Implements Joshua Bloch, Effective Java, Item 17 - Use Interfaces only to define types."/>
-            <property name="allowMarkerInterfaces" type="Boolean" default="true"/>
-        </module>
-        <module name="MutableException">
-            <description value="Ensures that exception classes (classes with names conforming to some regular expression and explicitly extending classes with names conforming to other regular expression) are immutable, that is, that they have only final fields."/>
-            <property name="format" type="Regular Expression" default="^.*Exception$|^.*Error$|^.*Throwable$"/>
-            <property name="extendedClassNameFormat" type="Regular Expression" default="^.*Exception$|^.*Error$|^.*Throwable$"/>
-        </module>
-        <module name="OneTopLevelClass">
-            <description value="Checks that each top-level class, interface or enum resides in a source file of its own."/>
-        </module>
-        <module name="ThrowsCount">
-            <description value="Restricts throws statements to a specified count (4 by default)."/>
-            <property name="max" type="Integer" default="4"/>
-            <property name="ignorePrivateMethods" type="Boolean" default="true"/>
-        </module>
-        <module name="VisibilityModifier">
-            <description value="Checks visibility of class members."/>
-            <property name="packageAllowed" type="Boolean" default="false"/>
-            <property name="protectedAllowed" type="Boolean" default="false"/>
-            <property name="publicMemberPattern" type="Regular Expression" default="^serialVersionUID$"/>
-            <property name="allowPublicFinalFields" type="Boolean" default="false"/>
-            <property name="allowPublicImmutableFields" type="Boolean" default="false"/>
-            <property name="immutableClassCanonicalNames" type="String Set" default="java.lang.String, java.lang.Integer, java.lang.Byte, java.lang.Character, java.lang.Short, java.lang.Boolean, java.lang.Long, java.lang.Double, java.lang.Float, java.lang.StackTraceElement, java.math.BigInteger, java.math.BigDecimal, java.io.File, java.util.Locale, java.util.UUID, java.net.URL, java.net.URI, java.net.Inet4Address, java.net.Inet6Address, java.net.InetSocketAddress"/>
-            <property name="ignoreAnnotationCanonicalNames" type="String Set" default="org.junit.Rule, org.junit.ClassRule, com.google.common.annotations.VisibleForTesting"/>
-        </module>
-    </category>
-    <category name="Coding">
-        <module name="ArrayTrailingComma">
-            <description value="Checks that array initialization contains a trailing comma."/>
-        </module>
-        <module name="AvoidInlineConditionals">
-            <description value="Detects inline conditionals."/>
-        </module>
-        <module name="CovariantEquals">
-            <description value="Checks that classes which define a covariant equals() method also override method equals(Object)."/>
-        </module>
-        <module name="DeclarationOrder">
-            <description value="According to Code Conventions for the Java Programming Language , the parts of a class or interface declaration should appear in the following order: "/>
-            <property name="ignoreConstructors" type="Boolean" default="false"/>
-            <property name="ignoreModifiers" type="Boolean" default="false"/>
-        </module>
-        <module name="DefaultComesLast">
-            <description value="Check that the default is after all the cases in a switch statement."/>
-            <property name="skipIfLastAndSharedWithCase" type="Boolean" default="false"/>
-        </module>
-        <module name="EmptyStatement">
-            <description value="Detects empty statements (standalone ; semicolon)."/>
-        </module>
-        <module name="EqualsAvoidNull">
-            <description value="Checks that any combination of String literals is on the left side of an equals() comparison."/>
-            <property name="ignoreEqualsIgnoreCase" type="Boolean" default="false"/>
-        </module>
-        <module name="EqualsHashCode">
-            <description value="Checks that classes that either override equals() or hashCode() also overrides the other."/>
-        </module>
-        <module name="ExplicitInitialization">
-            <description value="Checks if any class or object member is explicitly initialized to default for its type value (null for object references, zero for numeric types and char and false for boolean."/>
-            <property name="onlyObjectReferences" type="Boolean" default="false"/>
-        </module>
-        <module name="FallThrough">
-            <description value="Checks for fall-through in switch statements."/>
-            <property name="checkLastCaseGroup" type="Boolean" default="false"/>
-            <property name="reliefPattern" type="Regular Expression" default="fallthru|falls? ?through"/>
-        </module>
-        <module name="FinalLocalVariable">
-            <description value="Checks that local variables that never have their values changed are declared final."/>
-        </module>
-        <module name="HiddenField">
-            <description value="Checks that a local variable or a parameter does not shadow a field that is defined in the same class."/>
-            <property name="ignoreFormat" type="Regular Expression" default="null"/>
-            <property name="ignoreConstructorParameter" type="Boolean" default="false"/>
-            <property name="ignoreSetter" type="Boolean" default="false"/>
-            <property name="setterCanReturnItsClass" type="Boolean" default="false"/>
-            <property name="ignoreAbstractMethods" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens VARIABLE_DEF, PARAMETER_DEF, LAMBDA." default="VARIABLE_DEF, PARAMETER_DEF, LAMBDA."/>
-        </module>
-        <module name="IllegalCatch">
-            <description value="Checks that certain exception types do not appear in a catch statement."/>
-            <property name="illegalClassNames" type="String Set" default="java.lang.Throwable, RuntimeException, Error, Throwable, java.lang.Error, java.lang.RuntimeException, Exception, java.lang.Exception"/>
-        </module>
-        <module name="IllegalInstantiation">
-            <description value="Checks for illegal instantiations where a factory method is preferred."/>
-        </module>
-        <module name="IllegalThrows">
-            <description value="This check can be used to ensure that types are not declared to be thrown."/>
-            <property name="illegalClassNames" type="String Set" default="java.lang.Throwable, RuntimeException, Error, Throwable, java.lang.Error, java.lang.RuntimeException"/>
-            <property name="ignoredMethodNames" type="String Set" default="finalize"/>
-            <property name="ignoreOverriddenMethods" type="Boolean" default="true"/>
-        </module>
-        <module name="IllegalToken">
-            <description value="Checks for illegal tokens."/>
-            <property name="tokens" type="subset of tokens TokenTypes." default="LABELED_STAT."/>
-        </module>
-        <module name="IllegalTokenText">
-            <description value="Checks specified tokens text for matching an illegal pattern from format property."/>
-            <property name="format" type="Regular Expression" default="^$ (empty)"/>
-            <property name="ignoreCase" type="Boolean" default="false"/>
-            <property name="message" type="String" default=""/>
-            <property name="tokens" type="subset of tokens NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, IDENT, COMMENT_CONTENT, STRING_LITERAL, CHAR_LITERAL." default="empty"/>
-        </module>
-        <module name="IllegalType">
-            <description value="Checks that particular classes or interfaces are never used."/>
-            <property name="validateAbstractClassNames" type="Boolean" default="false"/>
-            <property name="illegalClassNames" type="String Set" default="LinkedHashSet, java.util.HashSet, java.util.LinkedHashMap, java.util.TreeMap, HashMap, TreeSet, java.util.HashMap, TreeMap, java.util.LinkedHashSet, java.util.TreeSet, HashSet, LinkedHashMap"/>
-            <property name="legalAbstractClassNames" type="String Set" default="{}"/>
-            <property name="ignoredMethodNames" type="String Set" default="getInitialContext, getEnvironment"/>
-            <property name="illegalAbstractClassNameFormat" type="Regular Expression" default="^(.*[.])?Abstract.*$"/>
-            <property name="memberModifiers" type="subset of tokens TokenTypes" default=""/>
-            <property name="tokens" type="subset of tokens ANNOTATION_FIELD_DEF, CLASS_DEF, INTERFACE_DEF, METHOD_CALL, METHOD_DEF, METHOD_REF, PARAMETER_DEF, VARIABLE_DEF." default="ANNOTATION_FIELD_DEF, CLASS_DEF, INTERFACE_DEF, METHOD_CALL, METHOD_DEF, METHOD_REF, PARAMETER_DEF, VARIABLE_DEF."/>
-        </module>
-        <module name="InnerAssignment">
-            <description value="Checks for assignments in subexpressions, such as in String s = Integer."/>
-        </module>
-        <module name="MagicNumber">
-            <description value="Checks that there are no magic numbers where a magic number is a numeric literal that is not defined as a constant."/>
-            <property name="ignoreNumbers" type="Number Set" default="-1, 0, 1, 2"/>
-            <property name="ignoreHashCodeMethod" type="Boolean" default="false"/>
-            <property name="ignoreAnnotation" type="Boolean" default="false"/>
-            <property name="ignoreFieldDeclaration" type="Boolean" default="false"/>
-            <property name="constantWaiverParentToken" type="subset of tokens TokenTypes" default="TYPECAST, METHOD_CALL, EXPR, ARRAY_INIT, UNARY_MINUS, UNARY_PLUS, ELIST, STAR, ASSIGN, PLUS, MINUS, DIV, LITERAL_NEW"/>
-            <property name="tokens" type="subset of tokens NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG." default="NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG."/>
-        </module>
-        <module name="MissingCtor">
-            <description value="Checks that classes (except abstract ones) define a constructor and don't rely on the default one."/>
-        </module>
-        <module name="MissingSwitchDefault">
-            <description value="Checks that switch statement has a default clause."/>
-        </module>
-        <module name="ModifiedControlVariable">
-            <description value="Check for ensuring that for loop control variables are not modified inside the for block."/>
-            <property name="skipEnhancedForLoopVariable" type="Boolean" default="false"/>
-        </module>
-        <module name="MultipleStringLiterals">
-            <description value="Checks for multiple occurrences of the same string literal within a single file."/>
-            <property name="allowedDuplicates" type="Integer" default="1"/>
-            <property name="ignoreStringsRegexp" type="Regular Expression" default="^$"/>
-            <property name="ignoreOccurrenceContext" type="subset of tokens TokenTypes" default="ANNOTATION"/>
-        </module>
-        <module name="MultipleVariableDeclarations">
-            <description value="Checks that each variable declaration is in its own statement and on its own line."/>
-        </module>
-        <module name="NestedForDepth">
-            <description value="Restricts nested for blocks to a specified depth (default = 1)."/>
-            <property name="max" type="Integer" default="1"/>
-        </module>
-        <module name="NestedIfDepth">
-            <description value="Restricts nested if-else blocks to a specified depth (default = 1)."/>
-            <property name="max" type="Integer" default="1"/>
-        </module>
-        <module name="NestedTryDepth">
-            <description value="Restricts nested try blocks to a specified depth (default = 1)."/>
-            <property name="max" type="Integer" default="1"/>
-        </module>
-        <module name="NoClone">
-            <description value="Checks that the clone method is not overridden from the Object class."/>
-        </module>
-        <module name="NoFinalizer">
-            <description value="Verifies there are no finalize() methods defined in a class."/>
-        </module>
-        <module name="OneStatementPerLine">
-            <description value="Checks that there is only one statement per line."/>
-        </module>
-        <module name="OverloadMethodsDeclarationOrder">
-            <description value="Checks that overload methods are grouped together."/>
-        </module>
-        <module name="PackageDeclaration">
-            <description value="Ensures that a class has a package declaration, and (optionally) whether the package name matches the directory name for the source file."/>
-            <property name="matchDirectoryStructure" type="Boolean" default="true"/>
-        </module>
-        <module name="ParameterAssignment">
-            <description value="Disallows assignment of parameters."/>
-        </module>
-        <module name="RequireThis">
-            <description value="Checks that references to instance variables and methods of the present object are explicitly of the form this."/>
-            <property name="checkFields" type="Boolean" default="true"/>
-            <property name="checkMethods" type="Boolean" default="true"/>
-            <property name="validateOnlyOverlapping" type="Boolean" default="true"/>
-        </module>
-        <module name="ReturnCount">
-            <description value="Restricts the number of return statements in methods, constructors and lambda expressions (2 by default)."/>
-            <property name="max" type="Integer" default="2"/>
-            <property name="maxForVoid" type="Integer" default="1"/>
-            <property name="format" type="Regular Expression" default="^equals$"/>
-            <property name="tokens" type="subset of tokens CTOR_DEF, METHOD_DEF, LAMBDA." default="CTOR_DEF, METHOD_DEF, LAMBDA."/>
-        </module>
-        <module name="SimplifyBooleanExpression">
-            <description value="Checks for over-complicated boolean expressions."/>
-        </module>
-        <module name="SimplifyBooleanReturn">
-            <description value="Checks for over-complicated boolean return statements."/>
-        </module>
-        <module name="StringLiteralEquality">
-            <description value="Checks that string literals are not used with == or !=."/>
-        </module>
-        <module name="SuperClone">
-            <description value="Checks that an overriding clone() method invokes super."/>
-        </module>
-        <module name="SuperFinalize">
-            <description value="Checks that an overriding finalize() method invokes super."/>
-        </module>
-        <module name="UnnecessaryParentheses">
-            <description value="Checks for the use of unnecessary parentheses."/>
-            <property name="tokens" type="subset of tokens EXPR, IDENT, NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, STRING_LITERAL, LITERAL_NULL, LITERAL_FALSE, LITERAL_TRUE, ASSIGN, BAND_ASSIGN, BOR_ASSIGN, BSR_ASSIGN, BXOR_ASSIGN, DIV_ASSIGN, MINUS_ASSIGN, MOD_ASSIGN, PLUS_ASSIGN, SL_ASSIGN, SR_ASSIGN, STAR_ASSIGN, LAMBDA." default="EXPR, IDENT, NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, STRING_LITERAL, LITERAL_NULL, LITERAL_FALSE, LITERAL_TRUE, ASSIGN, BAND_ASSIGN, BOR_ASSIGN, BSR_ASSIGN, BXOR_ASSIGN, DIV_ASSIGN, MINUS_ASSIGN, MOD_ASSIGN, PLUS_ASSIGN, SL_ASSIGN, SR_ASSIGN, STAR_ASSIGN, LAMBDA."/>
-        </module>
-        <module name="VariableDeclarationUsageDistance">
-            <description value="Checks the distance between declaration of variable and its first usage."/>
-            <property name="allowedDistance" type="Integer" default="3"/>
-            <property name="ignoreVariablePattern" type="Regular Expression" default=""/>
-            <property name="validateBetweenScopes" type="Boolean" default="false"/>
-            <property name="ignoreFinal" type="Boolean" default="true"/>
-        </module>
-    </category>
-    <category name="Headers">
-        <module name="Header">
-            <description value="Checks that a source file begins with a specified header."/>
-            <property name="headerFile" type="URI" default="null"/>
-            <property name="charset" type="String" default="the charset property of the parent Checker module"/>
-            <property name="header" type="String" default="null"/>
-            <property name="ignoreLines" type="Integer Set" default="{}"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="RegexpHeader">
-            <description value="Checks the header of a source file against a header that contains a regular expression for each line of the source header."/>
-            <property name="headerFile" type="URI" default="null"/>
-            <property name="charset" type="String" default="the charset property of the parent Checker module"/>
-            <property name="header" type="String" default="null"/>
-            <property name="multiLines" type="Integer Set" default="{}"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-    </category>
-    <category name="Imports">
-        <module name="AvoidStarImport">
-            <description value="Checks that there are no import statements that use the * notation."/>
-            <property name="excludes" type="String Set" default="{}"/>
-            <property name="allowClassImports" type="Boolean" default="false"/>
-            <property name="allowStaticMemberImports" type="Boolean" default="false"/>
-        </module>
-        <module name="AvoidStaticImport">
-            <description value="Checks that there are no static import statements."/>
-            <property name="excludes" type="String Set" default="{}"/>
-        </module>
-        <module name="CustomImportOrder">
-            <description value="Checks that the groups of import declarations appear in the order specified by the user."/>
-        </module>
-        <module name="IllegalImport">
-            <description value="Checks for imports from a set of illegal packages."/>
-            <property name="illegalPkgs" type="String Set" default="sun"/>
-            <property name="illegalClasses" type="String Set" default="{}"/>
-            <property name="regexp" type="Boolean" default="false"/>
-        </module>
-        <module name="ImportControl">
-            <description value="Controls what can be imported in each package and file."/>
-            <property name="file" type="URI" default="null"/>
-            <property name="path" type="Regular Expression" default=".*"/>
-        </module>
-        <module name="ImportOrder">
-            <description value="Checks the ordering/grouping of imports."/>
-            <property name="option" type="Import Order Policy" default="under"/>
-            <property name="groups" type="Regular Expressions" default="{}"/>
-            <property name="ordered" type="Boolean" default="true"/>
-            <property name="separated" type="Boolean" default="false"/>
-            <property name="separatedStaticGroups" type="Boolean" default="false"/>
-            <property name="caseSensitive" type="Boolean" default="true"/>
-            <property name="staticGroups" type="Regular Expressions" default="{}"/>
-            <property name="sortStaticImportsAlphabetically" type="Boolean" default="false"/>
-            <property name="useContainerOrderingForStatic" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens STATIC_IMPORT." default="STATIC_IMPORT."/>
-        </module>
-        <module name="RedundantImport">
-            <description value="Checks for redundant import statements."/>
-        </module>
-        <module name="UnusedImports">
-            <description value="Checks for unused import statements."/>
-            <property name="processJavadoc" type="Boolean" default="true"/>
-        </module>
-    </category>
-    <category name="Javadoc Comments">
-        <module name="AtclauseOrder">
-            <description value="Note: Google used the term at-clauses for block tags in their guide till 2017-02-28."/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="target" type="subset of tokens TokenTypes" default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
-            <property name="tagOrder" type="String Set" default="@author, @version, @param, @return, @throws, @exception, @see, @since, @serial, @serialField, @serialData, @deprecated"/>
-        </module>
-        <module name="JavadocMethod">
-            <description value="Checks the Javadoc of a method or constructor."/>
-            <property name="minLineCount" type="Integer" default="-1"/>
-            <property name="allowedAnnotations" type="String Set" default="Override"/>
-            <property name="validateThrows" type="Boolean" default="false"/>
-            <property name="scope" type="Scope" default="private"/>
-            <property name="excludeScope" type="Scope" default="null"/>
-            <property name="allowUndeclaredRTE" type="Boolean" default="false"/>
-            <property name="allowThrowsTagsForSubclasses" type="Boolean" default="false"/>
-            <property name="allowMissingParamTags" type="Boolean" default="false"/>
-            <property name="allowMissingThrowsTags" type="Boolean" default="false"/>
-            <property name="allowMissingReturnTag" type="Boolean" default="false"/>
-            <property name="allowMissingJavadoc" type="Boolean" default="false"/>
-            <property name="allowMissingPropertyJavadoc" type="Boolean" default="false"/>
-            <property name="logLoadErrors" type="Boolean" default="true"/>
-            <property name="suppressLoadErrors" type="Boolean" default="false"/>
-            <property name="ignoreMethodNamesRegex" type="Regular Expression" default="null"/>
-            <property name="tokens" type="subset of tokens METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF." default="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF."/>
-        </module>
-        <module name="JavadocPackage">
-            <description value="Checks that each Java package has a Javadoc file used for commenting."/>
-            <property name="allowLegacy" type="Boolean" default="false"/>
-            <property name="fileExtensions" type="String Set" default=".java"/>
-        </module>
-        <module name="JavadocParagraph">
-            <description value="Checks that: "/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="allowNewlineParagraph" type="Boolean" default="true"/>
-        </module>
-        <module name="JavadocStyle">
-            <description value="Validates Javadoc comments to help ensure they are well formed."/>
-            <property name="scope" type="Scope" default="private"/>
-            <property name="excludeScope" type="Scope" default="null"/>
-            <property name="checkFirstSentence" type="Boolean" default="true"/>
-            <property name="endOfSentenceFormat" type="Regular Expression" default="([.?!][ \t\n\r\f&lt;])|([.?!]$)"/>
-            <property name="checkEmptyJavadoc" type="Boolean" default="false"/>
-            <property name="checkHtml" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF." default="ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF."/>
-        </module>
-        <module name="JavadocTagContinuationIndentation">
-            <description value="Checks the indentation of the continuation lines in at-clauses."/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="offset" type="Integer" default="4"/>
-        </module>
-        <module name="JavadocType">
-            <description value="Checks Javadoc comments for class and interface definitions."/>
-            <property name="scope" type="Scope" default="private"/>
-            <property name="excludeScope" type="Scope" default="null"/>
-            <property name="authorFormat" type="Regular Expression" default="null"/>
-            <property name="versionFormat" type="Regular Expression" default="null"/>
-            <property name="allowMissingParamTags" type="Boolean" default="false"/>
-            <property name="allowUnknownTags" type="Boolean" default="false"/>
-            <property name="allowedAnnotations" type="String Set" default="Generated"/>
-            <property name="tokens" type="subset of tokens INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF." default="INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF."/>
-        </module>
-        <module name="JavadocVariable">
-            <description value="Checks that variables have Javadoc comments."/>
-            <property name="scope" type="Scope" default="private"/>
-            <property name="excludeScope" type="Scope" default="null"/>
-            <property name="ignoreNamePattern" type="Regular Expression" default="null"/>
-            <property name="tokens" type="subset of tokens ENUM_CONSTANT_DEF." default="ENUM_CONSTANT_DEF."/>
-        </module>
-        <module name="NonEmptyAtclauseDescription">
-            <description value="Checks that the at-clause tag is followed by description."/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="javadocTokens" type="subset of javadoc tokens PARAM_LITERAL, RETURN_LITERAL, THROWS_LITERAL, EXCEPTION_LITERAL, DEPRECATED_LITERAL." default="PARAM_LITERAL, RETURN_LITERAL, THROWS_LITERAL, EXCEPTION_LITERAL, DEPRECATED_LITERAL."/>
-        </module>
-        <module name="SingleLineJavadoc">
-            <description value="Checks that a JavaDoc block can fit in a single line and doesn't contain at-clauses."/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="ignoredTags" type="String Set" default="{}"/>
-            <property name="ignoreInlineTags" type="Boolean" default="true"/>
-        </module>
-        <module name="SummaryJavadoc">
-            <description value="Checks that Javadoc summary sentence does not contain phrases that are not recommended to use."/>
-            <property name="violateExecutionOnNonTightHtml" type="Boolean" default="false"/>
-            <property name="forbiddenSummaryFragments" type="Regular Expression" default="^$ (empty)"/>
-            <property name="period" type="String" default="."/>
-        </module>
-        <module name="WriteTag">
-            <description value="Requires user defined JavaDoc tag to be present in javadoc comment with defined format."/>
-            <property name="tag" type="String" default="null"/>
-            <property name="tagFormat" type="Regular Expression" default="null"/>
-            <property name="tagSeverity" type="Severity" default="info"/>
-            <property name="tokens" type="subset of tokens INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF, METHOD_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ANNOTATION_FIELD_DEF." default="INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF."/>
-        </module>
-    </category>
-    <category name="Metrics">
-        <module name="BooleanExpressionComplexity">
-            <description value="Restrict the number of number of &amp;&amp;, ||, &amp;, | and ^ in an expression."/>
-            <property name="max" type="Integer" default="3"/>
-            <property name="tokens" type="subset of tokens LAND, BAND, LOR, BOR, BXOR." default="LAND, BAND, LOR, BOR, BXOR."/>
-        </module>
-        <module name="ClassDataAbstractionCoupling">
-            <description value="This metric measures the number of instantiations of other classes within the given class."/>
-            <property name="max" type="Integer" default="7"/>
-            <property name="excludedClasses" type="String Set" default="HashMap, ArrayList, String, float, TreeSet, List, Boolean, Void, Override, Short, IllegalArgumentException, UnsupportedOperationException, HashSet, void, Character, IndexOutOfBoundsException, byte, double, Double, LinkedList, Float, Byte, SortedMap, Long, Throwable, Object, Class, Map, IllegalStateException, Set, StringBuilder, SuppressWarnings, SortedSet, long, RuntimeException, Deprecated, NullPointerException, Queue, SecurityException, FunctionalInterface, TreeMap, Deque, int, Exception, Integer, SafeVarargs, StringBuffer, boolean, char, short, ArrayIndexOutOfBoundsException"/>
-            <property name="excludeClassesRegexps" type="Regular Expressions" default="^$"/>
-            <property name="excludedPackages" type="String Set" default="{}"/>
-        </module>
-        <module name="ClassFanOutComplexity">
-            <description value="The number of other classes a given class relies on."/>
-            <property name="max" type="Integer" default="20"/>
-            <property name="excludedClasses" type="String Set" default="HashMap, ArrayList, String, float, TreeSet, List, Boolean, Void, Override, Short, IllegalArgumentException, UnsupportedOperationException, HashSet, void, Character, IndexOutOfBoundsException, byte, double, Double, LinkedList, Float, Byte, SortedMap, Long, Throwable, Object, Class, Map, IllegalStateException, Set, StringBuilder, SuppressWarnings, SortedSet, long, RuntimeException, Deprecated, NullPointerException, Queue, SecurityException, FunctionalInterface, TreeMap, Deque, int, Exception, Integer, SafeVarargs, StringBuffer, boolean, char, short, ArrayIndexOutOfBoundsException"/>
-            <property name="excludeClassesRegexps" type="Regular Expressions" default="^$"/>
-            <property name="excludedPackages" type="String Set" default="{}"/>
-        </module>
-        <module name="CyclomaticComplexity">
-            <description value="Checks cyclomatic complexity against a specified limit."/>
-            <property name="max" type="Integer" default="10"/>
-            <property name="switchBlockAsSingleDecisionPoint" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, LITERAL_CATCH, QUESTION, LAND, LOR." default="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, LITERAL_CATCH, QUESTION, LAND, LOR."/>
-        </module>
-        <module name="JavaNCSS">
-            <description value="Determines complexity of methods, classes and files by counting the Non Commenting Source Statements (NCSS)."/>
-            <property name="methodMaximum" type="Integer" default="50"/>
-            <property name="classMaximum" type="Integer" default="1500"/>
-            <property name="fileMaximum" type="Integer" default="2000"/>
-        </module>
-        <module name="NPathComplexity">
-            <description value="The NPATH metric computes the number of possible execution paths through a function(method)."/>
-            <property name="max" type="Integer" default="200"/>
-        </module>
-    </category>
-    <category name="Miscellaneous">
-        <module name="ArrayTypeStyle">
-            <description value="Checks the style of array type definitions."/>
-            <property name="javaStyle" type="Boolean" default="true"/>
-        </module>
-        <module name="AvoidEscapedUnicodeCharacters">
-            <description value="Restrict using Unicode escapes (e."/>
-            <property name="allowEscapesForControlCharacters" type="Boolean" default="false"/>
-            <property name="allowByTailComment" type="Boolean" default="false"/>
-            <property name="allowIfAllCharactersEscaped" type="Boolean" default="false"/>
-            <property name="allowNonPrintableEscapes" type="Boolean" default="false"/>
-        </module>
-        <module name="CommentsIndentation">
-            <description value="Controls the indentation between comments and surrounding code."/>
-            <property name="tokens" type="subset of tokens SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN." default="SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN."/>
-        </module>
-        <module name="DescendantToken">
-            <description value="Checks for restricted tokens beneath other tokens."/>
-            <property name="limitedTokens" type="subset of tokens TokenTypes" default=""/>
-            <property name="minimumDepth" type="Integer" default="0"/>
-            <property name="maximumDepth" type="Integer" default="java.lang.Integer.MAX_VALUE"/>
-            <property name="minimumNumber" type="Integer" default="0"/>
-            <property name="maximumNumber" type="Integer" default="java.lang.Integer.MAX_VALUE"/>
-            <property name="sumTokenCounts" type="Boolean" default="false"/>
-            <property name="minimumMessage" type="String" default="null"/>
-            <property name="maximumMessage" type="String" default="null"/>
-        </module>
-        <module name="FinalParameters">
-            <description value="Check that parameters for methods, constructors, and catch blocks are final."/>
-            <property name="ignorePrimitiveTypes" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens METHOD_DEF, CTOR_DEF, LITERAL_CATCH, FOR_EACH_CLAUSE." default="METHOD_DEF, CTOR_DEF."/>
-        </module>
-        <module name="Indentation">
-            <description value="Checks correct indentation of Java code."/>
-            <property name="basicOffset" type="Integer" default="4"/>
-            <property name="braceAdjustment" type="Integer" default="0"/>
-            <property name="caseIndent" type="Integer" default="4"/>
-            <property name="throwsIndent" type="Integer" default="4"/>
-            <property name="arrayInitIndent" type="Integer" default="4"/>
-            <property name="lineWrappingIndentation" type="Integer" default="4"/>
-            <property name="forceStrictCondition" type="Boolean" default="false"/>
-        </module>
-        <module name="NewlineAtEndOfFile">
-            <description value="Checks whether files end with a line separator."/>
-            <property name="lineSeparator" type="Line Separator Policy" default="system"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="OuterTypeFilename">
-            <description value="Checks that the outer type name and the file name match."/>
-        </module>
-        <module name="TodoComment">
-            <description value="A check for TODO: comments."/>
-            <property name="format" type="Regular Expression" default="TODO:"/>
-        </module>
-        <module name="TrailingComment">
-            <description value="The check to ensure that requires that comments be the only thing on a line."/>
-            <property name="format" type="Regular Expression" default="^[\s});]*$"/>
-            <property name="legalComment" type="Regular Expression" default="null"/>
-        </module>
-        <module name="Translation">
-            <description value="A FileSetCheck that ensures the correct translation of code by checking property files for consistency regarding their keys."/>
-            <property name="fileExtensions" type="String Set" default=".properties"/>
-            <property name="baseName" type="Regular Expression" default="^messages.*$"/>
-            <property name="requiredTranslations" type="String Set" default="{}"/>
-        </module>
-        <module name="UncommentedMain">
-            <description value="Checks for uncommented main() methods."/>
-            <property name="excludedClasses" type="Regular Expression" default="^$ (empty)"/>
-        </module>
-        <module name="UniqueProperties">
-            <description value="Checks properties files for duplicated properties."/>
-            <property name="fileExtensions" type="String Set" default=".properties"/>
-        </module>
-        <module name="UpperEll">
-            <description value="Checks that long constants are defined with an upper ell."/>
-        </module>
-    </category>
-    <category name="Modifiers">
-        <module name="ClassMemberImpliedModifier">
-            <description value="This check is effectively the opposite of RedundantModifier."/>
-            <property name="violateImpliedStaticOnNestedEnum" type="Boolean" default="true"/>
-            <property name="violateImpliedStaticOnNestedInterface" type="Boolean" default="true"/>
-        </module>
-        <module name="InterfaceMemberImpliedModifier">
-            <description value="This check is effectively the opposite of RedundantModifier."/>
-            <property name="violateImpliedPublicField" type="Boolean" default="true"/>
-            <property name="violateImpliedStaticField" type="Boolean" default="true"/>
-            <property name="violateImpliedFinalField" type="Boolean" default="true"/>
-            <property name="violateImpliedPublicMethod" type="Boolean" default="true"/>
-            <property name="violateImpliedAbstractMethod" type="Boolean" default="true"/>
-            <property name="violateImpliedPublicNested" type="Boolean" default="true"/>
-            <property name="violateImpliedStaticNested" type="Boolean" default="true"/>
-        </module>
-        <module name="ModifierOrder">
-            <description value="Checks that the order of modifiers conforms to the suggestions in the Java Language specification, sections 8."/>
-        </module>
-        <module name="RedundantModifier">
-            <description value="Checks for redundant modifiers in: "/>
-            <property name="tokens" type="subset of tokens METHOD_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, INTERFACE_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF, RESOURCE." default="METHOD_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, INTERFACE_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF, RESOURCE."/>
-        </module>
-    </category>
-    <category name="Naming Conventions">
-        <module name="AbbreviationAsWordInName">
-            <description value="allowedAbbreviationLength specifies how many consecutive capital letters are allowed in the identifier."/>
-            <property name="allowedAbbreviationLength" type="Integer" default="3"/>
-            <property name="allowedAbbreviations" type="String Set" default="{}"/>
-            <property name="ignoreFinal" type="Boolean" default="true"/>
-            <property name="ignoreStatic" type="Boolean" default="true"/>
-            <property name="ignoreOverriddenMethods" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, ENUM_CONSTANT_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF."/>
-        </module>
-        <module name="AbstractClassName">
-            <description value="Rationale: Abstract classes are convenience base class implementations of interfaces, not types as such."/>
-            <property name="format" type="Regular Expression" default="^Abstract.+$"/>
-            <property name="ignoreModifier" type="Boolean" default="false"/>
-            <property name="ignoreName" type="Boolean" default="false"/>
-        </module>
-        <module name="CatchParameterName">
-            <description value="Default pattern has the following characteristic: "/>
-            <property name="format" type="Regular Expression" default="^(e|t|ex|[a-z][a-z][a-zA-Z]+)$"/>
-        </module>
-        <module name="ClassTypeParameterName">
-            <description value="Checks that class type parameter names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[A-Z]$"/>
-        </module>
-        <module name="ConstantName">
-            <description value="Checks that constant names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
-            <property name="applyToPublic" type="Boolean" default="true"/>
-            <property name="applyToProtected" type="Boolean" default="true"/>
-            <property name="applyToPackage" type="Boolean" default="true"/>
-            <property name="applyToPrivate" type="Boolean" default="true"/>
-        </module>
-        <module name="InterfaceTypeParameterName">
-            <description value="Checks that interface type parameter names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[A-Z]$"/>
-        </module>
-        <module name="LambdaParameterName">
-            <description value="Check to verify lambda parameter names."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-        </module>
-        <module name="LocalFinalVariableName">
-            <description value="Checks that local final variable names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="tokens" type="subset of tokens VARIABLE_DEF, PARAMETER_DEF, RESOURCE." default="VARIABLE_DEF, PARAMETER_DEF, RESOURCE."/>
-        </module>
-        <module name="LocalVariableName">
-            <description value="Checks that local, non-final variable names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="allowOneCharVarInForLoop" type="Boolean" default="false"/>
-        </module>
-        <module name="MemberName">
-            <description value="Checks that instance variable names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="applyToPublic" type="Boolean" default="true"/>
-            <property name="applyToProtected" type="Boolean" default="true"/>
-            <property name="applyToPackage" type="Boolean" default="true"/>
-            <property name="applyToPrivate" type="Boolean" default="true"/>
-        </module>
-        <module name="MethodName">
-            <description value="Also, checks if a method name has the same name as the residing class."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="allowClassName" type="Boolean" default="false"/>
-            <property name="applyToPublic" type="Boolean" default="true"/>
-            <property name="applyToProtected" type="Boolean" default="true"/>
-            <property name="applyToPackage" type="Boolean" default="true"/>
-            <property name="applyToPrivate" type="Boolean" default="true"/>
-        </module>
-        <module name="MethodTypeParameterName">
-            <description value="Checks that method type parameter names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[A-Z]$"/>
-        </module>
-        <module name="PackageName">
-            <description value="The default value of format for module PackageName has been chosen to match the requirements in the Java Language specification and the Sun coding conventions."/>
-            <property name="format" type="Regular Expression" default="^[a-z]+(\.[a-zA-Z_][a-zA-Z0-9_]*)*$"/>
-        </module>
-        <module name="ParameterName">
-            <description value="To validate catch parameters please use CatchParameterName."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="ignoreOverridden" type="Boolean" default="false"/>
-            <property name="accessModifiers" type="Access Modifier Set" default="public, protected, package, private"/>
-        </module>
-        <module name="StaticVariableName">
-            <description value="Checks that {@code static}, non-{@code final} variable names conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
-            <property name="applyToPublic" type="Boolean" default="true"/>
-            <property name="applyToProtected" type="Boolean" default="true"/>
-            <property name="applyToPackage" type="Boolean" default="true"/>
-            <property name="applyToPrivate" type="Boolean" default="true"/>
-        </module>
-        <module name="TypeName">
-            <description value="Checks that type names for classes, interfaces, enums, and annotations conform to a format specified by the format property."/>
-            <property name="format" type="Regular Expression" default="^[A-Z][a-zA-Z0-9]*$"/>
-            <property name="applyToPublic" type="Boolean" default="true"/>
-            <property name="applyToProtected" type="Boolean" default="true"/>
-            <property name="applyToPackage" type="Boolean" default="true"/>
-            <property name="applyToPrivate" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF."/>
-        </module>
-    </category>
-    <category name="Regexp">
-        <module name="Regexp">
-            <description value="A check that makes sure that a specified pattern exists, exists less than a set number of times, or does not exist in the file."/>
-            <property name="format" type="Regular Expression" default="^$ (empty)"/>
-            <property name="message" type="String" default="null"/>
-            <property name="illegalPattern" type="Boolean" default="false"/>
-            <property name="duplicateLimit" type="Integer" default="0"/>
-            <property name="errorLimit" type="Integer" default="100"/>
-            <property name="ignoreComments" type="Boolean" default="false"/>
-        </module>
-        <module name="RegexpMultiline">
-            <description value="A check for detecting that matches across multiple lines."/>
-            <property name="format" type="Regular Expression" default="$."/>
-            <property name="message" type="String" default="null"/>
-            <property name="ignoreCase" type="Boolean" default="false"/>
-            <property name="minimum" type="Integer" default="0"/>
-            <property name="maximum" type="Integer" default="0"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="RegexpOnFilename">
-            <description value="Implementation of a check that looks for a file name and/or path match (or mis-match) against specified patterns."/>
-            <property name="folderPattern" type="Regular Expression" default="null"/>
-            <property name="fileNamePattern" type="Regular Expression" default="null"/>
-            <property name="match" type="Boolean" default="true"/>
-            <property name="ignoreFileNameExtensions" type="Boolean" default="false"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="RegexpSingleline">
-            <description value="A check for detecting single lines that match a supplied regular expression."/>
-            <property name="format" type="Regular Expression" default="$."/>
-            <property name="message" type="String" default="null"/>
-            <property name="ignoreCase" type="Boolean" default="false"/>
-            <property name="minimum" type="Integer" default="0"/>
-            <property name="maximum" type="Integer" default="0"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="RegexpSinglelineJava">
-            <description value="This class is variation on RegexpSingleline for detecting single lines that match a supplied regular expression in Java files."/>
-            <property name="format" type="Regular Expression" default="$."/>
-            <property name="message" type="String" default="null"/>
-            <property name="ignoreCase" type="Boolean" default="false"/>
-            <property name="minimum" type="Integer" default="0"/>
-            <property name="maximum" type="Integer" default="0"/>
-            <property name="ignoreComments" type="Boolean" default="false"/>
-        </module>
-    </category>
-    <category name="Size Violations">
-        <module name="AnonInnerLength">
-            <description value="Checks for long anonymous inner classes."/>
-            <property name="max" type="Integer" default="20"/>
-        </module>
-        <module name="ExecutableStatementCount">
-            <description value="Restricts the number of executable statements to a specified limit."/>
-            <property name="max" type="Integer" default="30"/>
-            <property name="tokens" type="subset of tokens CTOR_DEF, METHOD_DEF, INSTANCE_INIT, STATIC_INIT." default="CTOR_DEF, METHOD_DEF, INSTANCE_INIT, STATIC_INIT."/>
-        </module>
-        <module name="FileLength">
-            <description value="Checks for long source files."/>
-            <property name="max" type="Integer" default="2000"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="LineLength">
-            <description value="Checks for long lines."/>
-            <property name="ignorePattern" type="Regular Expression" default="^$ (empty)"/>
-            <property name="max" type="Integer" default="80"/>
-        </module>
-        <module name="MethodCount">
-            <description value="Checks the number of methods declared in each type declaration by access modifier or total count."/>
-            <property name="maxTotal" type="Integer" default="100"/>
-            <property name="maxPrivate" type="Integer" default="100"/>
-            <property name="maxPackage" type="Integer" default="100"/>
-            <property name="maxProtected" type="Integer" default="100"/>
-            <property name="maxPublic" type="Integer" default="100"/>
-            <property name="tokens" type="subset of tokens CLASS_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, ANNOTATION_DEF." default="CLASS_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, ANNOTATION_DEF."/>
-        </module>
-        <module name="MethodLength">
-            <description value="Checks for long methods and constructors."/>
-            <property name="max" type="Integer" default="150"/>
-            <property name="countEmpty" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens METHOD_DEF, CTOR_DEF." default="METHOD_DEF, CTOR_DEF."/>
-        </module>
-        <module name="OuterTypeNumber">
-            <description value="Checks for the number of types declared at the outer (or root) level in a file."/>
-            <property name="max" type="Integer" default="1"/>
-        </module>
-        <module name="ParameterNumber">
-            <description value="Checks the number of parameters of a method or constructor."/>
-            <property name="max" type="Integer" default="7"/>
-            <property name="ignoreOverriddenMethods" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens METHOD_DEF, CTOR_DEF." default="METHOD_DEF, CTOR_DEF."/>
-        </module>
-    </category>
-    <category name="Whitespace">
-        <module name="EmptyForInitializerPad">
-            <description value="Checks the padding of an empty for initializer; that is whether white space is required at an empty for initializer, or such white space is forbidden."/>
-            <property name="option" type="Pad Policy" default="nospace"/>
-        </module>
-        <module name="EmptyForIteratorPad">
-            <description value="Checks the padding of an empty for iterator; that is whether white space is required at an empty for iterator, or such white space is forbidden."/>
-            <property name="option" type="Pad Policy" default="nospace"/>
-        </module>
-        <module name="EmptyLineSeparator">
-            <description value="Checks for empty line separators after header, package, all import declarations, fields, constructors, methods, nested classes, static initializers and instance initializers."/>
-            <property name="allowNoEmptyLineBetweenFields" type="Boolean" default="false"/>
-            <property name="allowMultipleEmptyLines" type="Boolean" default="true"/>
-            <property name="allowMultipleEmptyLinesInsideClassMembers" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens PACKAGE_DEF, IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF." default="PACKAGE_DEF, IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
-        </module>
-        <module name="FileTabCharacter">
-            <description value="Checks that there are no tab characters ('\t') in the source code."/>
-            <property name="eachLine" type="Boolean" default="false"/>
-            <property name="fileExtensions" type="String Set" default="all files"/>
-        </module>
-        <module name="GenericWhitespace">
-            <description value="Checks that the whitespace around the Generic tokens (angle brackets) &lt; and > are correct to the typical convention."/>
-        </module>
-        <module name="MethodParamPad">
-            <description value="Checks the padding between the identifier of a method definition, constructor definition, method call, or constructor invocation; and the left parenthesis of the parameter list."/>
-            <property name="allowLineBreaks" type="Boolean" default="false"/>
-            <property name="option" type="Pad Policy" default="nospace"/>
-            <property name="tokens" type="subset of tokens CTOR_DEF, LITERAL_NEW, METHOD_CALL, METHOD_DEF, SUPER_CTOR_CALL, ENUM_CONSTANT_DEF." default="CTOR_DEF, LITERAL_NEW, METHOD_CALL, METHOD_DEF, SUPER_CTOR_CALL, ENUM_CONSTANT_DEF."/>
-        </module>
-        <module name="NoLineWrap">
-            <description value="Checks that chosen statements are not line-wrapped."/>
-            <property name="tokens" type="subset of tokens IMPORT, STATIC_IMPORT, PACKAGE_DEF, CLASS_DEF, METHOD_DEF, CTOR_DEF, ENUM_DEF, INTERFACE_DEF." default="PACKAGE_DEF, IMPORT, STATIC_IMPORT."/>
-        </module>
-        <module name="NoWhitespaceAfter">
-            <description value="Checks that there is no whitespace after a token."/>
-            <property name="allowLineBreaks" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens ARRAY_INIT, AT, INC, DEC, UNARY_MINUS, UNARY_PLUS, BNOT, LNOT, DOT, TYPECAST, ARRAY_DECLARATOR, INDEX_OP, LITERAL_SYNCHRONIZED, METHOD_REF." default="ARRAY_INIT, AT, INC, DEC, UNARY_MINUS, UNARY_PLUS, BNOT, LNOT, DOT, ARRAY_DECLARATOR, INDEX_OP."/>
-        </module>
-        <module name="NoWhitespaceBefore">
-            <description value="Checks that there is no whitespace before a token."/>
-            <property name="allowLineBreaks" type="Boolean" default="false"/>
-            <property name="tokens" type="subset of tokens COMMA, SEMI, POST_INC, POST_DEC, DOT, GENERIC_START, GENERIC_END, ELLIPSIS, METHOD_REF." default="COMMA, SEMI, POST_INC, POST_DEC, ELLIPSIS."/>
-        </module>
-        <module name="OperatorWrap">
-            <description value="Checks the policy on how to wrap lines on operators."/>
-            <property name="option" type="Wrap Operator Policy" default="nl"/>
-            <property name="tokens" type="subset of tokens QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, LITERAL_INSTANCEOF, TYPE_EXTENSION_AND, ASSIGN, DIV_ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, STAR_ASSIGN, MOD_ASSIGN, SR_ASSIGN, BSR_ASSIGN, SL_ASSIGN, BXOR_ASSIGN, BOR_ASSIGN, BAND_ASSIGN, METHOD_REF." default="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, TYPE_EXTENSION_AND, LITERAL_INSTANCEOF."/>
-        </module>
-        <module name="ParenPad">
-            <description value="Checks the policy on the padding of parentheses; i."/>
-            <property name="option" type="Pad Policy" default="nospace"/>
-            <property name="tokens" type="subset of tokens ANNOTATION, ANNOTATION_FIELD_DEF, CTOR_CALL, CTOR_DEF, DOT, ENUM_CONSTANT_DEF, EXPR, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_NEW, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_WHILE, METHOD_CALL, METHOD_DEF, QUESTION, RESOURCE_SPECIFICATION, SUPER_CTOR_CALL, LAMBDA." default="ANNOTATION, ANNOTATION_FIELD_DEF, CTOR_CALL, CTOR_DEF, DOT, ENUM_CONSTANT_DEF, EXPR, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_NEW, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_WHILE, METHOD_CALL, METHOD_DEF, QUESTION, RESOURCE_SPECIFICATION, SUPER_CTOR_CALL, LAMBDA."/>
-        </module>
-        <module name="SeparatorWrap">
-            <description value="Checks line wrapping with separators."/>
-            <property name="option" type="Wrap Operator Policy" default="eol"/>
-            <property name="tokens" type="subset of tokens DOT, COMMA, SEMI, ELLIPSIS, AT, LPAREN, RPAREN, ARRAY_DECLARATOR, RBRACK, METHOD_REF." default="DOT, COMMA."/>
-        </module>
-        <module name="SingleSpaceSeparator">
-            <description value="Checks that non-whitespace characters are separated by no more than one whitespace."/>
-            <property name="validateComments" type="Boolean" default="false"/>
-        </module>
-        <module name="TypecastParenPad">
-            <description value="Checks the policy on the padding of parentheses for typecasts."/>
-            <property name="option" type="Pad Policy" default="nospace"/>
-        </module>
-        <module name="WhitespaceAfter">
-            <description value="Checks that a token is followed by whitespace."/>
-            <property name="tokens" type="subset of tokens COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE." default="COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE."/>
-        </module>
-        <module name="WhitespaceAround">
-            <description value="Checks that a token is surrounded by whitespace."/>
-            <property name="allowEmptyConstructors" type="Boolean" default="false"/>
-            <property name="allowEmptyMethods" type="Boolean" default="false"/>
-            <property name="allowEmptyTypes" type="Boolean" default="false"/>
-            <property name="allowEmptyLoops" type="Boolean" default="false"/>
-            <property name="allowEmptyLambdas" type="Boolean" default="false"/>
-            <property name="allowEmptyCatches" type="Boolean" default="false"/>
-            <property name="ignoreEnhancedForColon" type="Boolean" default="true"/>
-            <property name="tokens" type="subset of tokens ASSIGN, ARRAY_INIT, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, DO_WHILE, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, LITERAL_ASSERT, TYPE_EXTENSION_AND, WILDCARD_TYPE, GENERIC_START, GENERIC_END, ELLIPSIS." default="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, DO_WHILE, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, LITERAL_ASSERT, TYPE_EXTENSION_AND."/>
-        </module>
-    </category>
+  <module name="Checker" description="All configurations have root module Checker.">
+    <property name="basedir" description="base directory name; stripped off in messages about files" type="String" default="null"/>
+    <property name="cacheFile" description="caches information about files that have checked OK; used to avoid repeated checks of the same files" type="File" default="null"/>
+    <property name="localeCountry" description="locale country for messages" type="String" default="default locale country for the Java Virtual Machine"/>
+    <property name="localeLanguage" description="locale language for messages" type="String" default="default locale language for the Java Virtual Machine"/>
+    <property name="charset" description="name of the file charset" type="String" default="System property &quot;file.encoding&quot;"/>
+    <property name="fileExtensions" description="file extensions that are accepted" type="String Set" default="all files"/>
+    <property name="severity" description="the default severity level of all violations" type="Severity" default="error"/>
+    <property name="haltOnException" description="whether to stop execution of Checkstyle if a single file produces any kind of exception during verification" type="Boolean" default="true"/>
+  </module>
+  <module name="TreeWalker" parent="Checker" description="FileSetCheck TreeWalker checks individual Java source files and defines properties that are applicable to checking such files.">
+    <property name="tabWidth" description="number of expanded spaces for a tab character (&quot;\t&quot;); used in messages and Checks that require a tab width, such as LineLength" type="Integer" default="8"/>
+    <property name="fileExtensions" description="file type extension to identify Java files. Setting this property is typically only required if your Java source code is preprocessed before compilation and the original files do not have the extension .java" type="String Set" default=".java"/>
+  </module>
+  <category name="Annotations">
+      <module name="AnnotationLocation" parent="TreeWalker" description="Check location of annotation on language elements.">
+        <property name="allowSamelineMultipleAnnotations" description="To allow annotation(s) to be located on the same line as target element." type="Boolean" default="false"/>
+        <property name="allowSamelineSingleParameterlessAnnotation" description="To allow single parameterless annotation to be located on the same line as target element." type="Boolean" default="true"/>
+        <property name="allowSamelineParameterizedAnnotation" description="To allow one and only parameterized annotation to be located on the same line as target element." type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
+      </module>
+      <module name="AnnotationOnSameLine" parent="TreeWalker" description="The check does verifying that annotations are located on the same line with their targets.">
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, PARAMETER_DEF, ANNOTATION_DEF, TYPECAST, LITERAL_THROWS, IMPLEMENTS_CLAUSE, TYPE_ARGUMENT, LITERAL_NEW, DOT, ANNOTATION_FIELD_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
+      </module>
+      <module name="AnnotationUseStyle" parent="TreeWalker" description="This check controls the style with the usage of annotations.">
+        <property name="elementStyle" description="Defines the annotation element styles." type="Element Style" default="compact_no_array"/>
+        <property name="closingParens" description="Defines the policy for ending parenthesis." type="Closing Parens" default="never"/>
+        <property name="trailingArrayComma" description="Defines the policy for trailing comma in arrays." type="Trailing Comma" default="never"/>
+      </module>
+      <module name="MissingDeprecated" parent="TreeWalker" description="Verifies that both the java.lang.Deprecated annotation is present and the @deprecated Javadoc tag is present when either is present.">
+        <property name="skipNoJavadoc" description="When this property is set to true check ignore cases when JavaDoc is missing, but still warns when JavaDoc is present but either @deprecated is missing from JavaDoc or @deprecated is missing from the element." type="Boolean" default="false"/>
+      </module>
+      <module name="MissingOverride" parent="TreeWalker" description="Verifies that the java.lang.Override annotation is present when the {@inheritDoc} javadoc tag is present.">
+        <property name="javaFiveCompatibility" description="When this property is true this check will only check classes, interfaces, etc. that do not contain the extends or implements keyword or are not anonymous classes. This means it only checks methods overridden from java.lang.ObjectJava 5 Compatibility mode severely limits this check. It is recommended to only use it on Java 5 source" type="Boolean" default="false"/>
+      </module>
+      <module name="PackageAnnotation" parent="TreeWalker" description="This check makes sure that all package annotations are in the package-info.java file.">
+      </module>
+      <module name="SuppressWarnings" parent="TreeWalker" description="This check allows you to specify what warnings that SuppressWarnings is not allowed to suppress.">
+        <property name="format" description="The warnings property is a regex pattern. Any warning being suppressed matching this pattern will be flagged." type="Regular Expression" default="^$|^\s+$"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, ENUM_CONSTANT_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, CTOR_DEF."/>
+      </module>
+      <module name="SuppressWarningsHolder" parent="TreeWalker" description="Maintains a set of check suppressions from @SuppressWarnings annotations.">
+        <property name="aliasList" description="Aliases for check names that can be used in code within SuppressWarnings" type="String Set in a format of comma separated attribute=value entries. The attribute is the fully qualified name of the Check and value is its alias." default="null"/>
+      </module>
+  </category>
+  <category name="Block Checks">
+      <module name="AvoidNestedBlocks" parent="TreeWalker" description="Finds nested blocks, i.e. blocks that are used freely in the code.">
+        <property name="allowInSwitchCase" description="Allow nested blocks in case statements" type="Boolean" default="false"/>
+      </module>
+      <module name="EmptyBlock" parent="TreeWalker" description="Checks for empty blocks.">
+        <property name="option" description="policy on block contents" type="Block Policy" default="statement"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens LITERAL_WHILE, LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_DO, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, INSTANCE_INIT, STATIC_INIT, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_CASE, LITERAL_DEFAULT, ARRAY_INIT." default="LITERAL_WHILE, LITERAL_TRY, LITERAL_FINALLY, LITERAL_DO, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, INSTANCE_INIT, STATIC_INIT, LITERAL_SWITCH, LITERAL_SYNCHRONIZED."/>
+      </module>
+      <module name="EmptyCatchBlock" parent="TreeWalker" description="Checks for empty catch blocks.">
+        <property name="exceptionVariableName" description="The name of variable associated with exception" type="String" default="^$"/>
+        <property name="commentFormat" description="The format of the first comment inside empty catch" type="String" default=".*"/>
+      </module>
+      <module name="LeftCurly" parent="TreeWalker" description="Checks for the placement of left curly braces ('{') for code blocks.">
+        <property name="option" description="policy on placement of a left curly brace ('{')" type="Left Curly Brace Policy" default="eol"/>
+        <property name="ignoreEnums" description="If true, Check will ignore enums when left curly brace policy is EOL" type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ANNOTATION_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, LAMBDA, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF, OBJBLOCK, STATIC_INIT." default="ANNOTATION_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, LAMBDA, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF, OBJBLOCK, STATIC_INIT."/>
+      </module>
+      <module name="NeedBraces" parent="TreeWalker" description="Checks for braces around code blocks.">
+        <property name="allowSingleLineStatement" description="allows single-line statements without braces" type="Boolean" default="false"/>
+        <property name="allowEmptyLoopBody" description="allows loops with empty bodies" type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE, LITERAL_CASE, LITERAL_DEFAULT, LAMBDA." default="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE."/>
+      </module>
+      <module name="RightCurly" parent="TreeWalker" description="Checks the placement of right curly braces ('}') for if-else, try-catch-finally blocks, while-loops, for-loops, method definitions, class definitions, constructor definitions, instance and static initialization blocks.">
+        <property name="option" description="policy on placement of a right curly brace ('}')" type="Right Curly Brace Policy" default="same"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT." default="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE."/>
+      </module>
+  </category>
+  <category name="Class Design">
+      <module name="DesignForExtension" parent="TreeWalker" description="The check finds classes that are designed for extension (subclass creation).">
+        <property name="ignoredAnnotations" description="Annotations which allow the check to skip the method from validation." type="String Set" default="Before, BeforeClass, Test, After, AfterClass"/>
+      </module>
+      <module name="FinalClass" parent="TreeWalker" description="Checks that a class which has only private constructors is declared as final.">
+      </module>
+      <module name="HideUtilityClassConstructor" parent="TreeWalker" description="Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a public constructor.">
+      </module>
+      <module name="InnerTypeLast" parent="TreeWalker" description="Check nested (inner) classes/interfaces are declared at the bottom of the class after all method and field declarations.">
+      </module>
+      <module name="InterfaceIsType" parent="TreeWalker" description="Implements Joshua Bloch, Effective Java, Item 17 - Use Interfaces only to define types.">
+        <property name="allowMarkerInterfaces" description="Controls whether marker interfaces like Serializable are allowed." type="Boolean" default="true"/>
+      </module>
+      <module name="MutableException" parent="TreeWalker" description="Ensures that exception classes (classes with names conforming to some regular expression and explicitly extending classes with names conforming to other regular expression) are immutable, that is, that they have only final fields.">
+        <property name="format" description="pattern for exception class names" type="Regular Expression" default="^.*Exception$|^.*Error$|^.*Throwable$"/>
+        <property name="extendedClassNameFormat" description="pattern for extended class names" type="Regular Expression" default="^.*Exception$|^.*Error$|^.*Throwable$"/>
+      </module>
+      <module name="OneTopLevelClass" parent="TreeWalker" description="Checks that each top-level class, interface or enum resides in a source file of its own.">
+      </module>
+      <module name="ThrowsCount" parent="TreeWalker" description="Restricts throws statements to a specified count (4 by default).">
+        <property name="max" description="maximum allowed number of throws statements" type="Integer" default="4"/>
+        <property name="ignorePrivateMethods" description="whether private methods must be ignored" type="Boolean" default="true"/>
+      </module>
+      <module name="VisibilityModifier" parent="TreeWalker" description="Checks visibility of class members.">
+        <property name="packageAllowed" description="whether package visible members are allowed" type="Boolean" default="false"/>
+        <property name="protectedAllowed" description="whether protected members are allowed" type="Boolean" default="false"/>
+        <property name="publicMemberPattern" description="pattern for public members that should be ignored" type="Regular Expression" default="^serialVersionUID$"/>
+        <property name="allowPublicFinalFields" description="allows public final fields" type="Boolean" default="false"/>
+        <property name="allowPublicImmutableFields" description="allows immutable fields to be declared as public if defined in final class" type="Boolean" default="false"/>
+        <property name="immutableClassCanonicalNames" description="immutable classes canonical names" type="String Set" default="java.lang.String, java.lang.Integer, java.lang.Byte, java.lang.Character, java.lang.Short, java.lang.Boolean, java.lang.Long, java.lang.Double, java.lang.Float, java.lang.StackTraceElement, java.math.BigInteger, java.math.BigDecimal, java.io.File, java.util.Locale, java.util.UUID, java.net.URL, java.net.URI, java.net.Inet4Address, java.net.Inet6Address, java.net.InetSocketAddress"/>
+        <property name="ignoreAnnotationCanonicalNames" description="ignore annotations canonical names" type="String Set" default="org.junit.Rule, org.junit.ClassRule, com.google.common.annotations.VisibleForTesting"/>
+      </module>
+  </category>
+  <category name="Coding">
+      <module name="ArrayTrailingComma" parent="TreeWalker" description="Checks that array initialization contains a trailing comma.">
+      </module>
+      <module name="AvoidInlineConditionals" parent="TreeWalker" description="Detects inline conditionals.">
+      </module>
+      <module name="CovariantEquals" parent="TreeWalker" description="Checks that classes which define a covariant equals() method also override method equals(Object).">
+      </module>
+      <module name="DeclarationOrder" parent="TreeWalker" description="According to Code Conventions for the Java Programming Language , the parts of a class or interface declaration should appear in the following order:">
+        <property name="ignoreConstructors" description="whether to ignore constructors" type="Boolean" default="false"/>
+        <property name="ignoreModifiers" description="whether to ignore modifiers" type="Boolean" default="false"/>
+      </module>
+      <module name="DefaultComesLast" parent="TreeWalker" description="Check that the default is after all the cases in a switch statement.">
+        <property name="skipIfLastAndSharedWithCase" description="whether to allow default along with case if they are not last" type="Boolean" default="false"/>
+      </module>
+      <module name="EmptyStatement" parent="TreeWalker" description="Detects empty statements (standalone &quot;;&quot; semicolon).">
+      </module>
+      <module name="EqualsAvoidNull" parent="TreeWalker" description="Checks that any combination of String literals is on the left side of an equals() comparison.">
+        <property name="ignoreEqualsIgnoreCase" description="whether to ignore String.equalsIgnoreCase() invocations" type="Boolean" default="false"/>
+      </module>
+      <module name="EqualsHashCode" parent="TreeWalker" description="Checks that classes that either override equals() or hashCode() also overrides the other.">
+      </module>
+      <module name="ExplicitInitialization" parent="TreeWalker" description="Checks if any class or object member is explicitly initialized to default for its type value (null for object references, zero for numeric types and char and false for boolean.">
+        <property name="onlyObjectReferences" description="whether only explicit initializations made to null for objects should be checked" type="Boolean" default="false"/>
+      </module>
+      <module name="FallThrough" parent="TreeWalker" description="Checks for fall-through in switch statements.">
+        <property name="checkLastCaseGroup" description="Whether the last case group must be checked." type="Boolean" default="false"/>
+        <property name="reliefPattern" description="Regular expression to match the relief comment that suppresses the warning about a fall through." type="Regular Expression" default="fallthru|falls? ?through"/>
+      </module>
+      <module name="FinalLocalVariable" parent="TreeWalker" description="Checks that local variables that never have their values changed are declared final.">
+        <property name="validateEnhancedForLoopVariable" description="Controls whether to check enhanced for-loop variable." type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens VARIABLE_DEF, PARAMETER_DEF." default="VARIABLE_DEF."/>
+      </module>
+      <module name="HiddenField" parent="TreeWalker" description="Checks that a local variable or a parameter does not shadow a field that is defined in the same class.">
+        <property name="ignoreFormat" description="pattern for names of variables and parameters to ignore" type="Regular Expression" default="null"/>
+        <property name="ignoreConstructorParameter" description="Controls whether to ignore constructor parameters." type="Boolean" default="false"/>
+        <property name="ignoreSetter" description="Controls whether to ignore the parameter of a property setter method, where the property setter method for field &quot;xyz&quot; has name &quot;setXyz&quot;, one parameter named &quot;xyz&quot; and return type of void ( default behavior) or class in which method is declared (only if property setterCanReturnItsClass is set to true)." type="Boolean" default="false"/>
+        <property name="setterCanReturnItsClass" description="Used in conjunction with ignoreSetter property it controls rule that recognizes method as a setter. By default setter is a method with signature of type void setXyz(${someType} xyz) By setting this property (setterCanReturnItsClass) to true we expand definition of setter to also include returning class in which setter is defined. For example class Foo { int prop; Foo setProp(int prop) { this.prop = prop; return this; } }" type="Boolean" default="false"/>
+        <property name="ignoreAbstractMethods" description="Controls whether to ignore parameters of abstract methods." type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens VARIABLE_DEF, PARAMETER_DEF, LAMBDA." default="VARIABLE_DEF, PARAMETER_DEF, LAMBDA."/>
+      </module>
+      <module name="IllegalCatch" parent="TreeWalker" description="Checks that certain exception types do not appear in a catch statement.">
+        <property name="illegalClassNames" description="exception class names to reject" type="String Set" default="java.lang.Throwable, RuntimeException, Error, Throwable, java.lang.Error, java.lang.RuntimeException, Exception, java.lang.Exception"/>
+      </module>
+      <module name="IllegalInstantiation" parent="TreeWalker" description="Checks for illegal instantiations where a factory method is preferred.">
+        <property name="classes" description="classes that should not be instantiated" type="String Set" default="{}"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF." default="CLASS_DEF."/>
+      </module>
+      <module name="IllegalThrows" parent="TreeWalker" description="This check can be used to ensure that types are not declared to be thrown.">
+        <property name="illegalClassNames" description="throw class names to reject" type="String Set" default="java.lang.Throwable, RuntimeException, Error, Throwable, java.lang.Error, java.lang.RuntimeException"/>
+        <property name="ignoredMethodNames" description="names of methods to ignore" type="String Set" default="finalize"/>
+        <property name="ignoreOverriddenMethods" description="ignore checking overridden methods (marked with Override or java.lang.Override annotation)." type="Boolean" default="true"/>
+      </module>
+      <module name="IllegalToken" parent="TreeWalker" description="Checks for illegal tokens.">
+        <property name="tokens" description="tokens to check" type="subset of tokens TokenTypes." default="LABELED_STAT."/>
+      </module>
+      <module name="IllegalTokenText" parent="TreeWalker" description="Checks specified tokens text for matching an illegal pattern from format property.">
+        <property name="format" description="illegal pattern" type="Regular Expression" default="^$ (empty)"/>
+        <property name="ignoreCase" description="Controls whether to ignore case when matching." type="Boolean" default="false"/>
+        <property name="message" description="Message which is used to notify about violations; if empty then the default message is used." type="String" default=""/>
+        <property name="tokens" description="tokens to check" type="subset of tokens NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, IDENT, COMMENT_CONTENT, STRING_LITERAL, CHAR_LITERAL." default="empty"/>
+      </module>
+      <module name="IllegalType" parent="TreeWalker" description="Checks that particular classes or interfaces are never used.">
+        <property name="validateAbstractClassNames" description="Whether to validate abstract class names" type="Boolean" default="false"/>
+        <property name="illegalClassNames" description="Classes that should not be used as types in variable declarations, return values or parameters" type="String Set" default="LinkedHashSet, java.util.HashSet, java.util.LinkedHashMap, java.util.TreeMap, HashMap, TreeSet, java.util.HashMap, TreeMap, java.util.LinkedHashSet, java.util.TreeSet, HashSet, LinkedHashMap"/>
+        <property name="legalAbstractClassNames" description="Abstract classes that may be used as types." type="String Set" default="{}"/>
+        <property name="ignoredMethodNames" description="Methods that should not be checked." type="String Set" default="getInitialContext, getEnvironment"/>
+        <property name="illegalAbstractClassNameFormat" description="Pattern for illegal abstract class names." type="Regular Expression" default="^(.*[.])?Abstract.*$"/>
+        <property name="memberModifiers" description="To check only methods and fields with any of the specified modifiers. This property does not affect method calls nor method references." type="subset of tokens TokenTypes" default=""/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ANNOTATION_FIELD_DEF, CLASS_DEF, INTERFACE_DEF, METHOD_CALL, METHOD_DEF, METHOD_REF, PARAMETER_DEF, VARIABLE_DEF." default="ANNOTATION_FIELD_DEF, CLASS_DEF, INTERFACE_DEF, METHOD_CALL, METHOD_DEF, METHOD_REF, PARAMETER_DEF, VARIABLE_DEF."/>
+      </module>
+      <module name="InnerAssignment" parent="TreeWalker" description="Checks for assignments in subexpressions, such as in String s = Integer.toString(i = 2);.">
+      </module>
+      <module name="MagicNumber" parent="TreeWalker" description="Checks that there are no &quot;magic numbers&quot; where a magic number is a numeric literal that is not defined as a constant.">
+        <property name="ignoreNumbers" description="non-magic numbers" type="Number Set" default="-1, 0, 1, 2"/>
+        <property name="ignoreHashCodeMethod" description="ignore magic numbers in hashCode methods" type="Boolean" default="false"/>
+        <property name="ignoreAnnotation" description="ignore magic numbers in annotation declarations." type="Boolean" default="false"/>
+        <property name="ignoreFieldDeclaration" description="ignore magic numbers in field declarations." type="Boolean" default="false"/>
+        <property name="constantWaiverParentToken" description="Token that are allowed in the AST path from the number literal to the enclosing constant definition." type="subset of tokens TokenTypes" default="TYPECAST, METHOD_CALL, EXPR, ARRAY_INIT, UNARY_MINUS, UNARY_PLUS, ELIST, STAR, ASSIGN, PLUS, MINUS, DIV, LITERAL_NEW"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG." default="NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG."/>
+      </module>
+      <module name="MissingCtor" parent="TreeWalker" description="Checks that classes (except abstract ones) define a constructor and don't rely on the default one.">
+      </module>
+      <module name="MissingSwitchDefault" parent="TreeWalker" description="Checks that switch statement has a &quot;default&quot; clause.">
+      </module>
+      <module name="ModifiedControlVariable" parent="TreeWalker" description="Check for ensuring that for loop control variables are not modified inside the for block.">
+        <property name="skipEnhancedForLoopVariable" description="Controls whether to check enhanced for-loop variable." type="Boolean" default="false"/>
+      </module>
+      <module name="MultipleStringLiterals" parent="TreeWalker" description="Checks for multiple occurrences of the same string literal within a single file.">
+        <property name="allowedDuplicates" description="The maximum number of occurrences to allow without generating a warning" type="Integer" default="1"/>
+        <property name="ignoreStringsRegexp" description="Regular expression pattern for ignored strings (with quotation marks)" type="Regular Expression" default="^$"/>
+        <property name="ignoreOccurrenceContext" description="Token type names where duplicate strings are ignored even if they don't match ignoredStringsRegexp. This allows you to exclude syntactical contexts like annotations or static initializers from the check." type="subset of tokens TokenTypes" default="ANNOTATION"/>
+      </module>
+      <module name="MultipleVariableDeclarations" parent="TreeWalker" description="Checks that each variable declaration is in its own statement and on its own line.">
+      </module>
+      <module name="NestedForDepth" parent="TreeWalker" description="Restricts nested for blocks to a specified depth (default = 1).">
+        <property name="max" description="allowed nesting depth" type="Integer" default="1"/>
+      </module>
+      <module name="NestedIfDepth" parent="TreeWalker" description="Restricts nested if-else blocks to a specified depth (default = 1).">
+        <property name="max" description="allowed nesting depth" type="Integer" default="1"/>
+      </module>
+      <module name="NestedTryDepth" parent="TreeWalker" description="Restricts nested try blocks to a specified depth (default = 1).">
+        <property name="max" description="allowed nesting depth" type="Integer" default="1"/>
+      </module>
+      <module name="NoClone" parent="TreeWalker" description="Checks that the clone method is not overridden from the Object class.">
+      </module>
+      <module name="NoFinalizer" parent="TreeWalker" description="Verifies there are no finalize() methods defined in a class.">
+      </module>
+      <module name="OneStatementPerLine" parent="TreeWalker" description="Checks that there is only one statement per line.">
+      </module>
+      <module name="OverloadMethodsDeclarationOrder" parent="TreeWalker" description="Checks that overload methods are grouped together.">
+      </module>
+      <module name="PackageDeclaration" parent="TreeWalker" description="Ensures that a class has a package declaration, and (optionally) whether the package name matches the directory name for the source file.">
+        <property name="matchDirectoryStructure" description="Whether to check for directory and package name match." type="Boolean" default="true"/>
+      </module>
+      <module name="ParameterAssignment" parent="TreeWalker" description="Disallows assignment of parameters.">
+      </module>
+      <module name="RequireThis" parent="TreeWalker" description="Checks that references to instance variables and methods of the present object are explicitly of the form &quot;this.varName&quot; or &quot;this.methodName(args)&quot; and that those references don't rely on the default behavior when &quot;this.&quot; is absent.">
+        <property name="checkFields" description="Whether to check references to fields." type="Boolean" default="true"/>
+        <property name="checkMethods" description="Whether to check references to methods." type="Boolean" default="true"/>
+        <property name="validateOnlyOverlapping" description="Whether to check only overlapping by variables or arguments." type="Boolean" default="true"/>
+      </module>
+      <module name="ReturnCount" parent="TreeWalker" description="Restricts the number of return statements in methods, constructors and lambda expressions (2 by default).">
+        <property name="max" description="maximum allowed number of return statements in non-void methods/lambdas" type="Integer" default="2"/>
+        <property name="maxForVoid" description="maximum allowed number of return statements in void methods/constructors/lambdas" type="Integer" default="1"/>
+        <property name="format" description="method names to ignore" type="Regular Expression" default="^equals$"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CTOR_DEF, METHOD_DEF, LAMBDA." default="CTOR_DEF, METHOD_DEF, LAMBDA."/>
+      </module>
+      <module name="SimplifyBooleanExpression" parent="TreeWalker" description="Checks for over-complicated boolean expressions.">
+      </module>
+      <module name="SimplifyBooleanReturn" parent="TreeWalker" description="Checks for over-complicated boolean return statements.">
+      </module>
+      <module name="StringLiteralEquality" parent="TreeWalker" description="Checks that string literals are not used with == or !=.">
+      </module>
+      <module name="SuperClone" parent="TreeWalker" description="Checks that an overriding clone() method invokes super.clone().">
+      </module>
+      <module name="SuperFinalize" parent="TreeWalker" description="Checks that an overriding finalize() method invokes super.finalize().">
+      </module>
+      <module name="UnnecessaryParentheses" parent="TreeWalker" description="Checks for the use of unnecessary parentheses.">
+        <property name="tokens" description="tokens to check" type="subset of tokens EXPR, IDENT, NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, STRING_LITERAL, LITERAL_NULL, LITERAL_FALSE, LITERAL_TRUE, ASSIGN, BAND_ASSIGN, BOR_ASSIGN, BSR_ASSIGN, BXOR_ASSIGN, DIV_ASSIGN, MINUS_ASSIGN, MOD_ASSIGN, PLUS_ASSIGN, SL_ASSIGN, SR_ASSIGN, STAR_ASSIGN, LAMBDA." default="EXPR, IDENT, NUM_DOUBLE, NUM_FLOAT, NUM_INT, NUM_LONG, STRING_LITERAL, LITERAL_NULL, LITERAL_FALSE, LITERAL_TRUE, ASSIGN, BAND_ASSIGN, BOR_ASSIGN, BSR_ASSIGN, BXOR_ASSIGN, DIV_ASSIGN, MINUS_ASSIGN, MOD_ASSIGN, PLUS_ASSIGN, SL_ASSIGN, SR_ASSIGN, STAR_ASSIGN, LAMBDA."/>
+      </module>
+      <module name="VariableDeclarationUsageDistance" parent="TreeWalker" description="Checks the distance between declaration of variable and its first usage.">
+        <property name="allowedDistance" description="A distance between declaration of variable and its first usage. Values should be greater than 0." type="Integer" default="3"/>
+        <property name="ignoreVariablePattern" description="pattern for ignoring the distance calculation" type="Regular Expression" default=""/>
+        <property name="validateBetweenScopes" description="Allows to calculate the distance between declaration of variable and its first usage in the different scopes." type="Boolean" default="false"/>
+        <property name="ignoreFinal" description="Allows to ignore variables with a 'final' modifier." type="Boolean" default="true"/>
+      </module>
+  </category>
+  <category name="Headers">
+      <module name="Header" parent="Checker" description="Checks that a source file begins with a specified header.">
+        <property name="headerFile" description="name of the file containing the required header" type="URI" default="null"/>
+        <property name="charset" description="character encoding to use when reading the headerFile" type="String" default="the charset property of the parent Checker module"/>
+        <property name="header" description="the required header specified inline. Individual header lines must be separated by the string &quot;\n&quot; (even on platforms with a different line separator), see examples below." type="String" default="null"/>
+        <property name="ignoreLines" description="line numbers to ignore" type="Integer Set" default="{}"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+      <module name="RegexpHeader" parent="Checker" description="Checks the header of a source file against a header that contains a regular expression for each line of the source header.">
+        <property name="headerFile" description="name of the file containing the required header" type="URI" default="null"/>
+        <property name="charset" description="character encoding to use when reading the headerFile" type="String" default="the charset property of the parent Checker module"/>
+        <property name="header" description="the required header specified inline. Individual header lines must be separated by the string &quot;\n&quot; (even on platforms with a different line separator). For header lines containing &quot;\n\n&quot; checkstyle will forcefully expect an empty line to exist. See examples below. Regular expressions must not span multiple lines." type="String" default="null"/>
+        <property name="multiLines" description="line numbers to repeat (zero or more times)" type="Integer Set" default="{}"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+  </category>
+  <category name="Imports">
+      <module name="AvoidStarImport" parent="TreeWalker" description="Checks that there are no import statements that use the * notation.">
+        <property name="excludes" description="packages where star imports are allowed. Note that this property is not recursive, subpackages of excluded packages are not automatically excluded." type="String Set" default="{}"/>
+        <property name="allowClassImports" description="whether to allow starred class imports like import java.util.*;." type="Boolean" default="false"/>
+        <property name="allowStaticMemberImports" description="whether to allow starred static member imports like import static org.junit.Assert.*;" type="Boolean" default="false"/>
+      </module>
+      <module name="AvoidStaticImport" parent="TreeWalker" description="Checks that there are no static import statements.">
+        <property name="excludes" description="Allows for certain classes via a star notation to be excluded such as java.lang.Math.* or specific static members to be excluded like java.lang.System.out for a variable or java.lang.Math.random for a method. If you exclude a starred import on a class this automatically excludes each member individually. For example: Excluding java.lang.Math.*. will allow the import of each static member in the Math class individually like java.lang.Math.PI." type="String Set" default="{}"/>
+      </module>
+      <module name="CustomImportOrder" parent="TreeWalker" description="Checks that the groups of import declarations appear in the order specified by the user.">
+        <property name="customImportOrderRules" description="Specify list of order declaration customizing by user." type="String" default="{}"/>
+        <property name="standardPackageRegExp" description="Specify RegExp for STANDARD_JAVA_PACKAGE group imports." type="Regular Expression" default="^(java|javax)\."/>
+        <property name="thirdPartyPackageRegExp" description="Specify RegExp for THIRD_PARTY_PACKAGE group imports." type="Regular Expression" default=".*"/>
+        <property name="specialImportsRegExp" description="Specify RegExp for SPECIAL_IMPORTS group imports." type="Regular Expression" default="^$ (empty)"/>
+        <property name="separateLineBetweenGroups" description="Force empty line separator between import groups." type="Boolean" default="true"/>
+        <property name="sortImportsInGroupAlphabetically" description="Force grouping alphabetically, in ASCII sort order." type="Boolean" default="false"/>
+      </module>
+      <module name="IllegalImport" parent="TreeWalker" description="Checks for imports from a set of illegal packages.">
+        <property name="illegalPkgs" description="Packages to reject, if regexp variable is not set, checks if import is the part of package. If regexp variable is set, then list of packages will be interpreted as regular expressions. Note, all properties for match will be used." type="String Set" default="sun"/>
+        <property name="illegalClasses" description="Class names to reject, if regexp variable is not set, checks if import equals class name. If regexp variable is set, then list of class name will be interpreted as regular expressions. Note, all properties for match will be used." type="String Set" default="{}"/>
+        <property name="regexp" description="Whether the illegalPkgs and illegalClasses should be interpreted as regular expressions" type="Boolean" default="false"/>
+      </module>
+      <module name="ImportControl" parent="TreeWalker" description="Controls what can be imported in each package and file.">
+        <property name="file" description="The location of the file containing the import control configuration. It can be a regular file, URL or resource path. It will try loading the path as a URL first, then as a file, and finally as a resource." type="URI" default="null"/>
+        <property name="path" description="Regular expression of file paths to which this check should apply. Files that don't match the pattern will not be checked. The pattern will be matched against the full absolute file path." type="Regular Expression" default=".*"/>
+      </module>
+      <module name="ImportOrder" parent="TreeWalker" description="Checks the ordering/grouping of imports.">
+        <property name="option" description="specify policy on the relative order between type imports and static imports." type="Import Order Policy" default="under"/>
+        <property name="groups" description="specify list of type import groups (every group identified either by a common prefix string, or by a regular expression enclosed in forward slashes (e.g. /regexp/). All type imports, which does not match any group, falls into an additional group, located at the end. Thus, the empty list of type groups (the default value) means one group for all type imports." type="Regular Expressions" default="{}"/>
+        <property name="ordered" description="control whether type imports within each group should be sorted. It doesn't affect sorting for static imports." type="Boolean" default="true"/>
+        <property name="separated" description="control whether type import groups should be separated by, at least, one blank line or comment and aren't separated internally. It doesn't affect separations for static imports." type="Boolean" default="false"/>
+        <property name="separatedStaticGroups" description="control whether static import groups should be separated by, at least, one blank line or comment and aren't separated internally. This property has effect only when the property option is is set to top or bottom." type="Boolean" default="false"/>
+        <property name="caseSensitive" description="control whether string comparison should be case sensitive or not. Case sensitive sorting is in ASCII sort order. It affects both type imports and static imports." type="Boolean" default="true"/>
+        <property name="staticGroups" description="specify list of static import groups (every group identified either by a common prefix string, or by a regular expression enclosed in forward slashes (e.g. /regexp/). All static imports, which does not match any group, falls into an additional group, located at the end. Thus, the empty list of static groups (the default value) means one group for all static imports. This property has effect only when the property option is set to top or bottom." type="Regular Expressions" default="{}"/>
+        <property name="sortStaticImportsAlphabetically" description="control whether static imports located at top or bottom are sorted within the group." type="Boolean" default="false"/>
+        <property name="useContainerOrderingForStatic" description="control whether to use container ordering (Eclipse IDE term) for static imports or not." type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens STATIC_IMPORT." default="STATIC_IMPORT."/>
+      </module>
+      <module name="RedundantImport" parent="TreeWalker" description="Checks for redundant import statements.">
+      </module>
+      <module name="UnusedImports" parent="TreeWalker" description="Checks for unused import statements.">
+        <property name="processJavadoc" description="whether to process Javadoc" type="Boolean" default="true"/>
+      </module>
+  </category>
+  <category name="Javadoc Comments">
+      <module name="AtclauseOrder" parent="TreeWalker" description="Checks the order of javadoc block-tags or javadoc tags.">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="target" description="Specify the list of targets to check at-clauses." type="subset of tokens TokenTypes" default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+        <property name="tagOrder" description="Specify the order by tags." type="String Set" default="@author, @version, @param, @return, @throws, @exception, @see, @since, @serial, @serialField, @serialData, @deprecated"/>
+      </module>
+      <module name="JavadocMethod" parent="TreeWalker" description="Checks the Javadoc of a method or constructor.">
+        <property name="minLineCount" description="Minimal amount of lines in method to allow no documentation." type="Integer" default="-1"/>
+        <property name="allowedAnnotations" description="List of annotations that allow missed documentation." type="String Set" default="Override"/>
+        <property name="validateThrows" description="Allows validating throws tags." type="Boolean" default="false"/>
+        <property name="scope" description="visibility scope where Javadoc comments are checked" type="Scope" default="private"/>
+        <property name="excludeScope" description="visibility scope where Javadoc comments are not checked" type="Scope" default="null"/>
+        <property name="allowUndeclaredRTE" description="whether to allow documented exceptions that are not declared if they are a subclass of java.lang.RuntimeException" type="Boolean" default="false"/>
+        <property name="allowThrowsTagsForSubclasses" description="whether to allow documented exceptions that are subclass of one of declared exception." type="Boolean" default="false"/>
+        <property name="allowMissingParamTags" description="whether to ignore errors when a method has parameters but does not have matching param tags in the javadoc." type="Boolean" default="false"/>
+        <property name="allowMissingThrowsTags" description="whether to ignore errors when a method declares that it throws exceptions but does not have matching throws tags in the javadoc." type="Boolean" default="false"/>
+        <property name="allowMissingReturnTag" description="whether to ignore errors when a method returns non-void type and does not have a return tag in the javadoc." type="Boolean" default="false"/>
+        <property name="allowMissingJavadoc" description="whether to ignore errors when a method javadoc is missed." type="Boolean" default="false"/>
+        <property name="allowMissingPropertyJavadoc" description="Whether to allow missing Javadoc on accessor methods for properties (setters and getters). The setter and getter methods must match exactly the structures below. public void setNumber(final int number){ mNumber = number;}public int getNumber(){ return mNumber;}public boolean isSomething(){ return false;}" type="Boolean" default="false"/>
+        <property name="logLoadErrors" description="This check may need to load exception classes mentioned in the @throws tag to check whether they are RuntimeExceptions. If loading the class fails, this property allows to control checkstyle's error handling. If set to false a classpath configuration problem is assumed and the TreeWalker stops operating on the class completely. If set to true (the default) , checkstyle assumes a typo or refactoring problem in the javadoc and logs the problem in the normal checkstyle report (potentially masking a configuration error)." type="Boolean" default="true"/>
+        <property name="suppressLoadErrors" description="When logLoadErrors is set to true, the TreeWalker completely processes a class and displays any problems with loading exceptions as checkstyle violations. When this property is set to true, the violations generated when logLoadErrors is set true are suppressed from being reported as violations in the checkstyle report." type="Boolean" default="false"/>
+        <property name="ignoreMethodNamesRegex" description="ignore method whose names are matching specified regex" type="Regular Expression" default="null"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF." default="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF."/>
+      </module>
+      <module name="JavadocPackage" parent="Checker" description="Checks that each Java package has a Javadoc file used for commenting.">
+        <property name="allowLegacy" description="If set then allow the use of a package.html file." type="Boolean" default="false"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default=".java"/>
+      </module>
+      <module name="JavadocParagraph" parent="TreeWalker" description="Checks that:">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="allowNewlineParagraph" description="whether the &lt;p&gt; tag should be placed immediately before the first word" type="Boolean" default="true"/>
+      </module>
+      <module name="JavadocStyle" parent="TreeWalker" description="Validates Javadoc comments to help ensure they are well formed.">
+        <property name="scope" description="visibility scope where Javadoc comments are checked" type="Scope" default="private"/>
+        <property name="excludeScope" description="visibility scope where Javadoc comments are not checked" type="Scope" default="null"/>
+        <property name="checkFirstSentence" description="Whether to check the first sentence for proper end of sentence." type="Boolean" default="true"/>
+        <property name="endOfSentenceFormat" description="Format for matching the end of a sentence." type="Regular Expression" default="([.?!][ \t\n\r\f&lt;])|([.?!]$)"/>
+        <property name="checkEmptyJavadoc" description="Whether to check if the Javadoc is missing a describing text." type="Boolean" default="false"/>
+        <property name="checkHtml" description="Whether to check for incomplete HTML tags." type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF." default="ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF."/>
+      </module>
+      <module name="JavadocTagContinuationIndentation" parent="TreeWalker" description="Checks the indentation of the continuation lines in at-clauses.">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="offset" description="How many spaces to use for new indentation level." type="Integer" default="4"/>
+      </module>
+      <module name="JavadocType" parent="TreeWalker" description="Checks Javadoc comments for class and interface definitions.">
+        <property name="scope" description="visibility scope where Javadoc comments are checked" type="Scope" default="private"/>
+        <property name="excludeScope" description="visibility scope where Javadoc comments are not checked" type="Scope" default="null"/>
+        <property name="authorFormat" description="pattern for @author tag" type="Regular Expression" default="null"/>
+        <property name="versionFormat" description="pattern for @version tag" type="Regular Expression" default="null"/>
+        <property name="allowMissingParamTags" description="whether to ignore errors when a class has type parameters but does not have matching param tags in the javadoc." type="Boolean" default="false"/>
+        <property name="allowUnknownTags" description="whether to ignore errors when a Javadoc tag is not recognised." type="Boolean" default="false"/>
+        <property name="allowedAnnotations" description="List of annotations that allow missed documentation. Only short names are allowed, e.g. Generated." type="String Set" default="Generated"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF." default="INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF."/>
+      </module>
+      <module name="JavadocVariable" parent="TreeWalker" description="Checks that variables have Javadoc comments.">
+        <property name="scope" description="visibility scope where Javadoc comments are checked" type="Scope" default="private"/>
+        <property name="excludeScope" description="visibility scope where Javadoc comments are not checked" type="Scope" default="null"/>
+        <property name="ignoreNamePattern" description="regexp to define variable names to ignore" type="Regular Expression" default="null"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ENUM_CONSTANT_DEF." default="ENUM_CONSTANT_DEF."/>
+      </module>
+      <module name="NonEmptyAtclauseDescription" parent="TreeWalker" description="Checks that the at-clause tag is followed by description.">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="javadocTokens" description="javadoc tokens to check" type="subset of javadoc tokens PARAM_LITERAL, RETURN_LITERAL, THROWS_LITERAL, EXCEPTION_LITERAL, DEPRECATED_LITERAL." default="PARAM_LITERAL, RETURN_LITERAL, THROWS_LITERAL, EXCEPTION_LITERAL, DEPRECATED_LITERAL."/>
+      </module>
+      <module name="SingleLineJavadoc" parent="TreeWalker" description="Checks that a JavaDoc block can fit in a single line and doesn't contain at-clauses.">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="ignoredTags" description="allows to specify at-clauses which are ignored by the check." type="String Set" default="{}"/>
+        <property name="ignoreInlineTags" description="whether inline tags must be ignored." type="Boolean" default="true"/>
+      </module>
+      <module name="SummaryJavadoc" parent="TreeWalker" description="Checks that Javadoc summary sentence does not contain phrases that are not recommended to use.">
+        <property name="violateExecutionOnNonTightHtml" description="If turned on, will print violations if the Javadoc being examined by this check violates the tight html rules defined at Tight-HTML Rules." type="Boolean" default="false"/>
+        <property name="forbiddenSummaryFragments" description="forbidden summary fragments" type="Regular Expression" default="^$ (empty)"/>
+        <property name="period" description="period symbol at the end of first javadoc sentence" type="String" default="."/>
+      </module>
+      <module name="WriteTag" parent="TreeWalker" description="Requires user defined JavaDoc tag to be present in javadoc comment with defined format.">
+        <property name="tag" description="Name of tag" type="String" default="null"/>
+        <property name="tagFormat" description="Format of tag" type="Regular Expression" default="null"/>
+        <property name="tagSeverity" description="Severity level when tag is found and printed" type="Severity" default="info"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF, METHOD_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ANNOTATION_FIELD_DEF." default="INTERFACE_DEF, CLASS_DEF, ENUM_DEF, ANNOTATION_DEF."/>
+      </module>
+  </category>
+  <category name="Metrics">
+      <module name="BooleanExpressionComplexity" parent="TreeWalker" description="Restrict the number of number of &amp;&amp;, ||, &amp;, | and ^ in an expression.">
+        <property name="max" description="the maximum allowed number of boolean operations in one expression." type="Integer" default="3"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens LAND, BAND, LOR, BOR, BXOR." default="LAND, BAND, LOR, BOR, BXOR."/>
+      </module>
+      <module name="ClassDataAbstractionCoupling" parent="TreeWalker" description="This metric measures the number of instantiations of other classes within the given class.">
+        <property name="max" description="the maximum threshold allowed" type="Integer" default="7"/>
+        <property name="excludedClasses" description="User-configured class names to ignore" type="String Set" default="HashMap, ArrayList, String, float, TreeSet, List, Boolean, Void, Override, Short, IllegalArgumentException, UnsupportedOperationException, HashSet, void, Character, IndexOutOfBoundsException, byte, double, Double, LinkedList, Float, Byte, SortedMap, Long, Throwable, Object, Class, Map, IllegalStateException, Set, StringBuilder, SuppressWarnings, SortedSet, long, RuntimeException, Deprecated, NullPointerException, Queue, SecurityException, FunctionalInterface, TreeMap, Deque, int, Exception, Integer, SafeVarargs, StringBuffer, boolean, char, short, ArrayIndexOutOfBoundsException"/>
+        <property name="excludeClassesRegexps" description="User-configured regular expressions to ignore classes" type="Regular Expressions" default="^$"/>
+        <property name="excludedPackages" description="User-configured packages to ignore" type="String Set" default="{}"/>
+      </module>
+      <module name="ClassFanOutComplexity" parent="TreeWalker" description="The number of other classes a given class relies on.">
+        <property name="max" description="the maximum threshold allowed" type="Integer" default="20"/>
+        <property name="excludedClasses" description="User-configured class names to ignore" type="String Set" default="HashMap, ArrayList, String, float, TreeSet, List, Boolean, Void, Override, Short, IllegalArgumentException, UnsupportedOperationException, HashSet, void, Character, IndexOutOfBoundsException, byte, double, Double, LinkedList, Float, Byte, SortedMap, Long, Throwable, Object, Class, Map, IllegalStateException, Set, StringBuilder, SuppressWarnings, SortedSet, long, RuntimeException, Deprecated, NullPointerException, Queue, SecurityException, FunctionalInterface, TreeMap, Deque, int, Exception, Integer, SafeVarargs, StringBuffer, boolean, char, short, ArrayIndexOutOfBoundsException"/>
+        <property name="excludeClassesRegexps" description="User-configured regular expressions to ignore classes" type="Regular Expressions" default="^$"/>
+        <property name="excludedPackages" description="User-configured packages to ignore" type="String Set" default="{}"/>
+      </module>
+      <module name="CyclomaticComplexity" parent="TreeWalker" description="Checks cyclomatic complexity against a specified limit.">
+        <property name="max" description="the maximum threshold allowed" type="Integer" default="10"/>
+        <property name="switchBlockAsSingleDecisionPoint" description="whether to treat the whole switch block as a single decision point" type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, LITERAL_CATCH, QUESTION, LAND, LOR." default="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, LITERAL_CATCH, QUESTION, LAND, LOR."/>
+      </module>
+      <module name="JavaNCSS" parent="TreeWalker" description="Determines complexity of methods, classes and files by counting the Non Commenting Source Statements (NCSS).">
+        <property name="methodMaximum" description="the maximum allowed number of non commenting lines in a method." type="Integer" default="50"/>
+        <property name="classMaximum" description="the maximum allowed number of non commenting lines in a class." type="Integer" default="1500"/>
+        <property name="fileMaximum" description="the maximum allowed number of non commenting lines in a file including all top level and nested classes." type="Integer" default="2000"/>
+      </module>
+      <module name="NPathComplexity" parent="TreeWalker" description="The NPATH metric computes the number of possible execution paths through a function(method).">
+        <property name="max" description="the maximum threshold allowed" type="Integer" default="200"/>
+      </module>
+  </category>
+  <category name="Miscellaneous">
+      <module name="ArrayTypeStyle" parent="TreeWalker" description="Checks the style of array type definitions.">
+        <property name="javaStyle" description="Controls whether to enforce Java style (true) or C style (false)." type="Boolean" default="true"/>
+      </module>
+      <module name="AvoidEscapedUnicodeCharacters" parent="TreeWalker" description="Restrict using Unicode escapes (e.g. \u221e).">
+        <property name="allowEscapesForControlCharacters" description="Allow use escapes for non-printable(control) characters." type="Boolean" default="false"/>
+        <property name="allowByTailComment" description="Allow use escapes if trail comment is present." type="Boolean" default="false"/>
+        <property name="allowIfAllCharactersEscaped" description="Allow if all characters in literal are escaped." type="Boolean" default="false"/>
+        <property name="allowNonPrintableEscapes" description="Allow non-printable escapes." type="Boolean" default="false"/>
+      </module>
+      <module name="CommentsIndentation" parent="TreeWalker" description="Controls the indentation between comments and surrounding code.">
+        <property name="tokens" description="tokens to check" type="subset of tokens SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN." default="SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN."/>
+      </module>
+      <module name="DescendantToken" parent="TreeWalker" description="Checks for restricted tokens beneath other tokens.">
+        <property name="limitedTokens" description="set of tokens with limited occurrences as descendants" type="subset of tokens TokenTypes" default=""/>
+        <property name="minimumDepth" description="the minimum depth for descendant counts" type="Integer" default="0"/>
+        <property name="maximumDepth" description="the maximum depth for descendant counts" type="Integer" default="java.lang.Integer.MAX_VALUE"/>
+        <property name="minimumNumber" description="a minimum count for descendants" type="Integer" default="0"/>
+        <property name="maximumNumber" description="a maximum count for descendants" type="Integer" default="java.lang.Integer.MAX_VALUE"/>
+        <property name="sumTokenCounts" description="whether the number of tokens found should be calculated from the sum of the individual token counts" type="Boolean" default="false"/>
+        <property name="minimumMessage" description="error message when the minimum count is not reached" type="String" default="null"/>
+        <property name="maximumMessage" description="error message when the maximum count is exceeded" type="String" default="null"/>
+      </module>
+      <module name="FinalParameters" parent="TreeWalker" description="Check that parameters for methods, constructors, and catch blocks are final.">
+        <property name="ignorePrimitiveTypes" description="ignore primitive types as parameters" type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens METHOD_DEF, CTOR_DEF, LITERAL_CATCH, FOR_EACH_CLAUSE." default="METHOD_DEF, CTOR_DEF."/>
+      </module>
+      <module name="Indentation" parent="TreeWalker" description="Checks correct indentation of Java code.">
+        <property name="basicOffset" description="how far new indentation level should be indented when on the next line" type="Integer" default="4"/>
+        <property name="braceAdjustment" description="how far a braces should be indented when on the next line" type="Integer" default="0"/>
+        <property name="caseIndent" description="how far a case label should be indented when on next line" type="Integer" default="4"/>
+        <property name="throwsIndent" description="how far a throws clause should be indented when on next line" type="Integer" default="4"/>
+        <property name="arrayInitIndent" description="how far an array initialisation should be indented when on next line" type="Integer" default="4"/>
+        <property name="lineWrappingIndentation" description="how far continuation line should be indented when line-wrapping is present" type="Integer" default="4"/>
+        <property name="forceStrictCondition" description="force strict indent level in line wrapping case. If value is true, line wrap indent have to be same as lineWrappingIndentation parameter. If value is false, line wrap indent could be bigger on any value user would like." type="Boolean" default="false"/>
+      </module>
+      <module name="NewlineAtEndOfFile" parent="Checker" description="Checks whether files end with a line separator.">
+        <property name="lineSeparator" description="type of line separator" type="Line Separator Policy" default="system"/>
+        <property name="fileExtensions" description="file type extension of the files to check." type="String Set" default="all files"/>
+      </module>
+      <module name="OuterTypeFilename" parent="TreeWalker" description="Checks that the outer type name and the file name match.">
+      </module>
+      <module name="TodoComment" parent="TreeWalker" description="A check for TODO: comments.">
+        <property name="format" description="Pattern to match comments against" type="Regular Expression" default="TODO:"/>
+      </module>
+      <module name="TrailingComment" parent="TreeWalker" description="The check to ensure that requires that comments be the only thing on a line.">
+        <property name="format" description="pattern for strings allowed before the comment" type="Regular Expression" default="^[\s});]*$"/>
+        <property name="legalComment" description="pattern for text allowed in trailing comments. (This pattern will not be applied to multiline comments and the text of the comment will be trimmed before matching.)" type="Regular Expression" default="null"/>
+      </module>
+      <module name="Translation" parent="Checker" description="A FileSetCheck that ensures the correct translation of code by checking property files for consistency regarding their keys.">
+        <property name="fileExtensions" description="File type extension to identify translation files. Setting this property is typically only required if your translation files are preprocessed and the original files do not have the extension .properties" type="String Set" default=".properties"/>
+        <property name="baseName" description="Base name of resource bundles which contain message resources. It helps the check to distinguish config and localization resources." type="Regular Expression" default="^messages.*$"/>
+        <property name="requiredTranslations" description="Allows to specify language codes of required translations which must exist in project. Language code is composed of the lowercase, two-letter codes as defined by ISO 639-1. Default value is empty String Set which means that only the existence of default translation is checked. Note, if you specify language codes (or just one language code) of required translations the check will also check for existence of default translation files in project. ATTENTION: the check will perform the validation of ISO codes if the option is used. So, if you specify, for example, &quot;mm&quot; for language code, TranslationCheck will rise violation that the language code is incorrect." type="String Set" default="{}"/>
+      </module>
+      <module name="UncommentedMain" parent="TreeWalker" description="Checks for uncommented main() methods.">
+        <property name="excludedClasses" description="Pattern for qualified names of classes which are allowed to have a main method." type="Regular Expression" default="^$ (empty)"/>
+      </module>
+      <module name="UniqueProperties" parent="Checker" description="Checks properties files for duplicated properties.">
+        <property name="fileExtensions" description="file type extension of the files to check." type="String Set" default=".properties"/>
+      </module>
+      <module name="UpperEll" parent="TreeWalker" description="Checks that long constants are defined with an upper ell.">
+      </module>
+  </category>
+  <category name="Modifiers">
+      <module name="ClassMemberImpliedModifier" parent="TreeWalker" description="Checks for implicit modifiers on nested types in classes.">
+        <property name="violateImpliedStaticOnNestedEnum" description="Control whether to enforce that static is explicitly coded on nested enums in classes." type="Boolean" default="true"/>
+        <property name="violateImpliedStaticOnNestedInterface" description="Control whether to enforce that static is explicitly coded on nested interfaces in classes." type="Boolean" default="true"/>
+      </module>
+      <module name="InterfaceMemberImpliedModifier" parent="TreeWalker" description="Checks for implicit modifiers on interface members and nested types.">
+        <property name="violateImpliedPublicField" description="Control whether to enforce that public is explicitly coded on interface fields." type="Boolean" default="true"/>
+        <property name="violateImpliedStaticField" description="Control whether to enforce that static is explicitly coded on interface fields." type="Boolean" default="true"/>
+        <property name="violateImpliedFinalField" description="Control whether to enforce that final is explicitly coded on interface fields." type="Boolean" default="true"/>
+        <property name="violateImpliedPublicMethod" description="Control whether to enforce that public is explicitly coded on interface methods." type="Boolean" default="true"/>
+        <property name="violateImpliedAbstractMethod" description="Control whether to enforce that abstract is explicitly coded on interface methods." type="Boolean" default="true"/>
+        <property name="violateImpliedPublicNested" description="Control whether to enforce that public is explicitly coded on interface nested types." type="Boolean" default="true"/>
+        <property name="violateImpliedStaticNested" description="Control whether to enforce that static is explicitly coded on interface nested types." type="Boolean" default="true"/>
+      </module>
+      <module name="ModifierOrder" parent="TreeWalker" description="Checks that the order of modifiers conforms to the suggestions in the Java Language specification, sections 8.1.1, 8.3.1, 8.4.3 and 9.4.">
+      </module>
+      <module name="RedundantModifier" parent="TreeWalker" description="Checks for redundant modifiers in:">
+        <property name="tokens" description="tokens to check" type="subset of tokens METHOD_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, INTERFACE_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF, RESOURCE." default="METHOD_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, INTERFACE_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF, RESOURCE."/>
+      </module>
+  </category>
+  <category name="Naming Conventions">
+      <module name="AbbreviationAsWordInName" parent="TreeWalker" description="The Check validate abbreviations(consecutive capital letters) length in identifier name, it also allows to enforce camel case naming.">
+        <property name="allowedAbbreviationLength" description="Indicate the number of consecutive capital letters allowed in targeted identifiers (abbreviations in the classes, interfaces, variables and methods names, ... )." type="Integer" default="3"/>
+        <property name="allowedAbbreviations" description="Specify list of abbreviations that must be skipped for checking. Abbreviations should be separated by comma." type="String Set" default="{}"/>
+        <property name="ignoreFinal" description="Allow to skip variables with final modifier." type="Boolean" default="true"/>
+        <property name="ignoreStatic" description="Allow to skip variables with static modifier." type="Boolean" default="true"/>
+        <property name="ignoreOverriddenMethods" description="Allow to ignore methods tagged with @Override annotation (that usually mean inherited name)." type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, ENUM_CONSTANT_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF, PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF."/>
+      </module>
+      <module name="AbstractClassName" parent="TreeWalker" description="Ensures that the names of abstract classes conforming to some regular expression and check that abstract modifier exists.">
+        <property name="format" description="Specify valid identifiers." type="Regular Expression" default="^Abstract.+$"/>
+        <property name="ignoreModifier" description="Control whether to ignore checking for the abstract modifier on classes that match the name." type="Boolean" default="false"/>
+        <property name="ignoreName" description="Control whether to ignore checking the name. Realistically only useful if using the check to identify that match name and do not have the abstract modifier." type="Boolean" default="false"/>
+      </module>
+      <module name="CatchParameterName" parent="TreeWalker" description="Checks that catch parameter names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^(e|t|ex|[a-z][a-z][a-zA-Z]+)$"/>
+      </module>
+      <module name="ClassTypeParameterName" parent="TreeWalker" description="Checks that class type parameter names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[A-Z]$"/>
+      </module>
+      <module name="ConstantName" parent="TreeWalker" description="Checks that constant names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+        <property name="applyToPublic" description="Controls whether to apply the check to public member." type="Boolean" default="true"/>
+        <property name="applyToProtected" description="Controls whether to apply the check to protected member." type="Boolean" default="true"/>
+        <property name="applyToPackage" description="Controls whether to apply the check to package-private member." type="Boolean" default="true"/>
+        <property name="applyToPrivate" description="Controls whether to apply the check to private member." type="Boolean" default="true"/>
+      </module>
+      <module name="InterfaceTypeParameterName" parent="TreeWalker" description="Checks that interface type parameter names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[A-Z]$"/>
+      </module>
+      <module name="LambdaParameterName" parent="TreeWalker" description="Check to verify lambda parameter names.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+      </module>
+      <module name="LocalFinalVariableName" parent="TreeWalker" description="Checks that local final variable names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens VARIABLE_DEF, PARAMETER_DEF, RESOURCE." default="VARIABLE_DEF, PARAMETER_DEF, RESOURCE."/>
+      </module>
+      <module name="LocalVariableName" parent="TreeWalker" description="Checks that local, non-final variable names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="allowOneCharVarInForLoop" description="Allow one character variable name in initialization expressions in FOR loop. For example: for (int i = 1; i &lt; 10; i++) {}" type="Boolean" default="false"/>
+      </module>
+      <module name="MemberName" parent="TreeWalker" description="Checks that instance variable names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="applyToPublic" description="Controls whether to apply the check to public member." type="Boolean" default="true"/>
+        <property name="applyToProtected" description="Controls whether to apply the check to protected member." type="Boolean" default="true"/>
+        <property name="applyToPackage" description="Controls whether to apply the check to package-private member." type="Boolean" default="true"/>
+        <property name="applyToPrivate" description="Controls whether to apply the check to private member." type="Boolean" default="true"/>
+      </module>
+      <module name="MethodName" parent="TreeWalker" description="Checks that method names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="allowClassName" description="Controls whether to allow a method name to have the same name as the residing class name. This is not to be confused with a constructor. An easy mistake is to place a return type on a constructor declaration which turns it into a method. For example: class MyClass { public void MyClass() {} //this is a method public MyClass() {} //this is a constructor}" type="Boolean" default="false"/>
+        <property name="applyToPublic" description="Controls whether to apply the check to public member." type="Boolean" default="true"/>
+        <property name="applyToProtected" description="Controls whether to apply the check to protected member." type="Boolean" default="true"/>
+        <property name="applyToPackage" description="Controls whether to apply the check to package-private member." type="Boolean" default="true"/>
+        <property name="applyToPrivate" description="Controls whether to apply the check to private member." type="Boolean" default="true"/>
+      </module>
+      <module name="MethodTypeParameterName" parent="TreeWalker" description="Checks that method type parameter names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[A-Z]$"/>
+      </module>
+      <module name="PackageName" parent="TreeWalker" description="Checks that package names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z]+(\.[a-zA-Z_][a-zA-Z0-9_]*)*$"/>
+      </module>
+      <module name="ParameterName" parent="TreeWalker" description="Checks that method parameter names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="ignoreOverridden" description="Allows to skip methods with Override annotation from validation. For example, the following method's parameter will be skipped from validation, if ignoreOverridden is true: @Overridepublic boolean equals(Object o) { return super.equals(o);}" type="Boolean" default="false"/>
+        <property name="accessModifiers" description="Access modifiers of methods where parameters are checked." type="Access Modifier Set" default="public, protected, package, private"/>
+      </module>
+      <module name="StaticVariableName" parent="TreeWalker" description="Checks that {@code static}, non-{@code final} variable names conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[a-z][a-zA-Z0-9]*$"/>
+        <property name="applyToPublic" description="Controls whether to apply the check to public member." type="Boolean" default="true"/>
+        <property name="applyToProtected" description="Controls whether to apply the check to protected member." type="Boolean" default="true"/>
+        <property name="applyToPackage" description="Controls whether to apply the check to package-private member." type="Boolean" default="true"/>
+        <property name="applyToPrivate" description="Controls whether to apply the check to private member." type="Boolean" default="true"/>
+      </module>
+      <module name="TypeName" parent="TreeWalker" description="Checks that type names for classes, interfaces, enums, and annotations conform to a format specified by the format property.">
+        <property name="format" description="Specifies valid identifiers." type="Regular Expression" default="^[A-Z][a-zA-Z0-9]*$"/>
+        <property name="applyToPublic" description="Controls whether to apply the check to public member." type="Boolean" default="true"/>
+        <property name="applyToProtected" description="Controls whether to apply the check to protected member." type="Boolean" default="true"/>
+        <property name="applyToPackage" description="Controls whether to apply the check to package-private member." type="Boolean" default="true"/>
+        <property name="applyToPrivate" description="Controls whether to apply the check to private member." type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF." default="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF."/>
+      </module>
+  </category>
+  <category name="Regexp">
+      <module name="Regexp" parent="TreeWalker" description="A check that makes sure that a specified pattern exists, exists less than a set number of times, or does not exist in the file.">
+        <property name="format" description="pattern" type="Regular Expression" default="^$ (empty)"/>
+        <property name="message" description="message which is used to notify about violations, if empty then the default (hard-coded) message is used." type="String" default="null"/>
+        <property name="illegalPattern" description="Controls whether the pattern is required or illegal." type="Boolean" default="false"/>
+        <property name="duplicateLimit" description="Controls whether to check for duplicates of a required pattern, any negative value means no checking for duplicates, any positive value is used as the maximum number of allowed duplicates, if the limit is exceeded errors will be logged." type="Integer" default="0"/>
+        <property name="errorLimit" description="Controls the maximum number of errors before the check will abort." type="Integer" default="100"/>
+        <property name="ignoreComments" description="Controls whether to ignore matches found within comments." type="Boolean" default="false"/>
+      </module>
+      <module name="RegexpMultiline" parent="Checker" description="A check for detecting that matches across multiple lines.">
+        <property name="format" description="illegal pattern" type="Regular Expression" default="$."/>
+        <property name="message" description="message which is used to notify about violations, if empty then default(hard-coded) message is used." type="String" default="null"/>
+        <property name="ignoreCase" description="Controls whether to ignore case when searching." type="Boolean" default="false"/>
+        <property name="minimum" description="The minimum number of matches required in each file." type="Integer" default="0"/>
+        <property name="maximum" description="The maximum number of matches required in each file." type="Integer" default="0"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+      <module name="RegexpOnFilename" parent="Checker" description="Implementation of a check that looks for a file name and/or path match (or mis-match) against specified patterns.">
+        <property name="folderPattern" description="Regular expression to match the folder path against." type="Regular Expression" default="null"/>
+        <property name="fileNamePattern" description="Regular expression to match the file name against." type="Regular Expression" default="null"/>
+        <property name="match" description="Whether to look for a match or mis-match on the file name, if the fileNamePattern is supplied, otherwise it is applied on the folderPattern." type="Boolean" default="true"/>
+        <property name="ignoreFileNameExtensions" description="Whether to ignore the file extension for the file name match." type="Boolean" default="false"/>
+        <property name="fileExtensions" description="File type extension of files to process. If this is specified, then only files that match these types are examined with the other patterns." type="String Set" default="all files"/>
+      </module>
+      <module name="RegexpSingleline" parent="Checker" description="A check for detecting single lines that match a supplied regular expression.">
+        <property name="format" description="illegal pattern" type="Regular Expression" default="$."/>
+        <property name="message" description="message which is used to notify about violations, if empty then default(hard-coded) message is used." type="String" default="null"/>
+        <property name="ignoreCase" description="Controls whether to ignore case when searching." type="Boolean" default="false"/>
+        <property name="minimum" description="The minimum number of matches required in each file." type="Integer" default="0"/>
+        <property name="maximum" description="The maximum number of matches required in each file." type="Integer" default="0"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+      <module name="RegexpSinglelineJava" parent="TreeWalker" description="This class is variation on RegexpSingleline for detecting single lines that match a supplied regular expression in Java files.">
+        <property name="format" description="illegal pattern" type="Regular Expression" default="$."/>
+        <property name="message" description="message which is used to notify about violations, if empty then default(hard-coded) message is used." type="String" default="null"/>
+        <property name="ignoreCase" description="Controls whether to ignore case when searching." type="Boolean" default="false"/>
+        <property name="minimum" description="The minimum number of matches required in each file." type="Integer" default="0"/>
+        <property name="maximum" description="The maximum number of matches required in each file." type="Integer" default="0"/>
+        <property name="ignoreComments" description="Controls whether to ignore text in comments when searching." type="Boolean" default="false"/>
+      </module>
+  </category>
+  <category name="Size Violations">
+      <module name="AnonInnerLength" parent="TreeWalker" description="Checks for long anonymous inner classes.">
+        <property name="max" description="maximum allowable number of lines" type="Integer" default="20"/>
+      </module>
+      <module name="ExecutableStatementCount" parent="TreeWalker" description="Restricts the number of executable statements to a specified limit.">
+        <property name="max" description="the maximum threshold allowed" type="Integer" default="30"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CTOR_DEF, METHOD_DEF, INSTANCE_INIT, STATIC_INIT." default="CTOR_DEF, METHOD_DEF, INSTANCE_INIT, STATIC_INIT."/>
+      </module>
+      <module name="FileLength" parent="Checker" description="Checks for long source files.">
+        <property name="max" description="maximum allowable number of lines" type="Integer" default="2000"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+      <module name="LineLength" parent="TreeWalker" description="Checks for long lines.">
+        <property name="ignorePattern" description="pattern for lines to ignore" type="Regular Expression" default="^$ (empty)"/>
+        <property name="max" description="maximum allowable line length" type="Integer" default="80"/>
+      </module>
+      <module name="MethodCount" parent="TreeWalker" description="Checks the number of methods declared in each type declaration by access modifier or total count.">
+        <property name="maxTotal" description="maximum allowable number of methods at all scope levels" type="Integer" default="100"/>
+        <property name="maxPrivate" description="maximum allowable number of private methods" type="Integer" default="100"/>
+        <property name="maxPackage" description="maximum allowable number of package methods" type="Integer" default="100"/>
+        <property name="maxProtected" description="maximum allowable number of protected methods" type="Integer" default="100"/>
+        <property name="maxPublic" description="maximum allowable number of public methods" type="Integer" default="100"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CLASS_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, ANNOTATION_DEF." default="CLASS_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, ANNOTATION_DEF."/>
+      </module>
+      <module name="MethodLength" parent="TreeWalker" description="Checks for long methods and constructors.">
+        <property name="max" description="maximum allowable number of lines" type="Integer" default="150"/>
+        <property name="countEmpty" description="whether to count empty lines and single line comments of the form //" type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens METHOD_DEF, CTOR_DEF." default="METHOD_DEF, CTOR_DEF."/>
+      </module>
+      <module name="OuterTypeNumber" parent="TreeWalker" description="Checks for the number of types declared at the outer (or root) level in a file.">
+        <property name="max" description="maximum allowable number of outer types" type="Integer" default="1"/>
+      </module>
+      <module name="ParameterNumber" parent="TreeWalker" description="Checks the number of parameters of a method or constructor.">
+        <property name="max" description="maximum allowable number of parameters" type="Integer" default="7"/>
+        <property name="ignoreOverriddenMethods" description="Ignore number of parameters for methods with @Override annotation" type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens METHOD_DEF, CTOR_DEF." default="METHOD_DEF, CTOR_DEF."/>
+      </module>
+  </category>
+  <category name="Whitespace">
+      <module name="EmptyForInitializerPad" parent="TreeWalker" description="Checks the padding of an empty for initializer; that is whether white space is required at an empty for initializer, or such white space is forbidden.">
+        <property name="option" description="policy on how to pad an empty for iterator" type="Pad Policy" default="nospace"/>
+      </module>
+      <module name="EmptyForIteratorPad" parent="TreeWalker" description="Checks the padding of an empty for iterator; that is whether white space is required at an empty for iterator, or such white space is forbidden.">
+        <property name="option" description="policy on how to pad an empty for iterator" type="Pad Policy" default="nospace"/>
+      </module>
+      <module name="EmptyLineSeparator" parent="TreeWalker" description="Checks for empty line separators after header, package, all import declarations, fields, constructors, methods, nested classes, static initializers and instance initializers.">
+        <property name="allowNoEmptyLineBetweenFields" description="Allow no empty line between fields" type="Boolean" default="false"/>
+        <property name="allowMultipleEmptyLines" description="Allow multiple empty lines between class members" type="Boolean" default="true"/>
+        <property name="allowMultipleEmptyLinesInsideClassMembers" description="Allow multiple empty lines inside class members" type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens PACKAGE_DEF, IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF." default="PACKAGE_DEF, IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF."/>
+      </module>
+      <module name="FileTabCharacter" parent="Checker" description="Checks that there are no tab characters ('\t') in the source code.">
+        <property name="eachLine" description="whether to report on each line containing a tab, or just the first instance" type="Boolean" default="false"/>
+        <property name="fileExtensions" description="file type extension of files to process" type="String Set" default="all files"/>
+      </module>
+      <module name="GenericWhitespace" parent="TreeWalker" description="Checks that the whitespace around the Generic tokens (angle brackets) &quot;&lt;&quot; and &quot;&gt;&quot; are correct to the typical convention.">
+      </module>
+      <module name="MethodParamPad" parent="TreeWalker" description="Checks the padding between the identifier of a method definition, constructor definition, method call, or constructor invocation; and the left parenthesis of the parameter list.">
+        <property name="allowLineBreaks" description="whether a line break between the identifier and left parenthesis is allowed" type="Boolean" default="false"/>
+        <property name="option" description="policy on how to pad method parameter" type="Pad Policy" default="nospace"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens CTOR_DEF, LITERAL_NEW, METHOD_CALL, METHOD_DEF, SUPER_CTOR_CALL, ENUM_CONSTANT_DEF." default="CTOR_DEF, LITERAL_NEW, METHOD_CALL, METHOD_DEF, SUPER_CTOR_CALL, ENUM_CONSTANT_DEF."/>
+      </module>
+      <module name="NoLineWrap" parent="TreeWalker" description="Checks that chosen statements are not line-wrapped.">
+        <property name="tokens" description="tokens to check" type="subset of tokens IMPORT, STATIC_IMPORT, PACKAGE_DEF, CLASS_DEF, METHOD_DEF, CTOR_DEF, ENUM_DEF, INTERFACE_DEF." default="PACKAGE_DEF, IMPORT, STATIC_IMPORT."/>
+      </module>
+      <module name="NoWhitespaceAfter" parent="TreeWalker" description="Checks that there is no whitespace after a token.">
+        <property name="allowLineBreaks" description="whether whitespace is allowed if the token is at a linebreak" type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ARRAY_INIT, AT, INC, DEC, UNARY_MINUS, UNARY_PLUS, BNOT, LNOT, DOT, TYPECAST, ARRAY_DECLARATOR, INDEX_OP, LITERAL_SYNCHRONIZED, METHOD_REF." default="ARRAY_INIT, AT, INC, DEC, UNARY_MINUS, UNARY_PLUS, BNOT, LNOT, DOT, ARRAY_DECLARATOR, INDEX_OP."/>
+      </module>
+      <module name="NoWhitespaceBefore" parent="TreeWalker" description="Checks that there is no whitespace before a token.">
+        <property name="allowLineBreaks" description="whether whitespace is allowed if the token is at a linebreak" type="Boolean" default="false"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens COMMA, SEMI, POST_INC, POST_DEC, DOT, GENERIC_START, GENERIC_END, ELLIPSIS, METHOD_REF." default="COMMA, SEMI, POST_INC, POST_DEC, ELLIPSIS."/>
+      </module>
+      <module name="OperatorWrap" parent="TreeWalker" description="Checks the policy on how to wrap lines on operators.">
+        <property name="option" description="policy on how to wrap lines" type="Wrap Operator Policy" default="nl"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, LITERAL_INSTANCEOF, TYPE_EXTENSION_AND, ASSIGN, DIV_ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, STAR_ASSIGN, MOD_ASSIGN, SR_ASSIGN, BSR_ASSIGN, SL_ASSIGN, BXOR_ASSIGN, BOR_ASSIGN, BAND_ASSIGN, METHOD_REF." default="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, TYPE_EXTENSION_AND, LITERAL_INSTANCEOF."/>
+      </module>
+      <module name="ParenPad" parent="TreeWalker" description="Checks the policy on the padding of parentheses; i.e. whether a space is required after a left parenthesis and before a right parenthesis, or such spaces are forbidden.">
+        <property name="option" description="policy on how to pad parentheses" type="Pad Policy" default="nospace"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ANNOTATION, ANNOTATION_FIELD_DEF, CTOR_CALL, CTOR_DEF, DOT, ENUM_CONSTANT_DEF, EXPR, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_NEW, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_WHILE, METHOD_CALL, METHOD_DEF, QUESTION, RESOURCE_SPECIFICATION, SUPER_CTOR_CALL, LAMBDA." default="ANNOTATION, ANNOTATION_FIELD_DEF, CTOR_CALL, CTOR_DEF, DOT, ENUM_CONSTANT_DEF, EXPR, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_NEW, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_WHILE, METHOD_CALL, METHOD_DEF, QUESTION, RESOURCE_SPECIFICATION, SUPER_CTOR_CALL, LAMBDA."/>
+      </module>
+      <module name="SeparatorWrap" parent="TreeWalker" description="Checks line wrapping with separators.">
+        <property name="option" description="policy on how to wrap lines" type="Wrap Operator Policy" default="eol"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens DOT, COMMA, SEMI, ELLIPSIS, AT, LPAREN, RPAREN, ARRAY_DECLARATOR, RBRACK, METHOD_REF." default="DOT, COMMA."/>
+      </module>
+      <module name="SingleSpaceSeparator" parent="TreeWalker" description="Checks that non-whitespace characters are separated by no more than one whitespace.">
+        <property name="validateComments" description="If set to true, whitespaces surrounding comments will be validated." type="Boolean" default="false"/>
+      </module>
+      <module name="TypecastParenPad" parent="TreeWalker" description="Checks the policy on the padding of parentheses for typecasts.">
+        <property name="option" description="policy on how to pad parentheses" type="Pad Policy" default="nospace"/>
+      </module>
+      <module name="WhitespaceAfter" parent="TreeWalker" description="Checks that a token is followed by whitespace.">
+        <property name="tokens" description="tokens to check" type="subset of tokens COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE." default="COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE."/>
+      </module>
+      <module name="WhitespaceAround" parent="TreeWalker" description="Checks that a token is surrounded by whitespace.">
+        <property name="allowEmptyConstructors" description="allow empty constructor bodies" type="Boolean" default="false"/>
+        <property name="allowEmptyMethods" description="allow empty method bodies" type="Boolean" default="false"/>
+        <property name="allowEmptyTypes" description="allow empty class, interface and enum bodies" type="Boolean" default="false"/>
+        <property name="allowEmptyLoops" description="allow empty loop bodies" type="Boolean" default="false"/>
+        <property name="allowEmptyLambdas" description="allow empty lambda bodies" type="Boolean" default="false"/>
+        <property name="allowEmptyCatches" description="allow empty catch bodies" type="Boolean" default="false"/>
+        <property name="ignoreEnhancedForColon" description="ignore whitespace around colon in for-each loops" type="Boolean" default="true"/>
+        <property name="tokens" description="tokens to check" type="subset of tokens ASSIGN, ARRAY_INIT, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, DO_WHILE, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, LITERAL_ASSERT, TYPE_EXTENSION_AND, WILDCARD_TYPE, GENERIC_START, GENERIC_END, ELLIPSIS." default="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, DO_WHILE, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, LITERAL_ASSERT, TYPE_EXTENSION_AND."/>
+      </module>
+  </category>
 </root>
