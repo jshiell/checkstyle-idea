@@ -23,11 +23,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * This class reads the pre-saved rules xml to provide editor
- * necessary data.
+ * This class reads the pre-saved rules xml to provide editor necessary data.
  */
 public class CheckStyleRuleProvider {
-  private File defaultRules;
+  private String defaultRules;
   private File customRules;
 
   private Map<String, List<ConfigRule>> defuleRuleByCategory;
@@ -37,8 +36,10 @@ public class CheckStyleRuleProvider {
 
   /**
    * Sets up the provided to self defined rule set
+   * 
    * @param path - The path to the custom rule definition xml
-   * @throws FileNotFoundException - When path doesn't lead to a existing xml file
+   * @throws FileNotFoundException    - When path doesn't lead to a existing xml
+   *                                  file
    * @throws IllegalArgumentException - When path doesn't lead to xml file.
    */
   public CheckStyleRuleProvider(String path) throws FileNotFoundException, IllegalArgumentException {
@@ -55,7 +56,7 @@ public class CheckStyleRuleProvider {
   }
 
   public CheckStyleRuleProvider() {
-    this.defaultRules = new File("src/main/resources/org/infernus/idea/checkstyle/available-rules.xml");
+    this.defaultRules = "/org/infernus/idea/checkstyle/available-rules.xml";
 
     this.defuleRuleByCategory = new HashMap<String, List<ConfigRule>>();
     this.allDefaultRule = new HashMap<String, ConfigRule>();
@@ -71,7 +72,7 @@ public class CheckStyleRuleProvider {
       docFactory.setSchema(null);
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
       docBuilder.setEntityResolver(new CheckStyleRuleProvider.NullEntityResolver());
-      Document configDOM = docBuilder.parse(this.defaultRules);
+      Document configDOM = docBuilder.parse(getClass().getResourceAsStream(this.defaultRules));
       Element root = configDOM.getDocumentElement();
 
       NodeList children = root.getChildNodes();
@@ -106,10 +107,9 @@ public class CheckStyleRuleProvider {
       }
 
     } catch (Exception e) {
-      System.out.println("In here");
       System.out.println(e.getClass());
       StackTraceElement[] eles = e.getStackTrace();
-      for (int j = 0; j < eles.length; j++) {
+      for (int j = 0; j < 10; j++) {
         System.out.println(eles[j].toString());
       }
     }
@@ -117,6 +117,7 @@ public class CheckStyleRuleProvider {
 
   /**
    * Helper function that makes a module DOM into ConfigRule
+   * 
    * @param module - The module DOM
    * @return The ConfigRule converted from module
    */
@@ -147,9 +148,10 @@ public class CheckStyleRuleProvider {
   }
 
   /**
-   * @return The map containing all default rules, key is the category of the rules
+   * @return The map containing all default rules, key is the category of the
+   *         rules
    */
-  public Map<String, List<ConfigRule>> getDefaultCategorizedRule() {
+  public Map<String, List<ConfigRule>> getDefaultCategorizedRules() {
     return new HashMap<String, List<ConfigRule>>(this.defuleRuleByCategory);
   }
 
@@ -162,7 +164,8 @@ public class CheckStyleRuleProvider {
   }
 
   /**
-   * @return The map containing all the default rules, key is the name of the rule.
+   * @return The map containing all the default rules, key is the name of the
+   *         rule.
    */
   public Map<String, ConfigRule> getDefaultRules() {
     return new HashMap<String, ConfigRule>(this.allDefaultRule);
@@ -177,14 +180,13 @@ public class CheckStyleRuleProvider {
   }
 
   /**
-   * A helper resolver that stops Java from trying to reach to DTD server,
-   * see https://stackoverflow.com/questions/6539051/how-can-i-tell-xalan-not-to-validate-xml-retrieved-using-the-document-function
+   * A helper resolver that stops Java from trying to reach to DTD server, see
+   * https://stackoverflow.com/questions/6539051/how-can-i-tell-xalan-not-to-validate-xml-retrieved-using-the-document-function
    * for full detail
-   * */
+   */
   private static class NullEntityResolver implements EntityResolver {
 
-    public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException, IOException {
+    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
       return new InputSource(new ByteArrayInputStream(new byte[0]));
     }
 

@@ -1,10 +1,14 @@
 package org.infernus.idea.checkstyle.model;
 
+import org.infernus.idea.checkstyle.util.CheckStyleRuleProvider;
 import org.infernus.idea.checkstyle.util.ConfigReader;
 import org.infernus.idea.checkstyle.util.ConfigWriter;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import com.intellij.openapi.project.Project;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
@@ -12,6 +16,8 @@ import java.util.*;
 public class ConfigGeneratorModel {
     /** The current state of the configuration */
     XMLConfig config;
+
+    private CheckStyleRuleProvider provider = new CheckStyleRuleProvider();
 
     /** The path the the config will be saved to when it is generated */
     private String path;
@@ -25,7 +31,7 @@ public class ConfigGeneratorModel {
      * Creates a new ConfigGeneratorModel with a blank XML configuration, file name,
      * path to the file, and set of active rules
      */
-    public ConfigGeneratorModel() {
+    public ConfigGeneratorModel(Project project) {
         this.path = "";
         this.config = new XMLConfig("Checker");
         this.activeRules = new HashMap<>();
@@ -41,6 +47,10 @@ public class ConfigGeneratorModel {
 
     }
 
+    public Collection<String> getConfigNames() {
+      return Arrays.asList("Config1", "Config2", "Config3");
+    }
+
     /**
      * Generates and saves the user-defined config to the given path
      *
@@ -51,8 +61,8 @@ public class ConfigGeneratorModel {
      * @throws IOException - When file could not be created with the path
      */
     public void generateConfig(String fileName) throws IOException {
-        String filepath = path + fileName + ".xml";
-        ConfigWriter.saveConfig(filepath, config);
+        // String filepath = path + fileName + ".xml";
+        // ConfigWriter.saveConfig(filepath, config);
     }
 
     /**
@@ -66,7 +76,7 @@ public class ConfigGeneratorModel {
      *         report when this error is thrown
      */
     public void importConfig(String fileName) throws ParserConfigurationException, SAXException, IOException {
-        config = ConfigReader.readConfig(path + fileName + ".xml");
+        // config = ConfigReader.readConfig(path + fileName + ".xml");
     }
 
     /**
@@ -75,8 +85,8 @@ public class ConfigGeneratorModel {
      * @return a Collection<XMLConfig> of all the active rules in the current
      *         configuration
      */
-    public Collection<XMLConfig> getActiveRules() {
-        return null;
+    public List<XMLConfig> getActiveRules() {
+        return Arrays.asList(new XMLConfig("Rule1"));
     }
 
     /**
@@ -87,7 +97,7 @@ public class ConfigGeneratorModel {
      */
     public ConfigRule getConfigRuleforXML(XMLConfig rule) {
         String ruleName = rule.getName();
-        return null;
+        return new ConfigRule(ruleName);
     }
 
     /**
@@ -108,7 +118,7 @@ public class ConfigGeneratorModel {
      *         ConfigRules, which contain all details for a given rule.
      */
     public TreeMap<String, List<ConfigRule>> getAvailableRules() {
-        return null;
+        return new TreeMap<>(provider.getDefaultCategorizedRules());
     }
 
     /**

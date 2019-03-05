@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -19,13 +20,17 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
+
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.ConfigGeneratorController;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
+import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -71,6 +76,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private final ToolWindow toolWindow;
     private final ComboBox configurationOverrideCombo = new ComboBox();
     private final DefaultComboBoxModel configurationOverrideModel = new DefaultComboBoxModel();
+    private final ConfigGeneratorController configController;
 
     private boolean displayingErrors = true;
     private boolean displayingWarnings = true;
@@ -107,6 +113,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         this.toolWindow = toolWindow;
         this.project = project;
+        this.configController = new ConfigGeneratorController(new ConfigGeneratorView(), new ConfigGeneratorModel(project));
 
         checkStylePlugin = project.getComponent(CheckStylePlugin.class);
         if (checkStylePlugin == null) {
@@ -165,6 +172,17 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         resultsTree.addKeyListener(new ToolWindowKeyboardListener());
         resultsTree.setCellRenderer(new ResultTreeRenderer());
 
+        JButton configButton = new JButton(
+            "Configuration Editor",
+            IconLoader.getIcon("/actions/moveToStandardPlace@2x.png"));
+        configButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        configButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                configController.displayConfigEditor();
+            }
+        });
+                
         progressLabel = new JLabel(" ");
         progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
         progressBar.setMinimum(0);
@@ -178,6 +196,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         progressPanel.add(new JLabel(message("plugin.toolwindow.override")));
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(configurationOverrideCombo);
+        progressPanel.add(Box.createHorizontalStrut(8));
+        progressPanel.add(configButton);
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.addSeparator();
         progressPanel.add(Box.createHorizontalStrut(4));
