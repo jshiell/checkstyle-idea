@@ -1,14 +1,14 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.util.CheckStyleRuleProvider;
 import org.infernus.idea.checkstyle.util.ConfigReader;
 import org.infernus.idea.checkstyle.util.ConfigWriter;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-
-import com.intellij.openapi.project.Project;
-
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
@@ -17,38 +17,40 @@ public class ConfigGeneratorModel {
     /** The current state of the configuration */
     XMLConfig config;
 
-    private CheckStyleRuleProvider provider = new CheckStyleRuleProvider();
-
-    /** The path the the config will be saved to when it is generated */
-    private String path;
-
-    /** The Map<String, ConfigRule> with the String being the name of a rule
+    /**
+     * The Map<String, ConfigRule> with the String being the name of a rule
      * mapping to the corresponding ConfigRule
      */
-    private Map<String, ConfigRule> activeRules;
+    private Map<String, ConfigRule> availableRules;
+
+    /** XMLConfig representations of all the active rules for the config */
+    private List<XMLConfig> xmlConfigs;
+
+    /** The state of the user's project */
+    private Project project;
+
+    /**
+     * A TreeMap<String, List<ConfigRule>> with names of all rule categories
+     * mapping to lists of all available rules in each category
+     */
+    private TreeMap<String, List<ConfigRule>> possibleRules;
 
     /**
      * Creates a new ConfigGeneratorModel with a blank XML configuration, file name,
      * path to the file, and set of active rules
      */
     public ConfigGeneratorModel(Project project) {
-        this.path = "";
+        CheckStyleRuleProvider provider = new CheckStyleRuleProvider();
+        this.availableRules = new HashMap<>();
+        this.possibleRules = new TreeMap<>(provider.getDefaultCategorizedRules());
+        for (String cat : possibleRules.keySet()) {
+            for (ConfigRule ruleDetails : possibleRules.get(cat)) {
+                availableRules.put(ruleDetails.getRuleName(), ruleDetails);
+            }
+        }
         this.config = new XMLConfig("Checker");
-        this.activeRules = new HashMap<>();
-    }
-
-    /**
-     * Adds a new rule to the current configuration state
-     *
-     * @param rule the XMLConfig representation of the rule to be added
-     *             to the configuration
-     */
-    public void addActiveRule(XMLConfig rule) {
-
-    }
-
-    public Collection<String> getConfigNames() {
-      return Arrays.asList("Config1", "Config2", "Config3");
+        this.xmlConfigs = new LinkedList<>();
+        this.project = project;
     }
 
     /**
@@ -61,8 +63,13 @@ public class ConfigGeneratorModel {
      * @throws IOException - When file could not be created with the path
      */
     public void generateConfig(String fileName) throws IOException {
-        // String filepath = path + fileName + ".xml";
-        // ConfigWriter.saveConfig(filepath, config);
+        config = generateCurrentConfig();
+        File configFolder = new File(project.getBasePath() + "/.idea/configs");
+        if (!configFolder.exists()) {
+            configFolder.mkdirs();
+        }
+        String filepath = project.getBasePath() + "/.idea/configs/" + fileName + ".xml";
+        ConfigWriter.saveConfig(filepath, config);
     }
 
     /**
@@ -76,7 +83,17 @@ public class ConfigGeneratorModel {
      *         report when this error is thrown
      */
     public void importConfig(String fileName) throws ParserConfigurationException, SAXException, IOException {
-        // config = ConfigReader.readConfig(path + fileName + ".xml");
+        xmlConfigs = new LinkedList<>();
+        config = ConfigReader.readConfig(project.getBasePath() + "/.idea/configs/" + fileName + ".xml");
+        for (XMLConfig check : config.getChildren()) {
+            if (check.getName().equals("TreeWalker")) {
+                for (XMLConfig treeChild : check.getChildren()) {
+                    addActiveRule(treeChild);
+                }
+            } else {
+                addActiveRule(check);
+            }
+        }
     }
 
     /**
@@ -86,27 +103,22 @@ public class ConfigGeneratorModel {
      *         configuration
      */
     public List<XMLConfig> getActiveRules() {
-        return Arrays.asList(new XMLConfig("Rule1"));
+        return new LinkedList<>(xmlConfigs);
     }
 
     /**
-     * Returns the XML configuration representation for the given rule
+     * Returns the ConfigRule representation for the given XML rule configuration
      *
-     * @param rule the rule to get the XML representation for
-     * @return the XML format for the given rule
+     * @param rule the rule to get the ConfigRule representation for
+     * @return the ConfigRule representation for the given XML rule configuration
      */
-    public ConfigRule getConfigRuleforXML(XMLConfig rule) {
+    public ConfigRule getConfigRuleforXML(XMLConfig rule) throws IllegalArgumentException{
         String ruleName = rule.getName();
-        return new ConfigRule(ruleName);
-    }
-
-    /**
-     * Removes an active rule from the current configuration
-     *
-     * @param rule the rule to remove from the XML config
-     */
-    public void removeActiveRule(XMLConfig rule) {
-
+        ConfigRule configRule = availableRules.get(ruleName);
+        if (configRule == null) {
+            throw new IllegalArgumentException();
+        }
+        return configRule;
     }
 
     /**
@@ -118,7 +130,7 @@ public class ConfigGeneratorModel {
      *         ConfigRules, which contain all details for a given rule.
      */
     public TreeMap<String, List<ConfigRule>> getAvailableRules() {
-        return new TreeMap<>(provider.getDefaultCategorizedRules());
+        return new TreeMap<>(possibleRules);
     }
 
     /**
@@ -129,6 +141,85 @@ public class ConfigGeneratorModel {
      *         will look like.
      */
     public String getPreview() {
-        return "";
+        XMLConfig preview = generateCurrentConfig();
+        return ConfigWriter.xmlPreview(preview);
+    }
+
+    /**
+     * Generates a XMLConfig with the state of the current config
+     *
+     * @return a XMLConfig with the state of the current config
+     */
+    private XMLConfig generateCurrentConfig() {
+        XMLConfig preview = new XMLConfig("Checker");
+        for (XMLConfig rule : xmlConfigs) {
+            if (availableRules.get(rule.getName()).getParent().equals("TreeWalker")) {
+                XMLConfig[] children = preview.getChildren();
+                boolean hasWalker = false;
+                for (XMLConfig child : children) {
+                    if (child.getName().equals("TreeWalker")) {
+                        child.addChild(rule);
+                        hasWalker = true;
+                        break;
+                    }
+                }
+                if (!hasWalker) {
+                    XMLConfig walker = new XMLConfig("TreeWalker");
+                    walker.addChild(rule);
+                    preview.addChild(walker);
+                }
+            } else {
+                preview.addChild(rule);
+            }
+        }
+        return preview;
+    }
+
+    /**
+     * Returns the names of all the possible configuration files a user
+     * can import.
+     *
+     * @return a Set<String> containing the names of all the possible configuration files a user
+     *         can import.
+     */
+    public Set<String> getConfigNames() {
+        Set<String> configFileNames = new HashSet<>();
+        VirtualFile s = project.getBaseDir();
+        VirtualFile idea = null;
+        for (VirtualFile dir : s.getChildren()) {
+            if (dir.getName().equals(".idea")) {
+                idea = dir;
+                break;
+            }
+        }
+        if (idea != null) {
+            for (VirtualFile dir : idea.getChildren()) {
+                if (dir.getName().equals("configs")) {
+                    for (VirtualFile config : dir.getChildren()) {
+                        configFileNames.add(config.getName().replace(".xml", ""));
+                    }
+                }
+            }
+        }
+        return configFileNames;
+    }
+
+    /**
+     * Adds a new rule to the current configuration state
+     *
+     * @param rule the XMLConfig representation of the rule to be added
+     *             to the configuration
+     */
+    public void addActiveRule(XMLConfig rule) {
+        xmlConfigs.add(rule);
+    }
+
+    /**
+     * Removes an active rule from the current configuration
+     *
+     * @param rule the rule to remove from the XML config
+     */
+    public void removeActiveRule(XMLConfig rule) {
+        xmlConfigs.remove(rule);
     }
 }

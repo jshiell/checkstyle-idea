@@ -139,8 +139,12 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
         public void keyTyped(KeyEvent e) {
           // The below line does not run if the user entered the text by
           // right-clicking and pasting into the boxes
-          char keyChar = e.getKeyChar();
-          xmlRule.addAttribute(attr, textField.getText() + (Character.isAlphabetic(keyChar) ? keyChar : ""));
+          String value = textField.getText();
+          char ch = e.getKeyChar();
+          if (ch >= 32 && ch < 127) {
+            value += ch;
+          }
+          xmlRule.addAttribute(attr, value);
         }
 
         @Override

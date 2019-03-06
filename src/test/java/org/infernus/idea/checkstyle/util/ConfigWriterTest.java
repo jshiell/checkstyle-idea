@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import static org.junit.Assert.*;
 
 public class ConfigWriterTest {
+
   private XMLConfig plainConfig;
   private static String easyConfigName = "easy.xml";
   private static String easyConfigPreviewName = "easyPreview.xml";
