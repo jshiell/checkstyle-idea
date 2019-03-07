@@ -2,12 +2,10 @@ package org.infernus.idea.checkstyle;
 
 import static org.mockito.Mockito.*;
 
-import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
-
 import org.infernus.idea.checkstyle.listeners.ActiveRuleSelectListener;
 import org.infernus.idea.checkstyle.listeners.AttributeSubmissionListener;
 import org.infernus.idea.checkstyle.listeners.CategorySelectListener;
+import org.infernus.idea.checkstyle.listeners.ClearButtonListener;
 import org.infernus.idea.checkstyle.listeners.GenerateButtonListener;
 import org.infernus.idea.checkstyle.listeners.ImportButtonListener;
 import org.infernus.idea.checkstyle.listeners.ImportSubmitListener;
@@ -69,6 +67,8 @@ public class ConfigGeneratorControllerTest {
   @Test
   public void addsAllButtonListeners() {
     verify(this.configEditor, times(1)).addButtonListener(any(ImportButtonListener.class),
+        any(ConfigurationListeners.class));
+    verify(this.configEditor, times(1)).addButtonListener(any(ClearButtonListener.class),
         any(ConfigurationListeners.class));
     verify(this.configEditor, times(1)).addButtonListener(any(PreviewButtonListener.class),
         any(ConfigurationListeners.class));

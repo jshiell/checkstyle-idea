@@ -1,8 +1,10 @@
 package org.infernus.idea.checkstyle.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
@@ -26,9 +28,14 @@ public class XMLPreviewDialog extends ConfigGeneratorWindow {
     this.textArea = new JTextArea();
     this.textArea.setEditable(false);
     this.textArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+    setMaximumSize(new Dimension((int) getMaximumSize().getWidth(), 1500));
 
     getContentPane().setLayout(new BorderLayout());
-    getContentPane().add(this.textArea, BorderLayout.CENTER);
+    getContentPane().add(scrollPane, BorderLayout.CENTER);
   }
 
   /**

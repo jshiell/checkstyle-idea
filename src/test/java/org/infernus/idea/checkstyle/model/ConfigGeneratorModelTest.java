@@ -76,7 +76,7 @@ public class ConfigGeneratorModelTest {
                 "<!DOCTYPE module PUBLIC \"-//Checkstyle//DTD Checkstyle Configuration 1.3//EN\" " +
                 "\"https://checkstyle.org/dtds/configuration_1_3.dtd\">\n" +
                 "<module name=\"Checker\"/>\n";
-        assertEquals(preview, model.getPreview());
+        assertEquals(preview, model.getPreview().replace("\r", ""));
 
     }
 
@@ -91,7 +91,7 @@ public class ConfigGeneratorModelTest {
                 "</module>\n";
         XMLConfig xmlConfig = new XMLConfig("FileTabCharacter");
         model.addActiveRule(xmlConfig);
-        assertEquals(preview, model.getPreview());
+        assertEquals(preview, model.getPreview().replace("\r", ""));
     }
 
     @Test

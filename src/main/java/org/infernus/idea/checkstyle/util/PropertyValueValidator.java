@@ -1,96 +1,124 @@
 package org.infernus.idea.checkstyle.util;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.apache.commons.validator.routines.UrlValidator;
 
 public class PropertyValueValidator {
+    private static String TOKEN_TYPES[] = {
+            "ABSTRACT", "ANNOTATION", "ANNOTATION_ARRAY_INIT", "ANNOTATION_DEF",
+            "ANNOTATION_FIELD_DEF", "ANNOTATION_MEMBER_VALUE_PAIR", "ANNOTATIONS",
+            "ARRAY_DECLARATOR", "ARRAY_INIT", "ASSIGN", "AT", "BAND", "BAND_ASSIGN",
+            "BLOCK_COMMENT_BEGIN", "BLOCK_COMMENT_END", "BNOT", "BOR", "BOR_ASSIGN",
+            "BSR", "BSR_ASSIGN", "BXOR", "BXOR_ASSIGN", "CASE_GROUP", "CHAR_LITERAL",
+            "CLASS_DEF", "COLON", "COMMA", "COMMENT_CONTENT", "CTOR_CALL", "CTOR_DEF",
+            "DEC", "DIV", "DIV_ASSIGN", "DO_WHILE", "DOT", "DOUBLE_COLON", "ELIST",
+            "ELLIPSIS", "EMPTY_STAT", "ENUM", "ENUM_CONSTANT_DEF", "ENUM_DEF", "EOF",
+            "EQUAL", "EXPR", "EXTENDS_CLAUSE", "FINAL", "FOR_CONDITION",
+            "FOR_EACH_CLAUSE", "FOR_INIT", "FOR_ITERATOR", "GE", "GENERIC_END",
+            "GENERIC_START", "GT", "IDENT", "IMPLEMENTS_CLAUSE", "IMPORT", "INC",
+            "INDEX_OP", "INSTANCE_INIT", "INTERFACE_DEF", "LABELED_STAT", "LAMBDA",
+            "LAND", "LCURLY", "LE", "LITERAL_ASSERT", "LITERAL_BOOLEAN", "LITERAL_BREAK",
+            "LITERAL_BYTE", "LITERAL_CASE", "LITERAL_CATCH", "LITERAL_CHAR", "LITERAL_CLASS",
+            "LITERAL_CONTINUE", "LITERAL_DEFAULT", "LITERAL_DO", "LITERAL_DOUBLE", "LITERAL_ELSE",
+            "LITERAL_FALSE", "LITERAL_FINALLY", "LITERAL_FLOAT", "LITERAL_FOR", "LITERAL_IF",
+            "LITERAL_INSTANCEOF", "LITERAL_INT", "LITERAL_INTERFACE", "LITERAL_LONG", "LITERAL_NATIVE",
+            "LITERAL_NEW", "LITERAL_NULL", "LITERAL_PRIVATE", "LITERAL_PROTECTED", "LITERAL_PUBLIC",
+            "LITERAL_RETURN", "LITERAL_SHORT", "LITERAL_STATIC", "LITERAL_SUPER", "LITERAL_SWITCH",
+            "LITERAL_SYNCHRONIZED", "LITERAL_THIS", "LITERAL_THROW", "LITERAL_THROWS",
+            "LITERAL_TRANSIENT", "LITERAL_TRUE", "LITERAL_TRY", "LITERAL_VOID", "LITERAL_VOLATILE",
+            "LITERAL_WHILE", "LNOT", "LOR", "LPAREN", "LT", "METHOD_CALL", "METHOD_DEF", "METHOD_REF",
+            "MINUS", "MINUS_ASSIGN", "MOD", "MOD_ASSIGN", "MODIFIERS", "NOT_EQUAL", "NUM_DOUBLE",
+            "NUM_FLOAT", "NUM_INT", "NUM_LONG", "OBJBLOCK", "PACKAGE_DEF", "PARAMETER_DEF", "PARAMETERS",
+            "PLUS", "PLUS_ASSIGN", "POST_DEC", "POST_INC", "QUESTION", "RBRACK", "RCURLY", "RESOURCE",
+            "RESOURCE_SPECIFICATION", "RESOURCES", "RPAREN", "SEMI", "SINGLE_LINE_COMMENT", "SL",
+            "SL_ASSIGN", "SLIST", "SR", "SR_ASSIGN", "STAR", "STAR_ASSIGN", "STATIC_IMPORT",
+            "STATIC_INIT", "STRICTFP", "STRING_LITERAL", "SUPER_CTOR_CALL", "TYPE", "TYPE_ARGUMENT",
+            "TYPE_ARGUMENTS", "TYPE_EXTENSION_AND", "TYPE_LOWER_BOUNDS", "TYPE_PARAMETER", "TYPE_PARAMETERS",
+            "TYPE_UPPER_BOUNDS", "TYPECAST", "UNARY_MINUS", "UNARY_PLUS", "VARIABLE_DEF", "WILDCARD_TYPE"
+    };
 
     /**
      * Validates the value according to the type
      * @param type - The type of the value
      * @param value - The value to validate
-     * @return true when the value passed the according validation, or when there is no
-     *         validation for the specific type
+     * @return null when the value pass the validation or has no validation available. Error message
+     *         about the reason why not passing the validation.
      */
-    public static boolean validate(String type, String value) {
+    public static String validate(String type, String value) {
         switch (type) {
-            case "Integer" :
-                return Pattern.matches("^[0-9]+$", value);
-            case "String" :
-            case "String Set" :
-            case "Boolean" :
-                return true; // per checkstyle's document, anything other than yes, true, on will be take as false
-            // therefore any value for boolean is technically correct
+            case "Number Set" :
             case "Integer Set" :
                 if (value.contains(",")) {
                     String ints[] = value.split(",");
 
                     for (String integer : ints) {
                         if (!Pattern.matches("^[0-9]+$", integer)) {
-                            return false;
+                            return "Has to be a list of number separated with comma without space";
                         }
                     }
 
-                    return true;
+                    return null;
                 }
 
-                return Pattern.matches("^[0-9]+$", value) || value.equals("{}");
+                return Pattern.matches("^[0-9]+$", value) || value.equals("{}") ? null : "Has to be a list of number separated with comma without space";
             case "Regular Expression" :
                 try {
                     Pattern.compile(value);
                 } catch (PatternSyntaxException e) {
-                    return false;
+                    return "Illegal regular expression";
                 }
 
-                return true;
+                return null;
             case "URI" :
                 String[] schemes = {"http","https"};
                 UrlValidator urlValidator = new UrlValidator(schemes);
 
                 return urlValidator.isValid(value) || Pattern.matches("^([\\p{L}_$][\\p{L}\\p{N}_$]*\\.)*[\\p{L}_$][\\p{L}\\p{N}_$]*$", value)
-                        || (new File(value).exists());
-            case "lineSeparator" :
-                return value.equals("crlf") || value.equals("cr") || value.equals("lf") || value.equals("lf_cr_crlf")
-                        || value.equals("system");
-            case "Pad Policy" :
-                return value.equals("nospace") || value.equals("space");
-            case "Wrap Operator Policy" :
-                return value.equals("nl") || value.equals("eol");
-            case "Block Policy" :
-                return value.equals("text") || value.equals("statement");
-            case "Scope" :
-                return value.equals("nothing") || value.equals("public") || value.equals("protected")
-                        || value.equals("package") || value.equals("private") || value.equals("anoninner");
+                        || (new File(value).exists()) ? null : "Not a valid URI";
             case "Access Modifier Set" :
                 String split[] = value.split(", ");
-
-                if (split.length == 0) {
-                    return value.equals("public") || value.equals("protected")
-                            || value.equals("package") || value.equals("private");
-                }
 
                 for (String subValue : split) {
                     if (!(subValue.equals("public") || subValue.equals("protected")
                             || subValue.equals("package") || subValue.equals("private"))) {
-                        return false;
+                        return subValue + " is a invalid Access Modifier";
                     }
                 }
-                return true;
-            case "Severity" :
-                return value.equals("ignore") || value.equals("info") || value.equals("warning") || value.equals("error");
-            case "Import Order Policy" :
-                return value.equals("top") || value.equals("above") || value.equals("inflow") || value.equals("under")
-                        || value.equals("bottom");
-            case "Element Style" :
-                return value.equals("expanded") || value.equals("compact") || value.equals("compact_no_array")
-                        || value.equals("ignore");
-            case "Closing Parens" :
-            case "Trailing Comma" :
-                return value.equals("always") || value.equals("never") || value.equals("ignore");
-            default:
-                return true;
+                return null;
         }
+
+        if (Pattern.matches("^subset of tokens.+$", type) && value.length() > 0) {
+            // types with "subset of tokens..." since those have no pattern we have to hard code things
+            String tokenString = type.replaceAll("subset of tokens", "").replace(".", "").trim();
+            String tokens[] = tokenString.split(", ");
+
+            if (tokens.length == 1 && tokens[0].equals("TokenTypes")) {
+                // another special case in this case
+                Set<String> valid_tokens = new HashSet<>(Arrays.asList(TOKEN_TYPES));
+                String input_tokens[] = value.split(", ");
+
+                for (String input_token : input_tokens) {
+                    if (!valid_tokens.contains(input_token.trim())) {
+                        return "Invalid token " + input_token;
+                    }
+                }
+            } else {
+                Set<String> valid_tokens = new HashSet<>(Arrays.asList(tokens));
+                String input_tokens[] = value.split(", ");
+
+                for (String input_token : input_tokens) {
+                    if (!valid_tokens.contains(input_token.trim())) {
+                        return "Invalid token " + input_token;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

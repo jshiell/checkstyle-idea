@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * An ADT to represent a CheckStyle rule
  */
-public class ConfigRule {
+public class ConfigRule implements Comparable<ConfigRule> {
   private String ruleName;
   /** The description of the rule */
   private String ruleDescription;
@@ -127,5 +127,22 @@ public class ConfigRule {
   @Override
   public String toString() {
     return this.getRuleName();
+  }
+
+  @Override
+  public int compareTo(ConfigRule o) {
+    if (o == null) {
+      return 1;
+    } else if (this.ruleName == null || o.ruleName == null) {
+      if (this.ruleName == null && o.ruleName == null) {
+        return 0;
+      } else if (this.ruleName == null) {
+        return -1;
+      } else {
+        return 1;
+      }
+    } else {
+      return this.ruleName.compareTo(o.ruleName);
+    }
   }
 }

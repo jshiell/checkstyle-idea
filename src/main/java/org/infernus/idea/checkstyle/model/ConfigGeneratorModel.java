@@ -35,12 +35,14 @@ public class ConfigGeneratorModel {
      */
     private TreeMap<String, List<ConfigRule>> possibleRules;
 
+    private CheckStyleRuleProvider provider;
+
     /**
      * Creates a new ConfigGeneratorModel with a blank XML configuration, file name,
      * path to the file, and set of active rules
      */
     public ConfigGeneratorModel(Project project) {
-        CheckStyleRuleProvider provider = new CheckStyleRuleProvider();
+        this.provider = new CheckStyleRuleProvider();
         this.availableRules = new HashMap<>();
         this.possibleRules = new TreeMap<>(provider.getDefaultCategorizedRules());
         for (String cat : possibleRules.keySet()) {
@@ -221,5 +223,9 @@ public class ConfigGeneratorModel {
      */
     public void removeActiveRule(XMLConfig rule) {
         xmlConfigs.remove(rule);
+    }
+
+    public CheckStyleRuleProvider getRuleProvider() {
+      return this.provider;
     }
 }

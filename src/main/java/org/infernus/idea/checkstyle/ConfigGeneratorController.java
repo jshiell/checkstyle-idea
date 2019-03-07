@@ -25,6 +25,7 @@ public class ConfigGeneratorController {
     this.view = view;
     this.model = model;
     this.view.getConfigEditor().setCategories(this.model.getAvailableRules().keySet());
+    this.view.getAttrEditor().setRuleProvider(this.model.getRuleProvider());
     addListeners();
   }
 
@@ -34,6 +35,8 @@ public class ConfigGeneratorController {
   protected void addListeners() {
     this.view.getConfigEditor().addButtonListener(new ImportButtonListener(this.view, this.model),
         ConfigurationListeners.IMPORT_BUTTON_LISTENER);
+    this.view.getConfigEditor().addButtonListener(new ClearButtonListener(this.view),
+        ConfigurationListeners.CLEAR_BUTTON_LISTENER);
     this.view.getConfigEditor().addButtonListener(new PreviewButtonListener(this.view, this.model),
         ConfigurationListeners.PREVIEW_BUTTON_LISTENER);
     this.view.getConfigEditor().addButtonListener(new GenerateButtonListener(this.view, this.model),

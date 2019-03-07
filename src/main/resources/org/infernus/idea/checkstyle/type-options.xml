@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE root>
+
+<root>
+    <type name="Line Separator Policy">
+        <option value="crlf"/>
+        <option value="cr"/>
+        <option value="lf"/>
+        <option value="lf_cr_crlf" />
+        <option value="system"/>
+    </type>
+    <type name="Pad Policy">
+        <option value="nospace" />
+        <option value="space" />
+    </type>
+    <type name="Wrap Operator Policy">
+        <option value="nl"/>
+        <option value="eol"/>
+    </type>
+    <type name="Block Policy">
+        <option value="text"/>
+        <option value="statement"/>
+    </type>
+    <type name="Scope">
+        <option value="nothing"/>
+        <option value="public"/>
+        <option value="protected" />
+        <option value="package"/>
+        <option value="private"/>
+        <option value="anoninner" />
+    </type>
+    <type name="Severity">
+        <option value="ignore"/>
+        <option value="info"/>
+        <option value="warning"/>
+        <option value="error"/>
+    </type>
+    <type name="Import Order Policy">
+        <option value="top"/>
+        <option value="above"/>
+        <option value="inflow"/>
+        <option value="under"/>
+        <option value="bottom"/>
+    </type>
+    <type name="Element Style">
+        <option value="expanded"/>
+        <option value="compact"/>
+        <option value="compact_no_array"/>
+        <option value="ignore"/>
+    </type>
+    <type name="Closing Parens">
+        <option value="always"/>
+        <option value="never"/>
+        <option value="ignore"/>
+    </type>
+    <type name="Trailing Comma">
+        <option value="always"/>
+        <option value="never"/>
+        <option value="ignore"/>
+    </type>
+</root>

@@ -16,10 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -28,9 +25,12 @@ import java.util.regex.Pattern;
 public class CheckStyleRuleProvider {
   private String defaultRules;
   private File customRules;
+  private String typeOptions;
 
   private Map<String, List<ConfigRule>> defuleRuleByCategory;
   private Map<String, ConfigRule> allDefaultRule;
+
+  private Map<String, Set<String>> defaultTypeOption;
 
   // TODO: read custom rules
 
@@ -57,11 +57,14 @@ public class CheckStyleRuleProvider {
 
   public CheckStyleRuleProvider() {
     this.defaultRules = "/org/infernus/idea/checkstyle/available-rules.xml";
+    this.typeOptions = "/org/infernus/idea/checkstyle/type-options.xml";
 
     this.defuleRuleByCategory = new HashMap<String, List<ConfigRule>>();
     this.allDefaultRule = new HashMap<String, ConfigRule>();
+    this.defaultTypeOption = new HashMap<String, Set<String>>();
 
     this.parseDefaultRules();
+    this.parseDefaultTypeOptions();
   }
 
   private void parseDefaultRules() {
@@ -140,11 +143,57 @@ public class CheckStyleRuleProvider {
 
     PropertyMetadata id = new PropertyMetadata("id");
     id.setType("String");
+    id.setDescription("Each module has a id property that can rename the module name to be a name defined by the user. This is used to differentiate two instances of the same Check. This custom module name should be unique for the entire configuration to prevent accidental overlapping. This custom name is required to be able to suppress violations of 1 of the checks in specific scenarios, while leaving the other unaffected. Without the custom module name, it is harder to differentiate one module's violations from the other.");
     id.setDefaultValue("null");
 
     output.addParameter("id", id);
 
+    PropertyMetadata severty = new PropertyMetadata("severity");
+    severty.setType("Severity");
+    severty.setDescription("the default severity level of all violations");
+    severty.setDefaultValue("error");
+
+    if (!output.getRuleName().equals("Checker")) {
+      output.addParameter(severty.getName(), severty);
+    }
+
     return output;
+  }
+
+  private void parseDefaultTypeOptions() {
+    try {
+      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      docFactory.setValidating(false);
+      docFactory.setIgnoringElementContentWhitespace(true);
+      docFactory.setSchema(null);
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      docBuilder.setEntityResolver(new CheckStyleRuleProvider.NullEntityResolver());
+      Document configDOM = docBuilder.parse(getClass().getResourceAsStream(this.typeOptions));
+      Element root = configDOM.getDocumentElement();
+
+      NodeList children = root.getChildNodes();
+
+      for (int i = 0; i < children.getLength(); i++) {
+        if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+          Element child = (Element) children.item(i);
+          this.defaultTypeOption.put(child.getAttribute("name"), new TreeSet<String>());
+
+          NodeList options = child.getElementsByTagName("option");
+          for (int j = 0; j < options.getLength(); j++) {
+            Element optionNode = (Element)options.item(j);
+            this.defaultTypeOption.get(child.getAttribute("name")).add(optionNode.getAttribute("value"));
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      System.out.println("In here");
+      System.out.println(e.getClass());
+      StackTraceElement[] eles = e.getStackTrace();
+      for (int j = 0; j < eles.length; j++) {
+        System.out.println(eles[j].toString());
+      }
+    }
   }
 
   /**
@@ -180,8 +229,17 @@ public class CheckStyleRuleProvider {
   }
 
   /**
-   * A helper resolver that stops Java from trying to reach to DTD server, see
-   * https://stackoverflow.com/questions/6539051/how-can-i-tell-xalan-not-to-validate-xml-retrieved-using-the-document-function
+   * @param type - The type to retrieve its options
+   * @return The set of the option of the given type. null when
+   *         such set doesn't exist. The set is pre-sorted
+   */
+  public Set<String> getTypeOptions(String type) {
+    return this.defaultTypeOption.get(type);
+  }
+
+  /**
+   * A helper resolver that stops Java from trying to reach to DTD server,
+   * see https://stackoverflow.com/questions/6539051/how-can-i-tell-xalan-not-to-validate-xml-retrieved-using-the-document-function
    * for full detail
    */
   private static class NullEntityResolver implements EntityResolver {

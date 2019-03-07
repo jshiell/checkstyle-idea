@@ -12,6 +12,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -22,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.intellij.ui.JBSplitter;
 
@@ -50,12 +55,16 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
   /** The list of selectable categories in the "Categories" panel. */
   private JList<String> categoryList;
   /** The list of selectable rules in the "Visible Rules" panel. */
+  private List<ConfigRule> visibleRules;
+  /** The list of selectable rules in the "Visible Rules" panel. */
   private JList<ConfigRule> visibleRulesList;
   /** The list of selectable rules in the "Active Rules" panel. */
   private JList<ConfigRule> activeRulesList;
 
   /** The listeners that have been registered with the "Import" button. */
   private Collection<ActionListener> importBtnListeners;
+  /** The listeners that have been registered with the "Clear" button. */
+  private Collection<ActionListener> clearBtnListeners;
   /** The listeners that have been registered with the "Preview" button. */
   private Collection<ActionListener> previewBtnListeners;
   /** The listeners that have been registered with the "Generate" button. */
@@ -82,12 +91,13 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     //////// Field Initialization ///////////////
     this.configNameField = new JTextField(20);
     this.categoryLabel = new JLabel();
-    
+
     this.categoryList = new JList<>();
     this.visibleRulesList = new JList<>();
     this.activeRulesList = new JList<>();
-    
+
     this.importBtnListeners = new ArrayList<>();
+    this.clearBtnListeners = new ArrayList<>();
     this.previewBtnListeners = new ArrayList<>();
     this.generateBtnListeners = new ArrayList<>();
     this.categorySelectListeners = new ArrayList<>();
@@ -119,7 +129,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    * @return The top row of the editor window.
    */
   protected JPanel createTopRow() {
-    JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEADING));
+    JPanel topRow = new JPanel(new BorderLayout());
+    topRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
     JButton importBtn = new JButton("Import");
     importBtn.addActionListener(new ActionListener() {
@@ -128,7 +139,42 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
         importBtnListeners.forEach(ibl -> ibl.actionPerformed(e));
       }
     });
-    topRow.add(importBtn);
+    topRow.add(importBtn, BorderLayout.WEST);
+
+    JTextField search = new JTextField();
+    search.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      private void handlechange() {
+        List<ConfigRule> lst = visibleRules.stream()
+            .filter(cr -> cr.getRuleName().toLowerCase().contains(search.getText().toLowerCase()))
+            .collect(Collectors.toList());
+        visibleRulesList.setListData(lst.toArray(new ConfigRule[lst.size()]));
+      }
+    });
+    topRow.add(search);
+
+    JButton clearBtn = new JButton("Clear");
+    clearBtn.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        clearBtnListeners.forEach(cbl -> cbl.actionPerformed(e));
+      }
+    });
+    topRow.add(clearBtn, BorderLayout.EAST);
 
     topRow.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
     return topRow;
@@ -141,13 +187,15 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    * @return The bottom row of the editor window.
    */
   protected JPanel createBottomRow() {
-    JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.LEADING));
+    JPanel bottomRow = new JPanel(new BorderLayout());
+    bottomRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    JPanel bottomRight = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
-    bottomRow.add(Box.createHorizontalStrut(4));
-    bottomRow.add(new JLabel("Configuration Name:"));
-    bottomRow.add(Box.createHorizontalStrut(4));
+    // bottomRow.add(Box.createHorizontalStrut(4));
+    bottomRow.add(new JLabel("Configuration Name: "), BorderLayout.WEST);
+    // bottomRow.add(Box.createHorizontalStrut(4));
     bottomRow.add(this.configNameField);
-    bottomRow.add(Box.createHorizontalStrut(4));
+    bottomRight.add(Box.createHorizontalStrut(4));
 
     JButton previewBtn = new JButton("Preview");
     previewBtn.addActionListener(new ActionListener() {
@@ -156,8 +204,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
         previewBtnListeners.forEach(pbl -> pbl.actionPerformed(e));
       }
     });
-    bottomRow.add(previewBtn);
-    bottomRow.add(Box.createHorizontalStrut(4));
+    bottomRight.add(previewBtn);
+    bottomRight.add(Box.createHorizontalStrut(4));
 
     JButton generateBtn = new JButton("Generate");
     generateBtn.addActionListener(new ActionListener() {
@@ -166,8 +214,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
         generateBtnListeners.forEach(gbl -> gbl.actionPerformed(e));
       }
     });
-    bottomRow.add(generateBtn);
-    bottomRow.add(Box.createHorizontalGlue());
+    bottomRight.add(generateBtn);
+    bottomRow.add(bottomRight, BorderLayout.EAST);
 
     bottomRow.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
     return bottomRow;
@@ -329,7 +377,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   public void setVisibleRules(String category, Collection<ConfigRule> rules) {
     this.categoryLabel.setText(category);
-    this.visibleRulesList.setListData(rules.toArray(new ConfigRule[rules.size()]));
+    this.visibleRules = new ArrayList<>(rules);
+    Collections.sort(this.visibleRules);
+    this.visibleRulesList.setListData(this.visibleRules.toArray(new ConfigRule[rules.size()]));
   }
 
   /**
@@ -392,6 +442,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     switch (button) {
     case IMPORT_BUTTON_LISTENER:
       this.importBtnListeners.add(al);
+      break;
+    case CLEAR_BUTTON_LISTENER:
+      this.clearBtnListeners.add(al);
       break;
     case PREVIEW_BUTTON_LISTENER:
       this.previewBtnListeners.add(al);

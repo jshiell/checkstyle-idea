@@ -18,6 +18,7 @@ public class ImportConfigListener implements ImportSubmitListener {
   public void configSubmitted(String configName) {
     try {
       this.model.importConfig(configName);
+      this.view.getConfigEditor().setConfigurationName(configName);
     } catch (Exception ex) {
       System.out.println("\n\n\n" + ex.getClass() + " - " + ex.getLocalizedMessage() + "\n\n\n");
     }
