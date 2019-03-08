@@ -10,9 +10,19 @@ import javax.swing.JFrame;
 
 import com.intellij.openapi.util.IconLoader;
 
+/**
+ * This class provides functions used by more than one of the
+ * ConfigGeneratorView's windows that handle logic such as arranging and
+ * displaying the window and setting the icon image.
+ */
 public abstract class ConfigGeneratorWindow extends JFrame {
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Instantiates a ConfigGeneratorWindow by setting the Icon Image to the
+   * CheckStyle logo and calling the <code>createWindowContent()</code> function
+   * to be defined by subclasses
+   */
   public ConfigGeneratorWindow() {
     super();
     setIconImage(iconToImage(IconLoader.getIcon("/org/infernus/idea/checkstyle/images/checkstyle32.png")));
@@ -20,14 +30,23 @@ public abstract class ConfigGeneratorWindow extends JFrame {
     setLocationByPlatform(true);
   }
 
+  /**
+   * Abstract function to add the window contents to the window
+   */
   protected abstract void createWindowContent();
 
+  /**
+   * Re-arrange the window while it is either visible or not
+   */
   protected void arrange() {
     pack();
     revalidate();
     repaint();
   }
 
+  /**
+   * Set this window to be visible and send it to the front
+   */
   protected void display() {
     if (!isVisible()) {
       setVisible(true);
@@ -54,6 +73,12 @@ public abstract class ConfigGeneratorWindow extends JFrame {
     }
   }
 
+  /**
+   * Convert a string from "camelCase" to "Title case"
+   * 
+   * @param camel The string (in camelCase) to re-format
+   * @return <code>camel</code> converted to Title case
+   */
   public static String camelToTitle(String camel) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < camel.length(); i++) {

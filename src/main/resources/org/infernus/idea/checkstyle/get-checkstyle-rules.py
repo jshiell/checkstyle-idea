@@ -1,8 +1,15 @@
+import sys
 import requests
 import urllib.request
 import time
 from bs4 import BeautifulSoup
 import re
+
+'''
+This script takes either 0 or 1 arguments, the path to the file to output to.
+If the argument is not provided this defaults to "available-rules.xml" in the
+directory from which the script was run.
+'''
 
 extensions = ['annotation', 'blocks', 'design', 'coding', 'header', 'imports',
               'javadoc', 'metrics', 'misc', 'modifier', 'naming', 'regexp', 'sizes', 'whitespace']
@@ -141,14 +148,14 @@ def get_attribute_line(attr_row, name_idx=0, desc_idx=1, type_idx=2, default_idx
   )
 
 def escape_raw_string(
-  raw_desc,
+  raw,
   amp_escape='&amp;',
   quot_escape='&quot;',
   lt_escape='&lt;',
   gt_escape='&gt;'
 ):
-  escaped_desc = (
-    raw_desc
+  escaped = (
+    raw
     .replace('\n', '')
     .replace('&', amp_escape)
     .replace('"', quot_escape)
@@ -156,9 +163,14 @@ def escape_raw_string(
     .replace('>', gt_escape)
     .strip()
   )
-  return re.sub(' +', ' ', escaped_desc)
+  return re.sub(' +', ' ', escaped)
 
-out = open('available-rules.xml', 'w')
+if len(sys.argv) == 2:
+  file_name = sys.argv[1]
+else:
+  file_name = 'available-rules.xml'
+
+out = open(file_name, 'w')
 
 xml = get_header_lines() + [
   '<root>',

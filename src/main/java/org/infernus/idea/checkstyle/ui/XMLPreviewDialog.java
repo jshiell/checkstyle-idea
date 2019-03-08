@@ -21,7 +21,7 @@ public class XMLPreviewDialog extends ConfigGeneratorWindow {
   
   /**
    * Sets the text area as uneditable, gives it a border, and adds it to the
-   * frame.
+   * frame
    */
   protected void createWindowContent() {
     setTitle("XML Preview");
@@ -39,7 +39,7 @@ public class XMLPreviewDialog extends ConfigGeneratorWindow {
   }
 
   /**
-   * Opens the preview window with xml in the text area.
+   * Opens the preview window with xml in the text area
    * @param xml The xml preview
    */
   public void display(String xml) {

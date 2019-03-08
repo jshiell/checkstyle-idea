@@ -25,36 +25,46 @@ import org.infernus.idea.checkstyle.listeners.ImportSubmitListener;
 public class ImportConfigDialog extends ConfigGeneratorWindow {
   private static final long serialVersionUID = 19L;
 
-  private JPanel centerPanel;
+  /**
+   * The combo box containining the list of Configurations that can be imported
+   */
   private JComboBox<String> combo;
-
+  /**
+   * Listeners registered with the "OK" button
+   */
   private Collection<ImportSubmitListener> submissionListeners = new ArrayList<>();
 
   /**
-   * 
+   * Sets the title and size of the window, adds a combo box to the center panel,
+   * and adds the "OK" and "Cancel" buttons (via createBottomRow())
    */
   protected void createWindowContent() {
     setTitle("Import Configuration");
     setMinimumSize(new Dimension(900, 100));
 
-    this.centerPanel = new JPanel(new GridLayout(0, 1));
-    this.centerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    JPanel centerPanel = new JPanel(new GridLayout(0, 1));
+    centerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
     this.combo = new JComboBox<>(new DefaultComboBoxModel<String>());
 
-    this.centerPanel.add(this.combo);
+    centerPanel.add(this.combo);
 
     getContentPane().setLayout(new BorderLayout());
-    getContentPane().add(this.centerPanel, BorderLayout.CENTER);
+    getContentPane().add(centerPanel, BorderLayout.CENTER);
     getContentPane().add(createBottomRow(), BorderLayout.SOUTH);
   }
 
+  /**
+   * Creates a horiontal JPanel containing "OK" and "Cancel" buttons
+   * 
+   * @return The panel to be used as the bottom row of the dialog
+   */
   protected JPanel createBottomRow() {
     JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 
     bottomRow.add(Box.createHorizontalStrut(4));
     JButton okBtn = new JButton("OK");
-    okBtn.addActionListener(new ActionListener(){
+    okBtn.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         submissionListeners.forEach(sl -> sl.configSubmitted((String) combo.getSelectedItem()));
@@ -77,7 +87,10 @@ public class ImportConfigDialog extends ConfigGeneratorWindow {
   }
 
   /**
+   * Displays the dialog with <code>configNames</code> as the values in the combo
+   * box
    * 
+   * @param configNames The names of Configurations that can be imported
    */
   public void display(Collection<String> configNames) {
     this.combo.removeAllItems();
@@ -89,6 +102,9 @@ public class ImportConfigDialog extends ConfigGeneratorWindow {
     super.display();
   }
 
+  /**
+   * Register a listener with the "OK" button
+   */
   public void addSubmitListener(ImportSubmitListener isl) {
     this.submissionListeners.add(isl);
   }
