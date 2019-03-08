@@ -11,11 +11,6 @@ import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
  * Rules" selection pane and opens the attribute editor.
  */
 public class ActiveRuleSelectListener extends SelectListener {
-  /** The view of the Checkstyle Configuration GUI */
-  private ConfigGeneratorView view;
-  /** The model of the Checkstyle Configuration GUI, handles the data */
-  private ConfigGeneratorModel model;
-
   /**
    * Initializes an ActiveRuleSelectListener
    * 

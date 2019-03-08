@@ -76,6 +76,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private final ToolWindow toolWindow;
     private final ComboBox configurationOverrideCombo = new ComboBox();
     private final DefaultComboBoxModel configurationOverrideModel = new DefaultComboBoxModel();
+
+    /** This is the entry point for the ConfigGenerator GUI */
     private final ConfigGeneratorController configController;
 
     private boolean displayingErrors = true;
@@ -113,7 +115,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         this.toolWindow = toolWindow;
         this.project = project;
-        this.configController = new ConfigGeneratorController(new ConfigGeneratorView(), new ConfigGeneratorModel(project));
+        this.configController = new ConfigGeneratorController(new ConfigGeneratorView(),
+            new ConfigGeneratorModel(project));
 
         checkStylePlugin = project.getComponent(CheckStylePlugin.class);
         if (checkStylePlugin == null) {
@@ -172,6 +175,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         resultsTree.addKeyListener(new ToolWindowKeyboardListener());
         resultsTree.setCellRenderer(new ResultTreeRenderer());
 
+        // Add a button to open the ConfigGenerator GUI
         JButton configButton = new JButton(
             "Configuration Editor",
             IconLoader.getIcon("/actions/moveToStandardPlace@2x.png"));

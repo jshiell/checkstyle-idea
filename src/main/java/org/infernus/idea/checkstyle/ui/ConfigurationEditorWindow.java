@@ -191,9 +191,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     bottomRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
     JPanel bottomRight = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
-    // bottomRow.add(Box.createHorizontalStrut(4));
     bottomRow.add(new JLabel("Configuration Name: "), BorderLayout.WEST);
-    // bottomRow.add(Box.createHorizontalStrut(4));
     bottomRow.add(this.configNameField);
     bottomRight.add(Box.createHorizontalStrut(4));
 
@@ -433,7 +431,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
   /**
    * Registers a listener for one of the buttons in the editor window (Import,
-   * Preview, Generate).
+   * Clear, Preview, Generate).
    * 
    * @param al     The listener to register
    * @param button The button with which to register <code>al</code>
