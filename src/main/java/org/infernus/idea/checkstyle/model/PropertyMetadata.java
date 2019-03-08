@@ -97,21 +97,21 @@ public class PropertyMetadata implements Comparable<PropertyMetadata> {
       if (this.name == null && pm.name == null) {
         return 0;
       } else if (this.name == null) {
-        return -1;
-      } else {
         return 1;
+      } else {
+        return -1;
       }
     } else if (this.name.equals(pm.name)) {
       return 0;
     } else {
       if (this.name.equals("id")) {
-        return 1;
+        return -1;
       } else if (pm.name.equals("id")) {
-        return -1;
-      } else if (this.name.equals("severity")) {
         return 1;
-      } else if (pm.name.equals("severity")) {
+      } else if (this.name.equals("severity")) {
         return -1;
+      } else if (pm.name.equals("severity")) {
+        return 1;
       } else {
         return this.name.compareTo(pm.name);
       }

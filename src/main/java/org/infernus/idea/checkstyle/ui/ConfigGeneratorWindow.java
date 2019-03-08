@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -17,6 +18,20 @@ import com.intellij.openapi.util.IconLoader;
  */
 public abstract class ConfigGeneratorWindow extends JFrame {
   private static final long serialVersionUID = 1L;
+
+  public static final int HEADER_FONT_SIZE = 18;
+  public static final int BORDER = 5;
+  public static final int SCROLLPANE_HEIGHT = 200;
+  public static final int SCROLLPANE_WIDTH = 200;
+
+  public static final Dimension EDITOR_MIN_SIZE = new Dimension(750, 450);
+
+  public static final Dimension IMPORT_MIN_SIZE = new Dimension(300, 100);
+
+  public static final Dimension ATTRIBUTES_MIN_SIZE = new Dimension(300, 200);
+  public static final Dimension ATTRIBUTES_MAX_SIZE = new Dimension(800, 400);
+  
+  public static final Dimension PREVIEW_MAX_SIZE = new Dimension(800, 800);
 
   /**
    * Instantiates a ConfigGeneratorWindow by setting the Icon Image to the

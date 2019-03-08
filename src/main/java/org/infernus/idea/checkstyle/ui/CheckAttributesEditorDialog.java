@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -88,8 +87,8 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
    */
   protected void createWindowContent() {
     setTitle("Attributes Editor");
-    setMinimumSize(new Dimension(600, 400));
-    setMaximumSize(new Dimension(1920, 1080));
+    setMinimumSize(ATTRIBUTES_MIN_SIZE);
+    setMaximumSize(ATTRIBUTES_MAX_SIZE);
     setResizable(false);
 
     //////// Field Initialization ///////////////
@@ -101,14 +100,14 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     /////////////////////////////////////////////
 
     this.centerPanel.setLayout(new GridLayout(0, 2));
-    this.centerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    this.centerPanel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     JPanel topRow = new JPanel(new BorderLayout());
     Font font = this.nameLabel.getFont();
-    this.nameLabel.setFont(new Font(font.getName(), Font.BOLD, 48));
+    this.nameLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
     topRow.add(this.nameLabel, BorderLayout.NORTH);
     topRow.add(this.descLabel, BorderLayout.SOUTH);
-    topRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    topRow.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add(topRow, BorderLayout.NORTH);
@@ -125,6 +124,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
    */
   protected JPanel createBottomRow() {
     JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+    bottomRow.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     bottomRow.add(Box.createHorizontalStrut(4));
     this.okBtn.addActionListener(new ActionListener() {

@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -18,21 +17,20 @@ public class XMLPreviewDialog extends ConfigGeneratorWindow {
    * The text area that displays the XML string
    */
   private JTextArea textArea;
-  
+
   /**
-   * Sets the text area as uneditable, gives it a border, and adds it to the
-   * frame
+   * Sets the text area as uneditable, gives it a border, and adds it to the frame
    */
   protected void createWindowContent() {
     setTitle("XML Preview");
     this.textArea = new JTextArea();
     this.textArea.setEditable(false);
-    this.textArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-    
+    this.textArea.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
+
     JScrollPane scrollPane = new JScrollPane(textArea);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-    setMaximumSize(new Dimension((int) getMaximumSize().getWidth(), 1500));
+    setMaximumSize(PREVIEW_MAX_SIZE);
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -40,6 +38,7 @@ public class XMLPreviewDialog extends ConfigGeneratorWindow {
 
   /**
    * Opens the preview window with xml in the text area
+   * 
    * @param xml The xml preview
    */
   public void display(String xml) {
