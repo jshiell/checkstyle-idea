@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.listeners;
 
-import java.util.stream.Collectors;
-
 import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.model.XMLConfig;
 import org.infernus.idea.checkstyle.listeners.AttributeSubmissionListener;
@@ -12,12 +10,7 @@ import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
  * "Cancel/Delete" buttons in the attributes editor window and adds or removes
  * the corresponding XMLConfigs.
  */
-public class AttributeSubmitListener implements AttributeSubmissionListener {
-  /** The view of the Checkstyle Configuration GUI */
-  ConfigGeneratorView view;
-  /** The model of the Checkstyle Configuration GUI, handles the data */
-  ConfigGeneratorModel model;
-
+public class AttributeSubmitListener extends ConfigGeneratorListener implements AttributeSubmissionListener {
   /**
    * Initializes an AttributeSubmissionListener
    * 
@@ -39,8 +32,7 @@ public class AttributeSubmitListener implements AttributeSubmissionListener {
   public void attributeSubmitted(XMLConfig xmlRule, boolean isNewRule) {
     if (isNewRule) {
       this.model.addActiveRule(xmlRule);
-      this.view.getConfigEditor().setActiveRules(this.model.getActiveRules().stream()
-          .map(rule -> this.model.getConfigRuleforXML(rule)).collect(Collectors.toList()));
+      updateActiveRules();
     }
   }
 
@@ -54,8 +46,7 @@ public class AttributeSubmitListener implements AttributeSubmissionListener {
   public void attributeCancelled(XMLConfig xmlRule, boolean isNewRule) {
     if (!isNewRule) {
       this.model.removeActiveRule(xmlRule);
-      this.view.getConfigEditor().setActiveRules(this.model.getActiveRules().stream()
-          .map(rule -> this.model.getConfigRuleforXML(rule)).collect(Collectors.toList()));
+      updateActiveRules();
     }
   }
 }

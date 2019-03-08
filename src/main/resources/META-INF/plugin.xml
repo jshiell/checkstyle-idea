@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <idea-plugin url="https://github.com/jshiell/checkstyle-idea">
-    <id>CheckStyle-IDEA</id>
-    <name>CheckStyle-IDEA</name>
+    <id>CheckStyle-IDEA-FLINT</id>
+    <name>CheckStyle-IDEA (Flint Distribution)</name>
     <resource-bundle>org.infernus.idea.checkstyle.CheckStyleBundle</resource-bundle>
     <description>
         <![CDATA[

@@ -10,15 +10,11 @@ import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
  * This class represents a listener that responds to a click of the "Import"
  * button and displays the configuration selection dialog.
  */
-public class ImportButtonListener implements ActionListener {
-  /** The view of the Checkstyle Configuration GUI */
-  private ConfigGeneratorView view;
-  /** The model of the Checkstyle Configuration GUI, handles the data */
-  private ConfigGeneratorModel model;
-
+public class ImportButtonListener extends ConfigGeneratorListener implements ActionListener {
   /**
    * Initializes an ImportButtonListener
-   * @param view The view this listener is attached to
+   * 
+   * @param view  The view this listener is attached to
    * @param model The model that represents the data for this instance of the GUI
    */
   public ImportButtonListener(ConfigGeneratorView view, ConfigGeneratorModel model) {
@@ -28,6 +24,7 @@ public class ImportButtonListener implements ActionListener {
 
   /**
    * Displays the configuration selection dialog
+   * 
    * @param e The event that triggered this function
    */
   @Override

@@ -13,6 +13,8 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -49,25 +51,41 @@ import org.infernus.idea.checkstyle.util.PropertyValueValidator;
 public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
   private static final long serialVersionUID = 13L;
 
-  /**
-   * The center panel that displays attribute names and values
-   */
+  /** The center panel that displays attribute names and values */
   private JPanel centerPanel;
+  /** The label that displays the name of the current rule */
   private JLabel nameLabel;
+  /** The label that displays the description of the current rule */
   private JLabel descLabel;
+  /** The "OK" button */
   private JButton okBtn;
+  /** The "Cancel/Delete" button */
   private JButton cancelBtn;
 
+  /** The state (attribute values) of the current rule */
   private XMLConfig xmlRule;
+  /**
+   * Whether or not this dialog was displayed for a rule that is already active
+   */
   private boolean isNewRule;
 
+  /**
+   * Utility class to get data about rules, set by the controller and used for
+   * attribute validation
+   */
   private CheckStyleRuleProvider provider;
 
   /**
-   * The listeners that have been registered with the "OK" button
+   * The listeners that have been registered with the "OK" and "Cancel/Delete"
+   * buttons
    */
   private final Collection<AttributeSubmissionListener> submissionListeners = new ArrayList<>();
 
+  /**
+   * Sets the title and sizes of this window, initializes the JComponent fields,
+   * adds the name and description labels to the window, as well as the "OK" and
+   * "Cancel/Delete" buttons (via createBottomRow())
+   */
   protected void createWindowContent() {
     setTitle("Attributes Editor");
     setMinimumSize(new Dimension(600, 400));
@@ -98,6 +116,13 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     getContentPane().add(createBottomRow(), BorderLayout.SOUTH);
   }
 
+  /**
+   * Adds click listeners to both bottom-row buttons and adds them to a horizontal
+   * JPanel
+   * 
+   * @return A horizontally-aligned panel containing the "OK" and "Cancel/Delete"
+   *         buttons
+   */
   protected JPanel createBottomRow() {
     JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 
@@ -126,10 +151,26 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     return bottomRow;
   }
 
+  /**
+   * Displays the attributes editor window for <code>rule</code>. Call this
+   * function if <code>rule</code> is not active (i.e. part of the current
+   * configuration)
+   * 
+   * @param rule The rule to display the attributes for
+   */
   public void displayForCheck(ConfigRule rule) {
     displayForCheck(rule, null);
   }
 
+  /**
+   * Displays the attributes editor window for
+   * <code>rule</code>/<code>config</code>. If <code>config</code> is null,
+   * <code>rule</code> represents a non-active rule
+   * 
+   * @param rule   The rule to display the attributes for
+   * @param config The present state of the rule (if it is active, some attributes
+   *               may have already been set)
+   */
   public void displayForCheck(ConfigRule rule, XMLConfig config) {
     this.okBtn.setEnabled(true);
     this.isNewRule = config == null;
@@ -140,7 +181,9 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     this.cancelBtn.setText(this.isNewRule ? "Cancel" : "Delete");
 
     this.centerPanel.removeAll();
-    for (PropertyMetadata entry : rule.getParameters().values()) {
+    List<PropertyMetadata> properties = new ArrayList<>(rule.getParameters().values());
+    Collections.sort(properties);
+    for (PropertyMetadata entry : properties) {
       String attr = entry.getName();
 
       JLabel label = new JLabel(camelToTitle(attr) + ": ");
@@ -148,6 +191,10 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
       label.setToolTipText(entry.getDescription());
       this.centerPanel.add(label);
 
+      // Use getInputComponent() to determine what input component to display for this
+      // attribute
+      // Pass null if this is a non-active rule or if this attribute has not been set
+      // yet
       this.centerPanel.add(
           getInputComponent(entry, this.isNewRule || !config.isAttributeSet(attr) ? null : config.getAttribute(attr)));
     }
@@ -156,6 +203,16 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     super.display();
   }
 
+  /**
+   * Determines what input component is appropriate for the given rule type and
+   * provides it
+   * 
+   * @param prop  The attribute for which to get an input component
+   * @param value The current value of <code>prop</code> for this rule or null if
+   *              <code>prop</code> has not been set
+   * @return A JComboBox, JSpinner, JCheckBox, or JTextField to serve as the input
+   *         for <code>prop</code>
+   */
   protected JComponent getInputComponent(PropertyMetadata prop, String value) {
     Set<String> typeOptions = null;
     if (provider != null) {

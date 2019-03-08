@@ -3,7 +3,11 @@ package org.infernus.idea.checkstyle.listeners;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class SelectListener implements MouseListener {
+/**
+ * This class stubs out all "MouseListener" methods so that its subclasses need
+ * only define the ones they want to respond to.
+ */
+public class SelectListener extends ConfigGeneratorListener implements MouseListener {
   @Override
   public void mouseClicked(MouseEvent e) {
   }

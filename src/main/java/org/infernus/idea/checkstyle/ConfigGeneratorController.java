@@ -35,7 +35,7 @@ public class ConfigGeneratorController {
   protected void addListeners() {
     this.view.getConfigEditor().addButtonListener(new ImportButtonListener(this.view, this.model),
         ConfigurationListeners.IMPORT_BUTTON_LISTENER);
-    this.view.getConfigEditor().addButtonListener(new ClearButtonListener(this.view),
+    this.view.getConfigEditor().addButtonListener(new ClearButtonListener(this.view, this.model),
         ConfigurationListeners.CLEAR_BUTTON_LISTENER);
     this.view.getConfigEditor().addButtonListener(new PreviewButtonListener(this.view, this.model),
         ConfigurationListeners.PREVIEW_BUTTON_LISTENER);
