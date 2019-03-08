@@ -26,6 +26,8 @@ public class ConfigGeneratorModel {
     /** XMLConfig representations of all the active rules for the config */
     private List<XMLConfig> xmlConfigs;
 
+    private CheckStyleRuleProvider provider;
+
     /** The state of the user's project */
     private Project project;
 
@@ -34,8 +36,6 @@ public class ConfigGeneratorModel {
      * mapping to lists of all available rules in each category
      */
     private TreeMap<String, List<ConfigRule>> possibleRules;
-
-    private CheckStyleRuleProvider provider;
 
     /**
      * Creates a new ConfigGeneratorModel with a blank XML configuration, file name,
@@ -72,6 +72,15 @@ public class ConfigGeneratorModel {
         }
         String filepath = project.getBasePath() + "/.idea/configs/" + fileName + ".xml";
         ConfigWriter.saveConfig(filepath, config);
+        VirtualFile s = project.getBaseDir();
+        VirtualFile idea = null;
+        for (VirtualFile dir : s.getChildren()) {
+            if (dir.getName().equals(".idea")) {
+                idea = dir;
+                idea.refresh(false,true);
+                break;
+            }
+        }
     }
 
     /**
@@ -226,6 +235,6 @@ public class ConfigGeneratorModel {
     }
 
     public CheckStyleRuleProvider getRuleProvider() {
-      return this.provider;
+        return this.provider;
     }
 }

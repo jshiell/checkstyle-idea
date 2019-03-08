@@ -196,7 +196,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
       // Pass null if this is a non-active rule or if this attribute has not been set
       // yet
       this.centerPanel.add(
-          getInputComponent(entry, this.isNewRule || !config.isAttributeSet(attr) ? null : config.getAttribute(attr)));
+              getInputComponent(entry, this.isNewRule || !config.isAttributeSet(attr) ? null : config.getAttribute(attr)));
     }
 
     super.arrange();
