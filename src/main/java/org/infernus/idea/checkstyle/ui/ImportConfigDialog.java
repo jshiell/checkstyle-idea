@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -40,10 +39,10 @@ public class ImportConfigDialog extends ConfigGeneratorWindow {
    */
   protected void createWindowContent() {
     setTitle("Import Configuration");
-    setMinimumSize(new Dimension(900, 100));
+    setMinimumSize(IMPORT_MIN_SIZE);
 
     JPanel centerPanel = new JPanel(new GridLayout(0, 1));
-    centerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    centerPanel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     this.combo = new JComboBox<>(new DefaultComboBoxModel<String>());
 

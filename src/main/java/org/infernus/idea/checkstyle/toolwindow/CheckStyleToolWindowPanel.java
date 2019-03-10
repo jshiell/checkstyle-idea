@@ -178,8 +178,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         // Add a button to open the ConfigGenerator GUI
         JButton configButton = new JButton(
             "Configuration Editor",
-            IconLoader.getIcon("/actions/moveToStandardPlace@2x.png"));
-        configButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            IconLoader.getIcon("/actions/moveToStandardPlace.png"));
+        configButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         configButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {

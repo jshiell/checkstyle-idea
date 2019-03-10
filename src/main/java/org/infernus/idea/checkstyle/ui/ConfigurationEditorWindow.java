@@ -86,7 +86,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   protected void createWindowContent() {
     setTitle("Configuration Editor");
-    setMinimumSize(new Dimension(1500, 900));
+    setMinimumSize(EDITOR_MIN_SIZE);
 
     //////// Field Initialization ///////////////
     this.configNameField = new JTextField(20);
@@ -130,7 +130,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   protected JPanel createTopRow() {
     JPanel topRow = new JPanel(new BorderLayout());
-    topRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    topRow.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     JButton importBtn = new JButton("Import");
     importBtn.addActionListener(new ActionListener() {
@@ -188,7 +188,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   protected JPanel createBottomRow() {
     JPanel bottomRow = new JPanel(new BorderLayout());
-    bottomRow.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    bottomRow.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
     JPanel bottomRight = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
     bottomRow.add(new JLabel("Configuration Name: "), BorderLayout.WEST);
@@ -238,11 +238,11 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JScrollPane scrollPane = new JScrollPane(this.categoryList);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setMinimumSize(new Dimension(200, 400));
-    scrollPane.setPreferredSize(new Dimension(200, 800));
+    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
+    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
 
     panel.add(scrollPane, BorderLayout.CENTER);
-    panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    panel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
     return panel;
   }
 
@@ -256,7 +256,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
     Font font = this.categoryLabel.getFont();
-    this.categoryLabel.setFont(new Font(font.getName(), Font.BOLD, 48));
+    this.categoryLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
 
     topRow.add(Box.createHorizontalStrut(4));
     topRow.add(this.categoryLabel);
@@ -288,12 +288,12 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JScrollPane scrollPane = new JScrollPane(this.visibleRulesList);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setMinimumSize(new Dimension(800, 200));
-    scrollPane.setPreferredSize(new Dimension(800, 400));
+    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH, SCROLLPANE_HEIGHT));
+    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH, SCROLLPANE_HEIGHT));
 
     panel.add(topRow, BorderLayout.NORTH);
     panel.add(scrollPane, BorderLayout.CENTER);
-    panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    panel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
     return panel;
   }
 
@@ -308,7 +308,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JLabel activeLabel = new JLabel("Active Rules");
     Font font = activeLabel.getFont();
-    activeLabel.setFont(new Font(font.getName(), Font.BOLD, 48));
+    activeLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
 
     topRow.add(Box.createHorizontalStrut(4));
     topRow.add(activeLabel);
@@ -340,12 +340,12 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JScrollPane scrollPane = new JScrollPane(this.activeRulesList);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setMinimumSize(new Dimension(800, 200));
-    scrollPane.setPreferredSize(new Dimension(800, 400));
+    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH, SCROLLPANE_HEIGHT));
+    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH, SCROLLPANE_HEIGHT));
 
     bottomPanel.add(topRow, BorderLayout.NORTH);
     bottomPanel.add(scrollPane, BorderLayout.CENTER);
-    bottomPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    bottomPanel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
     return bottomPanel;
   }
 
