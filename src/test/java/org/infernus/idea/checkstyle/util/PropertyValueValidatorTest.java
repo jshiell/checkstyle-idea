@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 public class PropertyValueValidatorTest {
     @Test
-    public void PropertyValueValidatorIntSetTest() {
+    public void propertyValueValidatorIntSetTest() {
         assertEquals(null, PropertyValueValidator.validate("Integer Set", "42,666"));
         assertEquals(null, PropertyValueValidator.validate("Integer Set", "42"));
         assertEquals(null, PropertyValueValidator.validate("Integer Set", "666"));
@@ -17,7 +17,7 @@ public class PropertyValueValidatorTest {
     }
 
     @Test
-    public void PropertyValueValidatorRegExpTest() {
+    public void propertyValueValidatorRegExpTest() {
         assertEquals(null, PropertyValueValidator.validate("Regular Expression", "^[0-9]+$"));
         assertEquals(null, PropertyValueValidator.validate("Regular Expression", "abcde"));
 
@@ -26,7 +26,7 @@ public class PropertyValueValidatorTest {
     }
 
     @Test
-    public void PropertyValueValidatorURLTest() {
+    public void propertyValueValidatorURLTest() {
         assertEquals(null, PropertyValueValidator.validate("URI", "http://checkstyle.sourceforge.net/property_types.html#regexp"));
         assertEquals(null, PropertyValueValidator.validate("URI", "org.infernus.idea.checkstyle.util"));
         assertEquals(null, PropertyValueValidator.validate("URI", "or_g.infernus.id_ea.ch12eckstyle.util"));
@@ -39,7 +39,7 @@ public class PropertyValueValidatorTest {
     }
 
     @Test
-    public void PropertyValueValidatorSubsetOfTest() {
+    public void propertyValueValidatorSubsetOfTest() {
         assertEquals(null, PropertyValueValidator.validate("subset of tokens ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF.",
                 "ANNOTATION_DEF, ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF, VARIABLE_DEF"));
         assertEquals(null, PropertyValueValidator.validate("subset of tokens TokenTypes.", "LABELED_STAT"));
@@ -50,7 +50,7 @@ public class PropertyValueValidatorTest {
     }
 
     @Test
-    public void PropertyValueValidatorAccessModifierSetTest() {
+    public void propertyValueValidatorAccessModifierSetTest() {
         assertEquals(null, PropertyValueValidator.validate("Access Modifier Set", "public"));
         assertEquals(null, PropertyValueValidator.validate("Access Modifier Set", "protected"));
         assertEquals(null, PropertyValueValidator.validate("Access Modifier Set", "package"));

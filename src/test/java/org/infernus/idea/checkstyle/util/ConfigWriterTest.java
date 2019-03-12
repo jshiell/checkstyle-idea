@@ -38,24 +38,24 @@ public class ConfigWriterTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void ConfigWriterSaveConfigNoRootCheckerTest() throws Exception {
+  public void configWriterSaveConfigNoRootCheckerTest() throws Exception {
     XMLConfig notCheckerRoot = new XMLConfig("Not Checker");
 
     ConfigWriter.saveConfig("dummy/dummy.xml", notCheckerRoot);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void ConfigWriterSaveConfigNotSaveToXMLTest() throws Exception {
+  public void configWriterSaveConfigNotSaveToXMLTest() throws Exception {
     ConfigWriter.saveConfig("notxml.txt", this.plainConfig);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void ConfigWriterSaveConfigSaveToNonExistDirTest() throws Exception {
+  public void configWriterSaveConfigSaveToNonExistDirTest() throws Exception {
     ConfigWriter.saveConfig("NotExistDir/someconfig.xml", this.plainConfig);
   }
 
   @Test
-  public void ConfigWriterSaveConfigSaveEasyConfigTest() throws Exception {
+  public void configWriterSaveConfigSaveEasyConfigTest() throws Exception {
     XMLConfig module1 = new XMLConfig("RegexpMultiline");
     this.plainConfig.addAttribute("cacheFile", "${checkstyle.cache.file}");
     this.plainConfig.addAttribute("severity", "error");
@@ -84,7 +84,7 @@ public class ConfigWriterTest {
   }
 
   @Test
-  public void ConfigWriterSaveConfigSaveComplicateConfigTest() throws Exception {
+  public void configWriterSaveConfigSaveComplicateConfigTest() throws Exception {
     XMLConfig SuppressWarningsFilter = new XMLConfig("SuppressWarningsFilter");
     XMLConfig BeforeExecutionExclusionFileFilter = new XMLConfig("BeforeExecutionExclusionFileFilter");
     XMLConfig SuppressWarnings = new XMLConfig("SuppressWarnings");
@@ -166,14 +166,14 @@ public class ConfigWriterTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void ConfigWriterXMLPreviewTest() throws Exception {
+  public void configWriterXMLPreviewTest() throws Exception {
     XMLConfig notCheck = new XMLConfig("NotChecker");
 
     ConfigWriter.xmlPreview(notCheck);
   }
 
   @Test
-  public void ConfigWriterXMLPreviewEasyXMLTest() throws Exception {
+  public void configWriterXMLPreviewEasyXMLTest() throws Exception {
     XMLConfig module1 = new XMLConfig("RegexpMultiline");
     this.plainConfig.addAttribute("cacheFile", "${checkstyle.cache.file}");
     this.plainConfig.addAttribute("severity", "error");
@@ -208,7 +208,7 @@ public class ConfigWriterTest {
   }
 
   @Test
-  public void ConfigWriterXMLPreviewComplicatedXMLTest() throws Exception {
+  public void configWriterXMLPreviewComplicatedXMLTest() throws Exception {
     XMLConfig SuppressWarningsFilter = new XMLConfig("SuppressWarningsFilter");
     XMLConfig BeforeExecutionExclusionFileFilter = new XMLConfig("BeforeExecutionExclusionFileFilter");
     XMLConfig SuppressWarnings = new XMLConfig("SuppressWarnings");

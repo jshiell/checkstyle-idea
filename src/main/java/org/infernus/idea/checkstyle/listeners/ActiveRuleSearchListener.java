@@ -1,12 +1,10 @@
 package org.infernus.idea.checkstyle.listeners;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.model.ConfigRule;
-import org.infernus.idea.checkstyle.model.XMLConfig;
 import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
 
 /**
