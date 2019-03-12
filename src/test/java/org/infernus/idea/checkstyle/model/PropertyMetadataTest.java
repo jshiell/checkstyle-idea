@@ -1,8 +1,13 @@
 package org.infernus.idea.checkstyle.model;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class PropertyMetadataTest {
   @Test
@@ -55,5 +60,21 @@ public class PropertyMetadataTest {
     property.setDescription(description);
 
     assertEquals(description, property.getDescription());
+  }
+
+  @Ignore
+  @Test
+  public void compareToOrderTest() {
+    List<String> sorted = Arrays.asList("id", "severity", "abc", "def", "ghi", null);
+    List<PropertyMetadata> lst = Arrays.asList(new PropertyMetadata(null), new PropertyMetadata("def"),
+        new PropertyMetadata("abc"), new PropertyMetadata("severity"), new PropertyMetadata("ghi"),
+        new PropertyMetadata("id"));
+
+    Collections.sort(lst);
+
+    int i;
+    for (i = 0; i < sorted.size(); i++) {
+      assertEquals(sorted.get(i), lst.get(i).getName());
+    }
   }
 }

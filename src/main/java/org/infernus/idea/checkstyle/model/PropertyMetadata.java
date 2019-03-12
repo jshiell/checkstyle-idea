@@ -93,7 +93,9 @@ public class PropertyMetadata implements Comparable<PropertyMetadata> {
    */
   @Override
   public int compareTo(PropertyMetadata pm) {
-    if (this.name == null || pm.name == null) {
+    if (pm == null) {
+      return -1;
+    } if (this.name == null || pm.name == null) {
       if (this.name == null && pm.name == null) {
         return 0;
       } else if (this.name == null) {

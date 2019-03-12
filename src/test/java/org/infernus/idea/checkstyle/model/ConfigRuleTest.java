@@ -2,9 +2,9 @@ package org.infernus.idea.checkstyle.model;
 
 import org.junit.Test;
 
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -86,5 +86,19 @@ public class ConfigRuleTest {
     rule.setParent(parent);
 
     assertEquals(parent, rule.getParent());
+  }
+
+  @Test
+  public void compareToOrderTest() {
+    List<String> sorted = Arrays.asList("abc", "def", "ghi", null);
+    List<ConfigRule> lst = Arrays.asList(new ConfigRule(null), new ConfigRule("def"), new ConfigRule("abc"),
+        new ConfigRule("ghi"));
+
+    Collections.sort(lst);
+
+    int i;
+    for (i = 0; i < sorted.size(); i++) {
+      assertEquals(sorted.get(i), lst.get(i).getRuleName());
+    }
   }
 }
