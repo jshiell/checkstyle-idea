@@ -14,6 +14,31 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 
 We require IDEA to be running on JDK 8. AFAIK this is the default as of IDEA 2016.1.
 
+## Table of Contents
+* [Use](#use)
+* [Configuration](#configuration)
+  * [Configuration Files](#configuration-files)
+  * [Eclipse-CS Variable Support](#eclipse-cs-variable-support)
+  * [Third Party Checks](#third-party-checks)
+  * [Copy libraries from project directory](#copy-libraries-from-project-directory)
+* [**Generating Configuration Files (ADDED BY FLINT TEAM)**](#generating-configuration-files)
+  * [**Importing**](#importing)
+  * [**Active Rules**](#active-rules)
+  * [**Adding Rules**](#adding-rules)
+  * [**Removing Rules**](#removing-rules)
+  * [**Previewing the Configuration File**](#previewing-the-configuration-file)
+  * [**Generating the Configuration**](#generating-the-configuration)
+* [Troubleshooting](#troubleshooting)
+* [Notable Extensions](#notabale-extensions)
+* [Development](#development)
+* [FAQ](#faq)
+* [Limitations](#limitations)
+* [Feedback](#feedback)
+* [Acknowledgements](#acknowledgements)
+* [Licence](#licence)
+* [Version History](#version-history)
+
+
 ## Use
 
 Once installed, a new inspection will be available in the group 'CheckStyle'. The 'Inspections' item in the preferences
@@ -40,34 +65,6 @@ will be ignored.
 
 If a custom file is being used and properties are available for definition then these will accessible using the 'Edit
 Properties' button.
-
-### Generating Configuration Files
-
-To generate a new CheckStyle file click on the 'Generate Configuration' button, to the right of the dropdown menu used 
-to select the configuration file to run. Once selected a window will be displayed that looks like the image below:
-
-![GUI mockup](reports/GUImockup.jpeg)
-
-In the top left of the larger window there is an 'Import' button, which when clicked will allow the user to import an existing 
-CheckStyle configuration file to the Configuration Generator. To the right of the 'Import' button we have a search bar that allows 
-you to search CheckStyles rule database for a specific rule, which will be displayed in the section below the search bar. 
-
-On the left side of the window there is a list of categories. Checkstyle has a large set of premade rules that are divided into categories 
-and each category will be displayed on the left, including a *Custom Rule* category, which will contain any custom rules you 
-write. Clicking on a category will display all the rules contained in that category in the boxes to the left that contain small plus 
-boxes. Clicking on a rule will display another small window to the right of the main window and will display the description and 
-parameters for the selected rule and an 'Add' button. 
-
-To add a rule to your new configuration file click the plus box or the 'Add' button in the smaller window. When a new rule is added 
-you will be prompted to input any parameters required by the rule and the rule will then be displayed in the *Added Rules* section. 
-
-At the bottom of the GUI window there is a box to define the file name for the new configuration file. If a configuration file is imported 
-all rules in that file will appear in the *Added Rules* section and the filename will be auto-filled with the imported file’s filename. If the 
-file name already exists, the existing configuration file will be overwritten by the new configuration file. There is then a 'Preview' button 
-which will display a preview of what the XML file will look like given all the rules that have been added thus far. 
-
-Finally the 'Generate' button in the bottom right corner will generate the new configuration file under the specified name.
-
 
 ### Eclipse-CS Variable Support
 
@@ -98,6 +95,89 @@ all your libraries reside outside of the project (as is often the case when buil
 used), then you can disable this feature. Since it slows down checker creation, you might want to keep it disabled
 until necessary. After changing this option, it may be necessary to restart IDEA to see the effects.
 
+---
+
+## Generating Configuration Files
+
+
+To generate a new CheckStyle Configuration file click on the 'Generate Configuration' 
+button as shown below, to the right of the dropdown menu used to select the configuration file 
+to run. 
+
+![Open Editor](images/OpenEditor.png)
+
+Once selected the window below be displayed:
+
+![GUI mockup](images/ConfigEditor.png)
+
+### Importing
+In the top left of the window there is an **Import** button, which when clicked will allow the user to import an existing 
+CheckStyle configuration file to the Configuration Generator. When importing you will see the window below:
+
+![Import Window](images/ImportWindow.png)
+
+The dropdown menu displays all XML Configuration files in your project's _.idea/configs_ directory. If your project
+does not contain a directory named _config_ in its _.idea_ directory (found in the root of the project), you will have
+no files to import and a directory named _config_ will be created when you generate a new file.
+ 
+Once you select a configuration to import, all the rules in the configuration will be added to the active rules section
+of the window. 
+
+### Active Rules
+
+The **Active Rules** section of the Configuration editor displays all of the rules you currently
+have in your configuration. Selecting a rule in the **Active Rules** section will display and allow you
+to edit all of its attribution values. Note, the Configuration Editor supports type validation so you 
+do not need to worry about inputting an invalid type for attributes.
+
+
+### Adding Rules
+
+There are two ways to find rules through the Configuration Editor.
+
+The first way is to search for rules by category. On the left side of the window there is a list of categories. Checkstyle has a large set of premade rules that are divided into categories 
+and each category is displayed on the left. Clicking on a category will display all the rules contained in that category. 
+
+The second way is to search for the rule by name. To the right of the 'Import' button we have a search bar that allows 
+you to search CheckStyles rule database for specific rules that have names containing the search query, which will be displayed in the section below the search bar.
+Currently using the search bar will display all matching rules within the currently selected category.
+As you can see in the example the search query is "default" and all rules in the *Coding* category that contain the query are displayed. 
+
+Clicking on a rule will display another small window to that will give you a description of the rule and 
+a areas to file in values for all possible attributes of the rule. Note assigning values for the attributes is optional.
+
+To add a rule to your active rules press the **OK** button in the window that is displayed after selecting a rule.
+Once the rule is added it will be displayed in the **Active Rules** section.
+
+### Removing Rules
+
+To remove a single rule that is currently in your configuration select the rule from the **Active Rules** section.
+The window with the rule's attributes will be displayed with a **Delete** button in the bottom right.
+Clicking this button will remove the rule from the configuration and **Active Rules** section.
+
+To remove all the rules in the configuration click the **Clear** button in the top right of the Configuration Editor
+window.
+
+### Previewing the Configuration File
+
+To see a preview of what the XML for your current configuration will look like click the **preview** button 
+in the bottom right of the Configuration Editor and a new window with the preview will be displayed.
+
+### Generating the Configuration
+
+Once you have added all of your desired rules to the **Active Rules** section you need to give a name to your 
+configuration in the bottom left text box of the Configuration Editor.
+
+Next click the **Generate** button and your configuration will be generated and added to _**project_path**/.idea/configs/_
+
+From here you can add the configuration to the list of checkstyle configurations
+by navigating to **Checkstyle** under **Preferences/Settings** and clicking the add button under the configuration files.
+Once added you will be able to select your configuration from the dropdown menu next to
+the Configuration Editor button as shown below:
+
+![Dropdown](images/ConfigDropdown.png)                                                                        
+
+---
 
 ## Troubleshooting
 

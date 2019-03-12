@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.listeners;
 
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.model.ConfigRule;

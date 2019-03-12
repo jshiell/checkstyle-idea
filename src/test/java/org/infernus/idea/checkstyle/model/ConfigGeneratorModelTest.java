@@ -19,24 +19,17 @@ public class ConfigGeneratorModelTest {
         model = new ConfigGeneratorModel(mock(Project.class));
     }
 
-    @Test
-    public void ConfigGeneratorRootIsCheckerTest() {
-
-    }
-
-    @Test
-    public void GenerateConfigTest() {
-
-    }
-
-    @Test
-    public void ImportConfigTest() {
-
-    }
 
     @Test
     public void GetActiveRulesTest() {
-
+        XMLConfig xmlConfig = new XMLConfig("FileTabCharacter");
+        XMLConfig xmlConfig2 = new XMLConfig("FileTabCharacter2");
+        model.addActiveRule(xmlConfig);
+        model.addActiveRule(xmlConfig2);
+        Set<XMLConfig> names = new HashSet<>();
+        names.add(xmlConfig);
+        names.add(xmlConfig2);
+        assertEquals(names, new HashSet<>(model.getActiveRules()));
     }
 
     @Test
@@ -44,7 +37,6 @@ public class ConfigGeneratorModelTest {
         XMLConfig xmlConfig = new XMLConfig("AbstractClassName");
         ConfigRule rule = model.getConfigRuleforXML(xmlConfig);
         assertEquals("AbstractClassName", rule.getRuleName());
-
     }
 
     @Test
@@ -77,12 +69,10 @@ public class ConfigGeneratorModelTest {
                 "\"https://checkstyle.org/dtds/configuration_1_3.dtd\">\n" +
                 "<module name=\"Checker\"/>\n";
         assertEquals(preview, model.getPreview().replace("\r", ""));
-
     }
 
     @Test
     public void ConfigPreviewWithAddedRuleTest() {
-
         String preview = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                 "<!DOCTYPE module PUBLIC \"-//Checkstyle//DTD Checkstyle Configuration 1.3//EN\" " +
                 "\"https://checkstyle.org/dtds/configuration_1_3.dtd\">\n" +
@@ -94,8 +84,10 @@ public class ConfigGeneratorModelTest {
         assertEquals(preview, model.getPreview().replace("\r", ""));
     }
 
-    @Test
-    public void GetConfigNamesTest() {
+    @Test(expected = IllegalArgumentException.class)
+    public void AddNullRuleTest() {
+        XMLConfig blank = null;
+        model.addActiveRule(blank);
     }
 
     @Test
@@ -115,5 +107,11 @@ public class ConfigGeneratorModelTest {
         assertTrue(active.contains(xml));
         model.removeActiveRule(xml);
         assertTrue(!model.getActiveRules().contains(xml));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void RemoveActiveRuleThrowsTest() {
+        XMLConfig xml = new XMLConfig("TestConfig");
+        model.removeActiveRule(xml);
     }
 }
