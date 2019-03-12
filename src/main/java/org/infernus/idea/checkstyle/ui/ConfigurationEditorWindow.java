@@ -63,6 +63,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
   private Collection<ActionListener> importBtnListeners;
   /** The listeners that have been registered with the global search bar */
   private Collection<SearchListener> searchBarListeners;
+  /** The listeners that have been registered with the active rules search bar */
+  private Collection<SearchListener> activeRulesSearchListeners;
   /** The listeners that have been registered with the "Clear" button. */
   private Collection<ActionListener> clearBtnListeners;
   /** The listeners that have been registered with the "Preview" button. */
@@ -98,6 +100,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     this.importBtnListeners = new ArrayList<>();
     this.searchBarListeners = new ArrayList<>();
+    this.activeRulesSearchListeners = new ArrayList<>();
     this.clearBtnListeners = new ArrayList<>();
     this.previewBtnListeners = new ArrayList<>();
     this.generateBtnListeners = new ArrayList<>();
@@ -236,8 +239,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JScrollPane scrollPane = new JScrollPane(this.categoryList);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
-    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
+    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH / 2, 2 * SCROLLPANE_HEIGHT));
+    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH / 2, 2 * SCROLLPANE_HEIGHT));
 
     panel.add(scrollPane, BorderLayout.CENTER);
     panel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
@@ -302,15 +305,37 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   protected JPanel createActiveRulesPanel() {
     JPanel bottomPanel = new JPanel(new BorderLayout());
-    JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEADING));
+    JPanel topRow = new JPanel(new BorderLayout());
 
     JLabel activeLabel = new JLabel("Active Rules");
     Font font = activeLabel.getFont();
     activeLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
 
-    topRow.add(Box.createHorizontalStrut(4));
-    topRow.add(activeLabel);
-    topRow.add(Box.createHorizontalStrut(4));
+    topRow.add(activeLabel, BorderLayout.WEST);
+
+    JTextField search = new JTextField();
+    search.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      private void handlechange() {
+        activeRulesSearchListeners.forEach(sbl -> sbl.searchPerformed(search.getText()));
+      }
+    });
+    search.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    topRow.add(search, BorderLayout.CENTER);
 
     this.activeRulesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.activeRulesList.setLayoutOrientation(JList.VERTICAL);
@@ -407,6 +432,11 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     return this.activeRulesList.getSelectedValue();
   }
 
+  /**
+   * Get the index of the currently-selected rule in the Active Rules panel.
+   * 
+   * @return The index for the currently-selected active rule
+   */
   public int getSelectedActiveIndex() {
     return this.activeRulesList.getSelectedIndex();
   }
@@ -462,6 +492,15 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   public void addGlobalSearchListener(SearchListener sl) {
     this.searchBarListeners.add(sl);
+  }
+
+  /**
+   * Registers a listener for the active rules search bar.
+   * 
+   * @param sl The listener to register
+   */
+  public void addActiveRuleSearchListener(SearchListener sl) {
+    this.activeRulesSearchListeners.add(sl);
   }
 
   /**

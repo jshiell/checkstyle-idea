@@ -2,16 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import static org.mockito.Mockito.*;
 
-import org.infernus.idea.checkstyle.listeners.ActiveRuleSelectListener;
-import org.infernus.idea.checkstyle.listeners.AttributeSubmissionListener;
-import org.infernus.idea.checkstyle.listeners.CategorySelectListener;
-import org.infernus.idea.checkstyle.listeners.ClearButtonListener;
-import org.infernus.idea.checkstyle.listeners.GenerateButtonListener;
-import org.infernus.idea.checkstyle.listeners.ImportButtonListener;
-import org.infernus.idea.checkstyle.listeners.ImportSubmitListener;
-import org.infernus.idea.checkstyle.listeners.PreviewButtonListener;
-import org.infernus.idea.checkstyle.listeners.SearchListener;
-import org.infernus.idea.checkstyle.listeners.VisibleRuleSelectListener;
+import org.infernus.idea.checkstyle.listeners.*;
 import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.ui.CheckAttributesEditorDialog;
 import org.infernus.idea.checkstyle.ui.ConfigGeneratorView;
@@ -67,7 +58,8 @@ public class ConfigGeneratorControllerTest {
 
   @Test
   public void addsAllSearchListeners() {
-    verify(this.configEditor, times(1)).addGlobalSearchListener(any(SearchListener.class));
+    verify(this.configEditor, times(1)).addGlobalSearchListener(any(SearchBarListener.class));
+    verify(this.configEditor, times(1)).addActiveRuleSearchListener(any(ActiveRuleSearchListener.class));
   }
 
   @Test
