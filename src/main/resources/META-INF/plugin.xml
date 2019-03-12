@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.24.3</version>
+    <version>5.24.4</version>
     <idea-version since-build="145.258"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.24.4: New: Added searching for Active Rules in Configuration Generator GUI, made top search bar global.</li>
     <li>5.24.3: Fixed: Fixed configuration generator GUI sizing and "clear" button.</li>
     <li>5.24.2: Fixed: Fixed a synchronisation edge-case (#425).</li>
     <li>5.24.1: Fixed: Some tweaks to the supported Checkstyle versions for better compatibility - thanks to @tsjensen (#424).</li>

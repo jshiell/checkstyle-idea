@@ -99,7 +99,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     this.descLabel = new JLabel();
     this.okBtn = new JButton("OK");
     this.cancelBtn = new JButton();
-    this.cancelColor = this.cancelBtn.getBackground();
+    this.cancelColor = this.cancelBtn.getForeground();
     /////////////////////////////////////////////
 
     this.centerPanel.setLayout(new GridLayout(0, 2));
@@ -182,7 +182,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     this.nameLabel.setText(rule.getRuleName());
     this.descLabel.setText(rule.getRuleDescription());
     this.cancelBtn.setText(this.isNewRule ? "Cancel" : "Delete");
-    this.cancelBtn.setBackground(this.isNewRule ? this.cancelColor : Color.RED);
+    this.cancelBtn.setForeground(this.isNewRule ? this.cancelColor : Color.RED);
 
     this.centerPanel.removeAll();
     List<PropertyMetadata> properties = new ArrayList<>(rule.getParameters().values());
