@@ -56,6 +56,7 @@ public class ExportSuccessfulDialog extends ConfigGeneratorWindow {
       }
     });
     bottomRow.add(okBtn, BorderLayout.EAST);
+    bottomRow.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
 
     return bottomRow;
   }
