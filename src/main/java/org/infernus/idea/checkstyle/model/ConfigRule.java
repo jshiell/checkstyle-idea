@@ -129,17 +129,24 @@ public class ConfigRule implements Comparable<ConfigRule> {
     return this.getRuleName();
   }
 
+  /**
+   * Compares two ConfigRules. If the name of either object is null, that object
+   * is greater (sorted to the end)
+   * 
+   * @return 1 if this object is greater, 0 if this and o are equal, -1 if o is
+   *         greater
+   */
   @Override
   public int compareTo(ConfigRule o) {
     if (o == null) {
-      return 1;
+      return -1;
     } else if (this.ruleName == null || o.ruleName == null) {
       if (this.ruleName == null && o.ruleName == null) {
         return 0;
       } else if (this.ruleName == null) {
-        return -1;
-      } else {
         return 1;
+      } else {
+        return -1;
       }
     } else {
       return this.ruleName.compareTo(o.ruleName);

@@ -46,7 +46,7 @@ public class ActiveRuleSelectListenerTest {
   }
   
   @Test
-  public void doesNothingIfNoSelected() {
+  public void doesNothingIfNoneSelected() {
     this.arsl.mouseClicked(null);
     verify(this.attrEditor, times(0)).displayForCheck(any());
   }
