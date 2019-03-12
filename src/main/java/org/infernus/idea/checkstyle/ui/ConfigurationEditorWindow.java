@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -30,6 +29,7 @@ import javax.swing.event.DocumentListener;
 
 import com.intellij.ui.JBSplitter;
 
+import org.infernus.idea.checkstyle.listeners.SearchListener;
 import org.infernus.idea.checkstyle.listeners.SelectListener;
 import org.infernus.idea.checkstyle.model.ConfigRule;
 import org.infernus.idea.checkstyle.util.ConfigurationListeners;
@@ -55,14 +55,16 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
   /** The list of selectable categories in the "Categories" panel. */
   private JList<String> categoryList;
   /** The list of selectable rules in the "Visible Rules" panel. */
-  private List<ConfigRule> visibleRules;
-  /** The list of selectable rules in the "Visible Rules" panel. */
   private JList<ConfigRule> visibleRulesList;
   /** The list of selectable rules in the "Active Rules" panel. */
   private JList<ConfigRule> activeRulesList;
 
   /** The listeners that have been registered with the "Import" button. */
   private Collection<ActionListener> importBtnListeners;
+  /** The listeners that have been registered with the global search bar */
+  private Collection<SearchListener> searchBarListeners;
+  /** The listeners that have been registered with the active rules search bar */
+  private Collection<SearchListener> activeRulesSearchListeners;
   /** The listeners that have been registered with the "Clear" button. */
   private Collection<ActionListener> clearBtnListeners;
   /** The listeners that have been registered with the "Preview" button. */
@@ -97,6 +99,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     this.activeRulesList = new JList<>();
 
     this.importBtnListeners = new ArrayList<>();
+    this.searchBarListeners = new ArrayList<>();
+    this.activeRulesSearchListeners = new ArrayList<>();
     this.clearBtnListeners = new ArrayList<>();
     this.previewBtnListeners = new ArrayList<>();
     this.generateBtnListeners = new ArrayList<>();
@@ -159,10 +163,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
       }
 
       private void handlechange() {
-        List<ConfigRule> lst = visibleRules.stream()
-            .filter(cr -> cr.getRuleName().toLowerCase().contains(search.getText().toLowerCase()))
-            .collect(Collectors.toList());
-        visibleRulesList.setListData(lst.toArray(new ConfigRule[lst.size()]));
+        searchBarListeners.forEach(sbl -> sbl.searchPerformed(search.getText()));
       }
     });
     topRow.add(search);
@@ -238,8 +239,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
 
     JScrollPane scrollPane = new JScrollPane(this.categoryList);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
-    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH/2, 2*SCROLLPANE_HEIGHT));
+    scrollPane.setMinimumSize(new Dimension(SCROLLPANE_WIDTH / 2, 2 * SCROLLPANE_HEIGHT));
+    scrollPane.setPreferredSize(new Dimension(SCROLLPANE_WIDTH / 2, 2 * SCROLLPANE_HEIGHT));
 
     panel.add(scrollPane, BorderLayout.CENTER);
     panel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
@@ -304,15 +305,38 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   protected JPanel createActiveRulesPanel() {
     JPanel bottomPanel = new JPanel(new BorderLayout());
-    JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEADING));
+    JPanel topRow = new JPanel(new BorderLayout());
 
     JLabel activeLabel = new JLabel("Active Rules");
     Font font = activeLabel.getFont();
     activeLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
+    activeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
-    topRow.add(Box.createHorizontalStrut(4));
-    topRow.add(activeLabel);
-    topRow.add(Box.createHorizontalStrut(4));
+    topRow.add(activeLabel, BorderLayout.WEST);
+
+    JTextField search = new JTextField();
+    search.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        handlechange();
+      }
+
+      private void handlechange() {
+        activeRulesSearchListeners.forEach(sbl -> sbl.searchPerformed(search.getText()));
+      }
+    });
+    topRow.add(search, BorderLayout.CENTER);
+    topRow.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
     this.activeRulesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.activeRulesList.setLayoutOrientation(JList.VERTICAL);
@@ -375,9 +399,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   public void setVisibleRules(String category, Collection<ConfigRule> rules) {
     this.categoryLabel.setText(category);
-    this.visibleRules = new ArrayList<>(rules);
-    Collections.sort(this.visibleRules);
-    this.visibleRulesList.setListData(this.visibleRules.toArray(new ConfigRule[rules.size()]));
+    List<ConfigRule> sortedRules = new ArrayList<>(rules);
+    Collections.sort(sortedRules);
+    this.visibleRulesList.setListData(sortedRules.toArray(new ConfigRule[rules.size()]));
   }
 
   /**
@@ -395,7 +419,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    * @param rules The rules to display
    */
   public void setActiveRules(Collection<ConfigRule> rules) {
-    this.activeRulesList.setListData(rules.toArray(new ConfigRule[rules.size()]));
+    List<ConfigRule> sortedRules = new ArrayList<>(rules);
+    Collections.sort(sortedRules);
+    this.activeRulesList.setListData(sortedRules.toArray(new ConfigRule[rules.size()]));
   }
 
   /**
@@ -407,6 +433,11 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     return this.activeRulesList.getSelectedValue();
   }
 
+  /**
+   * Get the index of the currently-selected rule in the Active Rules panel.
+   * 
+   * @return The index for the currently-selected active rule
+   */
   public int getSelectedActiveIndex() {
     return this.activeRulesList.getSelectedIndex();
   }
@@ -453,6 +484,24 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     default:
       break;
     }
+  }
+
+  /**
+   * Registers a listener for the global search bar at the top of the frame.
+   * 
+   * @param sl The listener to register
+   */
+  public void addGlobalSearchListener(SearchListener sl) {
+    this.searchBarListeners.add(sl);
+  }
+
+  /**
+   * Registers a listener for the active rules search bar.
+   * 
+   * @param sl The listener to register
+   */
+  public void addActiveRuleSearchListener(SearchListener sl) {
+    this.activeRulesSearchListeners.add(sl);
   }
 
   /**

@@ -42,6 +42,9 @@ public class ConfigGeneratorController {
     this.view.getConfigEditor().addButtonListener(new GenerateButtonListener(this.view, this.model),
         ConfigurationListeners.GENERATE_BUTTON_LISTENER);
 
+    this.view.getConfigEditor().addGlobalSearchListener(new SearchBarListener(this.view, this.model));
+    this.view.getConfigEditor().addActiveRuleSearchListener(new ActiveRuleSearchListener(this.view, this.model));
+
     this.view.getConfigEditor().addSelectionListener(new CategorySelectListener(this.view, this.model),
         ConfigurationListeners.CATEGORY_SELECT_LISTENER);
     this.view.getConfigEditor().addSelectionListener(new VisibleRuleSelectListener(this.view),
