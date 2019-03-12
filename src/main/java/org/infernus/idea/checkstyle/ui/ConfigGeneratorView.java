@@ -13,6 +13,8 @@ public class ConfigGeneratorView {
   private final CheckAttributesEditorDialog attrEditor = new CheckAttributesEditorDialog();
   /** The XML Preview dialog instance for this view */
   private final XMLPreviewDialog previewDialog = new XMLPreviewDialog();
+  /** The Export Successful dialog instance for this view */
+  private final ExportSuccessfulDialog exportDialog = new ExportSuccessfulDialog();
 
   /**
    * Get the Configuration Editor window instance
@@ -48,5 +50,14 @@ public class ConfigGeneratorView {
    */
   public XMLPreviewDialog getPreviewDialog() {
     return this.previewDialog;
+  }
+
+  /**
+   * Get the Export Successful dialog instance
+   * 
+   * @return The Export Successful dialog instance for this view
+   */
+  public ExportSuccessfulDialog getExportDialog() {
+    return this.exportDialog;
   }
 }

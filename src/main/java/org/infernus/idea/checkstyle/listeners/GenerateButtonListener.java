@@ -24,14 +24,17 @@ public class GenerateButtonListener extends ConfigGeneratorListener implements A
   }
 
   /**
-   * Exports the active configuration with the name in the text field
+   * Exports the active configuration with the name in the text field and displays
+   * a notification if successful
    * 
    * @param e The event that triggered this function
    */
   @Override
   public void actionPerformed(ActionEvent e) {
     try {
-      model.generateConfig(this.view.getConfigEditor().getConfigurationName());
+      String configName = this.view.getConfigEditor().getConfigurationName();
+      this.model.generateConfig(configName);
+      this.view.getExportDialog().display(configName);
     } catch (IOException ex) {
       System.out.println("\n\n\n" + ex.getClass() + " - " + ex.getLocalizedMessage() + "\n\n\n");
     }
