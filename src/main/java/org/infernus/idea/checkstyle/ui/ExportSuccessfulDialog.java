@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -47,6 +49,12 @@ public class ExportSuccessfulDialog extends ConfigGeneratorWindow {
     JPanel bottomRow = new JPanel(new BorderLayout());
 
     JButton okBtn = new JButton("OK");
+    okBtn.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        setVisible(false);
+      }
+    });
     bottomRow.add(okBtn, BorderLayout.EAST);
 
     return bottomRow;
@@ -59,8 +67,8 @@ public class ExportSuccessfulDialog extends ConfigGeneratorWindow {
    * @param configNames The names of Configurations that can be imported
    */
   public void display(String configName) {
-    this.centerLabel.setText(configName + " was successfully generated!\n"
-        + "You can find it in .idea/configs/" + configName + ".xml");
+    this.centerLabel.setText("<html>" + configName + " was successfully generated! <br />"
+        + "You can find it in .idea/configs/" + configName + ".xml</html>");
 
     super.arrange();
     super.display();
