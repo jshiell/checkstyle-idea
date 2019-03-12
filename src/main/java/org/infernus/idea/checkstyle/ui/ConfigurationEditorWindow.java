@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -30,6 +29,7 @@ import javax.swing.event.DocumentListener;
 
 import com.intellij.ui.JBSplitter;
 
+import org.infernus.idea.checkstyle.listeners.SearchListener;
 import org.infernus.idea.checkstyle.listeners.SelectListener;
 import org.infernus.idea.checkstyle.model.ConfigRule;
 import org.infernus.idea.checkstyle.util.ConfigurationListeners;
@@ -55,14 +55,14 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
   /** The list of selectable categories in the "Categories" panel. */
   private JList<String> categoryList;
   /** The list of selectable rules in the "Visible Rules" panel. */
-  private List<ConfigRule> visibleRules;
-  /** The list of selectable rules in the "Visible Rules" panel. */
   private JList<ConfigRule> visibleRulesList;
   /** The list of selectable rules in the "Active Rules" panel. */
   private JList<ConfigRule> activeRulesList;
 
   /** The listeners that have been registered with the "Import" button. */
   private Collection<ActionListener> importBtnListeners;
+  /** The listeners that have been registered with the global search bar */
+  private Collection<SearchListener> searchBarListeners;
   /** The listeners that have been registered with the "Clear" button. */
   private Collection<ActionListener> clearBtnListeners;
   /** The listeners that have been registered with the "Preview" button. */
@@ -97,6 +97,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     this.activeRulesList = new JList<>();
 
     this.importBtnListeners = new ArrayList<>();
+    this.searchBarListeners = new ArrayList<>();
     this.clearBtnListeners = new ArrayList<>();
     this.previewBtnListeners = new ArrayList<>();
     this.generateBtnListeners = new ArrayList<>();
@@ -159,10 +160,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
       }
 
       private void handlechange() {
-        List<ConfigRule> lst = visibleRules.stream()
-            .filter(cr -> cr.getRuleName().toLowerCase().contains(search.getText().toLowerCase()))
-            .collect(Collectors.toList());
-        visibleRulesList.setListData(lst.toArray(new ConfigRule[lst.size()]));
+        searchBarListeners.forEach(sbl -> sbl.searchPerformed(search.getText()));
       }
     });
     topRow.add(search);
@@ -375,9 +373,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    */
   public void setVisibleRules(String category, Collection<ConfigRule> rules) {
     this.categoryLabel.setText(category);
-    this.visibleRules = new ArrayList<>(rules);
-    Collections.sort(this.visibleRules);
-    this.visibleRulesList.setListData(this.visibleRules.toArray(new ConfigRule[rules.size()]));
+    List<ConfigRule> sortedRules = new ArrayList<>(rules);
+    Collections.sort(sortedRules);
+    this.visibleRulesList.setListData(sortedRules.toArray(new ConfigRule[rules.size()]));
   }
 
   /**
@@ -395,7 +393,9 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
    * @param rules The rules to display
    */
   public void setActiveRules(Collection<ConfigRule> rules) {
-    this.activeRulesList.setListData(rules.toArray(new ConfigRule[rules.size()]));
+    List<ConfigRule> sortedRules = new ArrayList<>(rules);
+    Collections.sort(sortedRules);
+    this.activeRulesList.setListData(sortedRules.toArray(new ConfigRule[rules.size()]));
   }
 
   /**
@@ -453,6 +453,15 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     default:
       break;
     }
+  }
+
+  /**
+   * Registers a listener for the global search bar at the top of the frame.
+   * 
+   * @param sl The listener to register
+   */
+  public void addGlobalSearchListener(SearchListener sl) {
+    this.searchBarListeners.add(sl);
   }
 
   /**

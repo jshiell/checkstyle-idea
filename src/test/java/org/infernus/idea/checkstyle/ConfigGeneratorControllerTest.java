@@ -10,6 +10,7 @@ import org.infernus.idea.checkstyle.listeners.GenerateButtonListener;
 import org.infernus.idea.checkstyle.listeners.ImportButtonListener;
 import org.infernus.idea.checkstyle.listeners.ImportSubmitListener;
 import org.infernus.idea.checkstyle.listeners.PreviewButtonListener;
+import org.infernus.idea.checkstyle.listeners.SearchListener;
 import org.infernus.idea.checkstyle.listeners.VisibleRuleSelectListener;
 import org.infernus.idea.checkstyle.model.ConfigGeneratorModel;
 import org.infernus.idea.checkstyle.ui.CheckAttributesEditorDialog;
@@ -62,6 +63,11 @@ public class ConfigGeneratorControllerTest {
         any(ConfigurationListeners.class));
     verify(this.configEditor, times(1)).addSelectionListener(any(ActiveRuleSelectListener.class),
         any(ConfigurationListeners.class));
+  }
+
+  @Test
+  public void addsAllSearchListeners() {
+    verify(this.configEditor, times(1)).addGlobalSearchListener(any(SearchListener.class));
   }
 
   @Test
