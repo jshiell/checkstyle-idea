@@ -194,4 +194,5 @@ public class XMLConfig {
   public void removeMessage(String key) {
     this.msgs.remove(key);
   }
+
 }

@@ -26,6 +26,7 @@ public class ConfigGeneratorModel {
     /** XMLConfig representations of all the active rules for the config */
     private List<XMLConfig> xmlConfigs;
 
+    /** Allows access to CheckStyle's rule database */
     private CheckStyleRuleProvider provider;
 
     /** The state of the user's project */
@@ -64,7 +65,7 @@ public class ConfigGeneratorModel {
      * @throws IllegalArgumentException - When the parent directory doesn't exist
      * @throws IOException - When file could not be created with the path
      */
-    public void generateConfig(String fileName) throws IOException {
+    public void generateConfig(String fileName) throws IOException, IllegalArgumentException {
         config = generateCurrentConfig();
         File configFolder = new File(project.getBasePath() + "/.idea/configs");
         if (!configFolder.exists()) {
@@ -220,8 +221,12 @@ public class ConfigGeneratorModel {
      *
      * @param rule the XMLConfig representation of the rule to be added
      *             to the configuration
+     * @throws IllegalArgumentException if the XMLConfig passed is null
      */
-    public void addActiveRule(XMLConfig rule) {
+    public void addActiveRule(XMLConfig rule) throws IllegalArgumentException {
+        if (rule == null) {
+            throw new IllegalArgumentException();
+        }
         xmlConfigs.add(rule);
     }
 
@@ -229,11 +234,20 @@ public class ConfigGeneratorModel {
      * Removes an active rule from the current configuration
      *
      * @param rule the rule to remove from the XML config
+     * @throws IllegalArgumentException if "rule" is not in active rules
      */
-    public void removeActiveRule(XMLConfig rule) {
+    public void removeActiveRule(XMLConfig rule) throws IllegalArgumentException {
+        if (!xmlConfigs.contains(rule)) {
+            throw new IllegalArgumentException();
+        }
         xmlConfigs.remove(rule);
     }
 
+    /**
+     * Returns the model's CheckStyleRuleProvider for access to CheckStyle's rule database
+     *
+     * @return the model's CheckStyleRuleProvider
+     */
     public CheckStyleRuleProvider getRuleProvider() {
         return this.provider;
     }
