@@ -60,6 +60,8 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
   private JButton okBtn;
   /** The "Cancel/Delete" button */
   private JButton cancelBtn;
+  /** The default color of the "Cancel" button */
+  private Color cancelColor;
 
   /** The state (attribute values) of the current rule */
   private XMLConfig xmlRule;
@@ -97,6 +99,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     this.descLabel = new JLabel();
     this.okBtn = new JButton("OK");
     this.cancelBtn = new JButton();
+    this.cancelColor = this.cancelBtn.getBackground();
     /////////////////////////////////////////////
 
     this.centerPanel.setLayout(new GridLayout(0, 2));
@@ -179,6 +182,7 @@ public class CheckAttributesEditorDialog extends ConfigGeneratorWindow {
     this.nameLabel.setText(rule.getRuleName());
     this.descLabel.setText(rule.getRuleDescription());
     this.cancelBtn.setText(this.isNewRule ? "Cancel" : "Delete");
+    this.cancelBtn.setBackground(this.isNewRule ? this.cancelColor : Color.RED);
 
     this.centerPanel.removeAll();
     List<PropertyMetadata> properties = new ArrayList<>(rule.getParameters().values());

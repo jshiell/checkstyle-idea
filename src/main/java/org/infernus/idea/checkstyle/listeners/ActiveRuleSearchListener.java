@@ -30,23 +30,26 @@ public class ActiveRuleSearchListener extends ConfigGeneratorListener implements
    * 
    * @param query The current contents of the search bar
    */
-  public void searchPerformed(String query) {
+  public void searchPerformed(String rawQuery) {
+    String query = rawQuery.toLowerCase();
+
     List<ConfigRule> filteredRules = this.model.getActiveRules().stream().filter(xmlRule -> {
       boolean containsQuery = false;
       for (String attrName : xmlRule.getAttributeNames()) {
         String attrValue = xmlRule.getAttribute(attrName);
-        if (attrName != null && attrName.contains(query)) {
+        if (attrName != null && attrName.toLowerCase().contains(query)) {
           containsQuery = true;
-        } else if (attrValue != null && attrValue.contains(query)) {
+        } else if (attrValue != null && attrValue.toLowerCase().contains(query)) {
           containsQuery = true;
         }
       }
 
       ConfigRule configRule = this.model.getConfigRuleforXML(xmlRule);
       System.out.println(configRule);
-      if (configRule.getRuleName() != null && configRule.getRuleName().contains(query)) {
+      if (configRule.getRuleName() != null && configRule.getRuleName().toLowerCase().contains(query)) {
         containsQuery = true;
-      } else if (configRule.getRuleDescription() != null && configRule.getRuleDescription().contains(query)) {
+      } else if (configRule.getRuleDescription() != null
+          && configRule.getRuleDescription().toLowerCase().contains(query)) {
         containsQuery = true;
       }
 

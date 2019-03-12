@@ -310,6 +310,7 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
     JLabel activeLabel = new JLabel("Active Rules");
     Font font = activeLabel.getFont();
     activeLabel.setFont(new Font(font.getName(), Font.BOLD, HEADER_FONT_SIZE));
+    activeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
     topRow.add(activeLabel, BorderLayout.WEST);
 
@@ -334,8 +335,8 @@ public class ConfigurationEditorWindow extends ConfigGeneratorWindow {
         activeRulesSearchListeners.forEach(sbl -> sbl.searchPerformed(search.getText()));
       }
     });
-    search.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     topRow.add(search, BorderLayout.CENTER);
+    topRow.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
     this.activeRulesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.activeRulesList.setLayoutOrientation(JList.VERTICAL);
