@@ -23,6 +23,7 @@ repositories {
 }
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 version = '5.25.0'
 
 intellij {
