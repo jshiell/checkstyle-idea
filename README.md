@@ -8,12 +8,10 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
-A plug-in for JetBrains' IntelliJ IDEA 2016-18 which provides real-time feedback against a given
+A plug-in for JetBrains' IntelliJ IDEA 2017-19 which provides real-time feedback against a given
 [CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
 
 Released under a BSD-style licence - please see the LICENCE file for details.
-
-We require IDEA to be running on JDK 8. AFAIK this is the default as of IDEA 2016.1.
 
 ## Use
 
@@ -206,6 +204,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.26.0** New: Now built against IDEA 2017.1.6 (was 2016.1).
 * **5.25.0** New: Added Checkstyle 8.17, 8.18 (#438).
 * **5.24.3** Fixed: Blatant white areas in the panel when Darcula in use - thanks to @embee1981 (#432).
 * **5.24.2** Fixed: Fixed a synchronisation edge-case (#425).

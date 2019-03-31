@@ -24,10 +24,10 @@ repositories {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '5.25.0'
+version = '5.26.0'
 
 intellij {
-    version = 'IC-2016.1';
+    version = 'IC-2017.1.6';
     pluginName 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false
