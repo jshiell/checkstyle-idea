@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.RuntimeInterruptedException;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -75,9 +74,6 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult =
                     processFilesForModuleInfoAndScan();
             return scanCompletedSuccessfully(scanResult.first, scanResult.second);
-        } catch (final RuntimeInterruptedException e) {
-            LOG.debug("Scan cancelled by IDEA", e);
-            return scanCompletedSuccessfully(resultOf(PRESENT), emptyMap());
         } catch (final CheckStylePluginException e) {
             LOG.warn("An error occurred while scanning a file.", e);
             return scanFailedWithError(e);
@@ -208,7 +204,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 
-        final List<PsiFile> locatedFiles = new ArrayList<>();
+        private final List<PsiFile> locatedFiles = new ArrayList<>();
 
         FindChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
             this.virtualFile = virtualFile;

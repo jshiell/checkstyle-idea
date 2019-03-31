@@ -18,18 +18,6 @@ public class CheckStyleModulePlugin implements ModuleComponent {
         LOG.info("CheckStyle Module Plugin loaded for module: \"" + module.getName() + "\"");
     }
 
-    public void projectOpened() {
-        LOG.debug("Project opened.");
-    }
-
-    public void projectClosed() {
-        LOG.debug("Project closed.");
-    }
-
-    public void moduleAdded() {
-        LOG.debug("Module added.");
-    }
-
     @NotNull
     public String getComponentName() {
         return CheckStylePlugin.ID_MODULE_PLUGIN;

@@ -1,7 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.components.ExportableComponent;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
@@ -31,8 +29,7 @@ import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDE
 import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
-public class ProjectConfigurationState
-        implements ExportableComponent, PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
+public class ProjectConfigurationState implements PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
 
     private static final Logger LOG = Logger.getInstance(ProjectConfigurationState.class);
 
@@ -64,16 +61,6 @@ public class ProjectConfigurationState
     @NotNull
     private ProjectSettings defaultProjectSettings() {
         return new ProjectSettings(project, defaultConfiguration(project).build());
-    }
-
-    @NotNull
-    public File[] getExportFiles() {
-        return new File[]{PathManager.getOptionsFile("checkstyle-idea_project_settings")};
-    }
-
-    @NotNull
-    public String getPresentableName() {
-        return CheckStylePlugin.ID_PLUGIN + " Project Settings";
     }
 
     public ProjectSettings getState() {
