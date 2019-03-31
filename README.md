@@ -206,6 +206,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.25.0** New: Added Checkstyle 8.17, 8.18 (#438).
 * **5.24.3** Fixed: Blatant white areas in the panel when Darcula in use - thanks to @embee1981 (#432).
 * **5.24.2** Fixed: Fixed a synchronisation edge-case (#425).
 * **5.24.1** Fixed: Some tweaks to the supported Checkstyle versions for better compatibility - thanks to @tsjensen (#424).
