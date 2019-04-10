@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -76,11 +75,12 @@ public class LocationDialogue extends JDialog {
     private ConfigurationLocation configurationLocation;
 
 
-    public LocationDialogue(@NotNull final Project project,
+    public LocationDialogue(@Nullable final Dialog parent,
+                            @NotNull final Project project,
                             @Nullable final String checkstyleVersion,
                             @Nullable final List<String> thirdPartyClasspath,
-                            @NotNull CheckstyleProjectService checkstyleProjectService) {
-        super(WindowManager.getInstance().getFrame(project));
+                            @NotNull final CheckstyleProjectService checkstyleProjectService) {
+        super(parent);
 
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;

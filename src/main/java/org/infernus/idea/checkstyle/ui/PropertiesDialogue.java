@@ -7,6 +7,7 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,9 +21,9 @@ public class PropertiesDialogue extends JDialog {
 
     private boolean committed = true;
 
-    public PropertiesDialogue(@NotNull final Project project,
-                              @NotNull final CheckstyleProjectService checkstyleProjectService,
-                              final Window parent) {
+    public PropertiesDialogue(@Nullable final Dialog parent,
+                              @NotNull final Project project,
+                              @NotNull final CheckstyleProjectService checkstyleProjectService) {
         super(parent);
 
         this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);

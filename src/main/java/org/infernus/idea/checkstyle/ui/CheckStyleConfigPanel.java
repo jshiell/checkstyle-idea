@@ -274,7 +274,7 @@ public class CheckStyleConfigPanel extends JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final LocationDialogue dialogue = new LocationDialogue(
-                    project, getCheckstyleVersion(), getThirdPartyClasspath(), checkstyleProjectService);
+                    parentDialogue(), project, getCheckstyleVersion(), getThirdPartyClasspath(), checkstyleProjectService);
 
             dialogue.setVisible(true);
 
@@ -290,6 +290,10 @@ public class CheckStyleConfigPanel extends JPanel {
                 }
             }
         }
+    }
+
+    private Dialog parentDialogue() {
+        return (Dialog) SwingUtilities.getAncestorOfClass(Dialog.class, CheckStyleConfigPanel.this);
     }
 
     /**
@@ -336,7 +340,8 @@ public class CheckStyleConfigPanel extends JPanel {
 
             final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
 
-            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(project, checkstyleProjectService, parentWindow(parent()));
+            final PropertiesDialogue propertiesDialogue = new PropertiesDialogue(
+                    parentDialogue(), project, checkstyleProjectService);
             propertiesDialogue.setConfigurationLocation(location);
 
             propertiesDialogue.setVisible(true);
@@ -345,17 +350,6 @@ public class CheckStyleConfigPanel extends JPanel {
                 final ConfigurationLocation editedLocation = propertiesDialogue.getConfigurationLocation();
                 locationModel.updateLocation(location, editedLocation);
             }
-        }
-
-        private Container parent() {
-            return CheckStyleConfigPanel.this.getParent();
-        }
-
-        private Window parentWindow(final Container window) {
-            if (window instanceof Window) {
-                return (Window) window;
-            }
-            return parentWindow(window.getParent());
         }
     }
 
@@ -389,7 +383,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     (String) getValue(Action.NAME),
                     (String) getValue(Action.SHORT_DESCRIPTION),
                     false, "jar");
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, project.getBaseDir());
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, CheckStyleConfigPanel.this, project, project.getBaseDir());
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
