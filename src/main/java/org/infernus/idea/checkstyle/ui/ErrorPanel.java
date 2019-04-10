@@ -32,6 +32,8 @@ public class ErrorPanel extends JPanel {
 
         errorField.setEditable(false);
         errorField.setTabSize(2);
+        errorField.setWrapStyleWord(true);
+        errorField.setLineWrap(true);
 
         final JScrollPane errorScrollPane = new JBScrollPane(errorField, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_ALWAYS);
         add(errorScrollPane, BorderLayout.CENTER);
@@ -47,7 +49,8 @@ public class ErrorPanel extends JPanel {
     }
 
     private Throwable causeOf(final Throwable t) {
-        if (t.getCause() != null && t.getCause() != t) {
+        if (t.getCause() != null && t.getCause() != t
+                && !t.getClass().getPackage().getName().startsWith("com.puppycrawl")) {
             return causeOf(t.getCause());
         }
         return t;
