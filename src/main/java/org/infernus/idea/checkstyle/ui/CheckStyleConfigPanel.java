@@ -46,9 +46,9 @@ public class CheckStyleConfigPanel extends JPanel {
     private final JList<?> pathList = new JBList(new DefaultListModel<String>());
 
     private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") + ":");
-    private final ComboBox csVersionDropdown;
+    private final ComboBox<String> csVersionDropdown;
     private final JLabel scopeDropdownLabel = new JLabel(CheckStyleBundle.message("config.scanscope.labelText") + ":");
-    private final ComboBox scopeDropdown = new ComboBox(ScanScope.values());
+    private final ComboBox<ScanScope> scopeDropdown = new ComboBox<>(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
     private final JCheckBox copyLibsCheckbox = new JCheckBox();
 
@@ -73,12 +73,12 @@ public class CheckStyleConfigPanel extends JPanel {
         initialise();
     }
 
-    private ComboBox buildCheckstyleVersionComboBox() {
+    private ComboBox<String> buildCheckstyleVersionComboBox() {
         SortedSet<String> versions = checkstyleProjectService.getSupportedVersions();
         SortedSet<String> reversedVersions = new TreeSet<>(Collections.reverseOrder(versions.comparator()));
         reversedVersions.addAll(versions);
-        String[] supportedVersions = reversedVersions.toArray(new String[reversedVersions.size()]);
-        return new ComboBox(supportedVersions);
+        String[] supportedVersions = reversedVersions.toArray(new String[0]);
+        return new ComboBox<>(supportedVersions);
     }
 
     private void activateCurrentClasspath() {
