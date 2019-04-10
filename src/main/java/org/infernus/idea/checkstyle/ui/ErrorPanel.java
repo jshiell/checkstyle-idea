@@ -1,10 +1,10 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,10 +24,10 @@ public class ErrorPanel extends JPanel {
     }
 
     private void initialise() {
-        setBorder(new EmptyBorder(8, 8, 8, 8));
+        setBorder(JBUI.Borders.empty(8));
 
         final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.error.caption"));
-        infoLabel.setBorder(new EmptyBorder(0, 0, 8, 0));
+        infoLabel.setBorder(JBUI.Borders.emptyBottom(8));
         add(infoLabel, BorderLayout.NORTH);
 
         errorField.setEditable(false);

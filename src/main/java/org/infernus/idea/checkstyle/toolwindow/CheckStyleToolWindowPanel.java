@@ -19,6 +19,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
@@ -29,7 +30,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -130,7 +130,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         toolBarBox.add(mainToolbar.getComponent());
         toolBarBox.add(treeToolbar.getComponent());
 
-        setBorder(new EmptyBorder(1, 1, 1, 1));
+        setBorder(JBUI.Borders.empty(1));
         add(toolBarBox, BorderLayout.WEST);
         add(createToolPanel(), BorderLayout.CENTER);
 

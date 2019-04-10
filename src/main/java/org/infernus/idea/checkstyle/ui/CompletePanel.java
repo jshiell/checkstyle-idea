@@ -4,7 +4,6 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class CompletePanel extends JPanel {
@@ -18,7 +17,7 @@ public class CompletePanel extends JPanel {
     private void initialise() {
         final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.complete.text"));
 
-        setBorder(new EmptyBorder(4, 4, 4, 4));
+        setBorder(JBUI.Borders.empty(4));
 
         add(infoLabel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.NORTHWEST,
                 GridBagConstraints.NONE, JBUI.insets(8), 0, 0));
