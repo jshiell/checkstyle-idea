@@ -297,7 +297,7 @@ public class LocationPanel extends JPanel {
                     (String) getValue(Action.NAME),
                     (String) getValue(Action.SHORT_DESCRIPTION),
                     true, "xml", "checkstyle");
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, LocationPanel.this, project, toSelect);
             if (chosen != null) {
                 final File newConfigFile = VfsUtilCore.virtualToIoFile(chosen);
                 fileLocationField.setText(newConfigFile.getAbsolutePath());
