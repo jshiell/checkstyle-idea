@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -131,9 +132,18 @@ public class LocationDialogue extends JDialog {
 
         pack();
 
+        addEscapeListener();
+
         final Toolkit toolkit = Toolkit.getDefaultToolkit();
         setLocation((toolkit.getScreenSize().width - getSize().width) / 2,
                 (toolkit.getScreenSize().height - getSize().height) / 2);
+    }
+
+    private void addEscapeListener() {
+        getRootPane().registerKeyboardAction((event) ->  setVisible(false),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+
     }
 
     private JPanel panelForCurrentStep() {
