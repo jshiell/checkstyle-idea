@@ -235,17 +235,21 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
 
         File targetFile = checkCommonPathsForTarget(fileName, module);
-
         if (targetFile != null) {
             return targetFile.getAbsolutePath();
         }
 
-        final URL classPathResource = checkstyleClassLoader.getResource(fileName);
-        if (classPathResource != null) {
+        if (existsOnClasspath(fileName, checkstyleClassLoader)) {
             return fileName;
         }
 
         return null;
+    }
+
+    private boolean existsOnClasspath(final String fileName,
+                                     final ClassLoader checkstyleClassLoader) {
+        return checkstyleClassLoader.getResource(fileName) != null
+                || (fileName.startsWith("/") && checkstyleClassLoader.getResource(fileName.substring(1)) != null);
     }
 
     private File checkCommonPathsForTarget(final String fileName,
