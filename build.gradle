@@ -24,7 +24,7 @@ repositories {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '5.26.0'
+version = '5.27.0'
 
 intellij {
     version = 'IC-2017.1.6';

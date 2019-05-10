@@ -204,6 +204,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.27.0** New: Added Checkstyle 8.20.
 * **5.26.0** New: Added Checkstyle 8.19.
 * **5.26.0** New: Now built against IDEA 2017.1.6 (was 2016.1).
 * **5.26.0** Fixed: We no longer strip classpath file references that start with a slash (#437).
