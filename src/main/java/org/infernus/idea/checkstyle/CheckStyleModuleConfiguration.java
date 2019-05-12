@@ -1,5 +1,12 @@
 package org.infernus.idea.checkstyle;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -11,14 +18,12 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-
 /**
  * A manager for CheckStyle module configuration.
  */
 @State(
         name = CheckStylePlugin.ID_MODULE_PLUGIN,
-        storages = {@Storage(id = "other", file = "$MODULE_FILE$")}
+        storages = {@Storage(file = "$MODULE_FILE$")}
 )
 public final class CheckStyleModuleConfiguration extends Properties
         implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {

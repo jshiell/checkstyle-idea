@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle.build;
 
+import java.io.File;
+import java.util.Set;
+
 import groovy.lang.Closure;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -10,9 +13,6 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
-
-import java.io.File;
-import java.util.Set;
 
 
 /**
@@ -40,7 +40,7 @@ public class CsaccessTestTask
 
         dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
 
-        configure((Closure<?>) project.getProperties().get("testConfigClosure"));
+        GradlePluginMain.configureTestTask(this);
         setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
     }
 
@@ -105,13 +105,13 @@ public class CsaccessTestTask
                     csaccessTestSrcSet.getOutput().getResourcesDir(),
                     csaccessSourceSet.getOutput().getResourcesDir(),
                     mainSourceSet.getOutput().getResourcesDir())
-                    .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
-                    .plus(csaccessSourceSet.getOutput().getClassesDirs())
-                    .plus(mainSourceSet.getOutput().getClassesDirs())
-                    .plus(project.files(csJars))
-                    .plus(originalClasspath)
-                    .minus(testSourceSet.getOutput().getClassesDirs())
-                    .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
+                .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
+                .plus(csaccessSourceSet.getOutput().getClassesDirs())
+                .plus(mainSourceSet.getOutput().getClassesDirs())
+                .plus(project.files(csJars))
+                .plus(originalClasspath)
+                .minus(testSourceSet.getOutput().getClassesDirs())
+                .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
 
             //getLogger().lifecycle("--------------------------------------------------------------------------");
             //getLogger().lifecycle("Effective classpath of " + getName() + ":");
