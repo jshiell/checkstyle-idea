@@ -16,6 +16,8 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
@@ -29,8 +31,10 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
 
     public static final String NAME = "gatherCheckstyleArtifacts";
 
+    @OutputDirectory
     private final File bundledJarsDir;
 
+    @OutputFile
     private final File classPathsInfoFile;
 
     public GatherCheckstyleArtifactsTask() {
@@ -46,8 +50,6 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
         // Task Outputs: the directory full of JARs, and the classpath info file
         bundledJarsDir = getTemporaryDir();
         classPathsInfoFile = new File(project.getBuildDir(), "resources-generated/checkstyle-classpaths.properties");
-        getOutputs().dir(bundledJarsDir);
-        getOutputs().file(classPathsInfoFile);
 
         // Add generated classpath info file to resources
         SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");

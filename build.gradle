@@ -1,10 +1,3 @@
-import org.infernus.idea.checkstyle.build.CheckstyleVersions
-import org.infernus.idea.checkstyle.build.CopyCheckstyleArtifactsToSandboxTask
-import org.infernus.idea.checkstyle.build.CopyClassesToSandboxTask
-import org.infernus.idea.checkstyle.build.CsaccessTestTask
-import org.infernus.idea.checkstyle.build.CustomSourceSetCreator
-import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask
-
 buildscript {
     repositories {
         maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
@@ -15,15 +8,18 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'org.jetbrains.intellij' version '0.4.7'
+    id 'com.dorongold.task-tree' version '1.3.1'
+    id 'org.infernus.idea.checkstyle.build'
 }
 
 repositories {
-    mavenLocal()
     jcenter()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Project Metadata
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 version = '5.27.0'
 
 intellij {
@@ -33,9 +29,13 @@ intellij {
     instrumentCode = false
 }
 
-final CustomSourceSetCreator customBuild = new CustomSourceSetCreator(project);
-customBuild.establishCsAccessSourceSet();
-customBuild.establishCsAccessTestSourceSet();
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//   Compilation
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8';
@@ -49,10 +49,6 @@ tasks.withType(JavaCompile) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Dependencies
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-ext {
-    supportedCsVersions = new CheckstyleVersions(project);
-}
 
 dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.6';
@@ -72,95 +68,15 @@ dependencies {
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Tests
+//   IntelliJ IDEA Config
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-ext {
-    // testConfigClosure is used by all tasks of type Test (runCsaccessTests, test, xtest_*):
-    testConfigClosure = {
-        testLogging {
-            events 'failed';
-            showStackTraces = true;
-            showExceptions = true;
-            showCauses = true;
-            //showStandardStreams = true;
-            exceptionFormat 'full';
-        }
-        afterSuite { final TestDescriptor descriptor, final TestResult testResult ->
-            if (descriptor.getParent() == null) {
-                logger.lifecycle('\r\t' + testResult.testCount + ' tests executed, ' +
-                        testResult.successfulTestCount + ' successful, ' +
-                        (testResult.testCount - testResult.successfulTestCount - testResult.skippedTestCount) +
-                        ' failed, ' + testResult.skippedTestCount + ' skipped.');
-            }
-        }
-    }
-}
-test((Closure) testConfigClosure);
-Task rct = tasks.create(CsaccessTestTask.NAME, CsaccessTestTask.class);
-rct.setCheckstyleVersion((String) supportedCsVersions.baseVersion, true);
-tasks.test.dependsOn rct;
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Cross-check 'csaccessTest' unit tests against the different Checkstyle runtimes
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Task xtestTask = tasks.create(CsaccessTestTask.XTEST_TASK_NAME);
-xtestTask.setGroup(CsaccessTestTask.XTEST_GROUP_NAME);
-xtestTask.setDescription('Runs the \'' + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME +
-            '\' unit tests against all supported Checkstyle runtimes.');
-
-tasks.check.dependsOn xtestTask;
-supportedCsVersions.versions.each { final String csVersion ->
-    if (supportedCsVersions.baseVersion != csVersion) {
-        CsaccessTestTask xt = tasks.create(CsaccessTestTask.getTaskName(csVersion), CsaccessTestTask.class);
-        xt.setCheckstyleVersion(csVersion, false);
-        xtestTask.dependsOn(xt);
-    }
-}
-customBuild.setupCoverageVerification();
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Extra tasks for packaging Checkstyle in different versions into the plugin distribution
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-tasks.create(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
-task copyCheckstyleArtifactsToSandbox(type: CopyCheckstyleArtifactsToSandboxTask);
-task copyCheckstyleArtifactsToTestSandbox(type: CopyCheckstyleArtifactsToSandboxTask) { setTest(); }
-task copyClassesToSandbox(type: CopyClassesToSandboxTask);
-task copyClassesToTestSandbox(type: CopyClassesToSandboxTask) { setTest(); }
-
-// Defer some of the wiring until after the intellij plugin's tasks have been created:
-tasks.all { final Task task ->
-    if ('buildPlugin' == task.name || 'runIdea' == task.name || 'runIde' == task.name) {
-        task.dependsOn(tasks.copyCheckstyleArtifactsToSandbox);
-        task.dependsOn tasks['copyClassesToSandbox'];
-    }
-    else if ('prepareSandbox' == task.name) {
-        tasks['copyCheckstyleArtifactsToSandbox'].dependsOn task;
-        tasks['copyClassesToSandbox'].dependsOn task;
-    }
-    else if ('prepareTestsSandbox' == task.name) {
-        tasks['copyCheckstyleArtifactsToTestSandbox'].dependsOn task;
-        tasks['copyClassesToTestSandbox'].dependsOn task;
-    }
-}
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//   Configure IntelliJ IDEA
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-idea.project {
-    languageLevel = JavaVersion.VERSION_1_8;
-}
 idea.module {
     downloadJavadoc = true;
     downloadSources = true;
     excludeDirs += file('.idea');
     excludeDirs += file('_support');
+
     // TODO We should also tell IntelliJ automatically that csaccessTest contains test code.
     // The following lines should really do it, but currently don't, which seems like a Gradle bug to me:
     //def SourceSet catSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME);
