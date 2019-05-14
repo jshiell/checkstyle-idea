@@ -92,7 +92,7 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
     private String convertToClassPath(final Set<File> resolvedDependecy) {
         final StringBuilder sb = new StringBuilder();
         for (final File f : resolvedDependecy) {
-            sb.append(CopyCheckstyleArtifactsToSandboxTask.TARGET_SUBFOLDER);
+            sb.append(GradlePluginMain.CSLIB_TARGET_SUBFOLDER);
             sb.append('/');
             sb.append(f.getName());
             sb.append(';');
