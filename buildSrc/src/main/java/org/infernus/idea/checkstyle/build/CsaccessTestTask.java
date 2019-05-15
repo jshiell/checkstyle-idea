@@ -19,7 +19,8 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * Gradle task that runs the unit tests in 'csaccessTest' against one of the supported Checkstyle versions.
  */
 public class CsaccessTestTask
-        extends Test {
+    extends Test
+{
     public static final String XTEST_GROUP_NAME = "xtest";
     public static final String XTEST_TASK_NAME = "xtest";
 
@@ -113,11 +114,13 @@ public class CsaccessTestTask
                 .minus(testSourceSet.getOutput().getClassesDirs())
                 .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
 
-            //getLogger().lifecycle("--------------------------------------------------------------------------");
-            //getLogger().lifecycle("Effective classpath of " + getName() + ":");
-            //for (File f : effectiveClasspath) {
-            //    getLogger().lifecycle("\t- " + f.getAbsolutePath());
-            //}
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("--------------------------------------------------------------------------");
+                getLogger().debug("Effective classpath of " + getName() + ":");
+                for (File f : effectiveClasspath) {
+                    getLogger().debug("\t- " + f.getAbsolutePath());
+                }
+            }
         }
         return effectiveClasspath;
     }

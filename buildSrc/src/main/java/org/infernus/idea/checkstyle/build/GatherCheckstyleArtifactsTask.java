@@ -8,18 +8,15 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import groovy.lang.Closure;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 
@@ -27,15 +24,19 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * Download all supported versions of Checkstyle along with their transitive dependencies, for bundling with the
  * plugin.
  */
-public class GatherCheckstyleArtifactsTask extends DefaultTask {
-
+public class GatherCheckstyleArtifactsTask
+    extends DefaultTask
+{
     public static final String NAME = "gatherCheckstyleArtifacts";
+
+    private final CheckstyleVersions csVersions;
 
     @OutputDirectory
     private final File bundledJarsDir;
 
     @OutputFile
     private final File classPathsInfoFile;
+
 
     public GatherCheckstyleArtifactsTask() {
         super();
@@ -44,44 +45,29 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
         final Project project = getProject();
 
         // Task Inputs: the property file with the list of supported Checkstyle versions
-        final CheckstyleVersions csVersions = new CheckstyleVersions(project);
+        csVersions = new CheckstyleVersions(project);
         getInputs().file(csVersions.getPropertyFile());
 
         // Task Outputs: the directory full of JARs, and the classpath info file
         bundledJarsDir = getTemporaryDir();
         classPathsInfoFile = new File(project.getBuildDir(), "resources-generated/checkstyle-classpaths.properties");
-
-        // Add generated classpath info file to resources
-        SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
-        SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        mainSourceSet.getResources().srcDir(classPathsInfoFile.getParentFile());
-
-        // 'processResources' now depends on this task
-        project.afterEvaluate(new Closure<Void>(this) {
-            @Override
-            public Void call(final Object... args) {
-                project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(getOwner());
-                return null;
-            }
-        });
-
-        doLast(new Closure<Void>(this) {
-            @Override
-            public Void call() {
-                final Set<File> bundledFiles = new TreeSet<>();
-                final Properties classPaths = new SortedProperties();
-
-                for (final String csVersion : csVersions.getVersions()) {
-                    final Set<File> files = resolveDependencies(project, csVersion);
-                    classPaths.setProperty(csVersion, convertToClassPath(files));
-                    bundledFiles.addAll(files);
-                }
-                copyFiles(bundledFiles);
-                createClassPathsFile(classPaths);
-                return null;
-            }
-        });
     }
+
+
+    @TaskAction
+    public void runTask() {
+        final Set<File> bundledFiles = new TreeSet<>();
+        final Properties classPaths = new SortedProperties();
+
+        for (final String csVersion : csVersions.getVersions()) {
+            final Set<File> files = resolveDependencies(getProject(), csVersion);
+            classPaths.setProperty(csVersion, convertToClassPath(files));
+            bundledFiles.addAll(files);
+        }
+        copyFiles(bundledFiles);
+        createClassPathsFile(classPaths);
+    }
+
 
     private Set<File> resolveDependencies(final Project project, final String checkstyleVersion) {
         final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
@@ -114,6 +100,7 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
         }
     }
 
+
     private void createClassPathsFile(final Properties classPaths) {
         //noinspection ResultOfMethodCallIgnored
         classPathsInfoFile.getParentFile().mkdir();
@@ -127,7 +114,12 @@ public class GatherCheckstyleArtifactsTask extends DefaultTask {
         }
     }
 
+
     public File getBundledJarsDir() {
         return bundledJarsDir;
+    }
+
+    public File getClassPathsInfoFile() {
+        return classPathsInfoFile;
     }
 }
