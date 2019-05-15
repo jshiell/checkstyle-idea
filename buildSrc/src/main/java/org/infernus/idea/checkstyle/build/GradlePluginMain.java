@@ -10,6 +10,7 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -104,7 +105,16 @@ public class GradlePluginMain
 
 
     private void createCheckstyleArtifactTasks(final Project pProject) {
-        pProject.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+        TaskProvider<GatherCheckstyleArtifactsTask> taskProvider =
+                pProject.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+        taskProvider.configure((GatherCheckstyleArtifactsTask task) -> {
+            pProject.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
+
+            // Add generated classpath info file to resources
+            SourceSetContainer sourceSets = (SourceSetContainer) pProject.getProperties().get("sourceSets");
+            SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+            mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
+        });
 
         createCopyCheckstyleArtifactsToSandboxTask(pProject, false);
         createCopyCheckstyleArtifactsToSandboxTask(pProject, true);
