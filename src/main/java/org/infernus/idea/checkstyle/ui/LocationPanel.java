@@ -42,6 +42,7 @@ public class LocationPanel extends JPanel {
     private final JTextField descriptionField = new JTextField();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
     private final JCheckBox insecureHttpCheckbox = new JCheckBox();
+    private final JLabel classpathLocationReminderLabel = new JLabel();
 
     private final Project project;
 
@@ -68,6 +69,7 @@ public class LocationPanel extends JPanel {
         urlLocationRadio.addActionListener(new RadioButtonActionListener());
         classpathLocationRadio.setText(CheckStyleBundle.message("config.file.classpath.text"));
         classpathLocationRadio.addActionListener(new RadioButtonActionListener());
+        classpathLocationReminderLabel.setText(CheckStyleBundle.message("config.file.classpath.reminder"));
 
         final ButtonGroup locationGroup = new ButtonGroup();
         locationGroup.add(fileLocationRadio);
@@ -122,8 +124,10 @@ public class LocationPanel extends JPanel {
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         add(classpathLocationField, new GridBagConstraints(1, 8, 2, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        add(classpathLocationReminderLabel, new GridBagConstraints(1, 9, 2, 1, 1.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
 
-        add(Box.createVerticalGlue(), new GridBagConstraints(0, 9, 3, 1, 0.0, 1.0,
+        add(Box.createVerticalGlue(), new GridBagConstraints(0, 10, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
     }
 
