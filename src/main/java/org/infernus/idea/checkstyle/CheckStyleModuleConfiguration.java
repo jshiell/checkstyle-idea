@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -23,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @State(
         name = CheckStylePlugin.ID_MODULE_PLUGIN,
-        storages = {@Storage(file = "$MODULE_FILE$")}
+        storages = {@Storage(StoragePathMacros.MODULE_FILE)}
 )
 public final class CheckStyleModuleConfiguration extends Properties
         implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {
