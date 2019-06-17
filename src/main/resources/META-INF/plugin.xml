@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.27.0</version>
+    <version>5.28.0</version>
     <idea-version since-build="171.4694.73"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.28.0: New: Added Checkstyle 8.21.</li>
     <li>5.27.0: New: Added Checkstyle 8.20.</li>
     <li>5.26.0: New: Added Checkstyle 8.19.</li>
     <li>5.26.0: New: Now built against IDEA 2017.1.6 (was 2016.1).</li>
