@@ -22,7 +22,8 @@ public class ExceptionWrapper {
             NullPointerException.class,
             ArrayIndexOutOfBoundsException.class,
             StringIndexOutOfBoundsException.class,
-            IllegalStateException.class));
+            IllegalStateException.class,
+            ClassCastException.class));
 
 
     public CheckStylePluginException wrap(@Nullable final String message, @NotNull final Throwable error) {

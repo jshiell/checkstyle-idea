@@ -78,6 +78,14 @@ public class ExceptionWrapperTest {
     }
 
     @Test
+    public void aCheckstyleExceptionThatHasACauseOfAClassCastExceptionIsWrappedInAPluginParseException() {
+        assertThat(
+                new ExceptionWrapper()
+                        .wrap(null, new CheckstyleException("aTestException", new ClassCastException("aTestException"))),
+                is(instanceOf(CheckStylePluginParseException.class)));
+    }
+
+    @Test
     public void aCheckstyleExceptionThatHasACauseOfAnyOtherExceptionIsWrappedInAPluginException() {
         assertThat(
                 new ExceptionWrapper()
