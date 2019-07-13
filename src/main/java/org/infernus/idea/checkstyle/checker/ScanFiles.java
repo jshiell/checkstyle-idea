@@ -14,6 +14,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
@@ -74,6 +75,10 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult =
                     processFilesForModuleInfoAndScan();
             return scanCompletedSuccessfully(scanResult.first, scanResult.second);
+
+        } catch (CheckStylePluginParseException e) {
+            LOG.debug("Parse exception caught during scan", e);
+            return scanFailedWithError(e);
         } catch (final CheckStylePluginException e) {
             LOG.warn("An error occurred while scanning a file.", e);
             return scanFailedWithError(e);

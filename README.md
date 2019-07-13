@@ -204,6 +204,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.29.2** Fixed: Parse errors are now better reflected in the log/error messages for static scans (#449).
 * **5.29.1** Fixed: ClassCastExceptions thrown from Antlr during parsing were not processed properly (#449).
 * **5.29.0** New: Added Checkstyle 8.22.
 * **5.28.0** New: Added Checkstyle 8.21.
