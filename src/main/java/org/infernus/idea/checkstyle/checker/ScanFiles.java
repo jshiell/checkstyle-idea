@@ -60,11 +60,13 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
     private Map<Module, Set<PsiFile>> mapsModulesToFiles() {
         final Map<Module, Set<PsiFile>> modulesToFiles = new HashMap<>();
-        for (final PsiFile file : files) {
-            final Module module = ModuleUtil.findModuleForPsiElement(file);
-            Set<PsiFile> filesForModule = modulesToFiles.computeIfAbsent(module, key -> new HashSet<>());
-            filesForModule.add(file);
-        }
+        ApplicationManager.getApplication().runReadAction(() -> {
+            for (final PsiFile file : files) {
+                final Module module = ModuleUtil.findModuleForPsiElement(file);
+                Set<PsiFile> filesForModule = modulesToFiles.computeIfAbsent(module, key -> new HashSet<>());
+                filesForModule.add(file);
+            }
+        });
         return modulesToFiles;
     }
 
