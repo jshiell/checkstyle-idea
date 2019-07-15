@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.psi.PsiElement;
@@ -40,7 +41,14 @@ public class Problem {
     public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager) {
         return inspectionManager.createProblemDescriptor(target,
                 CheckStyleBundle.message("inspection.message", message()),
-                null, problemHighlightType(), false, afterEndOfLine);
+                quickFixes(), problemHighlightType(), false, afterEndOfLine);
+    }
+
+    private LocalQuickFix[] quickFixes() {
+        if (sourceName != null) {
+            return new LocalQuickFix[]{new SuppressForCheckstyleFix(shortenClassName(sourceName))};
+        }
+        return null;
     }
 
     @NotNull
