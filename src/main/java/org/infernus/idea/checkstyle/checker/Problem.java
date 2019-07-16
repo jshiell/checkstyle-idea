@@ -67,7 +67,9 @@ public class Problem {
     private String shortenClassName(final String className) {
         final int lastPackageIndex = className.lastIndexOf(".");
         if (lastPackageIndex >= 0) {
-            return className.substring(lastPackageIndex + 1);
+            return className
+                    .substring(lastPackageIndex + 1)
+                    .replaceFirst("Check$", "");
         }
         return className;
     }
