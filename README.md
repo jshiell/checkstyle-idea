@@ -204,6 +204,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.30.0** New: Quick fix now available to add suppressions for the current rule (#358).
 * **5.29.2** Fixed: Wrapped module lookup as read action (#450).
 * **5.29.2** Fixed: Parse errors are now better reflected in the log/error messages for static scans (#449).
 * **5.29.1** Fixed: ClassCastExceptions thrown from Antlr during parsing were not processed properly (#449).

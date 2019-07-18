@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.29.2</version>
+    <version>5.30.0</version>
     <idea-version since-build="171.4694.73"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.30.0: New: Quick fix now available to add suppressions for the current rule (#358).</li>
     <li>5.29.2: Fixed: Wrapped module lookup as read action (#450).</li>
     <li>5.29.2: Fixed: Parse errors are now better reflected in the log/error messages for static scans (#449).</li>
     <li>5.29.1: Fixed: ClassCastExceptions thrown from Antlr during parsing were not processed properly (#449).</li>
