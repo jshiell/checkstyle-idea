@@ -1,13 +1,24 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import com.intellij.application.options.CodeStyle;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiJavaFile;
+import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -17,29 +28,13 @@ import java.util.function.IntUnaryOperator;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-import com.intellij.openapi.application.AccessToken;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.util.TempDirProvider;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import static java.util.Optional.ofNullable;
 
 
 /**
  * A representation of a file able to be scanned.
  */
-public class ScannableFile
-{
+public class ScannableFile {
     private static final Logger LOG = Logger.getInstance(ScannableFile.class);
 
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
@@ -57,7 +52,7 @@ public class ScannableFile
      * If required this will create a temporary copy of the file.
      *
      * @param psiFile the psiFile to create the file from.
-     * @param module the module the file belongs to.
+     * @param module  the module the file belongs to.
      * @throws IOException if file creation is required and fails.
      */
     public ScannableFile(@NotNull final PsiFile psiFile, @Nullable final Module module) throws IOException {
@@ -75,15 +70,11 @@ public class ScannableFile
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final CheckStylePlugin plugin,
                                                         @Nullable final Module module) {
-
-        final AccessToken readAccessToken = ApplicationManager.getApplication().acquireReadActionLock();
-        try {
-            return psiFiles.stream().filter(psiFile -> PsiFileValidator.isScannable(psiFile, ofNullable(module),
-                    plugin.configurationManager())).map(psiFile -> ScannableFile.create(psiFile, module)).filter
-                    (Objects::nonNull).collect(Collectors.toList());
-        } finally {
-            readAccessToken.finish();
-        }
+        Computable<List<ScannableFile>> action = () -> psiFiles.stream()
+                .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), plugin.configurationManager()))
+                .map(currentFile -> ScannableFile.create(currentFile, module))
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        return ApplicationManager.getApplication().runReadAction(action);
     }
 
     @Nullable
@@ -183,8 +174,7 @@ public class ScannableFile
     }
 
     private String tempFileDirectoryName() {
-        return String.format("%s%03d", TEMPFILE_DIR_PREFIX, TEMP_FILE_SOURCE.getAndUpdate(incrementUntil
-                (MAX_TEMP_FILE_SUFFIX)));
+        return String.format("%s%03d", TEMPFILE_DIR_PREFIX, TEMP_FILE_SOURCE.getAndUpdate(incrementUntil(MAX_TEMP_FILE_SUFFIX)));
     }
 
     @NotNull
@@ -208,7 +198,7 @@ public class ScannableFile
     }
 
     private void writeContentsToFile(final PsiFile file, final File outFile) throws IOException {
-        final String lineSeparator = CodeStyleSettingsManager.getSettings(file.getProject()).getLineSeparator();
+        final String lineSeparator = CodeStyle.getSettings(file.getProject()).getLineSeparator();
 
         final Writer tempFileOut = writerTo(outFile, charSetOf(file));
         for (final char character : file.getText().toCharArray()) {
@@ -224,7 +214,7 @@ public class ScannableFile
 
     @NotNull
     private Charset charSetOf(final PsiFile file) {
-        return virtualFileOf(file).map(VirtualFile::getCharset).orElseGet(() -> Charset.forName("UTF-8"));
+        return virtualFileOf(file).map(VirtualFile::getCharset).orElse(StandardCharsets.UTF_8);
     }
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {

@@ -137,7 +137,7 @@ public class TempDirProvider {
     @Nullable
     private String readTemplate() throws IOException {
         try (InputStream is = getClass().getResourceAsStream(README_TEMPLATE)) {
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
+            return IOUtils.toString(is, StandardCharsets.UTF_8.toString());
         }
     }
 

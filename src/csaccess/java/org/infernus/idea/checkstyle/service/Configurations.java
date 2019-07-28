@@ -2,10 +2,10 @@ package org.infernus.idea.checkstyle.service;
 
 import java.util.Optional;
 
+import com.intellij.application.options.CodeStyle;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
@@ -48,14 +48,10 @@ public class Configurations implements TabWidthAndBaseDirProvider {
 
     @NotNull
     CodeStyleSettings currentCodeStyleSettings() {
-        return codeStyleSettingsManager().getCurrentSettings();
-    }
-
-    private CodeStyleSettingsManager codeStyleSettingsManager() {
         if (module != null) {
-            return CodeStyleSettingsManager.getInstance(module.getProject());
+            return CodeStyle.getSettings(module.getProject());
         }
-        return CodeStyleSettingsManager.getInstance();
+        return CodeStyle.getDefaultSettings();
     }
 
     public Optional<String> baseDir() {
@@ -70,7 +66,7 @@ public class Configurations implements TabWidthAndBaseDirProvider {
     private int intValueOrDefault(final String value, final int defaultValue) {
         if (value != null) {
             try {
-                return Integer.valueOf(value);
+                return Integer.parseInt(value);
             } catch (NumberFormatException ignored) {
             }
         }

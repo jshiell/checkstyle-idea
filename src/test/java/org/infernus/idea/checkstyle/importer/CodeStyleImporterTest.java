@@ -3,10 +3,7 @@ package org.infernus.idea.checkstyle.importer;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
-import com.intellij.psi.codeStyle.PackageEntry;
-import com.intellij.psi.codeStyle.PackageEntryTable;
+import com.intellij.psi.codeStyle.*;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -37,7 +34,7 @@ public class CodeStyleImporterTest
 
         csService = new CheckstyleProjectService(project, mockPluginConfig);
 
-        codeStyleSettings = new CodeStyleSettings(false);
+        codeStyleSettings = new CodeStyleSettings();
         javaSettings = codeStyleSettings.getCommonSettings(JavaLanguage.INSTANCE);
     }
 
@@ -247,7 +244,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // staticPosition attribute - top
@@ -266,7 +263,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // staticPosition attribute - bottom
@@ -285,7 +282,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // staticPosition attribute - above
@@ -305,7 +302,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // staticPosition attribute - under
@@ -325,7 +322,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // staticPosition attribute - inflow
@@ -343,8 +340,8 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            assertFalse(codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // separated attribute - top
@@ -366,8 +363,8 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            assertFalse(codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // separate attribute - bottom
@@ -389,8 +386,8 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
             };
 
-            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            assertFalse(codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // separate attribute - above
@@ -412,7 +409,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // separate attribute - under
@@ -434,7 +431,7 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
             };
 
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
 
         // separate attribute - inflow
@@ -454,8 +451,8 @@ public class CodeStyleImporterTest
                     PackageEntry.ALL_OTHER_IMPORTS_ENTRY,
             };
 
-            assertEquals(false, codeStyleSettings.LAYOUT_STATIC_IMPORTS_SEPARATELY);
-            comparePackageEntries(expected, codeStyleSettings.IMPORT_LAYOUT_TABLE);
+            assertFalse(codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).LAYOUT_STATIC_IMPORTS_SEPARATELY);
+            comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
         }
     }
 
@@ -474,10 +471,11 @@ public class CodeStyleImporterTest
                                 "</module>"
                 )
         );
+        JavaCodeStyleSettings customSettings = codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class);
 
-        assertEquals(999, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(999, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+        assertEquals(999, customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(999, customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
 
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
@@ -489,9 +487,9 @@ public class CodeStyleImporterTest
                 )
         );
 
-        assertEquals(1, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(1, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+        assertEquals(1, customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(1, customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
 
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
@@ -502,11 +500,11 @@ public class CodeStyleImporterTest
                 )
         );
 
-        assertEquals(999, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(1, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+        assertEquals(999, customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(1, customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
 
-        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+        customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
 
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
@@ -517,9 +515,9 @@ public class CodeStyleImporterTest
                 )
         );
 
-        assertEquals(1, codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(999, codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
-        assertEquals(0, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
+        assertEquals(1, customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(999, customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND);
+        assertEquals(0, customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.getEntryCount());
 
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
@@ -535,13 +533,14 @@ public class CodeStyleImporterTest
                 new PackageEntry(false, "d.e.f", false),
         };
 
-        comparePackageEntries(expected, codeStyleSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND);
+        comparePackageEntries(expected, customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND);
     }
 
     private static void resetAvoidStarImportSettings(CodeStyleSettings settings) {
-        settings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
-        settings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
-        settings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(new PackageEntryTable());
+        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
+        customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+        customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
+        customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(new PackageEntryTable());
     }
 
 }

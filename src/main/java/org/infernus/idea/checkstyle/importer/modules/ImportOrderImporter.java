@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
 import java.util.HashSet;
@@ -19,7 +20,7 @@ public class ImportOrderImporter extends ModuleImporter {
     private StaticImportPosition staticPosition;
 
     @Override
-    protected void handleAttribute(@NotNull String attrName, @NotNull String attrValue) {
+    protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         switch (attrName) {
             case GROUPS:
                 groups = attrValue.split(",");
@@ -34,27 +35,29 @@ public class ImportOrderImporter extends ModuleImporter {
     }
 
     @Override
-    public void importTo(@NotNull CodeStyleSettings settings) {
+    public void importTo(@NotNull final CodeStyleSettings settings) {
+        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
+
         if (groups != null) {
-            processGroupsAttribute(groups, settings);
+            processGroupsAttribute(groups, customSettings);
         }
 
         if (staticPosition == null) {
-            processSeparatedAttribute(separated, settings);
+            processSeparatedAttribute(separated, customSettings);
         } else {
             if (staticPosition == StaticImportPosition.ABOVE || staticPosition == StaticImportPosition.UNDER) {
                 // we are applying the attributes in reverse so that we do not separate blocks containing static and
                 // non-static imports for the same package
-                processSeparatedAttribute(separated, settings);
-                processOptionAttribute(staticPosition, settings);
+                processSeparatedAttribute(separated, customSettings);
+                processOptionAttribute(staticPosition, customSettings);
             } else {
-                processOptionAttribute(staticPosition, settings);
-                processSeparatedAttribute(separated, settings);
+                processOptionAttribute(staticPosition, customSettings);
+                processSeparatedAttribute(separated, customSettings);
             }
         }
     }
 
-    private static void processGroupsAttribute(@NotNull String[] groups, @NotNull CodeStyleSettings settings) {
+    private static void processGroupsAttribute(@NotNull final String[] groups, @NotNull final JavaCodeStyleSettings settings) {
         PackageEntryTable importTable = new PackageEntryTable();
 
         for (String group : groups) {
@@ -67,7 +70,7 @@ public class ImportOrderImporter extends ModuleImporter {
         settings.IMPORT_LAYOUT_TABLE.copyFrom(importTable);
     }
 
-    private static void processSeparatedAttribute(boolean separated, @NotNull CodeStyleSettings settings) {
+    private static void processSeparatedAttribute(final boolean separated, @NotNull final JavaCodeStyleSettings settings) {
         PackageEntryTable importTable = new PackageEntryTable();
 
         if (settings.IMPORT_LAYOUT_TABLE.getEntryCount() < 1) {
@@ -92,7 +95,8 @@ public class ImportOrderImporter extends ModuleImporter {
         settings.IMPORT_LAYOUT_TABLE.copyFrom(importTable);
     }
 
-    private static void processOptionAttribute(@NotNull StaticImportPosition staticImportPosition, @NotNull CodeStyleSettings settings) {
+    private static void processOptionAttribute(@NotNull final StaticImportPosition staticImportPosition,
+                                               @NotNull final JavaCodeStyleSettings settings) {
         switch (staticImportPosition) {
             case TOP:
                 // remove other instances of PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY from the table

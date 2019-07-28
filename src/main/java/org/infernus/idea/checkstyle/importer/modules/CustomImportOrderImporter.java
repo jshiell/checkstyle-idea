@@ -1,15 +1,16 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
-import java.util.ArrayList;
-import java.util.function.Consumer;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -43,7 +44,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
     }
 
     @Override
-    protected void handleAttribute(@NotNull String attrName, @NotNull String attrValue) {
+    protected void handleAttribute(@NotNull final String attrName, @NotNull final String attrValue) {
         switch (attrName) {
             case CUSTOM_IMPORT_ORDER_RULES_PROP:
                 parseImportOrderRules(attrValue);
@@ -73,9 +74,9 @@ public class CustomImportOrderImporter extends ModuleImporter {
     }
 
     @Override
-    public void importTo(@NotNull CodeStyleSettings settings) {
-        PackageEntryTable customImportTable = createCustomImportTable();
-        settings.IMPORT_LAYOUT_TABLE.copyFrom(customImportTable);
+    public void importTo(@NotNull final CodeStyleSettings settings) {
+        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
+        customSettings.IMPORT_LAYOUT_TABLE.copyFrom(createCustomImportTable());
     }
 
     private PackageEntryTable createCustomImportTable() {
@@ -110,29 +111,33 @@ public class CustomImportOrderImporter extends ModuleImporter {
         return table;
     }
 
-    private void addBlankLineBetweenGroups(PackageEntryTable table) {
-        if(!separateLineBetweenGroups) {
-          return;
+    private void addBlankLineBetweenGroups(final PackageEntryTable table) {
+        if (!separateLineBetweenGroups) {
+            return;
         }
 
         table.addEntry(PackageEntry.BLANK_LINE_ENTRY);
     }
 
-    private List<String> parseCustomPackagesRegExp(@NotNull String value) {
+    private List<String> parseCustomPackagesRegExp(@NotNull final String value) {
+        String processedValue = value;
+
         String[] tokensToReplace = {"^", "$", ".*", "(", ")"};
-        for(String token : tokensToReplace) {
-            value = value.replace(token, "");
+        for (String token : tokensToReplace) {
+            processedValue = processedValue.replace(token, "");
         }
 
         // The ending \. used in the regex value is not required in IntelliJ
-        value = value.endsWith("\\.") ? value.substring(0, value.length() - 2) : value;
+        processedValue = processedValue.endsWith("\\.")
+                ? processedValue.substring(0, processedValue.length() - 2)
+                : processedValue;
 
-        String[] customPackages = value.split("\\|");
+        String[] customPackages = processedValue.split("\\|");
 
         return Arrays.asList(customPackages);
     }
 
-    private void parseImportOrderRules(@NotNull String value) {
+    private void parseImportOrderRules(@NotNull final String value) {
         String[] groups = value.split(IMPORT_GROUP_SEPARATOR);
         customImportOrder = Arrays.stream(groups)
                 .map(group -> group.replaceAll("\\(\\d+\\)", ""))
@@ -148,8 +153,8 @@ public class CustomImportOrderImporter extends ModuleImporter {
         SPECIAL_IMPORTS
     }
 
-    public class UnknownPropertyException extends RuntimeException {
-        UnknownPropertyException(String message) {
+    public static class UnknownPropertyException extends RuntimeException {
+        UnknownPropertyException(final String message) {
             super(message);
         }
     }
