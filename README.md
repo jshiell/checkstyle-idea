@@ -107,7 +107,7 @@ You can then easily build via Gradle:
 
 To run it in a sandboxed IDEA, run:
 
-    ./gradlew runIdea
+    ./gradlew runIde
 
 To debug the plugin, import the plugin into IDEA as a Gradle project, and then use the `runIdea` Gradle target in debug
 mode. 
