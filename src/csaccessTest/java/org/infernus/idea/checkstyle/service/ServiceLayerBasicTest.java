@@ -39,7 +39,6 @@ public class ServiceLayerBasicTest {
 
     private static final String CONFIG_FILE_BREAKS_AFTER_6_16_1 = "config1-6.16.1-but-not-6.17.xml";
     private static final String CONFIG_FILE_BREAKS_BEFORE_6_19 = "config2-6.19-but-not-6.17.xml";
-    private static final String CONFIG_FILE_BREAKS_ON_6_6 = "config3-6.19-but-not-6.6.xml";
 
     private static CheckstyleProjectService checkstyleProjectService;
 
@@ -93,27 +92,6 @@ public class ServiceLayerBasicTest {
     }
 
     @Test
-    public void aCustomCheckThatUsedApisBrokenIn6_6And6_7DoesNotWorkWithTheseRuntimes() throws IOException, URISyntaxException {
-        assumeThat(currentCsVersion(), isLessThan("8.0"));
-
-        //noinspection ThrowableNotThrown
-        CustomCheck3.popErrorOccurred4UnitTest();
-
-        final CheckStyleChecker checker = createChecker(CONFIG_FILE_BREAKS_ON_6_6);
-        runChecker(checker);
-
-        final Throwable errorOccurred = CustomCheck3.popErrorOccurred4UnitTest();
-        if (csVersionIsOneOf("6.6", "6.7")) {
-            assertThat(errorOccurred, allOf(
-                    is(not(nullValue())),
-                    instanceOf(NoSuchMethodError.class),
-                    hasMessage(containsString("getFilename"))));
-        } else {
-            assertThat(errorOccurred, is(nullValue()));
-        }
-    }
-
-    @Test
     public void theFileContentsHolderCannotBeUsedWithCheckstyle8_2AndAbove() throws IOException, URISyntaxException {
         assumeThat(currentCsVersion(), isGreaterThanOrEqualTo("8.2"));
 
@@ -142,15 +120,4 @@ public class ServiceLayerBasicTest {
                 .getClassLoader());
     }
 
-    private void runChecker(@NotNull final CheckStyleChecker checker) throws URISyntaxException {
-        final File sourceFile = new File(getClass().getResource("SourceFile.java").toURI());
-
-        final ScannableFile file1 = mock(ScannableFile.class);
-        when(file1.getFile()).thenReturn(sourceFile);
-        final List<ScannableFile> filesToScan = Collections.singletonList(file1);
-
-        final CheckstyleActions csInstance = checkstyleProjectService.getCheckstyleInstance();
-        csInstance.scan(checker.getCheckerWithConfig4UnitTest(), filesToScan, false, 2, //
-                Optional.of(sourceFile.getParent()));
-    }
 }

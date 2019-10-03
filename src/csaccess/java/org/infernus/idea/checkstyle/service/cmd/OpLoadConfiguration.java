@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -50,6 +48,17 @@ public class OpLoadConfiguration
 
     private static final String TREE_WALKER_ELEMENT = "TreeWalker";
     private static final Map<String, String> FILENAME_REPLACEMENTS = buildReplacementsMap();
+
+    @FunctionalInterface
+    private interface ConfigurationLoaderWrapper {
+        Configuration loadConfiguration(InputStream inputStream)
+                throws NoSuchMethodException, IllegalAccessException, InvocationTargetException;
+    }
+
+    private final List<ConfigurationLoaderWrapper> loaderFunctions = Arrays.asList(
+            this::loadConfigurationForCheckstylePre825,
+            this::loadConfigurationForBrokenCheckstyles,
+            this::loadConfigurationForCheckstyle825AndAbove);
 
     private final RulesContainer rulesContainer;
     private final PropertyResolver resolver;
@@ -141,39 +150,43 @@ public class OpLoadConfiguration
         }
     }
 
-
     Configuration callLoadConfiguration(final InputStream inputStream) {
-        boolean inputSourceRequired = false;
-        Method method;
-        try {
-            // This will fail in Checkstyle 6.10, 6.10.1, 6.11, and 6.11.1. The method was re-enabled in 6.11.2.
-            method = ConfigurationLoader.class.getMethod("loadConfiguration",
-                    InputSource.class, PropertyResolver.class, boolean.class);
-            inputSourceRequired = true;
-        } catch (NoSuchMethodException e) {
+        for (ConfigurationLoaderWrapper loaderFunction : loaderFunctions) {
             try {
-                // Solution for Checkstyle 6.10, 6.10.1, 6.11, and 6.11.1.
-                method = ConfigurationLoader.class.getMethod("loadConfiguration",
-                        InputStream.class, PropertyResolver.class, boolean.class);
-            } catch (NoSuchMethodException pE) {
-                throw new CheckstyleServiceException("internal error - Could not call "
-                        + ConfigurationLoader.class.getName() + ".loadConfiguration() "
-                        + "because the method was not found. New Checkstyle runtime?");
-            }
-        }
+                return loaderFunction.loadConfiguration(inputStream);
 
-        Configuration result;
-        try {
-            if (inputSourceRequired) {
-                result = (Configuration) method.invoke(null, new InputSource(inputStream), resolver, false);
-            } else {
-                result = (Configuration) method.invoke(null, inputStream, resolver, false);
+            } catch (NoSuchMethodException ignored) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new CheckstyleServiceException("internal error - Failed to call "
+                        + ConfigurationLoader.class.getName() + ".loadConfiguration()", e);
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new CheckstyleServiceException("internal error - Failed to call " //
-                    + ConfigurationLoader.class.getName() + ".loadConfiguration()", e);
         }
-        return result;
+        throw new CheckstyleServiceException("internal error - Could not call "
+                + ConfigurationLoader.class.getName() + ".loadConfiguration() "
+                + "because the method was not found. New Checkstyle runtime?");
+    }
+
+    private Configuration loadConfigurationForCheckstylePre825(final InputStream inputStream)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method method = ConfigurationLoader.class.getMethod("loadConfiguration",
+                InputSource.class, PropertyResolver.class, boolean.class);
+        return (Configuration) method.invoke(null, new InputSource(inputStream), resolver, false);
+    }
+
+    private Configuration loadConfigurationForBrokenCheckstyles(final InputStream inputStream)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        // The InputSource method was removed for Checkstyle 6.10, 6.10.1, 6.11, and 6.11.1; and restored in 6.11.2
+        Method method = ConfigurationLoader.class.getMethod("loadConfiguration",
+                InputStream.class, PropertyResolver.class, boolean.class);
+        return (Configuration) method.invoke(null, inputStream, resolver, false);
+    }
+
+    private Configuration loadConfigurationForCheckstyle825AndAbove(final InputStream inputStream)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Method method = ConfigurationLoader.class.getMethod("loadConfiguration",
+                InputSource.class, PropertyResolver.class, ConfigurationLoader.IgnoredModulesOptions.class);
+        return (Configuration) method.invoke(null, new InputSource(inputStream), resolver,
+                ConfigurationLoader.IgnoredModulesOptions.EXECUTE);
     }
 
 

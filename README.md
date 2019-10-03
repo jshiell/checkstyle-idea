@@ -204,6 +204,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.33.0** New: Added Checkstyle 8.25. Support has been dropped for Checkstyle < 6.16.1 due to API changes.
 * **5.32.0** New: Added Checkstyle 8.24.
 * **5.31.0** New: Added Checkstyle 8.23.
 * **5.31.0** New: Now built against IDEA 2018.1.8 (was 2017.1.3).
