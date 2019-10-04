@@ -25,7 +25,7 @@ public class CustomSourceSetCreator {
     static final String CSACCESS_SOURCESET_NAME = "csaccess";
     public static final String CSACCESSTEST_SOURCESET_NAME = "csaccessTest";
 
-    private static final double MINIMUM_CSACCESS_COVERAGE = 0.80d;
+    private static final double MINIMUM_CSACCESS_COVERAGE = 0.70d;
 
     private final Project project;
 
