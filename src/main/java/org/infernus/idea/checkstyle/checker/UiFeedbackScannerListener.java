@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
@@ -20,7 +21,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
 
     @Override
     public void scanStarting(final List<PsiFile> filesToScan) {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
                 toolWindowPanel.displayInProgress(filesToScan.size());
@@ -30,7 +31,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
 
     @Override
     public void filesScanned(final int count) {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
             if (toolWindowPanel != null) {
                 toolWindowPanel.incrementProgressBarBy(count);
@@ -41,7 +42,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
     @Override
     public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
                                           final Map<PsiFile, List<Problem>> scanResults) {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
                 switch (configurationLocationResult.status) {
@@ -61,7 +62,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
 
     @Override
     public void scanFailedWithError(final CheckStylePluginException error) {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
                 toolWindowPanel.displayErrorResult(error);

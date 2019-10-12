@@ -3,6 +3,8 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
@@ -317,17 +319,19 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         }
 
         final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-        final FileEditor[] editor = fileEditorManager.openFile(
-                virtualFile, true);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            final FileEditor[] editor = fileEditorManager.openFile(
+                    virtualFile, true);
 
-        if (editor.length > 0 && editor[0] instanceof TextEditor) {
-            final LogicalPosition problemPos = new LogicalPosition(
-                    Math.max(lineFor(nodeInfo) - 1, 0), Math.max(columnFor(nodeInfo), 0));
+            if (editor.length > 0 && editor[0] instanceof TextEditor) {
+                final LogicalPosition problemPos = new LogicalPosition(
+                        Math.max(lineFor(nodeInfo) - 1, 0), Math.max(columnFor(nodeInfo), 0));
 
-            final Editor textEditor = ((TextEditor) editor[0]).getEditor();
-            textEditor.getCaretModel().moveToLogicalPosition(problemPos);
-            textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
-        }
+                final Editor textEditor = ((TextEditor) editor[0]).getEditor();
+                textEditor.getCaretModel().moveToLogicalPosition(problemPos);
+                textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
+            }
+        }, ModalityState.NON_MODAL);
     }
 
     private int lineFor(final ResultTreeNode nodeInfo) {
