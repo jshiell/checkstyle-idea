@@ -33,7 +33,6 @@ public class CheckerFactoryCache {
         startBackgroundCleanupTask();
     }
 
-    // TODO Why would a cache return Optionals? The value should either be present or not present.
     public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location, @Nullable final Module module) {
         final CheckerFactoryCacheKey key = new CheckerFactoryCacheKey(location, module);
         cacheLock.readLock().lock();
@@ -49,9 +48,9 @@ public class CheckerFactoryCache {
                             if (cachedChecker != null) {
                                 cachedChecker.destroy();
                             }
-                        } finally {
-                            return cache.remove(key);
+                        } catch (Exception ignored) {
                         }
+                        return cache.remove(key);
                     });
                     cacheLock.readLock().lock();
                 }
@@ -62,10 +61,10 @@ public class CheckerFactoryCache {
         }
     }
 
-    public void put(@NotNull final ConfigurationLocation location, final Module module, @NotNull final CachedChecker
-            checker) {
-        writeToCache(() -> cache.put(new CheckerFactoryCacheKey(location, module),
-                checker));
+    public void put(@NotNull final ConfigurationLocation location,
+                    final Module module,
+                    @NotNull final CachedChecker checker) {
+        writeToCache(() -> cache.put(new CheckerFactoryCacheKey(location, module), checker));
     }
 
     public void invalidate() {
