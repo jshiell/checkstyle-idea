@@ -39,7 +39,7 @@ public final class CheckStylePlugin implements ProjectComponent {
      */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
-    public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
+    static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(CheckStylePlugin.class);
 
@@ -141,10 +141,6 @@ public final class CheckStylePlugin implements ProjectComponent {
     public void projectClosed() {
         LOG.debug("Project closed; invalidating checkers.");
 
-        invalidateCheckerCache();
-    }
-
-    private void invalidateCheckerCache() {
         checkerFactoryCache.invalidate();
     }
 
@@ -179,7 +175,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public <T> void checkComplete(final Future<T> task) {
+    private <T> void checkComplete(final Future<T> task) {
         if (task == null) {
             return;
         }
