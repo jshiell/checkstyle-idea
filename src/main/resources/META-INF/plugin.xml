@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.33.1</version>
+    <version>5.34.0</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.34.0: New: Added Checkstyle 8.26.</li>
     <li>5.33.1: Fixed: exception on scroll-to-source in newer versions of IDEA (#457).</li>
     <li>5.33.0: New: Added Checkstyle 8.25. Support has been dropped for Checkstyle < 6.16.1 due to API changes.</li>
     <li>5.32.0: New: Added Checkstyle 8.24.</li>
