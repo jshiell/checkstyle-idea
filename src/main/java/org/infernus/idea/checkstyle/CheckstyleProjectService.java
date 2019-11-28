@@ -27,8 +27,8 @@ public class CheckstyleProjectService {
 
     private final Project project;
 
-    private Callable<CheckstyleClassLoader> checkstyleClassLoaderFactory = null;
-    private CheckstyleClassLoader checkstyleClassLoader = null;
+    private Callable<CheckstyleClassLoaderContainer> checkstyleClassLoaderFactory = null;
+    private CheckstyleClassLoaderContainer checkstyleClassLoaderContainer = null;
 
     private final SortedSet<String> supportedVersions;
 
@@ -43,6 +43,7 @@ public class CheckstyleProjectService {
                                      @Nullable final List<String> thirdPartyJars) {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
+
         activateCheckstyleVersion(requestedVersion, thirdPartyJars);
     }
 
@@ -58,50 +59,56 @@ public class CheckstyleProjectService {
         return supportedVersions;
     }
 
-    public boolean isSupportedVersion(@Nullable final String version) {
-        return version != null && supportedVersions.contains(version);
-    }
-
     @NotNull
-    public String getDefaultVersion() {
+    private String getDefaultVersion() {
         return VersionListReader.getDefaultVersion(supportedVersions);
     }
 
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
-        final String version = isSupportedVersion(requestedVersion) ? requestedVersion : getDefaultVersion();
+        String checkstyleVersionToLoad = versionToLoad(requestedVersion);
         synchronized (project) {
-            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoader>() {
+            checkstyleClassLoaderContainer = null;
+            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoaderContainer>() {
                 @Override
-                public CheckstyleClassLoader call() {
-                    final List<URL> thirdPartyClassPath = toListOfUrls(thirdPartyJars);
-                    return new CheckstyleClassLoader(
-                            project, CheckstyleProjectService.this, version, thirdPartyClassPath);
+                public CheckstyleClassLoaderContainer call() {
+                    return new CheckstyleClassLoaderContainer(
+                            project,
+                            CheckstyleProjectService.this,
+                            checkstyleVersionToLoad,
+                            toListOfUrls(thirdPartyJars));
                 }
 
                 @NotNull
-                private List<URL> toListOfUrls(@Nullable final List<String> pThirdPartyJars) {
+                private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
                     List<URL> result = new ArrayList<>();
-                    if (pThirdPartyJars != null) {
-                        for (final String absolutePath : pThirdPartyJars) {
+                    if (jarFilePaths != null) {
+                        for (final String absolutePath : jarFilePaths) {
                             try {
                                 result.add(new File(absolutePath).toURI().toURL());
                             } catch (MalformedURLException e) {
-                                LOG.warn("Skipping malformed third party class path entry: " + absolutePath, e);
+                                LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
                             }
                         }
                     }
                     return result;
                 }
             };
-            checkstyleClassLoader = null;
         }
+    }
+
+    @NotNull
+    private String versionToLoad(@Nullable final String requestedVersion) {
+        if (requestedVersion != null && supportedVersions.contains(requestedVersion)) {
+            return requestedVersion;
+        }
+        return  getDefaultVersion();
     }
 
     public CheckstyleActions getCheckstyleInstance() {
         try {
             synchronized (project) {
-                return checkstyleClassLoader().loadCheckstyleImpl();
+                return checkstyleClassLoaderContainer().loadCheckstyleImpl();
             }
         } catch (CheckStylePluginException e) {
             throw e;
@@ -114,7 +121,7 @@ public class CheckstyleProjectService {
     public ClassLoader underlyingClassLoader() {
         try {
             synchronized (project) {
-                return checkstyleClassLoader().getClassLoader();
+                return checkstyleClassLoaderContainer().getClassLoader();
             }
         } catch (CheckStylePluginException e) {
             throw e;
@@ -123,11 +130,11 @@ public class CheckstyleProjectService {
         }
     }
 
-    private CheckstyleClassLoader checkstyleClassLoader() throws Exception {
-        if (checkstyleClassLoader == null) {
-            checkstyleClassLoader = checkstyleClassLoaderFactory.call();
+    private CheckstyleClassLoaderContainer checkstyleClassLoaderContainer() throws Exception {
+        if (checkstyleClassLoaderContainer == null) {
+            checkstyleClassLoaderContainer = checkstyleClassLoaderFactory.call();
         }
         // Don't worry about caching, class loaders do lots of caching.
-        return this.checkstyleClassLoader;
+        return this.checkstyleClassLoaderContainer;
     }
 }

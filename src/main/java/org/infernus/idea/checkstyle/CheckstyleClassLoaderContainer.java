@@ -30,7 +30,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 /**
  * Loads Checkstyle classes from a given Checkstyle version.
  */
-public class CheckstyleClassLoader {
+public class CheckstyleClassLoaderContainer {
     private static final String PROP_FILE = "checkstyle-classpaths.properties";
     private static final String CSACTIONS_CLASS = "org.infernus.idea.checkstyle.service.CheckstyleActionsImpl";
 
@@ -54,10 +54,10 @@ public class CheckstyleClassLoader {
     private final Project project;
     private final CheckstyleProjectService checkstyleProjectService;
 
-    public CheckstyleClassLoader(@NotNull final Project project,
-                                 @NotNull final CheckstyleProjectService checkstyleProjectService,
-                                 @NotNull final String checkstyleVersion,
-                                 @Nullable final List<URL> thirdPartyClassPath) {
+    public CheckstyleClassLoaderContainer(@NotNull final Project project,
+                                          @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                          @NotNull final String checkstyleVersion,
+                                          @Nullable final List<URL> thirdPartyClassPath) {
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
 
@@ -80,7 +80,7 @@ public class CheckstyleClassLoader {
     @NotNull
     private static Properties loadClassPathInfos() {
         final Properties result = new Properties();
-        try (InputStream is = CheckstyleClassLoader.class.getClassLoader().getResourceAsStream(PROP_FILE)) {
+        try (InputStream is = CheckstyleClassLoaderContainer.class.getClassLoader().getResourceAsStream(PROP_FILE)) {
             result.load(is);
         } catch (IOException e) {
             throw new CheckStylePluginException("Could not read plugin-internal file: " + PROP_FILE, e);
@@ -135,16 +135,16 @@ public class CheckstyleClassLoader {
     }
 
     @NotNull
-    private List<URL> getUrls(@NotNull final ClassLoader pClassLoader) {
+    private List<URL> getUrls(@NotNull final ClassLoader classLoader) {
         List<URL> result;
-        if (pClassLoader instanceof UrlClassLoader) {          // happens normally
-            result = ((UrlClassLoader) pClassLoader).getUrls();
-        } else if (pClassLoader instanceof URLClassLoader) {   // happens in test cases
-            result = Arrays.asList(((URLClassLoader) pClassLoader).getURLs());
+        if (classLoader instanceof UrlClassLoader) {          // happens normally
+            result = ((UrlClassLoader) classLoader).getUrls();
+        } else if (classLoader instanceof URLClassLoader) {   // happens in test cases
+            result = Arrays.asList(((URLClassLoader) classLoader).getURLs());
         } else {
             //noinspection ConstantConditions
             throw new CheckStylePluginException("incompatible class loader: "
-                    + (pClassLoader != null ? pClassLoader.getClass().getName() : "null"));
+                    + (classLoader != null ? classLoader.getClass().getName() : "null"));
         }
         return result;
     }
