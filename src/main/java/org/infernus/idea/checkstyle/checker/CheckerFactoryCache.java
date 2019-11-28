@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.concurrency.JobScheduler;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -9,24 +8,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class CheckerFactoryCache {
 
     private static final Logger LOG = Logger.getInstance(CheckerFactoryCache.class);
 
-    private static final int CLEANUP_PERIOD_SECONDS = 30;
-
     private final Map<CheckerFactoryCacheKey, CachedChecker> cache = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService cleanUpExecutor = JobScheduler.getScheduler();
-
-    public CheckerFactoryCache() {
-        startBackgroundCleanupTask();
-    }
 
     public Optional<CachedChecker> get(@NotNull final ConfigurationLocation location,
                                        @Nullable final Module module) {
+        cleanUpExpiredCachedCheckers();
+
         final CheckerFactoryCacheKey key = new CheckerFactoryCacheKey(location, module);
 
         final CachedChecker cachedChecker = cache.get(key);
@@ -61,14 +53,6 @@ public class CheckerFactoryCache {
             }
         } catch (Exception ignored) {
         }
-    }
-
-    private void startBackgroundCleanupTask() {
-        // Use {@link ScheduleThreadPoolExecutor#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)} rather
-        // than {@link ScheduleThreadPoolExecutor#scheduleWithFixedRate(Runnable, long, long, TimeUnit)} as
-        // recommended by JetBrains for compatibility with hibernation.
-        cleanUpExecutor.scheduleWithFixedDelay(this::cleanUpExpiredCachedCheckers, CLEANUP_PERIOD_SECONDS,
-                CLEANUP_PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     private void cleanUpExpiredCachedCheckers() {
