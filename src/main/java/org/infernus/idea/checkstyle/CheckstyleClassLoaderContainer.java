@@ -70,9 +70,9 @@ public class CheckstyleClassLoaderContainer {
     }
 
     @NotNull
-    private List<URL> emptyListIfNull(@Nullable final List<URL> thirdPartyClassPath) {
-        if (thirdPartyClassPath != null) {
-            return thirdPartyClassPath;
+    private List<URL> emptyListIfNull(@Nullable final List<URL> potentiallyNullList) {
+        if (potentiallyNullList != null) {
+            return potentiallyNullList;
         }
         return Collections.emptyList();
     }
@@ -89,8 +89,8 @@ public class CheckstyleClassLoaderContainer {
     }
 
     @NotNull
-    private ClassLoader buildClassLoader(@NotNull final String pClassPathFromProps, @NotNull final List<URL>
-            pThirdPartyClassPath) {
+    private ClassLoader buildClassLoader(@NotNull final String classPathFromProps,
+                                         @NotNull final List<URL> thirdPartyClasspath) {
         final String basePath = getBasePath();
         final File classesDir4UnitTesting = new File(basePath, "classes/java/csaccess");
         final boolean unitTesting = classesDir4UnitTesting.exists();
@@ -102,7 +102,7 @@ public class CheckstyleClassLoaderContainer {
             } else {
                 urls.add(new File(basePath, "checkstyle/classes").toURI().toURL());
             }
-            for (String jar : pClassPathFromProps.trim().split("\\s*;\\s*")) {
+            for (String jar : classPathFromProps.trim().split("\\s*;\\s*")) {
                 if (unitTesting) {
                     String testJarLocation = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
                     urls.add(new File(basePath, testJarLocation).toURI().toURL());
@@ -114,14 +114,14 @@ public class CheckstyleClassLoaderContainer {
             throw new CheckStylePluginException("internal error", e);
         }
 
-        urls.addAll(pThirdPartyClassPath);
+        urls.addAll(thirdPartyClasspath);
 
         // The plugin classloader is the new classloader's parent classloader.
-        final ChildFirstURLClassLoader newClassLoader = new ChildFirstURLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+        final ChildFirstURLClassLoader newClassLoader = new ChildFirstURLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
         if (weAreDebuggingADifferentVersionOfIdea(newClassLoader)) {
             // if we're debugging from another version of IDEA then child-first will do nasty things to the IDEA classpath
             Notifications.showWarning(project, message("plugin.debugging"));
-            return new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+            return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
         }
         return newClassLoader;
     }
@@ -135,16 +135,16 @@ public class CheckstyleClassLoaderContainer {
     }
 
     @NotNull
-    private List<URL> getUrls(@NotNull final ClassLoader classLoader) {
+    private List<URL> getUrls(@NotNull final ClassLoader sourceClassLoader) {
         List<URL> result;
-        if (classLoader instanceof UrlClassLoader) {          // happens normally
-            result = ((UrlClassLoader) classLoader).getUrls();
-        } else if (classLoader instanceof URLClassLoader) {   // happens in test cases
-            result = Arrays.asList(((URLClassLoader) classLoader).getURLs());
+        if (sourceClassLoader instanceof UrlClassLoader) {          // happens normally
+            result = ((UrlClassLoader) sourceClassLoader).getUrls();
+        } else if (sourceClassLoader instanceof URLClassLoader) {   // happens in test cases
+            result = Arrays.asList(((URLClassLoader) sourceClassLoader).getURLs());
         } else {
             //noinspection ConstantConditions
             throw new CheckStylePluginException("incompatible class loader: "
-                    + (classLoader != null ? classLoader.getClass().getName() : "null"));
+                    + (sourceClassLoader != null ? sourceClassLoader.getClass().getName() : "null"));
         }
         return result;
     }
@@ -229,7 +229,6 @@ public class CheckstyleClassLoaderContainer {
         return result;
     }
 
-
     @NotNull
     private String urlDecode(final String urlEncodedString) {
         try {
@@ -238,7 +237,6 @@ public class CheckstyleClassLoaderContainer {
             return urlEncodedString;
         }
     }
-
 
     @NotNull
     CheckstyleActions loadCheckstyleImpl() {
@@ -252,7 +250,7 @@ public class CheckstyleClassLoaderContainer {
         }
     }
 
-    public ClassLoader getClassLoader() {
+    ClassLoader getClassLoader() {
         return classLoader;
     }
 }
