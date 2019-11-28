@@ -8,14 +8,13 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.ClassLoaderDumper;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -137,9 +136,10 @@ public class CheckerFactory {
 
         final ClassLoader loaderOfCheckedCode = moduleClassPathBuilder().build(module);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Call to create new checker.");
-            logProperties(propertyResolver);
-            logClassLoaders(loaderOfCheckedCode);
+            LOG.debug("Call to create new checker with properties:\n"
+                    + dumpProperties(propertyResolver)
+                    + "With plugin classloader:"
+                    + ClassLoaderDumper.dumpClassLoader(loaderOfCheckedCode));
         }
 
         final Object workerResult = executeWorker(location, module, propertyResolver, loaderOfCheckedCode);
@@ -240,32 +240,18 @@ public class CheckerFactory {
                 "checkstyle.parse-failed", checkstyleException.getMessage());
     }
 
-    private void logClassLoaders(final ClassLoader classLoader) {
-        if (classLoader != null) {
-            ClassLoader currentLoader = classLoader;
-            while (currentLoader != null) {
-                if (currentLoader instanceof URLClassLoader) {
-                    LOG.debug("+ URLClassLoader: " + currentLoader.getClass().getName());
-                    final URLClassLoader urlLoader = (URLClassLoader) currentLoader;
-                    for (final URL url : urlLoader.getURLs()) {
-                        LOG.debug(" + URL: " + url);
-                    }
-                } else {
-                    LOG.debug("+ ClassLoader: " + currentLoader.getClass().getName());
-                }
-
-                currentLoader = currentLoader.getParent();
-            }
-        }
-    }
-
-    private void logProperties(final ListPropertyResolver resolver) {
+    private String dumpProperties(final ListPropertyResolver resolver) {
+        StringBuilder dump = new StringBuilder();
         if (resolver != null) {
             final Map<String, String> propertiesToValues = resolver.getPropertyNamesToValues();
             for (final Map.Entry<String, String> propertyEntry : propertiesToValues.entrySet()) {
-                final String propertyValue = propertyEntry.getValue();
-                LOG.debug("- Property: " + propertyEntry.getKey() + "=" + propertyValue);
+                dump.append("- Property: ")
+                        .append(propertyEntry.getKey())
+                        .append("=")
+                        .append(propertyEntry.getValue())
+                        .append('\n');
             }
         }
+        return dump.toString();
     }
 }

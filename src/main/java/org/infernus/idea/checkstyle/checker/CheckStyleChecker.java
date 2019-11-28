@@ -1,8 +1,10 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.util.ClassLoaderDumper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,32 +13,28 @@ import java.util.Optional;
 
 
 public class CheckStyleChecker {
-    /**
-     * checker with config
-     */
-    private final CheckstyleInternalObject checkerWithConfig;
 
-    /**
-     * the service instance that was current when this object is created
-     */
+    private static final Logger LOG = Logger.getInstance(CheckStyleChecker.class);
+
+    private final CheckstyleInternalObject checkerWithConfig;
     private final CheckstyleActions csServiceInstance;
 
     private final int tabWidth;
     private final Optional<String> baseDir;
 
-    private final ClassLoader loaderOfCheckedCode;
-
-
     public CheckStyleChecker(@NotNull final CheckstyleInternalObject checkerWithConfig,
                              final int tabWidth,
                              @NotNull final Optional<String> baseDir,
-                             final ClassLoader loaderOfCheckedCode,
                              @NotNull final CheckstyleActions csServiceInstance) {
-        this.csServiceInstance = csServiceInstance;
         this.checkerWithConfig = checkerWithConfig;
         this.tabWidth = tabWidth;
         this.baseDir = baseDir;
-        this.loaderOfCheckedCode = loaderOfCheckedCode;
+        this.csServiceInstance = csServiceInstance;
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Creating Checkstyle instances with CheckStyle classpath:\n"
+                    + ClassLoaderDumper.dumpClassLoader(csServiceInstance.getClass().getClassLoader()));
+        }
     }
 
     @NotNull
@@ -45,14 +43,8 @@ public class CheckStyleChecker {
         return csServiceInstance.scan(checkerWithConfig, scannableFiles, suppressErrors, tabWidth, baseDir);
     }
 
-
     public void destroy() {
         csServiceInstance.destroyChecker(checkerWithConfig);
-    }
-
-
-    public ClassLoader getLoaderOfCheckedCode() {
-        return loaderOfCheckedCode;
     }
 
 

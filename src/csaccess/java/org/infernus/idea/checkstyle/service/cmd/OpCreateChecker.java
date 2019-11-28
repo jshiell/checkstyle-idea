@@ -68,7 +68,7 @@ public class OpCreateChecker
         final TabWidthAndBaseDirProvider configs = configurations != null
                 ? configurations
                 : new Configurations(module, csConfig);
-        return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(), loaderOfCheckedCode,
+        return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(),
                 checkstyleProjectService.getCheckstyleInstance());
     }
 

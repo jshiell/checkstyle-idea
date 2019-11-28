@@ -151,6 +151,14 @@ Any comments or bug reports are most welcome - please visit
 the project website on [GitHub](https://github.com/jshiell/checkstyle-idea/).
 
 
+## I need debug information!
+
+The debug logging of the plugin is arcane and not particularly well done, for which I can only thank myself. However, if 
+such context is needed then it can be seen by using IDEA's **Help** -> **Debug Log Settings...** and adding:
+
+    #org.infernus.idea.checkstyle
+
+
 ## Acknowledgements
 
 This plug-in owes its existence to both the style-overlords at work mandating compliance with a CheckStyle
