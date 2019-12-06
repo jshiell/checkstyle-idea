@@ -134,8 +134,10 @@ public class LocationPanel extends JPanel {
     private void enabledLocation(final LocationType locationType) {
         fileLocationField.setEnabled(locationType == FILE);
         browseButton.setEnabled(locationType == FILE);
+        relativeFileCheckbox.setEnabled(locationType == FILE);
 
         urlLocationField.setEnabled(locationType == HTTP);
+        insecureHttpCheckbox.setEnabled(locationType == HTTP);
 
         classpathLocationField.setEnabled(locationType == CLASSPATH);
     }
