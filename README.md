@@ -194,6 +194,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Tim van der Lippe (@TimvdLippe)
 * @tduehr
 * Mark Brown (@embee1981)
+* Marshall Walker (@marshallwalker)
 
 And also thanks are due to the authors and contributors of:
 
@@ -212,7 +213,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
-* **5.34.1** Fixed: radio button issues - thanks to @marshallwalker (##461).
+* **5.35.0** New: Added Checkstyle 8.27.
+* **5.35.0** Fixed: radio button issues - thanks to @marshallwalker (##461).
 * **5.34.0** New: Added Checkstyle 8.26.
 * **5.33.1** Fixed: exception on scroll-to-source in newer versions of IDEA (#457).
 * **5.33.0** New: Added Checkstyle 8.25. Support has been dropped for Checkstyle < 6.16.1 due to API changes.
