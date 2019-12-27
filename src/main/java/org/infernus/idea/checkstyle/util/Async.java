@@ -2,26 +2,14 @@ package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public class Async {
+public final class Async {
     private static final int FIFTY_MS = 50;
 
-    private Async() {}
-
-    @Nullable
-    public static <T> T asyncResultOf(@NotNull final Callable<T> callable,
-                                      @Nullable final T defaultValue) {
-        try {
-            return whenFinished(executeOnPooledThread(callable)).get();
-
-        } catch (Exception e) {
-            return defaultValue;
-        }
+    private Async() {
     }
 
     public static <T> Future<T> executeOnPooledThread(final Callable<T> callable) {

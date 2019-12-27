@@ -31,7 +31,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
-import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
 import static org.infernus.idea.checkstyle.util.Notifications.showException;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 
@@ -60,7 +59,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
         final Module module = moduleOf(psiFile);
-        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, module, manager), NO_PROBLEMS_FOUND), manager);
+        return asProblemDescriptors(inspectFile(psiFile, module, manager), manager);
     }
 
     @Nullable
@@ -152,7 +151,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 .map(problems -> problems.stream()
                         .map(problem -> problem.toProblemDescriptor(manager))
                         .toArray(ProblemDescriptor[]::new))
-                .orElseGet(() -> ProblemDescriptor.EMPTY_ARRAY);
+                .orElse(ProblemDescriptor.EMPTY_ARRAY);
     }
 
     private CheckerFactory checkerFactory(final Project project) {
