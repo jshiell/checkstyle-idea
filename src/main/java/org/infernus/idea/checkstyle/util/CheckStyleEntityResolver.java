@@ -70,8 +70,8 @@ public class CheckStyleEntityResolver implements EntityResolver {
                                 format("%s://%s/dtds/suppressions_1_2.dtd", protocol, host)),
                         "/dtd/suppressions_1_2.dtd");
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions Xpath Experimental 1.2//EN",
-                        format("%s://%s/dtds/suppressions_1_2_xpath_experimental.dtd", protocol, host)),
-                    "/dtd/suppressions_1_2_xpath_experimental.dtd");
+                                format("%s://%s/dtds/suppressions_1_2_xpath_experimental.dtd", protocol, host)),
+                        "/dtd/suppressions_1_2_xpath_experimental.dtd");
 
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Package Names 1.0//EN",
                                 format("%s://%s/dtds/packages_1_0.dtd", protocol, host)),
@@ -175,13 +175,19 @@ public class CheckStyleEntityResolver implements EntityResolver {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             DTDKey dtdKey = (DTDKey) o;
 
-            if (publicId != null ? !publicId.equals(dtdKey.publicId) : dtdKey.publicId != null) return false;
+            if (publicId != null ? !publicId.equals(dtdKey.publicId) : dtdKey.publicId != null) {
+                return false;
+            }
             return systemId != null ? systemId.equals(dtdKey.systemId) : dtdKey.systemId == null;
         }
 
