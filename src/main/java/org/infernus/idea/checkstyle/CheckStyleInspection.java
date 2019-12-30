@@ -120,7 +120,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                        final CheckStylePlugin plugin,
                                        final ConfigurationLocation configurationLocation,
                                        final @NotNull Project project) {
-        if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
+        if (e.getCause() != null && e.getCause() instanceof ProcessCanceledException) {
+            LOG.debug("Process cancelled when scanning: " + psiFile.getName());
+
+        } else if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
             disableActiveConfiguration(plugin, project);
 
         } else if (e.getCause() != null && e.getCause() instanceof IOException) {
