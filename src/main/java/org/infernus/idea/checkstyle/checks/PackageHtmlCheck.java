@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checks;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;

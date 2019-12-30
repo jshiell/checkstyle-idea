@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.toolwindow;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
