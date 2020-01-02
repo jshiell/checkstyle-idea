@@ -23,13 +23,10 @@ repositories {
 version = '5.35.1'
 
 intellij {
-    version = 'IC-2019.3'
+    version = 'IC-2018.1.8'
     pluginName 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false
-    plugins = [
-            'java' // as plugin.xml declares dependency on 'com.intellij.modules.java'
-    ]
 }
 
 
