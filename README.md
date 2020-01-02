@@ -9,7 +9,12 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
 A plug-in for JetBrains' IntelliJ IDEA 2018-19 which provides real-time feedback against a given
-[CheckStyle](http://checkstyle.sourceforge.net/) profile by way of an inspection.
+[CheckStyle](https://checkstyle.sourceforge.io) profile by way of an inspection.
+
+Please note this is not an official part of Checkstyle - they neither endorse
+    nor bear responsibility for this plugin. The logo is sourced from the [Checkstyle resources
+    repository](https://github.com/checkstyle/resources/tree/master/img/cs-logos-twitter-gplus-backgrounds)
+    and used under the [CC BY 4.0 licence](https://github.com/checkstyle/resources/blob/master/img/README.txt).
 
 Released under a BSD-style licence - please see the LICENCE file for details.
 

@@ -9,6 +9,10 @@
     This plugin provides both real-time and on-demand scanning
     of Java files with CheckStyle from within IDEA.
 </p>
+<p>
+    Please note this is not an official part of Checkstyle - they neither endorse
+    nor bear responsibility for this plugin. Please see the README for full details.
+</p>
         ]]>
     </description>
     <version>5.35.2</version>
