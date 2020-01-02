@@ -73,7 +73,8 @@ public class ScannableFile {
         Computable<List<ScannableFile>> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), plugin.configurationManager()))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
-                .filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         return ApplicationManager.getApplication().runReadAction(action);
     }
 

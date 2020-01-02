@@ -99,7 +99,7 @@ public class ProcessResultsThread implements Runnable {
                 .orElseGet(() -> normalisePath(event.fileName));
     }
 
-    private String normalisePath(String prefixedFileName) {
+    private String normalisePath(final String prefixedFileName) {
         try {
             return Paths.get(prefixedFileName).normalize().toString();
         } catch (InvalidPathException e) {
@@ -219,12 +219,6 @@ public class ProcessResultsThread implements Runnable {
     }
 
     private void addProblem(final PsiFile psiFile, final Problem problem) {
-        List<Problem> problemsForFile = problems.get(psiFile);
-        if (problemsForFile == null) {
-            problemsForFile = new ArrayList<>();
-            problems.put(psiFile, problemsForFile);
-        }
-
-        problemsForFile.add(problem);
+        problems.computeIfAbsent(psiFile, key -> new ArrayList<>()).add(problem);
     }
 }

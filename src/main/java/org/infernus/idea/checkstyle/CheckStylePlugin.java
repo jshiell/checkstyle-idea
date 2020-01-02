@@ -43,6 +43,8 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(CheckStylePlugin.class);
 
+    private static final long NO_TIMEOUT = 0L;
+
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
     private final PluginConfigurationManager configurationManager;
@@ -204,7 +206,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
 
         try {
-            return whenFinished(runAsyncCheck(new ScanFiles(this, files, null))).get();
+            return whenFinished(runAsyncCheck(new ScanFiles(this, files, null)), NO_TIMEOUT).get();
         } catch (final Throwable e) {
             LOG.warn("Error scanning files", e);
             return Collections.emptyMap();

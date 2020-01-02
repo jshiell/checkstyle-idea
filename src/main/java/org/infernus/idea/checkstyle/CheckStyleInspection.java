@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,8 +59,32 @@ public class CheckStyleInspection extends LocalInspectionTool {
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
+        final CheckStylePlugin plugin = plugin(manager.getProject());
         final Module module = moduleOf(psiFile);
-        return asProblemDescriptors(asyncResultOf(() -> inspectFile(psiFile, module, manager), NO_PROBLEMS_FOUND, FIVE_SECONDS), manager);
+        List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), plugin, module);
+
+        try {
+            return asProblemDescriptors(
+                    asyncResultOf(() -> inspectFile(psiFile, scannableFiles, plugin, module, manager), NO_PROBLEMS_FOUND, FIVE_SECONDS),
+                    manager);
+
+        } catch (ProcessCanceledException | AssertionError e) {
+            LOG.debug("Inspection cancelled when scanning: " + psiFile.getName());
+            return noProblemsFound(manager);
+
+        } catch (Throwable e) {
+            LOG.warn("CheckStyle threw an exception when inspecting: " + psiFile.getName(), e);
+            showException(manager.getProject(), e);
+            return noProblemsFound(manager);
+
+        } finally {
+            scannableFiles.forEach(ScannableFile::deleteIfRequired);
+        }
+    }
+
+    @NotNull
+    private ProblemDescriptor[] noProblemsFound(@NotNull InspectionManager manager) {
+        return asProblemDescriptors(NO_PROBLEMS_FOUND, manager);
     }
 
     @Nullable
@@ -69,16 +92,14 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return ModuleUtil.findModuleForPsiElement(psiFile);
     }
 
-    @Nullable
-    public List<Problem> inspectFile(@NotNull final PsiFile psiFile,
-                                     @Nullable final Module module,
-                                     @NotNull final InspectionManager manager) {
-        LOG.debug("Inspection has been invoked.");
-
-        final CheckStylePlugin plugin = plugin(manager.getProject());
+    private List<Problem> inspectFile(@NotNull final PsiFile psiFile,
+                                      @NotNull final List<ScannableFile> scannableFiles,
+                                      @NotNull final CheckStylePlugin plugin,
+                                      @Nullable final Module module,
+                                      @NotNull final InspectionManager manager) {
+        LOG.debug("Inspection has been invoked for " + psiFile.getName());
 
         ConfigurationLocation configurationLocation = null;
-        final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             configurationLocation = plugin.getConfigurationLocation(module, null);
             if (configurationLocation == null || configurationLocation.isBlacklisted()) {

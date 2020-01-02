@@ -219,6 +219,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.2** Fixed: Reverted inspection threading due to perf degradation; reworked inspection locking (#462, #466).
 * **5.35.2** New: Logo added for plugin marketplace - thanks to @ahus1 (#465).
 * **5.35.1** Fixed: Changed inspection threading to avoid deadlocking (#462).
 * **5.35.0** New: Added Checkstyle 8.27.

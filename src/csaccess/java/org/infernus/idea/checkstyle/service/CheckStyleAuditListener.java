@@ -48,7 +48,7 @@ public class CheckStyleAuditListener
     }
 
     public void auditFinished(final AuditEvent auditEvent) {
-        List<Issue> errorsCopy = null;
+        List<Issue> errorsCopy;
         synchronized (errors) {
             errorsCopy = new ArrayList<>(errors);
         }
@@ -57,14 +57,7 @@ public class CheckStyleAuditListener
 
         final Application application = ApplicationManager.getApplication();
         if (application != null) {  // can be null in unit tests
-            // TODO Make sure that this does not block ... it seems that we are not starting a new thread.
-            //      Sometimes, the editor is non-responsive because Checkstyle is still processing results.
-            //      Problem: OpScan currently expects the ready-made list of problems synchronously.
-            if (application.isDispatchThread()) {
-                findThread.run();
-            } else {
-                application.runReadAction(findThread);
-            }
+            application.runReadAction(findThread);
             problems = findThread.getProblems();
         }
     }

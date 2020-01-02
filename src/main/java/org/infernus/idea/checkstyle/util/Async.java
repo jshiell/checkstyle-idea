@@ -41,7 +41,7 @@ public final class Async {
             ProgressManager.checkCanceled();
             elapsedTime += waitFor(FIFTY_MS);
 
-            if (timeoutInMs >= 0 && elapsedTime >= timeoutInMs) {
+            if (timeoutInMs > 0 && elapsedTime >= timeoutInMs) {
                 LOG.debug("Async task exhausted timeout of " + timeoutInMs + "ms, cancelling.");
                 future.cancel(true);
                 throw new ProcessCanceledException();
