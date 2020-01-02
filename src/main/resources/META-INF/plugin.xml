@@ -11,7 +11,7 @@
 </p>
         ]]>
     </description>
-    <version>5.35.1</version>
+    <version>5.35.2</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -20,6 +20,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.35.2: New: Logo added for plugin marketplace - thanks to @ahus1 (#465).</li>
     <li>5.35.1: Fixed: Changed inspection threading to avoid deadlocking (#462).</li>
     <li>5.35.0: New: Added Checkstyle 8.27.</li>
     <li>5.35.0: Fixed: radio button issues - thanks to @marshallwalker (##461).</li>

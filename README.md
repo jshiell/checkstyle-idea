@@ -195,6 +195,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * @tduehr
 * Mark Brown (@embee1981)
 * Marshall Walker (@marshallwalker)
+* Alexander Schwartz (@ahus1)
 
 And also thanks are due to the authors and contributors of:
 
@@ -213,6 +214,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.2** New: Logo added for plugin marketplace - thanks to @ahus1 (#465).
 * **5.35.1** Fixed: Changed inspection threading to avoid deadlocking (#462).
 * **5.35.0** New: Added Checkstyle 8.27.
 * **5.35.0** Fixed: radio button issues - thanks to @marshallwalker (#461).
