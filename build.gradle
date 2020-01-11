@@ -8,7 +8,7 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'org.jetbrains.intellij' version '0.4.15'
-    id 'com.dorongold.task-tree' version '1.3.1'
+    id 'com.dorongold.task-tree' version '1.5'
     id 'org.infernus.idea.checkstyle.build'
 }
 
