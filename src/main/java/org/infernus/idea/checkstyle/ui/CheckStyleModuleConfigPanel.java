@@ -5,7 +5,6 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
-import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -15,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static com.intellij.util.ui.JBUI.*;
 
