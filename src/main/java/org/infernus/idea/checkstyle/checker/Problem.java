@@ -110,11 +110,15 @@ public class Problem implements Comparable<Problem> {
     public int compareTo(@NotNull final Problem other) {
         int lineComparison = Integer.compare(this.line, other.line);
         if (lineComparison == 0) {
-            int severityComparison = -this.severityLevel.compareTo(other.severityLevel);
-            if (severityComparison == 0) {
-                return Objects.compare(this.message, other.message);
+            int columnComparison = Integer.compare(this.column, other.column);
+            if (columnComparison == 0) {
+                int severityComparison = -this.severityLevel.compareTo(other.severityLevel);
+                if (severityComparison == 0) {
+                    return Objects.compare(this.message, other.message);
+                }
+                return severityComparison;
             }
-            return severityComparison;
+            return columnComparison;
         }
         return lineComparison;
     }
