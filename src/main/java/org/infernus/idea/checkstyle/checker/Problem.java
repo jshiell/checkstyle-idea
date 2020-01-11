@@ -7,9 +7,10 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.psi.PsiElement;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
-public class Problem {
+public class Problem implements Comparable<Problem> {
     private final PsiElement target;
     private final SeverityLevel severityLevel;
     private final int line;
@@ -103,6 +104,19 @@ public class Problem {
             }
         }
         return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+    }
+
+    @Override
+    public int compareTo(@NotNull final Problem other) {
+        int lineComparison = Integer.compare(this.line, other.line);
+        if (lineComparison == 0) {
+            int severityComparison = -this.severityLevel.compareTo(other.severityLevel);
+            if (severityComparison == 0) {
+                return Objects.compare(this.message, other.message);
+            }
+            return severityComparison;
+        }
+        return lineComparison;
     }
 
     @Override

@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -174,6 +175,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     @NotNull
     private ProblemDescriptor[] asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
         return ofNullable(results)
+                .map(TreeSet::new)
                 .map(problems -> problems.stream()
                         .map(problem -> problem.toProblemDescriptor(manager))
                         .toArray(ProblemDescriptor[]::new))
