@@ -51,19 +51,19 @@ tasks.withType(JavaCompile) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
-    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.11'
+    implementation group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
 
     csaccessCompileOnly ("com.puppycrawl.tools:checkstyle:${supportedCsVersions.getBaseVersion()}") {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
-    testCompile files("${System.properties['java.home']}/../lib/tools.jar")
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
+    testImplementation files("${System.properties['java.home']}/../lib/tools.jar")
 }
 
 
