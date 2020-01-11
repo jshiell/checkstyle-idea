@@ -1,5 +1,12 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,20 +21,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.infernus.idea.checkstyle.util.TempDirProvider;
-import org.jetbrains.annotations.NotNull;
-
 
 /**
  * Replaces URLs pointing to files inside the project directory with URLs pointing to copies of these files stored in a
  * temporary directory. This prevents them from getting locked by our classloaders.
  */
-public class ClasspathStabilizer
-{
+public class ClasspathStabilizer {
+
     private static final Logger LOG = Logger.getInstance(ClasspathStabilizer.class);
 
     static final String HASHFOLDER = "hashed";
@@ -69,13 +69,13 @@ public class ClasspathStabilizer
                     }
                     stabilizedList.add(stabilizedUrl);
                 }
-                result = stabilizedList.toArray(new URL[stabilizedList.size()]);
+                result = stabilizedList.toArray(new URL[0]);
             }
         } catch (IOException | URISyntaxException | RuntimeException e) {
             LOG.warn("Failed to stabilize the classpath. Using original classpath. Some files may become locked.", e);
         }
         if (result == null) {
-            result = pUrls.toArray(new URL[pUrls.size()]);
+            result = pUrls.toArray(new URL[0]);
         }
         return result;
     }
@@ -94,8 +94,7 @@ public class ClasspathStabilizer
             }
             Files.copy(urlPath, targetPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         }
-        URL result = targetPath.toUri().toURL();
-        return result;
+        return targetPath.toUri().toURL();
     }
 
 
@@ -155,8 +154,9 @@ public class ClasspathStabilizer
         Optional<Path> result = Optional.empty();
         String basePath = project.getBasePath();
         if (basePath != null) {
-            if (basePath.length() > 2 && (basePath.startsWith("/") || basePath.startsWith("\\")) && basePath.charAt
-                    (2) == ':') {
+            if (basePath.length() > 2
+                    && (basePath.startsWith("/") || basePath.startsWith("\\"))
+                    && basePath.charAt(2) == ':') {
                 // e.g. "/D:/projects/foo", then we must cut off the leading slash
                 basePath = basePath.substring(1);
             }
