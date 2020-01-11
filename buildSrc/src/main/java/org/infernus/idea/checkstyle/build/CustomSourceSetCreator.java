@@ -57,14 +57,14 @@ public class CustomSourceSetCreator {
 
         // Derive all its configurations from 'main', so 'csaccess' code can see 'main' code
         final ConfigurationContainer configurations = project.getConfigurations();
-        configurations.getByName(csaccessSourceSet.getCompileConfigurationName())
-                .extendsFrom(configurations.getByName(mainSourceSet.getCompileConfigurationName()));
+        configurations.getByName(csaccessSourceSet.getImplementationConfigurationName())
+                .extendsFrom(configurations.getByName(mainSourceSet.getImplementationConfigurationName()));
         configurations.getByName(csaccessSourceSet.getCompileOnlyConfigurationName())
                 .extendsFrom(configurations.getByName(mainSourceSet.getCompileOnlyConfigurationName()));
         configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName())
                 .extendsFrom(configurations.getByName(mainSourceSet.getCompileClasspathConfigurationName()));
-        configurations.getByName(csaccessSourceSet.getRuntimeConfigurationName())
-                .extendsFrom(configurations.getByName(mainSourceSet.getRuntimeConfigurationName()));
+        configurations.getByName(csaccessSourceSet.getRuntimeOnlyConfigurationName())
+                .extendsFrom(configurations.getByName(mainSourceSet.getRuntimeOnlyConfigurationName()));
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):
         //    - compileTestJava -> compileCsaccessJava
@@ -95,18 +95,18 @@ public class CustomSourceSetCreator {
 
         // Derive all its configurations from 'test' and 'csaccess'
         final ConfigurationContainer configurations = project.getConfigurations();
-        configurations.getByName(csaccessTestSourceSet.getCompileConfigurationName()).extendsFrom(
-                configurations.getByName(csaccessSourceSet.getCompileConfigurationName()),
-                configurations.getByName(testSourceSet.getCompileConfigurationName()));
+        configurations.getByName(csaccessTestSourceSet.getImplementationConfigurationName()).extendsFrom(
+                configurations.getByName(csaccessSourceSet.getImplementationConfigurationName()),
+                configurations.getByName(testSourceSet.getImplementationConfigurationName()));
         configurations.getByName(csaccessTestSourceSet.getCompileOnlyConfigurationName()).extendsFrom(
                 configurations.getByName(csaccessSourceSet.getCompileOnlyConfigurationName()),
                 configurations.getByName(testSourceSet.getCompileOnlyConfigurationName()));
         configurations.getByName(csaccessTestSourceSet.getCompileClasspathConfigurationName()).extendsFrom(
                 configurations.getByName(csaccessSourceSet.getCompileClasspathConfigurationName()),
                 configurations.getByName(testSourceSet.getCompileClasspathConfigurationName()));
-        configurations.getByName(csaccessTestSourceSet.getRuntimeConfigurationName()).extendsFrom(
-                configurations.getByName(csaccessSourceSet.getRuntimeConfigurationName()),
-                configurations.getByName(testSourceSet.getRuntimeConfigurationName()));
+        configurations.getByName(csaccessTestSourceSet.getRuntimeOnlyConfigurationName()).extendsFrom(
+                configurations.getByName(csaccessSourceSet.getRuntimeOnlyConfigurationName()),
+                configurations.getByName(testSourceSet.getRuntimeOnlyConfigurationName()));
 
         // Wire task dependencies to match the classpath dependencies (arrow means "depends on"):
         //    - compileCsaccessTestJava -> compileCsaccessJava
