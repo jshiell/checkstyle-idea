@@ -43,7 +43,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private static final int DESC_COL_MAX_WIDTH = 200;
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
 
-    private final JList<?> pathList = new JBList(new DefaultListModel<String>());
+    private final JList<String> pathList = new JBList<>(new DefaultListModel<>());
 
     private final JLabel csVersionDropdownLabel = new JLabel(CheckStyleBundle.message("config.csversion.labelText") + ":");
     private final ComboBox<String> csVersionDropdown;
@@ -209,7 +209,6 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
 
-    @SuppressWarnings("unchecked")
     private DefaultListModel<String> pathListModel() {
         return (DefaultListModel<String>) pathList.getModel();
     }
@@ -353,7 +352,7 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    abstract class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
+    abstract static class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
         private static final long serialVersionUID = 7091312536206510956L;
 
         @Override

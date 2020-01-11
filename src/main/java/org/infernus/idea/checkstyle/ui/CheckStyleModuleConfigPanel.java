@@ -5,6 +5,7 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
+import org.infernus.idea.checkstyle.util.Objects;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -26,7 +27,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     private final JRadioButton useProjectConfigurationRadio = new JRadioButton();
     private final JRadioButton useModuleConfigurationRadio = new JRadioButton();
     private final JRadioButton excludeRadio = new JRadioButton();
-    private final ComboBox configurationFilesCombo = new ComboBox();
+    private final ComboBox<ConfigurationLocation> configurationFilesCombo = new ComboBox<>();
     private final DefaultComboBoxModel<ConfigurationLocation> configurationFilesModel = new DefaultComboBoxModel<>();
     private final JLabel configurationFilesLabel = new JLabel();
 
@@ -82,7 +83,6 @@ public class CheckStyleModuleConfigPanel extends JPanel {
                 GridBagConstraints.EAST, GridBagConstraints.NONE, JBUI.insets(8, 32, 8, 8), 0, 0));
 
         configurationFilesCombo.setToolTipText(CheckStyleBundle.message("config.module.module-file.tooltip"));
-        //noinspection unchecked
         configurationFilesCombo.setModel(configurationFilesModel);
         configPanel.add(configurationFilesCombo, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, ISOLATED_COMPONENT_INSETS, 0, 0));
@@ -177,23 +177,9 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      * @return true if modified.
      */
     public boolean isModified() {
-        return !equals(activeLocation, getActiveLocation())
-                || !equals(configurationLocations, getConfigurationLocations())
+        return !Objects.equals(activeLocation, getActiveLocation())
+                || !Objects.equals(configurationLocations, getConfigurationLocations())
                 || excluded != isExcluded();
-    }
-
-    /*
-     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
-     * some packages of IDEA 7.x.
-     */
-    private boolean equals(final Object object1, final Object object2) {
-        if (object1 == object2) {
-            return true;
-        }
-        if ((object1 == null) || (object2 == null)) {
-            return false;
-        }
-        return object1.equals(object2);
     }
 
     /**
