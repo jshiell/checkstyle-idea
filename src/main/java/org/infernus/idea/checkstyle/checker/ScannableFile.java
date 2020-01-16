@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 import java.util.regex.Matcher;
@@ -74,7 +75,7 @@ public class ScannableFile {
                 .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), plugin.configurationManager()))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         return ApplicationManager.getApplication().runReadAction(action);
     }
 

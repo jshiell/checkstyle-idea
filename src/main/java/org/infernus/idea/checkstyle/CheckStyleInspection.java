@@ -66,7 +66,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         try {
             return asProblemDescriptors(
-                    asyncResultOf(() -> inspectFile(psiFile, scannableFiles, plugin, module, manager), NO_PROBLEMS_FOUND, FIVE_SECONDS),
+                    asyncResultOf(() -> {
+                        try {
+                            return inspectFile(psiFile, scannableFiles, plugin, module, manager);
+                        } finally {
+                            scannableFiles.forEach(ScannableFile::deleteIfRequired);
+                        }
+                    }, NO_PROBLEMS_FOUND, FIVE_SECONDS),
                     manager);
 
         } catch (ProcessCanceledException | AssertionError e) {
@@ -77,9 +83,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
             LOG.warn("CheckStyle threw an exception when inspecting: " + psiFile.getName(), e);
             showException(manager.getProject(), e);
             return noProblemsFound(manager);
-
-        } finally {
-            scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 
