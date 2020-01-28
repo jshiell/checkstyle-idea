@@ -220,9 +220,10 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.3** New: Added Checkstyle 8.29 - thanks to @mustaphazorgati (#472).
 * **5.35.4** Fixed: File cleanup should no longer throw concurrent modification exceptions if execution is cancelled (#470).
 * **5.35.3** Fixed: Problems are no longer duplicated in inspection panel (#467).
-* **5.35.3** New: Added Checkstyle 8.28 - thanks to @mustaphazorgat (#468).
+* **5.35.3** New: Added Checkstyle 8.28 - thanks to @mustaphazorgati (#468).
 * **5.35.2** Fixed: Reverted inspection threading due to perf degradation; reworked inspection locking (#462, #466).
 * **5.35.2** New: Logo added for plugin marketplace - thanks to @ahus1 (#465).
 * **5.35.1** Fixed: Changed inspection threading to avoid deadlocking (#462).
