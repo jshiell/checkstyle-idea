@@ -72,11 +72,11 @@ public class ScanProject extends BaseAction {
                 final CheckStylePlugin checkStylePlugin = plugin(project);
                 final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
 
+                final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
                 VirtualFile[] sourceRoots;
                 if (scope == ScanScope.Everything) {
-                    sourceRoots = new VirtualFile[]{project.getBaseDir()};
+                    sourceRoots = projectRootManager.getContentRoots();
                 } else {
-                    final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
                     sourceRoots = projectRootManager.getContentSourceRoots();
                 }
 

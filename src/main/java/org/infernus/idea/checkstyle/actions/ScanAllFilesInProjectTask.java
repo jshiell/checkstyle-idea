@@ -17,6 +17,6 @@ public class ScanAllFilesInProjectTask extends ScanAllFilesTask {
     }
     @Override
     protected VirtualFile[] files() {
-        return ProjectRootManager.getInstance(project).getContentRootsFromAllModules();
+        return ProjectRootManager.getInstance(project).getContentRoots();
     }
 }
