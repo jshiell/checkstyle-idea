@@ -9,13 +9,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ScanScope;
-import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.FileTypes;
 
-import java.util.Collections;
+import static java.util.Collections.singletonList;
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to execute a CheckStyle scan on the current editor file.
@@ -28,16 +27,15 @@ public class ScanCurrentFile extends BaseAction {
             try {
                 final ScanScope scope = plugin(project).configurationManager().getCurrent().getScanScope();
 
-                final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                        project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+                final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
                         final VirtualFile selectedFile = getSelectedFile(project, scope);
                         if (selectedFile != null) {
-                            project.getComponent(CheckStylePlugin.class).asyncScanFiles(
-                                    Collections.singletonList(selectedFile), getSelectedOverride(toolWindow));
+                            plugin(project).asyncScanFiles(
+                                    singletonList(selectedFile), getSelectedOverride(toolWindow));
                         }
 
                     } catch (Throwable e) {
@@ -96,11 +94,7 @@ public class ScanCurrentFile extends BaseAction {
 
         project(event).ifPresent(project -> {
             try {
-                final CheckStylePlugin checkStylePlugin
-                        = project.getComponent(CheckStylePlugin.class);
-                if (checkStylePlugin == null) {
-                    throw new IllegalStateException("Couldn't get checkstyle plugin");
-                }
+                final CheckStylePlugin checkStylePlugin = plugin(project);
                 final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
 
                 final VirtualFile selectedFile = getSelectedFile(project, scope);

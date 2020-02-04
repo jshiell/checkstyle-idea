@@ -17,7 +17,8 @@ public class ResetLoadedRulesFiles extends BaseAction {
     public void actionPerformed(@NotNull final AnActionEvent event) {
         project(event).ifPresent(project -> {
             getService(project, PluginConfigurationManager.class)
-                    .getCurrent().getLocations()
+                    .getCurrent()
+                    .getLocations()
                     .forEach(ConfigurationLocation::removeFromBlacklist);
             getService(project, CheckerFactoryCache.class).invalidate();
         });

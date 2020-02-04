@@ -7,18 +7,17 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.content.Content;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.actOnToolWindowPanel;
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.getFromToolWindowPanel;
 
 /**
  * Base class for plug-in actions.
@@ -39,9 +38,7 @@ public abstract class BaseAction extends AnAction {
                 return;
             }
 
-            final ToolWindow toolWindow = ToolWindowManager
-                    .getInstance(project)
-                    .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowAccess.toolWindow(project);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
@@ -58,23 +55,11 @@ public abstract class BaseAction extends AnAction {
     }
 
     protected void setProgressText(final ToolWindow toolWindow, final String progressTextKey) {
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null) {
-            final JComponent component = content.getComponent();
-            // the content instance will be a JLabel while the component initialises
-            if (component instanceof CheckStyleToolWindowPanel) {
-                final CheckStyleToolWindowPanel panel = (CheckStyleToolWindowPanel) component;
-                panel.setProgressText(CheckStyleBundle.message(progressTextKey));
-            }
-        }
+        actOnToolWindowPanel(toolWindow, panel -> panel.setProgressText(CheckStyleBundle.message(progressTextKey)));
     }
 
     protected ConfigurationLocation getSelectedOverride(final ToolWindow toolWindow) {
-        final Content content = toolWindow.getContentManager().getContent(0);
-        if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
-            return ((CheckStyleToolWindowPanel) content.getComponent()).getSelectedOverride();
-        }
-        return null;
+        return getFromToolWindowPanel(toolWindow, CheckStyleToolWindowPanel::getSelectedOverride);
     }
 
     protected Optional<Project> project(@NotNull final AnActionEvent event) {

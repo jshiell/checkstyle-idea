@@ -5,12 +5,10 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 import java.util.List;
+
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Scan modified files.
@@ -25,12 +23,9 @@ public class ScanModifiedFiles extends BaseAction {
     public final void actionPerformed(final AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final ToolWindow toolWindow = ToolWindowManager.getInstance(project)
-                        .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-
                 final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-                project.getComponent(CheckStylePlugin.class).asyncScanFiles(changeListManager.getAffectedFiles(),
-                        getSelectedOverride(toolWindow));
+                plugin(project).asyncScanFiles(changeListManager.getAffectedFiles(),
+                        getSelectedOverride(toolWindow(project)));
             } catch (Throwable e) {
                 LOG.warn("Modified files scan failed", e);
             }
@@ -43,11 +38,6 @@ public class ScanModifiedFiles extends BaseAction {
 
         project(event).ifPresent(project -> {
             try {
-                final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-                if (checkStylePlugin == null) {
-                    throw new IllegalStateException("Couldn't get checkstyle plugin");
-                }
-
                 final Presentation presentation = event.getPresentation();
 
                 // disable if no files are modified
@@ -55,7 +45,7 @@ public class ScanModifiedFiles extends BaseAction {
                 if (modifiedFiles.isEmpty()) {
                     presentation.setEnabled(false);
                 } else {
-                    presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+                    presentation.setEnabled(!plugin(project).isScanInProgress());
                 }
             } catch (Throwable e) {
                 LOG.warn("Button update failed.", e);

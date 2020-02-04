@@ -7,12 +7,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ScanScope;
-import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 
 import java.util.Optional;
+
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to execute a CheckStyle scan on the current project.
@@ -25,8 +25,7 @@ public class ScanProject extends BaseAction {
             try {
                 final ScanScope scope = plugin(project).configurationManager().getCurrent().getScanScope();
 
-                final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                        project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+                final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> executeScan(project, scope, toolWindow));
 
             } catch (Throwable e) {
@@ -70,10 +69,7 @@ public class ScanProject extends BaseAction {
             }
 
             projectFromEvent.ifPresent(project -> {
-                final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-                if (checkStylePlugin == null) {
-                    throw new IllegalStateException("Couldn't get checkstyle plugin");
-                }
+                final CheckStylePlugin checkStylePlugin = plugin(project);
                 final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
 
                 VirtualFile[] sourceRoots;

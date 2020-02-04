@@ -3,9 +3,9 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+
+import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
 /**
  * Action to stop a check in progress.
@@ -16,9 +16,7 @@ public class StopCheck extends BaseAction {
     public void actionPerformed(final AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final ToolWindow toolWindow = ToolWindowManager
-                        .getInstance(project)
-                        .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+                final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
                     setProgressText(toolWindow, "plugin.status.in-progress.current");
 
