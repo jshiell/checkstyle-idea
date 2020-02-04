@@ -1,16 +1,16 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.junit.Before;
 import org.junit.Test;
+import org.picocontainer.PicoContainer;
 
 import java.util.SortedSet;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,10 +22,17 @@ public class CheckstyleProjectServiceTest {
 
     @Before
     public void setUp() {
+        Project project = mock(Project.class);
+
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+
         PluginConfigurationManager pluginConfigManager = mock(PluginConfigurationManager.class);
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder.testInstance(CHECKSTYLE_VERSION).build());
-        underTest = new CheckstyleProjectService(mock(Project.class), pluginConfigManager);
+        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(pluginConfigManager);
+
+        underTest = new CheckstyleProjectService(project);
     }
 
     @Test

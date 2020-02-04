@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -32,10 +33,9 @@ public class CheckstyleProjectService {
 
     private final SortedSet<String> supportedVersions;
 
-    public CheckstyleProjectService(@NotNull final Project project,
-                                    @NotNull final PluginConfigurationManager configurationManager) {
-        this(project, configurationManager.getCurrent().getCheckstyleVersion(),
-                configurationManager.getCurrent().getThirdPartyClasspath());
+    public CheckstyleProjectService(@NotNull final Project project) {
+        this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
+                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath());
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
@@ -102,7 +102,7 @@ public class CheckstyleProjectService {
         if (requestedVersion != null && supportedVersions.contains(requestedVersion)) {
             return requestedVersion;
         }
-        return  getDefaultVersion();
+        return getDefaultVersion();
     }
 
     public CheckstyleActions getCheckstyleInstance() {
@@ -136,5 +136,9 @@ public class CheckstyleProjectService {
         }
         // Don't worry about caching, class loaders do lots of caching.
         return this.checkstyleClassLoaderContainer;
+    }
+
+    private static PluginConfigurationManager pluginConfigurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 }

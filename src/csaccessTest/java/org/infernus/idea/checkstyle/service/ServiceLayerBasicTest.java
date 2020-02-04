@@ -4,7 +4,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
-import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -16,20 +15,19 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.infernus.idea.checkstyle.service.CsVersionInfo.*;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
-import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,10 +42,15 @@ public class ServiceLayerBasicTest {
 
     @BeforeClass
     public static void setUp() {
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(PROJECT.getPicoContainer()).thenReturn(picoContainer);
+
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(currentCsVersion()).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        checkstyleProjectService = new CheckstyleProjectService(PROJECT, mockPluginConfig);
+        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(mockPluginConfig);
+
+        checkstyleProjectService = new CheckstyleProjectService(PROJECT);
     }
 
     @AfterClass

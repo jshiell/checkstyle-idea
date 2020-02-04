@@ -15,15 +15,9 @@ public class PluginConfigurationManager {
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
 
     private final Project project;
-    private final ProjectConfigurationState projectConfigurationState;
-    private final ApplicationConfigurationState applicationConfigurationState;
 
-    public PluginConfigurationManager(@NotNull final Project project,
-                                      @NotNull final ProjectConfigurationState projectConfigurationState,
-                                      @NotNull final ApplicationConfigurationState applicationConfigurationState) {
+    public PluginConfigurationManager(@NotNull final Project project) {
         this.project = project;
-        this.projectConfigurationState = projectConfigurationState;
-        this.applicationConfigurationState = applicationConfigurationState;
     }
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
@@ -49,15 +43,14 @@ public class PluginConfigurationManager {
     @NotNull
     public PluginConfiguration getCurrent() {
         final PluginConfigurationBuilder defaultConfig = PluginConfigurationBuilder.defaultConfiguration(project);
-        return projectConfigurationState
-                .populate(applicationConfigurationState
-                        .populate(defaultConfig))
+        return projectConfigurationState()
+                .populate(applicationConfigurationState().populate(defaultConfig))
                 .build();
     }
 
     public void setCurrent(@NotNull final PluginConfiguration updatedConfiguration, final boolean fireEvents) {
-        projectConfigurationState.setCurrentConfig(updatedConfiguration);
-        applicationConfigurationState.setCurrentConfig(updatedConfiguration);
+        projectConfigurationState().setCurrentConfig(updatedConfiguration);
+        applicationConfigurationState().setCurrentConfig(updatedConfiguration);
         if (fireEvents) {
             fireConfigurationChanged();
         }
@@ -65,5 +58,13 @@ public class PluginConfigurationManager {
 
     public static PluginConfigurationManager getInstance(@NotNull final Project project) {
         return ServiceManager.getService(project, PluginConfigurationManager.class);
+    }
+
+    private ProjectConfigurationState projectConfigurationState() {
+        return ServiceManager.getService(project, ProjectConfigurationState.class);
+    }
+
+    private ApplicationConfigurationState applicationConfigurationState() {
+        return ServiceManager.getService(ApplicationConfigurationState.class);
     }
 }

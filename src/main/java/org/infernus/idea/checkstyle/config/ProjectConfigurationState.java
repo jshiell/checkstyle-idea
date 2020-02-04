@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
@@ -46,19 +47,19 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     private static final String PROPERTIES_PREFIX = "property-";
 
     private final Project project;
-    private final ConfigurationLocationFactory configurationLocationFactory;
 
     private ProjectSettings projectSettings;
 
-    public ProjectConfigurationState(@NotNull final Project project,
-                                     @NotNull final ConfigurationLocationFactory configurationLocationFactory) {
+    public ProjectConfigurationState(@NotNull final Project project) {
         this.project = project;
-        this.configurationLocationFactory = configurationLocationFactory;
 
         projectSettings = defaultProjectSettings();
     }
 
-    @NotNull
+    private ConfigurationLocationFactory configurationLocationFactory() {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+    }
+
     private ProjectSettings defaultProjectSettings() {
         return new ProjectSettings(project, defaultConfiguration(project).build());
     }
@@ -114,7 +115,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                                                      @NotNull final SortedSet<ConfigurationLocation> pLocations) {
         String serializedLocation = pLoadedMap.get(ACTIVE_CONFIG);
         if (serializedLocation != null && !serializedLocation.trim().isEmpty()) {
-            ConfigurationLocation activeLocation = configurationLocationFactory.create(project, serializedLocation);
+            ConfigurationLocation activeLocation = configurationLocationFactory().create(project, serializedLocation);
             return pLocations.stream().filter(cl -> cl.equals(activeLocation)).findFirst().orElse(null);
         }
         return null;
@@ -215,8 +216,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory.create(BundledConfig.SUN_CHECKS, project);
-        final ConfigurationLocation googleChecks = configurationLocationFactory.create(BundledConfig.GOOGLE_CHECKS, project);
+        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
+        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
         if (!configurationLocations.contains(sunChecks)) {
             configurationLocations.add(sunChecks);
         }
@@ -241,12 +242,12 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     @Nullable
-    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> pLoadedMap,
-                                                      @NotNull final String pKey) {
-        final String serialisedLocation = pLoadedMap.get(pKey);
+    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> loadedMap,
+                                                      @NotNull final String key) {
+        final String serialisedLocation = loadedMap.get(key);
         try {
-            final ConfigurationLocation location = configurationLocationFactory.create(project, serialisedLocation);
-            location.setProperties(propertiesFor(pLoadedMap, pKey));
+            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            location.setProperties(propertiesFor(loadedMap, key));
             return location;
 
         } catch (IllegalArgumentException e) {

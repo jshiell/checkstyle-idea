@@ -5,9 +5,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
@@ -15,6 +15,7 @@ import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +36,6 @@ import static org.mockito.Mockito.when;
 
 
 public class VersionMixExceptionTest extends LightPlatformTestCase {
-    private static final Project PROJECT = mock(Project.class);
-
     private static final String CONFIG_FILE = "config-ok.xml";
 
     private static final String PROPS_FILE_NAME = "/checkstyle-idea.properties";
@@ -44,6 +43,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     private static final String BASE_VERSION = readBaseVersion();
     private static final String OTHER_VERSION = "6.19";
 
+    private final Project project = mock(Project.class);
     private CheckstyleProjectService csService;
 
 
@@ -51,11 +51,16 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(BASE_VERSION).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
 
-        csService = new CheckstyleProjectService(PROJECT, mockPluginConfig);
+        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(mockPluginConfig);
+
+        csService = new CheckstyleProjectService(project);
         csService.activateCheckstyleVersion(BASE_VERSION, null);
     }
 
@@ -76,7 +81,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     public void testVersionMixException() throws IOException, URISyntaxException {
 
         Module module = mock(Module.class);
-        when(module.getProject()).thenReturn(PROJECT);
+        when(module.getProject()).thenReturn(project);
 
         final CheckStyleChecker checker = createChecker(module);
 
@@ -106,7 +111,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     public void testSunnyDay() throws IOException, URISyntaxException {
 
         Module module = mock(Module.class);
-        when(module.getProject()).thenReturn(PROJECT);
+        when(module.getProject()).thenReturn(project);
 
         CheckStyleChecker checker = createChecker(module);
         runChecker(checker);
@@ -150,15 +155,14 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     }
 
 
-    private String readFile(@NotNull final String pFilename) throws IOException, URISyntaxException {
-        URL url = getClass().getResource(pFilename);
+    private String readFile(@NotNull final String filename) throws IOException, URISyntaxException {
+        URL url = getClass().getResource(filename);
         if (url == null) {
-            url = Thread.currentThread().getContextClassLoader().getResource(pFilename);
+            url = Thread.currentThread().getContextClassLoader().getResource(filename);
         }
         assertNotNull(url);
         return new String(Files.readAllBytes(Paths.get(url.toURI())), StandardCharsets.UTF_8);
     }
-
 
     @NotNull
     private static String readBaseVersion() {

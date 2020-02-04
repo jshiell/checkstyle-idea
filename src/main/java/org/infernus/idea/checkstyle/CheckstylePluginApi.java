@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
@@ -17,25 +19,22 @@ import java.util.function.BiConsumer;
  */
 @SuppressWarnings("unused")
 public class CheckstylePluginApi {
-    private final CheckstyleProjectService checkstyleProjectService;
-    private final PluginConfigurationManager pluginConfigurationManager;
+    private final Project project;
 
-    public CheckstylePluginApi(final CheckstyleProjectService checkstyleProjectService,
-                               final PluginConfigurationManager pluginConfigurationManager) {
-        this.checkstyleProjectService = checkstyleProjectService;
-        this.pluginConfigurationManager = pluginConfigurationManager;
+    public CheckstylePluginApi(final Project project) {
+        this.project = project;
     }
 
     @Nullable
     public ClassLoader currentCheckstyleClassLoader() {
-        return checkstyleProjectService.underlyingClassLoader();
+        return checkstyleProjectService().underlyingClassLoader();
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        ConfigurationLocation activeLocation = pluginConfigurationManager.getCurrent().getActiveLocation();
+        ConfigurationLocation activeLocation = pluginConfigurationManager().getCurrent().getActiveLocation();
 
         if (activeLocation != null) {
-            CheckstyleActions checkstyleInstance = checkstyleProjectService.getCheckstyleInstance();
+            CheckstyleActions checkstyleInstance = checkstyleProjectService().getCheckstyleInstance();
             checkstyleInstance.peruseConfiguration(checkstyleInstance.loadConfiguration(activeLocation, true, new HashMap<>()),
                     module -> visitor.accept(activeLocation.getDescription(), module));
         }
@@ -44,5 +43,13 @@ public class CheckstylePluginApi {
     @SuppressWarnings("WeakerAccess")
     public interface ConfigurationVisitor extends BiConsumer<String, ConfigurationModule> {
 
+    }
+
+    private PluginConfigurationManager pluginConfigurationManager() {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
+    }
+
+    private CheckstyleProjectService checkstyleProjectService() {
+        return ServiceManager.getService(project, CheckstyleProjectService.class);
     }
 }

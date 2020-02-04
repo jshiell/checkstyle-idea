@@ -1,5 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -10,6 +13,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.picocontainer.PicoContainer;
 
 import java.util.TreeSet;
 
@@ -33,14 +37,18 @@ public class CheckstylePluginApiTest {
     public void setUp() {
         project = mock(Project.class);
 
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+
         pluginConfigManager = mock(PluginConfigurationManager.class);
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder.testInstance(CHECKSTYLE_VERSION).build());
+        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(pluginConfigManager);
 
-        checkstyleProjectService = new CheckstyleProjectService(project, pluginConfigManager);
-        underTest = new CheckstylePluginApi(
-                checkstyleProjectService,
-                pluginConfigManager);
+        checkstyleProjectService = new CheckstyleProjectService(project);
+        when(picoContainer.getComponentInstance(CheckstyleProjectService.class.getName())).thenReturn(checkstyleProjectService);
+
+        underTest = new CheckstylePluginApi(project);
     }
 
     @Test

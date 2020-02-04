@@ -1,16 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -20,14 +10,21 @@ import org.infernus.idea.checkstyle.util.ModulePaths;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
 
 public class ModuleClassPathBuilder {
     private static final Logger LOG = Logger.getInstance(ModuleClassPathBuilder.class);
 
-    private final PluginConfigurationManager pluginConfigurationManager;
+    private final Project project;
 
-    public ModuleClassPathBuilder(@NotNull final PluginConfigurationManager pluginConfigurationManager) {
-        this.pluginConfigurationManager = pluginConfigurationManager;
+    public ModuleClassPathBuilder(@NotNull final Project project) {
+        this.project = project;
     }
 
     public ClassLoader build(final Module baseModule) {
@@ -35,7 +32,7 @@ public class ModuleClassPathBuilder {
             return getClass().getClassLoader();
         }
 
-        final Project project = baseModule.getProject();
+        final Project baseModuleProject = baseModule.getProject();
         final List<URL> outputPaths = new ArrayList<>();
 
         final Set<Module> transitiveDependencies = new HashSet<>();
@@ -52,18 +49,22 @@ public class ModuleClassPathBuilder {
             LOG.debug("Creating class-loader with URLs: " + outputPaths);
         }
 
-        URL[] effectiveClasspath = outputPaths.toArray(new URL[outputPaths.size()]);
+        URL[] effectiveClasspath = outputPaths.toArray(new URL[0]);
         if (wantsCopyLibs()) {
-            final Optional<File> tempDir = new TempDirProvider().forCopiedLibraries(project);
+            final Optional<File> tempDir = new TempDirProvider().forCopiedLibraries(baseModuleProject);
             if (tempDir.isPresent()) {
                 final Path t = Paths.get(tempDir.get().toURI());
-                effectiveClasspath = new ClasspathStabilizer(project, t).stabilize(outputPaths);
+                effectiveClasspath = new ClasspathStabilizer(baseModuleProject, t).stabilize(outputPaths);
             }
         }
         return new URLClassLoader(effectiveClasspath, getClass().getClassLoader());
     }
 
+    private PluginConfigurationManager pluginConfigurationManager() {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
+    }
+
     private boolean wantsCopyLibs() {
-        return pluginConfigurationManager.getCurrent().isCopyLibs();
+        return pluginConfigurationManager().getCurrent().isCopyLibs();
     }
 }
