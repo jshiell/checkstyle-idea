@@ -12,15 +12,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.Future;
 
@@ -63,7 +62,7 @@ public final class CheckStylePlugin implements ProjectComponent {
         this.configurationManager = configurationManager;
         this.checkerFactoryCache = checkerFactoryCache;
 
-        LOG.info("CheckStyle Plugin loaded with project base dir: \"" + getProjectPath() + "\"");
+        LOG.info("CheckStyle Plugin");
 
         disableCheckStyleLogging();
     }
@@ -80,16 +79,6 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     public Project getProject() {
         return project;
-    }
-
-    @Nullable
-    private File getProjectPath() {
-        final VirtualFile baseDir = project.getBaseDir();
-        if (baseDir == null) {
-            return null;
-        }
-
-        return new File(baseDir.getPath());
     }
 
     /**
