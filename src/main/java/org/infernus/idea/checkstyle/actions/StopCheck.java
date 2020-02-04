@@ -1,9 +1,7 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
@@ -16,54 +14,37 @@ public class StopCheck extends BaseAction {
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
-        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
+        project(event).ifPresent(project -> {
+            try {
+                final ToolWindow toolWindow = ToolWindowManager
+                        .getInstance(project)
+                        .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+                toolWindow.activate(() -> {
+                    setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-        try {
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
+                    plugin(project).stopChecks();
+
+                    setProgressText(toolWindow, "plugin.status.aborted");
+                });
+
+            } catch (Throwable e) {
+                CheckStylePlugin.processErrorAndLog("Abort Scan", e);
             }
-
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(() -> {
-                setProgressText(toolWindow, "plugin.status.in-progress.current");
-
-                checkStylePlugin.stopChecks();
-
-                setProgressText(toolWindow, "plugin.status.aborted");
-            });
-
-        } catch (Throwable e) {
-            CheckStylePlugin.processErrorAndLog("Abort Scan", e);
-        }
+        });
     }
 
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);
 
-        try {
-            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
+        project(event).ifPresent(project -> {
+            try {
+                final Presentation presentation = event.getPresentation();
+                presentation.setEnabled(plugin(project).isScanInProgress());
+
+            } catch (Throwable e) {
+                CheckStylePlugin.processErrorAndLog("Abort button update", e);
             }
-
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-
-            final Presentation presentation = event.getPresentation();
-            presentation.setEnabled(checkStylePlugin.isScanInProgress());
-
-        } catch (Throwable e) {
-            CheckStylePlugin.processErrorAndLog("Abort button update", e);
-        }
+        });
     }
 }

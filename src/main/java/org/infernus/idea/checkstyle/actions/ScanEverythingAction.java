@@ -32,7 +32,7 @@ class ScanEverythingAction implements Runnable {
 
     @Override
     public void run() {
-        List<VirtualFile> filesToScan = null;
+        List<VirtualFile> filesToScan;
         if (module != null) {
             // all non-excluded files of a module
             final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);

@@ -1,10 +1,8 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
@@ -25,22 +23,18 @@ public class ScanCurrentChangeList extends BaseAction {
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
-        Project project = null;
-        try {
-            project = DataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) {
-                return;
+        project(event).ifPresent(project -> {
+            try {
+                final ToolWindow toolWindow = ToolWindowManager.getInstance(project)
+                        .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+
+                final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
+                project.getComponent(CheckStylePlugin.class).asyncScanFiles(filesFor(changeListManager
+                        .getDefaultChangeList()), getSelectedOverride(toolWindow));
+            } catch (Throwable e) {
+                LOG.warn("Modified files scan failed", e);
             }
-
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project)
-                    .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-
-            final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-            project.getComponent(CheckStylePlugin.class).asyncScanFiles(filesFor(changeListManager
-                    .getDefaultChangeList()), getSelectedOverride(toolWindow));
-        } catch (Throwable e) {
-            LOG.warn("Modified files scan failed", e);
-        }
+        });
     }
 
     private List<VirtualFile> filesFor(final LocalChangeList changeList) {
@@ -61,29 +55,24 @@ public class ScanCurrentChangeList extends BaseAction {
     @Override
     public void update(final AnActionEvent event) {
         super.update(event);
+        project(event).ifPresent(project -> {
+            try {
+                final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+                if (checkStylePlugin == null) {
+                    throw new IllegalStateException("Couldn't get checkstyle plugin");
+                }
 
-        Project project = null;
-        try {
-            project = DataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
+                final Presentation presentation = event.getPresentation();
+
+                final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
+                if (changeList == null || changeList.getChanges() == null || changeList.getChanges().size() == 0) {
+                    presentation.setEnabled(false);
+                } else {
+                    presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+                }
+            } catch (Throwable e) {
+                LOG.warn("Button update failed.", e);
             }
-
-            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-
-            final Presentation presentation = event.getPresentation();
-
-            final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
-            if (changeList == null || changeList.getChanges() == null || changeList.getChanges().size() == 0) {
-                presentation.setEnabled(false);
-            } else {
-                presentation.setEnabled(!checkStylePlugin.isScanInProgress());
-            }
-        } catch (Throwable e) {
-            LOG.warn("Button update failed.", e);
-        }
+        });
     }
 }

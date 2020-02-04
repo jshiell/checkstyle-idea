@@ -1,9 +1,6 @@
 package org.infernus.idea.checkstyle.actions;
 
-import java.util.Arrays;
-
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -18,6 +15,8 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.FileTypes;
 
+import java.util.Collections;
+
 /**
  * Action to execute a CheckStyle scan on the current editor file.
  */
@@ -25,43 +24,34 @@ public class ScanCurrentFile extends BaseAction {
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
-        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
-        if (project == null) {
-            return;
-        }
+        project(event).ifPresent(project -> {
+            try {
+                final ScanScope scope = plugin(project).configurationManager().getCurrent().getScanScope();
 
-        try {
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-            final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
+                final ToolWindow toolWindow = ToolWindowManager.getInstance(
+                        project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+                toolWindow.activate(() -> {
+                    try {
+                        setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(
-                    project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
-            toolWindow.activate(() -> {
-                try {
-                    setProgressText(toolWindow, "plugin.status.in-progress.current");
+                        final VirtualFile selectedFile = getSelectedFile(project, scope);
+                        if (selectedFile != null) {
+                            project.getComponent(CheckStylePlugin.class).asyncScanFiles(
+                                    Collections.singletonList(selectedFile), getSelectedOverride(toolWindow));
+                        }
 
-                    final VirtualFile selectedFile = getSelectedFile(project, scope);
-                    if (selectedFile != null) {
-                        project.getComponent(CheckStylePlugin.class).asyncScanFiles(
-                                Arrays.asList(selectedFile), getSelectedOverride(toolWindow));
+                    } catch (Throwable e) {
+                        CheckStylePlugin.processErrorAndLog("Current File scan", e);
                     }
+                });
 
-                } catch (Throwable e) {
-                    CheckStylePlugin.processErrorAndLog("Current File scan", e);
-                }
-            });
-
-        } catch (Throwable e) {
-            CheckStylePlugin.processErrorAndLog("Current File scan", e);
-        }
+            } catch (Throwable e) {
+                CheckStylePlugin.processErrorAndLog("Current File scan", e);
+            }
+        });
     }
 
     private VirtualFile getSelectedFile(final Project project, final ScanScope scope) {
-
         VirtualFile selectedFile = null;
 
         final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
@@ -104,30 +94,27 @@ public class ScanCurrentFile extends BaseAction {
     public void update(final AnActionEvent event) {
         super.update(event);
 
-        try {
-            final Project project = DataKeys.PROJECT.getData(event.getDataContext());
-            if (project == null) { // check if we're loading...
-                return;
-            }
+        project(event).ifPresent(project -> {
+            try {
+                final CheckStylePlugin checkStylePlugin
+                        = project.getComponent(CheckStylePlugin.class);
+                if (checkStylePlugin == null) {
+                    throw new IllegalStateException("Couldn't get checkstyle plugin");
+                }
+                final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
 
-            final CheckStylePlugin checkStylePlugin
-                    = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-            final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
+                final VirtualFile selectedFile = getSelectedFile(project, scope);
 
-            final VirtualFile selectedFile = getSelectedFile(project, scope);
-
-            // disable if no file is selected or scan in progress
-            final Presentation presentation = event.getPresentation();
-            if (selectedFile != null) {
-                presentation.setEnabled(!checkStylePlugin.isScanInProgress());
-            } else {
-                presentation.setEnabled(false);
+                // disable if no file is selected or scan in progress
+                final Presentation presentation = event.getPresentation();
+                if (selectedFile != null) {
+                    presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+                } else {
+                    presentation.setEnabled(false);
+                }
+            } catch (Throwable e) {
+                CheckStylePlugin.processErrorAndLog("Current File button update", e);
             }
-        } catch (Throwable e) {
-            CheckStylePlugin.processErrorAndLog("Current File button update", e);
-        }
+        });
     }
 }

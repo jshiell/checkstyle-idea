@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.util.Optional;
 
-import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -31,27 +29,19 @@ public abstract class BaseAction extends AnAction {
 
     @Override
     public void update(final AnActionEvent event) {
-        Project project;
         try {
-            project = DataKeys.PROJECT.getData(event.getDataContext());
+            final Project project = getEventProject(event);
             final Presentation presentation = event.getPresentation();
 
-            // check a project is loaded
             if (project == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
-
                 return;
             }
 
-            final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
-            if (checkStylePlugin == null) {
-                throw new IllegalStateException("Couldn't get checkstyle plugin");
-            }
-
-            // check if tool window is registered
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(
-                    CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+            final ToolWindow toolWindow = ToolWindowManager
+                    .getInstance(project)
+                    .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
             if (toolWindow == null) {
                 presentation.setEnabled(false);
                 presentation.setVisible(false);
@@ -59,9 +49,9 @@ public abstract class BaseAction extends AnAction {
                 return;
             }
 
-            // enable
             presentation.setEnabled(toolWindow.isAvailable());
             presentation.setVisible(true);
+
         } catch (Throwable e) {
             LOG.warn("Action update failed", e);
         }
@@ -81,7 +71,6 @@ public abstract class BaseAction extends AnAction {
 
     protected ConfigurationLocation getSelectedOverride(final ToolWindow toolWindow) {
         final Content content = toolWindow.getContentManager().getContent(0);
-        // the content instance will be a JLabel while the component initialises
         if (content != null && content.getComponent() instanceof CheckStyleToolWindowPanel) {
             return ((CheckStyleToolWindowPanel) content.getComponent()).getSelectedOverride();
         }
@@ -89,7 +78,16 @@ public abstract class BaseAction extends AnAction {
     }
 
     protected Optional<Project> project(@NotNull final AnActionEvent event) {
-        return ofNullable(PROJECT.getData(event.getDataContext()));
+        return ofNullable(getEventProject(event));
+    }
+
+    @NotNull
+    protected CheckStylePlugin plugin(final Project project) {
+        final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+        if (checkStylePlugin == null) {
+            throw new IllegalStateException("Couldn't get checkstyle plugin");
+        }
+        return checkStylePlugin;
     }
 
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {

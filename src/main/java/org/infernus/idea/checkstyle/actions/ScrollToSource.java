@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -17,7 +16,7 @@ public final class ScrollToSource extends ToggleAction {
 
     @Override
     public boolean isSelected(final AnActionEvent event) {
-        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
+        final Project project = getEventProject(event);
         if (project == null) {
             return false;
         }
@@ -41,7 +40,7 @@ public final class ScrollToSource extends ToggleAction {
 
     @Override
     public void setSelected(final AnActionEvent event, final boolean selected) {
-        final Project project = DataKeys.PROJECT.getData(event.getDataContext());
+        final Project project = getEventProject(event);
         if (project == null) {
             return;
         }
