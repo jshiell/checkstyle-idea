@@ -178,6 +178,8 @@
         <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstylePluginApi"
                         serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
 
+        <postStartupActivity implementation="org.infernus.idea.checkstyle.NotifyUserIfPluginUpdated"/>
+
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 
         <moduleService serviceInterface="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"

@@ -12,18 +12,15 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
-import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.Future;
 
-import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
@@ -105,20 +102,6 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     public void projectOpened() {
         LOG.debug("Project opened.");
-        notifyUserIfPluginUpdated();
-    }
-
-    private void notifyUserIfPluginUpdated() {
-        if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion())) {
-            Notifications.showInfo(project, message("plugin.update", currentPluginVersion()));
-            configurationManager.setCurrent(PluginConfigurationBuilder.from(configurationManager.getCurrent())
-                    .withLastActivePluginVersion(currentPluginVersion())
-                    .build(), false);
-        }
-    }
-
-    private String lastActivePluginVersion() {
-        return configurationManager.getCurrent().getLastActivePluginVersion();
     }
 
     public static String currentPluginVersion() {
