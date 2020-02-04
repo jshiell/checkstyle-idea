@@ -1,7 +1,9 @@
 package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +36,14 @@ abstract class ScanAllFilesTask implements Runnable {
         if (files != null) {
             for (final VirtualFile file : files) {
                 flattened.add(file);
-                if (file.getChildren() != null) {
-                    flattened.addAll(flattenFiles(file.getChildren()));
-                }
+                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<Object>() {
+                    @Override
+                    @NotNull
+                    public Result visitFileEx(@NotNull final VirtualFile file) {
+                        flattened.add(file);
+                        return CONTINUE;
+                    }
+                });
             }
         }
         return flattened;
