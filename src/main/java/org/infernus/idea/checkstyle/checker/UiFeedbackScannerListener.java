@@ -1,21 +1,20 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.Map;
 
 public class UiFeedbackScannerListener implements ScannerListener {
-    private final CheckStylePlugin plugin;
+    private final Project project;
 
-    public UiFeedbackScannerListener(final CheckStylePlugin plugin) {
-        this.plugin = plugin;
+    public UiFeedbackScannerListener(final Project project) {
+        this.project = project;
     }
 
 
@@ -32,7 +31,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
     @Override
     public void filesScanned(final int count) {
         ApplicationManager.getApplication().invokeLater(() -> {
-            final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
+            final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
             if (toolWindowPanel != null) {
                 toolWindowPanel.incrementProgressBarBy(count);
             }
@@ -72,6 +71,6 @@ public class UiFeedbackScannerListener implements ScannerListener {
 
     @Nullable
     private CheckStyleToolWindowPanel toolWindowPanel() {
-        return CheckStyleToolWindowPanel.panelFor(plugin.getProject());
+        return CheckStyleToolWindowPanel.panelFor(project);
     }
 }

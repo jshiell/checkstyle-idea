@@ -15,10 +15,10 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -26,13 +26,12 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static com.intellij.openapi.vcs.checkin.CheckinHandler.ReturnResult.*;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
@@ -87,7 +86,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        if (plugin.configurationManager().getCurrent().isScanBeforeCheckin()) {
+        if (configurationManager(project).getCurrent().isScanBeforeCheckin()) {
             try {
                 final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
@@ -98,7 +97,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                     }
                 }.queue();
 
-                return processScanResults(scanResults, executor, plugin);
+                return processScanResults(scanResults, executor, project);
 
             } catch (ProcessCanceledException e) {
                 return CANCEL;
@@ -116,26 +115,20 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return empty();
         }
 
-        final CheckStylePlugin plugin = ServiceManager.getService(project, CheckStylePlugin.class);
-        if (plugin == null) {
-            LOG.warn("Could not get CheckStyle Plug-in, skipping");
-            return empty();
-        }
-
-        return ofNullable(plugin.configurationManager());
+        return ofNullable(configurationManager(project));
     }
 
     private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,
                                             final CommitExecutor executor,
-                                            final CheckStylePlugin plugin) {
+                                            final Project project) {
         final int errorCount = errorCountOf(results);
         if (errorCount == 0) {
             return COMMIT;
         }
 
-        final int answer = promptUser(plugin, errorCount, executor);
+        final int answer = promptUser(project, errorCount, executor);
         if (answer == Messages.OK) {
-            showResultsInToolWindow(results, plugin);
+            showResultsInToolWindow(results, project);
             return CLOSE_WINDOW;
 
         } else if (answer == Messages.CANCEL || answer < 0) {
@@ -146,21 +139,18 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     }
 
     private int errorCountOf(final Map<PsiFile, List<Problem>> results) {
-        return results.entrySet().stream()
+        return (int) results.entrySet().stream()
                 .filter(this::hasProblemsThatAreNotIgnored)
-                .collect(toList())
-                .size();
+                .count();
     }
 
     private boolean hasProblemsThatAreNotIgnored(final Map.Entry<PsiFile, List<Problem>> entry) {
         return entry.getValue()
                 .stream()
-                .filter(problem -> problem.severityLevel() != SeverityLevel.Ignore)
-                .collect(toList())
-                .size() > 0;
+                .anyMatch(problem -> problem.severityLevel() != SeverityLevel.Ignore);
     }
 
-    private int promptUser(final CheckStylePlugin plugin,
+    private int promptUser(final Project project,
                            final int errorCount,
                            final CommitExecutor executor) {
         String commitButtonText;
@@ -179,18 +169,22 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 commitButtonText,
                 CommonBundle.getCancelButtonText()};
 
-        return Messages.showDialog(plugin.getProject(), message("handler.before.checkin.error.text", errorCount),
+        return Messages.showDialog(project, message("handler.before.checkin.error.text", errorCount),
                 message("handler.before.checkin.error.title"),
                 buttons, 0, UIUtil.getWarningIcon());
     }
 
     private void showResultsInToolWindow(final Map<PsiFile, List<Problem>> results,
-                                         final CheckStylePlugin plugin) {
-        final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(plugin.getProject());
+                                         final Project project) {
+        final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
         if (toolWindowPanel != null) {
             toolWindowPanel.displayResults(results);
             toolWindowPanel.showToolWindow();
         }
+    }
+
+    private PluginConfigurationManager configurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
 }

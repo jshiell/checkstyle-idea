@@ -13,6 +13,7 @@ import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -62,7 +63,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                          final boolean isOnTheFly) {
         final CheckStylePlugin plugin = plugin(manager.getProject());
         final Module module = moduleOf(psiFile);
-        List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), plugin, module);
+        List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), manager.getProject(), module);
 
         try {
             return asProblemDescriptors(
@@ -110,11 +111,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
                 return NO_PROBLEMS_FOUND;
             }
 
-            scannableFiles.addAll(ScannableFile.createAndValidate(singletonList(psiFile), plugin, module));
+            scannableFiles.addAll(ScannableFile.createAndValidate(singletonList(psiFile), manager.getProject(), module));
 
             return checkerFactory(psiFile.getProject())
                     .checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.configurationManager().getCurrent().isSuppressErrors()))
+                    .map(checker -> checker.scan(scannableFiles, configurationManager(psiFile.getProject()).getCurrent().isSuppressErrors()))
                     .map(results -> results.get(psiFile))
                     .map(this::dropIgnoredProblems)
                     .orElse(NO_PROBLEMS_FOUND);
@@ -128,7 +129,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
-            handlePluginException(e, psiFile, plugin, configurationLocation, manager.getProject());
+            handlePluginException(e, psiFile, configurationLocation, manager.getProject());
             return NO_PROBLEMS_FOUND;
 
         } finally {
@@ -144,14 +145,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private void handlePluginException(final Throwable e,
                                        final @NotNull PsiFile psiFile,
-                                       final CheckStylePlugin plugin,
                                        final ConfigurationLocation configurationLocation,
                                        final @NotNull Project project) {
         if (e.getCause() != null && e.getCause() instanceof ProcessCanceledException) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
 
         } else if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
-            disableActiveConfiguration(plugin, project);
+            disableActiveConfiguration(project);
 
         } else if (e.getCause() != null && e.getCause() instanceof IOException) {
             showWarning(project, message("checkstyle.file-io-failed"));
@@ -164,8 +164,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
-    private void disableActiveConfiguration(final CheckStylePlugin plugin, final Project project) {
-        plugin.configurationManager().disableActiveConfiguration();
+    private void disableActiveConfiguration(final Project project) {
+        configurationManager(project).disableActiveConfiguration();
         showWarning(project, message("checkstyle.configuration-disabled.file-not-found"));
     }
 
@@ -189,5 +189,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         return ServiceManager.getService(project, CheckerFactory.class);
     }
 
+    private PluginConfigurationManager configurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
+    }
 
 }

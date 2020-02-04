@@ -23,9 +23,9 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -69,7 +69,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
             = new HashMap<>();
 
-    private final CheckStylePlugin checkStylePlugin;
     private final Project project;
     private final ToolWindow toolWindow;
     private final ComboBox configurationOverrideCombo = new ComboBox();
@@ -111,13 +110,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         this.toolWindow = toolWindow;
         this.project = project;
 
-        checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-
         configurationChanged();
-        checkStylePlugin.configurationManager().addConfigurationListener(this);
+        configurationManager().addConfigurationListener(this);
 
         final ActionGroup mainActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
@@ -228,7 +222,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         configurationOverrideModel.removeAllElements();
 
         configurationOverrideModel.addElement(DEFAULT_OVERRIDE);
-        checkStylePlugin.configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
+        configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
         configurationOverrideModel.setSelectedItem(DEFAULT_OVERRIDE);
     }
 
@@ -594,5 +588,9 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     public void setDisplayingInfo(final boolean displayingInfo) {
         this.displayingInfo = displayingInfo;
+    }
+
+    private PluginConfigurationManager configurationManager() {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 }

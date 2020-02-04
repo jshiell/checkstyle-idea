@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +66,10 @@ public abstract class BaseAction extends AnAction {
 
     protected Optional<Project> project(@NotNull final AnActionEvent event) {
         return ofNullable(getEventProject(event));
+    }
+
+    protected PluginConfigurationManager configurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
     @NotNull

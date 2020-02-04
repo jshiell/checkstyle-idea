@@ -42,7 +42,7 @@ public class ScanModule extends BaseAction {
                     return;
                 }
 
-                final ScanScope scope = plugin(project).configurationManager().getCurrent().getScanScope();
+                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 toolWindow.activate(() -> {
                     try {
@@ -99,8 +99,7 @@ public class ScanModule extends BaseAction {
                     return;
                 }
 
-                final CheckStylePlugin checkStylePlugin = plugin(project);
-                final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
+                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 VirtualFile[] moduleFiles;
                 final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
@@ -112,7 +111,7 @@ public class ScanModule extends BaseAction {
 
                 // disable if no files are selected or scan in progress
                 if (containsAtLeastOneFile(moduleFiles)) {
-                    presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+                    presentation.setEnabled(!plugin(project).isScanInProgress());
                 } else {
                     presentation.setEnabled(false);
                 }

@@ -41,7 +41,6 @@ public final class CheckStylePlugin {
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
 
-
     /**
      * Construct a plug-in instance for the given project.
      *
@@ -49,19 +48,6 @@ public final class CheckStylePlugin {
      */
     public CheckStylePlugin(@NotNull final Project project) {
         this.project = project;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    /**
-     * Get the plugin configuration.
-     *
-     * @return the plug-in configuration.
-     */
-    public PluginConfigurationManager configurationManager() {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
     /**
@@ -123,8 +109,8 @@ public final class CheckStylePlugin {
             return;
         }
 
-        final ScanFiles checkFiles = new ScanFiles(this, files, overrideConfigLocation);
-        checkFiles.addListener(new UiFeedbackScannerListener(this));
+        final ScanFiles checkFiles = new ScanFiles(project, this, files, overrideConfigLocation);
+        checkFiles.addListener(new UiFeedbackScannerListener(project));
         runAsyncCheck(checkFiles);
     }
 
@@ -134,7 +120,7 @@ public final class CheckStylePlugin {
         }
 
         try {
-            return whenFinished(runAsyncCheck(new ScanFiles(this, files, null)), NO_TIMEOUT).get();
+            return whenFinished(runAsyncCheck(new ScanFiles(project, this, files, null)), NO_TIMEOUT).get();
         } catch (final Throwable e) {
             LOG.warn("Error scanning files", e);
             return Collections.emptyMap();
@@ -147,15 +133,15 @@ public final class CheckStylePlugin {
         return checkFilesFuture;
     }
 
-    public ConfigurationLocation getConfigurationLocation(@Nullable final Module module, @Nullable final
-    ConfigurationLocation override) {
+    public ConfigurationLocation getConfigurationLocation(@Nullable final Module module,
+                                                          @Nullable final ConfigurationLocation override) {
         if (override != null) {
             return override;
         }
 
         if (module != null) {
-            final CheckStyleModuleConfiguration moduleConfiguration = ModuleServiceManager.getService(module,
-                    CheckStyleModuleConfiguration.class);
+            final CheckStyleModuleConfiguration moduleConfiguration = ModuleServiceManager
+                    .getService(module, CheckStyleModuleConfiguration.class);
             if (moduleConfiguration == null) {
                 throw new IllegalStateException("Couldn't get checkstyle module configuration");
             }
@@ -166,6 +152,10 @@ public final class CheckStylePlugin {
             return moduleConfiguration.getActiveConfiguration();
         }
         return configurationManager().getCurrent().getActiveLocation();
+    }
+
+    private PluginConfigurationManager configurationManager() {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
     private class ScanCompletionTracker implements ScannerListener {

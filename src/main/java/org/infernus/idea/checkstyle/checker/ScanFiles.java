@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -36,12 +37,15 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     private final List<PsiFile> files;
     private final Map<Module, Set<PsiFile>> moduleToFiles;
     private final Set<ScannerListener> listeners = new HashSet<>();
+    private final Project project;
     private final CheckStylePlugin plugin;
     private final ConfigurationLocation overrideConfigLocation;
 
-    public ScanFiles(@NotNull final CheckStylePlugin checkStylePlugin,
+    public ScanFiles(@NotNull final Project project,
+                     @NotNull final CheckStylePlugin checkStylePlugin,
                      @NotNull final List<VirtualFile> virtualFiles,
                      @Nullable final ConfigurationLocation overrideConfigLocation) {
+        this.project = project;
         this.plugin = checkStylePlugin;
         this.overrideConfigLocation = overrideConfigLocation;
 
@@ -51,7 +55,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
     private List<PsiFile> findAllFilesFor(@NotNull final List<VirtualFile> virtualFiles) {
         final List<PsiFile> childFiles = new ArrayList<>();
-        final PsiManager psiManager = PsiManager.getInstance(this.plugin.getProject());
+        final PsiManager psiManager = PsiManager.getInstance(project);
         for (final VirtualFile virtualFile : virtualFiles) {
             childFiles.addAll(buildFilesList(psiManager, virtualFile));
         }
@@ -91,7 +95,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e) {
-        Notifications.showException(plugin.getProject(), e);
+        Notifications.showException(project, e);
         fireScanFailedWithError(e);
 
         return emptyMap();
@@ -191,20 +195,23 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                                                    final ConfigurationLocation configurationLocation) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
-            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, plugin, module));
+            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module));
 
-            return checkerFactory(module.getProject()).checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, plugin.configurationManager().getCurrent().isSuppressErrors()))
+            return checkerFactory().checker(module, configurationLocation)
+                    .map(checker -> checker.scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors()))
                     .orElseThrow(() -> new CheckStylePluginException("Could not create checker"));
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 
-    private CheckerFactory checkerFactory(final Project project) {
+    private CheckerFactory checkerFactory() {
         return ServiceManager.getService(project, CheckerFactory.class);
     }
 
+    private PluginConfigurationManager configurationManager() {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
+    }
 
     private class FindChildFiles extends VirtualFileVisitor {
 

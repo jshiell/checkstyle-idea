@@ -2,16 +2,18 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.application.options.CodeStyle;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,14 +71,18 @@ public class ScannableFile {
     }
 
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
-                                                        @NotNull final CheckStylePlugin plugin,
+                                                        @NotNull final Project project,
                                                         @Nullable final Module module) {
         Computable<List<ScannableFile>> action = () -> psiFiles.stream()
-                .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), plugin.configurationManager()))
+                .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), configurationManager(project)))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         return ApplicationManager.getApplication().runReadAction(action);
+    }
+
+    private static PluginConfigurationManager configurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
     @Nullable

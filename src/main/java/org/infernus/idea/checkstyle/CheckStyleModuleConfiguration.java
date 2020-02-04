@@ -1,19 +1,14 @@
 package org.infernus.idea.checkstyle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
 
 /**
  * A manager for CheckStyle module configuration.
@@ -29,7 +24,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
     private static final long serialVersionUID = 2804470793153632480L;
 
-    public  static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
+    public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
@@ -99,24 +94,19 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     private ConfigurationLocation getProjectConfiguration() {
-        return checkstylePlugin().configurationManager().getCurrent().getActiveLocation();
+        return configurationManager().getCurrent().getActiveLocation();
+    }
+
+    private PluginConfigurationManager configurationManager() {
+        return ServiceManager.getService(module.getProject(), PluginConfigurationManager.class);
     }
 
     public List<ConfigurationLocation> configurationLocations() {
-        return new ArrayList<>(checkstylePlugin().configurationManager().getCurrent().getLocations());
+        return new ArrayList<>(configurationManager().getCurrent().getLocations());
     }
 
     public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
-        return new ArrayList<>(checkstylePlugin().configurationManager().getCurrent().getLocations());
-    }
-
-    @NotNull
-    private CheckStylePlugin checkstylePlugin() {
-        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(module.getProject(), CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-        return checkStylePlugin;
+        return new ArrayList<>(configurationManager().getCurrent().getLocations());
     }
 
     private ConfigurationLocationFactory configurationLocationFactory(final Project project) {

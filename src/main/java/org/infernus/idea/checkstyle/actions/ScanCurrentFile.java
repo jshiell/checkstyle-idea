@@ -25,7 +25,7 @@ public class ScanCurrentFile extends BaseAction {
     public void actionPerformed(final AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final ScanScope scope = plugin(project).configurationManager().getCurrent().getScanScope();
+                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
@@ -94,15 +94,14 @@ public class ScanCurrentFile extends BaseAction {
 
         project(event).ifPresent(project -> {
             try {
-                final CheckStylePlugin checkStylePlugin = plugin(project);
-                final ScanScope scope = checkStylePlugin.configurationManager().getCurrent().getScanScope();
+                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 final VirtualFile selectedFile = getSelectedFile(project, scope);
 
                 // disable if no file is selected or scan in progress
                 final Presentation presentation = event.getPresentation();
                 if (selectedFile != null) {
-                    presentation.setEnabled(!checkStylePlugin.isScanInProgress());
+                    presentation.setEnabled(!plugin(project).isScanInProgress());
                 } else {
                     presentation.setEnabled(false);
                 }
