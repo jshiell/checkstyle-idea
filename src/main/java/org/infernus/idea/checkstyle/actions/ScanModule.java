@@ -50,7 +50,7 @@ public class ScanModule extends BaseAction {
 
                         Runnable scanAction = null;
                         if (scope == ScanScope.Everything) {
-                            scanAction = new ScanEverythingAction(module, getSelectedOverride(toolWindow));
+                            scanAction = new ScanAllFilesInModuleTask(module, getSelectedOverride(toolWindow));
                         } else {
                             final VirtualFile[] moduleSourceRoots =
                                     ModuleRootManager.getInstance(module).getSourceRoots(scope.includeTestClasses());

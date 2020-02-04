@@ -39,7 +39,7 @@ public class ScanProject extends BaseAction {
             setProgressText(toolWindow, "plugin.status.in-progress.project");
             Runnable scanAction = null;
             if (scope == ScanScope.Everything) {
-                scanAction = new ScanEverythingAction(project, getSelectedOverride(toolWindow));
+                scanAction = new ScanAllFilesInProjectTask(project, getSelectedOverride(toolWindow));
             } else {
                 final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
                 final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
