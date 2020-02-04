@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CheckerFactoryCache {
+public class CheckerFactoryCache implements Disposable {
 
     private static final Logger LOG = Logger.getInstance(CheckerFactoryCache.class);
 
@@ -31,6 +32,11 @@ public class CheckerFactoryCache {
             destroyChecker(cachedChecker);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void dispose() {
+        invalidate();
     }
 
     public void put(@NotNull final ConfigurationLocation location,

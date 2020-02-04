@@ -1,5 +1,6 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.startup;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -16,22 +17,22 @@ public class NotifyUserIfPluginUpdated implements StartupActivity {
 
     @Override
     public void runActivity(@NotNull final Project project) {
-        if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion(project))) {
+        final PluginConfigurationManager pluginConfigurationManager = pluginConfigurationManager(project);
+        if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion(pluginConfigurationManager))) {
             Notifications.showInfo(project, message("plugin.update", currentPluginVersion()));
 
-            PluginConfigurationManager configurationManager = pluginConfigurationManager(project);
-            configurationManager.setCurrent(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+            pluginConfigurationManager.setCurrent(PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent())
                     .withLastActivePluginVersion(currentPluginVersion())
                     .build(), false);
         }
     }
 
-    private PluginConfigurationManager pluginConfigurationManager(@NotNull final Project project) {
-        return project.getComponent(PluginConfigurationManager.class);
+    private String lastActivePluginVersion(final PluginConfigurationManager pluginConfigurationManager) {
+        return pluginConfigurationManager.getCurrent().getLastActivePluginVersion();
     }
 
-    private String lastActivePluginVersion(final Project project) {
-        return pluginConfigurationManager(project).getCurrent().getLastActivePluginVersion();
+    private PluginConfigurationManager pluginConfigurationManager(final Project project) {
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
 }

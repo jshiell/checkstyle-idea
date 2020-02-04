@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * A manager for CheckStyle module configuration.
  */
 @State(
-        name = CheckStylePlugin.ID_MODULE_PLUGIN,
+        name = CheckStyleModuleConfiguration.ID_MODULE_PLUGIN,
         storages = {@Storage(StoragePathMacros.MODULE_FILE)}
 )
 public final class CheckStyleModuleConfiguration extends Properties
@@ -28,6 +28,8 @@ public final class CheckStyleModuleConfiguration extends Properties
     private static final Logger LOG = Logger.getInstance(CheckStyleModuleConfiguration.class);
 
     private static final long serialVersionUID = 2804470793153632480L;
+
+    public  static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final String ACTIVE_CONFIG = "active-configuration";
     private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";

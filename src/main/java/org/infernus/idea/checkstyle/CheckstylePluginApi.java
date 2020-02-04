@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -16,13 +17,13 @@ import java.util.function.BiConsumer;
  */
 @SuppressWarnings("unused")
 public class CheckstylePluginApi {
-    private final CheckStylePlugin checkstylePlugin;
     private final CheckstyleProjectService checkstyleProjectService;
+    private final PluginConfigurationManager pluginConfigurationManager;
 
-    public CheckstylePluginApi(final CheckStylePlugin checkstylePlugin,
-                               final CheckstyleProjectService checkstyleProjectService) {
-        this.checkstylePlugin = checkstylePlugin;
+    public CheckstylePluginApi(final CheckstyleProjectService checkstyleProjectService,
+                               final PluginConfigurationManager pluginConfigurationManager) {
         this.checkstyleProjectService = checkstyleProjectService;
+        this.pluginConfigurationManager = pluginConfigurationManager;
     }
 
     @Nullable
@@ -31,7 +32,7 @@ public class CheckstylePluginApi {
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        ConfigurationLocation activeLocation = checkstylePlugin.configurationManager().getCurrent().getActiveLocation();
+        ConfigurationLocation activeLocation = pluginConfigurationManager.getCurrent().getActiveLocation();
 
         if (activeLocation != null) {
             CheckstyleActions checkstyleInstance = checkstyleProjectService.getCheckstyleInstance();

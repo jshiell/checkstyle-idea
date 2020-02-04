@@ -2,7 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManager;
-import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
@@ -10,7 +10,6 @@ import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import org.apache.log4j.Level;
 import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
@@ -28,14 +27,12 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 /**
  * Main class for the CheckStyle scanning plug-in.
  */
-public final class CheckStylePlugin implements ProjectComponent {
+public final class CheckStylePlugin {
 
     /**
      * The plugin ID. Caution: It must be identical to the String set in build.gradle at intellij.pluginName
      */
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
-
-    static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(CheckStylePlugin.class);
 
@@ -43,8 +40,6 @@ public final class CheckStylePlugin implements ProjectComponent {
 
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
-    private final PluginConfigurationManager configurationManager;
-    private final CheckerFactoryCache checkerFactoryCache;
 
 
     /**
@@ -52,26 +47,8 @@ public final class CheckStylePlugin implements ProjectComponent {
      *
      * @param project the current project.
      */
-    public CheckStylePlugin(@NotNull final Project project,
-                            @NotNull final PluginConfigurationManager configurationManager,
-                            @NotNull final CheckerFactoryCache checkerFactoryCache) {
+    public CheckStylePlugin(@NotNull final Project project) {
         this.project = project;
-        this.configurationManager = configurationManager;
-        this.checkerFactoryCache = checkerFactoryCache;
-
-        LOG.info("CheckStyle Plugin");
-
-        disableCheckStyleLogging();
-    }
-
-    private void disableCheckStyleLogging() {
-        try {
-            // This is a nasty hack to get around IDEA's DialogAppender sending any errors to the Event Log,
-            // which would result in CheckStyle parse errors spamming the Event Log.
-            org.apache.log4j.Logger.getLogger("com.puppycrawl.tools.checkstyle.TreeWalker").setLevel(Level.OFF);
-        } catch (Exception e) {
-            LOG.warn("Unable to suppress logging from CheckStyle's TreeWalker", e);
-        }
     }
 
     public Project getProject() {
@@ -84,7 +61,7 @@ public final class CheckStylePlugin implements ProjectComponent {
      * @return the plug-in configuration.
      */
     public PluginConfigurationManager configurationManager() {
-        return configurationManager;
+        return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
     /**
@@ -100,33 +77,12 @@ public final class CheckStylePlugin implements ProjectComponent {
         }
     }
 
-    public void projectOpened() {
-        LOG.debug("Project opened.");
-    }
-
     public static String currentPluginVersion() {
         final IdeaPluginDescriptor plugin = PluginManager.getPlugin(PluginId.getId(ID_PLUGIN));
         if (plugin != null) {
             return plugin.getVersion();
         }
         return "unknown";
-    }
-
-    public void projectClosed() {
-        LOG.debug("Project closed; invalidating checkers.");
-
-        checkerFactoryCache.invalidate();
-    }
-
-    @NotNull
-    public String getComponentName() {
-        return ID_PLUGIN;
-    }
-
-    public void initComponent() {
-    }
-
-    public void disposeComponent() {
     }
 
     public static void processErrorAndLog(@NotNull final String action, @NotNull final Throwable e) {

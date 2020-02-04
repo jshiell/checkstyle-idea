@@ -142,48 +142,25 @@
         ]]>
     </change-notes>
 
-    <project-components>
-        <component>
-            <implementation-class>org.infernus.idea.checkstyle.CheckStylePlugin</implementation-class>
-            <interface-class>org.infernus.idea.checkstyle.CheckStylePlugin</interface-class>
-        </component>
-    </project-components>
-
-    <module-components>
-        <component>
-            <implementation-class>org.infernus.idea.checkstyle.CheckStyleModulePlugin</implementation-class>
-            <interface-class>org.infernus.idea.checkstyle.CheckStyleModulePlugin</interface-class>
-        </component>
-    </module-components>
-
-
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceInterface="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"
-                            serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
+        <applicationService serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
 
-        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"
-                        serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.CheckerFactory"
-                        serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"
-                        serviceImplementation="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"
-                        serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstyleProjectService"
-                        serviceImplementation="org.infernus.idea.checkstyle.CheckstyleProjectService"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.PluginConfigurationManager"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.config.ProjectConfigurationState"
-                        serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
-        <projectService serviceInterface="org.infernus.idea.checkstyle.CheckstylePluginApi"
-                        serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckStylePlugin"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstyleProjectService"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
 
-        <postStartupActivity implementation="org.infernus.idea.checkstyle.NotifyUserIfPluginUpdated"/>
+        <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.NotifyUserIfPluginUpdated"/>
+        <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"/>
 
-        <moduleService serviceInterface="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"
-                       serviceImplementation="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"/>
+        <moduleService serviceImplementation="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"/>
 
         <moduleConfigurable instance="org.infernus.idea.checkstyle.CheckStyleModuleConfigurable"/>
 
@@ -257,7 +234,7 @@
 
             <action id="CheckStyleStopCheck"
                     class="org.infernus.idea.checkstyle.actions.StopCheck"
-                    text="Stop the running scan"
+                    text="Stop the Running Scan"
                     description="Stop the scan currently being run"
                     icon="/actions/suspend.png">
             </action>
@@ -305,7 +282,7 @@
 
             <action id="CheckStyleClearCheckCacheAction"
                     class="org.infernus.idea.checkstyle.actions.ResetLoadedRulesFiles"
-                    text="Reload Rules files"
+                    text="Reload Rules Files"
                     description="Clear the rules file cache and the blacklist, forcing a reload of changed rules"
                     icon="/actions/sync.png">
             </action>
