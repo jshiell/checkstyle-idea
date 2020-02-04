@@ -44,7 +44,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
 
     private CheckStylePlugin plugin(final Project project) {
-        final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
         if (checkStylePlugin == null) {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }
@@ -87,7 +87,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     @NotNull
-    private ProblemDescriptor[] noProblemsFound(@NotNull InspectionManager manager) {
+    private ProblemDescriptor[] noProblemsFound(@NotNull final InspectionManager manager) {
         return asProblemDescriptors(NO_PROBLEMS_FOUND, manager);
     }
 

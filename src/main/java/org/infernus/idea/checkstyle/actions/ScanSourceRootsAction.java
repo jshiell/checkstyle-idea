@@ -24,7 +24,7 @@ class ScanSourceRootsAction implements Runnable {
 
     @Override
     public void run() {
-        project.getComponent(CheckStylePlugin.class)
+        ServiceManager.getService(project, CheckStylePlugin.class)
                 .asyncScanFiles(flattenFiles(sourceRoots), selectedOverride);
     }
 

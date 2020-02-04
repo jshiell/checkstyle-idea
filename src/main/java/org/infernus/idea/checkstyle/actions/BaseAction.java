@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -68,7 +69,7 @@ public abstract class BaseAction extends AnAction {
 
     @NotNull
     protected CheckStylePlugin plugin(final Project project) {
-        final CheckStylePlugin checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
         if (checkStylePlugin == null) {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }

@@ -25,7 +25,7 @@ abstract class ScanAllFilesTask implements Runnable {
 
     @Override
     public void run() {
-        project.getComponent(CheckStylePlugin.class)
+        ServiceManager.getService(project, CheckStylePlugin.class)
                 .asyncScanFiles(flattenFiles(files()), selectedOverride);
     }
 

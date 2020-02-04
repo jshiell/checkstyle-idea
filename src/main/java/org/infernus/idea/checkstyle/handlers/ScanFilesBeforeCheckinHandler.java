@@ -80,7 +80,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
+        final CheckStylePlugin plugin = ServiceManager.getService(project, CheckStylePlugin.class);
         if (plugin == null) {
             LOG.warn("Could not get CheckStyle Plug-in, skipping");
             return COMMIT;
@@ -115,7 +115,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return empty();
         }
 
-        final CheckStylePlugin plugin = project.getComponent(CheckStylePlugin.class);
+        final CheckStylePlugin plugin = ServiceManager.getService(project, CheckStylePlugin.class);
         if (plugin == null) {
             LOG.warn("Could not get CheckStyle Plug-in, skipping");
             return empty();

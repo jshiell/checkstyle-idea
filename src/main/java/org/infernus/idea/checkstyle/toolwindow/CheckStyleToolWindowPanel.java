@@ -110,7 +110,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         this.toolWindow = toolWindow;
         this.project = project;
 
-        checkStylePlugin = project.getComponent(CheckStylePlugin.class);
+        checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
         if (checkStylePlugin == null) {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }

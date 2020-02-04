@@ -112,7 +112,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
     @NotNull
     private CheckStylePlugin checkstylePlugin() {
-        final CheckStylePlugin checkStylePlugin = module.getProject().getComponent(CheckStylePlugin.class);
+        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(module.getProject(), CheckStylePlugin.class);
         if (checkStylePlugin == null) {
             throw new IllegalStateException("Couldn't get checkstyle plugin");
         }
