@@ -2,8 +2,8 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.wm.ToolWindow;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -11,6 +11,7 @@ import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
  * Action to stop a check in progress.
  */
 public class StopCheck extends BaseAction {
+    private static final Logger LOG = Logger.getInstance(StopCheck.class);
 
     @Override
     public void actionPerformed(final AnActionEvent event) {
@@ -26,7 +27,7 @@ public class StopCheck extends BaseAction {
                 });
 
             } catch (Throwable e) {
-                CheckStylePlugin.processErrorAndLog("Abort Scan", e);
+                LOG.warn("Abort Scan failed", e);
             }
         });
     }
@@ -41,7 +42,7 @@ public class StopCheck extends BaseAction {
                 presentation.setEnabled(staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
-                CheckStylePlugin.processErrorAndLog("Abort button update", e);
+                LOG.warn("Abort button update failed", e);
             }
         });
     }

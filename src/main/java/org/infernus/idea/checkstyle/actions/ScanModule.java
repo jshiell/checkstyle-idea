@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -10,7 +11,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.model.ScanScope;
 
 import java.util.Optional;
@@ -21,6 +21,7 @@ import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
  * Action to execute a CheckStyle scan on the current module.
  */
 public class ScanModule extends BaseAction {
+    private static final Logger LOG = Logger.getInstance(ScanModule.class);
 
     @Override
     public final void actionPerformed(final AnActionEvent event) {
@@ -63,12 +64,12 @@ public class ScanModule extends BaseAction {
                             ApplicationManager.getApplication().runReadAction(scanAction);
                         }
                     } catch (Throwable e) {
-                        CheckStylePlugin.processErrorAndLog("Current Module scan", e);
+                        LOG.warn("Current Module scan failed", e);
                     }
                 });
 
             } catch (Throwable e) {
-                CheckStylePlugin.processErrorAndLog("Current Module scan", e);
+                LOG.warn("Current Module scan failed", e);
             }
         });
     }
@@ -117,7 +118,7 @@ public class ScanModule extends BaseAction {
                 }
             });
         } catch (Throwable e) {
-            CheckStylePlugin.processErrorAndLog("Current Module button update", e);
+            LOG.warn("Current Module button update failed", e);
         }
     }
 }
