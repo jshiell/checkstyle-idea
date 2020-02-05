@@ -51,13 +51,6 @@ public class FileConfigurationLocationTest {
     }
 
     @Test
-    public void theLegacyProjectDirectoryTokenShouldBeTokenisedInDescriptorForUnixPaths() {
-        underTest.setLocation("$PRJ_DIR$/a-path/to/checkstyle.xml");
-
-        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a-path/to/checkstyle.xml:aDescription")));
-    }
-
-    @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForWindowsPaths() {
         underTest = new TestFileConfigurationLocation(project, '\\');
         reset(project);
@@ -114,7 +107,7 @@ public class FileConfigurationLocationTest {
         assertThat(underTest.getLocation(), is(equalTo("c:\\a\\file\\location\\checkstyle.xml")));
     }
 
-    private class TestFileConfigurationLocation extends FileConfigurationLocation {
+    private static class TestFileConfigurationLocation extends FileConfigurationLocation {
         private final char separatorChar;
 
         TestFileConfigurationLocation(final Project project,

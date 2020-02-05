@@ -14,7 +14,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDEA_PROJECT_DIR;
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -66,15 +65,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             throw new IllegalArgumentException("A non-blank location is required");
         }
 
-        super.setLocation(tokenisePath(migrateLegacyProjectDir(location)));
-    }
-
-    @NotNull
-    private String migrateLegacyProjectDir(final String location) {
-        if (location.startsWith(LEGACY_PROJECT_DIR)) {
-            return IDEA_PROJECT_DIR + location.substring(LEGACY_PROJECT_DIR.length());
-        }
-        return location;
+        super.setLocation(tokenisePath(location));
     }
 
     @NotNull
@@ -156,7 +147,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     private InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {
         try (ZipFile jarFile = new ZipFile(jarPath)) {
-            for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements();) {
+            for (final Enumeration<? extends ZipEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                 final ZipEntry entry = e.nextElement();
 
                 if (!entry.isDirectory() && entry.getName().equals(filePath)) {
@@ -202,11 +193,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
             return null;
         }
 
-        String detokenisedPath = replaceProjectToken(path, LEGACY_PROJECT_DIR);
-
-        if (detokenisedPath == null) {
-            detokenisedPath = replaceProjectToken(path, IDEA_PROJECT_DIR);
-        }
+        String detokenisedPath = replaceProjectToken(path, IDEA_PROJECT_DIR);
 
         if (detokenisedPath == null) {
             detokenisedPath = fromUnixPath(path);
@@ -243,7 +230,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         }
 
         if (getProject().isDefault()) {
-            if (new File(path).exists() || path.startsWith(LEGACY_PROJECT_DIR) || path.startsWith(IDEA_PROJECT_DIR)) {
+            if (new File(path).exists() || path.startsWith(IDEA_PROJECT_DIR)) {
                 return toUnixPath(path);
             } else {
                 return IDEA_PROJECT_DIR + toUnixPath(separatorChar() + path);

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
 import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDEA_PROJECT_DIR;
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.LEGACY_PROJECT_DIR;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class ProjectConfigurationState implements PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
@@ -187,9 +186,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         LOG.debug("Processing file: " + path);
 
-        if (path.startsWith(LEGACY_PROJECT_DIR)) {
-            return detokeniseForPrefix(path, getProjectPath(project), LEGACY_PROJECT_DIR);
-        } else if (path.startsWith(IDEA_PROJECT_DIR)) {
+        if (path.startsWith(IDEA_PROJECT_DIR)) {
             return detokeniseForPrefix(path, getProjectPath(project), IDEA_PROJECT_DIR);
         }
 
