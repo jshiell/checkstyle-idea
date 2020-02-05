@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -75,7 +74,7 @@ public class StaticScanner {
             return;
         }
 
-        final ScanFiles checkFiles = new ScanFiles(project, checkStylePlugin(), files, overrideConfigLocation);
+        final ScanFiles checkFiles = new ScanFiles(project, files, overrideConfigLocation);
         checkFiles.addListener(new UiFeedbackScannerListener(project));
         runAsyncCheck(checkFiles);
     }
@@ -86,7 +85,7 @@ public class StaticScanner {
         }
 
         try {
-            return whenFinished(runAsyncCheck(new ScanFiles(project, checkStylePlugin(), files, null)), NO_TIMEOUT).get();
+            return whenFinished(runAsyncCheck(new ScanFiles(project, files, null)), NO_TIMEOUT).get();
         } catch (final Throwable e) {
             LOG.warn("Error scanning files", e);
             return Collections.emptyMap();
@@ -125,10 +124,6 @@ public class StaticScanner {
         public void scanFailedWithError(final CheckStylePluginException error) {
             checkComplete(future);
         }
-    }
-
-    private CheckStylePlugin checkStylePlugin() {
-        return ServiceManager.getService(project, CheckStylePlugin.class);
     }
 
 }

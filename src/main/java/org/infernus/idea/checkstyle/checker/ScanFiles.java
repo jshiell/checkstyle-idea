@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.config.ConfigurationLocationSource;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
@@ -38,15 +38,12 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     private final Map<Module, Set<PsiFile>> moduleToFiles;
     private final Set<ScannerListener> listeners = new HashSet<>();
     private final Project project;
-    private final CheckStylePlugin plugin;
     private final ConfigurationLocation overrideConfigLocation;
 
     public ScanFiles(@NotNull final Project project,
-                     @NotNull final CheckStylePlugin checkStylePlugin,
                      @NotNull final List<VirtualFile> virtualFiles,
                      @Nullable final ConfigurationLocation overrideConfigLocation) {
         this.project = project;
-        this.plugin = checkStylePlugin;
         this.overrideConfigLocation = overrideConfigLocation;
 
         files = findAllFilesFor(virtualFiles);
@@ -180,7 +177,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     @NotNull
     private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override,
                                                               final Module module) {
-        final ConfigurationLocation location = plugin.getConfigurationLocation(module, override);
+        final ConfigurationLocation location = configurationLocationSource().getConfigurationLocation(module, override);
         if (location == null) {
             return resultOf(NOT_PRESENT);
         }
@@ -213,7 +210,11 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
-    private class FindChildFiles extends VirtualFileVisitor {
+    private ConfigurationLocationSource configurationLocationSource() {
+        return ServiceManager.getService(project, ConfigurationLocationSource.class);
+    }
+
+    private static class FindChildFiles extends VirtualFileVisitor {
 
         private final VirtualFile virtualFile;
         private final PsiManager psiManager;

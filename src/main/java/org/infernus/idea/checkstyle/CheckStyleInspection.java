@@ -13,6 +13,7 @@ import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
+import org.infernus.idea.checkstyle.config.ConfigurationLocationSource;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
@@ -44,14 +45,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
 
-    private CheckStylePlugin plugin(final Project project) {
-        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-        return checkStylePlugin;
-    }
-
     @Nullable
     public JComponent createOptionsPanel() {
         return configPanel;
@@ -61,7 +54,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
-        final CheckStylePlugin plugin = plugin(manager.getProject());
         final Module module = moduleOf(psiFile);
         List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), manager.getProject(), module);
 
@@ -69,7 +61,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return asProblemDescriptors(
                     asyncResultOf(() -> {
                         try {
-                            return inspectFile(psiFile, scannableFiles, plugin, module, manager);
+                            return inspectFile(psiFile, scannableFiles, module, manager);
                         } finally {
                             scannableFiles.forEach(ScannableFile::deleteIfRequired);
                         }
@@ -87,6 +79,10 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
+    private ConfigurationLocationSource configurationLocationSource(final Project project) {
+        return ServiceManager.getService(project, ConfigurationLocationSource.class);
+    }
+
     @NotNull
     private ProblemDescriptor[] noProblemsFound(@NotNull final InspectionManager manager) {
         return asProblemDescriptors(NO_PROBLEMS_FOUND, manager);
@@ -99,14 +95,14 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private List<Problem> inspectFile(@NotNull final PsiFile psiFile,
                                       @NotNull final List<ScannableFile> scannableFiles,
-                                      @NotNull final CheckStylePlugin plugin,
                                       @Nullable final Module module,
                                       @NotNull final InspectionManager manager) {
         LOG.debug("Inspection has been invoked for " + psiFile.getName());
 
         ConfigurationLocation configurationLocation = null;
         try {
-            configurationLocation = plugin.getConfigurationLocation(module, null);
+            configurationLocation = configurationLocationSource(manager.getProject())
+                    .getConfigurationLocation(module, null);
             if (configurationLocation == null || configurationLocation.isBlacklisted()) {
                 return NO_PROBLEMS_FOUND;
             }

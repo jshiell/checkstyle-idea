@@ -152,6 +152,7 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.ModuleClassPathBuilder"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.model.ConfigurationLocationFactory"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstyleProjectService"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.config.ConfigurationLocationSource"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
