@@ -56,7 +56,7 @@ public class ScanModule extends BaseAction {
                             final VirtualFile[] moduleSourceRoots =
                                     ModuleRootManager.getInstance(module).getSourceRoots(scope.includeTestClasses());
                             if (moduleSourceRoots.length > 0) {
-                                scanAction = new ScanSourceRootsAction(project, moduleSourceRoots,
+                                scanAction = new ScanAllGivenFilesTask(project, moduleSourceRoots,
                                         getSelectedOverride(toolWindow));
                             }
                         }

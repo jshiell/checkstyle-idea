@@ -45,7 +45,7 @@ public class ScanProject extends BaseAction {
                 final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
                 final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
                 if (sourceRoots.length > 0) {
-                    scanAction = new ScanSourceRootsAction(project, sourceRoots, getSelectedOverride(toolWindow));
+                    scanAction = new ScanAllGivenFilesTask(project, sourceRoots, getSelectedOverride(toolWindow));
                 }
             }
             if (scanAction != null) {
