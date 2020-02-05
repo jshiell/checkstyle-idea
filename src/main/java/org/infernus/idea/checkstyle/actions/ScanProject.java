@@ -81,7 +81,7 @@ public class ScanProject extends BaseAction {
 
                 // disable if no files are selected or scan in progress
                 if (containsAtLeastOneFile(sourceRoots)) {
-                    presentation.setEnabled(!plugin(project).isScanInProgress());
+                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
                 } else {
                     presentation.setEnabled(false);
                 }

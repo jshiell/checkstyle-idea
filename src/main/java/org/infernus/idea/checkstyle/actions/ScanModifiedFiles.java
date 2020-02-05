@@ -24,7 +24,7 @@ public class ScanModifiedFiles extends BaseAction {
         project(event).ifPresent(project -> {
             try {
                 final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-                plugin(project).asyncScanFiles(changeListManager.getAffectedFiles(),
+                staticScanner(project).asyncScanFiles(changeListManager.getAffectedFiles(),
                         getSelectedOverride(toolWindow(project)));
             } catch (Throwable e) {
                 LOG.warn("Modified files scan failed", e);
@@ -45,7 +45,7 @@ public class ScanModifiedFiles extends BaseAction {
                 if (modifiedFiles.isEmpty()) {
                     presentation.setEnabled(false);
                 } else {
-                    presentation.setEnabled(!plugin(project).isScanInProgress());
+                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
                 }
             } catch (Throwable e) {
                 LOG.warn("Button update failed.", e);

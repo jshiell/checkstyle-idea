@@ -34,7 +34,7 @@ public class ScanCurrentFile extends BaseAction {
 
                         final VirtualFile selectedFile = getSelectedFile(project, scope);
                         if (selectedFile != null) {
-                            plugin(project).asyncScanFiles(
+                            staticScanner(project).asyncScanFiles(
                                     singletonList(selectedFile), getSelectedOverride(toolWindow));
                         }
 
@@ -101,7 +101,7 @@ public class ScanCurrentFile extends BaseAction {
                 // disable if no file is selected or scan in progress
                 final Presentation presentation = event.getPresentation();
                 if (selectedFile != null) {
-                    presentation.setEnabled(!plugin(project).isScanInProgress());
+                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
                 } else {
                     presentation.setEnabled(false);
                 }

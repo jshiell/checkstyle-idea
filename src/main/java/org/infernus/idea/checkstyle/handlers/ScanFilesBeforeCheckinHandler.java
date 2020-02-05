@@ -15,7 +15,7 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -80,9 +80,9 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             return COMMIT;
         }
 
-        final CheckStylePlugin plugin = ServiceManager.getService(project, CheckStylePlugin.class);
-        if (plugin == null) {
-            LOG.warn("Could not get CheckStyle Plug-in, skipping");
+        final StaticScanner staticScanner = ServiceManager.getService(project, StaticScanner.class);
+        if (staticScanner == null) {
+            LOG.warn("Could not get scanner, skipping");
             return COMMIT;
         }
 
@@ -93,7 +93,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
-                        scanResults.putAll(plugin.scanFiles(new ArrayList<>(checkinPanel.getVirtualFiles())));
+                        scanResults.putAll(staticScanner.scanFiles(new ArrayList<>(checkinPanel.getVirtualFiles())));
                     }
                 }.queue();
 

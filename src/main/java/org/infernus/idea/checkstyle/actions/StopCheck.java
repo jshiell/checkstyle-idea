@@ -20,7 +20,7 @@ public class StopCheck extends BaseAction {
                 toolWindow.activate(() -> {
                     setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                    plugin(project).stopChecks();
+                    staticScanner(project).stopChecks();
 
                     setProgressText(toolWindow, "plugin.status.aborted");
                 });
@@ -38,7 +38,7 @@ public class StopCheck extends BaseAction {
         project(event).ifPresent(project -> {
             try {
                 final Presentation presentation = event.getPresentation();
-                presentation.setEnabled(plugin(project).isScanInProgress());
+                presentation.setEnabled(staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
                 CheckStylePlugin.processErrorAndLog("Abort button update", e);

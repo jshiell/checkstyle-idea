@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
@@ -72,13 +72,8 @@ public abstract class BaseAction extends AnAction {
         return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
-    @NotNull
-    protected CheckStylePlugin plugin(final Project project) {
-        final CheckStylePlugin checkStylePlugin = ServiceManager.getService(project, CheckStylePlugin.class);
-        if (checkStylePlugin == null) {
-            throw new IllegalStateException("Couldn't get checkstyle plugin");
-        }
-        return checkStylePlugin;
+    protected StaticScanner staticScanner(final Project project) {
+        return ServiceManager.getService(project, StaticScanner.class);
     }
 
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
