@@ -59,7 +59,7 @@ public final class PluginConfigurationBuilder {
 
         return new PluginConfigurationBuilder(csDefaultVersion, ScanScope.getDefaultValue(), false,
                 copyLibs, defaultLocations, Collections.emptyList(), null, false,
-                CheckStylePlugin.currentPluginVersion());
+                CheckStylePlugin.version());
     }
 
     public static PluginConfigurationBuilder testInstance(final String checkstyleVersion) {

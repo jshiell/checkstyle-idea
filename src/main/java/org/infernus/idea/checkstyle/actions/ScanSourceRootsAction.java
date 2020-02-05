@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.actions;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +25,7 @@ class ScanSourceRootsAction implements Runnable {
 
     @Override
     public void run() {
-        ServiceManager.getService(project, CheckStylePlugin.class)
+        ServiceManager.getService(project, StaticScanner.class)
                 .asyncScanFiles(flattenFiles(sourceRoots), selectedOverride);
     }
 

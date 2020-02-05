@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,7 @@ abstract class ScanAllFilesTask implements Runnable {
 
     @Override
     public void run() {
-        ServiceManager.getService(project, CheckStylePlugin.class)
+        ServiceManager.getService(project, StaticScanner.class)
                 .asyncScanFiles(flattenFiles(files()), selectedOverride);
     }
 

@@ -145,7 +145,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
 
-        <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckStylePlugin"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.StaticScanner"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>

@@ -19,7 +19,7 @@ public class ApplicationConfigurationState
 
     @NotNull
     private ApplicationSettings defaultApplicationSettings() {
-        return new ApplicationSettings(CheckStylePlugin.currentPluginVersion());
+        return new ApplicationSettings(CheckStylePlugin.version());
     }
 
     public ApplicationSettings getState() {

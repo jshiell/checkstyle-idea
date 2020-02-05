@@ -11,18 +11,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
-import static org.infernus.idea.checkstyle.CheckStylePlugin.currentPluginVersion;
+import static org.infernus.idea.checkstyle.CheckStylePlugin.version;
 
 public class NotifyUserIfPluginUpdated implements StartupActivity {
 
     @Override
     public void runActivity(@NotNull final Project project) {
         final PluginConfigurationManager pluginConfigurationManager = pluginConfigurationManager(project);
-        if (!Objects.equals(currentPluginVersion(), lastActivePluginVersion(pluginConfigurationManager))) {
-            Notifications.showInfo(project, message("plugin.update", currentPluginVersion()));
+        if (!Objects.equals(version(), lastActivePluginVersion(pluginConfigurationManager))) {
+            Notifications.showInfo(project, message("plugin.update", version()));
 
             pluginConfigurationManager.setCurrent(PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent())
-                    .withLastActivePluginVersion(currentPluginVersion())
+                    .withLastActivePluginVersion(version())
                     .build(), false);
         }
     }
