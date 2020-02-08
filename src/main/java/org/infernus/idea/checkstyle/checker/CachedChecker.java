@@ -20,8 +20,8 @@ class CachedChecker {
 
     private long timeStamp;
 
-    CachedChecker(@NotNull final Project pProject, @NotNull final CheckStyleChecker checkStyleChecker) {
-        project = pProject;
+    CachedChecker(@NotNull final Project project, @NotNull final CheckStyleChecker checkStyleChecker) {
+        this.project = project;
         this.checkStyleChecker = checkStyleChecker;
         this.timeStamp = System.currentTimeMillis();
     }

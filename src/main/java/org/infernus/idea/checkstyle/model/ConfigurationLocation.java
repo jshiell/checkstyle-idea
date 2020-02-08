@@ -125,7 +125,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     public void reset() {
         propertiesCheckedThisSession = false;
-        blacklistedUntil = 0L;
+        removeFromBlacklist();
     }
 
     private List<String> extractProperties(@Nullable final InputStream inputStream,

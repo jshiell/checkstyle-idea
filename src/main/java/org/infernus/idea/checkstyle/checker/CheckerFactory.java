@@ -25,7 +25,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 
 /**
- * Creates Checkers. Registered as projectService in {@code plugin.xml}.
+ * Creates Checkers.
  */
 public class CheckerFactory {
     private static final Logger LOG = Logger.getInstance(CheckerFactory.class);
@@ -73,6 +73,7 @@ public class CheckerFactory {
             return cachedChecker.get();
         }
 
+        LOG.debug("No cached checker found, creating a new one for {}", location);
         final CachedChecker checker = createChecker(location, module);
         if (checker != null) {
             cache.put(location, module, checker);
