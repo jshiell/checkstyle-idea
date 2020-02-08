@@ -184,21 +184,17 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             return null;
         }
 
-        LOG.debug("Processing file: " + path);
-
         if (path.startsWith(IDEA_PROJECT_DIR)) {
-            return detokeniseForPrefix(path, getProjectPath(project), IDEA_PROJECT_DIR);
+            LOG.debug("Detokenising path: ", path);
+            final File projectPath = projectPath(project);
+            if (projectPath != null) {
+                return new File(projectPath, path.substring(IDEA_PROJECT_DIR.length())).getAbsolutePath();
+            }
+
+            LOG.warn("Could not detokenise path as project dir could not be determined: " + path);
+            return path;
         }
 
-        return path;
-    }
-
-    private String detokeniseForPrefix(final String path, final File projectPath, final String prefix) {
-        if (projectPath != null) {
-            return new File(projectPath, path.substring(prefix.length())).getAbsolutePath();
-        }
-
-        LOG.warn("Could not detokenise path as project dir is unset: " + path);
         return path;
     }
 
@@ -229,8 +225,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
      * @return the base path of the project.
      */
     @Nullable
-    private static File getProjectPath(@NotNull final Project pProject) {
-        final VirtualFile baseDir = pProject.getBaseDir();
+    private static File projectPath(@NotNull final Project project) {
+        final VirtualFile baseDir = project.getBaseDir();
         if (baseDir == null) {
             return null;
         }
@@ -379,7 +375,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                 return null;
             }
 
-            final File projectPath = getProjectPath(project);
+            final File projectPath = projectPath(project);
             if (projectPath != null) {
                 final String projectPathAbs = projectPath.getAbsolutePath();
                 if (path.startsWith(projectPathAbs)) {
