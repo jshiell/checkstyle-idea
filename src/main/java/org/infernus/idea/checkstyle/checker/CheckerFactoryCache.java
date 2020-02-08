@@ -24,12 +24,12 @@ public class CheckerFactoryCache implements Disposable {
 
         final CachedChecker cachedChecker = cache.get(key);
         if (cachedChecker != null && cachedChecker.isValid()) {
-            LOG.debug("Valid cached checker found; returning for {}", location);
+            LOG.debug("Valid cached checker found; returning for ", location);
             return Optional.of(cachedChecker);
         }
 
         if (cachedChecker != null) {
-            LOG.debug("Invalid cached checker found; deleting and returning empty for {}", location);
+            LOG.debug("Invalid cached checker found; deleting and returning empty for ", location);
             cache.remove(key);
             destroyChecker(cachedChecker);
         }
@@ -48,6 +48,8 @@ public class CheckerFactoryCache implements Disposable {
     }
 
     public void invalidate() {
+        LOG.debug("Cache invalidation requested");
+
         List<CachedChecker> existingCheckers = new ArrayList<>(cache.values());
         cache.clear();
 

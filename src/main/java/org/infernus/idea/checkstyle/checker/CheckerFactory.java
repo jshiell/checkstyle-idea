@@ -34,6 +34,13 @@ public class CheckerFactory {
     private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache cache;
 
+    @SuppressWarnings("unused") // IDEA's DI
+    public CheckerFactory(@NotNull final Project project) {
+        this.project = project;
+        this.checkstyleProjectService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        this.cache = ServiceManager.getService(project, CheckerFactoryCache.class);
+    }
+
     public CheckerFactory(@NotNull final Project project,
                           @NotNull final CheckstyleProjectService checkstyleProjectService,
                           @NotNull final CheckerFactoryCache cache) {
@@ -48,11 +55,7 @@ public class CheckerFactory {
 
     public Optional<CheckStyleChecker> checker(@Nullable final Module module,
                                                @NotNull final ConfigurationLocation location) {
-        LOG.debug("Getting CheckStyle checker with location " + location);
-
-        if (location == null) {
-            return Optional.empty();
-        }
+        LOG.debug("Getting CheckStyle checker with location ", location);
 
         try {
             final CachedChecker cachedChecker = getOrCreateCachedChecker(location, module);
@@ -67,13 +70,13 @@ public class CheckerFactory {
 
 
     private CachedChecker getOrCreateCachedChecker(@NotNull final ConfigurationLocation location,
-                                                   @Nullable final Module module) throws IOException {
+                                                   @Nullable final Module module) {
         final Optional<CachedChecker> cachedChecker = cache.get(location, module);
         if (cachedChecker.isPresent()) {
             return cachedChecker.get();
         }
 
-        LOG.debug("No cached checker found, creating a new one for {}", location);
+        LOG.debug("No cached checker found, creating a new one for ", location);
         final CachedChecker checker = createChecker(location, module);
         if (checker != null) {
             cache.put(location, module, checker);
@@ -83,10 +86,9 @@ public class CheckerFactory {
         return null;
     }
 
-
-    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location, final Module module, final Map<String, String> properties)
-            throws IOException {
-
+    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location,
+                                                       final Module module,
+                                                       final Map<String, String> properties) {
         addIfAbsent("basedir", basePathFor(module), properties);
 
         addIfAbsent("project_loc", project.getBasePath(), properties);
