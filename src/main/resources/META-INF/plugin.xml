@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.35.5</version>
+    <version>5.35.6</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.35.6: Fixed: changed module/project icons to be compatible with EAPs of IDEA 2020.1 (#474).</li>
     <li>5.35.5: New: Added Checkstyle 8.29 - thanks to @mustaphazorgati (#472).</li>
     <li>5.35.4: Fixed: File cleanup should no longer throw concurrent modification exceptions if execution is cancelled (#470).</li>
     <li>5.35.3: Fixed: Problems are no longer duplicated in inspection panel (#467).</li>
@@ -211,19 +212,19 @@
                     class="org.infernus.idea.checkstyle.actions.DisplayErrors"
                     text="Display Errors"
                     description="Display error results"
-                    icon="/compiler/error.png"/>
+                    icon="/general/error.png"/>
 
             <action id="CheckStyleDisplayWarningsAction"
                     class="org.infernus.idea.checkstyle.actions.DisplayWarnings"
                     text="Display Warnings"
                     description="Display warning results"
-                    icon="/compiler/warning.png"/>
+                    icon="/general/warning.png"/>
 
             <action id="CheckStyleDisplayInfoAction"
                     class="org.infernus.idea.checkstyle.actions.DisplayInfo"
                     text="Display Information Results"
                     description="Display information results"
-                    icon="/compiler/information.png"/>
+                    icon="/general/information.png"/>
         </group>
 
         <group id="CheckStylePluginActions" text="CheckStyle" popup="true">
@@ -255,28 +256,28 @@
                     class="org.infernus.idea.checkstyle.actions.ScanModule"
                     text="Check Module"
                     description="Run Checkstyle on all files in the current module"
-                    icon="/modules/modulesNode.png">
+                    icon="/nodes/ideaModule.png">
             </action>
 
             <action id="CheckStyleProjectFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanProject"
                     text="Check Project"
                     description="Run Checkstyle on all files in the current project"
-                    icon="/general/projectTab.png">
+                    icon="/nodes/ideaProject.png">
             </action>
 
             <action id="CheckStyleModifiedFilesAction"
                     class="org.infernus.idea.checkstyle.actions.ScanModifiedFiles"
                     text="Check All Modified Files"
                     description="Run Checkstyle on all modified files"
-                    icon="/general/toolWindowChanges.png">
+                    icon="/actions/listChanges.png">
             </action>
 
             <action id="CheckStyleDefaultChangeListAction"
                     class="org.infernus.idea.checkstyle.actions.ScanCurrentChangeList"
                     text="Check Files in the Current Change List"
                     description="Run Checkstyle on the current change list"
-                    icon="/general/smallConfigurableVcs.png">
+                    icon="/vcs/patch.png">
             </action>
 
             <separator/>
@@ -285,7 +286,7 @@
                     class="org.infernus.idea.checkstyle.actions.ResetLoadedRulesFiles"
                     text="Reload Rules Files"
                     description="Clear the rules file cache and the blacklist, forcing a reload of changed rules"
-                    icon="/actions/sync.png">
+                    icon="/actions/refresh.png">
             </action>
         </group>
 

@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.6** Fixed: changed module/project icons to be compatible with EAPs of IDEA 2020.1 (#474).
 * **5.35.5** New: Added Checkstyle 8.29 - thanks to @mustaphazorgati (#472).
 * **5.35.4** Fixed: File cleanup should no longer throw concurrent modification exceptions if execution is cancelled (#470).
 * **5.35.3** Fixed: Problems are no longer duplicated in inspection panel (#467).
