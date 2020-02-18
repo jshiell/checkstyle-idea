@@ -81,18 +81,21 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
         } catch (CheckStylePluginParseException e) {
             LOG.debug("Parse exception caught during scan", e);
-            return scanFailedWithError(e);
+            return scanFailedWithError(e, false);
         } catch (final CheckStylePluginException e) {
             LOG.warn("An error occurred while scanning a file.", e);
-            return scanFailedWithError(e);
+            return scanFailedWithError(e, true);
         } catch (final Throwable e) {
             LOG.warn("An error occurred while scanning a file.", e);
-            return scanFailedWithError(new CheckStylePluginException("An error occurred while scanning a file.", e));
+            return scanFailedWithError(new CheckStylePluginException("An error occurred while scanning a file.", e), true);
         }
     }
 
-    private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e) {
-        Notifications.showException(project, e);
+    private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e,
+                                                            final boolean recordExceptionInEventLog) {
+        if (recordExceptionInEventLog) {
+            Notifications.showException(project, e);
+        }
         fireScanFailedWithError(e);
 
         return emptyMap();
