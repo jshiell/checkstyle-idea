@@ -7,6 +7,7 @@ import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -92,10 +93,16 @@ public class CheckStyleConfigurable
 
     private void activateCurrentCheckstyleVersion(final String checkstyleVersion,
                                                   final List<String> thirdPartyClasspath) {
-        // Invalidate cache *before* activating the new Checkstyle version
-        checkerFactoryCache.invalidate();
-
+        invalidateCachedResources();
         checkstyleProjectService.activateCheckstyleVersion(checkstyleVersion, thirdPartyClasspath);
+    }
+
+    private void invalidateCachedResources() {
+        checkerFactoryCache.invalidate();
+        pluginConfigurationManager
+                .getCurrent()
+                .getLocations()
+                .forEach(ConfigurationLocation::reset);
     }
 
     public void reset() {
