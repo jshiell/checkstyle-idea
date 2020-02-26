@@ -84,7 +84,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             return scanFailedWithError(e, false);
         } catch (final CheckStylePluginException e) {
             LOG.warn("An error occurred while scanning a file.", e);
-            return scanFailedWithError(e, true);
+            return scanFailedWithError(e, false);
         } catch (final Throwable e) {
             LOG.warn("An error occurred while scanning a file.", e);
             return scanFailedWithError(new CheckStylePluginException("An error occurred while scanning a file.", e), true);
