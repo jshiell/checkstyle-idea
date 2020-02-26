@@ -1,13 +1,5 @@
 package org.infernus.idea.checkstyle.build;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
@@ -19,14 +11,21 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
+
+import static java.util.stream.Collectors.toSet;
+
 
 /**
  * Download all supported versions of Checkstyle along with their transitive dependencies, for bundling with the
  * plugin.
  */
 public class GatherCheckstyleArtifactsTask
-    extends DefaultTask
-{
+        extends DefaultTask {
     public static final String NAME = "gatherCheckstyleArtifacts";
 
     private final CheckstyleVersions csVersions;
@@ -58,16 +57,35 @@ public class GatherCheckstyleArtifactsTask
     public void runTask() {
         final Set<File> bundledFiles = new TreeSet<>();
         final Properties classPaths = new SortedProperties();
+        final Map<String, Set<File>> rawVersionsToDependencies = new HashMap<>();
+        final Set<String> availableFileNames = new HashSet<>();
 
         for (final String csVersion : csVersions.getVersions()) {
-            final Set<File> files = resolveDependencies(getProject(), csVersion);
-            classPaths.setProperty(csVersion, convertToClassPath(files));
-            bundledFiles.addAll(files);
+            final Set<File> dependencies = resolveDependencies(getProject(), csVersion);
+            rawVersionsToDependencies.put(csVersion, dependencies);
+            availableFileNames.addAll(dependencies.stream().map(File::getName).collect(toSet()));
         }
+
+        final Map<String, String> dependencyMappings = csVersions.getDependencyMappings();
+        for (final String csVersion : csVersions.getVersions()) {
+            Set<String> processedDependencies = rawVersionsToDependencies.get(csVersion).stream()
+                    .map(dependencyFile -> {
+                        if (csVersions.getDependencyMappings().containsKey(dependencyFile.getName())
+                                && availableFileNames.contains(dependencyMappings.get(dependencyFile.getName()))) {
+                            return dependencyMappings.get(dependencyFile.getName());
+                        } else {
+                            bundledFiles.add(dependencyFile);
+                            return dependencyFile.getName();
+                        }
+                    })
+                    .collect(toSet());
+
+            classPaths.setProperty(csVersion, convertToClassPath(processedDependencies));
+        }
+
         copyFiles(bundledFiles);
         createClassPathsFile(classPaths);
     }
-
 
     private Set<File> resolveDependencies(final Project project, final String checkstyleVersion) {
         final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
@@ -75,12 +93,12 @@ public class GatherCheckstyleArtifactsTask
         return csConf.resolve();
     }
 
-    private String convertToClassPath(final Set<File> resolvedDependecy) {
+    private String convertToClassPath(final Collection<String> resolvedDependencies) {
         final StringBuilder sb = new StringBuilder();
-        for (final File f : resolvedDependecy) {
+        for (final String fileName : resolvedDependencies) {
             sb.append(GradlePluginMain.CSLIB_TARGET_SUBFOLDER);
             sb.append('/');
-            sb.append(f.getName());
+            sb.append(fileName);
             sb.append(';');
         }
         sb.deleteCharAt(sb.length() - 1);
@@ -88,13 +106,11 @@ public class GatherCheckstyleArtifactsTask
     }
 
 
-
     private void copyFiles(final Set<File> bundledJars) {
         for (final File bundledJar : bundledJars) {
             try {
                 FileUtils.copyFileToDirectory(bundledJar, bundledJarsDir, true);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new GradleException("Unable to copy file: " + bundledJar.getAbsolutePath(), e);
             }
         }
@@ -107,10 +123,9 @@ public class GatherCheckstyleArtifactsTask
 
         try (OutputStream os = new FileOutputStream(classPathsInfoFile)) {
             classPaths.store(os, " Class path information for Checkstyle artifacts bundled with Checkstyle_IDEA");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new GradleException("Unable to write classpath info file: " + classPathsInfoFile.getAbsolutePath(),
-                e);
+                    e);
         }
     }
 

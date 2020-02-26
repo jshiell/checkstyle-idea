@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.7** New: We now try and re-use the larger compatible dependencies between Checkstyle version to substantially reduce the archive size.
 * **5.35.6** Fixed: parse exceptions reported by Checkstyle are no longer logged in the event log (#475).
 * **5.35.6** Fixed: changed module/project icons to be compatible with EAPs of IDEA 2020.1 (#474).
 * **5.35.5** New: Added Checkstyle 8.29 - thanks to @mustaphazorgati (#472).
