@@ -201,7 +201,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Mark Brown (@embee1981)
 * Marshall Walker (@marshallwalker)
 * Alexander Schwartz (@ahus1)
-* Mustapha Zorgati (@mustaphazorgat)
+* Mustapha Zorgati (@mustaphazorgati)
 
 And also thanks are due to the authors and contributors of:
 
@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.7** New: Added Checkstyle 8.30 - thanks to @mustaphazorgati (#478).
 * **5.35.7** New: We now try and re-use the larger compatible dependencies between Checkstyle version to substantially reduce the archive size.
 * **5.35.6** Fixed: parse exceptions reported by Checkstyle are no longer logged in the event log (#475).
 * **5.35.6** Fixed: changed module/project icons to be compatible with EAPs of IDEA 2020.1 (#474).
