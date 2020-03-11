@@ -51,6 +51,13 @@ public class FileConfigurationLocationTest {
     }
 
     @Test
+    public void directoryTraversalsInARelativePathShouldNotBeAlteredByTokenisation() {
+        underTest.setLocation(PROJECT_PATH + "/../a-path/to/checkstyle.xml");
+
+        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/../a-path/to/checkstyle.xml:aDescription")));
+    }
+
+    @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForWindowsPaths() {
         underTest = new TestFileConfigurationLocation(project, '\\');
         reset(project);
@@ -68,6 +75,13 @@ public class FileConfigurationLocationTest {
         underTest.setLocation(PROJECT_PATH + "/a-path/to/checkstyle.xml");
 
         assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/a-path/to/checkstyle.xml")));
+    }
+
+    @Test
+    public void directoryTraversalsInARelativePathShouldNotBeAlteredByDetokenisation() {
+        underTest.setLocation(PROJECT_PATH + "/../a-path/to/checkstyle.xml");
+
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/../a-path/to/checkstyle.xml")));
     }
 
     @Test
