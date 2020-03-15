@@ -22,7 +22,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileConfigurationLocationTest {
-    private static final String PROJECT_PATH = "/the/base-project/path";
+
+    private static final String PROJECT_BASE_PATH = "/the/base-project/path";
 
     @Mock
     private Project project;
@@ -48,14 +49,14 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForUnixPaths() {
-        underTest.setLocation(PROJECT_PATH + "/a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml");
 
         assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a-path/to/checkstyle.xml:aDescription")));
     }
 
     @Test
     public void directoryTraversalsInARelativePathShouldNotBeAlteredByTokenisation() {
-        underTest.setLocation(PROJECT_PATH + "/../a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml");
 
         assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/../a-path/to/checkstyle.xml:aDescription")));
     }
@@ -72,16 +73,16 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void aUnixLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
-        underTest.setLocation(PROJECT_PATH + "/a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml");
 
-        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/a-path/to/checkstyle.xml")));
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml")));
     }
 
     @Test
     public void directoryTraversalsInARelativePathShouldNotBeAlteredByDetokenisation() {
-        underTest.setLocation(PROJECT_PATH + "/../a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml");
 
-        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/../a-path/to/checkstyle.xml")));
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml")));
     }
 
     @Test
@@ -95,9 +96,9 @@ public class FileConfigurationLocationTest {
     public void aUnixLocationShouldBeStoredAndRetrievedCorrectlyWhenTheProjectPathIsNotUsedAndTheFileExistsInAPartiallyMatchingSiblingDirectory() {
         // Issue #9
 
-        underTest.setLocation(PROJECT_PATH + "-sibling/a-path/to/checkstyle.xml");
+        underTest.setLocation(PROJECT_BASE_PATH + "-sibling/a-path/to/checkstyle.xml");
 
-        assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "-sibling/a-path/to/checkstyle.xml")));
+        assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "-sibling/a-path/to/checkstyle.xml")));
     }
 
     @Test
@@ -140,7 +141,7 @@ public class FileConfigurationLocationTest {
         reset(project);
         when(project.getPicoContainer()).thenReturn(picoContainer);
         when(project.getBaseDir()).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn(PROJECT_PATH);
+        when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
 
         return new FileConfigurationLocation(project);
     }
