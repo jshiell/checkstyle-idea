@@ -52,7 +52,8 @@ public class ProjectFilePaths {
             return path;
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to make relative: " + path, e);
+            LOG.warn("Failed to make relative: " + path, e);
+            return path;
         }
     }
 
