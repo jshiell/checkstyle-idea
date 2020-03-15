@@ -159,6 +159,7 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.util.ProjectFilePaths"/>
 
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.NotifyUserIfPluginUpdated"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>

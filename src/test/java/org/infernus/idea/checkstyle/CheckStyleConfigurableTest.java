@@ -9,8 +9,10 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.picocontainer.PicoContainer;
 
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -63,10 +65,13 @@ public class CheckStyleConfigurableTest {
         return mockPanel;
     }
 
-
     @Test
     public void testIsModified() {
         Project mockProject = mock(Project.class);
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(mockProject.getPicoContainer()).thenReturn(picoContainer);
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(new ProjectFilePaths(mockProject));
+
         CheckStyleConfigPanel mockPanel = buildMockPanel(mockProject);
 
         CheckStyleConfigurable classUnderTest = new CheckStyleConfigurable(

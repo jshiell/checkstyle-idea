@@ -2,22 +2,33 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.picocontainer.PicoContainer;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class ConfigurationLocationFactoryTest {
 
-    private static final Project PROJECT = Mockito.mock(Project.class);
+    private final Project project = mock(Project.class);
 
     private final ConfigurationLocationFactory underTest = new ConfigurationLocationFactory();
 
+    @Before
+    public void setUp() {
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(new ProjectFilePaths(project));
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+    }
+
     @Test
     public void aFileConfigurationLocationIsCorrectlyParsed() {
-        assertThat(underTest.create(PROJECT, "LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules"),
+        assertThat(underTest.create(project, "LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules"),
                 allOf(
                         hasProperty("location", is(oneOf(
                                 "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml",
@@ -27,21 +38,20 @@ public class ConfigurationLocationFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void aTruncatedConfigurationLocationThrowsAnIllegalArgumentException() {
-        underTest.create(PROJECT, "LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml");
+        underTest.create(project, "LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void aConfigurationLocationWithNoFieldSeparatorsThrowsAnIllegalArgumentException() {
-        underTest.create(PROJECT, "LOCAL_FILE");
+        underTest.create(project, "LOCAL_FILE");
     }
-
 
     /**
      * Check that old config entries are converted correctly.
      */
     @Test
     public void testBundledConfigMigration() {
-        ConfigurationLocation cl = underTest.create(PROJECT, "CLASSPATH:/sun_checks.xml:The default Checkstyle rules");
+        ConfigurationLocation cl = underTest.create(project, "CLASSPATH:/sun_checks.xml:The default Checkstyle rules");
         assertNotNull(cl);
         assertEquals(BundledConfigurationLocation.class, cl.getClass());
         assertEquals(BundledConfig.SUN_CHECKS, ((BundledConfigurationLocation) cl).getBundledConfig());
@@ -49,7 +59,7 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void testBundledConfigSun() {
-        ConfigurationLocation cls = underTest.create(PROJECT, "BUNDLED:(bundled):Sun Checks");
+        ConfigurationLocation cls = underTest.create(project, "BUNDLED:(bundled):Sun Checks");
         assertNotNull(cls);
         assertEquals(BundledConfigurationLocation.class, cls.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;
@@ -62,7 +72,7 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void testBundledConfigGoogle() {
-        ConfigurationLocation clg = underTest.create(PROJECT, "BUNDLED:(bundled):Google Checks");
+        ConfigurationLocation clg = underTest.create(project, "BUNDLED:(bundled):Google Checks");
         assertNotNull(clg);
         assertEquals(BundledConfigurationLocation.class, clg.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) clg;

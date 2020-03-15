@@ -6,7 +6,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.VersionListReader;
@@ -16,17 +15,16 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.OS;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
-import static org.infernus.idea.checkstyle.config.PluginConfigurationManager.IDEA_PROJECT_DIR;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class ProjectConfigurationState implements PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
@@ -59,15 +57,19 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
+    private ProjectFilePaths projectFilePaths() {
+        return ServiceManager.getService(project, ProjectFilePaths.class);
+    }
+
     private ProjectSettings defaultProjectSettings() {
-        return new ProjectSettings(project, defaultConfiguration(project).build());
+        return new ProjectSettings(project, projectFilePaths(), defaultConfiguration(project).build());
     }
 
     public ProjectSettings getState() {
         return projectSettings;
     }
 
-    public void loadState(final ProjectSettings sourceProjectSettings) {
+    public void loadState(@NotNull final ProjectSettings sourceProjectSettings) {
         if (sourceProjectSettings != null) {
             projectSettings = sourceProjectSettings;
         } else {
@@ -91,7 +93,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        projectSettings = new ProjectSettings(project, currentPluginConfig);
+        projectSettings = new ProjectSettings(project, projectFilePaths(), currentPluginConfig);
     }
 
     /**
@@ -141,7 +143,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             final String[] parts = value.split(";");
             for (final String part : parts) {
                 if (part.length() > 0) {
-                    thirdPartyClasspath.add(detokenisePath(part));
+                    thirdPartyClasspath.add(projectFilePaths().detokenise(part));
                 }
             }
         }
@@ -173,31 +175,6 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         return result;
     }
 
-    /**
-     * Process a stored file path for any tokens.
-     *
-     * @param path the path to process.
-     * @return the processed path.
-     */
-    private String detokenisePath(final String path) {
-        if (path == null) {
-            return null;
-        }
-
-        if (path.startsWith(IDEA_PROJECT_DIR)) {
-            LOG.debug("Detokenising path: ", path);
-            final File projectPath = projectPath(project);
-            if (projectPath != null) {
-                return new File(projectPath, path.substring(IDEA_PROJECT_DIR.length())).getAbsolutePath();
-            }
-
-            LOG.warn("Could not detokenise path as project dir could not be determined: " + path);
-            return path;
-        }
-
-        return path;
-    }
-
     private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> pLoadedMap) {
         List<ConfigurationLocation> result = pLoadedMap.entrySet().stream()
                 .filter(this::propertyIsALocation)
@@ -217,21 +194,6 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         if (!configurationLocations.contains(googleChecks)) {
             configurationLocations.add(googleChecks);
         }
-    }
-
-    /**
-     * Get the base path of the project.
-     *
-     * @return the base path of the project.
-     */
-    @Nullable
-    private static File projectPath(@NotNull final Project project) {
-        final VirtualFile baseDir = project.getBaseDir();
-        if (baseDir == null) {
-            return null;
-        }
-
-        return new File(baseDir.getPath());
     }
 
     @Nullable
@@ -291,6 +253,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         public ProjectSettings(@NotNull final Project project,
+                               @NotNull final ProjectFilePaths projectFilePaths,
                                @NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
@@ -300,7 +263,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
             serializeLocations(project, mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
 
-            String s = serializeThirdPartyClasspath(project, currentPluginConfig.getThirdPartyClasspath());
+            String s = serializeThirdPartyClasspath(projectFilePaths, currentPluginConfig.getThirdPartyClasspath());
             if (!Strings.isBlank(s)) {
                 mapForSerialization.put(THIRDPARTY_CLASSPATH, s);
             }
@@ -352,38 +315,16 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             }
         }
 
-        private String serializeThirdPartyClasspath(@NotNull final Project project,
+        private String serializeThirdPartyClasspath(@NotNull final ProjectFilePaths projectFilePaths,
                                                     @NotNull final List<String> thirdPartyClasspath) {
             final StringBuilder sb = new StringBuilder();
             for (final String part : thirdPartyClasspath) {
                 if (sb.length() > 0) {
                     sb.append(";");
                 }
-                sb.append(tokenisePath(project, part));
+                sb.append(projectFilePaths.tokenise(part));
             }
             return sb.toString();
-        }
-
-        /**
-         * Process a path and add tokens as necessary.
-         *
-         * @param path the path to processed.
-         * @return the tokenised path.
-         */
-        private String tokenisePath(@NotNull final Project project, final String path) {
-            if (path == null) {
-                return null;
-            }
-
-            final File projectPath = projectPath(project);
-            if (projectPath != null) {
-                final String projectPathAbs = projectPath.getAbsolutePath();
-                if (path.startsWith(projectPathAbs)) {
-                    return IDEA_PROJECT_DIR + path.substring(projectPathAbs.length());
-                }
-            }
-
-            return path;
         }
     }
 

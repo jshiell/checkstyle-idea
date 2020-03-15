@@ -2,10 +2,11 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.picocontainer.PicoContainer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -97,7 +98,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void anUnmodifiedLocationIsNotMarkedAsChanged() throws IOException {
+    public void anUnmodifiedLocationIsNotMarkedAsChanged() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
@@ -105,7 +106,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void aLocationIsChangedIfTheLocationValueHasChanged() throws IOException {
+    public void aLocationIsChangedIfTheLocationValueHasChanged() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
@@ -115,7 +116,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void aLocationIsChangedIfTheDescriptionValueHasChanged() throws IOException {
+    public void aLocationIsChangedIfTheDescriptionValueHasChanged() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
@@ -201,7 +202,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile() throws IOException {
+        protected InputStream resolveFile() {
             throw new RuntimeException("Can't be called in default project");
         }
 
@@ -220,7 +221,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile() throws IOException {
+        protected InputStream resolveFile() {
             return new ByteArrayInputStream(getLocation().getBytes());
         }
 
@@ -234,9 +235,12 @@ public class ConfigurationLocationTest {
     @Test
     public void testSorting() {
         final Project project = mock(Project.class);
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(new ProjectFilePaths(project));
+
         List<ConfigurationLocation> list = new ArrayList<>();
-        FileConfigurationLocation fcl = new FileConfigurationLocation(
-                mock(Project.class), ConfigurationType.LOCAL_FILE);
+        FileConfigurationLocation fcl = new FileConfigurationLocation(project, ConfigurationType.LOCAL_FILE);
         fcl.setDescription("descB");
         fcl.setLocation("locB");
         list.add(fcl);
@@ -253,17 +257,17 @@ public class ConfigurationLocationTest {
 
         Collections.sort(list);
 
-        Assert.assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
-        Assert.assertTrue(list.get(0).getDescription().contains("Sun Checks"));
-        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project)));
-        Assert.assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
-        Assert.assertTrue(list.get(1).getDescription().contains("Google Checks"));
-        Assert.assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project)));
-        Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
-        Assert.assertEquals("descA", list.get(2).getDescription());
-        Assert.assertEquals(FileConfigurationLocation.class, list.get(3).getClass());
-        Assert.assertEquals("descB", list.get(3).getDescription());
-        Assert.assertEquals(RelativeFileConfigurationLocation.class, list.get(4).getClass());
-        Assert.assertEquals("descC", list.get(4).getDescription());
+        assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
+        assertTrue(list.get(0).getDescription().contains("Sun Checks"));
+        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project)));
+        assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
+        assertTrue(list.get(1).getDescription().contains("Google Checks"));
+        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project)));
+        assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
+        assertEquals("descA", list.get(2).getDescription());
+        assertEquals(FileConfigurationLocation.class, list.get(3).getClass());
+        assertEquals("descB", list.get(3).getDescription());
+        assertEquals(RelativeFileConfigurationLocation.class, list.get(4).getClass());
+        assertEquals("descC", list.get(4).getDescription());
     }
 }

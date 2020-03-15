@@ -3,19 +3,22 @@ package org.infernus.idea.checkstyle.model;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.picocontainer.PicoContainer;
 
 import java.io.File;
+import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileConfigurationLocationTest {
@@ -25,15 +28,15 @@ public class FileConfigurationLocationTest {
     private Project project;
     @Mock
     private VirtualFile projectBase;
+    @Mock
+    private PicoContainer picoContainer;
 
     private FileConfigurationLocation underTest;
 
     @Before
     public void setUp() {
-        when(project.getBaseDir()).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn(PROJECT_PATH);
+        underTest = useUnixPaths();
 
-        underTest = new TestFileConfigurationLocation(project, '/');
         underTest.setLocation("aLocation");
         underTest.setDescription("aDescription");
     }
@@ -59,10 +62,7 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForWindowsPaths() {
-        underTest = new TestFileConfigurationLocation(project, '\\');
-        reset(project);
-        when(project.getBaseDir()).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
+        underTest = useWindowsFilePaths();
 
         underTest.setLocation("c:\\some-where\\a-project\\a\\file\\location-in\\checkstyle.xml");
         underTest.setDescription("aDescription");
@@ -102,10 +102,7 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void aWindowsLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
-        underTest = new TestFileConfigurationLocation(project, '\\');
-        reset(project);
-        when(project.getBaseDir()).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
+        underTest = useWindowsFilePaths();
 
         underTest.setLocation("c:\\some-where\\a-project\\a\\file\\location\\checkstyle.xml");
 
@@ -114,36 +111,52 @@ public class FileConfigurationLocationTest {
 
     @Test
     public void aWindowsLocationShouldBeStoredAndRetrievedCorrectlyWhenTheProjectPathIsNotUsed() {
-        underTest = new TestFileConfigurationLocation(project, '\\');
+        underTest = useWindowsFilePaths();
 
         underTest.setLocation("c:\\a\\file\\location\\checkstyle.xml");
 
         assertThat(underTest.getLocation(), is(equalTo("c:\\a\\file\\location\\checkstyle.xml")));
     }
 
-    private static class TestFileConfigurationLocation extends FileConfigurationLocation {
-        private final char separatorChar;
+    private FileConfigurationLocation useWindowsFilePaths() {
+        reset(picoContainer);
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
+        when(project.getBaseDir()).thenReturn(projectBase);
 
-        TestFileConfigurationLocation(final Project project,
-                                      final char separatorChar) {
-            super(project);
-            this.separatorChar = separatorChar;
-        }
+        reset(project);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
 
-        @Override
-        char separatorChar() {
-            return separatorChar;
-        }
+        return new FileConfigurationLocation(project);
+    }
 
-        @Override
-        String absolutePathOf(final File file) {
+    private FileConfigurationLocation useUnixPaths() {
+        reset(picoContainer);
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/');
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
+
+        reset(project);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectBase.getPath()).thenReturn(PROJECT_PATH);
+
+        return new FileConfigurationLocation(project);
+    }
+
+    @NotNull
+    private ProjectFilePaths testProjectFilePaths(char separatorChar) {
+        Function<File, String> absolutePathOf = file -> {
             // a nasty hack to pretend we're on a Windows box when required...
             if (file.getPath().startsWith("c:")) {
                 return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
             }
 
             return FilenameUtils.separatorsToUnix(file.getPath());
-        }
+        };
+
+        return new ProjectFilePaths(project, separatorChar, absolutePathOf);
     }
 
 }

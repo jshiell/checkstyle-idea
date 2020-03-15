@@ -3,17 +3,21 @@ package org.infernus.idea.checkstyle.model;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.picocontainer.PicoContainer;
 
 import java.io.File;
+import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,10 +34,25 @@ public class RelativeFileConfigurationLocationTest {
 
     @Before
     public void setUp() {
+        PicoContainer picoContainer = mock(PicoContainer.class);
+        when(project.getPicoContainer()).thenReturn(picoContainer);
+
+        Function<File, String> absolutePathOf = file -> {
+            // a nasty hack to pretend we're on a Windows box when required...
+            if (file.getPath().startsWith("c:")) {
+                return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
+            }
+
+            return FilenameUtils.separatorsToUnix(file.getPath());
+        };
+
+        ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf);
+        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
+
         when(projectBase.getPath()).thenReturn(PROJECT_PATH);
         when(project.getBaseDir()).thenReturn(projectBase);
 
-        underTest = new TestFileConfigurationLocation(project, '/');
+        underTest = new RelativeFileConfigurationLocation(project);
         underTest.setLocation("aLocation");
         underTest.setDescription("aDescription");
     }
@@ -64,31 +83,6 @@ public class RelativeFileConfigurationLocationTest {
         underTest.setLocation("/somewhere/else/entirely/another-project/rules.xml");
 
         assertThat(underTest.getLocation(), is(equalTo(PROJECT_PATH + "/../../../somewhere/else/entirely/another-project/rules.xml")));
-    }
-
-    private static class TestFileConfigurationLocation extends RelativeFileConfigurationLocation {
-        private final char separatorChar;
-
-        TestFileConfigurationLocation(final Project project,
-                                      final char separatorChar) {
-            super(project);
-            this.separatorChar = separatorChar;
-        }
-
-        @Override
-        char separatorChar() {
-            return separatorChar;
-        }
-
-        @Override
-        String absolutePathOf(final File file) {
-            // a nasty hack to pretend we're on a Windows box when required...
-            if (file.getPath().startsWith("c:")) {
-                return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
-            }
-
-            return FilenameUtils.separatorsToUnix(file.getPath());
-        }
     }
 
 }

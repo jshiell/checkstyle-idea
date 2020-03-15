@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class PluginConfigurationManager {
-    public static final String IDEA_PROJECT_DIR = "$PROJECT_DIR$";
 
     private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
 
