@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.35.7</version>
+    <version>5.35.8</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.35.8: Fixed: restored support for legacy project directory tokenisation (#481).</li>
     <li>5.35.7: New: Added Checkstyle 8.30 - thanks to @mustaphazorgati (#478).</li>
     <li>5.35.7: New: We now try and re-use the larger compatible dependencies between Checkstyle version to substantially reduce the archive size.</li>
     <li>5.35.6: Fixed: parse exceptions reported by Checkstyle are no longer logged in the event log (#475).</li>

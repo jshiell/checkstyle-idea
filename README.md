@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.8** Fixed: restored support for legacy project directory tokenisation (#481).
 * **5.35.7** New: Added Checkstyle 8.30 - thanks to @mustaphazorgati (#478).
 * **5.35.7** New: We now try and re-use the larger compatible dependencies between Checkstyle version to substantially reduce the archive size.
 * **5.35.6** Fixed: parse exceptions reported by Checkstyle are no longer logged in the event log (#475).
