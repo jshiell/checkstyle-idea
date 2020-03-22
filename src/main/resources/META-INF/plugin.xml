@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.35.8: Fixed: ensure property changes won't affect scans in progress (#425).</li>
     <li>5.35.8: Fixed: changed serialisation method for better compatibility with IDEA 2020.1 (#476).</li>
     <li>5.35.8: Fixed: restored support for legacy project directory tokenisation (#481).</li>
     <li>5.35.7: New: Added Checkstyle 8.30 - thanks to @mustaphazorgati (#478).</li>

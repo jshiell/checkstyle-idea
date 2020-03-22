@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -33,7 +34,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private static final long BLACKLIST_TIME_MS = 1000 * 60;
 
-    private final Map<String, String> properties = new HashMap<>();
+    private final Map<String, String> properties = new ConcurrentHashMap<>();
     private final ConfigurationType type;
     private final Project project;
     private String location;
@@ -104,7 +105,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             resolveFile();
         }
 
-        return Collections.unmodifiableMap(properties);
+        return new HashMap<>(properties);
     }
 
     public void setProperties(final Map<String, String> newProperties) {
