@@ -6,6 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.annotations.MapAnnotation;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.VersionListReader;
@@ -62,7 +63,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     private ProjectSettings defaultProjectSettings() {
-        return new ProjectSettings(project, projectFilePaths(), defaultConfiguration(project).build());
+        return ProjectSettings.create(project, projectFilePaths(), defaultConfiguration(project).build());
     }
 
     public ProjectSettings getState() {
@@ -79,7 +80,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, String> settingsMap = projectSettings.getConfiguration();
+        Map<String, String> settingsMap = projectSettings.configuration();
         convertSettingsFormat(settingsMap);
         return builder
                 .withCheckstyleVersion(readCheckstyleVersion(settingsMap))
@@ -93,7 +94,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        projectSettings = new ProjectSettings(project, projectFilePaths(), currentPluginConfig);
+        projectSettings = ProjectSettings.create(project, projectFilePaths(), currentPluginConfig);
     }
 
     /**
@@ -243,18 +244,18 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
      * Wrapper class for IDEA state serialisation.
      */
     static class ProjectSettings {
+        @MapAnnotation
         private Map<String, String> configuration;
 
         /**
-         * No-args constructor for deserialization.
+         * No-args constructor required for deserialization.
          */
         public ProjectSettings() {
-            super();
         }
 
-        public ProjectSettings(@NotNull final Project project,
-                               @NotNull final ProjectFilePaths projectFilePaths,
-                               @NotNull final PluginConfiguration currentPluginConfig) {
+        static ProjectSettings create(@NotNull final Project project,
+                                      @NotNull final ProjectFilePaths projectFilePaths,
+                                      @NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
@@ -273,24 +274,22 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                 mapForSerialization.put(ACTIVE_CONFIG, currentPluginConfig.getActiveLocation().getDescriptor());
             }
 
-            configuration = mapForSerialization;
-        }
-
-        public void setConfiguration(final Map<String, String> deserialisedConfiguration) {
-            configuration = deserialisedConfiguration;
+            final ProjectSettings projectSettings = new ProjectSettings();
+            projectSettings.configuration = mapForSerialization;
+            return projectSettings;
         }
 
         @NotNull
-        public Map<String, String> getConfiguration() {
+        public Map<String, String> configuration() {
             if (configuration == null) {
                 return new TreeMap<>();
             }
             return configuration;
         }
 
-        private void serializeLocations(@NotNull final Project project,
-                                        @NotNull final Map<String, String> storage,
-                                        @NotNull final List<ConfigurationLocation> configurationLocations) {
+        private static void serializeLocations(@NotNull final Project project,
+                                               @NotNull final Map<String, String> storage,
+                                               @NotNull final List<ConfigurationLocation> configurationLocations) {
             int index = 0;
             for (final ConfigurationLocation configurationLocation : configurationLocations) {
                 storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
@@ -315,8 +314,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             }
         }
 
-        private String serializeThirdPartyClasspath(@NotNull final ProjectFilePaths projectFilePaths,
-                                                    @NotNull final List<String> thirdPartyClasspath) {
+        private static String serializeThirdPartyClasspath(@NotNull final ProjectFilePaths projectFilePaths,
+                                                           @NotNull final List<String> thirdPartyClasspath) {
             final StringBuilder sb = new StringBuilder();
             for (final String part : thirdPartyClasspath) {
                 if (sb.length() > 0) {
