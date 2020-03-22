@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.util.xmlb.annotations.MapAnnotation;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,57 +20,44 @@ public class ApplicationConfigurationState
 
     @NotNull
     private ApplicationSettings defaultApplicationSettings() {
-        return new ApplicationSettings(CheckStylePlugin.version());
+        return ApplicationSettings.create(CheckStylePlugin.version());
     }
 
     public ApplicationSettings getState() {
         return applicationSettings;
     }
 
-    public void loadState(final ApplicationSettings sourceApplicationSettings) {
-        if (sourceApplicationSettings != null) {
-            applicationSettings = sourceApplicationSettings;
-        } else {
-            applicationSettings = defaultApplicationSettings();
-        }
+    public void loadState(@NotNull final ApplicationSettings sourceApplicationSettings) {
+        applicationSettings = sourceApplicationSettings;
     }
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, String> settingsMap = applicationSettings.getConfiguration();
+        Map<String, String> settingsMap = applicationSettings.configuration();
         return builder
                 .withLastActivePluginVersion(settingsMap.get(LAST_ACTIVE_PLUGIN_VERSION));
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        applicationSettings = new ApplicationSettings(currentPluginConfig.getLastActivePluginVersion());
+        applicationSettings = ApplicationSettings.create(currentPluginConfig.getLastActivePluginVersion());
     }
 
     static class ApplicationSettings {
+        @MapAnnotation
         private Map<String, String> configuration;
 
-        /**
-         * No-args constructor for deserialization.
-         */
-        @SuppressWarnings("unused")
-        public ApplicationSettings() {
-            super();
-        }
-
-        public ApplicationSettings(final String lastActivePluginVersion) {
+        static ApplicationSettings create(final String lastActivePluginVersion) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
 
             mapForSerialization.put(LAST_ACTIVE_PLUGIN_VERSION, lastActivePluginVersion);
 
-            configuration = mapForSerialization;
-        }
-
-        public void setConfiguration(final Map<String, String> deserialisedConfiguration) {
-            configuration = deserialisedConfiguration;
+            final ApplicationSettings applicationSettings = new ApplicationSettings();
+            applicationSettings.configuration = mapForSerialization;
+            return applicationSettings;
         }
 
         @NotNull
-        public Map<String, String> getConfiguration() {
+        public Map<String, String> configuration() {
             if (configuration == null) {
                 return new TreeMap<>();
             }

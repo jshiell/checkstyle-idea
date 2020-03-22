@@ -4,9 +4,11 @@ import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.annotations.MapAnnotation;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -114,20 +116,18 @@ public final class CheckStyleModuleConfiguration extends Properties
     }
 
     public ModuleSettings getState() {
-        final ModuleSettings moduleSettings = new ModuleSettings();
+        final Map<String, String> moduleConfiguration = new HashMap<>();
         for (String configurationKey : stringPropertyNames()) {
-            moduleSettings.configuration.put(configurationKey, getProperty(configurationKey));
+            moduleConfiguration.put(configurationKey, getProperty(configurationKey));
         }
-        return moduleSettings;
+        return ModuleSettings.create(moduleConfiguration);
     }
 
-    public void loadState(final ModuleSettings moduleSettings) {
+    public void loadState(@NotNull final ModuleSettings sourceModuleSettings) {
         clear();
 
-        if (moduleSettings != null && moduleSettings.configuration != null) {
-            for (final String key : moduleSettings.configuration.keySet()) {
-                setProperty(key, moduleSettings.configuration.get(key));
-            }
+        for (final String key : sourceModuleSettings.configuration().keySet()) {
+            setProperty(key, sourceModuleSettings.configuration().get(key));
         }
     }
 
@@ -153,22 +153,18 @@ public final class CheckStyleModuleConfiguration extends Properties
         return 31 * super.hashCode() + module.hashCode();
     }
 
-    /**
-     * Wrapper class for IDEA state serialisation.
-     */
-    public static class ModuleSettings {
-        // this must remain public for serialisation purposes
-        public Map<String, String> configuration = new HashMap<>();
+    static class ModuleSettings {
+        @MapAnnotation
+        private Map<String, String> configuration;
 
-        public ModuleSettings() {
-            this.configuration = new HashMap<>();
+        static ModuleSettings create(final Map<String, String> configuration) {
+            final ModuleSettings moduleSettings = new ModuleSettings();
+            moduleSettings.configuration = configuration;
+            return moduleSettings;
         }
 
-        public ModuleSettings(final Map<String, String> configuration) {
-            this.configuration = configuration;
-        }
-
-        public Map<String, String> configurationAsMap() {
+        @NotNull
+        public Map<String, String> configuration() {
             if (configuration == null) {
                 return Collections.emptyMap();
             }

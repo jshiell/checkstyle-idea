@@ -71,11 +71,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     public void loadState(@NotNull final ProjectSettings sourceProjectSettings) {
-        if (sourceProjectSettings != null) {
-            projectSettings = sourceProjectSettings;
-        } else {
-            projectSettings = defaultProjectSettings();
-        }
+        projectSettings = sourceProjectSettings;
     }
 
     @NotNull
@@ -240,18 +236,9 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         return PROPERTIES_PREFIX + index + ".";
     }
 
-    /**
-     * Wrapper class for IDEA state serialisation.
-     */
     static class ProjectSettings {
         @MapAnnotation
         private Map<String, String> configuration;
-
-        /**
-         * No-args constructor required for deserialization.
-         */
-        public ProjectSettings() {
-        }
 
         static ProjectSettings create(@NotNull final Project project,
                                       @NotNull final ProjectFilePaths projectFilePaths,
