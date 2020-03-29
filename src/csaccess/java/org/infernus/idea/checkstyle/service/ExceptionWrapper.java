@@ -25,7 +25,6 @@ public class ExceptionWrapper {
             IllegalStateException.class,
             ClassCastException.class));
 
-
     public CheckStylePluginException wrap(@Nullable final String message, @NotNull final Throwable error) {
         final Throwable root = rootOrCheckStyleException(error);
         final String exMessage = ofNullable(message).orElseGet(root::getMessage);
@@ -36,7 +35,6 @@ public class ExceptionWrapper {
         return new CheckStylePluginException(exMessage, root);
     }
 
-
     private Throwable rootOrCheckStyleException(final Throwable error) {
         Throwable root = error;
         while (root.getCause() != null && notBaseCheckstyleException(root)) {
@@ -45,20 +43,26 @@ public class ExceptionWrapper {
         return root;
     }
 
-
     private boolean notBaseCheckstyleException(final Throwable root) {
         return !(root instanceof CheckstyleException && !(root.getCause() instanceof CheckstyleException));
     }
 
-
     private boolean isParseException(final Throwable throwable) {
         if (throwable instanceof CheckstyleException && throwable.getCause() != null) {
+            final Class<? extends Throwable> causeClass = throwable.getCause().getClass();
             for (Class<? extends Throwable> parseExceptionType : PARSE_EXCEPTIONS) {
-                if (parseExceptionType.isAssignableFrom(throwable.getCause().getClass())) {
+                if (parseExceptionType.isAssignableFrom(causeClass)) {
                     return true;
                 }
             }
+
+            return isAntlrException(causeClass);
         }
         return false;
+    }
+
+    private boolean isAntlrException(final Class<? extends Throwable> causeClass) {
+        final String causeClassPackage = causeClass.getPackage().getName();
+        return causeClassPackage.startsWith("antlr.") || causeClassPackage.startsWith("org.antlr.");
     }
 }

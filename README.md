@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.35.9** Fixed: improve catching of parse exceptions from Checkstyle (#485).
 * **5.35.8** Fixed: ensure property changes won't affect scans in progress (#425).
 * **5.35.8** Fixed: changed serialisation method for better compatibility with IDEA 2020.1 (#476).
 * **5.35.8** Fixed: restored support for legacy project directory tokenisation (#481).

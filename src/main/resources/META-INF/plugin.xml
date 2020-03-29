@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.35.8</version>
+    <version>5.35.9</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.35.9: Fixed: improve catching of parse exceptions from Checkstyle (#485).</li>
     <li>5.35.8: Fixed: ensure property changes won't affect scans in progress (#425).</li>
     <li>5.35.8: Fixed: changed serialisation method for better compatibility with IDEA 2020.1 (#476).</li>
     <li>5.35.8: Fixed: restored support for legacy project directory tokenisation (#481).</li>
