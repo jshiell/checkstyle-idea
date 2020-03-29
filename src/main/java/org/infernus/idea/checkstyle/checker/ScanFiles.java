@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
@@ -36,7 +37,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
     private final List<PsiFile> files;
     private final Map<Module, Set<PsiFile>> moduleToFiles;
-    private final Set<ScannerListener> listeners = new HashSet<>();
+    private final Set<ScannerListener> listeners = new CopyOnWriteArraySet<>();
     private final Project project;
     private final ConfigurationLocation overrideConfigLocation;
 
