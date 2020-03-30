@@ -74,15 +74,22 @@ public class OpCreateChecker
 
     private void setClassLoader(final Checker checker, final ClassLoader classLoader) {
         try {
-            Method classLoaderMethod;
+            Method classLoaderMethod = null;
             try {
                 classLoaderMethod = Checker.class.getMethod("setClassloader", ClassLoader.class);
             } catch (NoSuchMethodException | SecurityException e) {
-                classLoaderMethod = Checker.class.getMethod("setClassLoader", ClassLoader.class); // 8.0 and above
+                try {
+                    classLoaderMethod = Checker.class.getMethod("setClassLoader", ClassLoader.class); // 8.0 and above
+                } catch (NoSuchMethodException | SecurityException ignored) {
+                    // it is a no-op from 8.27, and removed entirely in 8.31
+                }
             }
-            classLoaderMethod.invoke(checker, classLoader);
 
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            if (classLoaderMethod != null) {
+                classLoaderMethod.invoke(checker, classLoader);
+            }
+
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new CheckstyleServiceException("Failed to set classloader", e);
         }
     }

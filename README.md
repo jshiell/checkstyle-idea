@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.36.0** New: Added Checkstyle 8.31.
 * **5.35.9** Fixed: concurrency issue with progress listeners (#486).
 * **5.35.9** Fixed: improve catching of parse exceptions from Checkstyle (#485).
 * **5.35.8** Fixed: ensure property changes won't affect scans in progress (#425).
