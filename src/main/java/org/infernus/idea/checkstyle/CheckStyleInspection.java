@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -54,6 +55,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
     public ProblemDescriptor[] checkFile(@NotNull final PsiFile psiFile,
                                          @NotNull final InspectionManager manager,
                                          final boolean isOnTheFly) {
+        if (InjectedLanguageManager.getInstance(manager.getProject()).isInjectedFragment(psiFile)) {
+            LOG.debug("Ignoring file as it is an injected fragment: " + psiFile);
+            return noProblemsFound(manager);
+        }
+
         final Module module = moduleOf(psiFile);
         List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), manager.getProject(), module);
         if (scannableFiles.isEmpty()) {
