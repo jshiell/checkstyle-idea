@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.36.2** Fixed: code style imports will now toggle wrapping-as-needed on when a line length is set (#487).
 * **5.36.1** Fixed: injected fragments are no longer passed to Checkstyle (#485).
 * **5.36.0** New: Added Checkstyle 8.31.
 * **5.35.9** Fixed: concurrency issue with progress listeners (#486).
