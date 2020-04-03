@@ -138,7 +138,7 @@ public class WhitespaceAroundImporter extends ModuleImporter {
             javaSettings.SPACE_BEFORE_TRY_LBRACE = true;
         }
         if (appliesTo(KnownTokenTypes.LCURLY)) {
-            javaSettings.SPACE_BEFORE_ANNOTATION_ARRAY_INITIALIZER_LBRACE = true;
+            javaSettings.SPACE_BEFORE_ANNOTATION_ARRAY_INITIALIZER_LBRACE = false;
             javaSettings.SPACE_BEFORE_ARRAY_INITIALIZER_LBRACE = true;
             javaSettings.SPACE_BEFORE_CATCH_LBRACE = true;
             javaSettings.SPACE_BEFORE_CLASS_LBRACE = true;

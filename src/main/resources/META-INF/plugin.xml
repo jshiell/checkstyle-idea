@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.36.2: Fixed: avoid malformed annotations with imported code styles (#484).</li>
     <li>5.36.2: Fixed: code style imports will now toggle wrapping-as-needed on when a line length is set (#487).</li>
     <li>5.36.1: Fixed: injected fragments are no longer passed to Checkstyle (#485).</li>
     <li>5.36.0: New: Added Checkstyle 8.31.</li>

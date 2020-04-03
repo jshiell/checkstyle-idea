@@ -1,14 +1,14 @@
 package org.infernus.idea.checkstyle.util;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 public final class Async {
     private static final Logger LOG = Logger.getInstance(Async.class);
