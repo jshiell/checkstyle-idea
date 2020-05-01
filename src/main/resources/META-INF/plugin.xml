@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.36.2</version>
+    <version>5.37.08</version>
     <idea-version since-build="181.5684.4"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.37.0: New: Added Checkstyle 8.32.</li>
     <li>5.36.2: Fixed: avoid malformed annotations with imported code styles (#484).</li>
     <li>5.36.2: Fixed: code style imports will now toggle wrapping-as-needed on when a line length is set (#487).</li>
     <li>5.36.1: Fixed: injected fragments are no longer passed to Checkstyle (#485).</li>
