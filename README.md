@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.38.0** New: Added Checkstyle 8.33.
 * **5.37.0** New: Added Checkstyle 8.32.
 * **5.36.2** Fixed: avoid malformed annotations with imported code styles (#484).
 * **5.36.2** Fixed: code style imports will now toggle wrapping-as-needed on when a line length is set (#487).
