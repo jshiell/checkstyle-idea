@@ -1,15 +1,15 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleComponent;
 import com.intellij.openapi.module.ModuleServiceManager;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public class CheckStyleModuleConfigurable implements Configurable {
+public class CheckStyleModuleConfigurable implements Configurable, ModuleComponent {
 
     private final Module module;
 
@@ -41,7 +41,7 @@ public class CheckStyleModuleConfigurable implements Configurable {
         return configPanel != null && configPanel.isModified();
     }
 
-    public void apply() throws ConfigurationException {
+    public void apply() {
         if (configPanel == null) {
             return;
         }
