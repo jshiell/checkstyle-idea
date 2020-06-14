@@ -220,6 +220,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 
 ## Version History
 
+* **5.39.0** New: Project settings are now under "Tools".
 * **5.39.0** New: Now built against IDEA 2019.1.4 (was 2018.1.8).
 * **5.38.0** New: Added Checkstyle 8.33.
 * **5.37.0** New: Added Checkstyle 8.32.
