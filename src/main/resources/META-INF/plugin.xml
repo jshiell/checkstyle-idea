@@ -15,8 +15,8 @@
 </p>
         ]]>
     </description>
-    <version>5.38.0</version>
-    <idea-version since-build="181.5684.4"/>
+    <version>5.39.0</version>
+    <idea-version since-build="191.8026.42"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.39.0: New: Now built against IDEA 2019.1.4 (was 2018.1.8).</li>
     <li>5.38.0: New: Added Checkstyle 8.33.</li>
     <li>5.37.0: New: Added Checkstyle 8.32.</li>
     <li>5.36.2: Fixed: avoid malformed annotations with imported code styles (#484).</li>
