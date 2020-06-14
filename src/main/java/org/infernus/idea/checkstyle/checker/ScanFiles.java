@@ -185,8 +185,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         if (location == null) {
             return resultOf(NOT_PRESENT);
         }
-        if (location.isBlacklisted()) {
-            return resultOf(location, BLACKLISTED);
+        if (location.isBlocked()) {
+            return resultOf(location, BLOCKED);
         }
         return resultOf(location, PRESENT);
     }

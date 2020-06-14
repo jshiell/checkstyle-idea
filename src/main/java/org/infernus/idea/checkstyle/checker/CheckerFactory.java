@@ -134,7 +134,7 @@ public class CheckerFactory {
                     addEclipseCsProperties(location, module, properties));
         } catch (IOException e) {
             LOG.info("CheckStyle properties could not be loaded: " + location.getLocation(), e);
-            return blacklistAndShowMessage(location, module, e, "checkstyle.file-io-failed", location.getLocation());
+            return blockAndShowMessage(location, module, e, "checkstyle.file-io-failed", location.getLocation());
         }
 
         final ClassLoader loaderOfCheckedCode = moduleClassPathBuilder().build(module);
@@ -148,13 +148,13 @@ public class CheckerFactory {
         final Object workerResult = executeWorker(location, module, propertyResolver, loaderOfCheckedCode);
 
         if (workerResult instanceof CheckstyleToolException) {
-            return blacklistAndShowMessageFromException(location, module, (CheckstyleToolException) workerResult);
+            return blockAndShowMessageFromException(location, module, (CheckstyleToolException) workerResult);
         } else if (workerResult instanceof IOException) {
             IOException ioExceptionResult = (IOException) workerResult;
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), ioExceptionResult);
-            return blacklistAndShowMessage(location, module, ioExceptionResult, "checkstyle.file-not-found", location.getLocation());
+            return blockAndShowMessage(location, module, ioExceptionResult, "checkstyle.file-not-found", location.getLocation());
         } else if (workerResult instanceof Throwable) {
-            return blacklistAndShowException(location, module, (Throwable) workerResult);
+            return blockAndShowException(location, module, (Throwable) workerResult);
         }
 
         return (CachedChecker) workerResult;
@@ -190,12 +190,12 @@ public class CheckerFactory {
         return worker.getResult();
     }
 
-    private CachedChecker blacklistAndShowMessage(final ConfigurationLocation location,
-                                                  final Module module,
-                                                  final Throwable cause,
-                                                  final String messageKey,
-                                                  final Object... messageArgs) {
-        return blacklistAnd(location, () -> {
+    private CachedChecker blockAndShowMessage(final ConfigurationLocation location,
+                                              final Module module,
+                                              final Throwable cause,
+                                              final String messageKey,
+                                              final Object... messageArgs) {
+        return blockAnd(location, () -> {
             if (module != null) {
                 Notifications.showError(module.getProject(), message(messageKey, messageArgs));
             } else {
@@ -204,10 +204,10 @@ public class CheckerFactory {
         });
     }
 
-    private CachedChecker blacklistAndShowException(final ConfigurationLocation location,
-                                                    final Module module,
-                                                    final Throwable t) {
-        return blacklistAnd(location, () -> {
+    private CachedChecker blockAndShowException(final ConfigurationLocation location,
+                                                final Module module,
+                                                final Throwable t) {
+        return blockAnd(location, () -> {
             if (module != null) {
                 Notifications.showException(module.getProject(), t);
             } else if (t instanceof CheckStylePluginException) {
@@ -219,27 +219,27 @@ public class CheckerFactory {
     }
 
     @Nullable
-    private CachedChecker blacklistAnd(final ConfigurationLocation location,
-                                       final Runnable ifNotBlacklisted) {
-        if (!location.isBlacklisted()) {
-            location.blacklist();
-            ifNotBlacklisted.run();
+    private CachedChecker blockAnd(final ConfigurationLocation location,
+                                   final Runnable ifNotBlocked) {
+        if (!location.isBlocked()) {
+            location.block();
+            ifNotBlocked.run();
         }
         return null;
     }
 
-    private CachedChecker blacklistAndShowMessageFromException(final ConfigurationLocation location,
-                                                               final Module module,
-                                                               final CheckstyleToolException checkstyleException) {
+    private CachedChecker blockAndShowMessageFromException(final ConfigurationLocation location,
+                                                           final Module module,
+                                                           final CheckstyleToolException checkstyleException) {
         if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
-            return blacklistAndShowMessage(location, module, checkstyleException, "checkstyle.double-checked-locking");
+            return blockAndShowMessage(location, module, checkstyleException, "checkstyle.double-checked-locking");
         } else if (checkstyleException.getMessage().contains("unable to parse configuration stream")
                 && checkstyleException.getCause() != null) {
-            return blacklistAndShowMessage(location, module, checkstyleException.getCause(),
+            return blockAndShowMessage(location, module, checkstyleException.getCause(),
                     "checkstyle.parse-failed", rootCauseOf(checkstyleException).getMessage());
         }
 
-        return blacklistAndShowMessage(location, module, checkstyleException.getCause(),
+        return blockAndShowMessage(location, module, checkstyleException.getCause(),
                 "checkstyle.parse-failed", checkstyleException.getMessage());
     }
 

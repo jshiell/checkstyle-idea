@@ -4,6 +4,6 @@ public enum ConfigurationLocationStatus {
 
     PRESENT,
     NOT_PRESENT,
-    BLACKLISTED
+    BLOCKED
 
 }

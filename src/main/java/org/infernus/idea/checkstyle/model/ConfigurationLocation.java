@@ -34,7 +34,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation> {
     private static final Logger LOG = Logger.getInstance(ConfigurationLocation.class);
 
-    private static final long BLACKLIST_TIME_MS = 1000 * 60;
+    private static final long BLOCK_TIME_MS = 1000 * 60;
 
     private final Map<String, String> properties = new ConcurrentHashMap<>();
     private final ConfigurationType type;
@@ -43,7 +43,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private String description;
 
     private boolean propertiesCheckedThisSession;
-    private long blacklistedUntil;
+    private long blockedUtil;
 
     public ConfigurationLocation(@NotNull final ConfigurationType type,
                                  @NotNull final Project project) {
@@ -128,7 +128,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     public void reset() {
         propertiesCheckedThisSession = false;
-        removeFromBlacklist();
+        unblock();
     }
 
     private List<String> extractProperties(@Nullable final InputStream inputStream,
@@ -441,19 +441,19 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
 
-    public boolean isBlacklisted() {
-        return blacklistedUntil > currentTimeMillis();
+    public boolean isBlocked() {
+        return blockedUtil > currentTimeMillis();
     }
 
-    public long blacklistedForSeconds() {
-        return Math.max((blacklistedUntil - currentTimeMillis()) / 1000, 0);
+    public long blockedForSeconds() {
+        return Math.max((blockedUtil - currentTimeMillis()) / 1000, 0);
     }
 
-    public void blacklist() {
-        blacklistedUntil = currentTimeMillis() + BLACKLIST_TIME_MS;
+    public void block() {
+        blockedUtil = currentTimeMillis() + BLOCK_TIME_MS;
     }
 
-    public void removeFromBlacklist() {
-        blacklistedUntil = 0L;
+    public void unblock() {
+        blockedUtil = 0L;
     }
 }

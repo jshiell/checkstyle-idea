@@ -380,8 +380,8 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.28.0** Fixed: Relative Header check filenames are now resolved relative to the project file (#227).
 * **4.28.0** New: Allow error selection by pressing Enter key (#226). Thanks to František Hartman.
 * **4.27.4** Fixed: errors are now correctly detected when the Checker property 'basedir' is defined (#183).
-* **4.27.3** New: the remaining blacklist time is now displayed in the result message.
-* **4.27.2** Fixed: the *reload rules files* button now correctly clears the blacklist (#224).
+* **4.27.3** New: the remaining block time is now displayed in the result message.
+* **4.27.2** Fixed: the *reload rules files* button now correctly clears the block (#224).
 * **4.27.1** Fixed: **basedir** now maps to the directory of the current module file, when available (#223).
 * **4.27.0** New: Updated to CheckStyle 6.17.
 * **4.26.0** New: Added support for Eclipse-CS predefined variables (#217).
@@ -461,7 +461,7 @@ This code is released under a BSD licence, as specified in the accompanying LICE
 * **4.5.0** Improved: Temporary file paths are now built relative to the module rather than just the package (#92).
 * **4.4.3** Fixed: Clash with IDEA's project path encoding (#88).
 * **4.4.2** Fixed: NPE when DoubleCheckedLocking file is added via config panel (#86).
-* **4.4.2** Fixed: Rules files are now blacklisted for 60s if they fail on load (#76).
+* **4.4.2** Fixed: Rules files are now blocked for 60s if they fail on load (#76).
 * **4.4.2** New: No default rules file is applied by default (#83).
 * **4.4.1** Fixed: Added a work-around for the API not respecting focus for split editors (#78).
 * **4.4.1** Fixed: ScanCurrentFile now works from the editor if the tool window has not yet been shown (#82).

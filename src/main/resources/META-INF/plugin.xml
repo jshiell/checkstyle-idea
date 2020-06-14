@@ -306,7 +306,7 @@
             <action id="CheckStyleClearCheckCacheAction"
                     class="org.infernus.idea.checkstyle.actions.ResetLoadedRulesFiles"
                     text="Reload Rules Files"
-                    description="Clear the rules file cache and the blacklist, forcing a reload of changed rules"
+                    description="Clear the rules file cache and blocked configurations, forcing a reload of changed rules"
                     icon="/actions/refresh.png">
             </action>
         </group>

@@ -113,7 +113,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         try {
             configurationLocation = configurationLocationSource(manager.getProject())
                     .getConfigurationLocation(module, null);
-            if (configurationLocation == null || configurationLocation.isBlacklisted()) {
+            if (configurationLocation == null || configurationLocation.isBlocked()) {
                 return NO_PROBLEMS_FOUND;
             }
 
@@ -159,12 +159,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } else if (e.getCause() != null && e.getCause() instanceof IOException) {
             showWarning(project, message("checkstyle.file-io-failed"));
-            blacklist(configurationLocation);
+            block(configurationLocation);
 
         } else {
             LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
             showException(project, e);
-            blacklist(configurationLocation);
+            block(configurationLocation);
         }
     }
 
@@ -173,9 +173,9 @@ public class CheckStyleInspection extends LocalInspectionTool {
         showWarning(project, message("checkstyle.configuration-disabled.file-not-found"));
     }
 
-    private void blacklist(final ConfigurationLocation configurationLocation) {
+    private void block(final ConfigurationLocation configurationLocation) {
         if (configurationLocation != null) {
-            configurationLocation.blacklist();
+            configurationLocation.block();
         }
     }
 

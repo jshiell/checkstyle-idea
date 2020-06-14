@@ -48,9 +48,9 @@ public class UiFeedbackScannerListener implements ScannerListener {
                     case NOT_PRESENT:
                         toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
                         break;
-                    case BLACKLISTED:
-                        toolWindowPanel.displayWarningResult("plugin.results.rules-blacklist",
-                                configurationLocationResult.location.blacklistedForSeconds());
+                    case BLOCKED:
+                        toolWindowPanel.displayWarningResult("plugin.results.rules-blocked",
+                                configurationLocationResult.location.blockedForSeconds());
                         break;
                     default:
                         toolWindowPanel.displayResults(scanResults);

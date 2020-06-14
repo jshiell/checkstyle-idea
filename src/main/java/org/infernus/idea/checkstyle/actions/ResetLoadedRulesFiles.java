@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static com.intellij.openapi.components.ServiceManager.getService;
 
 /**
- * Clear the Checker cache and blacklists, forcing a reload of rules files.
+ * Clear the Checker cache and blocks, forcing a reload of rules files.
  */
 public class ResetLoadedRulesFiles extends BaseAction {
 
