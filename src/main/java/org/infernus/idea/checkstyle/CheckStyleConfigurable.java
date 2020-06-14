@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
@@ -31,24 +32,14 @@ public class CheckStyleConfigurable
     private final PluginConfigurationManager pluginConfigurationManager;
     private final CheckerFactoryCache checkerFactoryCache;
 
-    public CheckStyleConfigurable(@NotNull final Project project,
-                                  @NotNull final CheckstyleProjectService checkstyleProjectService,
-                                  @NotNull final PluginConfigurationManager pluginConfigurationManager,
-                                  @NotNull final CheckerFactoryCache checkerFactoryCache) {
-        this(project, new CheckStyleConfigPanel(project, checkstyleProjectService, checkerFactoryCache),
-                checkstyleProjectService, pluginConfigurationManager, checkerFactoryCache);
-    }
-
-    CheckStyleConfigurable(@NotNull final Project project,
-                           @NotNull final CheckStyleConfigPanel configPanel,
-                           @NotNull final CheckstyleProjectService checkstyleProjectService,
-                           @NotNull final PluginConfigurationManager pluginConfigurationManager,
-                           @NotNull final CheckerFactoryCache checkerFactoryCache) {
+    CheckStyleConfigurable(@NotNull final Project project) {
         this.project = project;
-        this.configPanel = configPanel;
-        this.checkstyleProjectService = checkstyleProjectService;
-        this.pluginConfigurationManager = pluginConfigurationManager;
-        this.checkerFactoryCache = checkerFactoryCache;
+
+        this.checkstyleProjectService = ServiceManager.getService(project, CheckstyleProjectService.class);
+        this.checkerFactoryCache = ServiceManager.getService(project, CheckerFactoryCache.class);
+        this.pluginConfigurationManager = ServiceManager.getService(project, PluginConfigurationManager.class);
+
+        this.configPanel = new CheckStyleConfigPanel(project, checkstyleProjectService, checkerFactoryCache);
     }
 
     public String getDisplayName() {
