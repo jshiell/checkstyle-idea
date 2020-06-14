@@ -140,19 +140,21 @@ public class ProjectFilePathsTest {
     private ProjectFilePaths projectFilePathsForUnix() {
         Project project = mock(Project.class);
         VirtualFile projectBaseFile = mock(VirtualFile.class);
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
 
         when(projectBaseFile.getPath()).thenReturn(UNIX_PROJECT_BASE_PATH);
-        when(project.getBaseDir()).thenReturn(projectBaseFile);
+        when(projectPaths.projectPath(project)).thenReturn(projectBaseFile);
 
-        return new ProjectFilePaths(project, '/', File::getAbsolutePath);
+        return new ProjectFilePaths(project, '/', File::getAbsolutePath, projectPaths);
     }
 
     private ProjectFilePaths projectFilePathsForWindows() {
         Project project = mock(Project.class);
         VirtualFile projectBaseFile = mock(VirtualFile.class);
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
 
         when(projectBaseFile.getPath()).thenReturn(WINDOWS_PROJECT_BASE_PATH);
-        when(project.getBaseDir()).thenReturn(projectBaseFile);
+        when(projectPaths.projectPath(project)).thenReturn(projectBaseFile);
 
         return new ProjectFilePaths(project, '\\',  file -> {
             // a nasty hack to pretend we're on a Windows box when required...
@@ -161,7 +163,7 @@ public class ProjectFilePathsTest {
             }
 
             return FilenameUtils.separatorsToUnix(file.getPath());
-        });
+        }, projectPaths);
     }
 
 }

@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ public class RelativeFileConfigurationLocationTest {
     public void setUp() {
         PicoContainer picoContainer = mock(PicoContainer.class);
         when(project.getPicoContainer()).thenReturn(picoContainer);
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
 
         Function<File, String> absolutePathOf = file -> {
             // a nasty hack to pretend we're on a Windows box when required...
@@ -46,11 +48,11 @@ public class RelativeFileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
-        ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf);
+        ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf, projectPaths);
         when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
 
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
-        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectPaths.projectPath(project)).thenReturn(projectBase);
 
         underTest = new RelativeFileConfigurationLocation(project);
         underTest.setLocation("aLocation");

@@ -3,8 +3,10 @@ package org.infernus.idea.checkstyle.model;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
@@ -280,8 +282,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     private File checkProjectBaseDir(final String fileName) {
-        if (project.getBaseDir() != null) {
-            final File projectRelativePath = new File(project.getBaseDir().getPath(), fileName);
+        VirtualFile baseDir = ProjectUtil.guessProjectDir(project);
+        if (baseDir != null) {
+            final File projectRelativePath = new File(baseDir.getPath(), fileName);
             if (projectRelativePath.exists()) {
                 return projectRelativePath;
             }

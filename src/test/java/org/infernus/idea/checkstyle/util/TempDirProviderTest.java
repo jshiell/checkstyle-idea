@@ -42,7 +42,7 @@ public class TempDirProviderTest
 
         @Override
         @SuppressWarnings("MethodDoesntCallSuperMethod")
-        Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
+        Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
             if (usesIdeaFolder) {
                 final VirtualFile vf = Mockito.mock(VirtualFile.class);
                 Mockito.when(vf.getPath()).thenReturn(junitTempFolder.getRoot().getAbsolutePath());

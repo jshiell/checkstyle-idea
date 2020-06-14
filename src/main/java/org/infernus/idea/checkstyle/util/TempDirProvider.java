@@ -5,6 +5,7 @@ import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.components.impl.stores.IProjectStore;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.io.FileUtils;
@@ -55,12 +56,15 @@ public class TempDirProvider {
                 .orElse(new File(project.getBasePath(), "checkstyleidea.tmp"));
     }
 
-    Optional<VirtualFile> getIdeaFolder(@NotNull final Project pProject) {
-        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(pProject);
+    Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
+        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(project);
         if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            final VirtualFile ideaStorageDir = pProject.getBaseDir().findChild(Project.DIRECTORY_STORE_FOLDER);
-            if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
-                return Optional.of(ideaStorageDir);
+            VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
+            if (projectDir != null) {
+                final VirtualFile ideaStorageDir = projectDir.findChild(Project.DIRECTORY_STORE_FOLDER);
+                if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
+                    return Optional.of(ideaStorageDir);
+                }
             }
         }
         return Optional.empty();

@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +19,8 @@ import java.util.function.Function;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileConfigurationLocationTest {
@@ -31,6 +33,8 @@ public class FileConfigurationLocationTest {
     private VirtualFile projectBase;
     @Mock
     private PicoContainer picoContainer;
+    @Mock
+    private ProjectPaths projectPaths;
 
     private FileConfigurationLocation underTest;
 
@@ -123,11 +127,11 @@ public class FileConfigurationLocationTest {
         reset(picoContainer);
         ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
         when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
-        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectPaths.projectPath(project)).thenReturn(projectBase);
 
         reset(project);
         when(project.getPicoContainer()).thenReturn(picoContainer);
-        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
 
         return new FileConfigurationLocation(project);
@@ -140,7 +144,7 @@ public class FileConfigurationLocationTest {
 
         reset(project);
         when(project.getPicoContainer()).thenReturn(picoContainer);
-        when(project.getBaseDir()).thenReturn(projectBase);
+        when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
 
         return new FileConfigurationLocation(project);
@@ -157,7 +161,7 @@ public class FileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
-        return new ProjectFilePaths(project, separatorChar, absolutePathOf);
+        return new ProjectFilePaths(project, separatorChar, absolutePathOf, projectPaths);
     }
 
 }

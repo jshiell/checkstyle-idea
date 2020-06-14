@@ -4,6 +4,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -296,7 +297,7 @@ public class LocationPanel extends JPanel {
             if (!isBlank(configFilePath)) {
                 toSelect = LocalFileSystem.getInstance().findFileByPath(configFilePath);
             } else {
-                toSelect = project.getBaseDir();
+                toSelect = ProjectUtil.guessProjectDir(project);
             }
 
             final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(

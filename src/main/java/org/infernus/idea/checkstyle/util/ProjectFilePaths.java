@@ -18,20 +18,24 @@ public class ProjectFilePaths {
     private static final String IDEA_PROJECT_DIR = "$PROJECT_DIR$";
     private static final String LEGACY_PROJECT_DIR = "$PRJ_DIR$";
 
+    private final ProjectPaths projectPaths;
     private final Project project;
     private final char separatorChar;
     private final Function<File, String> absolutePathOf;
 
     public ProjectFilePaths(@NotNull final Project project) {
-        this(project, File.separatorChar, File::getAbsolutePath);
+        this(project, File.separatorChar, File::getAbsolutePath, new ProjectPaths());
     }
 
     public ProjectFilePaths(@NotNull final Project project,
                             final char separatorChar,
-                            @NotNull final Function<File, String> absolutePathOf) {
+                            @NotNull final Function<File, String> absolutePathOf,
+                            @NotNull final ProjectPaths projectPaths) {
         this.project = project;
         this.separatorChar = separatorChar;
         this.absolutePathOf = absolutePathOf;
+
+        this.projectPaths = projectPaths;
     }
 
     @Nullable
@@ -40,7 +44,7 @@ public class ProjectFilePaths {
             return path;
         }
 
-        final File projectPath = projectPath(project);
+        final File projectPath = projectPath();
         if (projectPath == null) {
             LOG.debug("Couldn't find project path, returning full path: " + path);
             return path;
@@ -74,7 +78,7 @@ public class ProjectFilePaths {
             }
         }
 
-        final File projectPath = projectPath(project);
+        final File projectPath = projectPath();
         if (projectPath != null && fsPath.startsWith(absolutePathOf.apply(projectPath) + separatorChar)) {
             return IDEA_PROJECT_DIR
                     + toUnixPath(fsPath.substring(absolutePathOf.apply(projectPath).length()));
@@ -101,7 +105,7 @@ public class ProjectFilePaths {
         for (String projectDirToken : asList(IDEA_PROJECT_DIR, LEGACY_PROJECT_DIR)) {
             int prefixLocation = path.indexOf(projectDirToken);
             if (prefixLocation >= 0) {
-                final File projectPath = projectPath(project);
+                final File projectPath = projectPath();
                 if (projectPath != null) {
                     final String projectRelativePath = toSystemPath(path.substring(prefixLocation + projectDirToken.length()));
                     final String completePath = projectPath + File.separator + projectRelativePath;
@@ -130,9 +134,9 @@ public class ProjectFilePaths {
     }
 
     @Nullable
-    private File projectPath(final Project project) {
+    private File projectPath() {
         try {
-            final VirtualFile baseDir = project.getBaseDir();
+            final VirtualFile baseDir = projectPaths.projectPath(project);
             if (baseDir == null) {
                 return null;
             }

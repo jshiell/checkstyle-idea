@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -382,7 +383,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     (String) getValue(Action.NAME),
                     (String) getValue(Action.SHORT_DESCRIPTION),
                     false, "jar");
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, CheckStyleConfigPanel.this, project, project.getBaseDir());
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
