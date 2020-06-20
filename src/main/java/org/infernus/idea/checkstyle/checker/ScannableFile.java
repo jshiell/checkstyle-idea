@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -14,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -152,11 +154,14 @@ public class ScannableFile {
 
     private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
         if (file.getParent() != null) {
-            final String baseDirUrl = file.getProject().getBaseDir().getUrl();
+            final VirtualFile projectDir = ProjectUtil.guessProjectDir(file.getProject());
+            if (projectDir != null) {
+                final String baseDirUrl = projectDir.getUrl();
 
-            final String parentUrl = file.getParent().getVirtualFile().getUrl();
-            if (parentUrl.startsWith(baseDirUrl)) {
-                return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(baseDirUrl.length()));
+                final String parentUrl = file.getParent().getVirtualFile().getUrl();
+                if (parentUrl.startsWith(baseDirUrl)) {
+                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(baseDirUrl.length()));
+                }
             }
         }
         return null;
