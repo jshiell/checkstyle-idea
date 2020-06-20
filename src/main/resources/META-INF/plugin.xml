@@ -179,6 +179,8 @@
 
         <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable" parentId="tools"/>
 
+        <moduleConfigurationEditorProvider implementation="org.infernus.idea.checkstyle.CheckstyleModuleConfigurationEditorProvider"/>
+
         <moduleService serviceImplementation="org.infernus.idea.checkstyle.CheckStyleModuleConfiguration"/>
 
         <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
@@ -200,12 +202,6 @@
                         schemeClass="com.intellij.psi.codeStyle.CodeStyleScheme"
                         implementationClass="org.infernus.idea.checkstyle.importer.CheckStyleCodeStyleImporter"/>
     </extensions>
-
-    <module-components>
-        <component>
-            <implementation-class>org.infernus.idea.checkstyle.CheckStyleModuleConfigurable</implementation-class>
-        </component>
-    </module-components>
 
     <actions>
         <group id="CheckStylePluginTreeActions" text="Filter" popup="true">

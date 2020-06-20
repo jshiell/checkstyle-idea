@@ -1,19 +1,18 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleComponent;
+import com.intellij.openapi.module.ModuleConfigurationEditor;
 import com.intellij.openapi.module.ModuleServiceManager;
-import com.intellij.openapi.options.Configurable;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public class CheckStyleModuleConfigurable implements Configurable, ModuleComponent {
+public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationEditor {
 
     private final Module module;
 
-    public CheckStyleModuleConfigurable(@NotNull final Module module) {
+    public CheckStyleModuleConfigurationEditor(@NotNull final Module module) {
         this.module = module;
     }
 
