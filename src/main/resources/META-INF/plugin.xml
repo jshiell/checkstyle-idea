@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.41.0</version>
+    <version>5.42.0</version>
     <idea-version since-build="191.8026.42"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.42.0: New: Added Checkstyle 8.36.</li>
     <li>5.41.0: New: Added Checkstyle 8.35.</li>
     <li>5.40.0: New: Added Checkstyle 8.34.</li>
     <li>5.39.0: New: Project settings are now under "Tools".</li>

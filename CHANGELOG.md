@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.42.0** New: Added Checkstyle 8.36.
 * **5.41.0** New: Added Checkstyle 8.35.
 * **5.40.0** New: Added Checkstyle 8.34.
 * **5.39.0** New: Project settings are now under "Tools".
