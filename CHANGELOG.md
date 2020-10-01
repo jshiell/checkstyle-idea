@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.44.0** New: Added Checkstyle 8.36.2.
 * **5.43.0** New: Added Checkstyle 8.36.1.
 * **5.42.0** New: Added Checkstyle 8.36.
 * **5.41.0** New: Added Checkstyle 8.35.
