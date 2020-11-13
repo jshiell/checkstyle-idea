@@ -119,11 +119,6 @@ mode.
 
 ## Frequently Asked Questions
 
-### I see a *Cannot Load Project* error stating *Unsupported major.minor version 52.0*.
- 
-The plugin is compiled using language level 1.8, and hence must be run on Java 8. This is because CheckStyle 6.2 and
-above require at least JVM 1.7, and because I like lambdas.
- 
 If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 8 or later.
 [Jetbrains offer a support document on this
 subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
