@@ -50,3 +50,8 @@ jobs:
         asset_path: ./build/distributions/CheckStyle-IDEA-${{ steps.build_info.outputs.build_tag }}.zip
         asset_name: CheckStyle-IDEA-${{ steps.build_info.outputs.build_tag }}.zip
         asset_content_type: application/zip
+
+    - name: Publish to Jetbrains Plugin Repo
+      run: ./gradlew publishPlugin
+      env:
+        JETBRAINS_PLUGIN_REPO_TOKEN: ${{ secrets.JETBRAINS_PLUGIN_REPO_TOKEN }}

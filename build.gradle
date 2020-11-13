@@ -29,6 +29,10 @@ intellij {
     instrumentCode = false
 }
 
+publishPlugin {
+    token = System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN")
+}
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Compilation
