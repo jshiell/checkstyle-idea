@@ -4,7 +4,7 @@
 
 Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
-[![Build Status](https://travis-ci.org/jshiell/checkstyle-idea.svg?branch=master)](https://travis-ci.org/jshiell/checkstyle-idea)
+[![Build Status](https://github.com/jshiell/checkstyle-idea/workflows/Build/badge.svg)](https://github.com/jshiell/checkstyle-idea/actions?query=workflow%3A%22Build%22)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
