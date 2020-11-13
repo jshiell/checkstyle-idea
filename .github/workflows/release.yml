@@ -24,9 +24,11 @@ jobs:
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CHANGELOG: $(cat ./CHANGELOG.md | grep 5.45.0 | sed 's%^\*[[:space:]]*\*\*[0-9.]*\*\*[[:space:]]*%%g')
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
+        body: $CHANGELOG
         draft: false
         prerelease: false
 
