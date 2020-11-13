@@ -37,6 +37,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build/distributions/CheckStyle-IDEA-${{ github.ref }}.zip
-        asset_name: CheckStyle-IDEA-${{ github.ref }}.zip
+        asset_path: ./build/distributions/CheckStyle-IDEA-${{ github.event.release.tag_name }}.zip
+        asset_name: CheckStyle-IDEA-${{ github.event.release.tag_name }}.zip
         asset_content_type: application/zip
