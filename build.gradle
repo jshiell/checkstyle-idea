@@ -55,8 +55,8 @@ tasks.withType(JavaCompile) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 dependencies {
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
-    implementation group: 'commons-codec', name: 'commons-codec', version: '1.11'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
     implementation group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
 
