@@ -24,7 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.46.0: New: Added Checkstyle 8.39.</li>
+    <li>5.46.0: New: Added Checkstyle 8.38, 8.39.</li>
     <li>5.45.1: Fixed: optimised download size.</li>
     <li>5.45.0: New: Added Checkstyle 8.37.</li>
     <li>5.44.0: New: Added Checkstyle 8.36.2.</li>
