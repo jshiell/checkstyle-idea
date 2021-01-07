@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.45.1</version>
+    <version>5.46.0</version>
     <idea-version since-build="191.8026.42"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.46.0: New: Added Checkstyle 8.39.</li>
     <li>5.45.1: Fixed: optimised download size.</li>
     <li>5.45.0: New: Added Checkstyle 8.37.</li>
     <li>5.44.0: New: Added Checkstyle 8.36.2.</li>
