@@ -18,7 +18,6 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-
 public class OpScan implements CheckstyleCommand<Map<PsiFile, List<Problem>>> {
 
     private final CheckerWithConfig checkerWithConfig;
@@ -26,7 +25,6 @@ public class OpScan implements CheckstyleCommand<Map<PsiFile, List<Problem>>> {
     private final boolean suppressErrors;
     private final int tabWidth;
     private final Optional<String> baseDir;
-
 
     public OpScan(@NotNull final CheckstyleInternalObject checkerWithConfig,
                   @NotNull final List<ScannableFile> scannableFiles,
@@ -69,14 +67,13 @@ public class OpScan implements CheckstyleCommand<Map<PsiFile, List<Problem>>> {
                                                     final CheckStyleAuditListener auditListener)
             throws CheckstyleException {
         final Checker checker = checkerWithConfig.getChecker();
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (checker) {
-            checker.addListener(auditListener);
-            try {
-                checker.process(files);
-            } finally {
-                checker.removeListener(auditListener);
-            }
+        checkerWithConfig.getCheckerLock().lock();
+        checker.addListener(auditListener);
+        try {
+            checker.process(files);
+        } finally {
+            checker.removeListener(auditListener);
+            checkerWithConfig.getCheckerLock().unlock();
         }
         return auditListener;
     }
