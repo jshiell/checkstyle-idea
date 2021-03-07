@@ -20,7 +20,7 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.47.1'
+version = '5.48.0'
 
 intellij {
     version = 'IC-2019.1.4'
