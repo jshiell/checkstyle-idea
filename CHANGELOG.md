@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.49.0** New: Added Checkstyle 8.41.1.
 * **5.48.0** New: Added Checkstyle 8.41.
 * **5.48.0** Fixed: Added a timeout to avoid deadlock on closing a project during a scan (#515).
 * **5.47.0** New: Added Checkstyle 8.40.
