@@ -20,8 +20,7 @@ public class CheckstyleVersions {
 
     private static final String PROP_FILE = "src/main/resources/checkstyle-idea.properties";
 
-    private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
-    private static final String PROP_NAME_JAVA8 = "checkstyle.versions.java8";
+    private static final String PROP_VERSIONS_SUPPORTED = "checkstyle.versions.supported";
     private static final String PROP_DEPENDENCY_MAP = "checkstyle.dependencies.map";
     private static final String PROP_NAME_BASEVERSION = "baseVersion";
 
@@ -43,13 +42,7 @@ public class CheckstyleVersions {
 
     private SortedSet<String> buildVersionSet(final Properties properties) {
         SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
-        theVersions.addAll(readVersions(properties, PROP_NAME_JAVA7));
-        Set<String> versions8 = readVersions(properties, PROP_NAME_JAVA8);
-        if (!Collections.disjoint(theVersions, versions8)) {
-            throw new GradleException("Properties '" + PROP_NAME_JAVA7 + "' and '" + PROP_NAME_JAVA8 + "' contain "
-                    + "duplicate entries in configuration file '" + PROP_FILE + "'");
-        }
-        theVersions.addAll(versions8);
+        theVersions.addAll(readVersions(properties, PROP_VERSIONS_SUPPORTED));
         return Collections.unmodifiableSortedSet(theVersions);
     }
 

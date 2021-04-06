@@ -24,8 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public class VersionListReader {
     private static final String PROP_FILE = "checkstyle-idea.properties";
 
-    private static final String PROP_NAME_JAVA7 = "checkstyle.versions.java7";
-    private static final String PROP_NAME_JAVA8 = "checkstyle.versions.java8";
+    private static final String PROP_SUPPORTED_VERSIONS = "checkstyle.versions.supported";
     private static final String PROP_VERSION_MAP = "checkstyle.versions.map";
 
     private final SortedSet<String> supportedVersions;
@@ -46,10 +45,6 @@ public class VersionListReader {
     private Properties readProperties(@NotNull final String propertyFile) {
         final Properties props = new Properties();
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(propertyFile)) {
-//            if (is == null) {
-//                // in unit tests, it seems we need this:
-//                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyFile);
-//            }
             if (is != null) {
                 props.load(is);
             }
@@ -76,13 +71,8 @@ public class VersionListReader {
     @NotNull
     private SortedSet<String> readSupportedVersions(@NotNull final String propertyFile,
                                                     @NotNull final Properties props) {
-        final String javaVersion = System.getProperty("java.version");
-
         final SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
-        theVersions.addAll(readVersions(propertyFile, props, PROP_NAME_JAVA7));
-        if (!javaVersion.startsWith("1.7")) {
-            theVersions.addAll(readVersions(propertyFile, props, PROP_NAME_JAVA8));
-        }
+        theVersions.addAll(readVersions(propertyFile, props, PROP_SUPPORTED_VERSIONS));
         return Collections.unmodifiableSortedSet(theVersions);
     }
 

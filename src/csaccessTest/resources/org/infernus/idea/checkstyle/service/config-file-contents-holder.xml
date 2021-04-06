@@ -2,8 +2,7 @@
 <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
         "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
-<!-- This configuration file will load fine in CS 6.19, but will fail to load in 6.18 or earlier, because the
-     'SingleSpaceSeparator' check was introduced only in 6.19. -->
+<!-- FileContentsHolder was dropped in Checkstyle 8.2 -->
 
 <module name="Checker">
     <property name="severity" value="warning"/>

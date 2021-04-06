@@ -34,8 +34,7 @@ import static org.mockito.Mockito.when;
 public class ServiceLayerBasicTest {
     private static final Project PROJECT = mock(Project.class);
 
-    private static final String CONFIG_FILE_BREAKS_AFTER_6_16_1 = "config1-6.16.1-but-not-6.17.xml";
-    private static final String CONFIG_FILE_BREAKS_BEFORE_6_19 = "config2-6.19-but-not-6.17.xml";
+    private static final String CONFIG_FILE_CONTENTS_HOLDER = "config-file-contents-holder.xml";
 
     private static CheckstyleProjectService checkstyleProjectService;
 
@@ -55,47 +54,11 @@ public class ServiceLayerBasicTest {
     }
 
     @Test
-    public void aTestPropertyRemovedIn6_16_1CannotBeUsedWithLaterRuntimes() throws IOException, URISyntaxException {
-        try {
-            createChecker(CONFIG_FILE_BREAKS_AFTER_6_16_1);
-
-            if (csVersionIsGreaterThan("6.16.1")) {
-                fail("expected exception was not thrown");
-            }
-        } catch (CheckstyleToolException e) {
-            if (csVersionIsGreaterThan("6.16.1")) {
-                assertThat(e.getMessage(), containsString("basenameSeparator"));
-            } else {
-                throw e;  // test failed
-            }
-        }
-    }
-
-    @Test
-    public void aCheckIntroducedIn6_19CannotBeLoadedWithEarlierRuntimes() throws IOException, URISyntaxException {
-        assumeThat(currentCsVersion(), isLessThan("8.2"));
-
-        try {
-            createChecker(CONFIG_FILE_BREAKS_BEFORE_6_19);
-
-            if (csVersionIsLessThan("6.19")) {
-                fail("expected exception was not thrown");
-            }
-        } catch (CheckstyleToolException e) {
-            if (csVersionIsLessThan("6.19")) {
-                assertThat(e.getMessage(), containsString("SingleSpaceSeparator"));
-            } else {
-                throw e;  // test failed
-            }
-        }
-    }
-
-    @Test
     public void theFileContentsHolderCannotBeUsedWithCheckstyle8_2AndAbove() throws IOException, URISyntaxException {
         assumeThat(currentCsVersion(), isGreaterThanOrEqualTo("8.2"));
 
         try {
-            createChecker(CONFIG_FILE_BREAKS_BEFORE_6_19);
+            createChecker(CONFIG_FILE_CONTENTS_HOLDER);
             fail("expected exception was not thrown");
         } catch (CheckstyleToolException e) {
             assertThat(e.getMessage(), containsString("FileContentsHolder"));

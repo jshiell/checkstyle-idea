@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
-    private static final String CHECKSTYLE_VERSION = "7.1.2";
+    private static final String CHECKSTYLE_VERSION = "8.0";
 
     private CheckstylePluginApi underTest;
 
@@ -79,7 +79,7 @@ public class CheckstylePluginApiTest {
         underTest.visitCurrentConfiguration(visitor);
 
         ArgumentCaptor<ConfigurationModule> configModuleCaptor = ArgumentCaptor.forClass(ConfigurationModule.class);
-        verify(visitor, times(56)).accept(eq("Google Checks"), configModuleCaptor.capture());
+        verify(visitor, times(58)).accept(eq("Google Checks"), configModuleCaptor.capture());
 
         assertThat(configModuleCaptor.getValue(), is(not(nullValue())));
         assertThat(configModuleCaptor.getValue().getName(), is("CommentsIndentation"));

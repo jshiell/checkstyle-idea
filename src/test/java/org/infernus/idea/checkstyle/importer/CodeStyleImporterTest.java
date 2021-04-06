@@ -29,7 +29,7 @@ public class CodeStyleImporterTest
         super.setUp();
 
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
-        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.2").build();
+        final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("8.0").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
         when(project.getService(PluginConfigurationManager.class)).thenReturn(mockPluginConfig);
 

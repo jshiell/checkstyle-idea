@@ -39,7 +39,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     private static final String PROPS_FILE_NAME = "/checkstyle-idea.properties";
 
     private static final String BASE_VERSION = readBaseVersion();
-    private static final String OTHER_VERSION = "6.19";
+    private static final String OTHER_VERSION = "8.0";
 
     private final Project project = mock(Project.class);
     private CheckstyleProjectService csService;
