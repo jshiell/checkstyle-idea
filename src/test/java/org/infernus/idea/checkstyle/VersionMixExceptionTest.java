@@ -15,14 +15,12 @@ import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -51,14 +49,11 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
-
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(BASE_VERSION).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
 
-        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(mockPluginConfig);
+        when(project.getService(PluginConfigurationManager.class)).thenReturn(mockPluginConfig);
 
         csService = new CheckstyleProjectService(project);
         csService.activateCheckstyleVersion(BASE_VERSION, null);
@@ -161,7 +156,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
             url = Thread.currentThread().getContextClassLoader().getResource(filename);
         }
         assertNotNull(url);
-        return new String(Files.readAllBytes(Paths.get(url.toURI())), StandardCharsets.UTF_8);
+        return Files.readString(Paths.get(url.toURI()));
     }
 
     @NotNull

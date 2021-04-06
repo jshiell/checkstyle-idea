@@ -11,7 +11,6 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.jetbrains.annotations.NotNull;
-import org.picocontainer.PicoContainer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,13 +28,10 @@ public class CodeStyleImporterTest
     protected void setUp() throws Exception {
         super.setUp();
 
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
-
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance("7.1.2").build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(mockPluginConfig);
+        when(project.getService(PluginConfigurationManager.class)).thenReturn(mockPluginConfig);
 
         csService = new CheckstyleProjectService(project);
 

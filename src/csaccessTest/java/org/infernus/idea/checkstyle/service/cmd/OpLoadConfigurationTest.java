@@ -1,12 +1,14 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
 import com.google.common.collect.ImmutableMap;
+import com.intellij.ide.plugins.PluginUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.extensions.ExtensionsArea;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -68,9 +70,14 @@ public class OpLoadConfigurationTest {
         when(PROJECT.getMessageBus()).thenReturn(messageBus);
         when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
 
+        final ExtensionsArea extensionArea = mock(ExtensionsArea.class);
+        final PluginUtil pluginUtil = mock(PluginUtil.class);
+
         final Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
         when(application.getMessageBus()).thenReturn(messageBus);
+        when(application.getExtensionArea()).thenReturn(extensionArea);
+        when(application.getService(PluginUtil.class)).thenReturn(pluginUtil);
         ApplicationManager.setApplication(application, mock(Disposable.class));
     }
 

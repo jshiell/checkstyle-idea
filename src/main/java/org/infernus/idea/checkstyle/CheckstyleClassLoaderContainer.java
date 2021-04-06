@@ -13,12 +13,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,10 +71,7 @@ public class CheckstyleClassLoaderContainer {
 
     @NotNull
     private List<URL> emptyListIfNull(@Nullable final List<URL> potentiallyNullList) {
-        if (potentiallyNullList != null) {
-            return potentiallyNullList;
-        }
-        return Collections.emptyList();
+        return Objects.requireNonNullElse(potentiallyNullList, Collections.emptyList());
     }
 
     @NotNull
@@ -142,9 +139,13 @@ public class CheckstyleClassLoaderContainer {
         } else if (sourceClassLoader instanceof URLClassLoader) {   // happens in test cases
             result = Arrays.asList(((URLClassLoader) sourceClassLoader).getURLs());
         } else {
-            //noinspection ConstantConditions
-            throw new CheckStylePluginException("incompatible class loader: "
-                    + (sourceClassLoader != null ? sourceClassLoader.getClass().getName() : "null"));
+            URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
+            try {
+                URL trimmedUrl = new URL(classResource.toString().replaceFirst("org[/\\\\]infernus.*", ""));
+                result = Collections.singletonList(trimmedUrl);
+            } catch (MalformedURLException e) {
+                result = Collections.singletonList(classResource);
+            }
         }
         return result;
     }
@@ -220,6 +221,7 @@ public class CheckstyleClassLoaderContainer {
     private String guessFromClassPath(@NotNull final List<URL> pUrls, @NotNull final Pattern pPattern) {
         String result = null;
         for (final URL url : pUrls) {
+            System.err.println("Testing " + url);
             Matcher matcher = pPattern.matcher(url.getPath());
             if (matcher.find()) {
                 result = matcher.group(1);
@@ -231,11 +233,7 @@ public class CheckstyleClassLoaderContainer {
 
     @NotNull
     private String urlDecode(final String urlEncodedString) {
-        try {
-            return URLDecoder.decode(urlEncodedString, "UTF-8");
-        } catch (UnsupportedEncodingException ignored) {
-            return urlEncodedString;
-        }
+        return URLDecoder.decode(urlEncodedString, StandardCharsets.UTF_8);
     }
 
     @NotNull

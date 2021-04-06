@@ -6,7 +6,6 @@ import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.picocontainer.PicoContainer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -188,7 +187,7 @@ public class ConfigurationLocationTest {
         configurationLocation.setProperties(properties);
     }
 
-    private class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
+    private static class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
         public DefaultProjectTestConfigurationLocation() {
             super(ConfigurationType.LOCAL_FILE, mock(Project.class));
 
@@ -212,7 +211,7 @@ public class ConfigurationLocationTest {
         }
     }
 
-    private class TestConfigurationLocation extends ConfigurationLocation {
+    private static class TestConfigurationLocation extends ConfigurationLocation {
         public TestConfigurationLocation(final String content) {
             super(ConfigurationType.LOCAL_FILE, mock(Project.class));
 
@@ -235,9 +234,7 @@ public class ConfigurationLocationTest {
     @Test
     public void testSorting() {
         final Project project = mock(Project.class);
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
-        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(new ProjectFilePaths(project));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
 
         List<ConfigurationLocation> list = new ArrayList<>();
         FileConfigurationLocation fcl = new FileConfigurationLocation(project, ConfigurationType.LOCAL_FILE);

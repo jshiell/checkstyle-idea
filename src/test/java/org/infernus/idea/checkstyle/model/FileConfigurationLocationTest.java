@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.util.function.Function;
@@ -31,8 +30,6 @@ public class FileConfigurationLocationTest {
     private Project project;
     @Mock
     private VirtualFile projectBase;
-    @Mock
-    private PicoContainer picoContainer;
     @Mock
     private ProjectPaths projectPaths;
 
@@ -124,13 +121,11 @@ public class FileConfigurationLocationTest {
     }
 
     private FileConfigurationLocation useWindowsFilePaths() {
-        reset(picoContainer);
-        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
-        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
-        when(projectPaths.projectPath(project)).thenReturn(projectBase);
-
         reset(project);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
+
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
+        when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
+        when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
 
@@ -138,12 +133,10 @@ public class FileConfigurationLocationTest {
     }
 
     private FileConfigurationLocation useUnixPaths() {
-        reset(picoContainer);
-        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/');
-        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
-
         reset(project);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
+
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/');
+        when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
 

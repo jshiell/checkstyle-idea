@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.util.function.Function;
@@ -35,8 +34,6 @@ public class RelativeFileConfigurationLocationTest {
 
     @Before
     public void setUp() {
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(project.getPicoContainer()).thenReturn(picoContainer);
         ProjectPaths projectPaths = mock(ProjectPaths.class);
 
         Function<File, String> absolutePathOf = file -> {
@@ -49,7 +46,7 @@ public class RelativeFileConfigurationLocationTest {
         };
 
         ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf, projectPaths);
-        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(testProjectFilePaths);
+        when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
 
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);

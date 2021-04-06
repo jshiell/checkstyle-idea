@@ -5,7 +5,6 @@ import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.junit.Before;
 import org.junit.Test;
-import org.picocontainer.PicoContainer;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -21,9 +20,7 @@ public class ConfigurationLocationFactoryTest {
 
     @Before
     public void setUp() {
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(picoContainer.getComponentInstance(ProjectFilePaths.class.getName())).thenReturn(new ProjectFilePaths(project));
-        when(project.getPicoContainer()).thenReturn(picoContainer);
+        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
     }
 
     @Test

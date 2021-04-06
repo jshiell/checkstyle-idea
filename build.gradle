@@ -20,13 +20,14 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.49.0'
+version = '5.50.0'
 
 intellij {
-    version = 'IC-2019.1.4'
+    version = 'IC-2020.1.4'
     pluginName 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false
+    plugins = ['java']
 }
 
 publishPlugin {

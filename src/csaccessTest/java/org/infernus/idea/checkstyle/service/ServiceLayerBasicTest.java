@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.picocontainer.PicoContainer;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +41,10 @@ public class ServiceLayerBasicTest {
 
     @BeforeClass
     public static void setUp() {
-        PicoContainer picoContainer = mock(PicoContainer.class);
-        when(PROJECT.getPicoContainer()).thenReturn(picoContainer);
-
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(currentCsVersion()).build();
         when(mockPluginConfig.getCurrent()).thenReturn(mockConfigDto);
-        when(picoContainer.getComponentInstance(PluginConfigurationManager.class.getName())).thenReturn(mockPluginConfig);
+        when(PROJECT.getService(PluginConfigurationManager.class)).thenReturn(mockPluginConfig);
 
         checkstyleProjectService = new CheckstyleProjectService(PROJECT);
     }
