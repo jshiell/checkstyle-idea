@@ -224,7 +224,7 @@ public class LocationDialogue extends JDialog {
     private CheckerFactory checkerFactory() {
         final CheckstyleProjectService editedConfigProjectService = CheckstyleProjectService.forVersion(
                 project, checkstyleVersion, thirdPartyClasspath);
-        return new CheckerFactory(project, editedConfigProjectService, new CheckerFactoryCache());
+        return CheckerFactory.create(project, editedConfigProjectService, new CheckerFactoryCache());
     }
 
     private Step continueWithoutLoadOfFile(final ConfigurationLocation location) {

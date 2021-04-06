@@ -41,12 +41,18 @@ public class CheckerFactory {
         this.cache = ServiceManager.getService(project, CheckerFactoryCache.class);
     }
 
-    public CheckerFactory(@NotNull final Project project,
-                          @NotNull final CheckstyleProjectService checkstyleProjectService,
-                          @NotNull final CheckerFactoryCache cache) {
+    private CheckerFactory(@NotNull final Project project,
+                           @NotNull final CheckstyleProjectService checkstyleProjectService,
+                           @NotNull final CheckerFactoryCache cache) {
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
         this.cache = cache;
+    }
+
+    public static CheckerFactory create(@NotNull final Project project,
+                         @NotNull final CheckstyleProjectService checkstyleProjectService,
+                         @NotNull final CheckerFactoryCache cache) {
+        return new CheckerFactory(project, checkstyleProjectService, cache);
     }
 
     public void verify(final ConfigurationLocation location) {
