@@ -100,7 +100,7 @@ property or classpath pre-requisite.
 Note that the plugin has been entirely developed on OS X - while it should be fine on Linux, I've no idea what result
 you'd get with Windows. YMMV.
 
-The pre-requisites for the plugin are fairly light - you'll need Git and JDK 1.8.x. Make sure your `JAVA_HOME`
+The pre-requisites for the plugin are fairly light - you'll need Git and JDK 11. Make sure your `JAVA_HOME`
 environment variable is set correctly before invoking Gradle.
 
     git clone https://github.com/jshiell/checkstyle-idea.git checkstyle-idea
