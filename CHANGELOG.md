@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.50.0** Fixed: ImportOrder third-party/special imports are ignored if regexes are not defined (#500).
 * **5.50.0** New: Checkstyle 6 and 7 are no longer supported.
 * **5.50.0** New: Now built against IDEA 2020.1.4 (was 2019.1.4).
 * **5.49.0** New: Added Checkstyle 8.41.1.

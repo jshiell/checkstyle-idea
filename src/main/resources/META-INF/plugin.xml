@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.50.0: Fixed: ImportOrder third-party/special imports are ignored if regexes are not defined (#500).</li>
     <li>5.50.0: New: Checkstyle 6 and 7 are no longer supported.</li>
     <li>5.50.0: New: Now built against IDEA 2020.1.4 (was 2019.1.4).</li>
     <li>5.49.0: New: Added Checkstyle 8.41.1.</li>
@@ -37,39 +38,6 @@
     <li>5.43.0: New: Added Checkstyle 8.36.1.</li>
     <li>5.42.0: New: Added Checkstyle 8.36.</li>
     <li>5.41.0: New: Added Checkstyle 8.35.</li>
-    <li>5.40.0: New: Added Checkstyle 8.34.</li>
-    <li>5.39.0: New: Project settings are now under "Tools".</li>
-    <li>5.39.0: New: Now built against IDEA 2019.1.4 (was 2018.1.8).</li>
-    <li>5.38.0: New: Added Checkstyle 8.33.</li>
-    <li>5.37.0: New: Added Checkstyle 8.32.</li>
-    <li>5.36.2: Fixed: avoid malformed annotations with imported code styles (#484).</li>
-    <li>5.36.2: Fixed: code style imports will now toggle wrapping-as-needed on when a line length is set (#487).</li>
-    <li>5.36.1: Fixed: injected fragments are no longer passed to Checkstyle (#485).</li>
-    <li>5.36.0: New: Added Checkstyle 8.31.</li>
-    <li>5.35.9: Fixed: concurrency issue with progress listeners (#486).</li>
-    <li>5.35.9: Fixed: improve catching of parse exceptions from Checkstyle (#485).</li>
-    <li>5.35.8: Fixed: ensure property changes won't affect scans in progress (#425).</li>
-    <li>5.35.8: Fixed: changed serialisation method for better compatibility with IDEA 2020.1 (#476).</li>
-    <li>5.35.8: Fixed: restored support for legacy project directory tokenisation (#481).</li>
-    <li>5.35.7: New: Added Checkstyle 8.30 - thanks to @mustaphazorgati (#478).</li>
-    <li>5.35.7: New: We now try and re-use the larger compatible dependencies between Checkstyle version to substantially reduce the archive size.</li>
-    <li>5.35.6: Fixed: parse exceptions reported by Checkstyle are no longer logged in the event log (#475).</li>
-    <li>5.35.6: Fixed: changed module/project icons to be compatible with EAPs of IDEA 2020.1 (#474).</li>
-    <li>5.35.5: New: Added Checkstyle 8.29 - thanks to @mustaphazorgati (#472).</li>
-    <li>5.35.4: Fixed: File cleanup should no longer throw concurrent modification exceptions if execution is cancelled (#470).</li>
-    <li>5.35.3: Fixed: Problems are no longer duplicated in inspection panel (#467).</li>
-    <li>5.35.3: New: Added Checkstyle 8.28 - thanks to @mustaphazorgati (#468).</li>
-    <li>5.35.2: Fixed: Reverted inspection threading due to perf degradation; reworked inspection locking (#462, #466).</li>
-    <li>5.35.2: New: Logo added for plugin marketplace - thanks to @ahus1 (#465).</li>
-    <li>5.35.1: Fixed: Changed inspection threading to avoid deadlocking (#462).</li>
-    <li>5.35.0: New: Added Checkstyle 8.27.</li>
-    <li>5.35.0: Fixed: radio button issues - thanks to @marshallwalker (##461).</li>
-    <li>5.34.0: New: Added Checkstyle 8.26.</li>
-    <li>5.33.1: Fixed: exception on scroll-to-source in newer versions of IDEA (#457).</li>
-    <li>5.33.0: New: Added Checkstyle 8.25. Support has been dropped for Checkstyle < 6.16.1 due to API changes.</li>
-    <li>5.32.0: New: Added Checkstyle 8.24.</li>
-    <li>5.31.0: New: Added Checkstyle 8.23.</li>
-    <li>5.31.0: New: Now built against IDEA 2018.1.8 (was 2017.1.3).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
