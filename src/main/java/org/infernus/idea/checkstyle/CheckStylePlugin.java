@@ -1,7 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 
 public final class CheckStylePlugin {
@@ -15,7 +15,7 @@ public final class CheckStylePlugin {
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
     public static String version() {
-        final IdeaPluginDescriptor plugin = PluginManager.getPlugin(PluginId.getId(ID_PLUGIN));
+        final IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(PluginId.getId(ID_PLUGIN));
         if (plugin != null) {
             return plugin.getVersion();
         }

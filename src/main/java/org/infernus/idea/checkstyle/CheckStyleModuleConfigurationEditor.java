@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleConfigurationEditor;
-import com.intellij.openapi.module.ModuleServiceManager;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +52,7 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
     }
 
     private CheckStyleModuleConfiguration getConfiguration() {
-        return ModuleServiceManager.getService(module, CheckStyleModuleConfiguration.class);
+        return module.getService(CheckStyleModuleConfiguration.class);
     }
 
     public void reset() {
