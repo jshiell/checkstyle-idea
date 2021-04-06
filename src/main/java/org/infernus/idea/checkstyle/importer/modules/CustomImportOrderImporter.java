@@ -37,10 +37,8 @@ public class CustomImportOrderImporter extends ModuleImporter {
         standardPackageRegExp.add("java");
 
         thirdPartyPackageRegExp = new ArrayList<>();
-        thirdPartyPackageRegExp.add("");
 
         specialImportsRegExp = new ArrayList<>();
-        specialImportsRegExp.add("");
     }
 
     @Override
@@ -85,38 +83,37 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
         if (customImportOrder != null) {
             for (ImportGroup group : customImportOrder) {
+                boolean entryAdded = false;
                 switch (group) {
                     case STATIC:
                         table.addEntry(PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY);
+                        entryAdded = true;
                         break;
                     case THIRD_PARTY_PACKAGE:
                         thirdPartyPackageRegExp.forEach(createPackageEntry);
+                        entryAdded = thirdPartyPackageRegExp.size() > 0;
                         break;
                     case SPECIAL_IMPORTS:
                         specialImportsRegExp.forEach(createPackageEntry);
+                        entryAdded = specialImportsRegExp.size() > 0;
                         break;
                     case STANDARD_JAVA_PACKAGE:
                         standardPackageRegExp.forEach(createPackageEntry);
+                        entryAdded = standardPackageRegExp.size() > 0;
                         break;
                     default:
                         // IntelliJ does not support this option or group does not exist
                         break;
                 }
 
-                addBlankLineBetweenGroups(table);
+                if (entryAdded && separateLineBetweenGroups) {
+                    table.addEntry(PackageEntry.BLANK_LINE_ENTRY);
+                }
             }
         }
 
         table.addEntry(PackageEntry.ALL_OTHER_IMPORTS_ENTRY);
         return table;
-    }
-
-    private void addBlankLineBetweenGroups(final PackageEntryTable table) {
-        if (!separateLineBetweenGroups) {
-            return;
-        }
-
-        table.addEntry(PackageEntry.BLANK_LINE_ENTRY);
     }
 
     private List<String> parseCustomPackagesRegExp(@NotNull final String value) {
@@ -128,9 +125,9 @@ public class CustomImportOrderImporter extends ModuleImporter {
         }
 
         // The ending \. used in the regex value is not required in IntelliJ
-        processedValue = processedValue.endsWith("\\.")
-                ? processedValue.substring(0, processedValue.length() - 2)
-                : processedValue;
+        if (processedValue.endsWith("\\.")) {
+            processedValue = processedValue.substring(0, processedValue.length() - 2);
+        }
 
         String[] customPackages = processedValue.split("\\|");
 
