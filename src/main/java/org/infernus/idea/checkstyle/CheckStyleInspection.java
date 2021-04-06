@@ -76,7 +76,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                             scannableFiles.forEach(ScannableFile::deleteIfRequired);
                         }
                     }, NO_PROBLEMS_FOUND, FIVE_SECONDS),
-                    manager);
+                    manager, isOnTheFly);
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.debug("Inspection cancelled when scanning: " + psiFile.getName());
@@ -95,7 +95,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     @NotNull
     private ProblemDescriptor[] noProblemsFound(@NotNull final InspectionManager manager) {
-        return asProblemDescriptors(NO_PROBLEMS_FOUND, manager);
+        return asProblemDescriptors(NO_PROBLEMS_FOUND, manager, false);
     }
 
     @Nullable
@@ -180,11 +180,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     @NotNull
-    private ProblemDescriptor[] asProblemDescriptors(final List<Problem> results, final InspectionManager manager) {
+    private ProblemDescriptor[] asProblemDescriptors(final List<Problem> results,
+                                                     final InspectionManager manager,
+                                                     final boolean onTheFly) {
         return ofNullable(results)
                 .map(TreeSet::new)
                 .map(problems -> problems.stream()
-                        .map(problem -> problem.toProblemDescriptor(manager))
+                        .map(problem -> problem.toProblemDescriptor(manager, onTheFly))
                         .toArray(ProblemDescriptor[]::new))
                 .orElse(ProblemDescriptor.EMPTY_ARRAY);
     }

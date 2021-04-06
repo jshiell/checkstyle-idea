@@ -39,10 +39,11 @@ public class Problem implements Comparable<Problem> {
     }
 
     @NotNull
-    public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager) {
+    public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager,
+                                                 final boolean onTheFly) {
         return inspectionManager.createProblemDescriptor(target,
                 CheckStyleBundle.message("inspection.message", message()),
-                quickFixes(), problemHighlightType(), false, afterEndOfLine);
+                quickFixes(), problemHighlightType(), onTheFly, afterEndOfLine);
     }
 
     private LocalQuickFix[] quickFixes() {
