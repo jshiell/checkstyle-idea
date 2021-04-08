@@ -59,6 +59,9 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Import Control 1.3//EN",
                                 format("%s://%s/dtds/import_control_1_3.dtd", protocol, host)),
                         "/dtd/import_control_1_3.dtd");
+                DTD_MAP.put(new DTDKey("-//Checkstyle//DTD ImportControl Configuration 1.4//EN",
+                                format("%s://%s/dtds/import_control_1_4.dtd", protocol, host)),
+                        "/dtd/import_control_1_4.dtd");
 
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.0//EN",
                                 format("%s://%s/dtds/suppressions_1_0.dtd", protocol, host)),
@@ -66,10 +69,13 @@ public class CheckStyleEntityResolver implements EntityResolver {
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.1//EN",
                                 format("%s://%s/dtds/suppressions_1_1.dtd", protocol, host)),
                         "/dtd/suppressions_1_1.dtd");
+                DTD_MAP.put(new DTDKey("-//Checkstyle//DTD SuppressionXpathFilter Experimental Configuration 1.1//EN",
+                                format("%s://%s/dtds/suppressions_1_1_xpath_experimental.dtd", protocol, host)),
+                        "/dtd/suppressions_1_1_xpath_experimental.dtd");
                 DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions 1.2//EN",
                                 format("%s://%s/dtds/suppressions_1_2.dtd", protocol, host)),
                         "/dtd/suppressions_1_2.dtd");
-                DTD_MAP.put(new DTDKey("-//Puppy Crawl//DTD Suppressions Xpath Experimental 1.2//EN",
+                DTD_MAP.put(new DTDKey("-//Checkstyle//DTD SuppressionXpathFilter Experimental Configuration 1.2//EN",
                                 format("%s://%s/dtds/suppressions_1_2_xpath_experimental.dtd", protocol, host)),
                         "/dtd/suppressions_1_2_xpath_experimental.dtd");
 
