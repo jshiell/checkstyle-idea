@@ -44,26 +44,26 @@ public class HTTPURLConfigurationLocationTest {
 
     @Test
     public void aRemoteFileCanBeFetched() throws IOException {
-        final InputStream stream = aLocationWithPath("/valid").resolveFile();
+        final InputStream stream = aLocationWithPath("/valid").resolveFile(getClass().getClassLoader());
 
         assertThat(toString(stream), is("A test response"));
     }
 
     @Test
     public void aRemoteFileCanBeFetchedViaARedirect() throws IOException {
-        final InputStream stream = aLocationWithPath("/redirect").resolveFile();
+        final InputStream stream = aLocationWithPath("/redirect").resolveFile(getClass().getClassLoader());
 
         assertThat(toString(stream), is("A test response"));
     }
 
     @Test(expected = FileNotFoundException.class)
     public void aMissingRemoteFileThrowsAFileNotFoundException() throws IOException {
-        aLocationWithPath("/invalid").resolveFile();
+        aLocationWithPath("/invalid").resolveFile(getClass().getClassLoader());
     }
 
     @Test(expected = SocketTimeoutException.class)
     public void aTimeoutThrowsASocketTimeoutException() throws IOException {
-        aTimingOutLocation().resolveFile();
+        aTimingOutLocation().resolveFile(getClass().getClassLoader());
     }
 
     private String toString(InputStream is) {
@@ -126,7 +126,7 @@ public class HTTPURLConfigurationLocationTest {
         }
     }
 
-    private class TimingOutHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
+    private static class TimingOutHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
         TimingOutHTTPURLConfigurationLocation() {
             super(mock(Project.class));
         }

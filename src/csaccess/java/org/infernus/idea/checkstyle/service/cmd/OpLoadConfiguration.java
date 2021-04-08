@@ -11,11 +11,9 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
-import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.IgnoringResolver;
 import org.infernus.idea.checkstyle.service.RulesContainer;
-import org.infernus.idea.checkstyle.service.RulesContainer.BundledRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.ConfigurationLocationRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.ContentRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.VirtualFileRulesContainer;
@@ -81,9 +79,7 @@ public class OpLoadConfiguration
                                final Map<String, String> properties,
                                final Module module,
                                @NotNull final CheckstyleProjectService checkstyleProjectService) {
-        this(configurationLocation instanceof BundledConfigurationLocation
-                ? new BundledRulesContainer(((BundledConfigurationLocation) configurationLocation).getBundledConfig())
-                : new ConfigurationLocationRulesContainer(configurationLocation), properties, module, checkstyleProjectService);
+        this(new ConfigurationLocationRulesContainer(configurationLocation), properties, module, checkstyleProjectService);
     }
 
     public OpLoadConfiguration(@NotNull final VirtualFile rulesFile,
@@ -190,7 +186,7 @@ public class OpLoadConfiguration
     }
 
 
-    void resolveFilePaths(final Project project, @NotNull final Configuration rootElement) throws CheckstyleException {
+    void resolveFilePaths(final Project project, @NotNull final Configuration rootElement) {
         if (!(rootElement instanceof DefaultConfiguration)) {
             LOG.warn("Root element is of unknown class: " + rootElement.getClass().getName());
             return;

@@ -3,15 +3,14 @@ package org.infernus.idea.checkstyle.service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
-import static org.infernus.idea.checkstyle.util.Streams.inMemoryCopyOf;
 
 
 /**
@@ -108,24 +107,4 @@ public interface RulesContainer {
         }
     }
 
-
-    class BundledRulesContainer implements RulesContainer {
-        private final BundledConfig bundledConfig;
-
-        public BundledRulesContainer(@NotNull final BundledConfig bundledConfig) {
-            this.bundledConfig = bundledConfig;
-        }
-
-        @Override
-        @Nullable
-        public String filePath() {
-            return "(bundled " + bundledConfig.getPath() + ")";
-        }
-
-        @Override
-        public InputStream inputStream(final ClassLoader checkstyleClassLoader) throws IOException {
-            // using the csaccess classloader:
-            return inMemoryCopyOf(getClass().getResourceAsStream(bundledConfig.getPath()));
-        }
-    }
 }

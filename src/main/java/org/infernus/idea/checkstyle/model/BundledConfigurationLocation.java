@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
@@ -9,21 +10,22 @@ import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static org.infernus.idea.checkstyle.util.Streams.inMemoryCopyOf;
+
 
 @SuppressWarnings("MethodDoesntCallSuperMethod")
 public class BundledConfigurationLocation extends ConfigurationLocation {
     @NotNull
     private final BundledConfig bundledConfig;
 
-
     BundledConfigurationLocation(@NotNull final BundledConfig bundledConfig,
                                  @NotNull final Project project) {
         super(ConfigurationType.BUNDLED, project);
         super.setLocation(bundledConfig.getLocation());
         super.setDescription(bundledConfig.getDescription());
+
         this.bundledConfig = bundledConfig;
     }
-
 
     @NotNull
     public BundledConfig getBundledConfig() {
@@ -32,7 +34,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public Map<String, String> getProperties() {
-        // the bundled configurations have no properties
+        // given the need to instantiate the CS classpath to read these files, the default impl of this currently causes a loop
         return Collections.emptyMap();
     }
 
@@ -48,10 +50,16 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
 
     @Override
     @NotNull
-    protected InputStream resolveFile() {
-        // This is impossible to resolve here, as this is possible only in the 'csaccess' source set.
-        // Fortunately, it is also unnecessary, because the bundled configs always exist and contain no properties.
-        throw new UnsupportedOperationException("load via CheckstyleActions.loadConfiguration() instead");
+    protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+        try {
+            InputStream source = checkstyleClassLoader.loadClass("com.puppycrawl.tools.checkstyle.Checker").getResourceAsStream(bundledConfig.getPath());
+            if (source == null) {
+                throw new IOException("Could not read " + bundledConfig.getPath() + " from classpath");
+            }
+            return inMemoryCopyOf(source);
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Couldn't find Checkstyle on classpath", e);
+        }
     }
 
     public boolean isEditableInConfigDialog() {

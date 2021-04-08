@@ -144,8 +144,8 @@ public class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setAddAction(new AddLocationAction());
         tableDecorator.setEditAction(new EditPropertiesAction());
         tableDecorator.setRemoveAction(new RemoveLocationAction());
-        tableDecorator.setEditActionUpdater(new DisableForDefaultUpdater());
-        tableDecorator.setRemoveActionUpdater(new DisableForDefaultUpdater());
+        tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndEditable());
+        tableDecorator.setRemoveActionUpdater(new EnableWhenSelectedAndEditable());
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         final JPanel container = new JPanel(new BorderLayout());
@@ -521,9 +521,9 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    private class DisableForDefaultUpdater implements AnActionButtonUpdater {
+    private class EnableWhenSelectedAndEditable implements AnActionButtonUpdater {
         @Override
-        public boolean isEnabled(final AnActionEvent e) {
+        public boolean isEnabled(@NotNull final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
             return selectedItem >= 0 && locationModel.getLocationAt(selectedItem).isEditableInConfigDialog();
         }

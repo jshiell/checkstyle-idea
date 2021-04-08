@@ -23,7 +23,7 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
 
     @NotNull
     @Override
-    protected InputStream resolveFile() throws IOException {
+    protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException {
         TrustManager[] trustAllCerts = new TrustManager[]{new AllTrustingTrustManager()};
 
         try {
@@ -34,7 +34,7 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
             // we care not for security
         }
 
-        return super.resolveFile();
+        return super.resolveFile(checkstyleClassLoader);
     }
 
     private static class AllTrustingTrustManager implements X509TrustManager {

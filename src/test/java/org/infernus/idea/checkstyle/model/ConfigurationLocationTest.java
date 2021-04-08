@@ -201,7 +201,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile() {
+        protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) {
             throw new RuntimeException("Can't be called in default project");
         }
 
@@ -220,7 +220,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile() {
+        protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) {
             return new ByteArrayInputStream(getLocation().getBytes());
         }
 

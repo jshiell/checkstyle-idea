@@ -242,7 +242,7 @@ public class CheckerFactory {
                                                            final CheckstyleToolException checkstyleException) {
         if (checkstyleException.getMessage().contains("Unable to instantiate DoubleCheckedLocking")) {
             return blockAndShowMessage(location, module, checkstyleException, "checkstyle.double-checked-locking");
-        } else if (checkstyleException.getMessage().contains("unable to parse configuration stream")
+        } else if ((checkstyleException.getMessage().contains("unable to parse configuration stream") || checkstyleException.getMessage().contains("Error loading file"))
                 && checkstyleException.getCause() != null) {
             return blockAndShowMessage(location, module, checkstyleException.getCause(),
                     "checkstyle.parse-failed", rootCauseOf(checkstyleException).getMessage());

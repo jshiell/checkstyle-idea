@@ -28,7 +28,7 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
     }
 
     @NotNull
-    protected InputStream resolveFile() throws IOException {
+    protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException {
         if (cachedContent != null && cacheExpiry > System.currentTimeMillis()) {
             return new ByteArrayInputStream(cachedContent);
         }

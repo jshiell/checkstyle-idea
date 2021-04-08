@@ -102,11 +102,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public Map<String, String> getProperties() throws IOException {
-        if (!propertiesCheckedThisSession
-                && (!project.isDefault() || canBeResolvedInDefaultProject())) {
-            resolveFile();
-        }
-
         return new HashMap<>(properties);
     }
 
@@ -188,7 +183,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public InputStream resolve(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
-        InputStream is = resolveFile();
+        InputStream is = resolveFile(checkstyleClassLoader);
 
         if (!propertiesCheckedThisSession) {
             final List<String> propertiesInFile = extractProperties(is, checkstyleClassLoader);
@@ -204,7 +199,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             try {
                 is.reset();
             } catch (IOException e) {
-                is = resolveFile(); // JAR IS doesn't support this, for instance
+                is = resolveFile(checkstyleClassLoader); // JAR IS doesn't support this, for instance
             }
 
             propertiesCheckedThisSession = true;
@@ -351,9 +346,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
      *
      * @return the file to load.
      * @throws IOException if the file cannot be loaded.
+     * @param checkstyleClassLoader the classloader for the configured Checkstyle.
      */
     @NotNull
-    protected abstract InputStream resolveFile() throws IOException;
+    protected abstract InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException;
 
     @Override
     public abstract Object clone();

@@ -312,7 +312,9 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testNoConfiguration() {
-        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module, mock(CheckstyleProjectService.class)) {
+        CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
+        when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+        OpLoadConfiguration testee = new OpLoadConfiguration(configurationLocation, null, module, projectService) {
             @Override
             Configuration callLoadConfiguration(final InputStream inputStream) {
                 return null;
@@ -374,8 +376,10 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testLoadFromString() throws IOException, URISyntaxException {
+        CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
+        when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
         final String configXml = FileUtil.readFile("cmd/config-ok.xml");
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class)).loadConfiguration(configXml);
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService).loadConfiguration(configXml);
         Assert.assertNotNull(csConfig);
     }
 
@@ -383,7 +387,9 @@ public class OpLoadConfigurationTest {
     @Test
     public void testLoadBundledSunChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class))
+        CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
+        when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
                 .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }
@@ -392,7 +398,9 @@ public class OpLoadConfigurationTest {
     @Test
     public void testLoadBundledGoogleChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class))
+        CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
+        when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
                 .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, mock(Project.class)), true, null);
         Assert.assertNotNull(csConfig);
     }

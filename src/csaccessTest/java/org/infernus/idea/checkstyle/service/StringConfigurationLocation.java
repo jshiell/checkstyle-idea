@@ -25,7 +25,7 @@ public class StringConfigurationLocation
 
     @NotNull
     @Override
-    protected InputStream resolveFile() throws IOException {
+    protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException {
         return new ByteArrayInputStream(configurationXml.getBytes(StandardCharsets.UTF_8));
     }
 
