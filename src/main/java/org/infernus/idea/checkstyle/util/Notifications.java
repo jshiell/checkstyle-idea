@@ -17,6 +17,7 @@ import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 
 public final class Notifications {
 
+    // these calls are deprecated, but the replacement extension point requires a base of 2020.3 or above
     private static final NotificationGroup BALLOON_GROUP = balloonGroup(message("plugin.notification.alerts"));
     private static final NotificationGroup LOG_ONLY_GROUP = logOnlyGroup(message("plugin.notification.logging"));
 
