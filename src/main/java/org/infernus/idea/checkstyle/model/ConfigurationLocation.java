@@ -294,8 +294,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private File checkModuleFile(final Module module,
                                  final String fileName) {
-        if (module.getModuleFile() != null) {
-            final File moduleRelativePath = new File(module.getModuleFile().getParent().getPath(), fileName);
+        VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
+        if (moduleDir != null) {
+            final File moduleRelativePath = new File(moduleDir.getPath(), fileName);
             if (moduleRelativePath.exists()) {
                 return moduleRelativePath;
             }

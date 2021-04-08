@@ -4,6 +4,8 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -111,11 +113,12 @@ public class CheckerFactory {
 
     private String basePathFor(final Module module) {
         if (module != null) {
-            final File moduleFile = new File(module.getModuleFilePath());
-            if (moduleFile.getParent() != null
-                    && moduleFile.getParentFile().exists()
-                    && !moduleFile.getParentFile().getName().equals("modules")) {
-                return moduleFile.getParentFile().getAbsolutePath();
+            VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
+            if (moduleDir != null) {
+                final File moduleDirFile = new File(moduleDir.getPath());
+                if (moduleDirFile.exists()) {
+                    return moduleDirFile.getAbsolutePath();
+                }
             }
         }
         return project.getBasePath();
