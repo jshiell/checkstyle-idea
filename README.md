@@ -31,13 +31,17 @@ Checker and should resolve this.
 
 ## Configuration
 
-Configuration is available under the *Settings* dialogue. This controls configuration for both the inspection and static
+Configuration is available under the *Settings* dialogue, under *Tools* -> *Checkstyle*. This controls configuration for both the inspection and static
 scanning.
 
 ### Configuration Files
 
 The main configuration option is that of the CheckStyle file. Multiple CheckStyle file may be added, and swapped between
-by using the checkbox. Files may be added using the 'Add' button.
+by using the checkbox. Files may be added using the 'Add' button, or you can use the versions of the standard Sun and 
+Google configuration that are bundled with the selected version of Checkstyle. Note that you cannot enter properties for
+these bundled rules at present.
+
+If you need to pass authentication information for rules file accessed via HTTP then you can use the `https://user:pass@host/` form to do so.
 
 The *Scan Test Classes* checkbox will enable scanning of Java files under test source roots. If disabled, these files
 will be ignored.
