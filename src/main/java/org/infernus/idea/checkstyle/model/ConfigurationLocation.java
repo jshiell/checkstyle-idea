@@ -101,7 +101,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
     }
 
-    public Map<String, String> getProperties() throws IOException {
+    public Map<String, String> getProperties() {
         return new HashMap<>(properties);
     }
 
@@ -117,7 +117,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.propertiesCheckedThisSession = false;
     }
 
-    public boolean isEditableInConfigDialog() {
+    public boolean isRemovable() {
         return true;
     }
 
@@ -179,6 +179,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             final String propertyName = value.substring(
                     propertyStart + 2, propertyEnd);
             propertyNames.add(propertyName);
+        }
+    }
+
+    @SuppressWarnings("EmptyTryBlock")
+    public void ensurePropertiesAreUpToDate(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+        if (!propertiesCheckedThisSession) {
+            try (InputStream ignored = resolve(checkstyleClassLoader)) {
+                // ignored
+            }
         }
     }
 
@@ -317,21 +326,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
-        return configurationLocation == null
-                || !equals(configurationLocation)
+        return !equals(configurationLocation)
                 || propertiesHaveChanged(configurationLocation);
-
     }
 
     private boolean propertiesHaveChanged(final ConfigurationLocation configurationLocation) {
         if (project.isDefault() && !configurationLocation.canBeResolvedInDefaultProject()) {
             return false;
         }
-        try {
-            return !getProperties().equals(configurationLocation.getProperties());
-        } catch (IOException e) {
-            return true;
-        }
+        return !getProperties().equals(configurationLocation.getProperties());
     }
 
     public String getDescriptor() {
@@ -357,11 +360,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     ConfigurationLocation cloneCommonPropertiesTo(final ConfigurationLocation cloned) {
         cloned.setDescription(getDescription());
         cloned.setLocation(getLocation());
-        try {
-            cloned.setProperties(new HashMap<>(getProperties()));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to resolve properties for " + this);
-        }
+        cloned.setProperties(new HashMap<>(getProperties()));
         return cloned;
     }
 

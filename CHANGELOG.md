@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.51.0** New: Properties can now be overridden for the bundled Google/Sun configurations (#497).
 * **5.51.0** Fixed: Added a couple of missing DTDs to the resolver.
 * **5.50.0** Fixed: ImportOrder third-party/special imports are ignored if regexes are not defined (#500).
 * **5.50.0** New: Replaced tool window icon with Checkstyle small icon (#519).

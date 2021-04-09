@@ -2,8 +2,6 @@ package org.infernus.idea.checkstyle.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
@@ -33,12 +31,6 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     }
 
     @Override
-    public Map<String, String> getProperties() {
-        // given the need to instantiate the CS classpath to read these files, the default impl of this currently causes a loop
-        return Collections.emptyMap();
-    }
-
-    @Override
     public void setLocation(final String location) {
         // do nothing, we always use the hard-coded location
     }
@@ -62,7 +54,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
         }
     }
 
-    public boolean isEditableInConfigDialog() {
+    public boolean isRemovable() {
         return false;
     }
 

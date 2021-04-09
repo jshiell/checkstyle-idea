@@ -38,8 +38,7 @@ scanning.
 
 The main configuration option is that of the CheckStyle file. Multiple CheckStyle file may be added, and swapped between
 by using the checkbox. Files may be added using the 'Add' button, or you can use the versions of the standard Sun and 
-Google configuration that are bundled with the selected version of Checkstyle. Note that you cannot enter properties for
-these bundled rules at present.
+Google configuration that are bundled with the selected version of Checkstyle.
 
 If you need to pass authentication information for rules file accessed via HTTP then you can use the `https://user:pass@host/` form to do so.
 

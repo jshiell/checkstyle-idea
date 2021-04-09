@@ -7,21 +7,18 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.annotations.MapAnnotation;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
-import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.OS;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,7 +60,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     private ProjectSettings defaultProjectSettings() {
-        return ProjectSettings.create(project, projectFilePaths(), defaultConfiguration(project).build());
+        return ProjectSettings.create(projectFilePaths(), defaultConfiguration(project).build());
     }
 
     public ProjectSettings getState() {
@@ -90,7 +87,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        projectSettings = ProjectSettings.create(project, projectFilePaths(), currentPluginConfig);
+        projectSettings = ProjectSettings.create(projectFilePaths(), currentPluginConfig);
     }
 
     /**
@@ -240,8 +237,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         @MapAnnotation
         private Map<String, String> configuration;
 
-        static ProjectSettings create(@NotNull final Project project,
-                                      @NotNull final ProjectFilePaths projectFilePaths,
+        static ProjectSettings create(@NotNull final ProjectFilePaths projectFilePaths,
                                       @NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
@@ -249,7 +245,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
             mapForSerialization.put(COPY_LIBS, String.valueOf(currentPluginConfig.isCopyLibs()));
 
-            serializeLocations(project, mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
+            serializeLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
 
             String s = serializeThirdPartyClasspath(projectFilePaths, currentPluginConfig.getThirdPartyClasspath());
             if (!Strings.isBlank(s)) {
@@ -274,27 +270,20 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             return configuration;
         }
 
-        private static void serializeLocations(@NotNull final Project project,
-                                               @NotNull final Map<String, String> storage,
+        private static void serializeLocations(@NotNull final Map<String, String> storage,
                                                @NotNull final List<ConfigurationLocation> configurationLocations) {
             int index = 0;
             for (final ConfigurationLocation configurationLocation : configurationLocations) {
                 storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
-                try {
-                    final Map<String, String> properties = configurationLocation.getProperties();
-                    if (properties != null) {
-                        for (final Map.Entry<String, String> prop : properties.entrySet()) {
-                            String value = prop.getValue();
-                            if (value == null) {
-                                value = "";
-                            }
-                            storage.put(PROPERTIES_PREFIX + index + "." + prop.getKey(), value);
+                final Map<String, String> properties = configurationLocation.getProperties();
+                if (properties != null) {
+                    for (final Map.Entry<String, String> prop : properties.entrySet()) {
+                        String value = prop.getValue();
+                        if (value == null) {
+                            value = "";
                         }
+                        storage.put(PROPERTIES_PREFIX + index + "." + prop.getKey(), value);
                     }
-                } catch (IOException e) {
-                    LOG.warn("Failed to read properties from " + configurationLocation, e);
-                    Notifications.showError(project, CheckStyleBundle.message("checkstyle" + ""
-                            + ".could-not-read-properties", configurationLocation.getLocation()));
                 }
 
                 ++index;

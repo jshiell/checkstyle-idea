@@ -138,9 +138,9 @@ public class CheckerFactory {
                                         @Nullable final Module module) {
         final ListPropertyResolver propertyResolver;
         try {
+            location.ensurePropertiesAreUpToDate(checkstyleProjectService.underlyingClassLoader());
             final Map<String, String> properties = removeEmptyProperties(location.getProperties());
-            propertyResolver = new ListPropertyResolver(
-                    addEclipseCsProperties(location, module, properties));
+            propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location, module, properties));
         } catch (IOException e) {
             LOG.info("CheckStyle properties could not be loaded: " + location.getLocation(), e);
             return blockAndShowMessage(location, module, e, "checkstyle.file-io-failed", location.getLocation());

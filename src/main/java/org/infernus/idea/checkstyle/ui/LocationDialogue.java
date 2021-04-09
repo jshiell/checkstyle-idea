@@ -317,15 +317,11 @@ public class LocationDialogue extends JDialog {
 
                 case COMPLETE:
                 case ERROR:
-                    try {
-                        final Map<String, String> properties = configurationLocation.getProperties();
-                        if (properties == null || properties.isEmpty()) {
-                            moveToStep(Step.SELECT);
-                        } else {
-                            moveToStep(Step.PROPERTIES);
-                        }
-                    } catch (IOException e1) {
+                    final Map<String, String> properties = configurationLocation.getProperties();
+                    if (properties == null || properties.isEmpty()) {
                         moveToStep(Step.SELECT);
+                    } else {
+                        moveToStep(Step.PROPERTIES);
                     }
                     return;
 
