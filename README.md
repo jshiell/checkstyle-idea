@@ -201,6 +201,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Alexander Schwartz (@ahus1)
 * Mustapha Zorgati (@mustaphazorgati)
 * Roman Karpenko (@neomoto)
+* Akash Mondal (@AkMo3)
 
 And also thanks are due to the authors and contributors of:
 
