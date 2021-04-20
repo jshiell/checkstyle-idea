@@ -2,20 +2,22 @@ package org.infernus.idea.checkstyle.service;
 
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
+
 
 public class CheckStyleAuditListenerTest {
     private int counter = 0;
 
     @Test
-    public void testSeverityLevels() throws Exception {
+    public void testSeverityLevels() {
         final CheckStyleAuditListener underTest = new CheckStyleAuditListener(Collections.emptyMap(), false, 2,
                 Optional.empty(), Collections.emptyList());
         underTest.addError(createDummyEvent(SeverityLevel.INFO));
@@ -26,70 +28,49 @@ public class CheckStyleAuditListenerTest {
     }
 
     @Test
-    public void testAddException() throws Exception {
+    public void testAddException() {
         final CheckStyleAuditListener underTest = new CheckStyleAuditListener(Collections.emptyMap(), false, 2,
                 Optional.empty(), Collections.emptyList());
-        underTest.addException(createDummyEvent(SeverityLevel.ERROR), //
+        underTest.addException(createDummyEvent(SeverityLevel.ERROR),
                 new IllegalArgumentException("Exception for unit testing only - not a real exception"));
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testWithoutLocalizedMessage() {
         final CheckStyleAuditListener underTest = new CheckStyleAuditListener(Collections.emptyMap(), false, 2,
                 Optional.empty(), Collections.emptyList());
+        underTest.addError(new AuditEvent("source", "filename.java"));  // quite unlikely to happen in real life
+    }
+
+    private AuditEvent createDummyEvent(@Nullable final SeverityLevel severityLevel) {
         try {
-            underTest.addError(new AuditEvent("source", "filename.java"));  // quite unlikely to happen in real life
-            Assert.fail("expected exception was not thrown");
-        } catch (NullPointerException e) {
-            // expected
+            return (AuditEvent) auditEvent().newInstance("source", "filename.java", createMessage(severityLevel));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create dummy event", e);
         }
     }
 
-    private AuditEvent createDummyEvent(@Nullable final SeverityLevel pSeverityLevel) throws Exception {
-        Constructor<?> auditEvent = getAuditEvent();
-        Class<?> messageClass = getMessageClass();
-        Class<?>[] Type = {int.class, int.class, String.class, String.class, Object[].class,
-                SeverityLevel.class, String.class, Class.class, String.class};
-        Constructor<?> cons = messageClass.getDeclaredConstructor(Type);
-
-        Object message = cons.newInstance(42 + (counter++), 21, "bundle", "message text",
-                null, pSeverityLevel, "moduleId", CheckStyleAuditListenerTest.class, null);
-        return (AuditEvent) auditEvent.newInstance("source", "filename.java", message);
+    @NotNull
+    private Object createMessage(@Nullable SeverityLevel severityLevel) throws ReflectiveOperationException {
+        Constructor<?> messageConstructor = messageClass().getDeclaredConstructor(int.class, int.class, String.class,
+                String.class, Object[].class, SeverityLevel.class, String.class, Class.class, String.class);
+        return messageConstructor.newInstance(42 + (counter++), 21, "bundle", "message text",
+                null, severityLevel, "moduleId", CheckStyleAuditListenerTest.class, null);
     }
 
-    private Class<?> getMessageClass() throws NullPointerException, ClassNotFoundException {
-        Class messageClass = null;
-        try {
-            messageClass = Class.forName("com.puppycrawl.tools.checkstyle.api.Violation");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Violation class not found");
-        }
-
-        if (messageClass == null) {
+    private Class<?> messageClass() {
+        for (String possibleClassName : asList("Violation", "LocalizedMessage")) {
             try {
-                messageClass = Class.forName("com.puppycrawl.tools.checkstyle.api.LocalizedMessage");
-            } catch (ClassNotFoundException e) {
-                System.out.println("LocalizedClass class Not found");
-                e.printStackTrace();
-                throw e;
+                return Class.forName("com.puppycrawl.tools.checkstyle.api." + possibleClassName);
+            } catch (ClassNotFoundException ignored) {
             }
         }
-        return messageClass;
+
+        throw new RuntimeException("Unable to find a message class for the version of Checkstyle on the classpath");
     }
 
-    private Constructor<?> getAuditEvent() throws Exception {
-        final Class<?> auditEventClass;
-        final Constructor<?> auditEvent;
-        try {
-            auditEventClass = Class.forName("com.puppycrawl.tools.checkstyle.api.AuditEvent");
-        } catch (ClassNotFoundException e) {
-            System.out.println("AuditEvent class Not found");
-            e.printStackTrace();
-            throw e;
-        }
-
-        Class<?>[] type = { Object.class, String.class, getMessageClass()};
-        auditEvent = auditEventClass.getDeclaredConstructor(type);
-        return auditEvent;
+    private Constructor<?> auditEvent() throws ClassNotFoundException, NoSuchMethodException {
+        return Class.forName("com.puppycrawl.tools.checkstyle.api.AuditEvent")
+                .getDeclaredConstructor(Object.class, String.class, messageClass());
     }
 }
