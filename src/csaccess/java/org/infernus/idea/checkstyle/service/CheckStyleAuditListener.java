@@ -88,9 +88,6 @@ public class CheckStyleAuditListener
 
     private Issue toIssue(final AuditEvent auditEvent) {
         String msg = auditEvent.getMessage();
-        if (auditEvent.getLocalizedMessage() != null) {
-            msg = auditEvent.getLocalizedMessage().getMessage();
-        }
         final SeverityLevel level = readSeverityLevel(auditEvent.getSeverityLevel());
         return new Issue(auditEvent.getFileName(), auditEvent.getLine(), auditEvent.getColumn(), msg, level,
                 auditEvent.getSourceName());

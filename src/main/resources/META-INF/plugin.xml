@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.51.0</version>
+    <version>5.52.0</version>
     <idea-version since-build="201.8743.12"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.52.0: New: Added Checkstyle 8.42 (#524).</li>
     <li>5.51.0: New: Properties can now be overridden for the bundled Google/Sun configurations (#497).</li>
     <li>5.51.0: Fixed: Added a couple of missing DTDs to the resolver.</li>
     <li>5.50.0: Fixed: ImportOrder third-party/special imports are ignored if regexes are not defined (#500).</li>
@@ -39,7 +40,6 @@
     <li>5.45.0: New: Added Checkstyle 8.37.</li>
     <li>5.44.0: New: Added Checkstyle 8.36.2.</li>
     <li>5.43.0: New: Added Checkstyle 8.36.1.</li>
-    <li>5.42.0: New: Added Checkstyle 8.36.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
