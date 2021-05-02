@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.build;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -23,8 +24,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * The main plugin class. The action starts here.
  */
 public class GradlePluginMain
-    implements Plugin<Project>
-{
+    implements Plugin<Project> {
     public static final String CSLIB_TARGET_SUBFOLDER = "checkstyle/lib";
 
     private CheckstyleVersions supportedCsVersions = null;
@@ -139,11 +139,22 @@ public class GradlePluginMain
             if (pIsTest) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
+                forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
+            } else {
+                tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
             }
 
             copyTask.from(gatherTask.getBundledJarsDir());
             copyTask.into(new File(pProject.getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
                     + "/CheckStyle-IDEA/" + CSLIB_TARGET_SUBFOLDER));
+        });
+    }
+
+    private void forEachXTest(final TaskContainer tasks, final Consumer<Task> taskConsumer) {
+        supportedCsVersions.getVersions().forEach((final String csVersion) -> {
+            if (!supportedCsVersions.getBaseVersion().equals(csVersion)) {
+                taskConsumer.accept(tasks.getByName(CsaccessTestTask.getTaskName(csVersion)));
+            }
         });
     }
 
@@ -170,6 +181,9 @@ public class GradlePluginMain
             if (pIsTest) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
+                forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
+            } else {
+                tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
             }
 
             final String targetSubfolder = "checkstyle/classes";
