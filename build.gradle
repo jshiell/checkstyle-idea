@@ -7,7 +7,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.intellij' version '0.7.3'
+    id 'org.jetbrains.intellij' version '1.0'
     id 'com.dorongold.task-tree' version '1.5'
     id 'org.infernus.idea.checkstyle.build'
 }
@@ -24,7 +24,7 @@ version = '5.52.0'
 
 intellij {
     version = 'IC-2020.1.4'
-    pluginName 'CheckStyle-IDEA'
+    pluginName = 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false
     plugins = ['java']
