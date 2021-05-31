@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.53.0** New: Added Checkstyle 8.43.
 * **5.52.0** Fixed: Inspection is now activated for whitespace changes (#513 / IDEA-265941).
 * **5.52.0** New: Added Checkstyle 8.42 (#524).
 * **5.51.0** New: Properties can now be overridden for the bundled Google/Sun configurations (#497).
