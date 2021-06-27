@@ -51,4 +51,9 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
         public void checkServerTrusted(final X509Certificate[] certs, final String authType) {
         }
     }
+
+    @Override
+    public Object clone() {
+        return cloneCommonPropertiesTo(new InsecureHTTPURLConfigurationLocation(getProject()));
+    }
 }

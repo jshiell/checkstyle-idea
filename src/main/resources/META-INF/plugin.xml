@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.53.0</version>
+    <version>5.53.1</version>
     <idea-version since-build="201.8743.12"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.53.1: Fixed: Insecure HTTP locations are now saved correctly (#528).</li>
     <li>5.53.0: New: Added Checkstyle 8.43.</li>
     <li>5.52.0: Fixed: Inspection is now activated for whitespace changes (#513 / IDEA-265941).</li>
     <li>5.52.0: New: Added Checkstyle 8.42 (#524).</li>
