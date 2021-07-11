@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.54.0** New: Added Checkstyle 8.44.
 * **5.53.1** Fixed: Insecure HTTP locations are now saved correctly (#528).
 * **5.53.0** New: Added Checkstyle 8.43.
 * **5.52.0** Fixed: Inspection is now activated for whitespace changes (#513 / IDEA-265941).
