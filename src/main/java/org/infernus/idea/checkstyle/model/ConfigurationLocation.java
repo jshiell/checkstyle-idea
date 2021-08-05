@@ -254,8 +254,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private boolean existsOnClasspath(final String fileName,
                                      final ClassLoader checkstyleClassLoader) {
-        return checkstyleClassLoader.getResource(fileName) != null
-                || (fileName.startsWith("/") && checkstyleClassLoader.getResource(fileName.substring(1)) != null);
+        return checkstyleClassLoader.getResource(fileName.startsWith("/") ? fileName.substring(1) : fileName) != null;
     }
 
     private File checkCommonPathsForTarget(final String fileName,
