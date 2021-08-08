@@ -8,7 +8,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -86,8 +86,8 @@ public class GradlePluginMain
         TaskProvider<Task> provider = tasks.register(CsaccessTestTask.XTEST_TASK_NAME);
         provider.configure((Task xtestTask) -> {
             xtestTask.setGroup(CsaccessTestTask.XTEST_GROUP_NAME);
-            xtestTask.setDescription("Runs the '" + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME + "' unit " +
-                    "tests against all supported Checkstyle runtimes.");
+            xtestTask.setDescription("Runs the '" + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME + "' unit "
+                    + "tests against all supported Checkstyle runtimes.");
             tasks.getByName(LifecycleBasePlugin.CHECK_TASK_NAME).dependsOn(xtestTask);
         });
 
@@ -124,19 +124,19 @@ public class GradlePluginMain
     }
 
 
-    private void createCopyCheckstyleArtifactsToSandboxTask(final Project pProject, final boolean pIsTest) {
-        final TaskContainer tasks = pProject.getTasks();
-        final String taskName = pIsTest ? "copyCheckstyleArtifactsToTestSandbox" : "copyCheckstyleArtifactsToSandbox";
+    private void createCopyCheckstyleArtifactsToSandboxTask(final Project project, final boolean test) {
+        final TaskContainer tasks = project.getTasks();
+        final String taskName = test ? "copyCheckstyleArtifactsToTestSandbox" : "copyCheckstyleArtifactsToSandbox";
         final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
         taskProvider.configure((Copy copyTask) -> {
             copyTask.setGroup("intellij");
             copyTask.setDescription("Adds the gathered Checkstyle artifacts to the prepared "
-                    + (pIsTest ? "test " : "") + "sandbox");
+                    + (test ? "test " : "") + "sandbox");
 
             final GatherCheckstyleArtifactsTask gatherTask =
                     (GatherCheckstyleArtifactsTask) tasks.getByName(GatherCheckstyleArtifactsTask.NAME);
             copyTask.dependsOn(gatherTask, "prepareTestingSandbox");
-            if (pIsTest) {
+            if (test) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
                 forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
@@ -145,7 +145,7 @@ public class GradlePluginMain
             }
 
             copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(pProject.getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
+            copyTask.into(new File(project.getBuildDir(), "idea-sandbox/plugins" + (test ? "-test" : "")
                     + "/CheckStyle-IDEA/" + CSLIB_TARGET_SUBFOLDER));
         });
     }
@@ -172,10 +172,10 @@ public class GradlePluginMain
         final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
         taskProvider.configure((Copy copyTask) -> {
             copyTask.setGroup("intellij");
-            copyTask.setDescription("Copy classes from \'" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
-                    + "\' sourceset into the prepared " + (pIsTest ? "test " : "") + "sandbox");
+            copyTask.setDescription("Copy classes from '" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
+                    + "' sourceset into the prepared " + (pIsTest ? "test " : "") + "sandbox");
 
-            final JavaPluginConvention jpc = pProject.getConvention().getPlugin(JavaPluginConvention.class);
+            final JavaPluginExtension jpc = pProject.getExtensions().getByType(JavaPluginExtension.class);
             SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
             copyTask.dependsOn(tasks.getByName(csaccessSourceSet.getClassesTaskName()));
             if (pIsTest) {

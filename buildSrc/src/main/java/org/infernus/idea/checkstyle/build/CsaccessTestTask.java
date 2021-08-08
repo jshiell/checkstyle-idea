@@ -8,7 +8,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
@@ -32,11 +32,10 @@ public class CsaccessTestTask
 
 
     public CsaccessTestTask() {
-
         super();
         final Project project = getProject();
-        final JavaPluginConvention javaConvention = project.getConvention().getPlugin(JavaPluginConvention.class);
-        final SourceSet csaccessTestSourceSet = javaConvention.getSourceSets().getByName(CustomSourceSetCreator
+        final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
+        final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator
                 .CSACCESSTEST_SOURCESET_NAME);
 
         dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
@@ -55,13 +54,13 @@ public class CsaccessTestTask
         csVersion = pCheckstyleVersion;
         setDescription("Runs the '" + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME + "' unit tests against a "
                 + "Checkstyle " + pCheckstyleVersion + " runtime.");
-        getReports().getJunitXml().setEnabled(false);
+        getReports().getJunitXml().getRequired().set(false);
         if (isBaseVersion) {
             setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
-            getReports().getHtml().setEnabled(true);
+            getReports().getHtml().getRequired().set(true);
         } else {
             setGroup(XTEST_GROUP_NAME);
-            getReports().getHtml().setEnabled(false);
+            getReports().getHtml().getRequired().set(false);
         }
 
         // Make the Checkstyle version available to the test cases via a system property.
@@ -90,8 +89,8 @@ public class CsaccessTestTask
 
         if (originalClasspath != null) {
             final Project project = getProject();
-            final JavaPluginConvention javaConvention = project.getConvention().getPlugin(JavaPluginConvention.class);
-            final SourceSetContainer sourceSets = javaConvention.getSourceSets();
+            final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
+            final SourceSetContainer sourceSets = jpc.getSourceSets();
             final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
             final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
             final SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);

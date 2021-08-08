@@ -138,9 +138,9 @@ public class CustomSourceSetCreator {
             jacocoReportTask.setDescription("Generate exclusive JaCoCo test report on the '"
                     + CSACCESS_SOURCESET_NAME + "' classes");
             configureJacocoTask(jacocoReportTask);
-            jacocoReportTask.getReports().getXml().setEnabled(true);
-            jacocoReportTask.getReports().getCsv().setEnabled(false);
-            jacocoReportTask.getReports().getHtml().setEnabled(true);
+            jacocoReportTask.getReports().getXml().getRequired().set(true);
+            jacocoReportTask.getReports().getCsv().getRequired().set(false);
+            jacocoReportTask.getReports().getHtml().getRequired().set(true);
         });
 
         // Verify minimum line coverage for 'csaccess' source set
