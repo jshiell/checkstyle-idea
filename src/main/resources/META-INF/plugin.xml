@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.55.0</version>
+    <version>5.55.1</version>
     <idea-version since-build="201.8743.12"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
     <li>5.55.0: New: Added Checkstyle 8.45.</li>
     <li>5.54.0: New: Added Checkstyle 8.44.</li>
     <li>5.53.1: Fixed: Insecure HTTP locations are now saved correctly (#528).</li>
@@ -43,8 +44,6 @@
     <li>5.46.0: New: Added Checkstyle 8.38, 8.39.</li>
     <li>5.45.1: Fixed: optimised download size.</li>
     <li>5.45.0: New: Added Checkstyle 8.37.</li>
-    <li>5.44.0: New: Added Checkstyle 8.36.2.</li>
-    <li>5.43.0: New: Added Checkstyle 8.36.1.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>

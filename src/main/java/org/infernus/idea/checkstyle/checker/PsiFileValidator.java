@@ -56,9 +56,9 @@ final class PsiFileValidator {
         return JavaProjectRootsUtil.isInGeneratedCode(psiFile.getVirtualFile(), psiFile.getProject());
     }
 
-    private static boolean isInSource(@NotNull final PsiFile psiFile, final PluginConfigurationManager pluginConfig) {
+    private static boolean isInSource(@NotNull final PsiFile psiFile, @NotNull final PluginConfigurationManager pluginConfig) {
         return pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
-            || ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile());
+            || (psiFile.getVirtualFile() != null && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
     }
 
     private static boolean isTestClass(final PsiElement element) {
