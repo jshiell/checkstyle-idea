@@ -1,16 +1,15 @@
 package org.infernus.idea.checkstyle.service;
 
-import antlr.MismatchedTokenException;
-import antlr.RecognitionException;
-import antlr.TokenStreamException;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 
 public class ExceptionWrapperTest {
@@ -22,26 +21,30 @@ public class ExceptionWrapperTest {
     }
 
     @Test
-    public void aCheckstyleExceptionThatHasACauseOfARecognitionExceptionIsWrappedInAPluginParseException() {
+    public void aCheckstyleExceptionThatHasACauseOfAnAntlrV2RecognitionExceptionIsWrappedInAPluginParseException() {
+        assumeTrue(classExists("antlr.RecognitionException"));
+
         assertThat(
-                new ExceptionWrapper()
-                        .wrap(null, new CheckstyleException("aTestException", new RecognitionException("aTestException"))),
+                new ExceptionWrapper().wrap(null, new CheckstyleException("aTestException", instantiateExceptionByNameWithMessage("antlr.RecognitionException"))),
                 is(instanceOf(CheckStylePluginParseException.class)));
     }
 
     @Test
     public void aCheckstyleExceptionThatHasACauseOfASubclassOfRecognitionExceptionIsWrappedInAPluginParseException() {
+        assumeTrue(classExists("antlr.MismatchedTokenException"));
+
         assertThat(
-                new ExceptionWrapper()
-                        .wrap(null, new CheckstyleException("aTestException", new MismatchedTokenException())),
+                new ExceptionWrapper().wrap(null, new CheckstyleException("aTestException", instantiateExceptionByName("antlr.MismatchedTokenException"))),
                 is(instanceOf(CheckStylePluginParseException.class)));
     }
 
     @Test
     public void aCheckstyleExceptionThatHasACauseOfATokenStreamExceptionIsWrappedInAPluginParseException() {
+        assumeTrue(classExists("antlr.TokenStreamException"));
+
         assertThat(
                 new ExceptionWrapper()
-                        .wrap(null, new CheckstyleException("aTestException", new TokenStreamException("aTestException"))),
+                        .wrap(null, new CheckstyleException("aTestException", instantiateExceptionByNameWithMessage("antlr.TokenStreamException"))),
                 is(instanceOf(CheckStylePluginParseException.class)));
     }
 
@@ -91,5 +94,32 @@ public class ExceptionWrapperTest {
                 new ExceptionWrapper()
                         .wrap(null, new CheckstyleException("aTestException", new IllegalStateException("aTestException"))),
                 is(instanceOf(CheckStylePluginException.class)));
+    }
+
+    @NotNull
+    private Throwable instantiateExceptionByName(String s) {
+        try {
+            return (Throwable) Class.forName(s).getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Test exception instantiation failed for " + s, e);
+        }
+    }
+
+    @NotNull
+    private Throwable instantiateExceptionByNameWithMessage(String s) {
+        try {
+            return (Throwable) Class.forName(s).getDeclaredConstructor(String.class).newInstance("aTestException");
+        } catch (Exception e) {
+            throw new RuntimeException("Test exception instantiation failed for " + s, e);
+        }
+    }
+
+    private boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

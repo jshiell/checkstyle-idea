@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.56.0: New: Added Checkstyle 9.0 (#536).</li>
     <li>5.56.0: New: Added Checkstyle 8.45.1.</li>
     <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
     <li>5.55.0: New: Added Checkstyle 8.45.</li>
