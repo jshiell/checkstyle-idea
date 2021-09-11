@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.55.1</version>
+    <version>5.56.0</version>
     <idea-version since-build="201.8743.12"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.56.0: New: Added Checkstyle 8.45.1.</li>
     <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
     <li>5.55.0: New: Added Checkstyle 8.45.</li>
     <li>5.54.0: New: Added Checkstyle 8.44.</li>
