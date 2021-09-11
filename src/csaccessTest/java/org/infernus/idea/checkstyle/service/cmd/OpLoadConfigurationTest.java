@@ -84,11 +84,11 @@ public class OpLoadConfigurationTest {
     @Test
     public void filePathsAreNotResolvedOnANonDefaultImplementationOfConfiguration() {
         final Configuration config = mock(Configuration.class);
-        verifyZeroInteractions(config);
+        verifyNoInteractions(config);
     }
 
     @Test
-    public void childrenOfUpdatedElementsArePreserved() throws CheckstyleException {
+    public void childrenOfUpdatedElementsArePreserved() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter").withAttribute("file", "aFileToResolve")
                         .withChild(ConfigurationBuilder.config("aChildModule")))
@@ -101,7 +101,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void attributesOfUpdatedElementsArePreserved() throws CheckstyleException {
+    public void attributesOfUpdatedElementsArePreserved() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("ImportControl")
@@ -118,7 +118,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void messagesOfUpdatedElementsArePreserved() throws CheckstyleException {
+    public void messagesOfUpdatedElementsArePreserved() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "aFileToResolve")
@@ -135,7 +135,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void multipleElementsAreUpdated() throws CheckstyleException {
+    public void multipleElementsAreUpdated() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "aFileToResolve"))
@@ -157,7 +157,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void removalOfElementsDoesNotEffectOtherElements() throws CheckstyleException {
+    public void removalOfElementsDoesNotEffectOtherElements() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "anUnresolvableFile"))
@@ -174,8 +174,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionDoesNotModifyTheConfiguration() throws
-            CheckstyleException {
+    public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionDoesNotModifyTheConfiguration() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "triggersAnIoException"))
@@ -188,8 +187,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionTriggersAnErrorNotification() throws
-            CheckstyleException {
+    public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionTriggersAnErrorNotification() {
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "triggersAnIoException"))
@@ -203,7 +201,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aModuleWithAFilenameThatIsNotResolvesTriggersAWarningNotification() throws CheckstyleException {
+    public void aModuleWithAFilenameThatIsNotResolvesTriggersAWarningNotification() {
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("RegexpHeader")
@@ -219,7 +217,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aModuleWithAFilenameThatIsBlankDoesNotHaveResolutionAttempted() throws CheckstyleException {
+    public void aModuleWithAFilenameThatIsBlankDoesNotHaveResolutionAttempted() {
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("ImportControl")
@@ -233,7 +231,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aSuppressionFilterWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
+    public void aSuppressionFilterWithAResolvableFilenameHasTheModuleUpdated() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "aFileToResolve"))
@@ -246,7 +244,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aSuppressionFilterWithAnUnresolvableFilenameHasTheModuleRemoved() throws CheckstyleException {
+    public void aSuppressionFilterWithAnUnresolvableFilenameHasTheModuleRemoved() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "anUnresolvableFile"))
@@ -256,7 +254,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aRegexpHeaderWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
+    public void aRegexpHeaderWithAResolvableFilenameHasTheModuleUpdated() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("RegexpHeader")
@@ -271,7 +269,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aRegexpHeaderWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() throws CheckstyleException {
+    public void aRegexpHeaderWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() {
         Configuration config = ConfigurationBuilder.checker().withChild(ConfigurationBuilder.config("TreeWalker")
                 .withChild(ConfigurationBuilder.config("RegexpHeader").withAttribute("headerFile",
                         "anUnresolvableFile"))).build();
@@ -282,7 +280,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void aImportControlWithAResolvableFilenameHasTheModuleUpdated() throws CheckstyleException {
+    public void aImportControlWithAResolvableFilenameHasTheModuleUpdated() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("ImportControl")
@@ -297,7 +295,7 @@ public class OpLoadConfigurationTest {
     }
 
     @Test
-    public void anImportControlWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() throws CheckstyleException {
+    public void anImportControlWithAnUnresolvableFilenameHasTheModuleReferenceRemoved() {
         Configuration config = ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("ImportControl")
@@ -329,7 +327,7 @@ public class OpLoadConfigurationTest {
 
 
     @Test
-    public void testWrongConfigurationClass() throws CheckstyleException {
+    public void testWrongConfigurationClass() {
         Configuration config = new Configuration() {
             @Override
             public String[] getAttributeNames() {
