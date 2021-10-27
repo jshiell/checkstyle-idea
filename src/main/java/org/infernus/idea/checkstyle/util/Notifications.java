@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.util;
 
 import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.jetbrains.annotations.NotNull;
@@ -8,8 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static com.intellij.notification.NotificationGroup.balloonGroup;
-import static com.intellij.notification.NotificationGroup.logOnlyGroup;
 import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;
 import static com.intellij.notification.NotificationType.*;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -17,9 +16,10 @@ import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 
 public final class Notifications {
 
-    // these calls are deprecated, but the replacement extension point requires a base of 2020.3 or above
-    private static final NotificationGroup BALLOON_GROUP = balloonGroup(message("plugin.notification.alerts"));
-    private static final NotificationGroup LOG_ONLY_GROUP = logOnlyGroup(message("plugin.notification.logging"));
+    private static final NotificationGroup BALLOON_GROUP =
+            NotificationGroupManager.getInstance().getNotificationGroup("CheckStyleIDEABalloonGroup");
+    private static final NotificationGroup LOG_ONLY_GROUP =
+            NotificationGroupManager.getInstance().getNotificationGroup("CheckStyleIDEALogOnlyGroup");
 
     private Notifications() {
     }

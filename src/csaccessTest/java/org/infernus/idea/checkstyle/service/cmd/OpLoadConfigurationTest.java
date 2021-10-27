@@ -1,19 +1,13 @@
 package org.infernus.idea.checkstyle.service.cmd;
 
 import com.google.common.collect.ImmutableMap;
-import com.intellij.ide.plugins.PluginUtil;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
+import com.intellij.notification.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.extensions.ExtensionsArea;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.messages.MessageBus;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
@@ -28,7 +22,7 @@ import org.infernus.idea.checkstyle.service.FileUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +39,10 @@ import static org.mockito.Mockito.*;
 
 public class OpLoadConfigurationTest {
     private static final Project PROJECT = mock(Project.class);
+    private static final NotificationGroup BALLOON_NOTIFICATION_GROUP = mock(NotificationGroup.class);
 
     private final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
     private final Module module = mock(Module.class);
-    private final Notifications notifications = mock(Notifications.class);
 
     private OpLoadConfiguration underTest;
 
@@ -56,7 +50,7 @@ public class OpLoadConfigurationTest {
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        final ClassLoader checkstyleClassloader = new URLClassLoader(new URL[] {});
+        final ClassLoader checkstyleClassloader = new URLClassLoader(new URL[]{});
         final CheckstyleProjectService checkstyleProjectService = mock(CheckstyleProjectService.class);
         when(checkstyleProjectService.underlyingClassLoader()).thenReturn(checkstyleClassloader);
 
@@ -69,19 +63,20 @@ public class OpLoadConfigurationTest {
     }
 
     private void interceptApplicationNotifications() {
-        final MessageBus messageBus = mock(MessageBus.class);
-        when(PROJECT.getMessageBus()).thenReturn(messageBus);
-        when(messageBus.syncPublisher(Notifications.TOPIC)).thenReturn(notifications);
+        reset(BALLOON_NOTIFICATION_GROUP);
+        when(BALLOON_NOTIFICATION_GROUP.createNotification(
+                anyString(),
+                anyString(),
+                ArgumentMatchers.any(NotificationType.class),
+                ArgumentMatchers.any(NotificationListener.class)))
+                .thenReturn(mock(Notification.class));
 
-        final ExtensionsArea extensionArea = mock(ExtensionsArea.class);
-        final PluginUtil pluginUtil = mock(PluginUtil.class);
         final NotificationGroupManager notificationGroupManager = mock(NotificationGroupManager.class);
+        when(notificationGroupManager.getNotificationGroup("CheckStyleIDEABalloonGroup"))
+                .thenReturn(BALLOON_NOTIFICATION_GROUP);
 
         final Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
-        when(application.getMessageBus()).thenReturn(messageBus);
-        when(application.getExtensionArea()).thenReturn(extensionArea);
-        when(application.getService(PluginUtil.class)).thenReturn(pluginUtil);
         when(application.getService(NotificationGroupManager.class)).thenReturn(notificationGroupManager);
         ApplicationManager.setApplication(application, mock(Disposable.class));
     }
@@ -193,20 +188,32 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void aModuleWithAFilenameThatRaisesAnIOExceptionOnResolutionTriggersAnErrorNotification() {
+        final Notification notification = mock(Notification.class);
+        when(BALLOON_NOTIFICATION_GROUP.createNotification(
+                eq(""),
+                eq(CheckStyleBundle.message("checkstyle.checker-failed", "aTriggeredIoException")),
+                eq(NotificationType.ERROR),
+                ArgumentMatchers.any(NotificationListener.class)))
+                .thenReturn(notification);
+
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
                         .withAttribute("file", "triggersAnIoException"))
                 .build());
 
-        final Notification notification = sentNotification();
-        assertThat(notification, is(not(nullValue())));
-        assertThat(notification.getType(), is(equalTo(NotificationType.ERROR)));
-        assertThat(notification.getContent(),
-                is(equalTo(CheckStyleBundle.message("checkstyle.checker-failed", "aTriggeredIoException"))));
+        verify(notification).notify(PROJECT);
     }
 
     @Test
     public void aModuleWithAFilenameThatIsNotResolvesTriggersAWarningNotification() {
+        final Notification notification = mock(Notification.class);
+        when(BALLOON_NOTIFICATION_GROUP.createNotification(
+                eq(""),
+                eq(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader")),
+                eq(NotificationType.WARNING),
+                ArgumentMatchers.any(NotificationListener.class)))
+                .thenReturn(notification);
+
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("RegexpHeader")
@@ -214,11 +221,12 @@ public class OpLoadConfigurationTest {
                                         "anUnresolvableFile")))
                 .build());
 
-        final Notification notification = sentNotification();
-        assertThat(notification, is(not(nullValue())));
-        assertThat(notification.getType(), is(equalTo(NotificationType.WARNING)));
-        assertThat(notification.getContent(),
-                is(equalTo(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader"))));
+        verify(BALLOON_NOTIFICATION_GROUP).createNotification(
+                eq(""),
+                eq(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader")),
+                eq(NotificationType.WARNING),
+                ArgumentMatchers.any(NotificationListener.class));
+        verify(notification).notify(PROJECT);
     }
 
     @Test
@@ -227,12 +235,6 @@ public class OpLoadConfigurationTest {
                 .withChild(ConfigurationBuilder.config("TreeWalker")
                         .withChild(ConfigurationBuilder.config("ImportControl")
                                 .withAttribute("file", ""))).build());
-    }
-
-    private Notification sentNotification() {
-        final ArgumentCaptor<Notification> notificationCaptor = ArgumentCaptor.forClass(Notification.class);
-        verify(notifications).notify(notificationCaptor.capture());
-        return notificationCaptor.getValue();
     }
 
     @Test

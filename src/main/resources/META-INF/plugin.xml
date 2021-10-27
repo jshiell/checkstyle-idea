@@ -95,6 +95,13 @@
         <schemeImporter name="CheckStyle Configuration"
                         schemeClass="com.intellij.psi.codeStyle.CodeStyleScheme"
                         implementationClass="org.infernus.idea.checkstyle.importer.CheckStyleCodeStyleImporter"/>
+
+        <notificationGroup displayType="BALLOON"
+                           id="CheckStyleIDEABalloonGroup"
+                           key="plugin.notification.alerts"/>
+        <notificationGroup displayType="NONE"
+                           id="CheckStyleIDEALogOnlyGroup"
+                           key="plugin.notification.logging"/>
     </extensions>
 
     <actions>
