@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.57.1** Fixed: Incorrect lower version bound fixed.
 * **5.57.0** Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).
 * **5.57.0** New: Added Checkstyle 9.0.1.
 * **5.57.0** New: Now built against IDEA 2021.1.3 (was 2020.1.4).
