@@ -39,13 +39,11 @@ public class CheckStyleCodeStyleImporter
         return new String[]{"xml"};
     }
 
-    @Nullable
     @Override
-    public CodeStyleScheme importScheme(@NotNull final Project project,
-                                        @NotNull final VirtualFile selectedFile,
-                                        @NotNull final CodeStyleScheme currentScheme,
-                                        @NotNull final SchemeFactory<CodeStyleScheme> schemeFactory)
-            throws SchemeImportException {
+    public @Nullable CodeStyleScheme importScheme(@NotNull Project project,
+                                                  @NotNull VirtualFile selectedFile,
+                                                  @NotNull CodeStyleScheme currentScheme,
+                                                  @NotNull SchemeFactory<? extends CodeStyleScheme> schemeFactory) throws SchemeImportException {
         try {
             CodeStyleScheme targetScheme = currentScheme;
             if (currentScheme.isDefault()) {

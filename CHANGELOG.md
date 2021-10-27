@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.57.0** New: Now built against IDEA 2021.1.3 (was 2020.1.4).
 * **5.56.0** New: Added Checkstyle 9.0 (#536).
 * **5.56.0** New: Added Checkstyle 8.45.1.
 * **5.55.1** Fixed: NPE when virtual file is only in memory (#533).

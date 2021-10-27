@@ -35,7 +35,7 @@ public class CodeStyleImporterTest
 
         csService = new CheckstyleProjectService(project);
 
-        codeStyleSettings = new CodeStyleSettings();
+        codeStyleSettings = CodeStyleSettingsManager.createTestSettings(CodeStyleSettings.getDefaults());
         javaSettings = codeStyleSettings.getCommonSettings(JavaLanguage.INSTANCE);
     }
 

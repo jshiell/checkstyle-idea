@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.56.0</version>
+    <version>5.57.0</version>
     <idea-version since-build="201.8743.12"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.57.0: New: Now built against IDEA 2021.1.3 (was 2020.1.4).</li>
     <li>5.56.0: New: Added Checkstyle 9.0 (#536).</li>
     <li>5.56.0: New: Added Checkstyle 8.45.1.</li>
     <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>

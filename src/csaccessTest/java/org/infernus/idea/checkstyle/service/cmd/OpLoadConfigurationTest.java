@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.service.cmd;
 import com.google.common.collect.ImmutableMap;
 import com.intellij.ide.plugins.PluginUtil;
 import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.Disposable;
@@ -32,6 +33,8 @@ import org.mockito.ArgumentCaptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -53,7 +56,7 @@ public class OpLoadConfigurationTest {
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
-        final ClassLoader checkstyleClassloader = mock(ClassLoader.class);
+        final ClassLoader checkstyleClassloader = new URLClassLoader(new URL[] {});
         final CheckstyleProjectService checkstyleProjectService = mock(CheckstyleProjectService.class);
         when(checkstyleProjectService.underlyingClassLoader()).thenReturn(checkstyleClassloader);
 
@@ -72,12 +75,14 @@ public class OpLoadConfigurationTest {
 
         final ExtensionsArea extensionArea = mock(ExtensionsArea.class);
         final PluginUtil pluginUtil = mock(PluginUtil.class);
+        final NotificationGroupManager notificationGroupManager = mock(NotificationGroupManager.class);
 
         final Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
         when(application.getMessageBus()).thenReturn(messageBus);
         when(application.getExtensionArea()).thenReturn(extensionArea);
         when(application.getService(PluginUtil.class)).thenReturn(pluginUtil);
+        when(application.getService(NotificationGroupManager.class)).thenReturn(notificationGroupManager);
         ApplicationManager.setApplication(application, mock(Disposable.class));
     }
 

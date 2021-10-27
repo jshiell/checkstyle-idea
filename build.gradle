@@ -20,10 +20,10 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.56.0'
+version = '5.57.0'
 
 intellij {
-    version = 'IC-2020.1.4'
+    version = 'IC-2021.1.3'
     pluginName = 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false
@@ -39,11 +39,11 @@ publishPlugin {
 //   Compilation
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//java {
-//    toolchain {
-//        languageVersion = JavaLanguageVersion.of(11)
-//    }
-//}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
