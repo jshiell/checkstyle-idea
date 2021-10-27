@@ -44,11 +44,17 @@ public class CheckStyleInspection extends LocalInspectionTool {
     private static final List<Problem> NO_PROBLEMS_FOUND = Collections.emptyList();
     private static final long FIVE_SECONDS = 5000L;
 
-    private final CheckStyleInspectionPanel configPanel = new CheckStyleInspectionPanel();
+    private final Object configPanelLock = new Object();
+    private CheckStyleInspectionPanel configPanel;
 
     @Nullable
     public JComponent createOptionsPanel() {
-        return configPanel;
+        synchronized (configPanelLock) {
+            if (configPanel == null) {
+                configPanel  = new CheckStyleInspectionPanel();
+            }
+            return configPanel;
+        }
     }
 
     @Override
