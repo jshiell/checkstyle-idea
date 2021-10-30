@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<idea-plugin url="https://github.com/jshiell/checkstyle-idea">
+<idea-plugin url="https://github.com/jshiell/checkstyle-idea" require-restart="true">
     <id>CheckStyle-IDEA</id>
     <name>CheckStyle-IDEA</name>
     <resource-bundle>org.infernus.idea.checkstyle.CheckStyleBundle</resource-bundle>
@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.57.1</version>
+    <version>5.57.2</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.57.2: Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).</li>
     <li>5.57.1: Fixed: Incorrect lower version bound fixed.</li>
     <li>5.57.0: Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).</li>
     <li>5.57.0: New: Added Checkstyle 9.0.1.</li>
@@ -48,8 +49,6 @@
     <li>5.48.0: Fixed: Added a timeout to avoid deadlock on closing a project during a scan (#515).</li>
     <li>5.47.0: New: Added Checkstyle 8.40.</li>
     <li>5.46.0: New: Added Checkstyle 8.38, 8.39.</li>
-    <li>5.45.1: Fixed: optimised download size.</li>
-    <li>5.45.0: New: Added Checkstyle 8.37.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>

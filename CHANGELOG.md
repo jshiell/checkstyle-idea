@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.57.2** Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).
 * **5.57.1** Fixed: Incorrect lower version bound fixed.
 * **5.57.0** Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).
 * **5.57.0** New: Added Checkstyle 9.0.1.
