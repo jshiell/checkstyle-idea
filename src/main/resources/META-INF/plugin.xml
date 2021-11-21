@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.57.2</version>
+    <version>5.58.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,7 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>UNRELEASED: New: Added Checkstyle 9.1.</li>
+    <li>5.58.0: New: Added Checkstyle 9.1 - thanks to @kennysoft.</li>
     <li>5.57.2: Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).</li>
     <li>5.57.1: Fixed: Incorrect lower version bound fixed.</li>
     <li>5.57.0: Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).</li>
