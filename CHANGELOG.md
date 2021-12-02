@@ -1,6 +1,6 @@
 # CheckStyle-IDEA Changelog
 
-* **UNRELEASED** New: Added Checkstyle 9.2.
+* **5.59.0** New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).
 * **5.58.0** New: Added Checkstyle 9.1 - thanks to @kennysoft (#543).
 * **5.57.2** Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).
 * **5.57.1** Fixed: Incorrect lower version bound fixed.

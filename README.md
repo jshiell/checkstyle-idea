@@ -205,6 +205,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Bruno Masetto (@bmasetto)
 * Robert Kruszewski (@robert3005)
 * Hyeonmin Park (@kennysoft)
+* Barnesly (@andrewflbarnes)
 
 And also thanks are due to the authors and contributors of:
 

@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.58.0</version>
+    <version>5.59.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,8 +24,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>UNRELEASED: New: Added Checkstyle 9.2.</li>
-    <li>5.58.0: New: Added Checkstyle 9.1 - thanks to @kennysoft.</li>
+    <li>5.59.0: New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).</li>
+    <li>5.58.0: New: Added Checkstyle 9.1 - thanks to @kennysoft (#543).</li>
     <li>5.57.2: Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).</li>
     <li>5.57.1: Fixed: Incorrect lower version bound fixed.</li>
     <li>5.57.0: Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).</li>
@@ -46,11 +46,6 @@
     <li>5.50.0: New: Replaced tool window icon with Checkstyle small icon (#519).</li>
     <li>5.50.0: New: Checkstyle 6 and 7 are no longer supported.</li>
     <li>5.50.0: New: Now built against IDEA 2020.1.4 (was 2019.1.4).</li>
-    <li>5.49.0: New: Added Checkstyle 8.41.1.</li>
-    <li>5.48.0: New: Added Checkstyle 8.41.</li>
-    <li>5.48.0: Fixed: Added a timeout to avoid deadlock on closing a project during a scan (#515).</li>
-    <li>5.47.0: New: Added Checkstyle 8.40.</li>
-    <li>5.46.0: New: Added Checkstyle 8.38, 8.39.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
