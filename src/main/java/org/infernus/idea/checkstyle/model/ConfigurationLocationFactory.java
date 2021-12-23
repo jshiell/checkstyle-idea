@@ -32,10 +32,10 @@ public class ConfigurationLocationFactory {
      * @param description the optional description.
      * @return the location.
      */
-    public ConfigurationLocation create(final Project project,
-                                        final ConfigurationType type,
-                                        final String location,
-                                        final String description) {
+    public @NotNull ConfigurationLocation create(final Project project,
+                                                 final ConfigurationType type,
+                                                 final String location,
+                                                 final String description) {
         if (type == null) {
             throw new IllegalArgumentException("Type is required");
         }
@@ -74,9 +74,9 @@ public class ConfigurationLocationFactory {
         configurationLocation.setDescription(description);
 
         synchronized (instanceCache) {
-            if (instanceCache.containsKey(configurationLocation)) {
-                return instanceCache.get(configurationLocation);
-
+            ConfigurationLocation cachedLocation = instanceCache.get(configurationLocation);
+            if (cachedLocation != null) {
+                return cachedLocation;
             } else {
                 instanceCache.put(configurationLocation, configurationLocation);
             }
@@ -94,7 +94,7 @@ public class ConfigurationLocationFactory {
      * @param stringRepresentation the toString of another ConfigurationLocation.
      * @return the location
      */
-    public ConfigurationLocation create(final Project project, final String stringRepresentation) {
+    public @NotNull ConfigurationLocation create(final Project project, final String stringRepresentation) {
         if (project == null) {
             throw new IllegalArgumentException("A project is required");
         }
@@ -128,8 +128,8 @@ public class ConfigurationLocationFactory {
         return create(project, type, location, description);
     }
 
-    public BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
-                                               @NotNull final Project project) {
+    public @NotNull BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
+                                                        @NotNull final Project project) {
         return new BundledConfigurationLocation(bundledConfig, project);
     }
 

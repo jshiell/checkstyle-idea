@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import static org.infernus.idea.checkstyle.util.Streams.inMemoryCopyOf;
 
 
-@SuppressWarnings("MethodDoesntCallSuperMethod")
 public class BundledConfigurationLocation extends ConfigurationLocation {
     @NotNull
     private final BundledConfig bundledConfig;
