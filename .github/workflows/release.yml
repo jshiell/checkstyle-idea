@@ -16,7 +16,7 @@ jobs:
       id: build_info
       run: |
         BUILD_TAG=${GITHUB_REF#refs/tags/}
-        CHANGELOG=$(cat ./CHANGELOG.md | grep "$BUILD_TAG" | sed 's%^\*[[:space:]]*\*\*[0-9.]*\*\*[[:space:]]*%%g')
+        cat ./CHANGELOG.md | grep "$BUILD_TAG" | sed 's%^\*[[:space:]]*\*\*[0-9.]*\*\*[[:space:]]*%%g' > ${{ github.workspace }}-CHANGELOG.txt
         echo "::set-output name=build_tag::${BUILD_TAG}"
         echo "::set-output name=changelog::${CHANGELOG}"
 
@@ -26,30 +26,16 @@ jobs:
         java-version: 11
     
     - name: Build
-      run: ./gradlew check jacocoCsaccessCoverageVerification buildPlugin
+      run: ./gradlew check buildPlugin
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        body: ${{ steps.build_info.outputs.changelog }}
+        body_path: ${{ github.workspace }}-CHANGELOG.txt
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build/distributions/CheckStyle-IDEA-${{ steps.build_info.outputs.build_tag }}.zip
-        asset_name: CheckStyle-IDEA-${{ steps.build_info.outputs.build_tag }}.zip
-        asset_content_type: application/zip
+        files:
+          build/distributions/CheckStyle-IDEA-${{ steps.build_info.outputs.build_tag }}.zip
 
     - name: Publish to Jetbrains Plugin Repo
       run: ./gradlew publishPlugin
