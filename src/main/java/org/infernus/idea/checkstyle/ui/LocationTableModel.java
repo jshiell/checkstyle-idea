@@ -18,7 +18,8 @@ public class LocationTableModel extends AbstractTableModel {
     private static final int COLUMN_ACTIVE = 0;
     private static final int COLUMN_DESCRIPTION = 1;
     private static final int COLUMN_FILE = 2;
-    private static final int NUMBER_OF_COLUMNS = 3;
+    private static final int COLUMN_SCOPE = 3;
+    private static final int NUMBER_OF_COLUMNS = 4;
 
     private final List<ConfigurationLocation> locations = new ArrayList<>();
     private ConfigurationLocation activeLocation;
@@ -197,6 +198,9 @@ public class LocationTableModel extends AbstractTableModel {
 
             case COLUMN_FILE:
                 return locations.get(rowIndex).getLocation();
+
+            case COLUMN_SCOPE:
+                return locations.get(rowIndex).getScope().getName();
 
             default:
                 throw new IllegalArgumentException("Invalid column: "

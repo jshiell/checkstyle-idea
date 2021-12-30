@@ -141,4 +141,5 @@ public class PluginConfiguration {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, locations, thirdPartyClasspath,
                 activeLocation, scanBeforeCheckin, lastActivePluginVersion);
     }
+
 }

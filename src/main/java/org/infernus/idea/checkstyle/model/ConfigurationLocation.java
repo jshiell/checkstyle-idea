@@ -41,6 +41,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private final Project project;
     private String location;
     private String description;
+    private final CustomScope scope;
 
     private boolean propertiesCheckedThisSession;
     private long blockedUtil;
@@ -49,6 +50,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                  @NotNull final Project project) {
         this.type = type;
         this.project = project;
+        this.scope = CustomScope.getDefaultValue();
     }
 
     public boolean canBeResolvedInDefaultProject() {
@@ -74,6 +76,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     public String getLocation() {
         return location;
+    }
+
+    public CustomScope getScope() {
+        return scope;
     }
 
     public void setLocation(final String location) {
