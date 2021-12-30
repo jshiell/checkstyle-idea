@@ -83,6 +83,8 @@ public class LocationPanel extends JPanel {
         final JLabel descriptionLabel = new JLabel(CheckStyleBundle.message("config.file.description.text"));
         descriptionField.setToolTipText(CheckStyleBundle.message("config.file.description.tooltip"));
 
+        //TODO add Scope Entry here
+
         final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
         final JLabel urlLocationlabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
         final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
