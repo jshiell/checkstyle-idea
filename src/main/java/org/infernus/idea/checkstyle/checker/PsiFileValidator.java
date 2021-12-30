@@ -79,7 +79,7 @@ final class PsiFileValidator {
 
     private static boolean modulesMatch(final PsiFile psiFile,
                                         final Optional<Module> module) {
-        if (!module.isPresent()) {
+        if (module.isEmpty()) {
             return true;
         }
         final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);

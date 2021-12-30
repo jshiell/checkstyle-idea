@@ -90,13 +90,13 @@ public final class JavadocPackageCheck implements Check {
         }
 
         // TODO Going through the whole config is somewhat inefficient here; might do this centrally and only
-        // once. Currently we don't care because there is only one such class.
+        //  once. Currently we don't care because there is only one such class.
         final AtomicReference<String> value = new AtomicReference<>();
         checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(config, module -> {
             if (MODULE_NAME.equals(module.getName()) || CHECK_PACKAGE_INFO.equals(module.getName())) {
                 value.set(module.getProperties().get("allowLegacy"));
                 // TODO This means that if for some reasons this attribute appears multiple times, the last
-                // occurrence wins. Instead, we should check if 'allowLegacy' is true anywhere.
+                //  occurrence wins. Instead, we should check if 'allowLegacy' is true anywhere.
             }
         });
         return value.get();

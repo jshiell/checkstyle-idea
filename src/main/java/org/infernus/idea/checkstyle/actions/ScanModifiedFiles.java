@@ -24,7 +24,8 @@ public class ScanModifiedFiles extends BaseAction {
         project(event).ifPresent(project -> {
             try {
                 final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-                staticScanner(project).asyncScanFiles(changeListManager.getAffectedFiles(),
+                staticScanner(project).asyncScanFiles(
+                        changeListManager.getAffectedFiles(),
                         getSelectedOverride(toolWindow(project)));
             } catch (Throwable e) {
                 LOG.warn("Modified files scan failed", e);

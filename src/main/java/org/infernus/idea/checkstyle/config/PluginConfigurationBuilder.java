@@ -57,14 +57,29 @@ public final class PluginConfigurationBuilder {
 
         final boolean copyLibs = OS.isWindows();
 
-        return new PluginConfigurationBuilder(csDefaultVersion, ScanScope.getDefaultValue(), false,
-                copyLibs, defaultLocations, Collections.emptyList(), null, false,
+        return new PluginConfigurationBuilder(
+                csDefaultVersion,
+                ScanScope.getDefaultValue(),
+                false,
+                copyLibs,
+                defaultLocations,
+                Collections.emptyList(),
+                null,
+                false,
                 CheckStylePlugin.version());
     }
 
     public static PluginConfigurationBuilder testInstance(final String checkstyleVersion) {
-        return new PluginConfigurationBuilder(checkstyleVersion, ScanScope.AllSources, false, false,
-                Collections.emptySortedSet(), Collections.emptyList(), null, false, "aVersion");
+        return new PluginConfigurationBuilder(
+                checkstyleVersion,
+                ScanScope.AllSources,
+                false,
+                false,
+                Collections.emptySortedSet(),
+                Collections.emptyList(),
+                null,
+                false,
+                "aVersion");
     }
 
     public static PluginConfigurationBuilder from(final PluginConfiguration source) {
@@ -125,9 +140,16 @@ public final class PluginConfigurationBuilder {
     }
 
     public PluginConfiguration build() {
-        return new PluginConfiguration(checkstyleVersion, scanScope, suppressErrors, copyLibraries,
-                locations, thirdPartyClasspath, activeLocation,
-                scanBeforeCheckin, lastActivePluginVersion);
+        return new PluginConfiguration(
+                checkstyleVersion,
+                scanScope,
+                suppressErrors,
+                copyLibraries,
+                locations,
+                thirdPartyClasspath,
+                activeLocation,
+                scanBeforeCheckin,
+                lastActivePluginVersion);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {
