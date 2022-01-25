@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.59.1</version>
+    <version>5.60.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.60.0: New: Added Checkstyle 9.2.1.</li>
     <li>5.59.1: Fixed: NPE when configuration location has been garbage collected from weak map (#547).</li>
     <li>5.59.0: New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).</li>
     <li>5.58.0: New: Added Checkstyle 9.1 - thanks to @kennysoft (#543).</li>
@@ -43,10 +44,6 @@
     <li>5.52.0: New: Added Checkstyle 8.42 (#524).</li>
     <li>5.51.0: New: Properties can now be overridden for the bundled Google/Sun configurations (#497).</li>
     <li>5.51.0: Fixed: Added a couple of missing DTDs to the resolver.</li>
-    <li>5.50.0: Fixed: ImportOrder third-party/special imports are ignored if regexes are not defined (#500).</li>
-    <li>5.50.0: New: Replaced tool window icon with Checkstyle small icon (#519).</li>
-    <li>5.50.0: New: Checkstyle 6 and 7 are no longer supported.</li>
-    <li>5.50.0: New: Now built against IDEA 2020.1.4 (was 2019.1.4).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
