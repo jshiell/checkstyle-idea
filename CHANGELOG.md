@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.61.0** New: Added Checkstyle 9.3.
 * **5.60.0** New: Added Checkstyle 9.2.1.
 * **5.59.1** Fixed: NPE when configuration location has been garbage collected from weak map (#547).
 * **5.59.0** New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).
