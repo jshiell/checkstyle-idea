@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.61.0</version>
+    <version>5.61.1</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.61.1: Fixed: Removed left-over log4j artefacts, to allow compatibility with newer EAPs.</li>
     <li>5.61.0: New: Added Checkstyle 9.3.</li>
     <li>5.60.0: New: Added Checkstyle 9.2.1.</li>
     <li>5.59.1: Fixed: NPE when configuration location has been garbage collected from weak map (#547).</li>
