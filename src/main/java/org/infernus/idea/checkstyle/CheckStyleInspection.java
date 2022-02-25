@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 
 import static java.util.Collections.singletonList;
@@ -115,16 +116,18 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                       @NotNull final InspectionManager manager) {
         LOG.debug("Inspection has been invoked for " + psiFile.getName());
 
-        ConfigurationLocation configurationLocation = null;
+        Optional<ConfigurationLocation> configurationLocation = Optional.empty();
         try {
-            configurationLocation = configurationLocationSource(manager.getProject())
-                    .getConfigurationLocation(module, null);
-            if (configurationLocation == null || configurationLocation.isBlocked()) {
+            configurationLocation =
+                    configurationLocationSource(manager.getProject())
+                            .getConfigurationLocation(module, null);
+
+            if (configurationLocation.map(ConfigurationLocation::isBlocked).orElse(true)) {
                 return NO_PROBLEMS_FOUND;
             }
 
             return checkerFactory(psiFile.getProject())
-                    .checker(module, configurationLocation)
+                    .checker(module, configurationLocation.get())
                     .map(checker -> checker.scan(scannableFiles, configurationManager(psiFile.getProject()).getCurrent().isSuppressErrors()))
                     .map(results -> results.get(psiFile))
                     .map(this::dropIgnoredProblems)
@@ -139,7 +142,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
-            handlePluginException(e, psiFile, configurationLocation, manager.getProject());
+            handlePluginException(e, psiFile, configurationLocation.orElse(null), manager.getProject());
             return NO_PROBLEMS_FOUND;
 
         } finally {

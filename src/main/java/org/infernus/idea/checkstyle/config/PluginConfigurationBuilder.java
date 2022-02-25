@@ -89,7 +89,7 @@ public final class PluginConfigurationBuilder {
                 source.isCopyLibs(),
                 source.getLocations(),
                 source.getThirdPartyClasspath(),
-                source.getActiveLocation(),
+                source.getActiveLocation().orElse(null),
                 source.isScanBeforeCheckin(),
                 source.getLastActivePluginVersion());
     }

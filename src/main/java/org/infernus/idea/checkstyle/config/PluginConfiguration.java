@@ -90,9 +90,8 @@ public class PluginConfiguration {
         return lastActivePluginVersion;
     }
 
-    @Nullable
-    public ConfigurationLocation getActiveLocation() {
-        return activeLocation;
+    public Optional<ConfigurationLocation> getActiveLocation() {
+        return Optional.ofNullable(activeLocation);
     }
 
     public boolean isScanBeforeCheckin() {

@@ -189,11 +189,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private void setThirdPartyClasspath(final List<String> classpath) {
         List<String> thirdPartyClasspath;
-        if (classpath == null) {
-            thirdPartyClasspath = new ArrayList<>();
-        } else {
-            thirdPartyClasspath = classpath;
-        }
+        thirdPartyClasspath = Objects.requireNonNullElseGet(classpath, ArrayList::new);
 
         final DefaultListModel<String> listModel = pathListModel();
         listModel.clear();
@@ -236,7 +232,7 @@ public class CheckStyleConfigPanel extends JPanel {
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
-        locationModel.setActiveLocation(pluginConfig.getActiveLocation());
+        locationModel.setActiveLocation(pluginConfig.getActiveLocation().orElse(null));
     }
 
     public PluginConfiguration getPluginConfiguration() {

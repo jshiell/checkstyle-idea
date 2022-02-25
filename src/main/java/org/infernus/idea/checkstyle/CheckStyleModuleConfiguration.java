@@ -75,7 +75,7 @@ public final class CheckStyleModuleConfiguration extends Properties
         return containsKey(ACTIVE_CONFIG);
     }
 
-    public ConfigurationLocation getActiveConfiguration() {
+    public Optional<ConfigurationLocation> getActiveConfiguration() {
         if (!containsKey(ACTIVE_CONFIG)) {
             return getProjectConfiguration();
         }
@@ -92,10 +92,10 @@ public final class CheckStyleModuleConfiguration extends Properties
             return getProjectConfiguration();
         }
 
-        return activeLocation;
+        return Optional.of(activeLocation);
     }
 
-    private ConfigurationLocation getProjectConfiguration() {
+    private Optional<ConfigurationLocation> getProjectConfiguration() {
         return configurationManager().getCurrent().getActiveLocation();
     }
 
@@ -165,10 +165,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
         @NotNull
         public Map<String, String> configuration() {
-            if (configuration == null) {
-                return Collections.emptyMap();
-            }
-            return configuration;
+            return Objects.requireNonNullElse(configuration, Collections.emptyMap());
         }
     }
 }

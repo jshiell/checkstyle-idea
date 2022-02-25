@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 /**
@@ -31,13 +32,17 @@ public class CheckstylePluginApi {
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        ConfigurationLocation activeLocation = pluginConfigurationManager().getCurrent().getActiveLocation();
+        Optional<ConfigurationLocation> activeLocation = pluginConfigurationManager().getCurrent().getActiveLocation();
 
-        if (activeLocation != null) {
+        activeLocation.ifPresent(it -> {
             CheckstyleActions checkstyleInstance = checkstyleProjectService().getCheckstyleInstance();
-            checkstyleInstance.peruseConfiguration(checkstyleInstance.loadConfiguration(activeLocation, true, new HashMap<>()),
-                    module -> visitor.accept(activeLocation.getDescription(), module));
-        }
+            checkstyleInstance.peruseConfiguration(
+                    checkstyleInstance.loadConfiguration(
+                            it,
+                            true,
+                            new HashMap<>()),
+                    module -> visitor.accept(it.getDescription(), module));
+        });
     }
 
     @SuppressWarnings("WeakerAccess")
