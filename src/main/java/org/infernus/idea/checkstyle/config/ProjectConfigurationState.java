@@ -253,9 +253,9 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             }
 
             mapForSerialization.put(SCAN_BEFORE_CHECKIN, String.valueOf(currentPluginConfig.isScanBeforeCheckin()));
-            if (currentPluginConfig.getActiveLocation() != null) {
-                mapForSerialization.put(ACTIVE_CONFIG, currentPluginConfig.getActiveLocation().getDescriptor());
-            }
+
+            currentPluginConfig.getActiveLocation()
+                    .ifPresent(it -> mapForSerialization.put(ACTIVE_CONFIG, it.getDescriptor()));
 
             final ProjectSettings projectSettings = new ProjectSettings();
             projectSettings.configuration = mapForSerialization;
@@ -264,10 +264,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         @NotNull
         public Map<String, String> configuration() {
-            if (configuration == null) {
-                return new TreeMap<>();
-            }
-            return configuration;
+            return Objects.requireNonNullElseGet(configuration, TreeMap::new);
         }
 
         private static void serializeLocations(@NotNull final Map<String, String> storage,

@@ -179,16 +179,16 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private ConfigurationLocationResult configurationLocation(final ConfigurationLocation override,
-                                                              final Module module) {
-        final ConfigurationLocation location = configurationLocationSource().getConfigurationLocation(module, override);
-        if (location == null) {
-            return resultOf(NOT_PRESENT);
-        }
-        if (location.isBlocked()) {
-            return resultOf(location, BLOCKED);
-        }
-        return resultOf(location, PRESENT);
+    private ConfigurationLocationResult configurationLocation(
+            final ConfigurationLocation override,
+            final Module module) {
+        final Optional<ConfigurationLocation> location =
+                configurationLocationSource().getConfigurationLocation(module, override);
+
+        return location.map(it -> it.isBlocked()
+                        ? resultOf(it, BLOCKED)
+                        : resultOf(it, PRESENT))
+                .orElse(resultOf(NOT_PRESENT));
     }
 
     private Map<PsiFile, List<Problem>> checkFiles(final Module module,

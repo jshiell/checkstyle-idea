@@ -8,6 +8,8 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class ConfigurationLocationSource {
 
     private final Project project;
@@ -16,16 +18,16 @@ public class ConfigurationLocationSource {
         this.project = project;
     }
 
-    public ConfigurationLocation getConfigurationLocation(@Nullable final Module module,
-                                                          @Nullable final ConfigurationLocation override) {
+    public Optional<ConfigurationLocation> getConfigurationLocation(@Nullable final Module module,
+                                                                    @Nullable final ConfigurationLocation override) {
         if (override != null) {
-            return override;
+            return Optional.of(override);
         }
 
         if (module != null) {
             CheckStyleModuleConfiguration moduleConfiguration = checkstyleModuleConfiguration(module);
             if (moduleConfiguration.isExcluded()) {
-                return null;
+                return Optional.empty();
             }
             return moduleConfiguration.getActiveConfiguration();
         }
