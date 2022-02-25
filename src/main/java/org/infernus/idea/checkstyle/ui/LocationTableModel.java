@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.Nullable;
@@ -200,7 +201,9 @@ public class LocationTableModel extends AbstractTableModel {
                 return locations.get(rowIndex).getLocation();
 
             case COLUMN_SCOPE:
-                return locations.get(rowIndex).getScope().getName();
+                return locations.get(rowIndex).getNamedScope()
+                        .map(NamedScope::getPresentableName)
+                        .orElse("");
 
             default:
                 throw new IllegalArgumentException("Invalid column: "
