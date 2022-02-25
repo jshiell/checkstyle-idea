@@ -24,7 +24,6 @@ public class ScanProject extends BaseAction {
     public void actionPerformed(final AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                //TODO mit CustomScope einschränken
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 final ToolWindow toolWindow = toolWindow(project);
@@ -65,13 +64,12 @@ public class ScanProject extends BaseAction {
             final Presentation presentation = event.getPresentation();
 
             Optional<Project> projectFromEvent = project(event);
-            if (!projectFromEvent.isPresent()) {
+            if (projectFromEvent.isEmpty()) {
                 presentation.setEnabled(false);
                 return;
             }
 
             projectFromEvent.ifPresent(project -> {
-                //TODO mit CustomScope einschränken
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
