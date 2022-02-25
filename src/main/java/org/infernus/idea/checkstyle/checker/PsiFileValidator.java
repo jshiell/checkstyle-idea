@@ -6,10 +6,13 @@ import com.intellij.openapi.roots.JavaProjectRootsUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
@@ -42,14 +45,12 @@ final class PsiFileValidator {
 
     private static boolean isValidFileType(final PsiFile psiFile,
                                            final PluginConfigurationManager pluginConfig) {
-        //TODO mit CustomScope einschränken
         return pluginConfig.getCurrent().getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
                                              final PluginConfigurationManager pluginConfig) {
-        //TODO mit CustomScope einschränken
         return pluginConfig.getCurrent().getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
@@ -59,9 +60,22 @@ final class PsiFileValidator {
     }
 
     private static boolean isInSource(@NotNull final PsiFile psiFile, @NotNull final PluginConfigurationManager pluginConfig) {
-        //TODO mit CustomScope einschränken
-        return pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
-            || (psiFile.getVirtualFile() != null && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
+        final boolean shouldBeScanned = pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
+                || (psiFile.getVirtualFile() != null
+                        && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
+        return shouldBeScanned && isInNamedScopeIfPresent(psiFile, pluginConfig);
+    }
+
+    /**
+     * Returns true, if the given psiFile is contained in the namedScope of the given pluginConfig.
+     * If no NamedScope is provided, true will be returned.
+     */
+    private static boolean isInNamedScopeIfPresent(@NotNull PsiFile psiFile, @NotNull PluginConfigurationManager pluginConfig) {
+        return pluginConfig.getCurrent().getActiveLocation()
+                .flatMap(ConfigurationLocation::getNamedScope)
+                .map(NamedScope::getValue)
+                .map(it -> it.contains(psiFile, DependencyValidationManager.getInstance(psiFile.getProject())))
+                .orElse(true);
     }
 
     private static boolean isTestClass(final PsiElement element) {
