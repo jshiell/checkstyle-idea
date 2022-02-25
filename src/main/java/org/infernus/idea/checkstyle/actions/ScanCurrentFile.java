@@ -10,9 +10,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.packageDependencies.DependencyValidationManager;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
+
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
@@ -88,7 +95,29 @@ public class ScanCurrentFile extends BaseAction {
                 }
             }
         }
-        return selectedFile;
+
+        if (selectedFile == null) {
+            return null;
+        }
+
+        final Optional<NamedScope> namedScope = pluginConfiguration.getActiveLocation().flatMap(ConfigurationLocation::getNamedScope);
+
+        if (namedScope.map(NamedScope::getValue).isEmpty()) {
+            return selectedFile;
+        }
+
+        final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
+        if (psiFile == null) {
+            throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
+        }
+        final boolean isFileInScope = namedScope
+                .map(NamedScope::getValue)
+                .get()
+                .contains(
+                        psiFile,
+                        DependencyValidationManager.getInstance(project));
+
+        return isFileInScope ? selectedFile : null;
     }
 
 
