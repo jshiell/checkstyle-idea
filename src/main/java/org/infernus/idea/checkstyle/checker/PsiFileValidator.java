@@ -42,12 +42,14 @@ final class PsiFileValidator {
 
     private static boolean isValidFileType(final PsiFile psiFile,
                                            final PluginConfigurationManager pluginConfig) {
+        //TODO mit CustomScope einschränken
         return pluginConfig.getCurrent().getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
                                              final PluginConfigurationManager pluginConfig) {
+        //TODO mit CustomScope einschränken
         return pluginConfig.getCurrent().getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
@@ -57,6 +59,7 @@ final class PsiFileValidator {
     }
 
     private static boolean isInSource(@NotNull final PsiFile psiFile, @NotNull final PluginConfigurationManager pluginConfig) {
+        //TODO mit CustomScope einschränken
         return pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
             || (psiFile.getVirtualFile() != null && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
     }

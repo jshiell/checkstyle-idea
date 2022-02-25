@@ -7,6 +7,7 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
@@ -41,7 +42,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private final Project project;
     private String location;
     private String description;
-    private final CustomScope scope;
+    private final NamedScope scope;
 
     private boolean propertiesCheckedThisSession;
     private long blockedUtil;
@@ -50,7 +51,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                  @NotNull final Project project) {
         this.type = type;
         this.project = project;
-        this.scope = CustomScope.getDefaultValue();
+        // TODO fill with correct value
+        this.scope = NamedScopeHelper.getScopeById(project, "Messages");
     }
 
     public boolean canBeResolvedInDefaultProject() {
@@ -78,8 +80,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return location;
     }
 
-    public CustomScope getScope() {
-        return scope;
+    public Optional<NamedScope> getNamedScope() {
+        return Optional.ofNullable(this.scope);
     }
 
     public void setLocation(final String location) {

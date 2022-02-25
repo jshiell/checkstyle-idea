@@ -49,6 +49,7 @@ public class ScanModule extends BaseAction {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.module");
 
+                        //TODO mit CustomScope einschränken
                         Runnable scanAction = null;
                         if (scope == ScanScope.Everything) {
                             scanAction = new ScanAllFilesInModuleTask(module, getSelectedOverride(toolWindow));
@@ -100,6 +101,7 @@ public class ScanModule extends BaseAction {
                     return;
                 }
 
+                //TODO mit CustomScope einschränken
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 VirtualFile[] moduleFiles;

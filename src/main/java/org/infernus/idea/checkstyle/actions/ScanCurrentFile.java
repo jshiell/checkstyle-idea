@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.FileTypes;
 
@@ -26,14 +27,14 @@ public class ScanCurrentFile extends BaseAction {
     public void actionPerformed(final AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
+                final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
 
                 final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        final VirtualFile selectedFile = getSelectedFile(project, scope);
+                        final VirtualFile selectedFile = getSelectedFile(project, pluginConfiguration);
                         if (selectedFile != null) {
                             staticScanner(project).asyncScanFiles(
                                     singletonList(selectedFile), getSelectedOverride(toolWindow));
@@ -50,8 +51,10 @@ public class ScanCurrentFile extends BaseAction {
         });
     }
 
-    private VirtualFile getSelectedFile(final Project project, final ScanScope scope) {
+
+    private VirtualFile getSelectedFile(final Project project, PluginConfiguration pluginConfiguration) {
         VirtualFile selectedFile = null;
+        final ScanScope scanScope = pluginConfiguration.getScanScope();
 
         final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (selectedTextEditor != null) {
@@ -67,18 +70,18 @@ public class ScanCurrentFile extends BaseAction {
         }
 
         // validate selected file against scan scope
-        if (selectedFile != null && scope != ScanScope.Everything) {
+        if (selectedFile != null && scanScope != ScanScope.Everything) {
             final ProjectFileIndex projectFileIndex = ProjectFileIndex.SERVICE.getInstance(project);
             if (projectFileIndex != null) {
                 if (!projectFileIndex.isInSourceContent(selectedFile)) {
                     selectedFile = null;
                 }
-                if (!scope.includeNonJavaSources() && selectedFile != null) {
+                if (!scanScope.includeNonJavaSources() && selectedFile != null) {
                     if (!FileTypes.isJava(selectedFile.getFileType())) {
                         selectedFile = null;
                     }
                 }
-                if (!scope.includeTestClasses() && selectedFile != null) {
+                if (!scanScope.includeTestClasses() && selectedFile != null) {
                     if (projectFileIndex.isInTestSourceContent(selectedFile)) {
                         selectedFile = null;
                     }
@@ -95,9 +98,9 @@ public class ScanCurrentFile extends BaseAction {
 
         project(event).ifPresent(project -> {
             try {
-                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
+                final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
 
-                final VirtualFile selectedFile = getSelectedFile(project, scope);
+                final VirtualFile selectedFile = getSelectedFile(project, pluginConfiguration);
 
                 // disable if no file is selected or scan in progress
                 final Presentation presentation = event.getPresentation();
