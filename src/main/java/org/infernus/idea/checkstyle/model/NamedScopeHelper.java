@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 
 public class NamedScopeHelper {
 
+    public static final String DEFAULT_SCOPE_ID = "All";
+
     public static Optional<NamedScope> getAnyScope(Project project) {
         final NamedScopeManager myLocalScopesManager = NamedScopeManager.getInstance(project);
         final DependencyValidationManager mySharedScopesManager = DependencyValidationManager.getInstance(project);
@@ -33,4 +35,13 @@ public class NamedScopeHelper {
         return sharedScopeOrNull != null ? sharedScopeOrNull : myLocalScopesManager.getScope(id);
     }
 
+    public static Stream<NamedScope> getAllScopes(Project project) {
+        return Stream.concat(
+                Arrays.stream(NamedScopeManager.getInstance(project).getScopes()),
+                Arrays.stream(DependencyValidationManager.getInstance(project).getScopes()));
+    }
+
+    public static NamedScope getDefaultScope(Project project) {
+        return DependencyValidationManager.getInstance(project).getScope(DEFAULT_SCOPE_ID);
+    }
 }

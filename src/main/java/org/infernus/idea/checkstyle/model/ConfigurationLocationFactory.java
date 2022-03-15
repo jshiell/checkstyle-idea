@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,12 +31,14 @@ public class ConfigurationLocationFactory {
      * @param type        the type.
      * @param location    the location.
      * @param description the optional description.
+     * @param namedScope  the {@link NamedScope} for this ConfigurationLocation
      * @return the location.
      */
     public @NotNull ConfigurationLocation create(final Project project,
                                                  final ConfigurationType type,
                                                  final String location,
-                                                 final String description) {
+                                                 final String description,
+                                                 final NamedScope namedScope) {
         if (type == null) {
             throw new IllegalArgumentException("Type is required");
         }
@@ -72,6 +75,7 @@ public class ConfigurationLocationFactory {
         }
         configurationLocation.setLocation(location);
         configurationLocation.setDescription(description);
+        configurationLocation.setNamedScope(namedScope);
 
         synchronized (instanceCache) {
             ConfigurationLocation cachedLocation = instanceCache.get(configurationLocation);
@@ -125,7 +129,13 @@ public class ConfigurationLocationFactory {
             return create(BundledConfig.SUN_CHECKS, project);   // backwards compatibility with old config files
         }
         final ConfigurationType type = ConfigurationType.parse(typeString);
-        return create(project, type, location, description);
+        //TODO correct deserialization
+        return create(
+                project,
+                type,
+                location,
+                description,
+                NamedScopeHelper.getDefaultScope(project));
     }
 
     public @NotNull BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
