@@ -8,11 +8,13 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,6 +43,7 @@ public class LocationPanel extends JPanel {
     private final JRadioButton urlLocationRadio = new JRadioButton();
     private final JRadioButton classpathLocationRadio = new JRadioButton();
     private final JTextField descriptionField = new JTextField();
+    private final JComboBox<NamedScope> scopeComboBox = new JComboBox<>();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
     private final JCheckBox insecureHttpCheckbox = new JCheckBox();
     private final JLabel classpathLocationReminderLabel = new JLabel();
@@ -83,11 +86,21 @@ public class LocationPanel extends JPanel {
         final JLabel descriptionLabel = new JLabel(CheckStyleBundle.message("config.file.description.text"));
         descriptionField.setToolTipText(CheckStyleBundle.message("config.file.description.tooltip"));
 
-        //TODO add Scope Entry here
-
         final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
         final JLabel urlLocationlabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
         final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
+
+        final JLabel scopeLabel = new JLabel(CheckStyleBundle.message("config.file.scope.label"));
+        NamedScopeHelper.getAllScopes(project).forEach(this.scopeComboBox::addItem);
+        this.scopeComboBox.setSelectedItem(NamedScopeHelper.getDefaultScope(project));
+        this.scopeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                value = ((NamedScope) value).getPresentableName();
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                return this;
+            }
+        });
 
         setBorder(JBUI.Borders.empty(8, 8, 4, 8));
 
@@ -132,6 +145,14 @@ public class LocationPanel extends JPanel {
 
         add(Box.createVerticalGlue(), new GridBagConstraints(0, 10, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
+
+        //TODO horizontal Separator
+
+        add(scopeLabel, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
+
+        add(scopeComboBox, new GridBagConstraints(1, 12, 2, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
     }
 
     private void enabledLocation(final LocationType locationType) {
@@ -165,24 +186,40 @@ public class LocationPanel extends JPanel {
      * @return the location or null if no valid location entered.
      */
     public ConfigurationLocation getConfigurationLocation() {
+        final NamedScope namedScope = (NamedScope) scopeComboBox.getSelectedItem();
+
         if (fileLocationField.isEnabled()) {
             if (isNotBlank(fileLocation())) {
-                return configurationLocationFactory().create(project, typeOfFile(),
-                        fileLocation(), descriptionField.getText());
+                return configurationLocationFactory().create(
+                        project,
+                        typeOfFile(),
+                        fileLocation(),
+                        descriptionField.getText(),
+                        namedScope);
             }
 
         } else if (urlLocationField.isEnabled()) {
             if (isNotBlank(urlLocation())) {
-                return configurationLocationFactory().create(project, typeOfUrl(),
-                        urlLocation(), descriptionField.getText());
+                return configurationLocationFactory().create(
+                        project,
+                        typeOfUrl(),
+                        urlLocation(),
+                        descriptionField.getText(),
+                        namedScope);
             }
 
         } else if (classpathLocationField.isEnabled()) {
             if (isNotBlank(classpathLocation())) {
-                return configurationLocationFactory().create(project, PLUGIN_CLASSPATH,
-                        classpathLocation(), descriptionField.getText());
+                return configurationLocationFactory().create(
+                        project,
+                        PLUGIN_CLASSPATH,
+                        classpathLocation(),
+                        descriptionField.getText(),
+                        namedScope);
             }
         }
+
+
 
         return null;
     }

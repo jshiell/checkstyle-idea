@@ -42,7 +42,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private final Project project;
     private String location;
     private String description;
-    private final NamedScope scope;
+    private NamedScope namedScope;
 
     private boolean propertiesCheckedThisSession;
     private long blockedUtil;
@@ -52,7 +52,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.type = type;
         this.project = project;
         // TODO fill with correct value
-        this.scope = NamedScopeHelper.getScopeById(project, "Messages");
+        this.namedScope = NamedScopeHelper.getScopeById(project, "Messages");
     }
 
     public boolean canBeResolvedInDefaultProject() {
@@ -81,7 +81,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public Optional<NamedScope> getNamedScope() {
-        return Optional.ofNullable(this.scope);
+        return Optional.ofNullable(this.namedScope);
     }
 
     public void setLocation(final String location) {
@@ -107,6 +107,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         } else {
             this.description = description;
         }
+    }
+
+    public void setNamedScope(NamedScope namedScope) {
+        this.namedScope = namedScope;
     }
 
     public Map<String, String> getProperties() {
