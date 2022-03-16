@@ -11,6 +11,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.StringConfigurationLocation;
+import org.infernus.idea.checkstyle.service.TestHelper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,7 +53,7 @@ public class OpCreateCheckerTest {
     public void testCreateCheckerWithConfigsMock() throws IOException, URISyntaxException {
 
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
-                FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
+                FileUtil.readFile("cmd/" + CONFIG_FILE), TestHelper.mockProject());
 
         final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, configLoc,
                 emptyMap(), configurationsMock, getClass().getClassLoader());
@@ -74,7 +75,7 @@ public class OpCreateCheckerTest {
     public void testCreateChecker_noModule() throws IOException, URISyntaxException {
 
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
-                FileUtil.readFile("cmd/" + CONFIG_FILE), mock(Project.class));
+                FileUtil.readFile("cmd/" + CONFIG_FILE), TestHelper.mockProject());
 
         //noinspection ConstantConditions
         CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(null, configLoc,

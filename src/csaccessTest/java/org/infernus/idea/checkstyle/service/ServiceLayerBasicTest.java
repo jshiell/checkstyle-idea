@@ -67,7 +67,7 @@ public class ServiceLayerBasicTest {
 
     private CheckStyleChecker createChecker(@NotNull final String configXmlFile)
             throws IOException, URISyntaxException {
-        final ConfigurationLocation configLoc = new StringConfigurationLocation(FileUtil.readFile(configXmlFile), mock(Project.class));
+        final ConfigurationLocation configLoc = new StringConfigurationLocation(FileUtil.readFile(configXmlFile), TestHelper.mockProject());
 
         final Module module = mock(Module.class);
         when(module.getProject()).thenReturn(PROJECT);

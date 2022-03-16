@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.junit.Before;
@@ -14,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 public class ConfigurationLocationFactoryTest {
 
-    private final Project project = mock(Project.class);
+    private final Project project = TestHelper.mockProject();
 
     private final ConfigurationLocationFactory underTest = new ConfigurationLocationFactory();
 

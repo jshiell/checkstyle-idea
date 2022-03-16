@@ -2,7 +2,10 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.scope.packageSet.InvalidPackageSet;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.apache.commons.io.FilenameUtils;
+import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +30,6 @@ public class FileConfigurationLocationTest {
     private static final String PROJECT_BASE_PATH = "/the/base-project/path";
 
     @Mock
-    private Project project;
-    @Mock
     private VirtualFile projectBase;
     @Mock
     private ProjectPaths projectPaths;
@@ -41,25 +42,26 @@ public class FileConfigurationLocationTest {
 
         underTest.setLocation("aLocation");
         underTest.setDescription("aDescription");
+        underTest.setNamedScope(TestHelper.NAMED_SCOPE);
     }
 
     @Test
     public void descriptorShouldContainsTypeLocationAndDescription() {
-        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:aLocation:aDescription")));
+        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:aLocation:aDescription;test")));
     }
 
     @Test
     public void theProjectDirectoryShouldBeTokenisedInDescriptorForUnixPaths() {
         underTest.setLocation(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml");
 
-        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a-path/to/checkstyle.xml:aDescription")));
+        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a-path/to/checkstyle.xml:aDescription;test")));
     }
 
     @Test
     public void directoryTraversalsInARelativePathShouldNotBeAlteredByTokenisation() {
         underTest.setLocation(PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml");
 
-        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/../a-path/to/checkstyle.xml:aDescription")));
+        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/../a-path/to/checkstyle.xml:aDescription;test")));
     }
 
     @Test
@@ -69,7 +71,7 @@ public class FileConfigurationLocationTest {
         underTest.setLocation("c:\\some-where\\a-project\\a\\file\\location-in\\checkstyle.xml");
         underTest.setDescription("aDescription");
 
-        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a/file/location-in/checkstyle.xml:aDescription")));
+        assertThat(underTest.getDescriptor(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a/file/location-in/checkstyle.xml:aDescription;test")));
     }
 
     @Test
@@ -121,7 +123,7 @@ public class FileConfigurationLocationTest {
     }
 
     private FileConfigurationLocation useWindowsFilePaths() {
-        reset(project);
+        final Project project = TestHelper.mockProject();
 
         ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
@@ -133,7 +135,7 @@ public class FileConfigurationLocationTest {
     }
 
     private FileConfigurationLocation useUnixPaths() {
-        reset(project);
+        final Project project = TestHelper.mockProject();
 
         ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/');
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
@@ -154,7 +156,7 @@ public class FileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
-        return new ProjectFilePaths(project, separatorChar, absolutePathOf, projectPaths);
+        return new ProjectFilePaths(TestHelper.mockProject(), separatorChar, absolutePathOf, projectPaths);
     }
 
 }

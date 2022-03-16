@@ -19,6 +19,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
 import org.infernus.idea.checkstyle.service.FileUtil;
+import org.infernus.idea.checkstyle.service.TestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -394,8 +395,9 @@ public class OpLoadConfigurationTest {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
-                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, mock(Project.class)), true, null);
+                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, TestHelper.mockProject()), true, null);
         Assert.assertNotNull(csConfig);
     }
 
@@ -406,7 +408,7 @@ public class OpLoadConfigurationTest {
         CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
-                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, mock(Project.class)), true, null);
+                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, TestHelper.mockProject()), true, null);
         Assert.assertNotNull(csConfig);
     }
 }

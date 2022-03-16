@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.infernus.idea.checkstyle.TestHelper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class HTTPURLConfigurationLocationTest {
 
     @NotNull
     private HTTPURLConfigurationLocation aLocationWithPath(final String path) {
-        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(mock(Project.class));
+        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(TestHelper.mockProject());
         location.setDescription("aTestLocation");
         location.setLocation(format("http://localhost:%s%s", serverPort, path));
         return location;
@@ -84,6 +85,7 @@ public class HTTPURLConfigurationLocationTest {
         final TimingOutHTTPURLConfigurationLocation location = new TimingOutHTTPURLConfigurationLocation();
         location.setDescription("aTimingOutTestLocation");
         location.setLocation(format("http://localhost:%s%s", serverPort, "/delayed"));
+        location.setNamedScope(TestHelper.NAMED_SCOPE);
         return location;
     }
 
@@ -128,7 +130,7 @@ public class HTTPURLConfigurationLocationTest {
 
     private static class TimingOutHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
         TimingOutHTTPURLConfigurationLocation() {
-            super(mock(Project.class));
+            super(TestHelper.mockProject());
         }
 
         @NotNull
