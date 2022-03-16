@@ -113,29 +113,33 @@ public class ConfigurationLocationFactory {
         }
         final String typeString = stringRepresentation.substring(0, typeSplitIndex);
 
-        final int descriptionSplitIndex = stringRepresentation.lastIndexOf(':');
-        if (typeSplitIndex == descriptionSplitIndex
-                || indexIsOutOfBounds(descriptionSplitIndex, stringRepresentation)) {
+        final int descriptionAndScopeSplitIndex = stringRepresentation.lastIndexOf(':');
+        if (typeSplitIndex == descriptionAndScopeSplitIndex
+                || indexIsOutOfBounds(descriptionAndScopeSplitIndex, stringRepresentation)) {
             throw new IllegalArgumentException("Invalid string representation: " + stringRepresentation);
         }
-        final String location = stringRepresentation.substring(typeSplitIndex + 1, descriptionSplitIndex);
+        final String location = stringRepresentation.substring(typeSplitIndex + 1, descriptionAndScopeSplitIndex);
+
 
         String description = "";
-        if (descriptionSplitIndex < (stringRepresentation.length() - 1)) {
-            description = stringRepresentation.substring(descriptionSplitIndex + 1);
+        String scopeString = "";
+        if (descriptionAndScopeSplitIndex < (stringRepresentation.length() - 1)) {
+            String descriptionAndScope = stringRepresentation.substring(descriptionAndScopeSplitIndex + 1);
+            final String[] split = descriptionAndScope.split(";");
+            description = split[0];
+            scopeString = split.length < 2 ? NamedScopeHelper.DEFAULT_SCOPE_ID : split[1];
         }
 
         if ("CLASSPATH".equals(typeString)) {
             return create(BundledConfig.SUN_CHECKS, project);   // backwards compatibility with old config files
         }
         final ConfigurationType type = ConfigurationType.parse(typeString);
-        //TODO correct deserialization
         return create(
                 project,
                 type,
                 location,
                 description,
-                NamedScopeHelper.getDefaultScope(project));
+                NamedScopeHelper.getScopeByIdWithDefaultFallback(project, scopeString));
     }
 
     public @NotNull BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,

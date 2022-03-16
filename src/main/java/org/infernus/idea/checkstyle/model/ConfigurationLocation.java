@@ -52,7 +52,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.type = type;
         this.project = project;
         // TODO fill with correct value
-        this.namedScope = NamedScopeHelper.getScopeById(project, "Messages");
+        this.namedScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "Messages");
     }
 
     public boolean canBeResolvedInDefaultProject() {
@@ -351,8 +351,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     public String getDescriptor() {
         assert location != null;
         assert description != null;
+        assert namedScope != null;
 
-        return type + ":" + location + ":" + description;
+        return type + ":" + location + ":" + description + ";" + namedScope.getScopeId();
     }
 
     /**
