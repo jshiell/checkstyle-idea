@@ -124,7 +124,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
 
 
     private CheckStyleChecker createChecker(@NotNull final Module pModule) throws URISyntaxException, IOException {
-        final ConfigurationLocation configLoc = new StringConfigurationLocation(readFile(CONFIG_FILE), mock(Project.class));
+        final ConfigurationLocation configLoc = new StringConfigurationLocation(readFile(CONFIG_FILE), TestHelper.mockProject());
 
         final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
         when(configurations.tabWidth()).thenReturn(2);

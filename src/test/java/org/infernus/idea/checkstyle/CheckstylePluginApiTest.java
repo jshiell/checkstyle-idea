@@ -31,7 +31,7 @@ public class CheckstylePluginApiTest {
 
     @Before
     public void setUp() {
-        project = mock(Project.class);
+        project = TestHelper.mockProject();
 
         pluginConfigManager = mock(PluginConfigurationManager.class);
         when(pluginConfigManager.getCurrent())

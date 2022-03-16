@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.model;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
+import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.Before;
@@ -26,8 +27,6 @@ public class RelativeFileConfigurationLocationTest {
     private static final String PROJECT_BASE_PATH = "/the/base-project/path";
 
     @Mock
-    private Project project;
-    @Mock
     private VirtualFile projectBase;
 
     private FileConfigurationLocation underTest;
@@ -45,6 +44,7 @@ public class RelativeFileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
+        final Project project = TestHelper.mockProject();
         ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf, projectPaths);
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
 

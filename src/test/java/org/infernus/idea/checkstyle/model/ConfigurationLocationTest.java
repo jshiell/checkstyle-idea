@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.jetbrains.annotations.NotNull;
@@ -148,8 +149,8 @@ public class ConfigurationLocationTest {
     public void aDescriptorContainsTheLocationDescriptionAndType() {
         final ConfigurationLocation location = new TestConfigurationLocation("aLocation");
 
-        assertThat(location.getDescriptor(), is(equalTo(format("%s:%s:%s",
-                location.getType(), location.getLocation(), location.getDescription()))));
+        assertThat(location.getDescriptor(), is(equalTo(format("%s:%s:%s;%s",
+                location.getType(), location.getLocation(), location.getDescription(), location.getNamedScope().get().getScopeId()))));
     }
 
     @Test
@@ -189,7 +190,7 @@ public class ConfigurationLocationTest {
 
     private static class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
         public DefaultProjectTestConfigurationLocation() {
-            super(ConfigurationType.LOCAL_FILE, mock(Project.class));
+            super(ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             when(getProject().isDefault()).thenReturn(true);
         }
@@ -212,10 +213,12 @@ public class ConfigurationLocationTest {
     }
 
     private static class TestConfigurationLocation extends ConfigurationLocation {
+
         public TestConfigurationLocation(final String content) {
-            super(ConfigurationType.LOCAL_FILE, mock(Project.class));
+            super(ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             setLocation(content);
+            setNamedScope(TestHelper.NAMED_SCOPE);
         }
 
         @NotNull
@@ -233,7 +236,7 @@ public class ConfigurationLocationTest {
 
     @Test
     public void testSorting() {
-        final Project project = mock(Project.class);
+        final Project project = TestHelper.mockProject();
         when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
 
         List<ConfigurationLocation> list = new ArrayList<>();
