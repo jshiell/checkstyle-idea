@@ -24,15 +24,22 @@ public class NamedScopeHelper {
                 .findAny();
     }
 
+    /**
+     * Returns the scope with the given id.
+     * If no scope with this ID exists, the Scope with the {@link #DEFAULT_SCOPE_ID} is being returned.
+     */
     @Nullable
-    public static NamedScope getScopeById(Project project, String id) {
-        //TODO local before shared or shared before local?
-        final NamedScopeManager myLocalScopesManager = NamedScopeManager.getInstance(project);
-        final DependencyValidationManager mySharedScopesManager = DependencyValidationManager.getInstance(project);
+    public static NamedScope getScopeByIdWithDefaultFallback(Project project, String id) {
+        final NamedScope localScopeOrNull = NamedScopeManager.getInstance(project).getScope(id);
+        if (localScopeOrNull != null) {
+            return localScopeOrNull;
+        }
+        final NamedScope sharedScopeOrNull = DependencyValidationManager.getInstance(project).getScope(id);
+        if (sharedScopeOrNull != null) {
+            return sharedScopeOrNull;
+        }
 
-        final NamedScope sharedScopeOrNull = mySharedScopesManager.getScope(id);
-
-        return sharedScopeOrNull != null ? sharedScopeOrNull : myLocalScopesManager.getScope(id);
+        return getDefaultScope(project);
     }
 
     public static Stream<NamedScope> getAllScopes(Project project) {
