@@ -1,6 +1,6 @@
 # CheckStyle-IDEA
 
-&copy; Copyright 2006-2021 CheckStyle-IDEA Contributors
+&copy; Copyright 2006-2022 CheckStyle-IDEA Contributors
 
 Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
@@ -8,8 +8,8 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jshiell/checkstyle-idea.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jshiell/checkstyle-idea/alerts)
 
-A plug-in for JetBrains' IntelliJ IDEA 2020/2021 which provides real-time feedback against a given
-[CheckStyle 8-9](https://checkstyle.sourceforge.io) profile by way of an inspection.
+A plug-in for JetBrains' IntelliJ IDEA 2021/2022 which provides real-time feedback against a given
+[CheckStyle 8-10](https://checkstyle.sourceforge.io) profile by way of an inspection.
 
 Please note this is not an official part of Checkstyle - they neither endorse
     nor bear responsibility for this plugin. The logo is sourced from the [Checkstyle resources

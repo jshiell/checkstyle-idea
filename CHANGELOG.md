@@ -1,5 +1,9 @@
 # CheckStyle-IDEA Changelog
 
+* **5.62.0** New: Added Checkstyle 10.0.
+* **5.61.1** Fixed: Removed left-over log4j artefacts, to allow compatibility with newer EAPs.
+* **5.61.0** New: Added Checkstyle 9.3.
+* **5.60.0** New: Added Checkstyle 9.2.1.
 * **5.59.1** Fixed: NPE when configuration location has been garbage collected from weak map (#547).
 * **5.59.0** New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).
 * **5.58.0** New: Added Checkstyle 9.1 - thanks to @kennysoft (#543).
