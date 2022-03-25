@@ -72,7 +72,7 @@ public class CheckstylePluginApiTest {
                 .thenReturn(PluginConfigurationBuilder
                         .testInstance(CHECKSTYLE_VERSION)
                         .withLocations(locations)
-                        .withActiveLocation(googleChecks)
+                        .withActiveLocation(locations)
                         .build());
         CheckstylePluginApi.ConfigurationVisitor visitor = mock(CheckstylePluginApi.ConfigurationVisitor.class);
 

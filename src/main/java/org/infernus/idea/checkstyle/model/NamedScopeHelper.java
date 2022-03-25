@@ -2,27 +2,21 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.packageDependencies.DependencyValidationManager;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
+import com.intellij.psi.search.scope.packageSet.PackageSet;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NamedScopeHelper {
+public final class NamedScopeHelper {
+
+    private NamedScopeHelper() {}
 
     public static final String DEFAULT_SCOPE_ID = "All";
-
-    public static Optional<NamedScope> getAnyScope(Project project) {
-        final NamedScopeManager myLocalScopesManager = NamedScopeManager.getInstance(project);
-        final DependencyValidationManager mySharedScopesManager = DependencyValidationManager.getInstance(project);
-
-        return Stream.concat(
-                        Arrays.stream(myLocalScopesManager.getScopes()),
-                        Arrays.stream(mySharedScopesManager.getScopes()))
-                .findAny();
-    }
 
     /**
      * Returns the scope with the given id.
@@ -50,5 +44,16 @@ public class NamedScopeHelper {
 
     public static NamedScope getDefaultScope(Project project) {
         return DependencyValidationManager.getInstance(project).getScope(DEFAULT_SCOPE_ID);
+    }
+
+    public static boolean isFileInScope(final PsiFile psiFile, @NotNull final NamedScope namedScope) {
+        final PackageSet packageSet = namedScope.getValue();
+        if (packageSet == null) {
+            return true;
+        }
+
+        return packageSet.contains(
+                psiFile,
+                DependencyValidationManager.getInstance(psiFile.getProject()));
     }
 }

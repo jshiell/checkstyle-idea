@@ -69,7 +69,7 @@ public class OpCreateChecker
                 ? configurations
                 : new Configurations(module, csConfig);
         return new CheckStyleChecker(cwc, configs.tabWidth(), configs.baseDir(),
-                checkstyleProjectService.getCheckstyleInstance());
+                checkstyleProjectService.getCheckstyleInstance(), location.getNamedScope());
     }
 
     private void setClassLoader(final Checker checker, final ClassLoader classLoader) {

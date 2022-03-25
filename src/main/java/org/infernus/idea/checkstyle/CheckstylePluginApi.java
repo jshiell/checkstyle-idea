@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.SortedSet;
 import java.util.function.BiConsumer;
 
 /**
@@ -32,9 +33,9 @@ public class CheckstylePluginApi {
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        Optional<ConfigurationLocation> activeLocation = pluginConfigurationManager().getCurrent().getActiveLocation();
+        SortedSet<ConfigurationLocation> activeLocations = pluginConfigurationManager().getCurrent().getActiveLocations();
 
-        activeLocation.ifPresent(it -> {
+        activeLocations.forEach(it -> {
             CheckstyleActions checkstyleInstance = checkstyleProjectService().getCheckstyleInstance();
             checkstyleInstance.peruseConfiguration(
                     checkstyleInstance.loadConfiguration(

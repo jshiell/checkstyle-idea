@@ -19,7 +19,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.currentTimeMillis;
@@ -52,7 +56,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.type = type;
         this.project = project;
         // TODO fill with correct value
-        this.namedScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "Messages");
+        this.namedScope = NamedScopeHelper.getDefaultScope(project);
     }
 
     public boolean canBeResolvedInDefaultProject() {

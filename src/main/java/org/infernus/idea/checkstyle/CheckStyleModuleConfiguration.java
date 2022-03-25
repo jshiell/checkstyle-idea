@@ -29,6 +29,7 @@ public final class CheckStyleModuleConfiguration extends Properties
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
 
     private static final String ACTIVE_CONFIG = "active-configuration";
+    private static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
     private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
 
     private final Module module;
@@ -75,28 +76,34 @@ public final class CheckStyleModuleConfiguration extends Properties
         return containsKey(ACTIVE_CONFIG);
     }
 
-    public Optional<ConfigurationLocation> getActiveConfiguration() {
+    public SortedSet<ConfigurationLocation> getActiveConfigurations() {
         if (!containsKey(ACTIVE_CONFIG)) {
             return getProjectConfiguration();
         }
 
-        ConfigurationLocation activeLocation = null;
+        SortedSet<ConfigurationLocation> activeLocations = new TreeSet<>();
         try {
-            activeLocation = configurationLocationFactory(module.getProject()).create(module.getProject(), getProperty(ACTIVE_CONFIG));
+            final ConfigurationLocationFactory factory = configurationLocationFactory(module.getProject());
+            activeLocations.add(factory.create(module.getProject(), getProperty(ACTIVE_CONFIG)));
+            stringPropertyNames().stream()
+                    .peek(e -> System.out.println("PROPERTY: " + e))
+                    .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
+                    .map(propertyName -> factory.create(module.getProject(), getProperty(propertyName)))
+                    .forEach(activeLocations::add);
         } catch (IllegalArgumentException e) {
             LOG.warn("Could not load active configuration", e);
         }
 
-        if (activeLocation == null || !configurationLocations().contains(activeLocation)) {
+        if (activeLocations.isEmpty() || !configurationLocations().containsAll(activeLocations)) {
             LOG.info("Active module configuration is invalid, returning project configuration");
             return getProjectConfiguration();
         }
 
-        return Optional.of(activeLocation);
+        return activeLocations;
     }
 
-    private Optional<ConfigurationLocation> getProjectConfiguration() {
-        return configurationManager().getCurrent().getActiveLocation();
+    private SortedSet<ConfigurationLocation> getProjectConfiguration() {
+        return configurationManager().getCurrent().getActiveLocations();
     }
 
     private PluginConfigurationManager configurationManager() {

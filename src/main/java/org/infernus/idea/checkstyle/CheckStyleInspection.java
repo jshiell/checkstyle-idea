@@ -23,16 +23,17 @@ import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.TreeSet;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Async.asyncResultOf;
@@ -116,22 +117,25 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                       @NotNull final InspectionManager manager) {
         LOG.debug("Inspection has been invoked for " + psiFile.getName());
 
-        Optional<ConfigurationLocation> configurationLocation = Optional.empty();
+        ArrayList<ConfigurationLocation> configurationLocations = new ArrayList<>();
         try {
-            configurationLocation =
+            configurationLocations.addAll(
                     configurationLocationSource(manager.getProject())
-                            .getConfigurationLocation(module, null);
+                            .getConfigurationLocation(module, null));
 
-            if (configurationLocation.map(ConfigurationLocation::isBlocked).orElse(true)) {
-                return NO_PROBLEMS_FOUND;
-            }
-
-            return checkerFactory(psiFile.getProject())
-                    .checker(module, configurationLocation.get())
-                    .map(checker -> checker.scan(scannableFiles, configurationManager(psiFile.getProject()).getCurrent().isSuppressErrors()))
-                    .map(results -> results.get(psiFile))
-                    .map(this::dropIgnoredProblems)
-                    .orElse(NO_PROBLEMS_FOUND);
+            // Check file with every non-blocked location
+            return configurationLocations.stream()
+                    .filter(not(ConfigurationLocation::isBlocked))
+                    .map(configurationLocation -> checkerFactory(psiFile.getProject())
+                            .checker(module, configurationLocation)
+                            .map(checker -> checker.scan(scannableFiles, configurationManager(psiFile.getProject()).getCurrent().isSuppressErrors()))
+                            .map(results -> results.get(psiFile))
+                            .map(this::dropIgnoredProblems)
+                            .orElse(NO_PROBLEMS_FOUND)
+                    )
+                    .flatMap(List::stream)
+                    .distinct()
+                    .collect(toList());
 
         } catch (ProcessCanceledException | AssertionError e) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
@@ -142,7 +146,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return NO_PROBLEMS_FOUND;
 
         } catch (Throwable e) {
-            handlePluginException(e, psiFile, configurationLocation.orElse(null), manager.getProject());
+            // it would be nice to only block the locations which caused the exception to occur
+            handlePluginException(e, psiFile, configurationLocations, manager.getProject());
             return NO_PROBLEMS_FOUND;
 
         } finally {
@@ -158,7 +163,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
     private void handlePluginException(final Throwable e,
                                        final @NotNull PsiFile psiFile,
-                                       final ConfigurationLocation configurationLocation,
+                                       final List<ConfigurationLocation> configurationLocations,
                                        final @NotNull Project project) {
         if (e.getCause() != null && e.getCause() instanceof ProcessCanceledException) {
             LOG.debug("Process cancelled when scanning: " + psiFile.getName());
@@ -168,12 +173,12 @@ public class CheckStyleInspection extends LocalInspectionTool {
 
         } else if (e.getCause() != null && e.getCause() instanceof IOException) {
             showWarning(project, message("checkstyle.file-io-failed"));
-            block(configurationLocation);
+            block(configurationLocations);
 
         } else {
             LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
             showException(project, e);
-            block(configurationLocation);
+            block(configurationLocations);
         }
     }
 
@@ -182,10 +187,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
         showWarning(project, message("checkstyle.configuration-disabled.file-not-found"));
     }
 
-    private void block(final ConfigurationLocation configurationLocation) {
-        if (configurationLocation != null) {
-            configurationLocation.block();
-        }
+    private void block(final List<ConfigurationLocation> configurationLocation) {
+        configurationLocation.forEach(ConfigurationLocation::block);
     }
 
     @NotNull
