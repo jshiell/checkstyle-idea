@@ -7,7 +7,9 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
@@ -55,8 +57,21 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                  @NotNull final Project project) {
         this.type = type;
         this.project = project;
-        // TODO fill with correct value
         this.namedScope = NamedScopeHelper.getDefaultScope(project);
+        this.initializeFutureScopeChangeHandling();
+    }
+
+    /**
+     * Refreshes the named scope if the scopes have been changed.
+     */
+    private void initializeFutureScopeChangeHandling() {
+        NamedScopeManager.getInstance(project).addScopeListener(this::scopeChanged, project);
+        DependencyValidationManager.getInstance(project).addScopeListener(this::scopeChanged, project);
+    }
+
+    private void scopeChanged() {
+        this.getNamedScope().ifPresent(scope ->
+                this.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(project, scope.getScopeId())));
     }
 
     public boolean canBeResolvedInDefaultProject() {
@@ -162,7 +177,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     /**
      * Extract all settable properties from the given configuration element.
      *
-     * @param element the configuration element.
+     * @param element
+     * 		the configuration element.
+     *
      * @return the settable property names.
      */
     private List<String> extractProperties(final Element element) {
@@ -269,7 +286,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     private boolean existsOnClasspath(final String fileName,
-                                     final ClassLoader checkstyleClassLoader) {
+                                      final ClassLoader checkstyleClassLoader) {
         return checkstyleClassLoader.getResource(fileName.startsWith("/") ? fileName.substring(1) : fileName) != null;
     }
 
@@ -363,9 +380,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     /**
      * Resolve this location to a file.
      *
+     * @param checkstyleClassLoader
+     * 		the classloader for the configured Checkstyle.
+     *
      * @return the file to load.
-     * @throws IOException if the file cannot be loaded.
-     * @param checkstyleClassLoader the classloader for the configured Checkstyle.
+     * @throws IOException
+     * 		if the file cannot be loaded.
      */
     @NotNull
     protected abstract InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException;
