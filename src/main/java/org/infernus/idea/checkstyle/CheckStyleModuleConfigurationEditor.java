@@ -5,7 +5,9 @@ import com.intellij.openapi.module.ModuleConfigurationEditor;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationEditor {
 
@@ -67,9 +69,9 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
         if (configuration.isExcluded()) {
             configPanel.setExcluded(true);
         } else if (configuration.isUsingModuleConfiguration()) {
-            configPanel.setActiveLocation(configuration.getActiveConfiguration().orElse(null));
+            configPanel.setActiveLocations(new ArrayList<>(configuration.getActiveConfigurations()));
         } else {
-            configPanel.setActiveLocation(null);
+            configPanel.setActiveLocations(Collections.emptyList());
         }
     }
 

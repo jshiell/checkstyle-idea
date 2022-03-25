@@ -21,9 +21,17 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
@@ -147,9 +155,9 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
-            final ConfigurationLocationResult locationResult = configurationLocation(overrideConfigLocation, module);
-            if (locationResult.status != PRESENT) {
-                return pair(locationResult, emptyMap());
+            final List<ConfigurationLocationResult> locationResults = configurationLocation(overrideConfigLocation, module);
+            if (locationResults.isEmpty()) {
+                return pair(resultOf(NOT_PRESENT), emptyMap());
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
@@ -157,8 +165,13 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                 continue;
             }
 
+            final List<ConfigurationLocation> locationsToCheck = locationResults.stream()
+                    .filter(configurationLocationResult -> configurationLocationResult.status != BLOCKED)
+                    .map(configurationLocationResult -> configurationLocationResult.location)
+                    .collect(Collectors.toList());
+
             fileResults.putAll(filesWithProblems(filesForModule,
-                    checkFiles(module, filesForModule, locationResult.location)));
+                    checkFiles(module, filesForModule, locationsToCheck)));
             fireFilesScanned(filesForModule.size());
         }
 
@@ -179,28 +192,39 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @NotNull
-    private ConfigurationLocationResult configurationLocation(
+    private List<ConfigurationLocationResult> configurationLocation(
             final ConfigurationLocation override,
             final Module module) {
-        final Optional<ConfigurationLocation> location =
+        final SortedSet<ConfigurationLocation> locations =
                 configurationLocationSource().getConfigurationLocation(module, override);
 
-        return location.map(it -> it.isBlocked()
+        return locations.stream().map(it -> it.isBlocked()
                         ? resultOf(it, BLOCKED)
                         : resultOf(it, PRESENT))
-                .orElse(resultOf(NOT_PRESENT));
+                .collect(Collectors.toList());
     }
 
     private Map<PsiFile, List<Problem>> checkFiles(final Module module,
                                                    final Set<PsiFile> filesToScan,
-                                                   final ConfigurationLocation configurationLocation) {
+                                                   final List<ConfigurationLocation> configurationLocations) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module));
 
-            return checkerFactory().checker(module, configurationLocation)
+            return configurationLocations.stream().map(configurationLocation -> checkerFactory().checker(module, configurationLocation)
                     .map(checker -> checker.scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors()))
-                    .orElseThrow(() -> new CheckStylePluginException("Could not create checker"));
+                    .orElseThrow(() -> new CheckStylePluginException("Could not create checker")))
+                    .flatMap(e -> e.entrySet().stream())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (List<Problem> e1, List<Problem> e2) -> {
+                                // Merge function to join multiple list of problems for the same file
+                                // If the same (equals) problem is contained in e1 and e2 only one gets added
+                                return Stream.concat(e1.stream(),e2.stream())
+                                        .distinct()
+                                        .collect(Collectors.toList());
+                            }));
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }

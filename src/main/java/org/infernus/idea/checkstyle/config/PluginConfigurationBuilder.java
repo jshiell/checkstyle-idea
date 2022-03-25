@@ -24,7 +24,7 @@ public final class PluginConfigurationBuilder {
     private boolean copyLibraries;
     private SortedSet<ConfigurationLocation> locations;
     private List<String> thirdPartyClasspath;
-    private ConfigurationLocation activeLocation;
+    private SortedSet<ConfigurationLocation> activeLocations;
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
 
@@ -34,7 +34,7 @@ public final class PluginConfigurationBuilder {
                                        final boolean copyLibraries,
                                        @NotNull final SortedSet<ConfigurationLocation> locations,
                                        @NotNull final List<String> thirdPartyClasspath,
-                                       @Nullable final ConfigurationLocation activeLocation,
+                                       @NotNull final SortedSet<ConfigurationLocation> activeLocations,
                                        final boolean scanBeforeCheckin,
                                        @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
@@ -43,7 +43,7 @@ public final class PluginConfigurationBuilder {
         this.copyLibraries = copyLibraries;
         this.locations = locations;
         this.thirdPartyClasspath = thirdPartyClasspath;
-        this.activeLocation = activeLocation;
+        this.activeLocations = activeLocations;
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
     }
@@ -64,7 +64,7 @@ public final class PluginConfigurationBuilder {
                 copyLibs,
                 defaultLocations,
                 Collections.emptyList(),
-                null,
+                Collections.emptySortedSet(),
                 false,
                 CheckStylePlugin.version());
     }
@@ -77,7 +77,7 @@ public final class PluginConfigurationBuilder {
                 false,
                 Collections.emptySortedSet(),
                 Collections.emptyList(),
-                null,
+                Collections.emptySortedSet(),
                 false,
                 "aVersion");
     }
@@ -89,7 +89,7 @@ public final class PluginConfigurationBuilder {
                 source.isCopyLibs(),
                 source.getLocations(),
                 source.getThirdPartyClasspath(),
-                source.getActiveLocation().orElse(null),
+                source.getActiveLocations(),
                 source.isScanBeforeCheckin(),
                 source.getLastActivePluginVersion());
     }
@@ -99,8 +99,8 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
-    public PluginConfigurationBuilder withActiveLocation(@Nullable final ConfigurationLocation newActiveLocation) {
-        this.activeLocation = newActiveLocation;
+    public PluginConfigurationBuilder withActiveLocation(final SortedSet<ConfigurationLocation> newActiveLocation) {
+        this.activeLocations = newActiveLocation;
         return this;
     }
 
@@ -147,7 +147,7 @@ public final class PluginConfigurationBuilder {
                 copyLibraries,
                 locations,
                 thirdPartyClasspath,
-                activeLocation,
+                activeLocations,
                 scanBeforeCheckin,
                 lastActivePluginVersion);
     }

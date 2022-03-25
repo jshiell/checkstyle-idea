@@ -6,7 +6,13 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 
 /**
@@ -21,7 +27,7 @@ public class PluginConfiguration {
     private final boolean copyLibs;
     private final SortedSet<ConfigurationLocation> locations;
     private final List<String> thirdPartyClasspath;
-    private final ConfigurationLocation activeLocation;
+    private final SortedSet<ConfigurationLocation> activeLocations;
     private final boolean scanBeforeCheckin;
     private final String lastActivePluginVersion;
 
@@ -31,7 +37,7 @@ public class PluginConfiguration {
                         final boolean copyLibs,
                         @NotNull final SortedSet<ConfigurationLocation> locations,
                         @NotNull final List<String> thirdPartyClasspath,
-                        @Nullable final ConfigurationLocation activeLocation,
+                        @NotNull final SortedSet<ConfigurationLocation> activeLocations,
                         final boolean scanBeforeCheckin,
                         @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
@@ -40,7 +46,9 @@ public class PluginConfiguration {
         this.copyLibs = copyLibs;
         this.locations = Collections.unmodifiableSortedSet(locations);
         this.thirdPartyClasspath = Collections.unmodifiableList(thirdPartyClasspath);
-        this.activeLocation = constrainActiveLocation(locations, activeLocation);
+        this.activeLocations = activeLocations.stream()
+		        .map(e -> constrainActiveLocation(locations, e))
+		        .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
     }
@@ -90,8 +98,8 @@ public class PluginConfiguration {
         return lastActivePluginVersion;
     }
 
-    public Optional<ConfigurationLocation> getActiveLocation() {
-        return Optional.ofNullable(activeLocation);
+    public SortedSet<ConfigurationLocation> getActiveLocations() {
+        return this.activeLocations;
     }
 
     public boolean isScanBeforeCheckin() {
@@ -130,7 +138,7 @@ public class PluginConfiguration {
                 && Objects.equals(copyLibs, otherDto.copyLibs)
                 && Objects.equals(locations, otherDto.locations)
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
-                && Objects.equals(activeLocation, otherDto.activeLocation)
+                && Objects.equals(activeLocations, otherDto.activeLocations)
                 && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
                 && Objects.equals(lastActivePluginVersion, otherDto.lastActivePluginVersion);
     }
@@ -138,7 +146,7 @@ public class PluginConfiguration {
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, locations, thirdPartyClasspath,
-                activeLocation, scanBeforeCheckin, lastActivePluginVersion);
+                activeLocations, scanBeforeCheckin, lastActivePluginVersion);
     }
 
 }

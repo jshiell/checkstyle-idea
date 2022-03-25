@@ -3,12 +3,16 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import static java.util.function.Predicate.not;
 
 /**
  * A table model for editing CheckStyle file locations.
@@ -23,7 +27,7 @@ public class LocationTableModel extends AbstractTableModel {
     private static final int NUMBER_OF_COLUMNS = 4;
 
     private final List<ConfigurationLocation> locations = new ArrayList<>();
-    private ConfigurationLocation activeLocation;
+    private final SortedSet<ConfigurationLocation> activeLocations = new TreeSet<>();
 
     /**
      * Create a new empty table model.
@@ -38,9 +42,7 @@ public class LocationTableModel extends AbstractTableModel {
             locations.addAll(newLocations);
         }
 
-        if (activeLocation != null && !locations.contains(activeLocation)) {
-            activeLocation = null;
-        }
+        this.activeLocations.removeIf(not(locations::contains));
 
         fireTableDataChanged();
     }
@@ -64,8 +66,11 @@ public class LocationTableModel extends AbstractTableModel {
     }
 
     public void removeLocationAt(final int index) {
-        if (equals(locations.get(index), activeLocation)) {
-            setActiveLocation(null);
+        final ConfigurationLocation locationToRemove = locations.get(index);
+        if (activeLocations.contains(locationToRemove)) {
+            final TreeSet<ConfigurationLocation> newActiveLocations = new TreeSet<>(this.activeLocations);
+            newActiveLocations.remove(locationToRemove);
+            setActiveLocations(newActiveLocations);
         }
         locations.remove(index);
 
@@ -76,59 +81,35 @@ public class LocationTableModel extends AbstractTableModel {
         return locations.get(index);
     }
 
-    public void setActiveLocation(@Nullable final ConfigurationLocation activeLocation) {
-        if (activeLocation != null && !locations.contains(activeLocation)) {
+    public void setActiveLocations(@NotNull final SortedSet<ConfigurationLocation> activeLocations) {
+        if (!activeLocations.isEmpty() && !locations.containsAll(activeLocations)) {
             throw new IllegalArgumentException("Active location is not in location list");
         }
 
-        if (activeLocation != null) {
-            updateActiveLocation(activeLocation, locations.indexOf(activeLocation), false);
+        if (!activeLocations.isEmpty()) {
+            activeLocations.forEach(activeLocation -> updateActiveLocation(activeLocation, locations.indexOf(activeLocation), false));
         } else {
-            updateActiveLocation(null, -1, false);
+            this.activeLocations.clear();
         }
     }
 
-    private void updateActiveLocation(@Nullable final ConfigurationLocation newLocation,
+    private void updateActiveLocation(@NotNull final ConfigurationLocation newLocation,
                                       final int newRow,
                                       final boolean allowToggle) {
-        int oldRow = -1;
-        for (int currentRow = 0; currentRow < locations.size(); ++currentRow) {
-            if (equals(locations.get(currentRow), this.activeLocation)) {
-                oldRow = currentRow;
-                break;
-            }
-        }
 
-        if (oldRow == newRow && allowToggle) {
-            this.activeLocation = null;
+        if (allowToggle && this.activeLocations.contains(newLocation)) {
+            this.activeLocations.remove(newLocation);
         } else {
-            this.activeLocation = newLocation;
+            this.activeLocations.add(newLocation);
         }
 
         if (newRow >= 0) {
             fireTableCellUpdated(newRow, COLUMN_ACTIVE);
         }
-        if (oldRow >= 0) {
-            fireTableCellUpdated(oldRow, COLUMN_ACTIVE);
-        }
     }
 
-    /*
-     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
-     * some packages of IDEA 7.x.
-     */
-    private boolean equals(final Object object1, final Object object2) {
-        if (object1 == object2) {
-            return true;
-        }
-        if ((object1 == null) || (object2 == null)) {
-            return false;
-        }
-        return object1.equals(object2);
-    }
-
-    public ConfigurationLocation getActiveLocation() {
-        return activeLocation;
+    public SortedSet<ConfigurationLocation> getActiveLocations() {
+        return activeLocations;
     }
 
     /**
@@ -192,7 +173,7 @@ public class LocationTableModel extends AbstractTableModel {
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         switch (columnIndex) {
             case COLUMN_ACTIVE:
-                return equals(locations.get(rowIndex), activeLocation);
+                return activeLocations.contains(locations.get(rowIndex));
 
             case COLUMN_DESCRIPTION:
                 return locations.get(rowIndex).getDescription();

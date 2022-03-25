@@ -5,10 +5,18 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -16,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.intellij.util.ui.JBUI.*;
+import static com.intellij.util.ui.JBUI.emptyInsets;
 
 /**
  * Provides module level configuration UI.
@@ -32,7 +40,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     private final JLabel configurationFilesLabel = new JLabel();
 
     private List<ConfigurationLocation> configurationLocations;
-    private ConfigurationLocation activeLocation;
+    private List<ConfigurationLocation> activeLocations;
     private boolean excluded;
 
     /**
@@ -126,18 +134,18 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     /**
      * Set the configuration to use, or null to use the project configuration.
      *
-     * @param activeLocation the configuration, or null to use the project configuration.
+     * @param activeLocations the configuration, or null to use the project configuration.
      */
-    public void setActiveLocation(@Nullable final ConfigurationLocation activeLocation) {
-        this.activeLocation = activeLocation;
+    public void setActiveLocations(final List<ConfigurationLocation> activeLocations) {
+        this.activeLocations = activeLocations;
 
-        if (activeLocation != null) {
-            configurationFilesCombo.setSelectedItem(activeLocation);
+        if (!activeLocations.isEmpty()) {
+            configurationFilesCombo.setSelectedItem(activeLocations.get(0));
         } else if (configurationFilesModel.getSize() > 0) {
             configurationFilesCombo.setSelectedItem(configurationFilesModel.getElementAt(0));
         }
 
-        if (activeLocation != null) {
+        if (!activeLocations.isEmpty()) {
             useModuleConfigurationRadio.setSelected(true);
         } else if (!excluded) {
             useProjectConfigurationRadio.setSelected(true);
@@ -177,7 +185,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      * @return true if modified.
      */
     public boolean isModified() {
-        return !Objects.equals(activeLocation, getActiveLocation())
+        return !activeLocations.contains(getActiveLocation())
                 || !Objects.equals(configurationLocations, getConfigurationLocations())
                 || excluded != isExcluded();
     }
