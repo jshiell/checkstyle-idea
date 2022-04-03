@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.62.0</version>
+    <version>5.63.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.63.0: New: Added Checkstyle 10.1.</li>
     <li>5.62.0: New: Added Checkstyle 10.0.</li>
     <li>5.61.1: Fixed: Removed left-over log4j artefacts, to allow compatibility with newer EAPs.</li>
     <li>5.61.0: New: Added Checkstyle 9.3.</li>
@@ -41,8 +42,6 @@
     <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
     <li>5.55.0: New: Added Checkstyle 8.45.</li>
     <li>5.54.0: New: Added Checkstyle 8.44.</li>
-    <li>5.53.1: Fixed: Insecure HTTP locations are now saved correctly (#528).</li>
-    <li>5.53.0: New: Added Checkstyle 8.43.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
