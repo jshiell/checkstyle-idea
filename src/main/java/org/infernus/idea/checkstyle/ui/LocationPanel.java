@@ -146,7 +146,6 @@ public class LocationPanel extends JPanel {
         add(Box.createVerticalGlue(), new GridBagConstraints(0, 10, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
 
-        //TODO horizontal Separator
 
         add(scopeLabel, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));

@@ -8,11 +8,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -24,8 +20,8 @@ public class ConfigurationLocationSource {
         this.project = project;
     }
 
-    public SortedSet<ConfigurationLocation> getConfigurationLocation(@Nullable final Module module,
-                                                                     @Nullable final ConfigurationLocation override) {
+    public SortedSet<ConfigurationLocation> getConfigurationLocations(@Nullable final Module module,
+                                                                      @Nullable final ConfigurationLocation override) {
         if (override != null) {
             return new TreeSet<>(Collections.singleton(override));
         }

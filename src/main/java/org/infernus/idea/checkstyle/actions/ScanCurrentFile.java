@@ -116,7 +116,7 @@ public class ScanCurrentFile extends BaseAction {
 
         final List<NamedScope> namedScopes = getNamedScopesToCheck(pluginConfiguration, overrideIfExists);
 
-        if (namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull) && !namedScopes.isEmpty()) {
+        if (!namedScopes.isEmpty() && namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull)) {
             return selectedFile;
         }
 

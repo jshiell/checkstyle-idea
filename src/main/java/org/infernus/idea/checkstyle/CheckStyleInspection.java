@@ -23,7 +23,7 @@ import org.infernus.idea.checkstyle.ui.CheckStyleInspectionPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,7 +125,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         try {
             configurationLocations.addAll(
                     configurationLocationSource(manager.getProject())
-                            .getConfigurationLocation(module, null));
+                            .getConfigurationLocations(module, null));
 
             // Check file with every non-blocked location
             return configurationLocations.stream()
