@@ -86,7 +86,6 @@ public final class CheckStyleModuleConfiguration extends Properties
             final ConfigurationLocationFactory factory = configurationLocationFactory(module.getProject());
             activeLocations.add(factory.create(module.getProject(), getProperty(ACTIVE_CONFIG)));
             stringPropertyNames().stream()
-                    .peek(e -> System.out.println("PROPERTY: " + e))
                     .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
                     .map(propertyName -> factory.create(module.getProject(), getProperty(propertyName)))
                     .forEach(activeLocations::add);

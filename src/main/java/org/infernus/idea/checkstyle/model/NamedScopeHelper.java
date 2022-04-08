@@ -8,7 +8,6 @@ import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import com.intellij.psi.search.scope.packageSet.PackageSet;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -22,7 +21,7 @@ public final class NamedScopeHelper {
      * Returns the scope with the given id.
      * If no scope with this ID exists, the Scope with the {@link #DEFAULT_SCOPE_ID} is being returned.
      */
-    @Nullable
+    @NotNull
     public static NamedScope getScopeByIdWithDefaultFallback(Project project, String id) {
         final NamedScope localScopeOrNull = NamedScopeManager.getInstance(project).getScope(id);
         if (localScopeOrNull != null) {

@@ -21,13 +21,7 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
@@ -197,7 +191,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             final ConfigurationLocation override,
             final Module module) {
         final SortedSet<ConfigurationLocation> locations =
-                configurationLocationSource().getConfigurationLocation(module, override);
+                configurationLocationSource().getConfigurationLocations(module, override);
 
         return locations.stream().map(it -> it.isBlocked()
                         ? resultOf(it, BLOCKED)
