@@ -14,6 +14,7 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -60,6 +61,7 @@ public abstract class BaseAction extends AnAction {
         actOnToolWindowPanel(toolWindow, panel -> panel.setProgressText(CheckStyleBundle.message(progressTextKey)));
     }
 
+    @Nullable
     protected ConfigurationLocation getSelectedOverride(final ToolWindow toolWindow) {
         return getFromToolWindowPanel(toolWindow, CheckStyleToolWindowPanel::getSelectedOverride);
     }

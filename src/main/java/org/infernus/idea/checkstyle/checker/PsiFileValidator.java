@@ -17,6 +17,8 @@ import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 final class PsiFileValidator {
@@ -26,12 +28,13 @@ final class PsiFileValidator {
 
     public static boolean isScannable(@Nullable final PsiFile psiFile,
                                       @NotNull final Optional<Module> module,
-                                      @NotNull final PluginConfigurationManager pluginConfig) {
+                                      @NotNull final PluginConfigurationManager pluginConfig,
+                                      @Nullable ConfigurationLocation overrideConfigLocation) {
         return psiFile != null
                 && psiFile.isValid()
                 && psiFile.isPhysical()
                 && hasDocument(psiFile)
-                && isInSource(psiFile, pluginConfig)
+                && isInSource(psiFile, pluginConfig, overrideConfigLocation)
                 && isValidFileType(psiFile, pluginConfig)
                 && isScannableIfTest(psiFile, pluginConfig)
                 && modulesMatch(psiFile, module)
@@ -58,19 +61,26 @@ final class PsiFileValidator {
         return JavaProjectRootsUtil.isInGeneratedCode(psiFile.getVirtualFile(), psiFile.getProject());
     }
 
-    private static boolean isInSource(@NotNull final PsiFile psiFile, @NotNull final PluginConfigurationManager pluginConfig) {
+    private static boolean isInSource(
+            @NotNull final PsiFile psiFile,
+            @NotNull final PluginConfigurationManager pluginConfig,
+            @Nullable ConfigurationLocation overrideConfigLocation) {
         final boolean shouldBeScanned = pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
                 || (psiFile.getVirtualFile() != null
                         && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
-        return shouldBeScanned && isInNamedScopeIfPresent(psiFile, pluginConfig);
+        return shouldBeScanned && isInNamedScopeIfPresent(
+                psiFile,
+                overrideConfigLocation != null
+                        ? Collections.singletonList(overrideConfigLocation)
+                        : pluginConfig.getCurrent().getActiveLocations());
     }
 
     /**
      * Returns true, if the given psiFile is contained in any named scope of the given pluginConfig.
      * If no NamedScope is provided, true will be returned.
      */
-    private static boolean isInNamedScopeIfPresent(@NotNull PsiFile psiFile, @NotNull PluginConfigurationManager pluginConfig) {
-        return pluginConfig.getCurrent().getActiveLocations().stream()
+    private static boolean isInNamedScopeIfPresent(@NotNull PsiFile psiFile, Collection<ConfigurationLocation> activeLocations) {
+        return activeLocations.stream()
                 .map(ConfigurationLocation::getNamedScope)
                 .flatMap(Optional::stream)
                 .anyMatch(scope -> NamedScopeHelper.isFileInScope(psiFile, scope));
