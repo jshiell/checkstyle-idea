@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.63.0** New: Added Checkstyle 10.1.
 * **5.62.0** New: Added Checkstyle 10.0.
 * **5.61.1** Fixed: Removed left-over log4j artefacts, to allow compatibility with newer EAPs.
 * **5.61.0** New: Added Checkstyle 9.3.

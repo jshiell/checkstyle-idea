@@ -12,7 +12,7 @@ repositories {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 dependencies {
-    implementation group: 'commons-io', name: 'commons-io', version: '2.4'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 

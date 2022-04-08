@@ -221,7 +221,6 @@ public class CheckstyleClassLoaderContainer {
     private String guessFromClassPath(@NotNull final List<URL> pUrls, @NotNull final Pattern pPattern) {
         String result = null;
         for (final URL url : pUrls) {
-            System.err.println("Testing " + url);
             Matcher matcher = pPattern.matcher(url.getPath());
             if (matcher.find()) {
                 result = matcher.group(1);

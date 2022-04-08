@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.intellij' version '1.4.0'
+    id 'org.jetbrains.intellij' version '1.5.2'
     id 'com.dorongold.task-tree' version '2.1.0'
     id 'org.infernus.idea.checkstyle.build'
 }
@@ -15,7 +15,7 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.62.0'
+version = '5.63.0'
 
 intellij {
     version = 'IC-2021.1.3'
