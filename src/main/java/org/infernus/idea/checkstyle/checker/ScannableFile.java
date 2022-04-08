@@ -15,7 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
-import org.infernus.idea.checkstyle.util.ProjectPaths;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,9 +74,14 @@ public class ScannableFile {
 
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final Project project,
-                                                        @Nullable final Module module) {
+                                                        @Nullable final Module module,
+                                                        @Nullable ConfigurationLocation overrideConfigLocation) {
         Computable<List<ScannableFile>> action = () -> psiFiles.stream()
-                .filter(currentFile -> PsiFileValidator.isScannable(currentFile, ofNullable(module), configurationManager(project)))
+                .filter(currentFile -> PsiFileValidator.isScannable(
+                        currentFile,
+                        ofNullable(module),
+                        configurationManager(project),
+                        overrideConfigLocation))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));

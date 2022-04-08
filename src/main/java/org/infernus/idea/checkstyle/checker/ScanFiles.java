@@ -47,6 +47,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     private final Map<Module, Set<PsiFile>> moduleToFiles;
     private final Set<ScannerListener> listeners = new CopyOnWriteArraySet<>();
     private final Project project;
+    @Nullable
     private final ConfigurationLocation overrideConfigLocation;
 
     public ScanFiles(@NotNull final Project project,
@@ -209,7 +210,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                                                    final List<ConfigurationLocation> configurationLocations) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
-            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module));
+            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module, this.overrideConfigLocation));
 
             return configurationLocations.stream().map(configurationLocation -> checkerFactory().checker(module, configurationLocation)
                     .map(checker -> checker.scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors()))

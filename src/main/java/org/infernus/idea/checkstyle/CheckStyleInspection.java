@@ -69,7 +69,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
 
         final Module module = moduleOf(psiFile);
-        List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(singletonList(psiFile), manager.getProject(), module);
+        List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(
+                singletonList(psiFile),
+                manager.getProject(),
+                module,
+                null);
         if (scannableFiles.isEmpty()) {
             LOG.debug("Inspection has been cancelled as file is not scannable: " + psiFile.getName());
             return noProblemsFound(manager);
