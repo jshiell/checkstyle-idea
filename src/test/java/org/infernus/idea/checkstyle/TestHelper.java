@@ -7,6 +7,7 @@ import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.jetbrains.annotations.NotNull;
 
+import static org.infernus.idea.checkstyle.model.NamedScopeHelper.DEFAULT_SCOPE_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,9 +16,12 @@ public class TestHelper {
 
     @NotNull
     public static Project mockProject() {
+        DependencyValidationManager dependencyValidationManager = mock(DependencyValidationManager.class);
+        when(dependencyValidationManager.getScope(DEFAULT_SCOPE_ID)).thenReturn(NAMED_SCOPE);
+
         final Project project = mock(Project.class);
         when(project.getService(NamedScopeManager.class)).thenReturn(new NamedScopeManager(project));
-        when(project.getService(DependencyValidationManager.class)).thenReturn(mock(DependencyValidationManager.class));
+        when(project.getService(DependencyValidationManager.class)).thenReturn(dependencyValidationManager);
         return project;
     }
 }

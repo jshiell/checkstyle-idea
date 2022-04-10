@@ -2,8 +2,6 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.search.scope.packageSet.InvalidPackageSet;
-import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.apache.commons.io.FilenameUtils;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -21,7 +19,6 @@ import java.util.function.Function;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -125,7 +122,7 @@ public class FileConfigurationLocationTest {
     private FileConfigurationLocation useWindowsFilePaths() {
         final Project project = TestHelper.mockProject();
 
-        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\');
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\', project);
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
@@ -137,7 +134,7 @@ public class FileConfigurationLocationTest {
     private FileConfigurationLocation useUnixPaths() {
         final Project project = TestHelper.mockProject();
 
-        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/');
+        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/', project);
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
@@ -146,7 +143,7 @@ public class FileConfigurationLocationTest {
     }
 
     @NotNull
-    private ProjectFilePaths testProjectFilePaths(char separatorChar) {
+    private ProjectFilePaths testProjectFilePaths(char separatorChar, Project project) {
         Function<File, String> absolutePathOf = file -> {
             // a nasty hack to pretend we're on a Windows box when required...
             if (file.getPath().startsWith("c:")) {
@@ -156,7 +153,7 @@ public class FileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
-        return new ProjectFilePaths(TestHelper.mockProject(), separatorChar, absolutePathOf, projectPaths);
+        return new ProjectFilePaths(project, separatorChar, absolutePathOf, projectPaths);
     }
 
 }
