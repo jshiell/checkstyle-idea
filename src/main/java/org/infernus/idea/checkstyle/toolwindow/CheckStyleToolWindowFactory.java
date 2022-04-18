@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -8,7 +9,7 @@ import com.intellij.ui.content.Content;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.jetbrains.annotations.NotNull;
 
-public class CheckStyleToolWindowFactory implements ToolWindowFactory {
+public class CheckStyleToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {

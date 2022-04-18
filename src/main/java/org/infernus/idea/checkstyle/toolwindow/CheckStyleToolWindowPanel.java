@@ -13,6 +13,7 @@ import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -53,7 +54,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 /**
  * The tool window for CheckStyle scans.
  */
-public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener {
+public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener, DumbAware {
 
     public static final String ID_TOOLWINDOW = "CheckStyle";
 
