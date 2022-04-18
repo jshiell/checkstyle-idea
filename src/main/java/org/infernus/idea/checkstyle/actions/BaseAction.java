@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
@@ -25,7 +26,7 @@ import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.getFromToolW
 /**
  * Base class for plug-in actions.
  */
-public abstract class BaseAction extends AnAction {
+public abstract class BaseAction extends DumbAwareAction {
 
     private static final Logger LOG = Logger.getInstance(BaseAction.class);
 
