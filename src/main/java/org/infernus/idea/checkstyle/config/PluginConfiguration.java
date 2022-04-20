@@ -48,6 +48,7 @@ public class PluginConfiguration {
         this.thirdPartyClasspath = Collections.unmodifiableList(thirdPartyClasspath);
         this.activeLocations = activeLocations.stream()
 		        .map(e -> constrainActiveLocation(locations, e))
+                .filter(Objects::nonNull)
 		        .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
