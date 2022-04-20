@@ -1,5 +1,7 @@
 # CheckStyle-IDEA Changelog
-* 
+
+* **5.65.0** Fix: NPE when active config lookup fails (#566).
+**5.65.0** Fix: Properties not correctly loaded for active files (#565).
 * **5.65.0** New: The toolwindow is now available during indexing (#564) - thanks to @ahus1.
 * **5.65.0** New: We now use SVG icons (#563) - thanks to @ahus1.
 * **5.64.0** New: You can now select multiple active Checkstyle files and scope them individually (#559) - thanks to @JanK411 and @Uschi003. 

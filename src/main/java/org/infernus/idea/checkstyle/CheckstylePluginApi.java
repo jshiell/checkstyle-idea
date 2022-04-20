@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.SortedSet;
 import java.util.function.BiConsumer;
 
@@ -33,7 +32,7 @@ public class CheckstylePluginApi {
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        SortedSet<ConfigurationLocation> activeLocations = pluginConfigurationManager().getCurrent().getActiveLocations();
+        SortedSet<ConfigurationLocation> activeLocations = pluginConfigurationManager().getCurrent().getActiveLocations(project);
 
         activeLocations.forEach(it -> {
             CheckstyleActions checkstyleInstance = checkstyleProjectService().getCheckstyleInstance();

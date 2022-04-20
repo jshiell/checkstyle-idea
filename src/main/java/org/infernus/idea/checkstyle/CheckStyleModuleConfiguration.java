@@ -5,12 +5,13 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.annotations.MapAnnotation;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A manager for CheckStyle module configuration.
@@ -76,24 +77,24 @@ public final class CheckStyleModuleConfiguration extends Properties
         return containsKey(ACTIVE_CONFIG);
     }
 
-    public SortedSet<ConfigurationLocation> getActiveConfigurations() {
+    public SortedSet<String> getActiveLocationDescriptors() {
         if (!containsKey(ACTIVE_CONFIG)) {
             return getProjectConfiguration();
         }
 
-        SortedSet<ConfigurationLocation> activeLocations = new TreeSet<>();
+        SortedSet<String> activeLocations = new TreeSet<>();
         try {
-            final ConfigurationLocationFactory factory = configurationLocationFactory(module.getProject());
-            activeLocations.add(factory.create(module.getProject(), getProperty(ACTIVE_CONFIG)));
+            activeLocations.add(getProperty(ACTIVE_CONFIG));
             stringPropertyNames().stream()
                     .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
-                    .map(propertyName -> factory.create(module.getProject(), getProperty(propertyName)))
+                    .map(this::getProperty)
+                    .filter(Objects::nonNull)
                     .forEach(activeLocations::add);
         } catch (IllegalArgumentException e) {
-            LOG.warn("Could not load active configuration", e);
+            LOG.warn("Could not load active configurations", e);
         }
 
-        if (activeLocations.isEmpty() || !configurationLocations().containsAll(activeLocations)) {
+        if (activeLocations.isEmpty()) {
             LOG.info("Active module configuration is invalid, returning project configuration");
             return getProjectConfiguration();
         }
@@ -101,8 +102,19 @@ public final class CheckStyleModuleConfiguration extends Properties
         return activeLocations;
     }
 
-    private SortedSet<ConfigurationLocation> getProjectConfiguration() {
-        return configurationManager().getCurrent().getActiveLocations();
+    @NotNull
+    public SortedSet<ConfigurationLocation> getActiveLocations(@NotNull final Project project) {
+        PluginConfiguration pluginConfiguration = configurationManager().getCurrent();
+        return getActiveLocationDescriptors().stream()
+                .map(activeLocationDescriptor -> pluginConfiguration.findByDescriptor(activeLocationDescriptor, project))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+
+    private SortedSet<String> getProjectConfiguration() {
+        return configurationManager().getCurrent().getActiveLocationDescriptors();
     }
 
     private PluginConfigurationManager configurationManager() {
@@ -115,10 +127,6 @@ public final class CheckStyleModuleConfiguration extends Properties
 
     public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
         return new ArrayList<>(configurationManager().getCurrent().getLocations());
-    }
-
-    private ConfigurationLocationFactory configurationLocationFactory(final Project project) {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     public ModuleSettings getState() {

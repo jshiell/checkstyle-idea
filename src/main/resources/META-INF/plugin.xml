@@ -24,6 +24,8 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.65.0: Fix: NPE when active config lookup fails (#566).</li>
+    <li>5.65.0: Fix: Properties not correctly loaded for active files (#565).</li>
     <li>5.65.0: New: The toolwindow is now available during indexing (#564) - thanks to @ahus1.</li>
     <li>5.65.0: New: We now use SVG icons (#563) - thanks to @ahus1.</li>
     <li>5.64.0: New: You can now select multiple active Checkstyle files and scope them individually (#559) - thanks to @JanK411 and @Uschi003.</li>

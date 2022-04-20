@@ -81,18 +81,18 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, String> settingsMap = projectSettings.configuration();
-        convertSettingsFormat(settingsMap);
-        final TreeSet<ConfigurationLocation> pLocations = new TreeSet<>(readConfigurationLocations(settingsMap));
+        Map<String, String> projectConfiguration = projectSettings.configuration();
+        convertSettingsFormat(projectConfiguration);
+        final TreeSet<ConfigurationLocation> deserialisedLocations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder
-                .withCheckstyleVersion(readCheckstyleVersion(settingsMap))
-                .withScanScope(scopeValueOf(settingsMap))
-                .withSuppressErrors(booleanValueOf(settingsMap, SUPPRESS_ERRORS))
-                .withCopyLibraries(booleanValueOfWithDefault(settingsMap, COPY_LIBS, OS.isWindows()))
-                .withLocations(pLocations)
-                .withThirdPartyClassPath(readThirdPartyClassPath(settingsMap))
-                .withActiveLocation(readActiveLocations(settingsMap, pLocations))
-                .withScanBeforeCheckin(booleanValueOf(settingsMap, SCAN_BEFORE_CHECKIN));
+                .withCheckstyleVersion(readCheckstyleVersion(projectConfiguration))
+                .withScanScope(scopeValueOf(projectConfiguration))
+                .withSuppressErrors(booleanValueOf(projectConfiguration, SUPPRESS_ERRORS))
+                .withCopyLibraries(booleanValueOfWithDefault(projectConfiguration, COPY_LIBS, OS.isWindows()))
+                .withLocations(deserialisedLocations)
+                .withThirdPartyClassPath(readThirdPartyClassPath(projectConfiguration))
+                .withActiveLocationDescriptor(readActiveLocations(projectConfiguration))
+                .withScanBeforeCheckin(booleanValueOf(projectConfiguration, SCAN_BEFORE_CHECKIN));
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
@@ -115,23 +115,22 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
     }
 
-    private SortedSet<ConfigurationLocation> readActiveLocations(@NotNull final Map<String, String> pLoadedMap,
-                                                      @NotNull final SortedSet<ConfigurationLocation> pLocations) {
-        String serializedSingleLocation = pLoadedMap.get(ACTIVE_CONFIG);
+    private SortedSet<String> readActiveLocations(@NotNull final Map<String, String> configuration) {
+        String serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
         if (serializedSingleLocation != null && !serializedSingleLocation.trim().isEmpty()) {
             // For backwards compatibility if only one location is used.
-            ConfigurationLocation activeLocation = configurationLocationFactory().create(project, serializedSingleLocation);
-            return pLocations.stream().filter(cl -> cl.equals(activeLocation)).limit(1).collect(Collectors.toCollection(TreeSet::new));
+            final SortedSet<String> locations = new TreeSet<>();
+            locations.add(serializedSingleLocation);
+            return locations;
         }
 
-        final List<ConfigurationLocation> possibleActiveLocations = readActiveConfigurationLocations(pLoadedMap);
-        return pLocations.stream().filter(possibleActiveLocations::contains).collect(Collectors.toCollection(TreeSet::new));
+        return readActiveConfigurationLocationsDescriptors(configuration);
     }
 
     @NotNull
-    private String readCheckstyleVersion(@NotNull final Map<String, String> pLoadedMap) {
+    private String readCheckstyleVersion(@NotNull final Map<String, String> configuration) {
         final VersionListReader vlr = new VersionListReader();
-        String result = pLoadedMap.get(CHECKSTYLE_VERSION_SETTING);
+        String result = configuration.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
             result = vlr.getDefaultVersion();
         } else {
@@ -141,10 +140,10 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
 
-    private List<String> readThirdPartyClassPath(@NotNull final Map<String, String> pLoadedMap) {
+    private List<String> readThirdPartyClassPath(@NotNull final Map<String, String> configuration) {
         final List<String> thirdPartyClasspath = new ArrayList<>();
 
-        final String value = pLoadedMap.get(THIRDPARTY_CLASSPATH);
+        final String value = configuration.get(THIRDPARTY_CLASSPATH);
         if (value != null) {
             final String[] parts = value.split(";");
             for (final String part : parts) {
@@ -160,16 +159,16 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         return Boolean.parseBoolean(loadedMap.get(propertyName));
     }
 
-    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> loadedMap,
+    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> configuration,
                                               final String propertyName,
                                               final boolean defaultValue) {
-        final String v = loadedMap.get(propertyName);
+        final String v = configuration.get(propertyName);
         return v != null ? Boolean.parseBoolean(v) : defaultValue;
     }
 
     @NotNull
-    private ScanScope scopeValueOf(@NotNull final Map<String, String> loadedMap) {
-        final String propertyValue = loadedMap.get(SCANSCOPE_SETTING);
+    private ScanScope scopeValueOf(@NotNull final Map<String, String> configuration) {
+        final String propertyValue = configuration.get(SCANSCOPE_SETTING);
         ScanScope result = ScanScope.getDefaultValue();
         if (propertyValue != null) {
             try {
@@ -181,18 +180,18 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         return result;
     }
 
-    private List<ConfigurationLocation> readActiveConfigurationLocations(@NotNull final Map<String, String> pLoadedMap) {
-        return pLoadedMap.keySet().stream()
-                .filter(s -> s.startsWith(ACTIVE_CONFIGS_PREFIX))
-                .map(s -> deserialiseLocation(pLoadedMap, s))
+    private SortedSet<String> readActiveConfigurationLocationsDescriptors(@NotNull final Map<String, String> configuration) {
+        return configuration.keySet().stream()
+                .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
+                .map(configuration::get)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> pLoadedMap) {
-        List<ConfigurationLocation> result = pLoadedMap.entrySet().stream()
+    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> configuration) {
+        List<ConfigurationLocation> result = configuration.entrySet().stream()
                 .filter(this::propertyIsALocation)
-                .map(e -> deserialiseLocation(pLoadedMap, e.getKey()))
+                .map(e -> deserialiseLocation(configuration, e.getKey()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         ensureBundledConfigs(result);  // useful for migration, or when config file edited manually
@@ -211,12 +210,12 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     @Nullable
-    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> loadedMap,
+    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> configuration,
                                                       @NotNull final String key) {
-        final String serialisedLocation = loadedMap.get(key);
+        final String serialisedLocation = configuration.get(key);
         try {
             final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
-            location.setProperties(propertiesFor(loadedMap, key));
+            location.setProperties(propertiesFor(configuration, key));
             return location;
 
         } catch (IllegalArgumentException e) {
@@ -230,7 +229,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     @NotNull
-    private Map<String, String> propertiesFor(@NotNull final Map<String, String> pLoadedMap,
+    private Map<String, String> propertiesFor(@NotNull final Map<String, String> configuration,
                                               @NotNull final String pKey) {
         final Map<String, String> properties = new HashMap<>();
 
@@ -238,7 +237,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         // loop again over all settings to find the properties belonging to this configuration
         // not the best solution, but since there are only few items it doesn't hurt too much...
-        pLoadedMap.entrySet().stream()
+        configuration.entrySet().stream()
                 .filter(property -> property.getKey().startsWith(propertyPrefix))
                 .forEach(property -> {
                     final String propertyName = property.getKey().substring(propertyPrefix.length());
@@ -276,16 +275,16 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
             mapForSerialization.put(SCAN_BEFORE_CHECKIN, String.valueOf(currentPluginConfig.isScanBeforeCheckin()));
 
-            serializeActiveLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getActiveLocations()));
+            serializeActiveLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getActiveLocationDescriptors()));
 
             final ProjectSettings projectSettings = new ProjectSettings();
             projectSettings.configuration = mapForSerialization;
             return projectSettings;
         }
 
-        private static void serializeActiveLocations(final Map<String, String> storage, final List<ConfigurationLocation> activeLocations) {
-            for (int i = 0; i < activeLocations.size(); i++) {
-                storage.put(ACTIVE_CONFIGS_PREFIX + i, activeLocations.get(i).getDescriptor());
+        private static void serializeActiveLocations(final Map<String, String> storage, final List<String> activeLocationDescriptors) {
+            for (int i = 0; i < activeLocationDescriptors.size(); i++) {
+                storage.put(ACTIVE_CONFIGS_PREFIX + i, activeLocationDescriptors.get(i));
             }
         }
 

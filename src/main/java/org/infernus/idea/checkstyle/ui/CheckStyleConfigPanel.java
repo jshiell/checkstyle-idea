@@ -47,12 +47,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -254,7 +250,7 @@ public class CheckStyleConfigPanel extends JPanel {
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
-        locationModel.setActiveLocations(pluginConfig.getActiveLocations());
+        locationModel.setActiveLocations(pluginConfig.getActiveLocations(project));
     }
 
     public PluginConfiguration getPluginConfiguration() {
@@ -272,7 +268,9 @@ public class CheckStyleConfigPanel extends JPanel {
                 .withCopyLibraries(copyLibsCheckbox.isSelected())
                 .withLocations(new TreeSet<>(locationModel.getLocations()))
                 .withThirdPartyClassPath(getThirdPartyClasspath())
-                .withActiveLocation(locationModel.getActiveLocations())
+                .withActiveLocationDescriptor(locationModel.getActiveLocations().stream()
+                        .map(ConfigurationLocation::getDescriptor)
+                        .collect(Collectors.toCollection(TreeSet::new)))
                 .build();
     }
 

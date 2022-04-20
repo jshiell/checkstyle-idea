@@ -69,7 +69,7 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
         if (configuration.isExcluded()) {
             configPanel.setExcluded(true);
         } else if (configuration.isUsingModuleConfiguration()) {
-            configPanel.setActiveLocations(new ArrayList<>(configuration.getActiveConfigurations()));
+            configPanel.setActiveLocations(new ArrayList<>(configuration.getActiveLocations(module.getProject())));
         } else {
             configPanel.setActiveLocations(Collections.emptyList());
         }

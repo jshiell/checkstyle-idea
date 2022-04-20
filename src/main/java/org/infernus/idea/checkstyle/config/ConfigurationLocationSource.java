@@ -31,9 +31,9 @@ public class ConfigurationLocationSource {
             if (moduleConfiguration.isExcluded()) {
                 return Collections.emptySortedSet();
             }
-            return moduleConfiguration.getActiveConfigurations();
+            return moduleConfiguration.getActiveLocations(project);
         }
-        return configurationManager().getCurrent().getActiveLocations();
+        return configurationManager().getCurrent().getActiveLocations(project);
     }
 
     private PluginConfigurationManager configurationManager() {

@@ -114,7 +114,7 @@ public class ScanCurrentFile extends BaseAction {
             return null;
         }
 
-        final List<NamedScope> namedScopes = getNamedScopesToCheck(pluginConfiguration, overrideIfExists);
+        final List<NamedScope> namedScopes = getNamedScopesToCheck(project, pluginConfiguration, overrideIfExists);
 
         if (!namedScopes.isEmpty() && namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull)) {
             return selectedFile;
@@ -133,12 +133,14 @@ public class ScanCurrentFile extends BaseAction {
 
     /**
      * Returns the NamedScopes that are to be checked. If overrideIfExists is provided, only its Scope is returned.
-     * Otherwise, all {@link PluginConfiguration#getActiveLocations() activeLocations} of the provided pluginConfiguration
+     * Otherwise, all {@link PluginConfiguration#getActiveLocationDescriptors() activeLocations} of the provided pluginConfiguration
      * are returned.
      */
     @NotNull
-    private List<NamedScope> getNamedScopesToCheck(PluginConfiguration pluginConfiguration, @Nullable ConfigurationLocation overrideIfExists) {
-        final Collection<ConfigurationLocation> getLocationsToCheck = overrideIfExists != null ? singletonList(overrideIfExists) : pluginConfiguration.getActiveLocations();
+    private List<NamedScope> getNamedScopesToCheck(Project project,
+                                                   PluginConfiguration pluginConfiguration,
+                                                   @Nullable ConfigurationLocation overrideIfExists) {
+        final Collection<ConfigurationLocation> getLocationsToCheck = overrideIfExists != null ? singletonList(overrideIfExists) : pluginConfiguration.getActiveLocations(project);
         return getLocationsToCheck.stream()
                 .map(ConfigurationLocation::getNamedScope)
                 .flatMap(Optional::stream)

@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.csapi.BundledConfig.GOOGLE_CHECKS;
@@ -72,7 +73,7 @@ public class CheckstylePluginApiTest {
                 .thenReturn(PluginConfigurationBuilder
                         .testInstance(CHECKSTYLE_VERSION)
                         .withLocations(locations)
-                        .withActiveLocation(locations)
+                        .withActiveLocationDescriptor(locations.stream().map(ConfigurationLocation::getDescriptor).collect(Collectors.toCollection(TreeSet::new)))
                         .build());
         CheckstylePluginApi.ConfigurationVisitor visitor = mock(CheckstylePluginApi.ConfigurationVisitor.class);
 

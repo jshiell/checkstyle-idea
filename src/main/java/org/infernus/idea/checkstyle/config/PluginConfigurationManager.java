@@ -34,7 +34,7 @@ public class PluginConfigurationManager {
 
     public void disableActiveConfiguration() {
         setCurrent(PluginConfigurationBuilder.from(getCurrent())
-                .withActiveLocation(null)
+                .withActiveLocationDescriptor(null)
                 .build(), true);
     }
 
