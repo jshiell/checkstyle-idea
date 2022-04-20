@@ -28,6 +28,7 @@ public class CheckstylePluginApiTest {
 
     private CheckstyleProjectService checkstyleProjectService;
     private PluginConfigurationManager pluginConfigManager;
+    private ConfigurationLocationFactory configurationLocationFactory;
     private Project project;
 
     @Before
@@ -41,6 +42,9 @@ public class CheckstylePluginApiTest {
 
         checkstyleProjectService = new CheckstyleProjectService(project);
         when(project.getService(CheckstyleProjectService.class)).thenReturn(checkstyleProjectService);
+
+        configurationLocationFactory = mock(ConfigurationLocationFactory.class);
+        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(configurationLocationFactory);
 
         underTest = new CheckstylePluginApi(project);
     }
@@ -76,6 +80,7 @@ public class CheckstylePluginApiTest {
                         .withActiveLocationDescriptor(locations.stream().map(ConfigurationLocation::getDescriptor).collect(Collectors.toCollection(TreeSet::new)))
                         .build());
         CheckstylePluginApi.ConfigurationVisitor visitor = mock(CheckstylePluginApi.ConfigurationVisitor.class);
+        when(configurationLocationFactory.create(project, googleChecks.getDescriptor())).thenReturn(googleChecks);
 
         underTest.visitCurrentConfiguration(visitor);
 
