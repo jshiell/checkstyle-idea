@@ -397,6 +397,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         cloned.setDescription(getDescription());
         cloned.setLocation(getLocation());
         cloned.setProperties(new HashMap<>(getProperties()));
+        cloned.setNamedScope(getNamedScope().orElse(NamedScopeHelper.getDefaultScope(project)));
         return cloned;
     }
 
