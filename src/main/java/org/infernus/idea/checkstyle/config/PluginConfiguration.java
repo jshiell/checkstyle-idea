@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import net.jcip.annotations.Immutable;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -74,8 +73,6 @@ public class PluginConfiguration {
     public SortedSet<ConfigurationLocation> getLocations() {
         return locations;
     }
-
-    private static final Logger LOG = Logger.getInstance(PluginConfiguration.class);
 
     @NotNull
     public Optional<ConfigurationLocation> findByDescriptor(@NotNull final String locationDescriptorToFind,
