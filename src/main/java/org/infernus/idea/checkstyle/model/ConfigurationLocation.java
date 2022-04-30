@@ -51,7 +51,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private NamedScope namedScope;
 
     private boolean propertiesCheckedThisSession;
-    private long blockedUtil;
+    private long blockedUntil;
 
     public ConfigurationLocation(@NotNull final ConfigurationType type,
                                  @NotNull final Project project) {
@@ -95,15 +95,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return type;
     }
 
-    public String getLocation() {
+    public synchronized String getLocation() {
         return location;
     }
 
-    public Optional<NamedScope> getNamedScope() {
+    public synchronized Optional<NamedScope> getNamedScope() {
         return Optional.ofNullable(this.namedScope);
     }
 
-    public void setLocation(final String location) {
+    public synchronized void setLocation(final String location) {
         if (isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
         }
@@ -116,11 +116,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.propertiesCheckedThisSession = false;
     }
 
-    public String getDescription() {
+    public synchronized String getDescription() {
         return description;
     }
 
-    public void setDescription(@Nullable final String description) {
+    public synchronized void setDescription(@Nullable final String description) {
         if (description == null) {
             this.description = location;
         } else {
@@ -128,15 +128,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
     }
 
-    public void setNamedScope(NamedScope namedScope) {
+    public synchronized void setNamedScope(NamedScope namedScope) {
         this.namedScope = namedScope;
     }
 
-    public Map<String, String> getProperties() {
+    public synchronized Map<String, String> getProperties() {
         return new HashMap<>(properties);
     }
 
-    public void setProperties(final Map<String, String> newProperties) {
+    public synchronized void setProperties(final Map<String, String> newProperties) {
         properties.clear();
 
         if (newProperties == null) {
@@ -148,11 +148,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         this.propertiesCheckedThisSession = false;
     }
 
-    public boolean isRemovable() {
+    public synchronized boolean isRemovable() {
         return true;
     }
 
-    public void reset() {
+    public synchronized void reset() {
         propertiesCheckedThisSession = false;
         unblock();
     }
@@ -216,7 +216,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     @SuppressWarnings("EmptyTryBlock")
-    public void ensurePropertiesAreUpToDate(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+    public synchronized void ensurePropertiesAreUpToDate(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         if (!propertiesCheckedThisSession) {
             try (InputStream ignored = resolve(checkstyleClassLoader)) {
                 // ignored
@@ -224,7 +224,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
     }
 
-    public InputStream resolve(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+    public synchronized InputStream resolve(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         InputStream is = resolveFile(checkstyleClassLoader);
 
         if (!propertiesCheckedThisSession) {
@@ -251,7 +251,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     @Nullable
-    public String resolveAssociatedFile(@Nullable final String filename,
+    public synchronized String resolveAssociatedFile(@Nullable final String filename,
                                         @Nullable final Module module,
                                         @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         if (filename == null) {
@@ -357,7 +357,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
-    public final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
+    public synchronized final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
         return !equals(configurationLocation)
                 || propertiesHaveChanged(configurationLocation);
     }
@@ -369,7 +369,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return !getProperties().equals(configurationLocation.getProperties());
     }
 
-    public String getDescriptor() {
+    public synchronized String getDescriptor() {
         assert location != null;
         assert description != null;
         assert namedScope != null;
@@ -474,19 +474,19 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
 
-    public boolean isBlocked() {
-        return blockedUtil > currentTimeMillis();
+    public synchronized boolean isBlocked() {
+        return blockedUntil > currentTimeMillis();
     }
 
-    public long blockedForSeconds() {
-        return Math.max((blockedUtil - currentTimeMillis()) / 1000, 0);
+    public synchronized long blockedForSeconds() {
+        return Math.max((blockedUntil - currentTimeMillis()) / 1000, 0);
     }
 
-    public void block() {
-        blockedUtil = currentTimeMillis() + BLOCK_TIME_MS;
+    public synchronized void block() {
+        blockedUntil = currentTimeMillis() + BLOCK_TIME_MS;
     }
 
-    public void unblock() {
-        blockedUtil = 0L;
+    public synchronized void unblock() {
+        blockedUntil = 0L;
     }
 }
