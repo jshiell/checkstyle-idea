@@ -1,5 +1,6 @@
 # CheckStyle-IDEA Changelog
 
+* **5.66.0** New: Added Checkstyle 10.2.
 * **5.66.0** Fix: Save all modified files before reloading rules, to ensure we load what people see (#562) - thanks to @ahus1.
 * **5.66.0** Fix: Improved thread safety on `ConfigurationLocation` (#568) - thanks to @ahus1.
 * **5.65.0** Fix: NPE when active config lookup fails (#566).
