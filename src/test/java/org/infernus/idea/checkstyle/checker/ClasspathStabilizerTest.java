@@ -25,8 +25,7 @@ import org.mockito.Mockito;
 /**
  * Unit tests of {@link ClasspathStabilizer}.
  */
-public class ClasspathStabilizerTest
-{
+public class ClasspathStabilizerTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     @Rule
@@ -70,13 +69,13 @@ public class ClasspathStabilizerTest
                 new File(baseDir, "nonexistent.jar").toURI().toURL(),
                 new File(targetFolder.getRoot(), "libs/lib1.jar").toURI().toURL(),
                 new File(targetFolder.getRoot(), "libs/lib2.jar").toURI().toURL(),
-                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER +
-                        "/mmmfkoez3kxcsqlrrqbfbcxo5e4k6gq4/lib1.jar").toURI().toURL(),
-                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER +
-                        "/n6yrt7uzrjravbwjwxa2ed62cpl57vh5/lib1.jar").toURI().toURL(),
+                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER
+                        + "/mmmfkoez3kxcsqlrrqbfbcxo5e4k6gq4/lib1.jar").toURI().toURL(),
+                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER
+                        + "/n6yrt7uzrjravbwjwxa2ed62cpl57vh5/lib1.jar").toURI().toURL(),
                 new File(targetFolder.getRoot(), "mmmfkoez3kxcsqlrrqbfbcxo5e4k6gq4/lib1.jar").toURI().toURL(),
-                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER +
-                        "/3i42h3s6nnfq2msvx7xzkyayscx5qbyj/" + TempDirProvider.README_FILE).toURI().toURL()
+                new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER
+                        + "/3i42h3s6nnfq2msvx7xzkyayscx5qbyj/" + TempDirProvider.README_FILE).toURI().toURL()
         };
         Assert.assertThat(expected, IsEqual.equalTo(result));
     }

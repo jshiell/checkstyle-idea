@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.model;
 
-import com.intellij.openapi.project.Project;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -22,7 +21,6 @@ import java.util.Scanner;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
 
 public class HTTPURLConfigurationLocationTest {
 

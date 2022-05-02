@@ -93,7 +93,8 @@ public class CheckStyleEntityResolver implements EntityResolver {
     private final ConfigurationLocation configurationLocation;
     private final ClassLoader checkstyleClassLoader;
 
-    public CheckStyleEntityResolver(final ConfigurationLocation configurationLocation, ClassLoader checkstyleClassLoader) {
+    public CheckStyleEntityResolver(final ConfigurationLocation configurationLocation,
+                                    final ClassLoader checkstyleClassLoader) {
         this.configurationLocation = configurationLocation;
         this.checkstyleClassLoader = checkstyleClassLoader;
     }

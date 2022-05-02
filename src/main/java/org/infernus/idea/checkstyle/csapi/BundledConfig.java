@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The configuration files bundled with Checkstyle-IDEA as provided by Checkstyle.
  */
-public enum BundledConfig
-{
+public enum BundledConfig {
+
     /** the Sun checks */
     SUN_CHECKS("(bundled)", "Sun Checks", "/sun_checks.xml"),
 
@@ -22,8 +22,8 @@ public enum BundledConfig
     private final String path;
 
 
-    private BundledConfig(@NotNull final String location, @NotNull final String description,
-                          @NotNull final String path) {
+    BundledConfig(@NotNull final String location, @NotNull final String description,
+                  @NotNull final String path) {
         this.location = location;
         this.description = description;
         this.path = path;

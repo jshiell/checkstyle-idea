@@ -8,7 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 
 class ModuleImporterFactory {
 
-    private ModuleImporterFactory() {}
+    private ModuleImporterFactory() {
+    }
 
     @Nullable
     static ModuleImporter getModuleImporter(@NotNull final ConfigurationModule configuration)

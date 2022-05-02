@@ -4,8 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-public class IgnoringResolverTest
-{
+public class IgnoringResolverTest {
     @Test
     public void testResolve1() {
         Assert.assertEquals("", new IgnoringResolver().resolve("key"));

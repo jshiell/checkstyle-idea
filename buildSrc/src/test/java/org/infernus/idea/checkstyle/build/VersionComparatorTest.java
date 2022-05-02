@@ -9,11 +9,9 @@ import org.junit.Test;
  *
  * @author Thomas Jensen
  */
-public class VersionComparatorTest
-{
+public class VersionComparatorTest {
     @Test
-    public void testComp()
-    {
+    public void testComp() {
         VersionComparator testee = new VersionComparator();
 
         Assert.assertTrue(testee.compare("6.1", "6.1.2") < 0);

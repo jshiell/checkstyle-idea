@@ -19,8 +19,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * Gradle task that runs the unit tests in 'csaccessTest' against one of the supported Checkstyle versions.
  */
 public class CsaccessTestTask
-    extends Test
-{
+    extends Test {
     public static final String XTEST_GROUP_NAME = "xtest";
     public static final String XTEST_TASK_NAME = "xtest";
 

@@ -10,8 +10,7 @@ import org.gradle.api.tasks.testing.TestResult;
  * Listener that reports on test suite statistics after completion of the test suite.
  */
 class TestSuiteStatsReporter
-    implements TestListener
-{
+    implements TestListener {
     private final Logger logger;
 
 

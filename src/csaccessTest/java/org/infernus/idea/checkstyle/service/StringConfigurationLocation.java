@@ -18,8 +18,8 @@ public class StringConfigurationLocation
     public StringConfigurationLocation(@NotNull final String configurationXml,
                                        @NotNull final Project project) {
         super(ConfigurationType.LOCAL_FILE, project);
-        setDescription("In-memory String-based configuration: " + //
-                configurationXml.substring(0, Math.min(100, configurationXml.length())) + " ...");
+        setDescription("In-memory String-based configuration: "
+                + configurationXml.substring(0, Math.min(100, configurationXml.length())) + " ...");
         this.configurationXml = configurationXml;
     }
 

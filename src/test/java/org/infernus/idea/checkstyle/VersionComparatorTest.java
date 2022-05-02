@@ -7,11 +7,9 @@ import org.junit.Test;
 /**
  * Unit tests of {@link VersionComparator}.
  */
-public class VersionComparatorTest
-{
+public class VersionComparatorTest {
     @Test
-    public void testComp()
-    {
+    public void testComp() {
         VersionComparator testee = new VersionComparator();
 
         Assert.assertTrue(testee.compare("8.1", "8.1.2") < 0);

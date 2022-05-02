@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 
 public final class NamedScopeHelper {
 
-    private NamedScopeHelper() {}
+    private NamedScopeHelper() {
+    }
 
     public static final String DEFAULT_SCOPE_ID = "All";
 

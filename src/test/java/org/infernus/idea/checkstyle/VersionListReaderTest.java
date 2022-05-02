@@ -6,8 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-public class VersionListReaderTest
-{
+public class VersionListReaderTest {
     @Test
     public void testNormalLoading() {
         VersionListReader underTest = new VersionListReader();
@@ -24,8 +23,7 @@ public class VersionListReaderTest
         try {
             new VersionListReader("non-existent.file");
             Assert.fail("expected exception was not thrown");
-        }
-        catch (CheckStylePluginException e) {
+        } catch (CheckStylePluginException e) {
             // expected
             Assert.assertTrue(e.getMessage().startsWith("Internal error: Could not read internal configuration file"));
         }
@@ -37,8 +35,7 @@ public class VersionListReaderTest
         try {
             new VersionListReader("checkstyle-idea.broken1.properties");
             Assert.fail("expected exception was not thrown");
-        }
-        catch (CheckStylePluginException e) {
+        } catch (CheckStylePluginException e) {
             // expected
             Assert.assertEquals("Internal error: Property 'checkstyle.versions.map' contains "
                     + "invalid mapping '7.1 -> 7.2'. Checkstyle version 7.1 is in fact supported "
@@ -52,8 +49,7 @@ public class VersionListReaderTest
         try {
             new VersionListReader("checkstyle-idea.broken2.properties");
             Assert.fail("expected exception was not thrown");
-        }
-        catch (CheckStylePluginException e) {
+        } catch (CheckStylePluginException e) {
             // expected
             Assert.assertEquals("Internal error: Property 'checkstyle.versions.map' contains "
                     + "invalid mapping '7.0 -> 7.1.1'. Target version 7.1.1 is not a supported "

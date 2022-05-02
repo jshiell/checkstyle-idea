@@ -40,10 +40,10 @@ public class CheckStyleCodeStyleImporter
     }
 
     @Override
-    public @Nullable CodeStyleScheme importScheme(@NotNull Project project,
-                                                  @NotNull VirtualFile selectedFile,
-                                                  @NotNull CodeStyleScheme currentScheme,
-                                                  @NotNull SchemeFactory<? extends CodeStyleScheme> schemeFactory) throws SchemeImportException {
+    public @Nullable CodeStyleScheme importScheme(@NotNull final Project project,
+                                                  @NotNull final VirtualFile selectedFile,
+                                                  @NotNull final CodeStyleScheme currentScheme,
+                                                  @NotNull final SchemeFactory<? extends CodeStyleScheme> schemeFactory) throws SchemeImportException {
         try {
             CodeStyleScheme targetScheme = currentScheme;
             if (currentScheme.isDefault()) {

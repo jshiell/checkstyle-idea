@@ -20,8 +20,7 @@ import org.mockito.Mockito;
 /**
  * Unit tests of {@link TempDirProvider}.
  */
-public class TempDirProviderTest
-{
+public class TempDirProviderTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     @Rule
@@ -29,8 +28,7 @@ public class TempDirProviderTest
 
 
     private static class TempDirProvider4Test
-            extends TempDirProvider
-    {
+            extends TempDirProvider {
         private final boolean usesIdeaFolder;
 
         private final TemporaryFolder junitTempFolder;
@@ -65,8 +63,8 @@ public class TempDirProviderTest
         TempDirProvider underTest = new TempDirProvider4Test(true, targetFolder);
         Optional<File> result = underTest.forCopiedLibraries(PROJECT);
         Assert.assertTrue(result.isPresent());
-        Assert.assertTrue(Files.isRegularFile(Paths.get(targetFolder.getRoot().toURI()).resolve
-                ("checkstyleidea-libs").resolve(TempDirProvider.README_FILE)));
+        Assert.assertTrue(Files.isRegularFile(Paths.get(targetFolder.getRoot().toURI())
+                .resolve("checkstyleidea-libs").resolve(TempDirProvider.README_FILE)));
     }
 
 

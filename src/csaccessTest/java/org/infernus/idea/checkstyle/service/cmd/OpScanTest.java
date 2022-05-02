@@ -13,13 +13,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 
-public class OpScanTest
-{
+public class OpScanTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     private static final class InvalidObject
-            implements CheckstyleInternalObject
-    {
+            implements CheckstyleInternalObject {
         // does not matter
     }
 

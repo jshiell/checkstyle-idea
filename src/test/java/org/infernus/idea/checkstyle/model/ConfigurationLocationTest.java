@@ -18,27 +18,26 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
 public class ConfigurationLocationTest {
 
-    private static final String TEST_FILE = "<module name=\"Checker\">\n" +
-            "<module name=\"TestFilter\">\n" +
-            "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n" +
-            "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n" +
-            "  <property name=\"something\" value=\"${property-three}\"/>\n" +
-            "</module>\n" +
-            "</module>";
+    private static final String TEST_FILE = "<module name=\"Checker\">\n"
+            + "<module name=\"TestFilter\">\n"
+            + "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n"
+            + "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n"
+            + "  <property name=\"something\" value=\"${property-three}\"/>\n"
+            + "</module>\n"
+            + "</module>";
 
-    private static final String TEST_FILE_2 = "<module name=\"Checker\">\n" +
-            "<module name=\"TestFilter\">\n" +
-            "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n" +
-            "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n" +
-            "  <property name=\"something\" value=\"${property-four}\"/>\n" +
-            "</module>\n" +
-            "</module>";
+    private static final String TEST_FILE_2 = "<module name=\"Checker\">\n"
+            + "<module name=\"TestFilter\">\n"
+            + "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n"
+            + "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n"
+            + "  <property name=\"something\" value=\"${property-four}\"/>\n"
+            + "</module>\n"
+            + "</module>";
 
     private TestConfigurationLocation underTest;
 

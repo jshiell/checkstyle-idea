@@ -216,7 +216,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
                             (List<Problem> e1, List<Problem> e2) -> {
                                 // Merge function to join multiple list of problems for the same file
                                 // If the same (equals) problem is contained in e1 and e2 only one gets added
-                                return Stream.concat(e1.stream(),e2.stream())
+                                return Stream.concat(e1.stream(), e2.stream())
                                         .distinct()
                                         .collect(Collectors.toList());
                             }));

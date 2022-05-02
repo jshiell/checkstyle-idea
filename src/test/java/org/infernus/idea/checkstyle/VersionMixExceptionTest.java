@@ -89,8 +89,8 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         } catch (CheckstyleVersionMixException e) {
             // expected
             final String internalClassName = "org.infernus.idea.checkstyle.service.entities.CheckerWithConfig";
-            assertTrue(e.getMessage().contains("Expected: " + internalClassName + ", actual: " +
-                    internalClassName));
+            assertTrue(e.getMessage().contains("Expected: " + internalClassName + ", actual: "
+                    + internalClassName));
             // Yes! Error, even though both class names are identical (but class loaders differ).
         } finally {
             csService.activateCheckstyleVersion(BASE_VERSION, null);

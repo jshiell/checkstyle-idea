@@ -42,8 +42,8 @@ public class OpCreateCheckerTest {
 
         configurationsMock = mock(TabWidthAndBaseDirProvider.class);
         when(configurationsMock.tabWidth()).thenReturn(2);
-        when(configurationsMock.baseDir()).thenReturn(  //
-                Optional.of(new File(OpCreateCheckerTest.class.getResource(CONFIG_FILE).toURI()).getParent()));
+        when(configurationsMock.baseDir())
+                .thenReturn(Optional.of(new File(OpCreateCheckerTest.class.getResource(CONFIG_FILE).toURI()).getParent()));
 
         checkstyleProjectServiceMock = mock(CheckstyleProjectService.class);
         when(checkstyleProjectServiceMock.getCheckstyleInstance()).thenReturn(mock(CheckstyleActions.class));

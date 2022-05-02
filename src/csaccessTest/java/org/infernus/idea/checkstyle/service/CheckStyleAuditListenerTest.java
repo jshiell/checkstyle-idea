@@ -51,7 +51,7 @@ public class CheckStyleAuditListenerTest {
     }
 
     @NotNull
-    private Object createMessage(@Nullable SeverityLevel severityLevel) throws ReflectiveOperationException {
+    private Object createMessage(@Nullable final SeverityLevel severityLevel) throws ReflectiveOperationException {
         Constructor<?> messageConstructor = messageClass().getDeclaredConstructor(int.class, int.class, String.class,
                 String.class, Object[].class, SeverityLevel.class, String.class, Class.class, String.class);
         return messageConstructor.newInstance(42 + (counter++), 21, "bundle", "message text",

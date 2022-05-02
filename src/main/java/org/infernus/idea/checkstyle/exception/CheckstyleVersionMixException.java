@@ -35,7 +35,7 @@ public class CheckstyleVersionMixException extends CheckstyleServiceException {
         if (actualObject != null) {
             sb.append(actualObject.getClass().getName());
             sb.append(" [interfaces: ");
-            for (Iterator<String> iter = getAllInterfaces(actualObject.getClass()).iterator(); iter.hasNext(); ) {
+            for (Iterator<String> iter = getAllInterfaces(actualObject.getClass()).iterator(); iter.hasNext();) {
                 sb.append(iter.next());
                 if (iter.hasNext()) {
                     sb.append(", ");
