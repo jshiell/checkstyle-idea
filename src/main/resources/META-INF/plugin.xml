@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.65.0</version>
+    <version>5.66.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,8 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.66.0: Fix: Save all modified files before reloading rules, to ensure we load what people see (#562) - thanks to @ahus1.</li>
+    <li>5.66.0: Fix: Improved thread safety on `ConfigurationLocation` (#568) - thanks to @ahus1.</li>
     <li>5.65.0: Fix: NPE when active config lookup fails (#566).</li>
     <li>5.65.0: Fix: Properties not correctly loaded for active files (#565).</li>
     <li>5.65.0: New: The toolwindow is now available during indexing (#564) - thanks to @ahus1.</li>
@@ -45,7 +47,6 @@
     <li>5.56.0: New: Added Checkstyle 9.0 (#536).</li>
     <li>5.56.0: New: Added Checkstyle 8.45.1.</li>
     <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
-    <li>5.55.0: New: Added Checkstyle 8.45.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
