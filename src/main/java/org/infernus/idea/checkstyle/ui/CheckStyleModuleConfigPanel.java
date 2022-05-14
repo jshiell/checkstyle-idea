@@ -5,6 +5,7 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -39,8 +40,8 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     private final DefaultComboBoxModel<ConfigurationLocation> configurationFilesModel = new DefaultComboBoxModel<>();
     private final JLabel configurationFilesLabel = new JLabel();
 
-    private List<ConfigurationLocation> configurationLocations;
-    private List<ConfigurationLocation> activeLocations;
+    private List<ConfigurationLocation> configurationLocations = new ArrayList<>();
+    private List<ConfigurationLocation> activeLocations = new ArrayList<>();
     private boolean excluded;
 
     /**
@@ -119,7 +120,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     }
 
     public void setConfigurationLocations(final List<ConfigurationLocation> locations) {
-        this.configurationLocations = locations;
+        this.configurationLocations = Objects.requireNonNullElseGet(locations, ArrayList::new);
 
         configurationFilesModel.removeAllElements();
 
@@ -137,7 +138,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
      * @param activeLocations the configuration, or null to use the project configuration.
      */
     public void setActiveLocations(final List<ConfigurationLocation> activeLocations) {
-        this.activeLocations = activeLocations;
+        this.activeLocations = Objects.requireNonNullElseGet(activeLocations, ArrayList::new);
 
         if (!activeLocations.isEmpty()) {
             configurationFilesCombo.setSelectedItem(activeLocations.get(0));
