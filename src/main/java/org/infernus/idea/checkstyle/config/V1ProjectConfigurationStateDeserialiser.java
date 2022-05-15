@@ -33,7 +33,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
 
     @Override
     public PluginConfigurationBuilder deserialise(@NotNull final PluginConfigurationBuilder builder,
-                                                  @NotNull final Map<String, String> projectConfiguration) {
+                                                  @NotNull final Map<String, Object> projectConfiguration) {
         convertSettingsFormat(projectConfiguration);
         final TreeSet<ConfigurationLocation> deserialisedLocations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder
@@ -53,7 +53,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
      *
      * @param deserialisedMap the loaded settings
      */
-    private void convertSettingsFormat(final Map<String, String> deserialisedMap) {
+    private void convertSettingsFormat(final Map<String, Object> deserialisedMap) {
         if (deserialisedMap != null && !deserialisedMap.isEmpty() && !deserialisedMap.containsKey(SCANSCOPE_SETTING)) {
             ScanScope scope = ScanScope.fromFlags(booleanValueOf(deserialisedMap, CHECK_TEST_CLASSES),
                     booleanValueOf(deserialisedMap, CHECK_NONJAVA_FILES));
@@ -63,12 +63,12 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         }
     }
 
-    private SortedSet<String> readActiveLocations(@NotNull final Map<String, String> configuration) {
-        String serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
-        if (serializedSingleLocation != null && !serializedSingleLocation.trim().isEmpty()) {
+    private SortedSet<String> readActiveLocations(@NotNull final Map<String, Object> configuration) {
+        Object serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
+        if (serializedSingleLocation != null && !serializedSingleLocation.toString().trim().isEmpty()) {
             // For backwards compatibility if only one location is used.
             final SortedSet<String> locations = new TreeSet<>();
-            locations.add(serializedSingleLocation);
+            locations.add(serializedSingleLocation.toString());
             return locations;
         }
 
@@ -76,23 +76,21 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @NotNull
-    private String readCheckstyleVersion(@NotNull final Map<String, String> configuration) {
+    private String readCheckstyleVersion(@NotNull final Map<String, Object> configuration) {
         final VersionListReader vlr = new VersionListReader();
-        String result = configuration.get(CHECKSTYLE_VERSION_SETTING);
+        Object result = configuration.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
-            result = vlr.getDefaultVersion();
-        } else {
-            result = vlr.getReplacementMap().getOrDefault(result, result);
+            return vlr.getDefaultVersion();
         }
-        return result;
+        return vlr.getReplacementMap().getOrDefault(result.toString(), result.toString());
     }
 
-    private List<String> readThirdPartyClassPath(@NotNull final Map<String, String> configuration) {
+    private List<String> readThirdPartyClassPath(@NotNull final Map<String, Object> configuration) {
         final List<String> thirdPartyClasspath = new ArrayList<>();
 
-        final String value = configuration.get(THIRDPARTY_CLASSPATH);
+        final Object value = configuration.get(THIRDPARTY_CLASSPATH);
         if (value != null) {
-            final String[] parts = value.split(";");
+            final String[] parts = value.toString().split(";");
             for (final String part : parts) {
                 if (part.length() > 0) {
                     thirdPartyClasspath.add(projectFilePaths().detokenise(part));
@@ -103,12 +101,12 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @NotNull
-    private ScanScope scopeValueOf(@NotNull final Map<String, String> configuration) {
-        final String propertyValue = configuration.get(SCANSCOPE_SETTING);
+    private ScanScope scopeValueOf(@NotNull final Map<String, Object> configuration) {
+        final Object propertyValue = configuration.get(SCANSCOPE_SETTING);
         ScanScope result = ScanScope.getDefaultValue();
         if (propertyValue != null) {
             try {
-                result = ScanScope.valueOf(propertyValue);
+                result = ScanScope.valueOf(propertyValue.toString());
             } catch (IllegalArgumentException e) {
                 // settings got messed up (manual edit?) - use default
             }
@@ -116,15 +114,16 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         return result;
     }
 
-    private SortedSet<String> readActiveConfigurationLocationsDescriptors(@NotNull final Map<String, String> configuration) {
+    private SortedSet<String> readActiveConfigurationLocationsDescriptors(@NotNull final Map<String, Object> configuration) {
         return configuration.keySet().stream()
                 .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
                 .map(configuration::get)
                 .filter(Objects::nonNull)
+                .map(Object::toString)
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> configuration) {
+    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, Object> configuration) {
         List<ConfigurationLocation> result = configuration.entrySet().stream()
                 .filter(this::propertyIsALocation)
                 .map(e -> deserialiseLocation(configuration, e.getKey()))
@@ -146,11 +145,11 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @Nullable
-    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> configuration,
+    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, Object> configuration,
                                                       @NotNull final String key) {
-        final String serialisedLocation = configuration.get(key);
+        final Object serialisedLocation = configuration.get(key);
         try {
-            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation);
+            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation.toString());
             location.setProperties(propertiesFor(configuration, key));
             return location;
 
@@ -160,12 +159,12 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         }
     }
 
-    private boolean propertyIsALocation(final Map.Entry<String, String> property) {
+    private boolean propertyIsALocation(final Map.Entry<String, Object> property) {
         return property.getKey().startsWith(LOCATION_PREFIX);
     }
 
     @NotNull
-    private Map<String, String> propertiesFor(@NotNull final Map<String, String> configuration,
+    private Map<String, String> propertiesFor(@NotNull final Map<String, Object> configuration,
                                               @NotNull final String pKey) {
         final Map<String, String> properties = new HashMap<>();
 
@@ -177,7 +176,11 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
                 .filter(property -> property.getKey().startsWith(propertyPrefix))
                 .forEach(property -> {
                     final String propertyName = property.getKey().substring(propertyPrefix.length());
-                    properties.put(propertyName, property.getValue());
+                    if (property.getValue() != null) {
+                        properties.put(propertyName, property.getValue().toString());
+                    } else {
+                        properties.put(propertyName, null);
+                    }
                 });
         return properties;
     }

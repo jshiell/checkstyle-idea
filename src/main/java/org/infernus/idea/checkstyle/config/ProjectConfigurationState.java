@@ -58,7 +58,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, String> projectConfiguration = projectSettings.configuration();
+        Map<String, Object> projectConfiguration = projectSettings.configuration();
         return selectDeserialiser().deserialise(builder, projectConfiguration);
     }
 
@@ -73,11 +73,11 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     static class ProjectSettings {
         @MapAnnotation
-        private Map<String, String> configuration;
+        private Map<String, Object> configuration;
 
         static ProjectSettings create(@NotNull final ProjectFilePaths projectFilePaths,
                                       @NotNull final PluginConfiguration currentPluginConfig) {
-            final Map<String, String> mapForSerialization = new TreeMap<>();
+            final Map<String, Object> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
@@ -99,18 +99,19 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             return projectSettings;
         }
 
-        private static void serializeActiveLocations(final Map<String, String> storage, final List<String> activeLocationDescriptors) {
+        private static void serializeActiveLocations(final Map<String, Object> storage,
+                                                     final List<String> activeLocationDescriptors) {
             for (int i = 0; i < activeLocationDescriptors.size(); i++) {
                 storage.put(ACTIVE_CONFIGS_PREFIX + i, activeLocationDescriptors.get(i));
             }
         }
 
         @NotNull
-        public Map<String, String> configuration() {
+        public Map<String, Object> configuration() {
             return Objects.requireNonNullElseGet(configuration, TreeMap::new);
         }
 
-        private static void serializeLocations(@NotNull final Map<String, String> storage,
+        private static void serializeLocations(@NotNull final Map<String, Object> storage,
                                                @NotNull final List<ConfigurationLocation> configurationLocations) {
             int index = 0;
             for (final ConfigurationLocation configurationLocation : configurationLocations) {

@@ -8,18 +8,21 @@ public abstract class ProjectConfigurationStateDeserialiser {
 
     public abstract PluginConfigurationBuilder deserialise(
             @NotNull PluginConfigurationBuilder builder,
-            @NotNull Map<String, String> projectConfiguration);
+            @NotNull Map<String, Object> projectConfiguration);
 
 
-    protected boolean booleanValueOf(@NotNull final Map<String, String> loadedMap, final String propertyName) {
-        return Boolean.parseBoolean(loadedMap.get(propertyName));
+    protected boolean booleanValueOf(@NotNull final Map<String, Object> properties, final String propertyName) {
+        return booleanValueOfWithDefault(properties, propertyName, false);
     }
 
-    protected boolean booleanValueOfWithDefault(@NotNull final Map<String, String> configuration,
+    protected boolean booleanValueOfWithDefault(@NotNull final Map<String, Object> properties,
                                                 final String propertyName,
                                                 final boolean defaultValue) {
-        final String v = configuration.get(propertyName);
-        return v != null ? Boolean.parseBoolean(v) : defaultValue;
+        final Object value = properties.get(propertyName);
+        if (value != null) {
+            return Boolean.parseBoolean(value.toString());
+        }
+        return defaultValue;
     }
 
 }
