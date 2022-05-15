@@ -58,7 +58,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, Object> projectConfiguration = projectSettings.configuration();
+        Map<String, String> projectConfiguration = projectSettings.configuration();
         return selectDeserialiser().deserialise(builder, projectConfiguration);
     }
 
@@ -73,12 +73,12 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     static class ProjectSettings {
         @MapAnnotation
-        private Map<String, Object> configuration;
+        private Map<String, String> configuration;
 
         static ProjectSettings create(@NotNull final Project project,
                                       @NotNull final ProjectFilePaths projectFilePaths,
                                       @NotNull final PluginConfiguration currentPluginConfig) {
-            final Map<String, Object> mapForSerialization = new TreeMap<>();
+            final Map<String, String> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
             mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
@@ -103,7 +103,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             return projectSettings;
         }
 
-        private static void serializeActiveLocations(final Map<String, Object> storage,
+        private static void serializeActiveLocations(final Map<String, String> storage,
                                                      @NotNull final List<String> activeLocationIds,
                                                      @NotNull final SortedSet<ConfigurationLocation> locations,
                                                      @NotNull final Project project) {
@@ -119,11 +119,11 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         @NotNull
-        public Map<String, Object> configuration() {
+        public Map<String, String> configuration() {
             return Objects.requireNonNullElseGet(configuration, TreeMap::new);
         }
 
-        private static void serializeLocations(@NotNull final Map<String, Object> storage,
+        private static void serializeLocations(@NotNull final Map<String, String> storage,
                                                @NotNull final List<ConfigurationLocation> configurationLocations,
                                                @NotNull Project project) {
             int index = 0;

@@ -29,7 +29,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
 
     @Override
     public PluginConfigurationBuilder deserialise(@NotNull final PluginConfigurationBuilder builder,
-                                                  @NotNull final Map<String, Object> projectConfiguration) {
+                                                  @NotNull final Map<String, String> projectConfiguration) {
         convertSettingsFormat(projectConfiguration);
         final TreeSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder
@@ -49,7 +49,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
      *
      * @param deserialisedMap the loaded settings
      */
-    private void convertSettingsFormat(final Map<String, Object> deserialisedMap) {
+    private void convertSettingsFormat(final Map<String, String> deserialisedMap) {
         if (deserialisedMap != null && !deserialisedMap.isEmpty() && !deserialisedMap.containsKey(SCANSCOPE_SETTING)) {
             ScanScope scope = ScanScope.fromFlags(booleanValueOf(deserialisedMap, CHECK_TEST_CLASSES),
                     booleanValueOf(deserialisedMap, CHECK_NONJAVA_FILES));
@@ -59,7 +59,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         }
     }
 
-    private SortedSet<String> readActiveLocationIds(@NotNull final Map<String, Object> configuration,
+    private SortedSet<String> readActiveLocationIds(@NotNull final Map<String, String> configuration,
                                                     @NotNull final Collection<ConfigurationLocation> locations) {
         Object serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
 
@@ -82,7 +82,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @NotNull
-    private String readCheckstyleVersion(@NotNull final Map<String, Object> configuration) {
+    private String readCheckstyleVersion(@NotNull final Map<String, String> configuration) {
         final VersionListReader vlr = new VersionListReader();
         Object result = configuration.get(CHECKSTYLE_VERSION_SETTING);
         if (result == null) {
@@ -91,7 +91,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         return vlr.getReplacementMap().getOrDefault(result.toString(), result.toString());
     }
 
-    private List<String> readThirdPartyClassPath(@NotNull final Map<String, Object> configuration) {
+    private List<String> readThirdPartyClassPath(@NotNull final Map<String, String> configuration) {
         final List<String> thirdPartyClasspath = new ArrayList<>();
 
         final Object value = configuration.get(THIRDPARTY_CLASSPATH);
@@ -107,7 +107,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @NotNull
-    private ScanScope scopeValueOf(@NotNull final Map<String, Object> configuration) {
+    private ScanScope scopeValueOf(@NotNull final Map<String, String> configuration) {
         final Object propertyValue = configuration.get(SCANSCOPE_SETTING);
         ScanScope result = ScanScope.getDefaultValue();
         if (propertyValue != null) {
@@ -120,7 +120,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         return result;
     }
 
-    private SortedSet<String> readActiveConfigurationLocationsDescriptors(@NotNull final Map<String, Object> configuration) {
+    private SortedSet<String> readActiveConfigurationLocationsDescriptors(@NotNull final Map<String, String> configuration) {
         return configuration.keySet().stream()
                 .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
                 .map(configuration::get)
@@ -129,7 +129,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, Object> configuration) {
+    private List<ConfigurationLocation> readConfigurationLocations(@NotNull final Map<String, String> configuration) {
         List<ConfigurationLocation> result = configuration.entrySet().stream()
                 .filter(this::propertyIsALocation)
                 .map(e -> deserialiseLocation(configuration, e.getKey()))
@@ -140,7 +140,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
     @Nullable
-    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, Object> configuration,
+    private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, String> configuration,
                                                       @NotNull final String key) {
         final Object serialisedLocation = configuration.get(key);
         try {
@@ -154,12 +154,12 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         }
     }
 
-    private boolean propertyIsALocation(final Map.Entry<String, Object> property) {
+    private boolean propertyIsALocation(final Map.Entry<String, String> property) {
         return property.getKey().startsWith(LOCATION_PREFIX);
     }
 
     @NotNull
-    private Map<String, String> propertiesFor(@NotNull final Map<String, Object> configuration,
+    private Map<String, String> propertiesFor(@NotNull final Map<String, String> configuration,
                                               @NotNull final String pKey) {
         final Map<String, String> properties = new HashMap<>();
 
@@ -172,7 +172,7 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
                 .forEach(property -> {
                     final String propertyName = property.getKey().substring(propertyPrefix.length());
                     if (property.getValue() != null) {
-                        properties.put(propertyName, property.getValue().toString());
+                        properties.put(propertyName, property.getValue());
                     } else {
                         properties.put(propertyName, null);
                     }
@@ -196,11 +196,11 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     }
 
 
-    private boolean booleanValueOf(@NotNull final Map<String, Object> properties, final String propertyName) {
+    private boolean booleanValueOf(@NotNull final Map<String, String> properties, final String propertyName) {
         return booleanValueOfWithDefault(properties, propertyName, false);
     }
 
-    private boolean booleanValueOfWithDefault(@NotNull final Map<String, Object> properties,
+    private boolean booleanValueOfWithDefault(@NotNull final Map<String, String> properties,
                                               final String propertyName,
                                               final boolean defaultValue) {
         final Object value = properties.get(propertyName);

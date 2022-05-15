@@ -43,7 +43,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
 
     @Test
     public void basicPropertiesCanBeDeserialised() {
-        final Map<String, Object> configuration = testConfiguration();
+        final Map<String, String> configuration = testConfiguration();
 
         PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
@@ -62,7 +62,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
 
     @Test
     public void configurationLocationsCanBeDeserialised() {
-        final Map<String, Object> configuration = testConfiguration();
+        final Map<String, String> configuration = testConfiguration();
 
         PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
@@ -88,8 +88,8 @@ public class V1ProjectConfigurationStateDeserialiserTest {
     }
 
     @NotNull
-    private Map<String, Object> testConfiguration() {
-        final Map<String, Object> configuration = new HashMap<>();
+    private Map<String, String> testConfiguration() {
+        final Map<String, String> configuration = new HashMap<>();
         configuration.put("active-configuration-0", "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
         configuration.put("checkstyle-version", "10.2");
         configuration.put("copy-libs", "false");

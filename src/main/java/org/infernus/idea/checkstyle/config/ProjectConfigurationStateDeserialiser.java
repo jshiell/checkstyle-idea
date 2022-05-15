@@ -20,7 +20,7 @@ public abstract class ProjectConfigurationStateDeserialiser {
 
     public abstract PluginConfigurationBuilder deserialise(
             @NotNull PluginConfigurationBuilder builder,
-            @NotNull Map<String, Object> projectConfiguration);
+            @NotNull Map<String, String> projectConfiguration);
 
     protected void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
         final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
