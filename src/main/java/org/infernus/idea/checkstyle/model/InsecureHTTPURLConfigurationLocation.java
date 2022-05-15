@@ -17,8 +17,9 @@ import java.security.cert.X509Certificate;
  */
 public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
 
-    public InsecureHTTPURLConfigurationLocation(@NotNull final Project project) {
-        super(ConfigurationType.INSECURE_HTTP_URL, project);
+    public InsecureHTTPURLConfigurationLocation(@NotNull final Project project,
+                                 @NotNull final String id) {
+        super(id, ConfigurationType.INSECURE_HTTP_URL, project);
     }
 
     @NotNull
@@ -54,6 +55,6 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
 
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new InsecureHTTPURLConfigurationLocation(getProject()));
+        return cloneCommonPropertiesTo(new InsecureHTTPURLConfigurationLocation(getProject(), getId()));
     }
 }

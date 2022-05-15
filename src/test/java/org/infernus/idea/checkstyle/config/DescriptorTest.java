@@ -1,34 +1,33 @@
-package org.infernus.idea.checkstyle.model;
+package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-
-public class ConfigurationLocationFactoryTest {
+public class DescriptorTest {
 
     private final Project project = TestHelper.mockProject();
-    private final NamedScope allScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "All");
-
-    private final ConfigurationLocationFactory underTest = new ConfigurationLocationFactory();
 
     @Before
     public void setUp() {
-        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(underTest);
+        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(new ConfigurationLocationFactory());
         when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
     }
 
     @Test
     public void aFileConfigurationLocationIsCorrectlyParsed() {
-        assertThat(underTest.create(project, "anId", ConfigurationType.LOCAL_FILE, "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", "Some checkstyle rules", allScope),
+        assertThat(Descriptor.parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules", project).toConfigurationLocation(project),
                 allOf(
                         hasProperty("location", is(oneOf(
                                 "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml",
@@ -36,12 +35,22 @@ public class ConfigurationLocationFactoryTest {
                         hasProperty("description", is("Some checkstyle rules"))));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void aTruncatedConfigurationLocationThrowsAnIllegalArgumentException() {
+        Descriptor.parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", project).toConfigurationLocation(project);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void aConfigurationLocationWithNoFieldSeparatorsThrowsAnIllegalArgumentException() {
+        Descriptor.parse("LOCAL_FILE", project).toConfigurationLocation(project);
+    }
+
     /**
      * Check that old config entries are converted correctly.
      */
     @Test
     public void testBundledConfigMigration() {
-        ConfigurationLocation cl = underTest.create(project, "anId", ConfigurationType.LEGACY_CLASSPATH, "/sun_checks.xml", "The default Checkstyle rules", allScope);
+        ConfigurationLocation cl = Descriptor.parse("CLASSPATH:/sun_checks.xml:The default Checkstyle rules", project).toConfigurationLocation(project);
         assertNotNull(cl);
         assertEquals(BundledConfigurationLocation.class, cl.getClass());
         assertEquals(BundledConfig.SUN_CHECKS, ((BundledConfigurationLocation) cl).getBundledConfig());
@@ -49,7 +58,7 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void testBundledConfigSun() {
-        ConfigurationLocation cls = underTest.create(project, "anId", ConfigurationType.BUNDLED, "(bundled)", "Sun Checks", allScope);
+        ConfigurationLocation cls = Descriptor.parse("BUNDLED:(bundled):Sun Checks", project).toConfigurationLocation(project);
         assertNotNull(cls);
         assertEquals(BundledConfigurationLocation.class, cls.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;
@@ -62,7 +71,7 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void testBundledConfigGoogle() {
-        ConfigurationLocation clg = underTest.create(project, "anId", ConfigurationType.BUNDLED, "(bundled)", "Google Checks", allScope);
+        ConfigurationLocation clg = Descriptor.parse("BUNDLED:(bundled):Google Checks", project).toConfigurationLocation(project);
         assertNotNull(clg);
         assertEquals(BundledConfigurationLocation.class, clg.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) clg;

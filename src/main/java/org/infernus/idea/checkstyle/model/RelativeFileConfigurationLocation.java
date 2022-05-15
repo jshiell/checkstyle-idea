@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.util.Strings;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A configuration file on a mounted file system which will always be referred to
@@ -9,8 +10,9 @@ import org.infernus.idea.checkstyle.util.Strings;
  */
 public class RelativeFileConfigurationLocation extends FileConfigurationLocation {
 
-    RelativeFileConfigurationLocation(final Project project) {
-        super(project, ConfigurationType.PROJECT_RELATIVE);
+    RelativeFileConfigurationLocation(@NotNull final Project project,
+                                      @NotNull final String id) {
+        super(project, id, ConfigurationType.PROJECT_RELATIVE);
     }
 
     @Override
@@ -31,6 +33,6 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
 
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new RelativeFileConfigurationLocation(getProject()));
+        return cloneCommonPropertiesTo(new RelativeFileConfigurationLocation(getProject(), getId()));
     }
 }

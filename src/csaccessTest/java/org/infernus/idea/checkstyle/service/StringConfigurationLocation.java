@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 
 public class StringConfigurationLocation
@@ -17,7 +18,7 @@ public class StringConfigurationLocation
 
     public StringConfigurationLocation(@NotNull final String configurationXml,
                                        @NotNull final Project project) {
-        super(ConfigurationType.LOCAL_FILE, project);
+        super(UUID.randomUUID().toString(), ConfigurationType.LOCAL_FILE, project);
         setDescription("In-memory String-based configuration: "
                 + configurationXml.substring(0, Math.min(100, configurationXml.length())) + " ...");
         this.configurationXml = configurationXml;

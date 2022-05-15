@@ -45,7 +45,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     private ProjectSettings defaultProjectSettings() {
-        return ProjectSettings.create(projectFilePaths(), defaultConfiguration(project).build());
+        return ProjectSettings.create(project, projectFilePaths(), defaultConfiguration(project).build());
     }
 
     public ProjectSettings getState() {
@@ -68,14 +68,15 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        projectSettings = ProjectSettings.create(projectFilePaths(), currentPluginConfig);
+        projectSettings = ProjectSettings.create(project, projectFilePaths(), currentPluginConfig);
     }
 
     static class ProjectSettings {
         @MapAnnotation
         private Map<String, Object> configuration;
 
-        static ProjectSettings create(@NotNull final ProjectFilePaths projectFilePaths,
+        static ProjectSettings create(@NotNull final Project project,
+                                      @NotNull final ProjectFilePaths projectFilePaths,
                                       @NotNull final PluginConfiguration currentPluginConfig) {
             final Map<String, Object> mapForSerialization = new TreeMap<>();
             mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
@@ -83,7 +84,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
             mapForSerialization.put(COPY_LIBS, String.valueOf(currentPluginConfig.isCopyLibs()));
 
-            serializeLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()));
+            serializeLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()), project);
 
             String s = serializeThirdPartyClasspath(projectFilePaths, currentPluginConfig.getThirdPartyClasspath());
             if (!Strings.isBlank(s)) {
@@ -92,7 +93,10 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
             mapForSerialization.put(SCAN_BEFORE_CHECKIN, String.valueOf(currentPluginConfig.isScanBeforeCheckin()));
 
-            serializeActiveLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getActiveLocationDescriptors()));
+            serializeActiveLocations(mapForSerialization,
+                    new ArrayList<>(currentPluginConfig.getActiveLocationIds()),
+                    currentPluginConfig.getLocations(),
+                    project);
 
             final ProjectSettings projectSettings = new ProjectSettings();
             projectSettings.configuration = mapForSerialization;
@@ -100,9 +104,17 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         private static void serializeActiveLocations(final Map<String, Object> storage,
-                                                     final List<String> activeLocationDescriptors) {
-            for (int i = 0; i < activeLocationDescriptors.size(); i++) {
-                storage.put(ACTIVE_CONFIGS_PREFIX + i, activeLocationDescriptors.get(i));
+                                                     @NotNull final List<String> activeLocationIds,
+                                                     @NotNull final SortedSet<ConfigurationLocation> locations,
+                                                     @NotNull final Project project) {
+            for (int i = 0; i < activeLocationIds.size(); i++) {
+                String currentId = activeLocationIds.get(i);
+                Optional<ConfigurationLocation> currentLocation = locations.stream()
+                        .filter(candidate -> candidate.getId().equals(currentId))
+                        .findFirst();
+                if (currentLocation.isPresent()) {
+                    storage.put(ACTIVE_CONFIGS_PREFIX + i, Descriptor.of(currentLocation.get(), project).toString());
+                }
             }
         }
 
@@ -112,10 +124,11 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         private static void serializeLocations(@NotNull final Map<String, Object> storage,
-                                               @NotNull final List<ConfigurationLocation> configurationLocations) {
+                                               @NotNull final List<ConfigurationLocation> configurationLocations,
+                                               @NotNull Project project) {
             int index = 0;
             for (final ConfigurationLocation configurationLocation : configurationLocations) {
-                storage.put(LOCATION_PREFIX + index, configurationLocation.getDescriptor());
+                storage.put(LOCATION_PREFIX + index, Descriptor.of(configurationLocation, project).toString());
                 final Map<String, String> properties = configurationLocation.getProperties();
                 if (properties != null) {
                     for (final Map.Entry<String, String> prop : properties.entrySet()) {

@@ -1,12 +1,11 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
-import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -77,10 +76,14 @@ public class CheckstylePluginApiTest {
                 .thenReturn(PluginConfigurationBuilder
                         .testInstance(CHECKSTYLE_VERSION)
                         .withLocations(locations)
-                        .withActiveLocationDescriptor(locations.stream().map(ConfigurationLocation::getDescriptor).collect(Collectors.toCollection(TreeSet::new)))
+                        .withActiveLocationIds(locations.stream()
+                                .map(ConfigurationLocation::getId)
+                                .collect(Collectors.toCollection(TreeSet::new)))
                         .build());
         CheckstylePluginApi.ConfigurationVisitor visitor = mock(CheckstylePluginApi.ConfigurationVisitor.class);
-        when(configurationLocationFactory.create(project, googleChecks.getDescriptor())).thenReturn(googleChecks);
+        NamedScope allScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "All");
+        when(configurationLocationFactory.create(eq(project), anyString(), eq(ConfigurationType.BUNDLED), eq("(bundled)"), eq("Google Checks"), eq(allScope)))
+                .thenReturn(googleChecks);
 
         underTest.visitCurrentConfiguration(visitor);
 

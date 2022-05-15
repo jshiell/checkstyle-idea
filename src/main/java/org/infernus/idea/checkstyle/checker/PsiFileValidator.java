@@ -72,7 +72,7 @@ final class PsiFileValidator {
                 psiFile,
                 overrideConfigLocation != null
                         ? Collections.singletonList(overrideConfigLocation)
-                        : pluginConfig.getCurrent().getActiveLocations(psiFile.getProject()));
+                        : pluginConfig.getCurrent().getActiveLocations());
     }
 
     /**

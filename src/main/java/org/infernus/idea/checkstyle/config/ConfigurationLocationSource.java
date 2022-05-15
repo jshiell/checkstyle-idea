@@ -33,7 +33,7 @@ public class ConfigurationLocationSource {
             }
             return moduleConfiguration.getActiveLocations(project);
         }
-        return configurationManager().getCurrent().getActiveLocations(project);
+        return configurationManager().getCurrent().getActiveLocations();
     }
 
     private PluginConfigurationManager configurationManager() {

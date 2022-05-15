@@ -32,7 +32,7 @@ public class CheckstylePluginApi {
     }
 
     public void visitCurrentConfiguration(@NotNull final ConfigurationVisitor visitor) {
-        SortedSet<ConfigurationLocation> activeLocations = pluginConfigurationManager().getCurrent().getActiveLocations(project);
+        SortedSet<ConfigurationLocation> activeLocations = pluginConfigurationManager().getCurrent().getActiveLocations();
 
         activeLocations.forEach(it -> {
             CheckstyleActions checkstyleInstance = checkstyleProjectService().getCheckstyleInstance();

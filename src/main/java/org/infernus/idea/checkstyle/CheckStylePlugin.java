@@ -15,9 +15,13 @@ public final class CheckStylePlugin {
     public static final String ID_PLUGIN = "CheckStyle-IDEA";
 
     public static String version() {
-        final IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(PluginId.getId(ID_PLUGIN));
-        if (plugin != null) {
-            return plugin.getVersion();
+        try {
+            final IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(PluginId.getId(ID_PLUGIN));
+            if (plugin != null) {
+                return plugin.getVersion();
+            }
+        } catch (Throwable ignored) {
+            // thrown if plugin isn't initialised, e.g. during tests
         }
         return "unknown";
     }

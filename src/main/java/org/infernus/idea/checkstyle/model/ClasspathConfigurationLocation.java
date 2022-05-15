@@ -23,8 +23,9 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
     private byte[] cachedContent;
     private long cacheExpiry;
 
-    ClasspathConfigurationLocation(final Project project) {
-        super(ConfigurationType.PLUGIN_CLASSPATH, project);
+    ClasspathConfigurationLocation(@NotNull final Project project,
+                                   @NotNull final String id) {
+        super(id, ConfigurationType.PLUGIN_CLASSPATH, project);
     }
 
     @NotNull
@@ -65,6 +66,6 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new ClasspathConfigurationLocation(getProject()));
+        return cloneCommonPropertiesTo(new ClasspathConfigurationLocation(getProject(), getId()));
     }
 }

@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static org.infernus.idea.checkstyle.model.ConfigurationType.*;
 import static org.infernus.idea.checkstyle.ui.LocationPanel.LocationType.*;
@@ -186,11 +187,13 @@ public class LocationPanel extends JPanel {
      */
     public ConfigurationLocation getConfigurationLocation() {
         final NamedScope namedScope = (NamedScope) scopeComboBox.getSelectedItem();
+        final String newId = UUID.randomUUID().toString();
 
         if (fileLocationField.isEnabled()) {
             if (isNotBlank(fileLocation())) {
                 return configurationLocationFactory().create(
                         project,
+                        newId,
                         typeOfFile(),
                         fileLocation(),
                         descriptionField.getText(),
@@ -201,6 +204,7 @@ public class LocationPanel extends JPanel {
             if (isNotBlank(urlLocation())) {
                 return configurationLocationFactory().create(
                         project,
+                        newId,
                         typeOfUrl(),
                         urlLocation(),
                         descriptionField.getText(),
@@ -211,6 +215,7 @@ public class LocationPanel extends JPanel {
             if (isNotBlank(classpathLocation())) {
                 return configurationLocationFactory().create(
                         project,
+                        newId,
                         PLUGIN_CLASSPATH,
                         classpathLocation(),
                         descriptionField.getText(),

@@ -24,7 +24,7 @@ public final class PluginConfigurationBuilder {
     private boolean copyLibraries;
     private SortedSet<ConfigurationLocation> locations;
     private List<String> thirdPartyClasspath;
-    private SortedSet<String> activeLocationDescriptors;
+    private SortedSet<String> activeLocationIds;
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
 
@@ -34,7 +34,7 @@ public final class PluginConfigurationBuilder {
                                        final boolean copyLibraries,
                                        @NotNull final SortedSet<ConfigurationLocation> locations,
                                        @NotNull final List<String> thirdPartyClasspath,
-                                       @NotNull final SortedSet<String> activeLocationDescriptors,
+                                       @NotNull final SortedSet<String> activeLocationIds,
                                        final boolean scanBeforeCheckin,
                                        @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
@@ -43,7 +43,7 @@ public final class PluginConfigurationBuilder {
         this.copyLibraries = copyLibraries;
         this.locations = locations;
         this.thirdPartyClasspath = thirdPartyClasspath;
-        this.activeLocationDescriptors = activeLocationDescriptors;
+        this.activeLocationIds = activeLocationIds;
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
     }
@@ -89,7 +89,7 @@ public final class PluginConfigurationBuilder {
                 source.isCopyLibs(),
                 source.getLocations(),
                 source.getThirdPartyClasspath(),
-                source.getActiveLocationDescriptors(),
+                source.getActiveLocationIds(),
                 source.isScanBeforeCheckin(),
                 source.getLastActivePluginVersion());
     }
@@ -99,8 +99,8 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
-    public PluginConfigurationBuilder withActiveLocationDescriptor(final SortedSet<String> newActiveLocationDescriptor) {
-        this.activeLocationDescriptors = newActiveLocationDescriptor;
+    public PluginConfigurationBuilder withActiveLocationIds(final SortedSet<String> newActiveLocationIds) {
+        this.activeLocationIds = newActiveLocationIds;
         return this;
     }
 
@@ -147,7 +147,7 @@ public final class PluginConfigurationBuilder {
                 copyLibraries,
                 locations,
                 thirdPartyClasspath,
-                activeLocationDescriptors,
+                activeLocationIds,
                 scanBeforeCheckin,
                 lastActivePluginVersion);
     }

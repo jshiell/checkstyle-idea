@@ -29,13 +29,15 @@ public class FileConfigurationLocation extends ConfigurationLocation {
      *
      * @param project the project.
      */
-    FileConfigurationLocation(final Project project) {
-        this(project, ConfigurationType.LOCAL_FILE);
+    FileConfigurationLocation(@NotNull final Project project,
+                              @NotNull final String id) {
+        this(project, id, ConfigurationType.LOCAL_FILE);
     }
 
-    FileConfigurationLocation(final Project project,
-                              final ConfigurationType configurationType) {
-        super(configurationType, project);
+    FileConfigurationLocation(@NotNull final Project project,
+                              @NotNull final String id,
+                              @NotNull final ConfigurationType configurationType) {
+        super(id, configurationType, project);
     }
 
     @Override
@@ -163,6 +165,6 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public Object clone() {
-        return cloneCommonPropertiesTo(new FileConfigurationLocation(getProject()));
+        return cloneCommonPropertiesTo(new FileConfigurationLocation(getProject(), getId()));
     }
 }

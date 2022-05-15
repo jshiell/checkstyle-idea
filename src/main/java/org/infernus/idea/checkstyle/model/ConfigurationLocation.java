@@ -21,11 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.currentTimeMillis;
@@ -44,6 +40,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private static final long BLOCK_TIME_MS = 1000 * 60;
 
     private final Map<String, String> properties = new ConcurrentHashMap<>();
+    private final String id;
     private final ConfigurationType type;
     private final Project project;
     private String location;
@@ -53,8 +50,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private boolean propertiesCheckedThisSession;
     private long blockedUntil;
 
-    public ConfigurationLocation(@NotNull final ConfigurationType type,
+    public ConfigurationLocation(@NotNull final String id,
+                                 @NotNull final ConfigurationType type,
                                  @NotNull final Project project) {
+        this.id = id;
         this.type = type;
         this.project = project;
         this.namedScope = NamedScopeHelper.getDefaultScope(project);
@@ -91,11 +90,20 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
+    @NotNull
+    public String getId() {
+        return id;
+    }
+
     public ConfigurationType getType() {
         return type;
     }
 
     public synchronized String getLocation() {
+        return location;
+    }
+
+    public final synchronized String getRawLocation() {
         return location;
     }
 
@@ -177,9 +185,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     /**
      * Extract all settable properties from the given configuration element.
      *
-     * @param element
-     * 		the configuration element.
-     *
+     * @param element the configuration element.
      * @return the settable property names.
      */
     private List<String> extractProperties(final Element element) {
@@ -252,8 +258,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     @Nullable
     public synchronized String resolveAssociatedFile(@Nullable final String filename,
-                                        @Nullable final Module module,
-                                        @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
+                                                     @Nullable final Module module,
+                                                     @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         if (filename == null) {
             return null;
         } else if (new File(filename).exists()) {
@@ -369,23 +375,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return !getProperties().equals(configurationLocation.getProperties());
     }
 
-    public synchronized String getDescriptor() {
-        assert location != null;
-        assert description != null;
-        assert namedScope != null;
-
-        return type + ":" + location + ":" + description + ";" + namedScope.getScopeId();
-    }
-
     /**
      * Resolve this location to a file.
      *
-     * @param checkstyleClassLoader
-     * 		the classloader for the configured Checkstyle.
-     *
+     * @param checkstyleClassLoader the classloader for the configured Checkstyle.
      * @return the file to load.
-     * @throws IOException
-     * 		if the file cannot be loaded.
+     * @throws IOException if the file cannot be loaded.
      */
     @NotNull
     protected abstract InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException;

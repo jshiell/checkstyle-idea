@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.jetbrains.annotations.NotNull;
@@ -148,7 +149,7 @@ public class ConfigurationLocationTest {
     public void aDescriptorContainsTheLocationDescriptionAndType() {
         final ConfigurationLocation location = new TestConfigurationLocation("aLocation");
 
-        assertThat(location.getDescriptor(), is(equalTo(format("%s:%s:%s;%s",
+        assertThat(Descriptor.of(location, location.getProject()).toString(), is(equalTo(format("%s:%s:%s;%s",
                 location.getType(), location.getLocation(), location.getDescription(), location.getNamedScope().get().getScopeId()))));
     }
 
@@ -189,7 +190,7 @@ public class ConfigurationLocationTest {
 
     private static class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
         public DefaultProjectTestConfigurationLocation() {
-            super(ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
+            super("anId", ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             when(getProject().isDefault()).thenReturn(true);
         }
@@ -214,7 +215,7 @@ public class ConfigurationLocationTest {
     private static class TestConfigurationLocation extends ConfigurationLocation {
 
         public TestConfigurationLocation(final String content) {
-            super(ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
+            super("anId", ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             setLocation(content);
             setNamedScope(TestHelper.NAMED_SCOPE);
@@ -239,29 +240,29 @@ public class ConfigurationLocationTest {
         when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
 
         List<ConfigurationLocation> list = new ArrayList<>();
-        FileConfigurationLocation fcl = new FileConfigurationLocation(project, ConfigurationType.LOCAL_FILE);
+        FileConfigurationLocation fcl = new FileConfigurationLocation(project, "id1", ConfigurationType.LOCAL_FILE);
         fcl.setDescription("descB");
         fcl.setLocation("locB");
         list.add(fcl);
-        RelativeFileConfigurationLocation rfcl1 = new RelativeFileConfigurationLocation(project);
+        RelativeFileConfigurationLocation rfcl1 = new RelativeFileConfigurationLocation(project, "id2");
         rfcl1.setDescription("descA");
         rfcl1.setLocation("locA");
         list.add(rfcl1);
-        list.add(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project));
-        RelativeFileConfigurationLocation rfcl2 = new RelativeFileConfigurationLocation(project);
+        list.add(new BundledConfigurationLocation("id3", BundledConfig.SUN_CHECKS, project));
+        RelativeFileConfigurationLocation rfcl2 = new RelativeFileConfigurationLocation(project, "id4");
         rfcl2.setDescription("descC");
         rfcl2.setLocation("locC");
         list.add(rfcl2);
-        list.add(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project));
+        list.add(new BundledConfigurationLocation("id5", BundledConfig.GOOGLE_CHECKS, project));
 
         Collections.sort(list);
 
         assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
         assertTrue(list.get(0).getDescription().contains("Sun Checks"));
-        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project)));
+        assertTrue(list.contains(new BundledConfigurationLocation("id6", BundledConfig.SUN_CHECKS, project)));
         assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
         assertTrue(list.get(1).getDescription().contains("Google Checks"));
-        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project)));
+        assertTrue(list.contains(new BundledConfigurationLocation("id7", BundledConfig.GOOGLE_CHECKS, project)));
         assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
         assertEquals("descA", list.get(2).getDescription());
         assertEquals(FileConfigurationLocation.class, list.get(3).getClass());

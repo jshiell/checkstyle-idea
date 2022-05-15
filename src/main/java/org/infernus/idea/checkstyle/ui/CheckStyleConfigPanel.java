@@ -250,7 +250,7 @@ public class CheckStyleConfigPanel extends JPanel {
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
-        locationModel.setActiveLocations(pluginConfig.getActiveLocations(project));
+        locationModel.setActiveLocations(pluginConfig.getActiveLocations());
     }
 
     public PluginConfiguration getPluginConfiguration() {
@@ -268,8 +268,8 @@ public class CheckStyleConfigPanel extends JPanel {
                 .withCopyLibraries(copyLibsCheckbox.isSelected())
                 .withLocations(new TreeSet<>(locationModel.getLocations()))
                 .withThirdPartyClassPath(getThirdPartyClasspath())
-                .withActiveLocationDescriptor(locationModel.getActiveLocations().stream()
-                        .map(ConfigurationLocation::getDescriptor)
+                .withActiveLocationIds(locationModel.getActiveLocations().stream()
+                        .map(ConfigurationLocation::getId)
                         .collect(Collectors.toCollection(TreeSet::new)))
                 .build();
     }

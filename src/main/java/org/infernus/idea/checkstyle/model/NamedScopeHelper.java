@@ -23,7 +23,8 @@ public final class NamedScopeHelper {
      * If no scope with this ID exists, the Scope with the {@link #DEFAULT_SCOPE_ID} is being returned.
      */
     @NotNull
-    public static NamedScope getScopeByIdWithDefaultFallback(Project project, String id) {
+    public static NamedScope getScopeByIdWithDefaultFallback(@NotNull final Project project,
+                                                             @NotNull final String id) {
         final NamedScope localScopeOrNull = NamedScopeManager.getInstance(project).getScope(id);
         if (localScopeOrNull != null) {
             return localScopeOrNull;
@@ -36,13 +37,13 @@ public final class NamedScopeHelper {
         return getDefaultScope(project);
     }
 
-    public static Stream<NamedScope> getAllScopes(Project project) {
+    public static Stream<NamedScope> getAllScopes(@NotNull final Project project) {
         return Stream.concat(
                 Arrays.stream(NamedScopeManager.getInstance(project).getScopes()),
                 Arrays.stream(DependencyValidationManager.getInstance(project).getScopes()));
     }
 
-    public static NamedScope getDefaultScope(Project project) {
+    public static NamedScope getDefaultScope(@NotNull final Project project) {
         return DependencyValidationManager.getInstance(project).getScope(DEFAULT_SCOPE_ID);
     }
 

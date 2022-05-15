@@ -70,14 +70,14 @@ public class V1ProjectConfigurationStateDeserialiserTest {
 
         ArrayList<ConfigurationLocation> configList = new ArrayList<>(pluginConfiguration.getLocations());
         assertThat(configList, equalTo(List.of(
-                configurationLocationFactory.create(project, "BUNDLED:(bundled):Sun Checks;All"),
-                configurationLocationFactory.create(project, "BUNDLED:(bundled):Google Checks;All"),
-                configurationLocationFactory.create(project, "LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-545.xml:545;All"),
-                configurationLocationFactory.create(project, "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All"),
-                configurationLocationFactory.create(project, "HTTP_URL:http://demo:demo@localhost:8000/working-checkstyle-rules-8.24.xml:Working HTTP;All")
-        )));
-        assertThat(pluginConfiguration.getActiveLocations(project), hasSize(1));
-        assertThat(pluginConfiguration.getActiveLocations(project).first(), equalTo(configList.get(3)));
+                Descriptor.parse("BUNDLED:(bundled):Sun Checks;All", project).toConfigurationLocation(project),
+                Descriptor.parse("BUNDLED:(bundled):Google Checks;All", project).toConfigurationLocation(project),
+                Descriptor.parse("LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-545.xml:545;All", project).toConfigurationLocation(project),
+                Descriptor.parse("LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All", project).toConfigurationLocation(project),
+                Descriptor.parse("HTTP_URL:http://demo:demo@localhost:8000/working-checkstyle-rules-8.24.xml:Working HTTP;All", project).toConfigurationLocation(project))
+        ));
+        assertThat(pluginConfiguration.getActiveLocations(), hasSize(1));
+        assertThat(pluginConfiguration.getActiveLocations().first(), equalTo(configList.get(3)));
         assertThat(configList.get(1).getProperties(), equalTo(Map.of(
                 "org.checkstyle.google.suppressionfilter.config", "notxpath",
                 "org.checkstyle.google.suppressionxpathfilter.config", "xpath"

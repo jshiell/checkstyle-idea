@@ -5,7 +5,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.annotations.MapAnnotation;
-import org.infernus.idea.checkstyle.config.PluginConfiguration;
+import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ public final class CheckStyleModuleConfiguration extends Properties
         }
 
         if (configurationLocation != null) {
-            setProperty(ACTIVE_CONFIG, configurationLocation.getDescriptor());
+            setProperty(ACTIVE_CONFIG, configurationLocation.getId());
         } else {
             remove(ACTIVE_CONFIG);
         }
@@ -77,7 +77,7 @@ public final class CheckStyleModuleConfiguration extends Properties
         return containsKey(ACTIVE_CONFIG);
     }
 
-    public SortedSet<String> getActiveLocationDescriptors() {
+    private SortedSet<String> getActiveLocationIds(@NotNull final Project project) {
         if (!containsKey(ACTIVE_CONFIG)) {
             return getProjectConfiguration();
         }
@@ -99,14 +99,20 @@ public final class CheckStyleModuleConfiguration extends Properties
             return getProjectConfiguration();
         }
 
-        return activeLocations;
+        return activeLocations.stream()
+                .map(it -> Descriptor.parse(it, project))
+                .map(it -> it.findIn(configurationLocations(), project))
+                .filter(Optional::isPresent)
+                .map(it -> it.get().getId())
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @NotNull
     public SortedSet<ConfigurationLocation> getActiveLocations(@NotNull final Project project) {
-        PluginConfiguration pluginConfiguration = configurationManager().getCurrent();
-        return getActiveLocationDescriptors().stream()
-                .map(activeLocationDescriptor -> pluginConfiguration.findByDescriptor(activeLocationDescriptor, project))
+        return getActiveLocationIds(project).stream()
+                .map(activeLocationDescriptor -> configurationLocations().stream()
+                        .filter(it -> it.getId().equals(activeLocationDescriptor))
+                        .findFirst())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -114,7 +120,7 @@ public final class CheckStyleModuleConfiguration extends Properties
 
 
     private SortedSet<String> getProjectConfiguration() {
-        return configurationManager().getCurrent().getActiveLocationDescriptors();
+        return configurationManager().getCurrent().getActiveLocationIds();
     }
 
     private PluginConfigurationManager configurationManager() {

@@ -22,7 +22,9 @@ public enum ConfigurationType {
      */
     PROJECT_RELATIVE,
 
-    PLUGIN_CLASSPATH;
+    PLUGIN_CLASSPATH,
+
+    LEGACY_CLASSPATH; // legacy
 
 
     /**
@@ -39,6 +41,8 @@ public enum ConfigurationType {
         final String processedType = typeAsString.toUpperCase().replace(' ', '_');
         if ("FILE".equals(processedType)) {
             return LOCAL_FILE;
+        } else if ("CLASSPATH".equals(processedType)) {
+            return LEGACY_CLASSPATH;
         }
 
         return valueOf(processedType);

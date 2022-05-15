@@ -17,6 +17,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.URLConnection;
 import java.util.Scanner;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,14 +66,14 @@ public class HTTPURLConfigurationLocationTest {
         aTimingOutLocation().resolveFile(getClass().getClassLoader());
     }
 
-    private String toString(InputStream is) {
+    private String toString(final InputStream is) {
         Scanner s = new Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 
     @NotNull
     private HTTPURLConfigurationLocation aLocationWithPath(final String path) {
-        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(TestHelper.mockProject());
+        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(TestHelper.mockProject(), UUID.randomUUID().toString());
         location.setDescription("aTestLocation");
         location.setLocation(format("http://localhost:%s%s", serverPort, path));
         return location;
@@ -128,7 +129,7 @@ public class HTTPURLConfigurationLocationTest {
 
     private static class TimingOutHTTPURLConfigurationLocation extends HTTPURLConfigurationLocation {
         TimingOutHTTPURLConfigurationLocation() {
-            super(TestHelper.mockProject());
+            super(TestHelper.mockProject(), UUID.randomUUID().toString());
         }
 
         @NotNull

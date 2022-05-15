@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,7 +52,7 @@ public class RelativeFileConfigurationLocationTest {
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
         when(projectPaths.projectPath(project)).thenReturn(projectBase);
 
-        underTest = new RelativeFileConfigurationLocation(project);
+        underTest = new RelativeFileConfigurationLocation(project, UUID.randomUUID().toString());
         underTest.setLocation("aLocation");
         underTest.setDescription("aDescription");
     }

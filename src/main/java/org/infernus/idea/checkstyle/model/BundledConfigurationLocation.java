@@ -1,12 +1,12 @@
 package org.infernus.idea.checkstyle.model;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.infernus.idea.checkstyle.util.Streams.inMemoryCopyOf;
 
@@ -15,9 +15,10 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     @NotNull
     private final BundledConfig bundledConfig;
 
-    BundledConfigurationLocation(@NotNull final BundledConfig bundledConfig,
+    BundledConfigurationLocation(@NotNull final String id,
+                                 @NotNull final BundledConfig bundledConfig,
                                  @NotNull final Project project) {
-        super(ConfigurationType.BUNDLED, project);
+        super(id, ConfigurationType.BUNDLED, project);
         super.setLocation(bundledConfig.getLocation());
         super.setDescription(bundledConfig.getDescription());
 
@@ -61,6 +62,6 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     @Override
     @NotNull
     public BundledConfigurationLocation clone() {
-        return new BundledConfigurationLocation(bundledConfig, getProject());
+        return new BundledConfigurationLocation(getId(), bundledConfig, getProject());
     }
 }

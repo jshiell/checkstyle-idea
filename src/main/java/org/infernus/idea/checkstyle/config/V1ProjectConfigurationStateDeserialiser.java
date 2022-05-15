@@ -4,9 +4,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.VersionListReader;
-import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.OS;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -25,25 +23,23 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
 
-    private final Project project;
-
     public V1ProjectConfigurationStateDeserialiser(@NotNull final Project project) {
-        this.project = project;
+        super(project);
     }
 
     @Override
     public PluginConfigurationBuilder deserialise(@NotNull final PluginConfigurationBuilder builder,
                                                   @NotNull final Map<String, Object> projectConfiguration) {
         convertSettingsFormat(projectConfiguration);
-        final TreeSet<ConfigurationLocation> deserialisedLocations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
+        final TreeSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder
                 .withCheckstyleVersion(readCheckstyleVersion(projectConfiguration))
                 .withScanScope(scopeValueOf(projectConfiguration))
                 .withSuppressErrors(booleanValueOf(projectConfiguration, SUPPRESS_ERRORS))
                 .withCopyLibraries(booleanValueOfWithDefault(projectConfiguration, COPY_LIBS, OS.isWindows()))
-                .withLocations(deserialisedLocations)
+                .withLocations(locations)
                 .withThirdPartyClassPath(readThirdPartyClassPath(projectConfiguration))
-                .withActiveLocationDescriptor(readActiveLocations(projectConfiguration))
+                .withActiveLocationIds(readActiveLocationIds(projectConfiguration, locations))
                 .withScanBeforeCheckin(booleanValueOf(projectConfiguration, SCAN_BEFORE_CHECKIN));
     }
 
@@ -63,16 +59,26 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         }
     }
 
-    private SortedSet<String> readActiveLocations(@NotNull final Map<String, Object> configuration) {
+    private SortedSet<String> readActiveLocationIds(@NotNull final Map<String, Object> configuration,
+                                                    @NotNull final Collection<ConfigurationLocation> locations) {
         Object serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
+
+        final SortedSet<String> activeDescriptors;
         if (serializedSingleLocation != null && !serializedSingleLocation.toString().trim().isEmpty()) {
             // For backwards compatibility if only one location is used.
-            final SortedSet<String> locations = new TreeSet<>();
-            locations.add(serializedSingleLocation.toString());
-            return locations;
+            activeDescriptors = new TreeSet<>();
+            activeDescriptors.add(serializedSingleLocation.toString());
+        } else {
+            activeDescriptors = readActiveConfigurationLocationsDescriptors(configuration);
         }
 
-        return readActiveConfigurationLocationsDescriptors(configuration);
+        return activeDescriptors.stream()
+                .map(it -> Descriptor.parse(it, getProject()))
+                .map(it -> it.findIn(locations, getProject()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(ConfigurationLocation::getId)
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @NotNull
@@ -133,23 +139,12 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         return result;
     }
 
-    private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
-        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
-        if (!configurationLocations.contains(sunChecks)) {
-            configurationLocations.add(sunChecks);
-        }
-        if (!configurationLocations.contains(googleChecks)) {
-            configurationLocations.add(googleChecks);
-        }
-    }
-
     @Nullable
     private ConfigurationLocation deserialiseLocation(@NotNull final Map<String, Object> configuration,
                                                       @NotNull final String key) {
         final Object serialisedLocation = configuration.get(key);
         try {
-            final ConfigurationLocation location = configurationLocationFactory().create(project, serialisedLocation.toString());
+            ConfigurationLocation location = Descriptor.parse(serialisedLocation.toString(), getProject()).toConfigurationLocation(getProject());
             location.setProperties(propertiesFor(configuration, key));
             return location;
 
@@ -196,12 +191,23 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
         return PROPERTIES_PREFIX + index + ".";
     }
 
-    private ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+    private ProjectFilePaths projectFilePaths() {
+        return ServiceManager.getService(getProject(), ProjectFilePaths.class);
     }
 
-    private ProjectFilePaths projectFilePaths() {
-        return ServiceManager.getService(project, ProjectFilePaths.class);
+
+    private boolean booleanValueOf(@NotNull final Map<String, Object> properties, final String propertyName) {
+        return booleanValueOfWithDefault(properties, propertyName, false);
+    }
+
+    private boolean booleanValueOfWithDefault(@NotNull final Map<String, Object> properties,
+                                              final String propertyName,
+                                              final boolean defaultValue) {
+        final Object value = properties.get(propertyName);
+        if (value != null) {
+            return Boolean.parseBoolean(value.toString());
+        }
+        return defaultValue;
     }
 
 }

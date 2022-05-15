@@ -1,10 +1,8 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import net.jcip.annotations.Immutable;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +23,7 @@ public class PluginConfiguration {
     private final boolean copyLibs;
     private final SortedSet<ConfigurationLocation> locations;
     private final List<String> thirdPartyClasspath;
-    private final SortedSet<String> activeLocationDescriptors;
+    private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
     private final String lastActivePluginVersion;
 
@@ -35,7 +33,7 @@ public class PluginConfiguration {
                         final boolean copyLibs,
                         @NotNull final SortedSet<ConfigurationLocation> locations,
                         @NotNull final List<String> thirdPartyClasspath,
-                        @NotNull final SortedSet<String> activeLocationDescriptors,
+                        @NotNull final SortedSet<String> activeLocationIds,
                         final boolean scanBeforeCheckin,
                         @Nullable final String lastActivePluginVersion) {
         this.checkstyleVersion = checkstyleVersion;
@@ -44,7 +42,7 @@ public class PluginConfiguration {
         this.copyLibs = copyLibs;
         this.locations = Collections.unmodifiableSortedSet(locations);
         this.thirdPartyClasspath = Collections.unmodifiableList(thirdPartyClasspath);
-        this.activeLocationDescriptors = activeLocationDescriptors.stream()
+        this.activeLocationIds = activeLocationIds.stream()
                 .filter(Objects::nonNull)
 		        .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
@@ -81,16 +79,14 @@ public class PluginConfiguration {
         // logic to make things consistent
         // Ideally we should switch from descriptors to GUIDs or similar to avoid such things, although we'd
         // still need the logic for legacy values
-        ConfigurationLocation resolvedConfiguration = configurationLocationFactory(project).create(project, locationDescriptorToFind);
+        Descriptor descriptorToFind = Descriptor.of(
+                Descriptor.parse(locationDescriptorToFind, project).toConfigurationLocation(project),
+                project);
 
         return locations.stream()
-                .filter(location -> location.getDescriptor().equals(resolvedConfiguration.getDescriptor()))
+                .filter(location -> Descriptor.of(location, project).equals(descriptorToFind))
                 .limit(1)
                 .findFirst();
-    }
-
-    private ConfigurationLocationFactory configurationLocationFactory(final Project project) {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
     }
 
     @NotNull
@@ -103,14 +99,14 @@ public class PluginConfiguration {
         return lastActivePluginVersion;
     }
 
-    public SortedSet<String> getActiveLocationDescriptors() {
-        return this.activeLocationDescriptors;
+    public SortedSet<String> getActiveLocationIds() {
+        return this.activeLocationIds;
     }
 
     @NotNull
-    public SortedSet<ConfigurationLocation> getActiveLocations(@NotNull final Project project) {
-        return getActiveLocationDescriptors().stream()
-                .map(activeLocationDescriptor -> findByDescriptor(activeLocationDescriptor, project))
+    public SortedSet<ConfigurationLocation> getActiveLocations() {
+        return getActiveLocationIds().stream()
+                .map(idToFind -> locations.stream().filter(candidate -> candidate.getId().equals(idToFind)).findFirst())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -152,7 +148,7 @@ public class PluginConfiguration {
                 && Objects.equals(copyLibs, otherDto.copyLibs)
                 && Objects.equals(locations, otherDto.locations)
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
-                && Objects.equals(activeLocationDescriptors, otherDto.activeLocationDescriptors)
+                && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
                 && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
                 && Objects.equals(lastActivePluginVersion, otherDto.lastActivePluginVersion);
     }
@@ -160,7 +156,7 @@ public class PluginConfiguration {
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, locations, thirdPartyClasspath,
-                activeLocationDescriptors, scanBeforeCheckin, lastActivePluginVersion);
+                activeLocationIds, scanBeforeCheckin, lastActivePluginVersion);
     }
 
 }
