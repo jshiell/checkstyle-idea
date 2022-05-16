@@ -51,6 +51,10 @@ tasks.withType(JavaCompile) {
     }
 }
 
+test {
+    forkEvery = 1
+}
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Dependencies
