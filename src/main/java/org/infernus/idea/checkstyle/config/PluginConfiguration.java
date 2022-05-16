@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.project.Project;
 import net.jcip.annotations.Immutable;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
@@ -70,23 +69,6 @@ public class PluginConfiguration {
     @NotNull
     public SortedSet<ConfigurationLocation> getLocations() {
         return locations;
-    }
-
-    @NotNull
-    public Optional<ConfigurationLocation> findByDescriptor(@NotNull final String locationDescriptorToFind,
-                                                            @NotNull final Project project) {
-        // This is a horrid hack to get around IDEA resolving $PROJECT_DIR$ in descriptors, hence we need to do the whole load
-        // logic to make things consistent
-        // Ideally we should switch from descriptors to GUIDs or similar to avoid such things, although we'd
-        // still need the logic for legacy values
-        Descriptor descriptorToFind = Descriptor.of(
-                Descriptor.parse(locationDescriptorToFind, project).toConfigurationLocation(project),
-                project);
-
-        return locations.stream()
-                .filter(location -> Descriptor.of(location, project).equals(descriptorToFind))
-                .limit(1)
-                .findFirst();
     }
 
     @NotNull
