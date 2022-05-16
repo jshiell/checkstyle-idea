@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CheckStyleModuleConfigurationTest {
+public class ModuleConfigurationStateTest {
 
     private final Project project = TestHelper.mockProject();
     private final Module module = mock(Module.class);
@@ -86,10 +86,10 @@ public class CheckStyleModuleConfigurationTest {
 
     @Test
     public void theActiveLocationCanBeDeserialised() {
-        final CheckStyleModuleConfiguration.ModuleSettings moduleSettings
-                = CheckStyleModuleConfiguration.ModuleSettings.create(testConfiguration());
+        final ModuleConfigurationState.ModuleSettings moduleSettings
+                = ModuleConfigurationState.ModuleSettings.create(testConfiguration());
 
-        CheckStyleModuleConfiguration underTest = new CheckStyleModuleConfiguration(module);
+        ModuleConfigurationState underTest = new ModuleConfigurationState(module);
         underTest.loadState(moduleSettings);
 
         SortedSet<ConfigurationLocation> activeLocations = underTest.getActiveLocations(project);

@@ -76,7 +76,7 @@
 
         <moduleConfigurationEditorProvider implementation="org.infernus.idea.checkstyle.CheckstyleModuleConfigurationEditorProvider"/>
 
-        <moduleService serviceImplementation="org.infernus.idea.checkstyle.config.CheckStyleModuleConfiguration"/>
+        <moduleService serviceImplementation="org.infernus.idea.checkstyle.config.ModuleConfigurationState"/>
 
         <localInspection implementationClass="org.infernus.idea.checkstyle.CheckStyleInspection"
                          bundle="org.infernus.idea.checkstyle.CheckStyleBundle"

@@ -2,7 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleConfigurationEditor;
-import org.infernus.idea.checkstyle.config.CheckStyleModuleConfiguration;
+import org.infernus.idea.checkstyle.config.ModuleConfigurationState;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,15 +47,15 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
             return;
         }
 
-        final CheckStyleModuleConfiguration configuration = getConfiguration();
+        final ModuleConfigurationState configuration = getConfiguration();
         configuration.setActiveConfiguration(configPanel.getActiveLocation());
         configuration.setExcluded(configPanel.isExcluded());
 
         reset();
     }
 
-    private CheckStyleModuleConfiguration getConfiguration() {
-        return module.getService(CheckStyleModuleConfiguration.class);
+    private ModuleConfigurationState getConfiguration() {
+        return module.getService(ModuleConfigurationState.class);
     }
 
     public void reset() {
@@ -63,7 +63,7 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
             return;
         }
 
-        final CheckStyleModuleConfiguration configuration = getConfiguration();
+        final ModuleConfigurationState configuration = getConfiguration();
 
         configPanel.setConfigurationLocations(configuration.getAndResolveConfigurationLocations());
 

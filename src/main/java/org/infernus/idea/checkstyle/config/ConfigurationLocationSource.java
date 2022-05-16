@@ -26,7 +26,7 @@ public class ConfigurationLocationSource {
         }
 
         if (module != null) {
-            CheckStyleModuleConfiguration moduleConfiguration = checkstyleModuleConfiguration(module);
+            ModuleConfigurationState moduleConfiguration = checkstyleModuleConfiguration(module);
             if (moduleConfiguration.isExcluded()) {
                 return Collections.emptySortedSet();
             }
@@ -39,8 +39,8 @@ public class ConfigurationLocationSource {
         return ServiceManager.getService(project, PluginConfigurationManager.class);
     }
 
-    private CheckStyleModuleConfiguration checkstyleModuleConfiguration(final Module module) {
-        return module.getService(CheckStyleModuleConfiguration.class);
+    private ModuleConfigurationState checkstyleModuleConfiguration(final Module module) {
+        return module.getService(ModuleConfigurationState.class);
     }
 
 }

@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
  * A manager for CheckStyle module configuration.
  */
 @State(
-        name = CheckStyleModuleConfiguration.ID_MODULE_PLUGIN,
+        name = ModuleConfigurationState.ID_MODULE_PLUGIN,
         storages = {@Storage(StoragePathMacros.MODULE_FILE)}
 )
-public final class CheckStyleModuleConfiguration extends Properties
-        implements PersistentStateComponent<CheckStyleModuleConfiguration.ModuleSettings> {
+public final class ModuleConfigurationState extends Properties
+        implements PersistentStateComponent<ModuleConfigurationState.ModuleSettings> {
 
-    private static final Logger LOG = Logger.getInstance(CheckStyleModuleConfiguration.class);
+    private static final Logger LOG = Logger.getInstance(ModuleConfigurationState.class);
 
     private static final long serialVersionUID = 2804470793153632480L;
 
@@ -38,7 +38,7 @@ public final class CheckStyleModuleConfiguration extends Properties
      *
      * @param module the module we belong to.
      */
-    public CheckStyleModuleConfiguration(final Module module) {
+    public ModuleConfigurationState(final Module module) {
         if (module == null) {
             throw new IllegalArgumentException("Module is required");
         }
@@ -161,7 +161,7 @@ public final class CheckStyleModuleConfiguration extends Properties
             return false;
         }
 
-        CheckStyleModuleConfiguration that = (CheckStyleModuleConfiguration) o;
+        ModuleConfigurationState that = (ModuleConfigurationState) o;
 
         return module.equals(that.module);
     }
