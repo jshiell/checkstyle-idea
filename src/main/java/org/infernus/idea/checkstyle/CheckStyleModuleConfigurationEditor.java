@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleConfigurationEditor;
+import org.infernus.idea.checkstyle.config.CheckStyleModuleConfiguration;
 import org.infernus.idea.checkstyle.ui.CheckStyleModuleConfigPanel;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,12 +1,10 @@
-package org.infernus.idea.checkstyle;
+package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.annotations.MapAnnotation;
-import org.infernus.idea.checkstyle.config.Descriptor;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 

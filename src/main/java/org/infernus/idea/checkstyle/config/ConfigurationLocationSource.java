@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.CheckStyleModuleConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
