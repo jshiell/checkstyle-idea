@@ -29,7 +29,8 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
 
     @Override
     public PluginConfigurationBuilder deserialise(@NotNull final PluginConfigurationBuilder builder,
-                                                  @NotNull final Map<String, String> projectConfiguration) {
+                                                  @NotNull final ProjectSettings projectSettings) {
+        final Map<String, String> projectConfiguration = projectSettings.configuration();
         convertSettingsFormat(projectConfiguration);
         final TreeSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder

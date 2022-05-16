@@ -8,7 +8,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
 public abstract class ProjectConfigurationStateDeserialiser {
 
@@ -20,7 +19,7 @@ public abstract class ProjectConfigurationStateDeserialiser {
 
     public abstract PluginConfigurationBuilder deserialise(
             @NotNull PluginConfigurationBuilder builder,
-            @NotNull Map<String, String> projectConfiguration);
+            @NotNull ProjectConfigurationState.ProjectSettings projectSettings);
 
     protected void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
         final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);

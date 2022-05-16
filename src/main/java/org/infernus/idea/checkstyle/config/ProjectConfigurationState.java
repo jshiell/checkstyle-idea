@@ -58,8 +58,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        Map<String, String> projectConfiguration = projectSettings.configuration();
-        return selectDeserialiser().deserialise(builder, projectConfiguration);
+        return selectDeserialiser().deserialise(builder, projectSettings);
     }
 
     @NotNull
@@ -98,9 +97,15 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                     currentPluginConfig.getLocations(),
                     project);
 
-            final ProjectSettings projectSettings = new ProjectSettings();
-            projectSettings.configuration = mapForSerialization;
-            return projectSettings;
+            return new ProjectSettings(mapForSerialization);
+        }
+
+        @SuppressWarnings("unused") // for serilisation
+        ProjectSettings() {
+        }
+
+        ProjectSettings(@NotNull final Map<String, String> serialisedConfiguration) {
+            this.configuration = serialisedConfiguration;
         }
 
         private static void serializeActiveLocations(final Map<String, String> storage,

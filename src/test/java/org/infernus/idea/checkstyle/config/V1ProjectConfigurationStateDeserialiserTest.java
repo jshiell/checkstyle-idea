@@ -43,7 +43,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
 
     @Test
     public void basicPropertiesCanBeDeserialised() {
-        final Map<String, String> configuration = testConfiguration();
+        final ProjectConfigurationState.ProjectSettings configuration = testConfiguration();
 
         PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
@@ -62,7 +62,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
 
     @Test
     public void configurationLocationsCanBeDeserialised() {
-        final Map<String, String> configuration = testConfiguration();
+        final ProjectConfigurationState.ProjectSettings configuration = testConfiguration();
 
         PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
@@ -88,7 +88,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
     }
 
     @NotNull
-    private Map<String, String> testConfiguration() {
+    private ProjectConfigurationState.ProjectSettings testConfiguration() {
         final Map<String, String> configuration = new HashMap<>();
         configuration.put("active-configuration-0", "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
         configuration.put("checkstyle-version", "10.2");
@@ -105,7 +105,8 @@ public class V1ProjectConfigurationStateDeserialiserTest {
         configuration.put("scanscope", "JavaOnlyWithTests");
         configuration.put("suppress-errors", "false");
         configuration.put("thirdparty-classpath", "$PROJECT_DIR$/test-configs/spring-javaformat-checkstyle-0.0.31.jar;$PROJECT_DIR$/test-configs/spring-javaformat-config-0.0.31.jar");
-        return configuration;
+
+        return new ProjectConfigurationState.ProjectSettings(configuration);
     }
 
 }
