@@ -72,6 +72,13 @@ public class PluginConfiguration {
     }
 
     @NotNull
+    public Optional<ConfigurationLocation> getLocationById(@NotNull String locationId) {
+        return locations.stream()
+                .filter(candidate -> candidate.getId().equals(locationId))
+                .findFirst();
+    }
+
+    @NotNull
     public List<String> getThirdPartyClasspath() {
         return thirdPartyClasspath;
     }

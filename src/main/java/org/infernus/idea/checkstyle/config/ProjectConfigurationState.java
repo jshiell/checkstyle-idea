@@ -100,7 +100,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             return new ProjectSettings(mapForSerialization);
         }
 
-        @SuppressWarnings("unused") // for serilisation
+        @SuppressWarnings("unused") // for serialisation
         ProjectSettings() {
         }
 

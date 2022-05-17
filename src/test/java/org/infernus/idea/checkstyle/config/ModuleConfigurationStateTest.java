@@ -41,7 +41,6 @@ public class ModuleConfigurationStateTest {
 
     private ConfigurationLocation expectedLocation;
 
-
     @Before
     public void configureMocks() {
         when(module.getProject()).thenReturn(project);
@@ -92,10 +91,10 @@ public class ModuleConfigurationStateTest {
         ModuleConfigurationState underTest = new ModuleConfigurationState(module);
         underTest.loadState(moduleSettings);
 
-        SortedSet<ConfigurationLocation> activeLocations = underTest.getActiveLocations(project);
+        SortedSet<String> activeLocations = underTest.getActiveLocationIds();
         assertThat(activeLocations, hasSize(1));
         assertThat(expectedLocation, not(nullValue()));
-        assertThat(activeLocations.first(), equalTo(expectedLocation));
+        assertThat(activeLocations.first(), equalTo(expectedLocation.getId()));
     }
 
     @NotNull

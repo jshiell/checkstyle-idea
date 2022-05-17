@@ -18,172 +18,162 @@ import java.util.stream.Collectors;
         name = ModuleConfigurationState.ID_MODULE_PLUGIN,
         storages = {@Storage(StoragePathMacros.MODULE_FILE)}
 )
-public final class ModuleConfigurationState extends Properties
+public final class ModuleConfigurationState
         implements PersistentStateComponent<ModuleConfigurationState.ModuleSettings> {
 
     private static final Logger LOG = Logger.getInstance(ModuleConfigurationState.class);
 
-    private static final long serialVersionUID = 2804470793153632480L;
-
     public static final String ID_MODULE_PLUGIN = "CheckStyle-IDEA-Module";
-
-    private static final String ACTIVE_CONFIG = "active-configuration";
-    private static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
-    private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
 
     private final Module module;
 
-    /**
-     * Create a new configuration bean.
-     *
-     * @param module the module we belong to.
-     */
-    public ModuleConfigurationState(final Module module) {
-        if (module == null) {
-            throw new IllegalArgumentException("Module is required");
-        }
+    private SortedSet<String> activeLocationIds;
+    private boolean excludedFromScan;
 
+    public ModuleConfigurationState(@NotNull final Module module) {
         this.module = module;
     }
 
-    public void setActiveConfiguration(final ConfigurationLocation configurationLocation) {
-        if (configurationLocation != null && !configurationLocations().contains(configurationLocation)) {
-            throw new IllegalArgumentException("Location is not valid: " + configurationLocation);
-        }
-
-        if (configurationLocation != null) {
-            setProperty(ACTIVE_CONFIG, configurationLocation.getId());
-        } else {
-            remove(ACTIVE_CONFIG);
-        }
-    }
-
-    public void setExcluded(final boolean excluded) {
-        if (excluded) {
-            setProperty(EXCLUDE_FROM_SCAN, "true");
-        } else {
-            remove(EXCLUDE_FROM_SCAN);
-        }
-    }
-
-    public boolean isExcluded() {
-        return containsKey(EXCLUDE_FROM_SCAN)
-                && "true".equalsIgnoreCase(getProperty(EXCLUDE_FROM_SCAN, "false"));
-    }
-
-    public boolean isUsingModuleConfiguration() {
-        return containsKey(ACTIVE_CONFIG);
-    }
-
-    private SortedSet<String> getActiveLocationIds(@NotNull final Project project) {
-        if (!containsKey(ACTIVE_CONFIG)) {
-            return getProjectConfiguration();
-        }
-
-        SortedSet<String> activeLocations = new TreeSet<>();
-        try {
-            activeLocations.add(getProperty(ACTIVE_CONFIG));
-            stringPropertyNames().stream()
-                    .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
-                    .map(this::getProperty)
-                    .filter(Objects::nonNull)
-                    .forEach(activeLocations::add);
-        } catch (IllegalArgumentException e) {
-            LOG.warn("Could not load active configurations", e);
-        }
-
-        if (activeLocations.isEmpty()) {
-            LOG.info("Active module configuration is invalid, returning project configuration");
-            return getProjectConfiguration();
-        }
-
-        return activeLocations.stream()
-                .map(it -> Descriptor.parse(it, project))
-                .map(it -> it.findIn(configurationLocations(), project))
-                .filter(Optional::isPresent)
-                .map(it -> it.get().getId())
-                .collect(Collectors.toCollection(TreeSet::new));
+    public void setActiveLocationIds(@NotNull final SortedSet<String> activeLocationIds) {
+        this.activeLocationIds = activeLocationIds;
     }
 
     @NotNull
-    public SortedSet<ConfigurationLocation> getActiveLocations(@NotNull final Project project) {
-        return getActiveLocationIds(project).stream()
-                .map(activeLocationDescriptor -> configurationLocations().stream()
-                        .filter(it -> it.getId().equals(activeLocationDescriptor))
-                        .findFirst())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toCollection(TreeSet::new));
+    public SortedSet<String> getActiveLocationIds() {
+        return activeLocationIds;
     }
 
 
-    private SortedSet<String> getProjectConfiguration() {
-        return configurationManager().getCurrent().getActiveLocationIds();
+    public void setExcluded(final boolean excluded) {
+        this.excludedFromScan = excluded;
+    }
+
+    public boolean isExcluded() {
+        return excludedFromScan;
+    }
+
+    public boolean isUsingModuleConfiguration() {
+        return !getActiveLocationIds().isEmpty();
     }
 
     private PluginConfigurationManager configurationManager() {
         return ServiceManager.getService(module.getProject(), PluginConfigurationManager.class);
     }
 
-    public List<ConfigurationLocation> configurationLocations() {
+    private List<ConfigurationLocation> configurationLocations() {
         return new ArrayList<>(configurationManager().getCurrent().getLocations());
-    }
-
-    public List<ConfigurationLocation> getAndResolveConfigurationLocations() {
-        return new ArrayList<>(configurationManager().getCurrent().getLocations());
-    }
-
-    public ModuleSettings getState() {
-        final Map<String, String> moduleConfiguration = new HashMap<>();
-        for (String configurationKey : stringPropertyNames()) {
-            moduleConfiguration.put(configurationKey, getProperty(configurationKey));
-        }
-        return ModuleSettings.create(moduleConfiguration);
-    }
-
-    public void loadState(@NotNull final ModuleSettings sourceModuleSettings) {
-        clear();
-
-        for (final String key : sourceModuleSettings.configuration().keySet()) {
-            setProperty(key, sourceModuleSettings.configuration().get(key));
-        }
     }
 
     @Override
-    public synchronized boolean equals(final Object o) {
+    @NotNull
+    public ModuleSettings getState() {
+        final ModuleSettings settings = new ModuleSettings();
+        settings.setActiveLocationIds(activeLocationIds, module.getProject(), configurationManager().getCurrent());
+        settings.setExcluded(excludedFromScan);
+        return settings;
+    }
+
+    @Override
+    public void loadState(@NotNull final ModuleSettings moduleSettings) {
+        this.activeLocationIds = moduleSettings.getActiveLocationIds(module.getProject(), configurationLocations());
+        this.excludedFromScan = moduleSettings.isExcluded();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
-
         ModuleConfigurationState that = (ModuleConfigurationState) o;
-
-        return module.equals(that.module);
+        return excludedFromScan == that.excludedFromScan && Objects.equals(module, that.module)
+                && Objects.equals(activeLocationIds, that.activeLocationIds);
     }
 
     @Override
-    public synchronized int hashCode() {
-        return 31 * super.hashCode() + module.hashCode();
+    public int hashCode() {
+        return Objects.hash(module, activeLocationIds, excludedFromScan);
     }
 
     static class ModuleSettings {
-        @MapAnnotation
-        private Map<String, String> configuration;
 
+        private static final String ACTIVE_CONFIG = "active-configuration";
+        private static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
+        private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
+
+        @MapAnnotation
+        private Map<String, String> configuration = new HashMap<>();
+
+        @NotNull
         static ModuleSettings create(final Map<String, String> configuration) {
             final ModuleSettings moduleSettings = new ModuleSettings();
-            moduleSettings.configuration = configuration;
+            moduleSettings.configuration = Objects.requireNonNullElse(configuration, new HashMap<>());
             return moduleSettings;
         }
 
         @NotNull
         public Map<String, String> configuration() {
             return Objects.requireNonNullElse(configuration, Collections.emptyMap());
+        }
+
+        @NotNull
+        SortedSet<String> getActiveLocationIds(@NotNull final Project project,
+                                               @NotNull final List<ConfigurationLocation> locations) {
+            SortedSet<String> activeLocations = new TreeSet<>();
+            try {
+                if (configuration.get(ACTIVE_CONFIG) != null) {
+                    activeLocations.add(configuration.get(ACTIVE_CONFIG));
+                }
+                configuration.keySet().stream()
+                        .filter(propertyName -> propertyName.startsWith(ACTIVE_CONFIGS_PREFIX))
+                        .map(configuration::get)
+                        .filter(Objects::nonNull)
+                        .forEach(activeLocations::add);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Could not load active configurations", e);
+            }
+
+            if (activeLocations.isEmpty()) {
+                LOG.info("Active module configuration is invalid, returning project configuration");
+                return new TreeSet<>();
+            }
+
+            return activeLocations.stream()
+                    .map(it -> Descriptor.parse(it, project))
+                    .map(it -> it.findIn(locations, project))
+                    .filter(Optional::isPresent)
+                    .map(it -> it.get().getId())
+                    .collect(Collectors.toCollection(TreeSet::new));
+        }
+
+
+        public void setActiveLocationIds(@NotNull final SortedSet<String> activeLocationIds,
+                                         @NotNull final Project project,
+                                         @NotNull final PluginConfiguration pluginConfiguration) {
+            final List<String> listOfLocationsIds = new ArrayList<>(activeLocationIds);
+            for (int i = 0; i < listOfLocationsIds.size(); i++) {
+                String currentId = listOfLocationsIds.get(i);
+                Optional<ConfigurationLocation> currentLocation = pluginConfiguration.getLocationById(currentId);
+                if (currentLocation.isPresent()) {
+                    configuration.put(ACTIVE_CONFIGS_PREFIX + i, Descriptor.of(currentLocation.get(), project).toString());
+                }
+            }
+        }
+
+
+        public void setExcluded(final boolean excluded) {
+            if (excluded) {
+                configuration.put(EXCLUDE_FROM_SCAN, "true");
+            } else {
+                configuration.remove(EXCLUDE_FROM_SCAN);
+            }
+        }
+
+        public boolean isExcluded() {
+            return configuration.containsKey(EXCLUDE_FROM_SCAN)
+                    && "true".equalsIgnoreCase(configuration.getOrDefault(EXCLUDE_FROM_SCAN, "false"));
         }
     }
 }

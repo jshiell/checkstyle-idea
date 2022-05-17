@@ -8,8 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class ConfigurationLocationSource {
 
@@ -30,7 +32,11 @@ public class ConfigurationLocationSource {
             if (moduleConfiguration.isExcluded()) {
                 return Collections.emptySortedSet();
             }
-            return moduleConfiguration.getActiveLocations(project);
+            PluginConfiguration configuration = configurationManager().getCurrent();
+            return moduleConfiguration.getActiveLocationIds().stream()
+                    .map(id -> configuration.getLocationById(id).orElse(null))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(TreeSet::new));
         }
         return configurationManager().getCurrent().getActiveLocations();
     }
