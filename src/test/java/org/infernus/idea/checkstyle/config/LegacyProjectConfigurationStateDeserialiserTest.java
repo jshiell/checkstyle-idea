@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class V1ProjectConfigurationStateDeserialiserTest {
+public class LegacyProjectConfigurationStateDeserialiserTest {
 
     private final Project project = TestHelper.mockProject();
     private final ProjectPaths projectPaths = mock(ProjectPaths.class);
@@ -45,7 +45,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
     public void basicPropertiesCanBeDeserialised() {
         final ProjectConfigurationState.ProjectSettings configuration = testConfiguration();
 
-        PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
+        PluginConfiguration pluginConfiguration = new LegacyProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
                 .build();
 
@@ -64,7 +64,7 @@ public class V1ProjectConfigurationStateDeserialiserTest {
     public void configurationLocationsCanBeDeserialised() {
         final ProjectConfigurationState.ProjectSettings configuration = testConfiguration();
 
-        PluginConfiguration pluginConfiguration = new V1ProjectConfigurationStateDeserialiser(project)
+        PluginConfiguration pluginConfiguration = new LegacyProjectConfigurationStateDeserialiser(project)
                 .deserialise(PluginConfigurationBuilder.testInstance("10.1"), configuration)
                 .build();
 

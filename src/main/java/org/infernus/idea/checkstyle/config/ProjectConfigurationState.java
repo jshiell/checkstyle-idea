@@ -4,21 +4,24 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.xmlb.annotations.MapAnnotation;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.util.xmlb.annotations.*;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.ProjectFilePaths;
-import org.infernus.idea.checkstyle.util.Strings;
+import org.infernus.idea.checkstyle.model.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
 public class ProjectConfigurationState implements PersistentStateComponent<ProjectConfigurationState.ProjectSettings> {
 
+    private static final Logger LOG = Logger.getInstance(ProjectConfigurationState.class);
     static final String ACTIVE_CONFIG = "active-configuration";
     static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
     static final String CHECKSTYLE_VERSION_SETTING = "checkstyle-version";
@@ -40,12 +43,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         projectSettings = defaultProjectSettings();
     }
 
-    private ProjectFilePaths projectFilePaths() {
-        return ServiceManager.getService(project, ProjectFilePaths.class);
-    }
-
     private ProjectSettings defaultProjectSettings() {
-        return ProjectSettings.create(project, projectFilePaths(), defaultConfiguration(project).build());
+        return ProjectSettings.create(defaultConfiguration(project).build());
     }
 
     public ProjectSettings getState() {
@@ -58,107 +57,172 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     @NotNull
     PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder) {
-        return selectDeserialiser().deserialise(builder, projectSettings);
-    }
-
-    @NotNull
-    private V1ProjectConfigurationStateDeserialiser selectDeserialiser() {
-        return new V1ProjectConfigurationStateDeserialiser(project);
+        return projectSettings.populate(builder, project);
     }
 
     void setCurrentConfig(@NotNull final PluginConfiguration currentPluginConfig) {
-        projectSettings = ProjectSettings.create(project, projectFilePaths(), currentPluginConfig);
+        projectSettings = ProjectSettings.create(currentPluginConfig);
     }
 
     static class ProjectSettings {
+
+        @SuppressWarnings("FieldMayBeFinal")
+        @Attribute
+        private String serialisationVersion;
+
+        @Tag
+        private String checkstyleVersion;
+        @Tag
+        private String scanScope;
+        @Tag
+        private boolean suppressErrors;
+        @Tag
+        private boolean copyLibs;
+        @Tag
+        private boolean scanBeforeCheckin;
+        @XCollection
+        private List<String> thirdPartyClasspath;
+        @XCollection
+        private List<String> activeLocationIds;
+        @MapAnnotation
+        private List<ConfigurationLocation> locations;
+
         @MapAnnotation
         private Map<String, String> configuration;
 
-        static ProjectSettings create(@NotNull final Project project,
-                                      @NotNull final ProjectFilePaths projectFilePaths,
-                                      @NotNull final PluginConfiguration currentPluginConfig) {
-            final Map<String, String> mapForSerialization = new TreeMap<>();
-            mapForSerialization.put(CHECKSTYLE_VERSION_SETTING, currentPluginConfig.getCheckstyleVersion());
-            mapForSerialization.put(SCANSCOPE_SETTING, currentPluginConfig.getScanScope().name());
-            mapForSerialization.put(SUPPRESS_ERRORS, String.valueOf(currentPluginConfig.isSuppressErrors()));
-            mapForSerialization.put(COPY_LIBS, String.valueOf(currentPluginConfig.isCopyLibs()));
+        static ProjectSettings create(@NotNull final PluginConfiguration currentPluginConfig) {
+            final ProjectSettings projectSettings = new ProjectSettings();
 
-            serializeLocations(mapForSerialization, new ArrayList<>(currentPluginConfig.getLocations()), project);
+            projectSettings.serialisationVersion = "2";
 
-            String s = serializeThirdPartyClasspath(projectFilePaths, currentPluginConfig.getThirdPartyClasspath());
-            if (!Strings.isBlank(s)) {
-                mapForSerialization.put(THIRDPARTY_CLASSPATH, s);
-            }
+            projectSettings.checkstyleVersion = currentPluginConfig.getCheckstyleVersion();
+            projectSettings.scanScope = currentPluginConfig.getScanScope().name();
+            projectSettings.suppressErrors = currentPluginConfig.isSuppressErrors();
+            projectSettings.copyLibs = currentPluginConfig.isCopyLibs();
+            projectSettings.scanBeforeCheckin = currentPluginConfig.isScanBeforeCheckin();
 
-            mapForSerialization.put(SCAN_BEFORE_CHECKIN, String.valueOf(currentPluginConfig.isScanBeforeCheckin()));
+            projectSettings.thirdPartyClasspath = new ArrayList<>(currentPluginConfig.getThirdPartyClasspath());
+            projectSettings.activeLocationIds = new ArrayList<>(currentPluginConfig.getActiveLocationIds());
 
-            serializeActiveLocations(mapForSerialization,
-                    new ArrayList<>(currentPluginConfig.getActiveLocationIds()),
-                    currentPluginConfig.getLocations(),
-                    project);
+            projectSettings.locations = currentPluginConfig.getLocations().stream()
+                            .map(location -> new ConfigurationLocation(
+                                    location.getId(),
+                                    location.getType().name(),
+                                    location.getLocation(),
+                                    location.getDescription(),
+                                    location.getNamedScope().map(NamedScope::getScopeId).orElse("")
+                            ))
+                                    .collect(Collectors.toList());
 
-            return new ProjectSettings(mapForSerialization);
+            return projectSettings;
         }
 
         @SuppressWarnings("unused") // for serialisation
         ProjectSettings() {
         }
 
-        ProjectSettings(@NotNull final Map<String, String> serialisedConfiguration) {
-            this.configuration = serialisedConfiguration;
-        }
-
-        private static void serializeActiveLocations(final Map<String, String> storage,
-                                                     @NotNull final List<String> activeLocationIds,
-                                                     @NotNull final SortedSet<ConfigurationLocation> locations,
-                                                     @NotNull final Project project) {
-            for (int i = 0; i < activeLocationIds.size(); i++) {
-                String currentId = activeLocationIds.get(i);
-                Optional<ConfigurationLocation> currentLocation = locations.stream()
-                        .filter(candidate -> candidate.getId().equals(currentId))
-                        .findFirst();
-                if (currentLocation.isPresent()) {
-                    storage.put(ACTIVE_CONFIGS_PREFIX + i, Descriptor.of(currentLocation.get(), project).toString());
-                }
-            }
+        ProjectSettings(@NotNull final Map<String, String> legacySerialisedFormat) {
+            this.configuration = legacySerialisedFormat;
         }
 
         @NotNull
-        public Map<String, String> configuration() {
+        Map<String, String> legacyConfiguration() {
             return Objects.requireNonNullElseGet(configuration, TreeMap::new);
         }
 
-        private static void serializeLocations(@NotNull final Map<String, String> storage,
-                                               @NotNull final List<ConfigurationLocation> configurationLocations,
-                                               @NotNull Project project) {
-            int index = 0;
-            for (final ConfigurationLocation configurationLocation : configurationLocations) {
-                storage.put(LOCATION_PREFIX + index, Descriptor.of(configurationLocation, project).toString());
-                final Map<String, String> properties = configurationLocation.getProperties();
-                if (properties != null) {
-                    for (final Map.Entry<String, String> prop : properties.entrySet()) {
-                        String value = prop.getValue();
-                        if (value == null) {
-                            value = "";
-                        }
-                        storage.put(PROPERTIES_PREFIX + index + "." + prop.getKey(), value);
-                    }
-                }
-
-                ++index;
+        PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder,
+                                            @NotNull final Project project) {
+            if (Objects.equals(serialisationVersion, "2")) {
+                return builder
+                        .withCheckstyleVersion(checkstyleVersion)
+                        .withScanScope(lookupScanScope())
+                        .withSuppressErrors(suppressErrors)
+                        .withCopyLibraries(copyLibs)
+                        .withScanBeforeCheckin(scanBeforeCheckin)
+                        .withThirdPartyClassPath(thirdPartyClasspath)
+                        .withLocations(locations.stream()
+                                .map(location -> deserialiseLocation(project, location))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toCollection(TreeSet::new)))
+                        .withActiveLocationIds(new TreeSet<>(activeLocationIds));
             }
+
+            return new LegacyProjectConfigurationStateDeserialiser(project)
+                    .deserialise(builder, this);
         }
 
-        private static String serializeThirdPartyClasspath(@NotNull final ProjectFilePaths projectFilePaths,
-                                                           @NotNull final List<String> thirdPartyClasspath) {
-            final StringBuilder sb = new StringBuilder();
-            for (final String part : thirdPartyClasspath) {
-                if (sb.length() > 0) {
-                    sb.append(";");
+        @NotNull
+        private ScanScope lookupScanScope() {
+            if (scanScope != null) {
+                try {
+                    return ScanScope.valueOf(scanScope);
+                } catch (IllegalArgumentException e) {
+                    // settings got messed up (manual edit?) - use default
                 }
-                sb.append(projectFilePaths.tokenise(part));
             }
-            return sb.toString();
+            return ScanScope.getDefaultValue();
+        }
+
+        private ConfigurationLocationFactory configurationLocationFactory(@NotNull final Project project) {
+            return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+        }
+
+        @Nullable
+        private org.infernus.idea.checkstyle.model.ConfigurationLocation deserialiseLocation(@NotNull Project project,
+                                                                                             @NotNull ProjectConfigurationState.ConfigurationLocation location) {
+            try {
+                return configurationLocationFactory(project).create(
+                        project,
+                        location.id,
+                        ConfigurationType.parse(location.type),
+                        location.location,
+                        location.description,
+                        NamedScopeHelper.getScopeByIdWithDefaultFallback(project, location.scope));
+            } catch (Exception e) {
+                LOG.error("Failed to deserialise " + location, e);
+                return null;
+            }
+        }
+    }
+
+    static class ConfigurationLocation {
+
+        @Attribute
+        private String id;
+        @Attribute
+        private String type;
+        @Attribute
+        private String scope;
+        @Attribute
+        private String description;
+        @Text
+        private String location;
+
+        @SuppressWarnings("unused") // serialisation
+        public ConfigurationLocation() {
+        }
+
+        public ConfigurationLocation(String id,
+                                     String type,
+                                     String location,
+                                     String description,
+                                     String scope) {
+            this.id = id;
+            this.type = type;
+            this.scope = scope;
+            this.description = description;
+            this.location = location;
+        }
+
+        @Override
+        public String toString() {
+            return "WireConfigurationLocation{" +
+                    "id='" + id + '\'' +
+                    ", type='" + type + '\'' +
+                    ", scope='" + scope + '\'' +
+                    ", description='" + description + '\'' +
+                    ", location='" + location + '\'' +
+                    '}';
         }
     }
 

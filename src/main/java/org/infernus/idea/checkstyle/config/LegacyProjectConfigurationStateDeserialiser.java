@@ -4,7 +4,9 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.VersionListReader;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.OS;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -16,21 +18,22 @@ import java.util.stream.Collectors;
 
 import static org.infernus.idea.checkstyle.config.ProjectConfigurationState.*;
 
-public class V1ProjectConfigurationStateDeserialiser extends ProjectConfigurationStateDeserialiser {
+public class LegacyProjectConfigurationStateDeserialiser {
 
-    private static final Logger LOG = Logger.getInstance(V1ProjectConfigurationStateDeserialiser.class);
+    private static final Logger LOG = Logger.getInstance(LegacyProjectConfigurationStateDeserialiser.class);
 
     private static final String CHECK_TEST_CLASSES = "check-test-classes";
     private static final String CHECK_NONJAVA_FILES = "check-nonjava-files";
 
-    public V1ProjectConfigurationStateDeserialiser(@NotNull final Project project) {
-        super(project);
+    private final Project project;
+
+    public LegacyProjectConfigurationStateDeserialiser(@NotNull final Project project) {
+        this.project = project;
     }
 
-    @Override
     public PluginConfigurationBuilder deserialise(@NotNull final PluginConfigurationBuilder builder,
                                                   @NotNull final ProjectSettings projectSettings) {
-        final Map<String, String> projectConfiguration = projectSettings.configuration();
+        final Map<String, String> projectConfiguration = projectSettings.legacyConfiguration();
         convertSettingsFormat(projectConfiguration);
         final TreeSet<ConfigurationLocation> locations = new TreeSet<>(readConfigurationLocations(projectConfiguration));
         return builder
@@ -209,6 +212,25 @@ public class V1ProjectConfigurationStateDeserialiser extends ProjectConfiguratio
             return Boolean.parseBoolean(value.toString());
         }
         return defaultValue;
+    }
+
+    private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
+        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
+        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
+        if (!configurationLocations.contains(sunChecks)) {
+            configurationLocations.add(sunChecks);
+        }
+        if (!configurationLocations.contains(googleChecks)) {
+            configurationLocations.add(googleChecks);
+        }
+    }
+
+    private ConfigurationLocationFactory configurationLocationFactory() {
+        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+    }
+
+    private Project getProject() {
+        return project;
     }
 
 }

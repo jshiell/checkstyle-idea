@@ -4,7 +4,10 @@ import com.intellij.openapi.components.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.MapAnnotation;
+import com.intellij.util.xmlb.annotations.Tag;
+import com.intellij.util.xmlb.annotations.XCollection;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,15 +71,16 @@ public final class ModuleConfigurationState
     @NotNull
     public ModuleSettings getState() {
         final ModuleSettings settings = new ModuleSettings();
-        settings.setActiveLocationIds(activeLocationIds, module.getProject(), configurationManager().getCurrent());
-        settings.setExcluded(excludedFromScan);
+        settings.useLatestSerialisationFormat();
+        settings.setActiveLocationIds(activeLocationIds);
+        settings.setExcludeFromScan(excludedFromScan);
         return settings;
     }
 
     @Override
     public void loadState(@NotNull final ModuleSettings moduleSettings) {
         this.activeLocationIds = moduleSettings.getActiveLocationIds(module.getProject(), configurationLocations());
-        this.excludedFromScan = moduleSettings.isExcluded();
+        this.excludedFromScan = moduleSettings.isExcludeFromScan();
     }
 
     @Override
@@ -103,6 +107,17 @@ public final class ModuleConfigurationState
         private static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
         private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
 
+        @SuppressWarnings("FieldMayBeFinal")
+        @Attribute
+        private String serialisationVersion;
+
+        @SuppressWarnings("FieldMayBeFinal")
+        @XCollection
+        private List<String> activeLocationsIds;
+        @Tag
+        private boolean excludeFromScan = false;
+
+        // legacy configuration
         @MapAnnotation
         private Map<String, String> configuration = new HashMap<>();
 
@@ -113,14 +128,21 @@ public final class ModuleConfigurationState
             return moduleSettings;
         }
 
-        @NotNull
-        public Map<String, String> configuration() {
-            return Objects.requireNonNullElse(configuration, Collections.emptyMap());
+        public void setActiveLocationIds(@NotNull final SortedSet<String> newActiveLocationIds) {
+            this.activeLocationsIds = new ArrayList<>(newActiveLocationIds);
+        }
+
+        public void setExcludeFromScan(final boolean excludeFromScan) {
+            this.excludeFromScan = excludeFromScan;
         }
 
         @NotNull
         SortedSet<String> getActiveLocationIds(@NotNull final Project project,
                                                @NotNull final List<ConfigurationLocation> locations) {
+            if (Objects.equals(serialisationVersion, "2")) {
+                return new TreeSet<>(Objects.requireNonNullElse(activeLocationsIds, Collections.emptyList()));
+            }
+
             SortedSet<String> activeLocations = new TreeSet<>();
             try {
                 if (configuration.get(ACTIVE_CONFIG) != null) {
@@ -148,32 +170,18 @@ public final class ModuleConfigurationState
                     .collect(Collectors.toCollection(TreeSet::new));
         }
 
-
-        public void setActiveLocationIds(@NotNull final SortedSet<String> activeLocationIds,
-                                         @NotNull final Project project,
-                                         @NotNull final PluginConfiguration pluginConfiguration) {
-            final List<String> listOfLocationsIds = new ArrayList<>(activeLocationIds);
-            for (int i = 0; i < listOfLocationsIds.size(); i++) {
-                String currentId = listOfLocationsIds.get(i);
-                Optional<ConfigurationLocation> currentLocation = pluginConfiguration.getLocationById(currentId);
-                if (currentLocation.isPresent()) {
-                    configuration.put(ACTIVE_CONFIGS_PREFIX + i, Descriptor.of(currentLocation.get(), project).toString());
-                }
+        public boolean isExcludeFromScan() {
+            if (Objects.equals(serialisationVersion, "2")) {
+                return excludeFromScan;
             }
-        }
 
-
-        public void setExcluded(final boolean excluded) {
-            if (excluded) {
-                configuration.put(EXCLUDE_FROM_SCAN, "true");
-            } else {
-                configuration.remove(EXCLUDE_FROM_SCAN);
-            }
-        }
-
-        public boolean isExcluded() {
             return configuration.containsKey(EXCLUDE_FROM_SCAN)
                     && "true".equalsIgnoreCase(configuration.getOrDefault(EXCLUDE_FROM_SCAN, "false"));
+        }
+
+        public void useLatestSerialisationFormat() {
+            serialisationVersion = "2";
+            configuration.clear();
         }
     }
 }
