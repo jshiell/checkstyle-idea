@@ -216,7 +216,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         @Override
         public String toString() {
-            return "WireConfigurationLocation{" +
+            return "ConfigurationLocation{" +
                     "id='" + id + '\'' +
                     ", type='" + type + '\'' +
                     ", scope='" + scope + '\'' +
