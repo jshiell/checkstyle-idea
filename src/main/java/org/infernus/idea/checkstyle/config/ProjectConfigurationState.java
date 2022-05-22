@@ -169,7 +169,11 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         @Nullable
         private org.infernus.idea.checkstyle.model.ConfigurationLocation deserialiseLocation(@NotNull Project project,
-                                                                                             @NotNull ProjectConfigurationState.ConfigurationLocation location) {
+                                                                                             @Nullable ProjectConfigurationState.ConfigurationLocation location) {
+            if (location == null) {
+                return null;
+            }
+
             try {
                 return configurationLocationFactory(project).create(
                         project,
