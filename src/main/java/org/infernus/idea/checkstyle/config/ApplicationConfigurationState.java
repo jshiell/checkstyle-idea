@@ -8,6 +8,7 @@ import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 @State(name = CheckStylePlugin.ID_PLUGIN + "-app", storages = {@Storage("checkstyle-idea.xml")})
@@ -58,10 +59,7 @@ public class ApplicationConfigurationState
 
         @NotNull
         public Map<String, String> configuration() {
-            if (configuration == null) {
-                return new TreeMap<>();
-            }
-            return configuration;
+            return Objects.requireNonNullElseGet(configuration, TreeMap::new);
         }
     }
 }

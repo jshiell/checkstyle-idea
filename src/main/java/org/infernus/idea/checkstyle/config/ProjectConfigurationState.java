@@ -139,12 +139,12 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                         .withSuppressErrors(suppressErrors)
                         .withCopyLibraries(copyLibs)
                         .withScanBeforeCheckin(scanBeforeCheckin)
-                        .withThirdPartyClassPath(thirdPartyClasspath)
-                        .withLocations(locations.stream()
+                        .withThirdPartyClassPath(Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
+                        .withLocations(Objects.requireNonNullElseGet(locations, () -> new ArrayList<ConfigurationLocation>()).stream()
                                 .map(location -> deserialiseLocation(project, location))
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toCollection(TreeSet::new)))
-                        .withActiveLocationIds(new TreeSet<>(activeLocationIds));
+                        .withActiveLocationIds(new TreeSet<>(Objects.requireNonNullElseGet(activeLocationIds, ArrayList::new)));
             }
 
             return new LegacyProjectConfigurationStateDeserialiser(project)

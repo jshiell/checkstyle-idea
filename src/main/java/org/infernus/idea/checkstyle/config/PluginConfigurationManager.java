@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 public class PluginConfigurationManager {
 
@@ -34,7 +35,7 @@ public class PluginConfigurationManager {
 
     public void disableActiveConfiguration() {
         setCurrent(PluginConfigurationBuilder.from(getCurrent())
-                .withActiveLocationIds(null)
+                .withActiveLocationIds(new TreeSet<>())
                 .build(), true);
     }
 

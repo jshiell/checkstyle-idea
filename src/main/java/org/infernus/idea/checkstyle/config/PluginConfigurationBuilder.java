@@ -12,10 +12,7 @@ import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public final class PluginConfigurationBuilder {
     private String checkstyleVersion;
@@ -99,7 +96,7 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
-    public PluginConfigurationBuilder withActiveLocationIds(final SortedSet<String> newActiveLocationIds) {
+    public PluginConfigurationBuilder withActiveLocationIds(@NotNull final SortedSet<String> newActiveLocationIds) {
         this.activeLocationIds = newActiveLocationIds;
         return this;
     }
@@ -119,12 +116,12 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
-    public PluginConfigurationBuilder withLocations(final SortedSet<ConfigurationLocation> newLocations) {
+    public PluginConfigurationBuilder withLocations(@NotNull final SortedSet<ConfigurationLocation> newLocations) {
         this.locations = newLocations;
         return this;
     }
 
-    public PluginConfigurationBuilder withThirdPartyClassPath(final List<String> newThirdPartyClassPath) {
+    public PluginConfigurationBuilder withThirdPartyClassPath(@NotNull final List<String> newThirdPartyClassPath) {
         this.thirdPartyClasspath = newThirdPartyClassPath;
         return this;
     }
@@ -145,9 +142,9 @@ public final class PluginConfigurationBuilder {
                 scanScope,
                 suppressErrors,
                 copyLibraries,
-                locations,
-                thirdPartyClasspath,
-                activeLocationIds,
+                Objects.requireNonNullElseGet(locations, TreeSet::new),
+                Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
+                Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
                 scanBeforeCheckin,
                 lastActivePluginVersion);
     }

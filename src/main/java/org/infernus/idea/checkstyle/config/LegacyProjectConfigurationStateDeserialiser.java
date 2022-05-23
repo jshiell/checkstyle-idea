@@ -63,6 +63,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
         }
     }
 
+    @NotNull
     private SortedSet<String> readActiveLocationIds(@NotNull final Map<String, String> configuration,
                                                     @NotNull final Collection<ConfigurationLocation> locations) {
         Object serializedSingleLocation = configuration.get(ACTIVE_CONFIG);
@@ -95,6 +96,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
         return vlr.getReplacementMap().getOrDefault(result.toString(), result.toString());
     }
 
+    @NotNull
     private List<String> readThirdPartyClassPath(@NotNull final Map<String, String> configuration) {
         final List<String> thirdPartyClasspath = new ArrayList<>();
 
