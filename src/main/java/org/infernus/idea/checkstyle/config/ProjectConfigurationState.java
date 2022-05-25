@@ -108,7 +108,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                             .map(location -> new ConfigurationLocation(
                                     location.getId(),
                                     location.getType().name(),
-                                    location.getLocation(),
+                                    location.getRawLocation(),
                                     location.getDescription(),
                                     location.getNamedScope().map(NamedScope::getScopeId).orElse("")
                             ))
