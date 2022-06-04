@@ -32,12 +32,17 @@ public class ConfigurationLocationSource {
             if (moduleConfiguration.isExcluded()) {
                 return Collections.emptySortedSet();
             }
+
             PluginConfiguration configuration = configurationManager().getCurrent();
-            return moduleConfiguration.getActiveLocationIds().stream()
+            TreeSet<ConfigurationLocation> moduleActiveConfigurations = moduleConfiguration.getActiveLocationIds().stream()
                     .map(id -> configuration.getLocationById(id).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toCollection(TreeSet::new));
+            if (!moduleActiveConfigurations.isEmpty()) {
+                return moduleActiveConfigurations;
+            }
         }
+
         return configurationManager().getCurrent().getActiveLocations();
     }
 
