@@ -1,6 +1,8 @@
 # CheckStyle-IDEA Changelog
 
-* **5.66.1** Fix: Fix NPE in module configuration (#570).
+* **5.67.0** New: Added Checkstyle 10.3.
+* **5.67.0** Fix: Project paths should now remain relative where possible (#569).
+* **5.67.0** Fix: Fix NPE in module configuration (#570).
 * **5.66.0** New: Added Checkstyle 10.2.
 * **5.66.0** Fix: Save all modified files before reloading rules, to ensure we load what people see (#562) - thanks to @ahus1.
 * **5.66.0** Fix: Improved thread safety on `ConfigurationLocation` (#568) - thanks to @ahus1.

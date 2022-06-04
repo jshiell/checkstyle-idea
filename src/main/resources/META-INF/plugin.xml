@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.66.1</version>
+    <version>5.67.0</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,7 +24,9 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.66.1: Fix: Fix NPE in module configuration (#570).</li>
+    <li>5.67.0: New: Added Checkstyle 10.3.</li>
+    <li>5.67.0: Fix: Project paths should now remain relative where possible (#569).</li>
+    <li>5.67.0: Fix: Fix NPE in module configuration (#570).</li>
     <li>5.66.0: New: Added Checkstyle 10.2.</li>
     <li>5.66.0: Fix: Save all modified files before reloading rules, to ensure we load what people see (#562) - thanks to @ahus1.</li>
     <li>5.66.0: Fix: Improved thread safety on `ConfigurationLocation` (#568) - thanks to @ahus1.</li>
