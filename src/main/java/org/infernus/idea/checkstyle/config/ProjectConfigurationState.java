@@ -105,19 +105,21 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             projectSettings.activeLocationIds = new ArrayList<>(currentPluginConfig.getActiveLocationIds());
 
             projectSettings.locations = currentPluginConfig.getLocations().stream()
-                            .map(location -> new ConfigurationLocation(
-                                    location.getId(),
-                                    location.getType().name(),
-                                    location.getRawLocation(),
-                                    location.getDescription(),
-                                    location.getNamedScope().map(NamedScope::getScopeId).orElse("")
-                            ))
-                                    .collect(Collectors.toList());
+                    .map(location -> new ConfigurationLocation(
+                            location.getId(),
+                            location.getType().name(),
+                            location.getRawLocation(),
+                            location.getDescription(),
+                            location.getNamedScope().map(NamedScope::getScopeId).orElse(""),
+                            location.getProperties()
+                    ))
+                    .collect(Collectors.toList());
 
             return projectSettings;
         }
 
-        @SuppressWarnings("unused") // for serialisation
+        @SuppressWarnings("unused")
+            // for serialisation
         ProjectSettings() {
         }
 
@@ -168,20 +170,22 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         @Nullable
-        private org.infernus.idea.checkstyle.model.ConfigurationLocation deserialiseLocation(@NotNull Project project,
-                                                                                             @Nullable ProjectConfigurationState.ConfigurationLocation location) {
+        private org.infernus.idea.checkstyle.model.ConfigurationLocation deserialiseLocation(@NotNull final Project project,
+                                                                                             @Nullable final ProjectConfigurationState.ConfigurationLocation location) {
             if (location == null) {
                 return null;
             }
 
             try {
-                return configurationLocationFactory(project).create(
+                org.infernus.idea.checkstyle.model.ConfigurationLocation configurationLocation = configurationLocationFactory(project).create(
                         project,
                         location.id,
                         ConfigurationType.parse(location.type),
-                        location.location,
+                        Objects.requireNonNullElse(location.location, "").trim(),
                         location.description,
                         NamedScopeHelper.getScopeByIdWithDefaultFallback(project, location.scope));
+                configurationLocation.setProperties(Objects.requireNonNullElse(location.properties, new HashMap<>()));
+                return configurationLocation;
             } catch (Exception e) {
                 LOG.error("Failed to deserialise " + location, e);
                 return null;
@@ -201,32 +205,42 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         private String description;
         @Text
         private String location;
+        @MapAnnotation
+        private Map<String, String> properties;
 
-        @SuppressWarnings("unused") // serialisation
-        public ConfigurationLocation() {
+        @SuppressWarnings("unused")
+            // serialisation
+        ConfigurationLocation() {
         }
 
-        public ConfigurationLocation(String id,
-                                     String type,
-                                     String location,
-                                     String description,
-                                     String scope) {
+        ConfigurationLocation(final String id,
+                              final String type,
+                              final String location,
+                              final String description,
+                              final String scope,
+                              final Map<String, String> properties) {
             this.id = id;
             this.type = type;
             this.scope = scope;
             this.description = description;
             this.location = location;
+            if (properties != null && !properties.isEmpty()) {
+                this.properties = properties;
+            } else {
+                this.properties = null;
+            }
         }
 
         @Override
         public String toString() {
-            return "ConfigurationLocation{" +
-                    "id='" + id + '\'' +
-                    ", type='" + type + '\'' +
-                    ", scope='" + scope + '\'' +
-                    ", description='" + description + '\'' +
-                    ", location='" + location + '\'' +
-                    '}';
+            return "ConfigurationLocation{"
+                    + "id='" + id + '\''
+                    + ", type='" + type + '\''
+                    + ", scope='" + scope + '\''
+                    + ", description='" + description + '\''
+                    + ", location='" + location + '\''
+                    + ", properties='" + properties + '\''
+                    + '}';
         }
     }
 
