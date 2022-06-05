@@ -72,7 +72,7 @@ public final class ModuleConfigurationState
     public ModuleSettings getState() {
         final ModuleSettings settings = new ModuleSettings();
         settings.useLatestSerialisationFormat();
-        settings.setActiveLocationIds(activeLocationIds);
+        settings.setActiveLocationIds(Objects.requireNonNullElse(activeLocationIds, new TreeSet<>()));
         settings.setExcludeFromScan(excludedFromScan);
         return settings;
     }

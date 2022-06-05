@@ -1,5 +1,7 @@
+
 # CheckStyle-IDEA Changelog
 
+* **5.67.1** Fix: Improve serialisation from legacy formats (#574).
 * **5.67.0** New: Added Checkstyle 10.3.
 * **5.67.0** Fix: Project paths should now remain relative where possible (#569).
 * **5.67.0** Fix: Fix NPE in module configuration (#570).
