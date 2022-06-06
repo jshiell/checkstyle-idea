@@ -43,7 +43,7 @@ public final class ModuleConfigurationState
 
     @NotNull
     public SortedSet<String> getActiveLocationIds() {
-        return activeLocationIds;
+        return Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new);
     }
 
 
@@ -72,7 +72,7 @@ public final class ModuleConfigurationState
     public ModuleSettings getState() {
         final ModuleSettings settings = new ModuleSettings();
         settings.useLatestSerialisationFormat();
-        settings.setActiveLocationIds(Objects.requireNonNullElse(activeLocationIds, new TreeSet<>()));
+        settings.setActiveLocationIds(Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new));
         settings.setExcludeFromScan(excludedFromScan);
         return settings;
     }

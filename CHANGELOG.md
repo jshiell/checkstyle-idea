@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.67.2** Fix: NPE in active modules configurations (#576).
 * **5.67.1** Fix: Improve serialisation from legacy formats (#574).
 * **5.67.1** Fix: Fix serialisation of property values (#573).
 * **5.67.0** New: Added Checkstyle 10.3.
