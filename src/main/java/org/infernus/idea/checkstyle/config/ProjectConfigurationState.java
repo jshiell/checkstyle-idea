@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.xmlb.annotations.*;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNullElseGet;
 import static org.infernus.idea.checkstyle.config.PluginConfigurationBuilder.defaultConfiguration;
 
 @State(name = CheckStylePlugin.ID_PLUGIN, storages = {@Storage("checkstyle-idea.xml")})
@@ -129,7 +131,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         @NotNull
         Map<String, String> legacyConfiguration() {
-            return Objects.requireNonNullElseGet(configuration, TreeMap::new);
+            return requireNonNullElseGet(configuration, TreeMap::new);
         }
 
         PluginConfigurationBuilder populate(@NotNull final PluginConfigurationBuilder builder,
@@ -141,16 +143,27 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                         .withSuppressErrors(suppressErrors)
                         .withCopyLibraries(copyLibs)
                         .withScanBeforeCheckin(scanBeforeCheckin)
-                        .withThirdPartyClassPath(Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
-                        .withLocations(Objects.requireNonNullElseGet(locations, () -> new ArrayList<ConfigurationLocation>()).stream()
-                                .map(location -> deserialiseLocation(project, location))
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toCollection(TreeSet::new)))
-                        .withActiveLocationIds(new TreeSet<>(Objects.requireNonNullElseGet(activeLocationIds, ArrayList::new)));
+                        .withThirdPartyClassPath(requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
+                        .withLocations(deserialiseLocations(project))
+                        .withActiveLocationIds(new TreeSet<>(requireNonNullElseGet(activeLocationIds, ArrayList::new)));
             }
 
             return new LegacyProjectConfigurationStateDeserialiser(project)
                     .deserialise(builder, this);
+        }
+
+        @NotNull
+        private TreeSet<org.infernus.idea.checkstyle.model.ConfigurationLocation> deserialiseLocations(@NotNull final Project project) {
+            TreeSet<org.infernus.idea.checkstyle.model.ConfigurationLocation> configurationLocations = requireNonNullElseGet(this.locations, () -> new ArrayList<ConfigurationLocation>()).stream()
+                    .map(location -> deserialiseLocation(project, location))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(TreeSet::new));
+            List.of(BundledConfig.values()).forEach(bundleConfig -> {
+                if (configurationLocations.stream().noneMatch(bundleConfig::matches)) {
+                    configurationLocations.add(configurationLocationFactory(project).create(bundleConfig, project));
+                }
+            });
+            return configurationLocations;
         }
 
         @NotNull

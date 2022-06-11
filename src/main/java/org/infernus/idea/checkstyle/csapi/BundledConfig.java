@@ -1,6 +1,10 @@
 package org.infernus.idea.checkstyle.csapi;
 
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 
 /**
@@ -43,6 +47,12 @@ public enum BundledConfig {
     @NotNull
     public String getPath() {
         return path;
+    }
+
+    public boolean matches(@NotNull final ConfigurationLocation configurationLocation) {
+        return configurationLocation.getType() == ConfigurationType.BUNDLED
+                && Objects.equals(configurationLocation.getLocation(), location)
+                && Objects.equals(configurationLocation.getDescription(), description);
     }
 
 

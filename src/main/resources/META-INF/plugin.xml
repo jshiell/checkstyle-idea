@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.67.2</version>
+    <version>5.67.3</version>
     <idea-version since-build="211.7628.21"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.67.3: Fix: Bundled configurations are restored if absent.</li>
     <li>5.67.2: Fix: NPE in active modules configurations (#576).</li>
     <li>5.67.1: Fix: Improve serialisation from legacy formats (#574).</li>
     <li>5.67.1: Fix: Fix serialisation of property values (#573).</li>
