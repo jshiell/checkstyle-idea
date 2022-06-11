@@ -67,7 +67,7 @@ public class ConfigurationLocationFactory {
                 break;
 
             case BUNDLED:
-                configurationLocation = new BundledConfigurationLocation(id, BundledConfig.fromDescription(description), project);
+                configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description), project);
                 break;
 
             case LEGACY_CLASSPATH:
@@ -95,7 +95,7 @@ public class ConfigurationLocationFactory {
 
     public @NotNull BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
                                                         @NotNull final Project project) {
-        return new BundledConfigurationLocation(UUID.randomUUID().toString(), bundledConfig, project);
+        return new BundledConfigurationLocation(bundledConfig, project);
     }
 
 }

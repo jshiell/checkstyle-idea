@@ -15,10 +15,9 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     @NotNull
     private final BundledConfig bundledConfig;
 
-    BundledConfigurationLocation(@NotNull final String id,
-                                 @NotNull final BundledConfig bundledConfig,
+    BundledConfigurationLocation(@NotNull final BundledConfig bundledConfig,
                                  @NotNull final Project project) {
-        super(id, ConfigurationType.BUNDLED, project);
+        super(bundledConfig.getId(), ConfigurationType.BUNDLED, project);
         super.setLocation(bundledConfig.getLocation());
         super.setDescription(bundledConfig.getDescription());
 
@@ -62,6 +61,6 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     @Override
     @NotNull
     public BundledConfigurationLocation clone() {
-        return new BundledConfigurationLocation(getId(), bundledConfig, getProject());
+        return new BundledConfigurationLocation(bundledConfig, getProject());
     }
 }

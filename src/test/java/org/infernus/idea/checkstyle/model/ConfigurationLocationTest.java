@@ -248,21 +248,21 @@ public class ConfigurationLocationTest {
         rfcl1.setDescription("descA");
         rfcl1.setLocation("locA");
         list.add(rfcl1);
-        list.add(new BundledConfigurationLocation("id3", BundledConfig.SUN_CHECKS, project));
+        list.add(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project));
         RelativeFileConfigurationLocation rfcl2 = new RelativeFileConfigurationLocation(project, "id4");
         rfcl2.setDescription("descC");
         rfcl2.setLocation("locC");
         list.add(rfcl2);
-        list.add(new BundledConfigurationLocation("id5", BundledConfig.GOOGLE_CHECKS, project));
+        list.add(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project));
 
         Collections.sort(list);
 
         assertEquals(BundledConfigurationLocation.class, list.get(0).getClass());
         assertTrue(list.get(0).getDescription().contains("Sun Checks"));
-        assertTrue(list.contains(new BundledConfigurationLocation("id6", BundledConfig.SUN_CHECKS, project)));
+        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.SUN_CHECKS, project)));
         assertEquals(BundledConfigurationLocation.class, list.get(1).getClass());
         assertTrue(list.get(1).getDescription().contains("Google Checks"));
-        assertTrue(list.contains(new BundledConfigurationLocation("id7", BundledConfig.GOOGLE_CHECKS, project)));
+        assertTrue(list.contains(new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project)));
         assertEquals(RelativeFileConfigurationLocation.class, list.get(2).getClass());
         assertEquals("descA", list.get(2).getDescription());
         assertEquals(FileConfigurationLocation.class, list.get(3).getClass());

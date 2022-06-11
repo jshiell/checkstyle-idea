@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.67.3** Fix: Bundled configurations now have constant IDs when recreated or ported from earlier versions (#569).
 * **5.67.3** Fix: Bundled configurations are restored if absent.
 * **5.67.2** Fix: NPE in active modules configurations (#576).
 * **5.67.1** Fix: Improve serialisation from legacy formats (#574).

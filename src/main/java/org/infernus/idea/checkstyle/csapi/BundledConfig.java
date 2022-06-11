@@ -13,11 +13,13 @@ import java.util.Objects;
 public enum BundledConfig {
 
     /** the Sun checks */
-    SUN_CHECKS("(bundled)", "Sun Checks", "/sun_checks.xml"),
+    SUN_CHECKS("bundled-sun-checks", "(bundled)", "Sun Checks", "/sun_checks.xml"),
 
     /** the Google checks */
-    GOOGLE_CHECKS("(bundled)", "Google Checks", "/google_checks.xml");
+    GOOGLE_CHECKS("bundled-google-checks", "(bundled)", "Google Checks", "/google_checks.xml");
 
+
+    private final String id;
 
     private final String location;
 
@@ -26,13 +28,19 @@ public enum BundledConfig {
     private final String path;
 
 
-    BundledConfig(@NotNull final String location, @NotNull final String description,
+    BundledConfig(@NotNull final String id,
+                  @NotNull final String location,
+                  @NotNull final String description,
                   @NotNull final String path) {
+        this.id = id;
         this.location = location;
         this.description = description;
         this.path = path;
     }
 
+    public String getId() {
+        return id;
+    }
 
     @NotNull
     public String getLocation() {
