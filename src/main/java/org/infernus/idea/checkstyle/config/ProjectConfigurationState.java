@@ -4,6 +4,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.diagnostic.ControlFlowException;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
@@ -200,6 +201,9 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                 configurationLocation.setProperties(Objects.requireNonNullElse(location.properties, new HashMap<>()));
                 return configurationLocation;
             } catch (Exception e) {
+                if (e instanceof ControlFlowException) {
+                    throw e;
+                }
                 LOG.error("Failed to deserialise " + location, e);
                 return null;
             }
