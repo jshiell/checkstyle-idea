@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.68.0** New: Added Checkstyle 10.3.1. 
 * **5.68.0** Fix: User info requiring escaping in rules file URIs is now handled correctly (#535) - thanks to @austek. 
 * **5.67.4** Fix: Process exceptions from IDEA are now correctly rethrown during config deserialisation (#578).
 * **5.67.3** Fix: Bundled configurations now have constant IDs when recreated or ported from earlier versions (#569).
