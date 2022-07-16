@@ -16,7 +16,7 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.67.4'
+version = '5.68.0'
 
 intellij {
     version = 'IC-2021.1.3'

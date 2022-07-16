@@ -208,6 +208,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Barnesly (@andrewflbarnes)
 * Jan Köper (@JanK411)
 * Jeremy Ziegler (@Uschi003)
+* Ali Ustek (@austek)
 
 And also thanks are due to the authors and contributors of:
 
