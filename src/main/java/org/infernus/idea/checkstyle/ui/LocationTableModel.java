@@ -5,6 +5,8 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -179,7 +181,16 @@ public class LocationTableModel extends AbstractTableModel {
                 return locations.get(rowIndex).getDescription();
 
             case COLUMN_FILE:
-                return locations.get(rowIndex).getLocation();
+	            String locationFile = locations.get(rowIndex).getLocation();
+	            try {
+		            String userInfo = new URL(locationFile).getUserInfo();
+		            return locationFile.replace(
+							userInfo,
+				            userInfo.replaceAll("(.*):(.*)", "$1:*****")
+		            );
+	            } catch (MalformedURLException e) {
+		            return locationFile;
+	            }
 
             case COLUMN_SCOPE:
                 return locations.get(rowIndex).getNamedScope()
