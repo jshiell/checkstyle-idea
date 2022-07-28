@@ -184,10 +184,13 @@ public class LocationTableModel extends AbstractTableModel {
 	            String locationFile = locations.get(rowIndex).getLocation();
 	            try {
 		            String userInfo = new URL(locationFile).getUserInfo();
-		            return locationFile.replace(
-							userInfo,
-				            userInfo.replaceAll("(.*):(.*)", "$1:*****")
-		            );
+                    if (userInfo != null) {
+                        return locationFile.replace(
+                                userInfo,
+                                userInfo.replaceAll("(.*):(.*)", "$1:*****")
+                        );
+                    }
+                    return locationFile;
 	            } catch (MalformedURLException e) {
 		            return locationFile;
 	            }
