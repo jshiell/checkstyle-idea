@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 
@@ -50,7 +51,7 @@ public class ConfigurationLocationTest {
 
     @Test
     public void whenReadPropertiesAreExtracted() throws IOException {
-        underTest.resolve(getClass().getClassLoader());
+        underTest.resolve(getClass().getClassLoader()).close();
 
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", ""));
@@ -59,10 +60,10 @@ public class ConfigurationLocationTest {
 
     @Test
     public void propertiesAreRereadWhenTheLocationIsChanged() throws IOException {
-        underTest.resolve(getClass().getClassLoader());
+        underTest.resolve(getClass().getClassLoader()).close();
 
         underTest.setLocation(TEST_FILE_2);
-        underTest.resolve(getClass().getClassLoader());
+        underTest.resolve(getClass().getClassLoader()).close();
 
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", ""));
@@ -72,12 +73,12 @@ public class ConfigurationLocationTest {
 
     @Test
     public void propertyValuesAreRetainedWhenThePropertiesAreReread() throws IOException {
-        underTest.resolve(getClass().getClassLoader());
+        underTest.resolve(getClass().getClassLoader()).close();
 
         updatePropertyOn(underTest, "property-two", "aValue");
 
         underTest.setLocation(TEST_FILE_2);
-        underTest.resolve(getClass().getClassLoader());
+        underTest.resolve(getClass().getClassLoader()).close();
 
         assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
     }
@@ -126,7 +127,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void aLocationIsChangedIfThePropertiesHaveChanged() throws IOException {
+    public void aLocationIsChangedIfThePropertiesHaveChanged() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         final TestConfigurationLocation location2 = new TestConfigurationLocation(TEST_FILE);
 
@@ -136,7 +137,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void aLocationsPropertiesAreIgnoredIfInTheDefaultProjectAndItCannotBeResolvedInTheDefaultProject() throws IOException {
+    public void aLocationsPropertiesAreIgnoredIfInTheDefaultProjectAndItCannotBeResolvedInTheDefaultProject() {
         final DefaultProjectTestConfigurationLocation location1 = new DefaultProjectTestConfigurationLocation();
         final DefaultProjectTestConfigurationLocation location2 = new DefaultProjectTestConfigurationLocation();
 
@@ -154,7 +155,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void equalsIgnoresProperties() throws IOException {
+    public void equalsIgnoresProperties() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         updatePropertyOn(location1, "property-one", "aValue");
 
@@ -165,7 +166,7 @@ public class ConfigurationLocationTest {
     }
 
     @Test
-    public void hashCodeIgnoresProperties() throws IOException {
+    public void hashCodeIgnoresProperties() {
         final TestConfigurationLocation location1 = new TestConfigurationLocation(TEST_FILE);
         updatePropertyOn(location1, "property-one", "aValue");
 
@@ -182,14 +183,14 @@ public class ConfigurationLocationTest {
 
     private void updatePropertyOn(final ConfigurationLocation configurationLocation,
                                   final String propertyKey,
-                                  final String propertyValue) throws IOException {
+                                  final String propertyValue) {
         final Map<String, String> properties = new HashMap<>(underTest.getProperties());
         properties.put(propertyKey, propertyValue);
         configurationLocation.setProperties(properties);
     }
 
     private static class DefaultProjectTestConfigurationLocation extends ConfigurationLocation {
-        public DefaultProjectTestConfigurationLocation() {
+        DefaultProjectTestConfigurationLocation() {
             super("anId", ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             when(getProject().isDefault()).thenReturn(true);
@@ -202,7 +203,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) {
+        protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) {
             throw new RuntimeException("Can't be called in default project");
         }
 
@@ -214,7 +215,7 @@ public class ConfigurationLocationTest {
 
     private static class TestConfigurationLocation extends ConfigurationLocation {
 
-        public TestConfigurationLocation(final String content) {
+        TestConfigurationLocation(final String content) {
             super("anId", ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
 
             setLocation(content);
@@ -223,7 +224,7 @@ public class ConfigurationLocationTest {
 
         @NotNull
         @Override
-        protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) {
+        protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) {
             return new ByteArrayInputStream(getLocation().getBytes());
         }
 

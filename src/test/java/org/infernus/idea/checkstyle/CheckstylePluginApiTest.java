@@ -13,9 +13,10 @@ import org.mockito.ArgumentCaptor;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.csapi.BundledConfig.GOOGLE_CHECKS;
-import static org.junit.Assert.assertThat;
+
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;

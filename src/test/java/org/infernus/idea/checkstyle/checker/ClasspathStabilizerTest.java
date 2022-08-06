@@ -7,19 +7,20 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.intellij.openapi.project.Project;
 import org.hamcrest.core.IsEqual;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertArrayEquals;
 
 
 /**
@@ -77,7 +78,7 @@ public class ClasspathStabilizerTest {
                 new File(targetFolder.getRoot(), ClasspathStabilizer.HASHFOLDER
                         + "/3i42h3s6nnfq2msvx7xzkyayscx5qbyj/" + TempDirProvider.README_FILE).toURI().toURL()
         };
-        Assert.assertThat(expected, IsEqual.equalTo(result));
+        assertThat(expected, IsEqual.equalTo(result));
     }
 
 
@@ -91,11 +92,11 @@ public class ClasspathStabilizerTest {
 
         URL[] result = underTest.stabilize(inputClasspath);
         final URL[] expected = new URL[]{new File(targetFolder.getRoot(), "lib1.jar").toURI().toURL()};
-        Assert.assertTrue(Arrays.equals(expected, result));
+        assertArrayEquals(expected, result);
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(2));
 
         result = underTest.stabilize(inputClasspath);
-        Assert.assertTrue(Arrays.equals(expected, result));
+        assertArrayEquals(expected, result);
     }
 }
