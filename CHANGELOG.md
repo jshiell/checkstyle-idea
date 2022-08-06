@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.70.0** New: Added Checkstyle 10.3.2.
 * **5.69.1** Fix: handle URIs without userinfo (#583, #581).
 * **5.69.0** New: Ensure passwords are hidden when display URIs (#581) - thanks to @austek.
 * **5.68.0** New: Added Checkstyle 10.3.1. 
