@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A child-first URL class loader, taken from <a href="https://stackoverflow.com/a/6424879">...</a>
@@ -113,4 +110,8 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return "ChildFirstURLClassLoader: URLs " + Arrays.toString(getURLs()) + "; Parent " + getParent();
+    }
 }

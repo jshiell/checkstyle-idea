@@ -49,6 +49,13 @@ public class CheckstyleClassLoaderContainer {
     private static final Pattern CLASSES_URL_2017_1_EARLIER = Pattern.compile(
             "^(.*?)[/\\\\]classes(?:[/\\\\]main)?[/\\\\]?$");
 
+    /**
+     * Or if we're building in IDEA with Gradle, it'll be something like:
+     * /Users/foo/Projects/checkstyle-idea/build/classes/java/main/
+     */
+    private static final Pattern CLASSES_URL_GRADLE = Pattern.compile(
+            "^(.*?)[/\\\\]classes[/\\\\]java[/\\\\]main[/\\\\]?$");
+
     private final ClassLoader classLoader;
 
     private final Project project;
@@ -88,27 +95,13 @@ public class CheckstyleClassLoaderContainer {
     @NotNull
     private ClassLoader buildClassLoader(@NotNull final String classPathFromProps,
                                          @NotNull final List<URL> thirdPartyClasspath) {
-        final String basePath = getBasePath();
-        final File classesDir4UnitTesting = new File(basePath, "classes/java/csaccess");
-        final boolean unitTesting = classesDir4UnitTesting.exists();
+        final String basePluginPath = getBasePluginPath();
 
-        List<URL> urls = new ArrayList<>();
-        try {
-            if (unitTesting) {
-                urls.add(classesDir4UnitTesting.toURI().toURL());
-            } else {
-                urls.add(new File(basePath, "checkstyle/classes").toURI().toURL());
-            }
-            for (String jar : classPathFromProps.trim().split("\\s*;\\s*")) {
-                if (unitTesting) {
-                    String testJarLocation = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
-                    urls.add(new File(basePath, testJarLocation).toURI().toURL());
-                } else {
-                    urls.add(new File(basePath, jar).toURI().toURL());
-                }
-            }
-        } catch (MalformedURLException e) {
-            throw new CheckStylePluginException("internal error", e);
+        List<URL> urls;
+        if (basePluginPath != null) {
+            urls = baseClasspathUrlsForPackagedPlugin(classPathFromProps, basePluginPath);
+        } else {
+            urls = baseClasspathUrlsForIDEAUnitTests(classPathFromProps);
         }
 
         urls.addAll(thirdPartyClasspath);
@@ -120,7 +113,68 @@ public class CheckstyleClassLoaderContainer {
             Notifications.showWarning(project, message("plugin.debugging"));
             return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
         }
+
         return newClassLoader;
+    }
+
+    private static List<URL> baseClasspathUrlsForPackagedPlugin(@NotNull final String classPathFromProps,
+                                                                @NotNull final String basePath) {
+        try {
+            final List<URL> urls = new ArrayList<>();
+
+            urls.add(new File(basePath, "checkstyle/classes").toURI().toURL());
+            for (String jar : splitClassPathFromProperties(classPathFromProps)) {
+                File jarLocation = new File(basePath, jar);
+                if (!jarLocation.exists()) {
+                    throw new CheckStylePluginException("Cannot find packaged artefact: " + jarLocation.getAbsolutePath());
+                }
+                urls.add(jarLocation.toURI().toURL());
+            }
+
+            return urls;
+
+        } catch (MalformedURLException e) {
+            throw new CheckStylePluginException("Failed to parse classpath URL", e);
+        }
+    }
+
+    private List<URL> baseClasspathUrlsForIDEAUnitTests(@NotNull final String classPathFromProps) {
+        try {
+            final List<URL> urls = new ArrayList<>();
+            final String buildPath = guessBuildPathFromClasspath();
+            URL unitTestingClassPath = null;
+            if (buildPath != null) {
+                final File classesDir4UnitTesting = new File(buildPath, "classes/java/csaccess");
+                if (classesDir4UnitTesting.exists()) {
+                    unitTestingClassPath = classesDir4UnitTesting.toURI().toURL();
+                }
+            }
+
+            if (unitTestingClassPath == null) {
+                throw new CheckStylePluginException("Could not determine plugin directory or build directory");
+            }
+
+            urls.add(unitTestingClassPath);
+
+            for (String jar : splitClassPathFromProperties(classPathFromProps)) {
+                String testJarLocation = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
+                File jarLocation = new File(buildPath, testJarLocation);
+                if (!jarLocation.exists()) {
+                    throw new CheckStylePluginException("Cannot find collected artefact: " + jarLocation.getAbsolutePath());
+                }
+                urls.add(jarLocation.toURI().toURL());
+            }
+
+            return urls;
+
+        } catch (MalformedURLException e) {
+            throw new CheckStylePluginException("Failed to parse classpath URL", e);
+        }
+    }
+
+    @NotNull
+    private static String[] splitClassPathFromProperties(@NotNull final String classPathFromProps) {
+        return classPathFromProps.trim().split("\\s*;\\s*");
     }
 
     private boolean weAreDebuggingADifferentVersionOfIdea(final ClassLoader classLoaderToTest) {
@@ -152,38 +206,33 @@ public class CheckstyleClassLoaderContainer {
 
     /**
      * Determine the base path of the plugin. When running in IntelliJ, this is something like
-     * {@code C:/Users/jdoe/.IdeaIC2016.3/config/plugins/CheckStyle-IDEA} (on Windows). When running in a unit test,
-     * it is this project's build directory, for example {@code D:/Documents/Projects/checkstyle-idea/build} (again
-     * on Windows).
+     * {@code C:/Users/jdoe/.IdeaIC2016.3/config/plugins/CheckStyle-IDEA} (on Windows); when running in Gradle,
+     * it's probably the sandbox directory.
      *
      * @return the base path, as absolute path
      */
-    @NotNull
-    private String getBasePath() {
+    @Nullable
+    private String getBasePluginPath() {
         String result = getPluginPath();
 
         if (result == null) {
             result = getPreinstalledPluginPath();
         }
 
-        if (result == null) {
-            result = guessPluginPathFromClasspath();
-        }
-
-        if (result == null) {
-            throw new CheckStylePluginException("Could not determine plugin directory");
-        }
         return result;
     }
 
     @Nullable
-    private String guessPluginPathFromClasspath() {
+    private String guessBuildPathFromClasspath() {
         final List<URL> urls = getUrls(getClass().getClassLoader());
         String result = guessFromClassPath(urls, CLASSES_URL_2017_2_LATER);
         if (result != null) {
             result += "/build";
         } else {
             result = guessFromClassPath(urls, CLASSES_URL_2017_1_EARLIER);
+        }
+        if (result == null) {
+            result = guessFromClassPath(urls, CLASSES_URL_GRADLE);
         }
         if (result != null) {
             result = urlDecode(result);
@@ -218,10 +267,10 @@ public class CheckstyleClassLoaderContainer {
     }
 
     @Nullable
-    private String guessFromClassPath(@NotNull final List<URL> pUrls, @NotNull final Pattern pPattern) {
+    private String guessFromClassPath(@NotNull final List<URL> urls, @NotNull final Pattern pattern) {
         String result = null;
-        for (final URL url : pUrls) {
-            Matcher matcher = pPattern.matcher(url.getPath());
+        for (final URL url : urls) {
+            Matcher matcher = pattern.matcher(url.getPath());
             if (matcher.find()) {
                 result = matcher.group(1);
                 break;
