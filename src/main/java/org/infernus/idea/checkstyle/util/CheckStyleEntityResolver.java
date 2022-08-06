@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -196,10 +197,10 @@ public class CheckStyleEntityResolver implements EntityResolver {
 
             DTDKey dtdKey = (DTDKey) o;
 
-            if (publicId != null ? !publicId.equals(dtdKey.publicId) : dtdKey.publicId != null) {
+            if (!Objects.equals(publicId, dtdKey.publicId)) {
                 return false;
             }
-            return systemId != null ? systemId.equals(dtdKey.systemId) : dtdKey.systemId == null;
+            return Objects.equals(systemId, dtdKey.systemId);
         }
 
         @Override

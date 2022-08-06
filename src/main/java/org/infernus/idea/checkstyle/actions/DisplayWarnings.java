@@ -4,6 +4,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.*;
 
@@ -13,21 +16,18 @@ import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.*;
 public class DisplayWarnings extends DumbAwareToggleAction {
 
     @Override
-    public boolean isSelected(final AnActionEvent event) {
+    public boolean isSelected(final @NotNull AnActionEvent event) {
         final Project project = getEventProject(event);
         if (project == null) {
             return false;
         }
 
         Boolean displayingWarnings = getFromToolWindowPanel(toolWindow(project), CheckStyleToolWindowPanel::isDisplayingWarnings);
-        if (displayingWarnings != null) {
-            return displayingWarnings;
-        }
-        return false;
+        return Objects.requireNonNullElse(displayingWarnings, false);
     }
 
     @Override
-    public void setSelected(final AnActionEvent event, final boolean selected) {
+    public void setSelected(final @NotNull AnActionEvent event, final boolean selected) {
         final Project project = getEventProject(event);
         if (project == null) {
             return;

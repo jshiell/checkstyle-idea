@@ -151,7 +151,7 @@ public class ConfigurationLocationTest {
         final ConfigurationLocation location = new TestConfigurationLocation("aLocation");
 
         assertThat(Descriptor.of(location, location.getProject()).toString(), is(equalTo(format("%s:%s:%s;%s",
-                location.getType(), location.getLocation(), location.getDescription(), location.getNamedScope().get().getScopeId()))));
+                location.getType(), location.getLocation(), location.getDescription(), location.getNamedScope().orElseThrow().getScopeId()))));
     }
 
     @Test

@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
@@ -43,7 +44,7 @@ public class OpCreateCheckerTest {
         configurationsMock = mock(TabWidthAndBaseDirProvider.class);
         when(configurationsMock.tabWidth()).thenReturn(2);
         when(configurationsMock.baseDir())
-                .thenReturn(Optional.of(new File(OpCreateCheckerTest.class.getResource(CONFIG_FILE).toURI()).getParent()));
+                .thenReturn(Optional.of(new File(Objects.requireNonNull(OpCreateCheckerTest.class.getResource(CONFIG_FILE)).toURI()).getParent()));
 
         checkstyleProjectServiceMock = mock(CheckstyleProjectService.class);
         when(checkstyleProjectServiceMock.getCheckstyleInstance()).thenReturn(mock(CheckstyleActions.class));
@@ -62,7 +63,7 @@ public class OpCreateCheckerTest {
 
 
     @Test(expected = CheckStylePluginException.class)
-    public void testCreateChecker_noConfigLoc() {
+    public void testCreateCheckerWithNoConfigLoc() {
 
         //noinspection ConstantConditions
         new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, null, emptyMap(),
@@ -72,12 +73,11 @@ public class OpCreateCheckerTest {
 
 
     @Test
-    public void testCreateChecker_noModule() throws IOException, URISyntaxException {
+    public void testCreateCheckerWithNoModule() throws IOException, URISyntaxException {
 
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
                 FileUtil.readFile("cmd/" + CONFIG_FILE), TestHelper.mockProject());
 
-        //noinspection ConstantConditions
         CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(null, configLoc,
                 emptyMap(), configurationsMock, getClass().getClassLoader());
         assertNotNull(checker);

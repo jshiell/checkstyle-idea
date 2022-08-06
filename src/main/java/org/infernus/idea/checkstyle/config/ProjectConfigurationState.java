@@ -69,7 +69,6 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
     static class ProjectSettings {
 
-        @SuppressWarnings("FieldMayBeFinal")
         @Attribute
         private String serialisationVersion;
 

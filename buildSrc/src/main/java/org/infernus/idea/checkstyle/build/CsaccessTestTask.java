@@ -82,42 +82,38 @@ public class CsaccessTestTask
      */
     @Override
     public FileCollection getClasspath() {
-
         final FileCollection originalClasspath = super.getClasspath();
-        FileCollection effectiveClasspath = null;
 
-        if (originalClasspath != null) {
-            final Project project = getProject();
-            final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
-            final SourceSetContainer sourceSets = jpc.getSourceSets();
-            final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
-            final SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
-            final SourceSet csaccessTestSrcSet = sourceSets.getByName(CustomSourceSetCreator
-                    .CSACCESSTEST_SOURCESET_NAME);
+        final Project project = getProject();
+        final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
+        final SourceSetContainer sourceSets = jpc.getSourceSets();
+        final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+        final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
+        final SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
+        final SourceSet csaccessTestSrcSet = sourceSets.getByName(CustomSourceSetCreator
+                .CSACCESSTEST_SOURCESET_NAME);
 
-            final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, csVersion);
-            final ConfigurationContainer configurations = project.getConfigurations();
-            final Set<File> csJars = configurations.detachedConfiguration(csDep).getFiles();
+        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, csVersion);
+        final ConfigurationContainer configurations = project.getConfigurations();
+        final Set<File> csJars = configurations.detachedConfiguration(csDep).getFiles();
 
-            effectiveClasspath = project.files(
-                    csaccessTestSrcSet.getOutput().getResourcesDir(),
-                    csaccessSourceSet.getOutput().getResourcesDir(),
-                    mainSourceSet.getOutput().getResourcesDir())
-                .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
-                .plus(csaccessSourceSet.getOutput().getClassesDirs())
-                .plus(mainSourceSet.getOutput().getClassesDirs())
-                .plus(project.files(csJars))
-                .plus(originalClasspath)
-                .minus(testSourceSet.getOutput().getClassesDirs())
-                .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
+        FileCollection effectiveClasspath = project.files(
+                csaccessTestSrcSet.getOutput().getResourcesDir(),
+                csaccessSourceSet.getOutput().getResourcesDir(),
+                mainSourceSet.getOutput().getResourcesDir())
+            .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
+            .plus(csaccessSourceSet.getOutput().getClassesDirs())
+            .plus(mainSourceSet.getOutput().getClassesDirs())
+            .plus(project.files(csJars))
+            .plus(originalClasspath)
+            .minus(testSourceSet.getOutput().getClassesDirs())
+            .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
 
-            if (getLogger().isDebugEnabled()) {
-                getLogger().debug("--------------------------------------------------------------------------");
-                getLogger().debug("Effective classpath of " + getName() + ":");
-                for (File f : effectiveClasspath) {
-                    getLogger().debug("\t- " + f.getAbsolutePath());
-                }
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("--------------------------------------------------------------------------");
+            getLogger().debug("Effective classpath of " + getName() + ":");
+            for (File f : effectiveClasspath) {
+                getLogger().debug("\t- " + f.getAbsolutePath());
             }
         }
         return effectiveClasspath;

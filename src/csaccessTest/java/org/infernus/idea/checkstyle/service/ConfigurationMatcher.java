@@ -8,6 +8,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 
 import static org.infernus.idea.checkstyle.service.cmd.CheckstyleBridge.messagesFrom;
@@ -29,20 +30,17 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
         return equals(actual, expected);
     }
 
-    private boolean equals(Configuration config1, Configuration config2) {
+    private boolean equals(final Configuration config1, final Configuration config2) {
         if (config1 == config2) {
             return true;
         }
-        if (config1 == null
-                || !Objects.equals(config1.getName(), config2.getName())
-                || config1.getChildren().length != config2.getChildren().length
-                || !Arrays.equals(config1.getAttributeNames(), config2.getAttributeNames())
-                || childrenAreNotEqual(config1, config2)
-                || attributesAreNotEqual(config1, config2)
-                || messagesAreNotEqual(config1, config2)) {
-            return false;
-        }
-        return true;
+        return config1 != null
+                && Objects.equals(config1.getName(), config2.getName())
+                && config1.getChildren().length == config2.getChildren().length
+                && Arrays.equals(config1.getAttributeNames(), config2.getAttributeNames())
+                && !childrenAreNotEqual(config1, config2)
+                && !attributesAreNotEqual(config1, config2)
+                && !messagesAreNotEqual(config1, config2);
     }
 
     private boolean messagesAreNotEqual(final Configuration config1, final Configuration config2) {
@@ -72,7 +70,7 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     @NotNull
     private Configuration[] sortedChildrenOf(final Configuration config1) {
         final Configuration[] sortedConfigChildren = config1.getChildren();
-        Arrays.sort(sortedConfigChildren, (a, b) -> a.getName().compareTo(b.getName()));
+        Arrays.sort(sortedConfigChildren, Comparator.comparing(Configuration::getName));
         return sortedConfigChildren;
     }
 
@@ -117,10 +115,6 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     }
 
     private String indent(final int level) {
-        final StringBuilder out = new StringBuilder();
-        for (int i = 0; i < level * INDENT_SIZE; ++i) {
-            out.append(" ");
-        }
-        return out.toString();
+        return " ".repeat(Math.max(0, level * INDENT_SIZE));
     }
 }

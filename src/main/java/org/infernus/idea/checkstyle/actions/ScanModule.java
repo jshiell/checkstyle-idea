@@ -12,6 +12,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.model.ScanScope;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class ScanModule extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanModule.class);
 
     @Override
-    public final void actionPerformed(final AnActionEvent event) {
+    public final void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
                 final ToolWindow toolWindow = toolWindow(project);
@@ -75,7 +76,7 @@ public class ScanModule extends BaseAction {
     }
 
     @Override
-    public final void update(final AnActionEvent event) {
+    public final void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
         try {

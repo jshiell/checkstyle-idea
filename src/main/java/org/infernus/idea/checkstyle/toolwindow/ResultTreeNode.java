@@ -20,12 +20,11 @@ public class ResultTreeNode {
     private Problem problem;
     private Icon icon;
     private String text;
-    private String tooltip;
     private String description;
     private SeverityLevel severity;
 
     /**
-     * Construct a informational node.
+     * Construct an informational node.
      *
      * @param text the information text.
      */
@@ -71,11 +70,11 @@ public class ResultTreeNode {
     }
 
     private void updateIconsForProblem() {
-        if (severity != null && SeverityLevel.Ignore.equals(severity)) {
+        if (SeverityLevel.Ignore.equals(severity)) {
             icon = Icons.icon("/general/hideWarnings.png");
-        } else if (severity != null && SeverityLevel.Warning.equals(severity)) {
+        } else if (SeverityLevel.Warning.equals(severity)) {
             icon = Icons.icon("/general/warning.png");
-        } else if (severity != null && SeverityLevel.Info.equals(severity)) {
+        } else if (SeverityLevel.Info.equals(severity)) {
             icon = Icons.icon("/general/information.png");
         } else {
             icon = Icons.icon("/general/error.png");
@@ -110,9 +109,9 @@ public class ResultTreeNode {
     }
 
     /**
-     * Get the node's icon when in an collapsed state.
+     * Get the node's icon when in a collapsed state.
      *
-     * @return the node's icon when in an collapsed state.
+     * @return the node's icon when in a collapsed state.
      */
     public Icon getCollapsedIcon() {
         return icon;
@@ -125,14 +124,6 @@ public class ResultTreeNode {
      */
     public String getText() {
         return text;
-    }
-
-    public Icon getIcon() {
-        return icon;
-    }
-
-    public void setIcon(final Icon icon) {
-        this.icon = icon;
     }
 
     /**
@@ -154,24 +145,6 @@ public class ResultTreeNode {
      */
     public PsiFile getFile() {
         return file;
-    }
-
-    /**
-     * Get the tooltip for this node, if any.
-     *
-     * @return the tooltip for this node, or null if none.
-     */
-    public String getTooltip() {
-        return tooltip;
-    }
-
-    /**
-     * Set the tooltip for this node, if any.
-     *
-     * @param tooltip the tooltip for this node, or null if none.
-     */
-    public void setTooltip(final String tooltip) {
-        this.tooltip = tooltip;
     }
 
     /**

@@ -26,16 +26,6 @@ public class PropertiesTableModel extends AbstractTableModel {
     }
 
     /**
-     * Create a new properties table model.
-     *
-     * @param properties the map of property names to values.
-     */
-    public PropertiesTableModel(
-            final Map<String, String> properties) {
-        setProperties(properties);
-    }
-
-    /**
      * Set the current properties in the table.
      *
      * @param newProperties the map of property names to values.

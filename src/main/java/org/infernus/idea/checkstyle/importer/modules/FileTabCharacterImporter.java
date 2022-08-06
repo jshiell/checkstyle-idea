@@ -39,8 +39,6 @@ public class FileTabCharacterImporter extends ModuleImporter {
 
     private void setNoTabChar(@NotNull final CodeStyleSettings settings, final FileType fileType) {
         CommonCodeStyleSettings.IndentOptions indentOptions = settings.getIndentOptions(fileType);
-        if (indentOptions != null) {
-            indentOptions.USE_TAB_CHARACTER = false;
-        }
+        indentOptions.USE_TAB_CHARACTER = false;
     }
 }

@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.wm.ToolWindow;
+import org.jetbrains.annotations.NotNull;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -14,7 +15,7 @@ public class StopCheck extends BaseAction {
     private static final Logger LOG = Logger.getInstance(StopCheck.class);
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
+    public void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
                 final ToolWindow toolWindow = toolWindow(project);
@@ -33,7 +34,7 @@ public class StopCheck extends BaseAction {
     }
 
     @Override
-    public void update(final AnActionEvent event) {
+    public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
         project(event).ifPresent(project -> {

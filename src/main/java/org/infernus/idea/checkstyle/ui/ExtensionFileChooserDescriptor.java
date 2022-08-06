@@ -68,7 +68,7 @@ public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
 
     private boolean isJar(final VirtualFile file) {
         final String currentExtension = file.getExtension();
-        return currentExtension != null && JAR_EXTENSION.equalsIgnoreCase(currentExtension);
+        return JAR_EXTENSION.equalsIgnoreCase(currentExtension);
     }
 
     private boolean fileExtensionMatches(final VirtualFile file) {

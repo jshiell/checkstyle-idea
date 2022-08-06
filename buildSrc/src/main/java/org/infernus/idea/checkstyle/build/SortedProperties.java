@@ -16,7 +16,7 @@ class SortedProperties extends Properties {
     public synchronized Enumeration<Object> keys() {
         List<Object> keyList = Collections.list(super.keys());
         final Comparator<String> versionComparator = new VersionComparator();
-        Collections.sort(keyList, (a, b) -> versionComparator.compare(a.toString(), b.toString()));
+        keyList.sort((a, b) -> versionComparator.compare(a.toString(), b.toString()));
         return Collections.enumeration(keyList);
     }
 }

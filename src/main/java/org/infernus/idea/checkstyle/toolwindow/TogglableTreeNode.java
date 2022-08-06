@@ -28,9 +28,8 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
-    @SuppressWarnings("unchecked")
     List<TogglableTreeNode> getAllChildren() {
-        return (List<TogglableTreeNode>) children.stream()
+        return children.stream()
                 .map(child -> (TogglableTreeNode) child)
                 .collect(Collectors.toList());
     }
@@ -47,7 +46,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
             }
             ++realIndex;
             if (visibleIndex == index) {
-                return (TreeNode) children.get(realIndex);
+                return children.get(realIndex);
             }
         }
 

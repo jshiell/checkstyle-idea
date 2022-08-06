@@ -23,10 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -128,7 +125,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
 
         final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
         when(configurations.tabWidth()).thenReturn(2);
-        final String baseDir = new File(getClass().getResource(CONFIG_FILE).toURI()).getParent();
+        final String baseDir = new File(Objects.requireNonNull(getClass().getResource(CONFIG_FILE)).toURI()).getParent();
         when(configurations.baseDir()).thenReturn(Optional.of(baseDir));
 
         return csService.getCheckstyleInstance().createChecker(pModule, configLoc,
@@ -138,7 +135,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
 
     private void runChecker(@NotNull final CheckStyleChecker checker) throws URISyntaxException {
 
-        final File sourceFile = new File(getClass().getResource("SourceFile.java").toURI());
+        final File sourceFile = new File(Objects.requireNonNull(getClass().getResource("SourceFile.java")).toURI());
 
         final ScannableFile file1 = mock(ScannableFile.class);
         when(file1.getFile()).thenReturn(sourceFile);

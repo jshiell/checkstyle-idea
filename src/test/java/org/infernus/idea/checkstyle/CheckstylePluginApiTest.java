@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.csapi.BundledConfig.GOOGLE_CHECKS;
 
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
@@ -58,8 +57,9 @@ public class CheckstylePluginApiTest {
     @Test
     public void classLoaderCanLoadCheckStyleInternalClasses() throws ClassNotFoundException {
         checkstyleProjectService.activateCheckstyleVersion(CHECKSTYLE_VERSION, null);
-        assertThat(underTest.currentCheckstyleClassLoader(), is(not(nullValue())));
-        assertThat(underTest.currentCheckstyleClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
+        ClassLoader currentClassLoader = underTest.currentCheckstyleClassLoader();
+        assertThat(currentClassLoader, is(not(nullValue())));
+        assertThat(currentClassLoader.loadClass("com.puppycrawl.tools.checkstyle.Checker"),
                 is(not(nullValue())));
     }
 

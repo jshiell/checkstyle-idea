@@ -9,6 +9,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.model.ScanScope;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ public class ScanProject extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanProject.class);
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
+    public void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
@@ -57,7 +58,7 @@ public class ScanProject extends BaseAction {
     }
 
     @Override
-    public void update(final AnActionEvent event) {
+    public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
         try {

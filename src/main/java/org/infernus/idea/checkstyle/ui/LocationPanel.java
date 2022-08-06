@@ -5,6 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -44,7 +45,7 @@ public class LocationPanel extends JPanel {
     private final JRadioButton urlLocationRadio = new JRadioButton();
     private final JRadioButton classpathLocationRadio = new JRadioButton();
     private final JTextField descriptionField = new JTextField();
-    private final JComboBox<NamedScope> scopeComboBox = new JComboBox<>();
+    private final ComboBox<NamedScope> scopeComboBox = new ComboBox<>();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
     private final JCheckBox insecureHttpCheckbox = new JCheckBox();
     private final JLabel classpathLocationReminderLabel = new JLabel();
@@ -96,9 +97,9 @@ public class LocationPanel extends JPanel {
         this.scopeComboBox.setSelectedItem(NamedScopeHelper.getDefaultScope(project));
         this.scopeComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                value = ((NamedScope) value).getPresentableName();
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            public Component getListCellRendererComponent(final JList<?> list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
+                var presentableName = ((NamedScope) value).getPresentableName();
+                super.getListCellRendererComponent(list, presentableName, index, isSelected, cellHasFocus);
                 return this;
             }
         });

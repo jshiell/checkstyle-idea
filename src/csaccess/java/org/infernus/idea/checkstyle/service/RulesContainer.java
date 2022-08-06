@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +36,6 @@ public interface RulesContainer {
 
     @Nullable
     default String resolveAssociatedFile(@Nullable final String fileName,
-                                         @NotNull final Project project,
                                          @Nullable final Module module,
                                          @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         return null;
@@ -62,7 +60,6 @@ public interface RulesContainer {
         }
 
         public String resolveAssociatedFile(final String fileName,
-                                            @NotNull final Project project,
                                             final Module module,
                                             @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
             return configurationLocation.resolveAssociatedFile(fileName, module, checkstyleClassLoader);

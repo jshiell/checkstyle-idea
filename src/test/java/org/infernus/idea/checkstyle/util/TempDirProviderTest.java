@@ -24,7 +24,7 @@ public class TempDirProviderTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     @Rule
-    public TemporaryFolder targetFolder = new TemporaryFolder();
+    public final TemporaryFolder targetFolder = new TemporaryFolder();
 
 
     private static class TempDirProvider4Test
@@ -33,13 +33,12 @@ public class TempDirProviderTest {
 
         private final TemporaryFolder junitTempFolder;
 
-        public TempDirProvider4Test(final boolean pUsesIdeaFolder, @NotNull final TemporaryFolder pJunitTempFolder) {
+        TempDirProvider4Test(final boolean pUsesIdeaFolder, @NotNull final TemporaryFolder pJunitTempFolder) {
             usesIdeaFolder = pUsesIdeaFolder;
             junitTempFolder = pJunitTempFolder;
         }
 
         @Override
-        @SuppressWarnings("MethodDoesntCallSuperMethod")
         Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
             if (usesIdeaFolder) {
                 final VirtualFile vf = Mockito.mock(VirtualFile.class);

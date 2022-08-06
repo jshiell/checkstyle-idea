@@ -25,7 +25,7 @@ public final class VersionComparator implements Comparator<String>, Serializable
         All,
         Major,
         Minor,
-        Micro;
+        Micro
     }
 
 

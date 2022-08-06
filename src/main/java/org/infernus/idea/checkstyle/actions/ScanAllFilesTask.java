@@ -37,7 +37,7 @@ abstract class ScanAllFilesTask implements Runnable {
         if (files != null) {
             for (final VirtualFile file : files) {
                 flattened.add(file);
-                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<Object>() {
+                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<>() {
                     @Override
                     @NotNull
                     public Result visitFileEx(@NotNull final VirtualFile file) {

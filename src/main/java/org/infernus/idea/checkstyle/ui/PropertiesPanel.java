@@ -92,9 +92,7 @@ public class PropertiesPanel extends JPanel {
         this.configurationLocation = (ConfigurationLocation) configurationLocation.clone();
 
         // get latest properties from file
-        InputStream configInputStream = null;
-        try {
-            configInputStream = configurationLocation.resolve(checkstyleProjectService.underlyingClassLoader());
+        try (InputStream configInputStream = configurationLocation.resolve(checkstyleProjectService.underlyingClassLoader())) {
             propertiesModel.setProperties(configurationLocation.getProperties());
 
         } catch (IOException e) {
@@ -103,13 +101,6 @@ public class PropertiesPanel extends JPanel {
             Messages.showErrorDialog(project, CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()),
                     CheckStyleBundle.message("config.file.error.title"));
 
-        } finally {
-            if (configInputStream != null) {
-                try {
-                    configInputStream.close();
-                } catch (IOException ignored) {
-                }
-            }
         }
     }
 }

@@ -23,20 +23,18 @@ public class OpPeruseConfigurationTest {
 
     @Test(expected = CheckstyleVersionMixException.class)
     public void testWrongConfigurationClass() {
-        //noinspection ConstantConditions
         new OpPeruseConfiguration(new InvalidObject(), new StubVisitor());
     }
 
     @Test
     public void testNullConfig() throws CheckstyleException {
-        //noinspection ConstantConditions
         final OpPeruseConfiguration cmd = new OpPeruseConfiguration(new CsConfigObject(null), new StubVisitor());
         assertNull(cmd.execute(PROJECT));
     }
 
-    private class StubVisitor implements ConfigVisitor {
+    private static class StubVisitor implements ConfigVisitor {
         @Override
-        public void visit(@NotNull ConfigurationModule module) {
+        public void visit(@NotNull final ConfigurationModule module) {
 
         }
     }

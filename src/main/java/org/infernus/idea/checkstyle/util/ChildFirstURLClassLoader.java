@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A child-first URL class loader, taken from https://stackoverflow.com/a/6424879
+ * A child-first URL class loader, taken from <a href="https://stackoverflow.com/a/6424879">...</a>
  */
 public class ChildFirstURLClassLoader extends URLClassLoader {
 
@@ -74,7 +74,7 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
         if (getParent() != null) {
             parentUrls = getParent().getResources(name);
         }
-        final List<URL> urls = new ArrayList<URL>();
+        final List<URL> urls = new ArrayList<>();
         if (systemUrls != null) {
             while (systemUrls.hasMoreElements()) {
                 urls.add(systemUrls.nextElement());
@@ -90,7 +90,7 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
                 urls.add(parentUrls.nextElement());
             }
         }
-        return new Enumeration<URL>() {
+        return new Enumeration<>() {
             private final Iterator<URL> iter = urls.iterator();
 
             public boolean hasMoreElements() {

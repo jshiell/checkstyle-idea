@@ -59,5 +59,5 @@ public enum KnownTokenTypes {
     STAR,
     STAR_ASSIGN,
     TYPECAST,
-    VARIABLE_DEF;
+    VARIABLE_DEF
 }

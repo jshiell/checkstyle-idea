@@ -33,11 +33,9 @@ public class SimpleResolverTest {
         assertNull(new SimpleResolver(props).resolve(null));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testNoProps() {
         assertNull(new SimpleResolver(emptyMap()).resolve("key1"));
         assertNull(new SimpleResolver(emptyMap()).resolve(null));
-        assertNull(new SimpleResolver(null).resolve(null));
     }
 }

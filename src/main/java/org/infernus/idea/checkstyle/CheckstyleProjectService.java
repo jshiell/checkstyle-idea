@@ -69,7 +69,7 @@ public class CheckstyleProjectService {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
         synchronized (project) {
             checkstyleClassLoaderContainer = null;
-            checkstyleClassLoaderFactory = new Callable<CheckstyleClassLoaderContainer>() {
+            checkstyleClassLoaderFactory = new Callable<>() {
                 @Override
                 public CheckstyleClassLoaderContainer call() {
                     return new CheckstyleClassLoaderContainer(

@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -114,18 +116,16 @@ public class OpLoadConfiguration
     }
 
     private static Map<String, String> buildReplacementsMap() {
-        Map<String, String> result = new HashMap<>();
-        result.put("RegexpHeader", "headerFile");
-        result.put("com.puppycrawl.tools.checkstyle.checks.RegexpHeaderCheck", "headerFile");
-        result.put("Header", "headerFile");
-        result.put("com.puppycrawl.tools.checkstyle.checks.header.HeaderCheck", "headerFile");
-        result.put("SuppressionFilter", "file");
-        result.put("com.puppycrawl.tools.checkstyle.filters.SuppressionFilter", "file");
-        result.put("SuppressionXpathFilter", "file");
-        result.put("com.puppycrawl.tools.checkstyle.filters.SuppressionXpathFilter", "file");
-        result.put("ImportControl", "file");
-        result.put("com.puppycrawl.tools.checkstyle.checks.imports.ImportControlCheck", "file");
-        return Collections.unmodifiableMap(result);
+        return Map.of("RegexpHeader", "headerFile",
+                "com.puppycrawl.tools.checkstyle.checks.RegexpHeaderCheck", "headerFile",
+                "Header", "headerFile",
+                "com.puppycrawl.tools.checkstyle.checks.header.HeaderCheck", "headerFile",
+                "SuppressionFilter", "file",
+                "com.puppycrawl.tools.checkstyle.filters.SuppressionFilter", "file",
+                "SuppressionXpathFilter", "file",
+                "com.puppycrawl.tools.checkstyle.filters.SuppressionXpathFilter", "file",
+                "ImportControl", "file",
+                "com.puppycrawl.tools.checkstyle.checks.imports.ImportControlCheck", "file");
     }
 
 
@@ -222,7 +222,7 @@ public class OpLoadConfiguration
                                       final Configuration configModule,
                                       final String propertyName,
                                       final String fileName) throws IOException {
-        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, project, module, checkstyleClassLoader());
+        final String resolvedFile = rulesContainer.resolveAssociatedFile(fileName, module, checkstyleClassLoader());
         if (resolvedFile == null || !resolvedFile.equals(fileName)) {
             configRoot.removeChild(configModule);
             if (resolvedFile != null) {

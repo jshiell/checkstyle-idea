@@ -43,7 +43,7 @@ public final class JavadocPackageCheck implements Check {
      */
     public void configure(@NotNull final CheckstyleInternalObject config) {
         final String stringValue = parsePackageInfoLegacy(config);
-        usingLegacyPackage = null != stringValue && Boolean.parseBoolean(stringValue);
+        usingLegacyPackage = Boolean.parseBoolean(stringValue);
     }
 
     public boolean process(@NotNull final PsiFile file, @NotNull final String pEventSourceName) {
@@ -71,7 +71,7 @@ public final class JavadocPackageCheck implements Check {
 
     private PsiElement findFirstSibling(@NotNull final PsiFile psiFile) {
         PsiElement currentSibling = psiFile;
-        while (currentSibling != null && currentSibling.getPrevSibling() != null) {
+        while (currentSibling.getPrevSibling() != null) {
             currentSibling = currentSibling.getPrevSibling();
         }
         return currentSibling;

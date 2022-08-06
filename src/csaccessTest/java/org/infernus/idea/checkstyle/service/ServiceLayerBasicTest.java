@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
-import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -20,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -54,7 +54,7 @@ public class ServiceLayerBasicTest {
     }
 
     @Test
-    public void theFileContentsHolderCannotBeUsedWithCheckstyle8_2AndAbove() throws IOException, URISyntaxException {
+    public void theFileContentsHolderCannotBeUsedWithCheckstyle82AndAbove() throws IOException, URISyntaxException {
         assumeThat(currentCsVersion(), isGreaterThanOrEqualTo("8.2"));
 
         try {
@@ -65,7 +65,7 @@ public class ServiceLayerBasicTest {
         }
     }
 
-    private CheckStyleChecker createChecker(@NotNull final String configXmlFile)
+    private void createChecker(@NotNull final String configXmlFile)
             throws IOException, URISyntaxException {
         final ConfigurationLocation configLoc = new StringConfigurationLocation(FileUtil.readFile(configXmlFile), TestHelper.mockProject());
 
@@ -75,10 +75,10 @@ public class ServiceLayerBasicTest {
         final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
         when(configurations.tabWidth()).thenReturn(2);
         when(configurations.baseDir()).thenReturn(
-                Optional.of(new File(getClass().getResource(configXmlFile).toURI()).getParent()));
+                Optional.of(new File(Objects.requireNonNull(getClass().getResource(configXmlFile)).toURI()).getParent()));
 
         final CheckstyleActions csInstance = checkstyleProjectService.getCheckstyleInstance();
-        return csInstance.createChecker(module, configLoc, Collections.emptyMap(), configurations, getClass()
+        csInstance.createChecker(module, configLoc, Collections.emptyMap(), configurations, getClass()
                 .getClassLoader());
     }
 

@@ -6,7 +6,6 @@ import org.junit.Assert;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -24,6 +23,6 @@ public final class FileUtil {
             url = Thread.currentThread().getContextClassLoader().getResource(filename);
         }
         Assert.assertNotNull("File not found: " + filename, url);
-        return new String(Files.readAllBytes(Paths.get(url.toURI())), StandardCharsets.UTF_8);
+        return Files.readString(Paths.get(url.toURI()));
     }
 }

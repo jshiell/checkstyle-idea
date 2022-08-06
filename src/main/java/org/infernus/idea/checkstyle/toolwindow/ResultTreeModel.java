@@ -47,12 +47,8 @@ public class ResultTreeModel extends DefaultTreeModel {
      * @param messageText the text to display.
      */
     public void setRootText(@Nullable final String messageText) {
-        if (messageText == null) {
-            visibleRootNode.setUserObject(new ResultTreeNode(CheckStyleBundle.message("plugin.results.no-scan")));
-
-        } else {
-            visibleRootNode.setUserObject(new ResultTreeNode(messageText));
-        }
+        visibleRootNode.setUserObject(new ResultTreeNode(
+                Objects.requireNonNullElseGet(messageText, () -> CheckStyleBundle.message("plugin.results.no-scan"))));
 
         nodeChanged(visibleRootNode);
     }
@@ -94,7 +90,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                 final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
 
                 final boolean currentVisible = problemNode.isVisible();
-                final boolean desiredVisible = levels != null && contains(levels, result.getSeverity());
+                final boolean desiredVisible = contains(levels, result.getSeverity());
                 if (currentVisible != desiredVisible) {
                     problemNode.setVisible(desiredVisible);
 

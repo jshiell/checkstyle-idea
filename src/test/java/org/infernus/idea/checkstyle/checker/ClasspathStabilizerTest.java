@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import com.intellij.openapi.project.Project;
@@ -30,12 +31,12 @@ public class ClasspathStabilizerTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
     @Rule
-    public TemporaryFolder targetFolder = new TemporaryFolder();
+    public final TemporaryFolder targetFolder = new TemporaryFolder();
 
 
     @BeforeClass
     public static void setup() {
-        String baseDir = ClasspathStabilizerTest.class.getResource("/cpstab").getPath();
+        String baseDir = Objects.requireNonNull(ClasspathStabilizerTest.class.getResource("/cpstab")).getPath();
         Mockito.when(PROJECT.getBasePath()).thenReturn(baseDir);
     }
 

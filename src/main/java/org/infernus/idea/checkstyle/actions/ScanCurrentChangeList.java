@@ -7,6 +7,7 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class ScanCurrentChangeList extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanCurrentChangeList.class);
 
     @Override
-    public final void actionPerformed(final AnActionEvent event) {
+    public final void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
                 final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
@@ -47,14 +48,14 @@ public class ScanCurrentChangeList extends BaseAction {
     }
 
     @Override
-    public void update(final AnActionEvent event) {
+    public void update(final @NotNull AnActionEvent event) {
         super.update(event);
         project(event).ifPresent(project -> {
             try {
                 final Presentation presentation = event.getPresentation();
 
                 final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
-                if (changeList == null || changeList.getChanges() == null || changeList.getChanges().size() == 0) {
+                if (changeList.getChanges() == null || changeList.getChanges().size() == 0) {
                     presentation.setEnabled(false);
                 } else {
                     presentation.setEnabled(!staticScanner(project).isScanInProgress());

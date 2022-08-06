@@ -19,7 +19,7 @@ public class SimpleResolver implements PropertyResolver {
     @Nullable
     public String resolve(@Nullable final String name) {
         String result = null;
-        if (properties != null && name != null) {
+        if (name != null) {
             result = properties.get(name);
         }
         return result;

@@ -89,7 +89,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     static {
         try {
             CHECKSTYLE_ERROR_PATTERNS.put(
-                    Pattern.compile("Property \\$\\{([^\\}]*)\\} has not been set"),
+                    Pattern.compile("Property \\$\\{([^}]*)} has not been set"),
                     "plugin.results.error.missing-property");
             CHECKSTYLE_ERROR_PATTERNS.put(
                     Pattern.compile("Unable to instantiate (.*)"),
@@ -197,10 +197,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     @Nullable
     public static CheckStyleToolWindowPanel panelFor(final Project project) {
         final ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-        if (toolWindowManager == null) {
-            LOG.debug("Couldn't get tool window manager for project " + project);
-            return null;
-        }
 
         final ToolWindow toolWindow = toolWindowManager.getToolWindow(ID_TOOLWINDOW);
         if (toolWindow == null) {
@@ -540,7 +536,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             severityLevels.add(SeverityLevel.Info);
         }
 
-        return severityLevels.toArray(new SeverityLevel[severityLevels.size()]);
+        return severityLevels.toArray(new SeverityLevel[0]);
     }
 
     /**

@@ -37,7 +37,7 @@ public class ScanCurrentFile extends BaseAction {
     private static final Logger LOG = Logger.getInstance(ScanCurrentFile.class);
 
     @Override
-    public void actionPerformed(final AnActionEvent event) {
+    public void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
                 final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
@@ -148,7 +148,7 @@ public class ScanCurrentFile extends BaseAction {
 
 
     @Override
-    public void update(final AnActionEvent event) {
+    public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
         project(event).ifPresent(project -> {

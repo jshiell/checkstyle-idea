@@ -30,7 +30,7 @@ public abstract class BaseAction extends DumbAwareAction {
     private static final Logger LOG = Logger.getInstance(BaseAction.class);
 
     @Override
-    public void update(final AnActionEvent event) {
+    public void update(final @NotNull AnActionEvent event) {
         try {
             final Project project = getEventProject(event);
             final Presentation presentation = event.getPresentation();

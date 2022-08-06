@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.*;
 
 import static com.intellij.openapi.vcs.checkin.CheckinHandler.ReturnResult.*;
-import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
@@ -75,10 +74,6 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     public ReturnResult beforeCheckin(@Nullable final CommitExecutor executor,
                                       final PairConsumer<Object, Object> additionalDataConsumer) {
         final Project project = checkinPanel.getProject();
-        if (project == null) {
-            LOG.warn("Could not get project for check-in panel, skipping");
-            return COMMIT;
-        }
 
         final StaticScanner staticScanner = ServiceManager.getService(project, StaticScanner.class);
         if (staticScanner == null) {
@@ -110,11 +105,6 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
     private Optional<PluginConfigurationManager> settings() {
         final Project project = checkinPanel.getProject();
-        if (project == null) {
-            LOG.warn("Could not get project for check-in panel");
-            return empty();
-        }
-
         return ofNullable(configurationManager(project));
     }
 

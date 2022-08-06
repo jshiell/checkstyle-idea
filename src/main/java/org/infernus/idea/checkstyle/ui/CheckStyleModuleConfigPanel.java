@@ -5,7 +5,6 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Icons;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;

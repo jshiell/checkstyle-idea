@@ -107,11 +107,9 @@ public final class ModuleConfigurationState
         private static final String ACTIVE_CONFIGS_PREFIX = ACTIVE_CONFIG + "-";
         private static final String EXCLUDE_FROM_SCAN = "exclude-from-scan";
 
-        @SuppressWarnings("FieldMayBeFinal")
         @Attribute
         private String serialisationVersion;
 
-        @SuppressWarnings("FieldMayBeFinal")
         @XCollection
         private List<String> activeLocationsIds;
         @Tag

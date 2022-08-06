@@ -35,7 +35,7 @@ public class CheckStyleCodeStyleImporter
 
     @NotNull
     @Override
-    public String[] getSourceExtensions() {
+    public String @NotNull [] getSourceExtensions() {
         return new String[]{"xml"};
     }
 

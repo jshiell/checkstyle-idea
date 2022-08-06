@@ -141,7 +141,7 @@ public class CheckstyleClassLoaderContainer {
         } else {
             URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
             try {
-                URL trimmedUrl = new URL(classResource.toString().replaceFirst("org[/\\\\]infernus.*", ""));
+                URL trimmedUrl = new URL(Objects.requireNonNull(classResource).toString().replaceFirst("org[/\\\\]infernus.*", ""));
                 result = Collections.singletonList(trimmedUrl);
             } catch (MalformedURLException e) {
                 result = Collections.singletonList(classResource);

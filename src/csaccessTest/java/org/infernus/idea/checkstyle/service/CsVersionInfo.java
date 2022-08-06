@@ -6,14 +6,10 @@ import org.hamcrest.TypeSafeMatcher;
 import org.infernus.idea.checkstyle.VersionComparator;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
@@ -22,11 +18,14 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Utility class for unit tests in 'csaccessTest' to query the currently used Checkstyle runtime.
  */
-public class CsVersionInfo {
+public final class CsVersionInfo {
     private static final String PROPS_FILE_NAME = "/checkstyle-idea.properties";
     private static final String BASE_VERSION = readBaseVersion();
 
     public static final String CSVERSION_SYSPROP_NAME = "org.infernus.idea.checkstyle.version";
+
+    private CsVersionInfo() {
+    }
 
     @NotNull
     private static String readBaseVersion() {
@@ -40,25 +39,6 @@ public class CsVersionInfo {
         }
         assertNotNull(result);
         return result;
-    }
-
-    public static boolean csVersionIsOneOf(@NotNull final String expectedCsVersion,
-                                           @Nullable final String... otherPossibleVersions) {
-        final String actualCsVersion = currentCsVersion();
-        final List<String> expectedVersions = new ArrayList<>();
-        expectedVersions.add(expectedCsVersion);
-        if (otherPossibleVersions != null) {
-            expectedVersions.addAll(Arrays.asList(otherPossibleVersions));
-        }
-        return expectedVersions.contains(actualCsVersion);
-    }
-
-    public static boolean csVersionIsLessThan(@NotNull final String pCsVersion) {
-        return new VersionComparator().compare(currentCsVersion(), pCsVersion) < 0;
-    }
-
-    public static boolean csVersionIsGreaterThan(@NotNull final String pCsVersion) {
-        return new VersionComparator().compare(currentCsVersion(), pCsVersion) > 0;
     }
 
     @NotNull
@@ -75,30 +55,17 @@ public class CsVersionInfo {
     }
 
     public static Matcher<String> isGreaterThanOrEqualTo(@NotNull final String expectedCsVersion) {
-        return new TypeSafeMatcher<String>() {
+        return new TypeSafeMatcher<>() {
             @Override
-            protected boolean matchesSafely(String actualCsVersion) {
+            protected boolean matchesSafely(final String actualCsVersion) {
                 return new VersionComparator().compare(actualCsVersion, expectedCsVersion) >= 0;
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendText("is greater than").appendValue(expectedCsVersion);
             }
         };
     }
 
-    public static Matcher<String> isLessThan(@NotNull final String expectedCsVersion) {
-        return new TypeSafeMatcher<String>() {
-            @Override
-            protected boolean matchesSafely(String actualCsVersion) {
-                return new VersionComparator().compare(actualCsVersion, expectedCsVersion) < 0;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("is less than").appendValue(expectedCsVersion);
-            }
-        };
-    }
 }

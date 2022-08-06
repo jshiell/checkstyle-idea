@@ -17,9 +17,9 @@ public final class FilePaths {
      * If one of the provided resources does not exist, it is assumed to be a file unless it ends with '/' or
      * '\'.
      * <p/>
-     * This (and the tests) is from http://stackoverflow.com/a/3054692 - all credit to the author.
+     * This (and the tests) is from <a href="http://stackoverflow.com/a/3054692">...</a> - all credit to the author.
      * Ideally we'd use URI.relativize(), but it only works in the prefixes match
-     * (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6226081).
+     * (<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6226081">...</a>).
      *
      * @param targetPath    targetPath is calculated to this file
      * @param basePath      basePath is calculated from this file

@@ -75,7 +75,7 @@ public class ScannableFile {
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
                                                         @NotNull final Project project,
                                                         @Nullable final Module module,
-                                                        @Nullable ConfigurationLocation overrideConfigLocation) {
+                                                        @Nullable final ConfigurationLocation overrideConfigLocation) {
         Computable<List<ScannableFile>> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(
                         currentFile,
@@ -98,7 +98,6 @@ public class ScannableFile {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile, module);
             ApplicationManager.getApplication().runReadAction(fileAction);
 
-            //noinspection ThrowableResultOfMethodCallIgnored
             if (fileAction.getFailure() != null) {
                 throw fileAction.getFailure();
             }
