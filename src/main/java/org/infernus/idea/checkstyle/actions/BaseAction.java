@@ -6,7 +6,9 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.StaticScanner;
@@ -17,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Optional.ofNullable;
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.actOnToolWindowPanel;
@@ -79,14 +82,23 @@ public abstract class BaseAction extends DumbAwareAction {
     }
 
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {
-        boolean result = false;
+        final var result = new AtomicBoolean(false);
         for (VirtualFile file : files) {
-            if ((file.isDirectory() && containsAtLeastOneFile(file.getChildren())) || (!file.isDirectory() && file
-                    .isValid())) {
-                result = true;
+            VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<>() {
+                @Override
+                public @NotNull Result visitFileEx(@NotNull final VirtualFile file) {
+                    if (!file.isDirectory() && file.isValid()) {
+                        result.set(true);
+                        return SKIP_CHILDREN;
+                    }
+                    return CONTINUE;
+                }
+            });
+
+            if (result.get()) {
                 break;
             }
         }
-        return result;
+        return result.get();
     }
 }
