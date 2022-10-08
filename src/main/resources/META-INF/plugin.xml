@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.71.1: Fixed: commons-logging.properties is now ignored on the project classfile (#555).</li>
     <li>5.71.1: New: Checkin dialogue now shows the number of errors and warnings found (#591).</li>
     <li>5.71.0: New: Added Checkstyle 10.3.4.</li>
     <li>5.70.0: New: Added Checkstyle 10.3.2.</li>

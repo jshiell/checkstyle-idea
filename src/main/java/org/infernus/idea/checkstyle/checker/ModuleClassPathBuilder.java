@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -57,7 +56,7 @@ public class ModuleClassPathBuilder {
                 effectiveClasspath = new ClasspathStabilizer(baseModuleProject, t).stabilize(outputPaths);
             }
         }
-        return new URLClassLoader(effectiveClasspath, getClass().getClassLoader());
+        return new ResourceFilteringURLClassLoader(effectiveClasspath, getClass().getClassLoader(), "commons-logging.properties");
     }
 
     private PluginConfigurationManager pluginConfigurationManager() {

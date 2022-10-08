@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.71.1** Fixed: commons-logging.properties is now ignored on the project classfile (#555).
 * **5.71.1** New: Checkin dialogue now shows the number of errors and warnings found (#591).
 * **5.71.0** New: Added Checkstyle 10.3.4.
 * **5.70.0** New: Added Checkstyle 10.3.2.
