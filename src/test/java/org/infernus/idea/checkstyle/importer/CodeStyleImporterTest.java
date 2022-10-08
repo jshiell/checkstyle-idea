@@ -50,6 +50,7 @@ public class CodeStyleImporterTest
 
     private void importConfiguration(@NotNull String configuration) {
         configuration = FILE_PREFIX + configuration + FILE_SUFFIX;
+
         new CheckStyleCodeStyleImporter(csService).importConfiguration(
                 csService, loadConfiguration(configuration), codeStyleSettings);
     }

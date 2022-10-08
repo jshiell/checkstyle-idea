@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.71.1** New: Checkin dialogue now shows the number of errors and warnings found (#591).
 * **5.71.0** New: Added Checkstyle 10.3.4.
 * **5.70.0** New: Added Checkstyle 10.3.2.
 * **5.69.1** Fix: handle URIs without userinfo (#583, #581).

@@ -35,6 +35,7 @@ import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private static final Logger LOG = Logger.getInstance(ScanFilesBeforeCheckinHandler.class);
+    public static final String DOT_SUFFIX = "...";
 
     private final CheckinProjectPanel checkinPanel;
 
@@ -111,12 +112,13 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,
                                             final CommitExecutor executor,
                                             final Project project) {
-        final int errorCount = errorCountOf(results);
-        if (errorCount == 0) {
+        final long errorCount = countOf(results, SeverityLevel.Error);
+        final long warningCount = countOf(results, SeverityLevel.Warning);
+        if (errorCount == 0 && warningCount == 0) {
             return COMMIT;
         }
 
-        final int answer = promptUser(project, errorCount, executor);
+        final int answer = promptUser(project, errorCount, warningCount, executor);
         if (answer == Messages.OK) {
             showResultsInToolWindow(results, project);
             return CLOSE_WINDOW;
@@ -128,20 +130,23 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         return COMMIT;
     }
 
-    private int errorCountOf(final Map<PsiFile, List<Problem>> results) {
-        return (int) results.entrySet().stream()
-                .filter(this::hasProblemsThatAreNotIgnored)
+    private long countOf(final Map<PsiFile, List<Problem>> results, final SeverityLevel level) {
+        return results.entrySet().stream()
+                .map(entry -> problemsAtLevel(entry, level))
+                .mapToLong(Long::longValue)
+                .sum();
+    }
+
+    private long problemsAtLevel(final Map.Entry<PsiFile, List<Problem>> entry, final SeverityLevel level) {
+        return entry.getValue()
+                .stream()
+                .filter(problem -> problem.severityLevel() == level)
                 .count();
     }
 
-    private boolean hasProblemsThatAreNotIgnored(final Map.Entry<PsiFile, List<Problem>> entry) {
-        return entry.getValue()
-                .stream()
-                .anyMatch(problem -> problem.severityLevel() != SeverityLevel.Ignore);
-    }
-
     private int promptUser(final Project project,
-                           final int errorCount,
+                           final long errorCount,
+                           final long warningCount,
                            final CommitExecutor executor) {
         String commitButtonText;
         if (executor != null) {
@@ -150,8 +155,8 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
             commitButtonText = checkinPanel.getCommitActionName();
         }
 
-        if (commitButtonText.endsWith("...")) {
-            commitButtonText = commitButtonText.substring(0, commitButtonText.length() - 3);
+        if (commitButtonText.endsWith(DOT_SUFFIX)) {
+            commitButtonText = commitButtonText.substring(0, commitButtonText.length() - DOT_SUFFIX.length());
         }
 
         final String[] buttons = new String[]{
@@ -159,7 +164,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 commitButtonText,
                 CommonBundle.getCancelButtonText()};
 
-        return Messages.showDialog(project, message("handler.before.checkin.error.text", errorCount),
+        return Messages.showDialog(project, message("handler.before.checkin.error.text", errorCount, warningCount),
                 message("handler.before.checkin.error.title"),
                 buttons, 0, UIUtil.getWarningIcon());
     }
