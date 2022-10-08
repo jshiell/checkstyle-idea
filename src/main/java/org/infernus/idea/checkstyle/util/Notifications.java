@@ -27,28 +27,32 @@ public final class Notifications {
     public static void showInfo(final Project project,
                                 final String infoText) {
         BALLOON_GROUP
-                .createNotification("", infoText, INFORMATION, URL_OPENING_LISTENER)
+                .createNotification("", infoText, INFORMATION)
+                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showWarning(final Project project,
                                    final String warningText) {
         BALLOON_GROUP
-                .createNotification("", warningText, WARNING, URL_OPENING_LISTENER)
+                .createNotification("", warningText, WARNING)
+                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showError(final Project project,
                                  final String errorText) {
         BALLOON_GROUP
-                .createNotification("", errorText, ERROR, URL_OPENING_LISTENER)
+                .createNotification("", errorText, ERROR)
+                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
     public static void showException(final Project project,
                                      final Throwable t) {
         LOG_ONLY_GROUP
-                .createNotification(titleFor(t), messageFor(t), ERROR, URL_OPENING_LISTENER)
+                .createNotification(titleFor(t), messageFor(t), ERROR)
+                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 

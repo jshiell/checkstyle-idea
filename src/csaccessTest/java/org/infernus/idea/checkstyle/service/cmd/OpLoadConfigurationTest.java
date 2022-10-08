@@ -65,12 +65,14 @@ public class OpLoadConfigurationTest {
 
     private void interceptApplicationNotifications() {
         reset(BALLOON_NOTIFICATION_GROUP);
+        Notification notification = mock(Notification.class);
         when(BALLOON_NOTIFICATION_GROUP.createNotification(
                 anyString(),
                 anyString(),
-                ArgumentMatchers.any(NotificationType.class),
-                ArgumentMatchers.any(NotificationListener.class)))
-                .thenReturn(mock(Notification.class));
+                ArgumentMatchers.any(NotificationType.class)))
+                .thenReturn(notification);
+        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
+                .thenReturn(notification);
 
         final NotificationGroupManager notificationGroupManager = mock(NotificationGroupManager.class);
         when(notificationGroupManager.getNotificationGroup("CheckStyleIDEABalloonGroup"))
@@ -193,8 +195,9 @@ public class OpLoadConfigurationTest {
         when(BALLOON_NOTIFICATION_GROUP.createNotification(
                 eq(""),
                 eq(CheckStyleBundle.message("checkstyle.checker-failed", "aTriggeredIoException")),
-                eq(NotificationType.ERROR),
-                ArgumentMatchers.any(NotificationListener.class)))
+                eq(NotificationType.ERROR)))
+                .thenReturn(notification);
+        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
                 .thenReturn(notification);
 
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
@@ -211,8 +214,9 @@ public class OpLoadConfigurationTest {
         when(BALLOON_NOTIFICATION_GROUP.createNotification(
                 eq(""),
                 eq(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader")),
-                eq(NotificationType.WARNING),
-                ArgumentMatchers.any(NotificationListener.class)))
+                eq(NotificationType.WARNING)))
+                .thenReturn(notification);
+        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
                 .thenReturn(notification);
 
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
@@ -225,8 +229,7 @@ public class OpLoadConfigurationTest {
         verify(BALLOON_NOTIFICATION_GROUP).createNotification(
                 eq(""),
                 eq(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader")),
-                eq(NotificationType.WARNING),
-                ArgumentMatchers.any(NotificationListener.class));
+                eq(NotificationType.WARNING));
         verify(notification).notify(PROJECT);
     }
 

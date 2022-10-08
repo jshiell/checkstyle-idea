@@ -53,9 +53,6 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 return panel;
             }
 
-            public void refresh() {
-            }
-
             public void saveState() {
                 settings().ifPresent(settings -> settings.setCurrent(
                         PluginConfigurationBuilder.from(settings.getCurrent()).withScanBeforeCheckin(checkBox.isSelected()).build(),
