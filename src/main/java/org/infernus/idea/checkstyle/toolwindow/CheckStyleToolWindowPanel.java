@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
@@ -588,6 +587,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 
     private PluginConfigurationManager configurationManager() {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 }

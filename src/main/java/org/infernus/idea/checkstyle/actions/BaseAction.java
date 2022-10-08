@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
@@ -74,11 +73,11 @@ public abstract class BaseAction extends DumbAwareAction {
     }
 
     protected PluginConfigurationManager configurationManager(final Project project) {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
     protected StaticScanner staticScanner(final Project project) {
-        return ServiceManager.getService(project, StaticScanner.class);
+        return project.getService(StaticScanner.class);
     }
 
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {

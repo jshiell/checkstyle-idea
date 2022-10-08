@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -226,15 +225,15 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     private CheckerFactory checkerFactory() {
-        return ServiceManager.getService(project, CheckerFactory.class);
+        return project.getService(CheckerFactory.class);
     }
 
     private PluginConfigurationManager configurationManager() {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
     private ConfigurationLocationSource configurationLocationSource() {
-        return ServiceManager.getService(project, ConfigurationLocationSource.class);
+        return project.getService(ConfigurationLocationSource.class);
     }
 
     private static class FindChildFiles extends VirtualFileVisitor {

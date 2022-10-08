@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.handlers;
 
 import com.intellij.CommonBundle;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -76,7 +75,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                                       final PairConsumer<Object, Object> additionalDataConsumer) {
         final Project project = checkinPanel.getProject();
 
-        final StaticScanner staticScanner = ServiceManager.getService(project, StaticScanner.class);
+        final StaticScanner staticScanner = project.getService(StaticScanner.class);
         if (staticScanner == null) {
             LOG.warn("Could not get scanner, skipping");
             return COMMIT;
@@ -179,7 +178,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
     }
 
     private PluginConfigurationManager configurationManager(final Project project) {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
 }

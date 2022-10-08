@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.ui;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
@@ -267,7 +266,7 @@ public class LocationPanel extends JPanel {
     }
 
     private ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+        return project.getService(ConfigurationLocationFactory.class);
     }
 
     /*

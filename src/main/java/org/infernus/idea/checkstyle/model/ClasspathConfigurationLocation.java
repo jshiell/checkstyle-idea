@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.model;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -61,7 +60,7 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
 
     private CheckstyleProjectService checkstyleProjectService(@NotNull final Project project) {
         // we can't bring this in at construction time due to a cyclic dep
-        return ServiceManager.getService(project, CheckstyleProjectService.class);
+        return project.getService(CheckstyleProjectService.class);
     }
 
     @Override

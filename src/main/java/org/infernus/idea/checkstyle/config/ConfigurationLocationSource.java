@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -47,7 +46,7 @@ public class ConfigurationLocationSource {
     }
 
     private PluginConfigurationManager configurationManager() {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
     private ModuleConfigurationState checkstyleModuleConfiguration(final Module module) {

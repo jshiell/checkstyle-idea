@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleConfigurationEditor;
 import org.infernus.idea.checkstyle.config.ModuleConfigurationState;
@@ -69,7 +68,7 @@ public class CheckStyleModuleConfigurationEditor implements ModuleConfigurationE
     }
 
     private PluginConfigurationManager pluginConfigurationManager() {
-        return ServiceManager.getService(module.getProject(), PluginConfigurationManager.class);
+        return module.getProject().getService(PluginConfigurationManager.class);
     }
 
     public void reset() {

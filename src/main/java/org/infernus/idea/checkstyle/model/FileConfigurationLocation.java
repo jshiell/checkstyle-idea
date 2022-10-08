@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.model;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -160,7 +159,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
 
     @NotNull
     protected ProjectFilePaths projectFilePaths() {
-        return ServiceManager.getService(getProject(), ProjectFilePaths.class);
+        return getProject().getService(ProjectFilePaths.class);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,14 +56,14 @@ public class PluginConfigurationManager {
     }
 
     public static PluginConfigurationManager getInstance(@NotNull final Project project) {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
     private ProjectConfigurationState projectConfigurationState() {
-        return ServiceManager.getService(project, ProjectConfigurationState.class);
+        return project.getService(ProjectConfigurationState.class);
     }
 
     private ApplicationConfigurationState applicationConfigurationState() {
-        return ServiceManager.getService(ApplicationConfigurationState.class);
+        return ApplicationManager.getApplication().getService(ApplicationConfigurationState.class);
     }
 }

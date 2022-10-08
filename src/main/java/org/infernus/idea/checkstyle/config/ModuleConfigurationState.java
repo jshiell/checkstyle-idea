@@ -60,7 +60,7 @@ public final class ModuleConfigurationState
     }
 
     private PluginConfigurationManager configurationManager() {
-        return ServiceManager.getService(module.getProject(), PluginConfigurationManager.class);
+        return module.getProject().getService(PluginConfigurationManager.class);
     }
 
     private List<ConfigurationLocation> configurationLocations() {

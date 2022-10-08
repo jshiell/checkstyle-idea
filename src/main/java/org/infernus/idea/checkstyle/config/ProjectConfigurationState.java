@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.ControlFlowException;
@@ -179,7 +178,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         }
 
         private ConfigurationLocationFactory configurationLocationFactory(@NotNull final Project project) {
-            return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+            return project.getService(ConfigurationLocationFactory.class);
         }
 
         @Nullable

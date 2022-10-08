@@ -4,7 +4,6 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.lang.injection.InjectedLanguageManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -102,7 +101,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     private ConfigurationLocationSource configurationLocationSource(final Project project) {
-        return ServiceManager.getService(project, ConfigurationLocationSource.class);
+        return project.getService(ConfigurationLocationSource.class);
     }
 
     @NotNull
@@ -208,11 +207,11 @@ public class CheckStyleInspection extends LocalInspectionTool {
     }
 
     private CheckerFactory checkerFactory(final Project project) {
-        return ServiceManager.getService(project, CheckerFactory.class);
+        return project.getService(CheckerFactory.class);
     }
 
     private PluginConfigurationManager configurationManager(final Project project) {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
 }

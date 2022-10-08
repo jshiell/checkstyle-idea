@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.importer;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.SchemeFactory;
 import com.intellij.openapi.options.SchemeImportException;
@@ -65,7 +64,7 @@ public class CheckStyleCodeStyleImporter
         if (overrideCheckstyleProjectService != null) {
             return overrideCheckstyleProjectService;
         }
-        return ServiceManager.getService(project, CheckstyleProjectService.class);
+        return project.getService(CheckstyleProjectService.class);
     }
 
     @Nullable

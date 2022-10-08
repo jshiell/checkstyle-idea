@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.VersionListReader;
@@ -198,7 +197,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
     }
 
     private ProjectFilePaths projectFilePaths() {
-        return ServiceManager.getService(getProject(), ProjectFilePaths.class);
+        return getProject().getService(ProjectFilePaths.class);
     }
 
 
@@ -228,7 +227,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
     }
 
     private ConfigurationLocationFactory configurationLocationFactory() {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+        return project.getService(ConfigurationLocationFactory.class);
     }
 
     private Project getProject() {

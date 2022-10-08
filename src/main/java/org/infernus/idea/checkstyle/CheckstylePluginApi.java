@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -51,10 +50,10 @@ public class CheckstylePluginApi {
     }
 
     private PluginConfigurationManager pluginConfigurationManager() {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
     private CheckstyleProjectService checkstyleProjectService() {
-        return ServiceManager.getService(project, CheckstyleProjectService.class);
+        return project.getService(CheckstyleProjectService.class);
     }
 }

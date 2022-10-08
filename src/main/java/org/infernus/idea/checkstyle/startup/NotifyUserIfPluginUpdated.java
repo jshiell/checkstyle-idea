@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.startup;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -32,7 +31,7 @@ public class NotifyUserIfPluginUpdated implements StartupActivity {
     }
 
     private PluginConfigurationManager pluginConfigurationManager(final Project project) {
-        return ServiceManager.getService(project, PluginConfigurationManager.class);
+        return project.getService(PluginConfigurationManager.class);
     }
 
 }

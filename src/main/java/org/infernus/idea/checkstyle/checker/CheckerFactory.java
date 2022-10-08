@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -39,8 +38,8 @@ public class CheckerFactory {
     @SuppressWarnings("unused") // IDEA's DI
     public CheckerFactory(@NotNull final Project project) {
         this.project = project;
-        this.checkstyleProjectService = ServiceManager.getService(project, CheckstyleProjectService.class);
-        this.cache = ServiceManager.getService(project, CheckerFactoryCache.class);
+        this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
+        this.cache = project.getService(CheckerFactoryCache.class);
     }
 
     private CheckerFactory(@NotNull final Project project,
@@ -131,7 +130,7 @@ public class CheckerFactory {
     }
 
     private ModuleClassPathBuilder moduleClassPathBuilder() {
-        return ServiceManager.getService(project, ModuleClassPathBuilder.class);
+        return project.getService(ModuleClassPathBuilder.class);
     }
 
     private CachedChecker createChecker(@NotNull final ConfigurationLocation location,

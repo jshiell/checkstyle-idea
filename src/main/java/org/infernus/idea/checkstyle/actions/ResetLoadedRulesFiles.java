@@ -9,10 +9,8 @@ import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
-import static com.intellij.openapi.components.ServiceManager.getService;
-
 /**
- * Clear the Checker cache and blocks, forcing a reload of rules files.
+ * Clear the Checker cache and blocks, forcing reloading of rules files.
  */
 public class ResetLoadedRulesFiles extends BaseAction {
 
@@ -29,11 +27,11 @@ public class ResetLoadedRulesFiles extends BaseAction {
         }
 
         project(event).ifPresent(project -> {
-            getService(project, PluginConfigurationManager.class)
+            project.getService(PluginConfigurationManager.class)
                     .getCurrent()
                     .getLocations()
                     .forEach(ConfigurationLocation::reset);
-            getService(project, CheckerFactoryCache.class).invalidate();
+            project.getService(CheckerFactoryCache.class).invalidate();
         });
     }
 }

@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
@@ -35,9 +34,9 @@ public class CheckStyleConfigurable
     CheckStyleConfigurable(@NotNull final Project project) {
         this.project = project;
 
-        this.checkstyleProjectService = ServiceManager.getService(project, CheckstyleProjectService.class);
-        this.checkerFactoryCache = ServiceManager.getService(project, CheckerFactoryCache.class);
-        this.pluginConfigurationManager = ServiceManager.getService(project, PluginConfigurationManager.class);
+        this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
+        this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
+        this.pluginConfigurationManager = project.getService(PluginConfigurationManager.class);
 
         this.configPanel = new CheckStyleConfigPanel(project, checkstyleProjectService, checkerFactoryCache);
     }

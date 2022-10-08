@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.VersionListReader;
@@ -150,6 +149,6 @@ public final class PluginConfigurationBuilder {
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+        return project.getService(ConfigurationLocationFactory.class);
     }
 }

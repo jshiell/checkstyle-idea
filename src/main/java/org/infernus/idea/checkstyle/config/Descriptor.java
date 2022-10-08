@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -105,7 +104,7 @@ public class Descriptor {
     }
 
     private ConfigurationLocationFactory configurationLocationFactory(final Project project) {
-        return ServiceManager.getService(project, ConfigurationLocationFactory.class);
+        return project.getService(ConfigurationLocationFactory.class);
     }
 
     public ConfigurationType getConfigurationType() {
