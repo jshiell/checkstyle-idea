@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.72.0</version>
+    <version>5.73.0</version>
     <idea-version since-build="213.7172.25"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.73.0: New: Added Checkstyle 10.4.</li>
     <li>5.72.0: Now built against IDEA 2021.3.3 (was 2021.1.3).</li>
     <li>5.71.1: Fixed: commons-logging.properties is now ignored on the project classfile (#555).</li>
     <li>5.71.1: New: Checkin dialogue now shows the number of errors and warnings found (#591).</li>
@@ -50,22 +51,6 @@
     <li>5.65.0: New: The toolwindow is now available during indexing (#564) - thanks to @ahus1.</li>
     <li>5.65.0: New: We now use SVG icons (#563) - thanks to @ahus1.</li>
     <li>5.64.0: New: You can now select multiple active Checkstyle files and scope them individually (#559) - thanks to @JanK411 and @Uschi003.</li>
-    <li>5.63.0: New: Added Checkstyle 10.1.</li>
-    <li>5.62.0: New: Added Checkstyle 10.0.</li>
-    <li>5.61.1: Fixed: Removed left-over log4j artefacts, to allow compatibility with newer EAPs.</li>
-    <li>5.61.0: New: Added Checkstyle 9.3.</li>
-    <li>5.60.0: New: Added Checkstyle 9.2.1.</li>
-    <li>5.59.1: Fixed: NPE when configuration location has been garbage collected from weak map (#547).</li>
-    <li>5.59.0: New: Added Checkstyle 9.2 - thanks to @andrewflbarnes (#546).</li>
-    <li>5.58.0: New: Added Checkstyle 9.1 - thanks to @kennysoft (#543).</li>
-    <li>5.57.2: Fixed: Plugin now requires a restart on update due to issues with IDEA's dynamic loading (#539).</li>
-    <li>5.57.1: Fixed: Incorrect lower version bound fixed.</li>
-    <li>5.57.0: Fixed: Configuration panel is now lazy init-ed to avoid deadlock (#538).</li>
-    <li>5.57.0: New: Added Checkstyle 9.0.1.</li>
-    <li>5.57.0: New: Now built against IDEA 2021.1.3 (was 2020.1.4).</li>
-    <li>5.56.0: New: Added Checkstyle 9.0 (#536).</li>
-    <li>5.56.0: New: Added Checkstyle 8.45.1.</li>
-    <li>5.55.1: Fixed: NPE when virtual file is only in memory (#533).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
