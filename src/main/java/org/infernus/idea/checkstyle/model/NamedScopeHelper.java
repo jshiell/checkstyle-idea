@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.psi.PsiFile;
@@ -9,6 +10,7 @@ import com.intellij.psi.search.scope.packageSet.PackageSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public final class NamedScopeHelper {
@@ -48,13 +50,15 @@ public final class NamedScopeHelper {
     }
 
     public static boolean isFileInScope(final PsiFile psiFile, @NotNull final NamedScope namedScope) {
-        final PackageSet packageSet = namedScope.getValue();
-        if (packageSet == null) {
-            return true;
-        }
+        return ReadAction.compute(() -> {
+            final PackageSet packageSet = namedScope.getValue();
+            if (packageSet == null) {
+                return true;
+            }
 
-        return packageSet.contains(
-                psiFile,
-                DependencyValidationManager.getInstance(psiFile.getProject()));
+            return packageSet.contains(
+                    psiFile,
+                    DependencyValidationManager.getInstance(psiFile.getProject()));
+        });
     }
 }
