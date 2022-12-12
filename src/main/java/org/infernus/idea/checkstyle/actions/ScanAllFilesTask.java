@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-abstract class ScanAllFilesTask implements Runnable {
+abstract class ScanAllFilesTask implements ThrowableRunnable<RuntimeException> {
 
     private final Project project;
     private final ConfigurationLocation selectedOverride;

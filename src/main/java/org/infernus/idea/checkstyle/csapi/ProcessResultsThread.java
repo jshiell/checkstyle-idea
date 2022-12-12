@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiInvalidElementAccessException;
+import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checks.Check;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-public class ProcessResultsThread implements Runnable {
+public class ProcessResultsThread implements ThrowableRunnable<RuntimeException> {
 
     private static final Logger LOG = Logger.getInstance(ProcessResultsThread.class);
 

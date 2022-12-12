@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiFile;
 import com.puppycrawl.tools.checkstyle.api.AuditEvent;
@@ -57,7 +58,7 @@ public class CheckStyleAuditListener
 
         final Application application = ApplicationManager.getApplication();
         if (application != null) {  // can be null in unit tests
-            application.runReadAction(findThread);
+            ReadAction.run(findThread);
             problems = findThread.getProblems();
         }
     }

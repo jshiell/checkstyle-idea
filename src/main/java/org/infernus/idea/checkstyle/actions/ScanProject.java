@@ -2,12 +2,13 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +40,7 @@ public class ScanProject extends BaseAction {
     private void executeScan(final Project project, final ScanScope scope, final ToolWindow toolWindow) {
         try {
             setProgressText(toolWindow, "plugin.status.in-progress.project");
-            Runnable scanAction = null;
+            ThrowableRunnable<RuntimeException> scanAction = null;
             if (scope == ScanScope.Everything) {
                 scanAction = new ScanAllFilesInProjectTask(project, getSelectedOverride(toolWindow));
             } else {
@@ -50,7 +51,7 @@ public class ScanProject extends BaseAction {
                 }
             }
             if (scanAction != null) {
-                ApplicationManager.getApplication().runReadAction(scanAction);
+                ReadAction.run(scanAction);
             }
         } catch (Throwable e) {
             LOG.warn("Project scan failed", e);

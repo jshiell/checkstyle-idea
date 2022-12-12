@@ -2,7 +2,7 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +51,7 @@ public class ScanModule extends BaseAction {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.module");
 
-                        Runnable scanAction = null;
+                        ThrowableRunnable<RuntimeException> scanAction = null;
                         if (scope == ScanScope.Everything) {
                             scanAction = new ScanAllFilesInModuleTask(module, getSelectedOverride(toolWindow));
                         } else {
@@ -62,7 +63,7 @@ public class ScanModule extends BaseAction {
                             }
                         }
                         if (scanAction != null) {
-                            ApplicationManager.getApplication().runReadAction(scanAction);
+                            ReadAction.run(scanAction);
                         }
                     } catch (Throwable e) {
                         LOG.warn("Current Module scan failed", e);

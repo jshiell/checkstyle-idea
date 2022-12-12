@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +11,7 @@ import java.io.IOException;
 /**
  * Action to read the file to a temporary file.
  */
-class CreateScannableFileAction implements Runnable {
+class CreateScannableFileAction implements ThrowableRunnable<RuntimeException> {
 
     /**
      * Any failure that occurred on the thread.

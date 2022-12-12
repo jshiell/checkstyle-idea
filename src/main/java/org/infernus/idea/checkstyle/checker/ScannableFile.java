@@ -1,14 +1,14 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.application.options.CodeStyle;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -75,7 +75,7 @@ public class ScannableFile {
                                                         @NotNull final Project project,
                                                         @Nullable final Module module,
                                                         @Nullable final ConfigurationLocation overrideConfigLocation) {
-        Computable<List<ScannableFile>> action = () -> psiFiles.stream()
+        ThrowableComputable<List<ScannableFile>, RuntimeException> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(
                         currentFile,
                         ofNullable(module),
@@ -84,7 +84,7 @@ public class ScannableFile {
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-        return ApplicationManager.getApplication().runReadAction(action);
+        return ReadAction.compute(action);
     }
 
     private static PluginConfigurationManager configurationManager(final Project project) {
@@ -95,7 +95,7 @@ public class ScannableFile {
     private static ScannableFile create(@NotNull final PsiFile psiFile, @Nullable final Module module) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile, module);
-            ApplicationManager.getApplication().runReadAction(fileAction);
+            ReadAction.run(fileAction);
 
             if (fileAction.getFailure() != null) {
                 throw fileAction.getFailure();

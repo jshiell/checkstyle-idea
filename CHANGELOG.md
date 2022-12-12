@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.74.1** Fixed: Ensure scope is checked as read action (#595).
 * **5.74.0** New: Added Checkstyle 10.5.0 - thanks to @kennysoft (#596).
 * **5.73.0** New: Added Checkstyle 10.4.
 * **5.72.0** Now built against IDEA 2021.3.3 (was 2021.1.3).

@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -63,15 +63,15 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     private Map<Module, Set<PsiFile>> mapsModulesToFiles() {
-        final Map<Module, Set<PsiFile>> modulesToFiles = new HashMap<>();
-        ApplicationManager.getApplication().runReadAction(() -> {
+        return ReadAction.compute(() -> {
+            final Map<Module, Set<PsiFile>> modulesToFiles = new HashMap<>();
             for (final PsiFile file : files) {
                 final Module module = ModuleUtil.findModuleForPsiElement(file);
                 Set<PsiFile> filesForModule = modulesToFiles.computeIfAbsent(module, key -> new HashSet<>());
                 filesForModule.add(file);
             }
+            return modulesToFiles;
         });
-        return modulesToFiles;
     }
 
     @Override
@@ -132,13 +132,11 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     private List<PsiFile> buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
-        final List<PsiFile> allChildFiles = new ArrayList<>();
-        ApplicationManager.getApplication().runReadAction(() -> {
+        return ReadAction.compute(() -> {
             final FindChildFiles visitor = new FindChildFiles(virtualFile, psiManager);
             VfsUtilCore.visitChildrenRecursively(virtualFile, visitor);
-            allChildFiles.addAll(visitor.locatedFiles);
+            return visitor.locatedFiles;
         });
-        return allChildFiles;
     }
 
     private Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> processFilesForModuleInfoAndScan() {
