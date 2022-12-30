@@ -32,13 +32,13 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 	private long cacheExpiry;
 
 	HTTPURLConfigurationLocation(@NotNull final Project project,
-	                             @NotNull final String id) {
+								 @NotNull final String id) {
 		super(id, ConfigurationType.HTTP_URL, project);
 	}
 
 	HTTPURLConfigurationLocation(@NotNull final String id,
-	                             @NotNull final ConfigurationType configurationType,
-	                             @NotNull final Project project) {
+								 @NotNull final ConfigurationType configurationType,
+								 @NotNull final Project project) {
 		super(id, configurationType, project);
 	}
 
