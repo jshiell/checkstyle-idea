@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -10,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.jdom.Document;
@@ -64,8 +66,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
      * Refreshes the named scope if the scopes have been changed.
      */
     private void initializeFutureScopeChangeHandling() {
-        NamedScopeManager.getInstance(project).addScopeListener(this::scopeChanged, project);
-        DependencyValidationManager.getInstance(project).addScopeListener(this::scopeChanged, project);
+        Disposable parent = project.getService(CheckerFactoryCache.class);
+        NamedScopeManager.getInstance(project).addScopeListener(this::scopeChanged, parent);
+        DependencyValidationManager.getInstance(project).addScopeListener(this::scopeChanged, parent);
     }
 
     private void scopeChanged() {

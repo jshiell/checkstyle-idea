@@ -38,7 +38,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     private static final String BASE_VERSION = readBaseVersion();
     private static final String OTHER_VERSION = "8.0";
 
-    private final Project project = mock(Project.class);
+    private final Project project = TestHelper.mockProject();
     private CheckstyleProjectService csService;
 
 
