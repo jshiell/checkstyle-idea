@@ -8,11 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.table.AbstractTableModel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.util.function.Predicate.not;
 
@@ -84,7 +80,7 @@ public class LocationTableModel extends AbstractTableModel {
     }
 
     public void setActiveLocations(@NotNull final SortedSet<ConfigurationLocation> activeLocations) {
-        if (!activeLocations.isEmpty() && !locations.containsAll(activeLocations)) {
+        if (!activeLocations.isEmpty() && !new HashSet<>(locations).containsAll(activeLocations)) {
             throw new IllegalArgumentException("Active location is not in location list");
         }
 
@@ -123,11 +119,6 @@ public class LocationTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    /**
-     * Get the properties from the table.
-     *
-     * @return the map of properties to values.
-     */
     public List<ConfigurationLocation> getLocations() {
         return Collections.unmodifiableList(locations);
     }
@@ -181,9 +172,9 @@ public class LocationTableModel extends AbstractTableModel {
                 return locations.get(rowIndex).getDescription();
 
             case COLUMN_FILE:
-	            String locationFile = locations.get(rowIndex).getLocation();
-	            try {
-		            String userInfo = new URL(locationFile).getUserInfo();
+                String locationFile = locations.get(rowIndex).getLocation();
+                try {
+                    String userInfo = new URL(locationFile).getUserInfo();
                     if (userInfo != null) {
                         return locationFile.replace(
                                 userInfo,
@@ -191,9 +182,9 @@ public class LocationTableModel extends AbstractTableModel {
                         );
                     }
                     return locationFile;
-	            } catch (MalformedURLException e) {
-		            return locationFile;
-	            }
+                } catch (MalformedURLException e) {
+                    return locationFile;
+                }
 
             case COLUMN_SCOPE:
                 return locations.get(rowIndex).getNamedScope()

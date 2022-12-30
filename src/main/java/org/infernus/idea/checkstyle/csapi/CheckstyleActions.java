@@ -68,7 +68,7 @@ public interface CheckstyleActions {
      * @param isSuppressingErrors flag indicating whether errors should be suppressed (from plugin config)
      * @param tabWidth            number of characters per tab
      * @param baseDir             the base dir
-     * @return list of problems per file
+     * @return a map of files to the problems found in the file
      */
     Map<PsiFile, List<Problem>> scan(@NotNull CheckstyleInternalObject checkerWithConfig,
                                      @NotNull List<ScannableFile> scannableFiles,
