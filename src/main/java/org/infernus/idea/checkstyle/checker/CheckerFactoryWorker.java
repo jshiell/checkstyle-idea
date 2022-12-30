@@ -44,7 +44,7 @@ class CheckerFactoryWorker extends Thread {
             final CheckStyleChecker checker = checkstyleProjectService
                     .getCheckstyleInstance()
                     .createChecker(module, location, properties, loaderOfCheckedCode);
-            threadReturn = new CachedChecker(project, checker);
+            threadReturn = new CachedChecker(checker);
         } catch (RuntimeException e) {
             threadReturn = e;
         }

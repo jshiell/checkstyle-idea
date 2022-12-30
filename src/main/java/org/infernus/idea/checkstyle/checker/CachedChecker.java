@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,14 +13,11 @@ class CachedChecker {
      */
     private static final int CACHE_VALID_TIME = 60000;
 
-    private final Project project;
-
     private final CheckStyleChecker checkStyleChecker;
 
     private long timeStamp;
 
-    CachedChecker(@NotNull final Project project, @NotNull final CheckStyleChecker checkStyleChecker) {
-        this.project = project;
+    CachedChecker(@NotNull final CheckStyleChecker checkStyleChecker) {
         this.checkStyleChecker = checkStyleChecker;
         this.timeStamp = System.currentTimeMillis();
     }
@@ -29,11 +25,6 @@ class CachedChecker {
     public CheckStyleChecker getCheckStyleChecker() {
         this.timeStamp = System.currentTimeMillis();
         return checkStyleChecker;
-    }
-
-    @NotNull
-    public Project getProject() {
-        return project;
     }
 
     private long getTimeStamp() {

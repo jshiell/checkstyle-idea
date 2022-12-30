@@ -84,7 +84,7 @@ public class OpPeruseConfiguration implements CheckstyleCommand<Void> {
 
         ConfigurationModule result = null;
         if (name != null) {
-            result = new ConfigurationModule(name, properties, knownTokenTypes, messages);
+            result = new ConfigurationModule(name, properties, knownTokenTypes);
         }
         return result;
     }

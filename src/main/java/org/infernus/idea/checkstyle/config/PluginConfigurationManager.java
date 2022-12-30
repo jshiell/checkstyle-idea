@@ -55,10 +55,6 @@ public class PluginConfigurationManager {
         }
     }
 
-    public static PluginConfigurationManager getInstance(@NotNull final Project project) {
-        return project.getService(PluginConfigurationManager.class);
-    }
-
     private ProjectConfigurationState projectConfigurationState() {
         return project.getService(ProjectConfigurationState.class);
     }

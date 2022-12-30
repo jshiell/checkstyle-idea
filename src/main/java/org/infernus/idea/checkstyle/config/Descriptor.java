@@ -107,22 +107,6 @@ public class Descriptor {
         return project.getService(ConfigurationLocationFactory.class);
     }
 
-    public ConfigurationType getConfigurationType() {
-        return configurationType;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public NamedScope getScope() {
-        return scope;
-    }
-
     @Override
     public String toString() {
         return configurationType + ":" + location + ":" + description + ";" + scope.getScopeId();

@@ -17,13 +17,9 @@ public class ConfigurationModule {
 
     private final Set<KnownTokenTypes> knownTokenTypes;
 
-    private final Map<String, String> messages;
-
-
     public ConfigurationModule(@NotNull final String name,
                                @Nullable final Map<String, String> properties,
-                               @Nullable final Set<KnownTokenTypes> knownTokenTypes,
-                               @Nullable final Map<String, String> messages) {
+                               @Nullable final Set<KnownTokenTypes> knownTokenTypes) {
         this.name = name;
 
         if (properties != null) {
@@ -36,12 +32,6 @@ public class ConfigurationModule {
             this.knownTokenTypes = Collections.unmodifiableSet(knownTokenTypes);
         } else {
             this.knownTokenTypes = Collections.emptySet();
-        }
-
-        if (messages != null) {
-            this.messages = Collections.unmodifiableMap(messages);
-        } else {
-            this.messages = Collections.emptyMap();
         }
     }
 
@@ -59,10 +49,5 @@ public class ConfigurationModule {
     @NotNull
     public Set<KnownTokenTypes> getKnownTokenTypes() {
         return knownTokenTypes;
-    }
-
-    @NotNull
-    public Map<String, String> getMessages() {
-        return messages;
     }
 }
