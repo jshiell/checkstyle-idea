@@ -14,12 +14,15 @@ import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,10 +175,24 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                            @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
-                final SAXBuilder saxBuilder = new SAXBuilder();
-                saxBuilder.setEntityResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
-                final Document configDoc = saxBuilder.build(inputStream);
-                return extractProperties(configDoc.getRootElement());
+                final List<String> propertyNames = new ArrayList<>();
+
+                final XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
+                final XMLEventReader eventReader = factory.createXMLEventReader(inputStream);
+
+                while (eventReader.hasNext()) {
+                    final XMLEvent event = eventReader.nextEvent();
+
+                    if (event.isStartElement()) {
+                        final String propertyName = extractNameIfPropertyElement((StartElement) event);
+                        if (propertyName != null) {
+                            propertyNames.add(propertyName);
+                        }
+                    }
+                }
+
+                return propertyNames;
 
             } catch (Exception e) {
                 LOG.warn("CheckStyle file could not be parsed for properties.", e);
@@ -185,43 +202,19 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return new ArrayList<>();
     }
 
-    /**
-     * Extract all settable properties from the given configuration element.
-     *
-     * @param element the configuration element.
-     * @return the settable property names.
-     */
-    private List<String> extractProperties(final Element element) {
-        final List<String> propertyNames = new ArrayList<>();
-
-        if (element != null) {
-            extractPropertyNames(element, propertyNames);
-
-            for (final Element child : element.getChildren()) {
-                propertyNames.addAll(extractProperties(child));
+    private static String extractNameIfPropertyElement(final StartElement startElement) {
+        if ("property".equals(startElement.getName().getLocalPart())) {
+            final Attribute valueAttribute = startElement.getAttributeByName(new QName("value"));
+            if (valueAttribute != null) {
+                final String value = valueAttribute.getValue();
+                final int propertyStart = value.indexOf("${");
+                final int propertyEnd = value.indexOf('}');
+                if (propertyStart >= 0 && propertyEnd >= 0) {
+                    return value.substring(propertyStart + 2, propertyEnd);
+                }
             }
         }
-
-        return propertyNames;
-    }
-
-    private void extractPropertyNames(final Element element, final List<String> propertyNames) {
-        if (!"property".equals(element.getName())) {
-            return;
-        }
-
-        final String value = element.getAttributeValue("value");
-        if (value == null) {
-            return;
-        }
-
-        final int propertyStart = value.indexOf("${");
-        final int propertyEnd = value.indexOf('}');
-        if (propertyStart >= 0 && propertyEnd >= 0) {
-            final String propertyName = value.substring(
-                    propertyStart + 2, propertyEnd);
-            propertyNames.add(propertyName);
-        }
+        return null;
     }
 
     @SuppressWarnings("EmptyTryBlock")

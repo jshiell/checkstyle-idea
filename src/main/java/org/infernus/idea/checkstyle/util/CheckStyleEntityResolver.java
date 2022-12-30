@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
+import javax.xml.stream.XMLResolver;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
@@ -22,7 +24,7 @@ import static java.util.Arrays.asList;
 /**
  * Entity resolver for CheckStyle DTDs.
  */
-public class CheckStyleEntityResolver implements EntityResolver {
+public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
 
     private static final Log LOG = LogFactory.getLog(CheckStyleEntityResolver.class);
 
@@ -114,6 +116,18 @@ public class CheckStyleEntityResolver implements EntityResolver {
         }
 
         return null;
+    }
+
+    @Override
+    public Object resolveEntity(final String publicID,
+                                final String systemID,
+                                final String baseURI,
+                                final String namespace) throws XMLStreamException {
+        try {
+            return resolveEntity(publicID, systemID);
+        } catch (IOException e) {
+            throw new XMLStreamException(e);
+        }
     }
 
     @Nullable
