@@ -27,7 +27,7 @@ intellij {
 }
 
 publishPlugin {
-    token = System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN")
+    token.set(System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN"))
 }
 
 
@@ -41,10 +41,10 @@ java {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << '-Xlint:deprecation'
-    options.release = 11
+    options.release.set(11)
 
     if (it.name == 'compileCsaccessJava' || it.name == 'compileCsaccessTestJava') {
         options.compilerArgs << '-Xlint:unchecked'
