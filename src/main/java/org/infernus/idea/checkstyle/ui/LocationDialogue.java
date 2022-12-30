@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -255,10 +256,8 @@ public class LocationDialogue extends JDialog {
 
                     Map<String, String> properties;
                     if (!project.isDefault() || location.canBeResolvedInDefaultProject()) {
-                        try {
-                            location.resolve(checkstyleProjectService.underlyingClassLoader());
+                        try (InputStream ignored = location.resolve(checkstyleProjectService.underlyingClassLoader())) {
                             properties = location.getProperties();
-
                         } catch (IOException e) {
                             showError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
                             return;
