@@ -29,7 +29,7 @@ final class PsiFileValidator {
     public static boolean isScannable(@Nullable final PsiFile psiFile,
                                       @NotNull final Optional<Module> module,
                                       @NotNull final PluginConfigurationManager pluginConfig,
-                                      @Nullable ConfigurationLocation overrideConfigLocation) {
+                                      @Nullable final ConfigurationLocation overrideConfigLocation) {
         return psiFile != null
                 && psiFile.isValid()
                 && psiFile.isPhysical()
@@ -64,10 +64,10 @@ final class PsiFileValidator {
     private static boolean isInSource(
             @NotNull final PsiFile psiFile,
             @NotNull final PluginConfigurationManager pluginConfig,
-            @Nullable ConfigurationLocation overrideConfigLocation) {
+            @Nullable final ConfigurationLocation overrideConfigLocation) {
         final boolean shouldBeScanned = pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
                 || (psiFile.getVirtualFile() != null
-                        && ProjectFileIndex.SERVICE.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
+                        && ProjectFileIndex.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
         return shouldBeScanned && isInNamedScopeIfPresent(
                 psiFile,
                 overrideConfigLocation != null
@@ -79,7 +79,8 @@ final class PsiFileValidator {
      * Returns true, if the given psiFile is contained in any named scope of the given pluginConfig.
      * If no NamedScope is provided, true will be returned.
      */
-    private static boolean isInNamedScopeIfPresent(@NotNull PsiFile psiFile, Collection<ConfigurationLocation> activeLocations) {
+    private static boolean isInNamedScopeIfPresent(@NotNull final PsiFile psiFile,
+                                                   final Collection<ConfigurationLocation> activeLocations) {
         return activeLocations.stream()
                 .map(ConfigurationLocation::getNamedScope)
                 .flatMap(Optional::stream)

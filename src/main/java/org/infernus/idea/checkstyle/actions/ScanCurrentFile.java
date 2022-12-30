@@ -92,20 +92,18 @@ public class ScanCurrentFile extends BaseAction {
 
         // validate selected file against scan scope
         if (selectedFile != null && scanScope != ScanScope.Everything) {
-            final ProjectFileIndex projectFileIndex = ProjectFileIndex.SERVICE.getInstance(project);
-            if (projectFileIndex != null) {
-                if (!projectFileIndex.isInSourceContent(selectedFile)) {
+            final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
+            if (!projectFileIndex.isInSourceContent(selectedFile)) {
+                selectedFile = null;
+            }
+            if (!scanScope.includeNonJavaSources() && selectedFile != null) {
+                if (!FileTypes.isJava(selectedFile.getFileType())) {
                     selectedFile = null;
                 }
-                if (!scanScope.includeNonJavaSources() && selectedFile != null) {
-                    if (!FileTypes.isJava(selectedFile.getFileType())) {
-                        selectedFile = null;
-                    }
-                }
-                if (!scanScope.includeTestClasses() && selectedFile != null) {
-                    if (projectFileIndex.isInTestSourceContent(selectedFile)) {
-                        selectedFile = null;
-                    }
+            }
+            if (!scanScope.includeTestClasses() && selectedFile != null) {
+                if (projectFileIndex.isInTestSourceContent(selectedFile)) {
+                    selectedFile = null;
                 }
             }
         }
