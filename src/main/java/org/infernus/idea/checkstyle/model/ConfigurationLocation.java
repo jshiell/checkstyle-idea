@@ -136,7 +136,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
     }
 
-    public synchronized void setNamedScope(NamedScope namedScope) {
+    public synchronized void setNamedScope(final NamedScope namedScope) {
         this.namedScope = namedScope;
     }
 
@@ -293,7 +293,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private boolean existsOnClasspath(final String fileName,
                                       final ClassLoader checkstyleClassLoader) {
-        return checkstyleClassLoader.getResource(fileName.startsWith("/") ? fileName.substring(1) : fileName) != null;
+        if (fileName.startsWith("/")) {
+            return checkstyleClassLoader.getResource(fileName.substring(1)) != null;
+        }
+        return checkstyleClassLoader.getResource(fileName) != null;
     }
 
     private File checkCommonPathsForTarget(final String fileName,
@@ -348,22 +351,20 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private File checkModuleContentRoots(final Module module, final String fileName) {
         ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
-        if (rootManager.getContentEntries().length > 0) {
-            for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
-                if (contentEntry.getFile() == null) {
-                    continue;
-                }
+        for (final ContentEntry contentEntry : rootManager.getContentEntries()) {
+            if (contentEntry.getFile() == null) {
+                continue;
+            }
 
-                final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
-                if (contentEntryPath.exists()) {
-                    return contentEntryPath;
-                }
+            final File contentEntryPath = new File(contentEntry.getFile().getPath(), fileName);
+            if (contentEntryPath.exists()) {
+                return contentEntryPath;
             }
         }
         return null;
     }
 
-    public synchronized final boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
+    public final synchronized boolean hasChangedFrom(final ConfigurationLocation configurationLocation) {
         return !equals(configurationLocation)
                 || propertiesHaveChanged(configurationLocation);
     }
