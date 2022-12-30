@@ -88,7 +88,8 @@
                          groupKey="inspection.group"
                          level="WARNING"
                          enabledByDefault="true"
-                         runForWholeFile="true"/>
+                         runForWholeFile="true"
+                         language=""/>
 
         <checkinHandlerFactory id="CheckStyleIDEACheckInHandlerFactory"
                                implementation="org.infernus.idea.checkstyle.handlers.ScanFilesBeforeCheckinHandlerFactory"/>
