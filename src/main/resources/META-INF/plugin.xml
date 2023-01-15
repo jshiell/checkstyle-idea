@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.74.2</version>
+    <version>5.75.0</version>
     <idea-version since-build="213.7172.25"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.75.0: New: Added Checkstyle 10.6.0.</li>
     <li>5.74.1: Fixed: Ensure scope is checked as read action (#595).</li>
     <li>5.74.0: New: Added Checkstyle 10.5.0 - thanks to @kennysoft (#596).</li>
     <li>5.73.0: New: Added Checkstyle 10.4.</li>
@@ -48,11 +49,6 @@
     <li>5.66.0: New: Added Checkstyle 10.2.</li>
     <li>5.66.0: Fix: Save all modified files before reloading rules, to ensure we load what people see (#562) - thanks to @ahus1.</li>
     <li>5.66.0: Fix: Improved thread safety on `ConfigurationLocation` (#568) - thanks to @ahus1.</li>
-    <li>5.65.0: Fix: NPE when active config lookup fails (#566).</li>
-    <li>5.65.0: Fix: Properties not correctly loaded for active files (#565).</li>
-    <li>5.65.0: New: The toolwindow is now available during indexing (#564) - thanks to @ahus1.</li>
-    <li>5.65.0: New: We now use SVG icons (#563) - thanks to @ahus1.</li>
-    <li>5.64.0: New: You can now select multiple active Checkstyle files and scope them individually (#559) - thanks to @JanK411 and @Uschi003.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
