@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.75.0** Fixed: Set target component on toolbars (#602).
 * **5.75.0** New: Added Checkstyle 10.6.0.
 * **5.74.1** Fixed: Ensure scope is checked as read action (#595).
 * **5.74.0** New: Added Checkstyle 10.5.0 - thanks to @kennysoft (#596).

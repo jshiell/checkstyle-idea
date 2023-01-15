@@ -117,11 +117,13 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                 ActionManager.getInstance().getAction(MAIN_ACTION_GROUP);
         final ActionToolbar mainToolbar = ActionManager.getInstance().createActionToolbar(
                 ID_TOOLWINDOW, mainActionGroup, false);
+        mainToolbar.setTargetComponent(this);
 
         final ActionGroup treeActionGroup = (ActionGroup)
                 ActionManager.getInstance().getAction(TREE_ACTION_GROUP);
         final ActionToolbar treeToolbar = ActionManager.getInstance().createActionToolbar(
                 ID_TOOLWINDOW, treeActionGroup, false);
+        treeToolbar.setTargetComponent(this);
 
         final Box toolBarBox = Box.createHorizontalBox();
         toolBarBox.add(mainToolbar.getComponent());
