@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.75.0</version>
+    <version>5.76.0</version>
     <idea-version since-build="213.7172.25"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.76.0: New: Added Checkstyle 10.7.0.</li>
     <li>5.75.0: Fixed: Set target component on toolbars (#602).</li>
     <li>5.75.0: New: Added Checkstyle 10.6.0.</li>
     <li>5.74.1: Fixed: Ensure scope is checked as read action (#595).</li>
