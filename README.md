@@ -1,6 +1,6 @@
 # CheckStyle-IDEA
 
-&copy; Copyright 2006-2022 CheckStyle-IDEA Contributors
+&copy; Copyright 2006-2023 CheckStyle-IDEA Contributors
 
 Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
