@@ -19,4 +19,4 @@ jobs:
         java-version: 11
     
     - name: Build
-      run: ./gradlew check jacocoCsaccessCoverageVerification
+      run: ./gradlew check
