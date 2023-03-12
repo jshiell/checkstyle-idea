@@ -32,8 +32,8 @@ public class CheckerFactory {
     private static final Logger LOG = Logger.getInstance(CheckerFactory.class);
 
     private final Project project;
-    private final CheckstyleProjectService checkstyleProjectService;
-    private final CheckerFactoryCache cache;
+    private CheckstyleProjectService checkstyleProjectService;
+    private  CheckerFactoryCache cache;
 
     @SuppressWarnings("unused") // IDEA's DI
     public CheckerFactory(@NotNull final Project project) {
@@ -42,18 +42,13 @@ public class CheckerFactory {
         this.cache = project.getService(CheckerFactoryCache.class);
     }
 
-    private CheckerFactory(@NotNull final Project project,
-                           @NotNull final CheckstyleProjectService checkstyleProjectService,
-                           @NotNull final CheckerFactoryCache cache) {
-        this.project = project;
-        this.checkstyleProjectService = checkstyleProjectService;
-        this.cache = cache;
-    }
-
     public static CheckerFactory create(@NotNull final Project project,
-                         @NotNull final CheckstyleProjectService checkstyleProjectService,
-                         @NotNull final CheckerFactoryCache cache) {
-        return new CheckerFactory(project, checkstyleProjectService, cache);
+                                        @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                        @NotNull final CheckerFactoryCache cache) {
+        CheckerFactory checkerFactory = new CheckerFactory(project);
+        checkerFactory.checkstyleProjectService = checkstyleProjectService;
+        checkerFactory.cache = cache;
+        return checkerFactory;
     }
 
     public void verify(final ConfigurationLocation location) {
