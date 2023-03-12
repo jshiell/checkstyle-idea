@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Build info
       id: build_info
@@ -20,7 +20,7 @@ jobs:
         echo "::set-output name=build_tag::${BUILD_TAG}"
 
     - name: Set up Java 11
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3
       with:
         java-version: 11
     
