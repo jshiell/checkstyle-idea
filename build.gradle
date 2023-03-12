@@ -19,7 +19,7 @@ repositories {
 version = '5.77.0'
 
 intellij {
-    version = 'IC-2021.3.3'
+    version = 'IC-2022.1.4'
     pluginName = 'CheckStyle-IDEA'
     updateSinceUntilBuild = false
     instrumentCode = false

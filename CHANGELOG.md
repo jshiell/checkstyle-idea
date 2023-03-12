@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.77.0** New: Now built against IDEA 2022.1.4 (was 2021.3.3).
 * **5.77.0** New: Added Checkstyle 10.8.1.
 * **5.76.0** New: Added Checkstyle 10.7.0.
 * **5.75.0** Fixed: Set target component on toolbars (#602).

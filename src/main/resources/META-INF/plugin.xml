@@ -16,7 +16,7 @@
         ]]>
     </description>
     <version>5.77.0</version>
-    <idea-version since-build="213.7172.25"/>
+    <idea-version since-build="221.6008.13"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
     <depends>com.intellij.modules.java</depends>
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.77.0: New: Now built against IDEA 2022.1.4 (was 2021.3.3).</li>
     <li>5.77.0: New: Added Checkstyle 10.8.1.</li>
     <li>5.76.0: New: Added Checkstyle 10.7.0.</li>
     <li>5.75.0: Fixed: Set target component on toolbars (#602).</li>
