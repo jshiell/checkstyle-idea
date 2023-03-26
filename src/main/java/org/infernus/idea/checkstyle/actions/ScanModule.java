@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -12,6 +13,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.util.ThrowableRunnable;
+import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,47 +82,47 @@ public class ScanModule extends BaseAction {
     public final void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
-        try {
-            final Presentation presentation = event.getPresentation();
+        final Presentation presentation = event.getPresentation();
+        final Optional<Project> projectFromEvent = project(event);
+        if (projectFromEvent.isEmpty()) { // check if we're loading...
+            presentation.setEnabled(false);
+            return;
+        }
 
-            Optional<Project> projectFromEvent = project(event);
-            if (projectFromEvent.isEmpty()) { // check if we're loading...
-                presentation.setEnabled(false);
-                return;
-            }
-
-            projectFromEvent.ifPresent(project -> {
+        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
+            try {
                 final VirtualFile[] selectedFiles
                         = FileEditorManager.getInstance(project).getSelectedFiles();
                 if (selectedFiles.length == 0) {
-                    return;
+                    return VirtualFile.EMPTY_ARRAY;
                 }
 
                 final Module module = ModuleUtil.findModuleForFile(
                         selectedFiles[0], project);
                 if (module == null) {
-                    return;
+                    return VirtualFile.EMPTY_ARRAY;
                 }
 
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
-                VirtualFile[] moduleFiles;
                 final ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
                 if (scope == ScanScope.Everything) {
-                    moduleFiles = moduleRootManager.getContentRoots();
+                    return moduleRootManager.getContentRoots();
                 } else {
-                    moduleFiles = moduleRootManager.getSourceRoots(scope.includeTestClasses());
+                    return moduleRootManager.getSourceRoots(scope.includeTestClasses());
                 }
+            } catch (Throwable e) {
+                LOG.warn("Current Module button update failed", e);
+                return VirtualFile.EMPTY_ARRAY;
+            }
 
-                // disable if no files are selected or scan in progress
-                if (containsAtLeastOneFile(moduleFiles)) {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                } else {
-                    presentation.setEnabled(false);
-                }
-            });
-        } catch (Throwable e) {
-            LOG.warn("Current Module button update failed", e);
-        }
+        }).finishOnUiThread(ModalityState.any(), (moduleFiles) -> {
+            // disable if no files are selected or scan in progress
+            if (containsAtLeastOneFile(moduleFiles)) {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
+            }
+        }).submit(NonUrgentExecutor.getInstance()));
     }
 }

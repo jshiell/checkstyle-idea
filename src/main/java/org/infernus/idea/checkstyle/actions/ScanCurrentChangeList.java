@@ -2,11 +2,15 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -50,19 +54,28 @@ public class ScanCurrentChangeList extends BaseAction {
     @Override
     public void update(final @NotNull AnActionEvent event) {
         super.update(event);
-        project(event).ifPresent(project -> {
-            try {
-                final Presentation presentation = event.getPresentation();
 
-                final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
-                if (changeList.getChanges() == null || changeList.getChanges().size() == 0) {
-                    presentation.setEnabled(false);
-                } else {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                }
+        final Presentation presentation = event.getPresentation();
+        final Optional<Project> projectFromEvent = project(event);
+        if (projectFromEvent.isEmpty()) { // check if we're loading...
+            presentation.setEnabled(false);
+            return;
+        }
+
+        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
+            try {
+                return ChangeListManager.getInstance(project).getDefaultChangeList();
+
             } catch (Throwable e) {
                 LOG.warn("Button update failed.", e);
+                return null;
             }
-        });
+        }).finishOnUiThread(ModalityState.any(), (changeList) -> {
+            if (changeList != null && (changeList.getChanges() == null || changeList.getChanges().size() == 0)) {
+                presentation.setEnabled(false);
+            } else {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            }
+        }).submit(NonUrgentExecutor.getInstance()));
     }
 }

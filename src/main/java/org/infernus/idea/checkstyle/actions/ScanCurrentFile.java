@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -13,6 +15,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
@@ -72,10 +75,65 @@ public class ScanCurrentFile extends BaseAction {
     @Nullable
     private VirtualFile getSelectedFile(
             final Project project,
-            PluginConfiguration pluginConfiguration,
-            @Nullable ConfigurationLocation overrideIfExists) {
-        VirtualFile selectedFile = null;
+            final PluginConfiguration pluginConfiguration,
+            final @Nullable ConfigurationLocation overrideIfExists) {
+        final VirtualFile selectedFile = getSelectedFile(project);
+        if (selectedFile == null) {
+            return null;
+        }
+
+        if (!isFileValidAgainstScanScope(project, pluginConfiguration, selectedFile)) {
+            return null;
+        }
+
+        final List<NamedScope> namedScopes = getNamedScopesToCheck(pluginConfiguration, overrideIfExists);
+        if (!namedScopes.isEmpty() && namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull)) {
+            return selectedFile;
+        }
+
+        final boolean isFileInScope = namedScopes.stream()
+                .anyMatch((NamedScope namedScope) -> NamedScopeHelper.isFileInScope(psiFileFor(project, selectedFile), namedScope));
+        if (isFileInScope) {
+            return selectedFile;
+        }
+
+        return null;
+    }
+
+    @NotNull
+    private static PsiFile psiFileFor(@NotNull final Project project,
+                                      @NotNull final VirtualFile selectedFile) {
+        final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
+        if (psiFile == null) {
+            throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
+        }
+        return psiFile;
+    }
+
+    private static boolean isFileValidAgainstScanScope(@NotNull final Project project,
+                                                       @NotNull final PluginConfiguration pluginConfiguration,
+                                                       @NotNull final VirtualFile selectedFile) {
         final ScanScope scanScope = pluginConfiguration.getScanScope();
+
+        if (scanScope != ScanScope.Everything) {
+            final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
+            if (!projectFileIndex.isInSourceContent(selectedFile)) {
+                return false;
+            }
+            if (!scanScope.includeNonJavaSources() && !FileTypes.isJava(selectedFile.getFileType())) {
+                return false;
+            }
+            if (!scanScope.includeTestClasses()) {
+                return !projectFileIndex.isInTestSourceContent(selectedFile);
+            }
+        }
+
+        return true;
+    }
+
+    @Nullable
+    private static VirtualFile getSelectedFile(@NotNull final Project project) {
+        VirtualFile selectedFile = null;
 
         final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (selectedTextEditor != null) {
@@ -89,44 +147,7 @@ public class ScanCurrentFile extends BaseAction {
                 selectedFile = selectedFiles[0];
             }
         }
-
-        // validate selected file against scan scope
-        if (selectedFile != null && scanScope != ScanScope.Everything) {
-            final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
-            if (!projectFileIndex.isInSourceContent(selectedFile)) {
-                selectedFile = null;
-            }
-            if (!scanScope.includeNonJavaSources() && selectedFile != null) {
-                if (!FileTypes.isJava(selectedFile.getFileType())) {
-                    selectedFile = null;
-                }
-            }
-            if (!scanScope.includeTestClasses() && selectedFile != null) {
-                if (projectFileIndex.isInTestSourceContent(selectedFile)) {
-                    selectedFile = null;
-                }
-            }
-        }
-
-        if (selectedFile == null) {
-            return null;
-        }
-
-        final List<NamedScope> namedScopes = getNamedScopesToCheck(pluginConfiguration, overrideIfExists);
-
-        if (!namedScopes.isEmpty() && namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull)) {
-            return selectedFile;
-        }
-
-        final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
-        if (psiFile == null) {
-            throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
-        }
-
-        final boolean isFileInScope = namedScopes.stream()
-                .anyMatch((NamedScope namedScope) -> NamedScopeHelper.isFileInScope(psiFile, namedScope));
-
-        return isFileInScope ? selectedFile : null;
+        return selectedFile;
     }
 
     /**
@@ -135,39 +156,48 @@ public class ScanCurrentFile extends BaseAction {
      * are returned.
      */
     @NotNull
-    private List<NamedScope> getNamedScopesToCheck(PluginConfiguration pluginConfiguration,
-                                                   @Nullable ConfigurationLocation overrideIfExists) {
-        final Collection<ConfigurationLocation> getLocationsToCheck = overrideIfExists != null ? singletonList(overrideIfExists) : pluginConfiguration.getActiveLocations();
+    private List<NamedScope> getNamedScopesToCheck(final PluginConfiguration pluginConfiguration,
+                                                   final @Nullable ConfigurationLocation overrideIfExists) {
+        final Collection<ConfigurationLocation> getLocationsToCheck;
+        if (overrideIfExists != null) {
+            getLocationsToCheck = singletonList(overrideIfExists);
+        } else {
+            getLocationsToCheck = pluginConfiguration.getActiveLocations();
+        }
         return getLocationsToCheck.stream()
                 .map(ConfigurationLocation::getNamedScope)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
-        project(event).ifPresent(project -> {
-            try {
-                final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
+        final Presentation presentation = event.getPresentation();
+        final Optional<Project> projectFromEvent = project(event);
+        if (projectFromEvent.isEmpty()) { // check if we're loading...
+            presentation.setEnabled(false);
+            return;
+        }
 
-                final VirtualFile selectedFile = getSelectedFile(
-                        project,
-                        pluginConfiguration,
+        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
+            try {
+                return getSelectedFile(project,
+                        configurationManager(project).getCurrent(),
                         getSelectedOverride(toolWindow(project)));
 
-                // disable if no file is selected or scan in progress
-                final Presentation presentation = event.getPresentation();
-                if (selectedFile != null) {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                } else {
-                    presentation.setEnabled(false);
-                }
             } catch (Throwable e) {
                 LOG.warn("Current File button update failed", e);
+                return null;
             }
-        });
+        }).finishOnUiThread(ModalityState.any(), (selectedFile) -> {
+            // disable if no file is selected or scan in progress
+            if (selectedFile != null) {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
+            }
+        }).submit(NonUrgentExecutor.getInstance()));
     }
 }

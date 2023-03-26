@@ -2,12 +2,16 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -38,20 +42,28 @@ public class ScanModifiedFiles extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
-        project(event).ifPresent(project -> {
-            try {
-                final Presentation presentation = event.getPresentation();
+        final Presentation presentation = event.getPresentation();
+        final Optional<Project> projectFromEvent = project(event);
+        if (projectFromEvent.isEmpty()) { // check if we're loading...
+            presentation.setEnabled(false);
+            return;
+        }
 
-                // disable if no files are modified
-                final List<VirtualFile> modifiedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
-                if (modifiedFiles.isEmpty()) {
-                    presentation.setEnabled(false);
-                } else {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                }
+        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
+            try {
+                return ChangeListManager.getInstance(project).getAffectedFiles();
+
             } catch (Throwable e) {
                 LOG.warn("Button update failed.", e);
+                return Collections.EMPTY_LIST;
             }
-        });
+        }).finishOnUiThread(ModalityState.any(), (modifiedFiles) -> {
+            // disable if no files are modified
+            if (modifiedFiles.isEmpty()) {
+                presentation.setEnabled(false);
+            } else {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            }
+        }).submit(NonUrgentExecutor.getInstance()));
     }
 }

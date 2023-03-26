@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -9,6 +10,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.util.ThrowableRunnable;
+import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,36 +64,36 @@ public class ScanProject extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         super.update(event);
 
-        try {
-            final Presentation presentation = event.getPresentation();
+        final Presentation presentation = event.getPresentation();
+        final Optional<Project> projectFromEvent = project(event);
+        if (projectFromEvent.isEmpty()) {
+            presentation.setEnabled(false);
+            return;
+        }
 
-            Optional<Project> projectFromEvent = project(event);
-            if (projectFromEvent.isEmpty()) {
-                presentation.setEnabled(false);
-                return;
-            }
-
-            projectFromEvent.ifPresent(project -> {
+        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
+            try {
                 final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
                 final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-                VirtualFile[] sourceRoots;
                 if (scope == ScanScope.Everything) {
-                    sourceRoots = projectRootManager.getContentRoots();
+                    return projectRootManager.getContentRoots();
                 } else {
-                    sourceRoots = projectRootManager.getContentSourceRoots();
+                    return projectRootManager.getContentSourceRoots();
                 }
+            } catch (Throwable e) {
+                LOG.warn("Project button update failed", e);
+                return VirtualFile.EMPTY_ARRAY;
+            }
 
-                // disable if no files are selected or scan in progress
-                if (containsAtLeastOneFile(sourceRoots)) {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                } else {
-                    presentation.setEnabled(false);
-                }
-            });
-        } catch (Throwable e) {
-            LOG.warn("Project button update failed", e);
-        }
+        }).finishOnUiThread(ModalityState.any(), (sourceRoots) -> {
+            // disable if no files are selected or scan in progress
+            if (containsAtLeastOneFile(sourceRoots)) {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
+            }
+        }).submit(NonUrgentExecutor.getInstance()));
     }
 
 }
