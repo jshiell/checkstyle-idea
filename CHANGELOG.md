@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.77.1** Fixed: Colour mismatch in new UI (#608).
 * **5.77.1** Fixed: Improved action update handling to reduce pauses (#601).
 * **5.77.0** Fixed: Remove constructor injection from CheckerFactory for 2023.x compatibility (#604).
 * **5.77.0** New: Now built against IDEA 2022.1.4 (was 2021.3.3).
