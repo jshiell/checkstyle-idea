@@ -26,6 +26,11 @@ intellij {
     plugins = ['java']
 }
 
+verifyPlugin {
+    dependsOn(copyClassesToSandbox)
+    dependsOn(copyCheckstyleArtifactsToSandbox)
+}
+
 publishPlugin {
     token.set(System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN"))
 }
