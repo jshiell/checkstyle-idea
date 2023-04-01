@@ -14,8 +14,6 @@ import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
 /**
@@ -62,38 +60,32 @@ public class ScanProject extends BaseAction {
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
-        super.update(event);
-
         final Presentation presentation = event.getPresentation();
-        final Optional<Project> projectFromEvent = project(event);
-        if (projectFromEvent.isEmpty()) {
-            presentation.setEnabled(false);
-            return;
-        }
 
-        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
-            try {
-                final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
+        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
+                    try {
+                        final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
 
-                final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-                if (scope == ScanScope.Everything) {
-                    return projectRootManager.getContentRoots();
-                } else {
-                    return projectRootManager.getContentSourceRoots();
-                }
-            } catch (Throwable e) {
-                LOG.warn("Project button update failed", e);
-                return VirtualFile.EMPTY_ARRAY;
-            }
+                        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
+                        if (scope == ScanScope.Everything) {
+                            return projectRootManager.getContentRoots();
+                        } else {
+                            return projectRootManager.getContentSourceRoots();
+                        }
+                    } catch (Throwable e) {
+                        LOG.warn("Project button update failed", e);
+                        return VirtualFile.EMPTY_ARRAY;
+                    }
 
-        }).finishOnUiThread(ModalityState.any(), (sourceRoots) -> {
-            // disable if no files are selected or scan in progress
-            if (containsAtLeastOneFile(sourceRoots)) {
-                presentation.setEnabled(!staticScanner(project).isScanInProgress());
-            } else {
-                presentation.setEnabled(false);
-            }
-        }).submit(NonUrgentExecutor.getInstance()));
+                }).finishOnUiThread(ModalityState.any(), (sourceRoots) -> {
+                    // disable if no files are selected or scan in progress
+                    if (containsAtLeastOneFile(sourceRoots)) {
+                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
+                    } else {
+                        presentation.setEnabled(false);
+                    }
+                }).submit(NonUrgentExecutor.getInstance()),
+                () -> presentation.setEnabled(false));
     }
 
 }

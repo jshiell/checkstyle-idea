@@ -43,22 +43,21 @@ public class ScanCurrentFile extends BaseAction {
     public void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
-
                 final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
                     try {
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
                         final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow);
-                        final VirtualFile selectedFile = getSelectedFile(
+                        final VirtualFile selectedFile = getSelectedValidFile(
                                 project,
-                                pluginConfiguration,
                                 overrideIfExists);
                         if (selectedFile != null) {
                             staticScanner(project).asyncScanFiles(
                                     singletonList(selectedFile),
                                     overrideIfExists);
+                        } else {
+                            setProgressText(toolWindow, "plugin.status.in-progress.out-of-scope");
                         }
 
                     } catch (Throwable e) {
@@ -73,15 +72,15 @@ public class ScanCurrentFile extends BaseAction {
     }
 
     @Nullable
-    private VirtualFile getSelectedFile(
+    private VirtualFile getSelectedValidFile(
             final Project project,
-            final PluginConfiguration pluginConfiguration,
             final @Nullable ConfigurationLocation overrideIfExists) {
         final VirtualFile selectedFile = getSelectedFile(project);
         if (selectedFile == null) {
             return null;
         }
 
+        final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
         if (!isFileValidAgainstScanScope(project, pluginConfiguration, selectedFile)) {
             return null;
         }
@@ -132,7 +131,7 @@ public class ScanCurrentFile extends BaseAction {
     }
 
     @Nullable
-    private static VirtualFile getSelectedFile(@NotNull final Project project) {
+    private VirtualFile getSelectedFile(@NotNull final Project project) {
         VirtualFile selectedFile = null;
 
         final Editor selectedTextEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
@@ -172,32 +171,25 @@ public class ScanCurrentFile extends BaseAction {
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
-        super.update(event);
-
         final Presentation presentation = event.getPresentation();
-        final Optional<Project> projectFromEvent = project(event);
-        if (projectFromEvent.isEmpty()) { // check if we're loading...
-            presentation.setEnabled(false);
-            return;
-        }
 
-        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
-            try {
-                return getSelectedFile(project,
-                        configurationManager(project).getCurrent(),
-                        getSelectedOverride(toolWindow(project)));
+        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
+                    try {
+                        return getSelectedValidFile(project,
+                                getSelectedOverride(toolWindow(project)));
 
-            } catch (Throwable e) {
-                LOG.warn("Current File button update failed", e);
-                return null;
-            }
-        }).finishOnUiThread(ModalityState.any(), (selectedFile) -> {
-            // disable if no file is selected or scan in progress
-            if (selectedFile != null) {
-                presentation.setEnabled(!staticScanner(project).isScanInProgress());
-            } else {
-                presentation.setEnabled(false);
-            }
-        }).submit(NonUrgentExecutor.getInstance()));
+                    } catch (Throwable e) {
+                        LOG.warn("Current File button update failed", e);
+                        return null;
+                    }
+                }).finishOnUiThread(ModalityState.any(), (selectedFile) -> {
+                    // disable if no file is selected or scan in progress
+                    if (selectedFile != null) {
+                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
+                    } else {
+                        presentation.setEnabled(false);
+                    }
+                }).submit(NonUrgentExecutor.getInstance()),
+                () -> presentation.setEnabled(false));
     }
 }

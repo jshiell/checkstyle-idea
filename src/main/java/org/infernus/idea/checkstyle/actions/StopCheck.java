@@ -35,16 +35,14 @@ public class StopCheck extends BaseAction {
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
-        super.update(event);
-
-        project(event).ifPresent(project -> {
+        final Presentation presentation = event.getPresentation();
+        project(event).ifPresentOrElse(project -> {
             try {
-                final Presentation presentation = event.getPresentation();
                 presentation.setEnabled(staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
                 LOG.warn("Abort button update failed", e);
             }
-        });
+        }, () -> presentation.setEnabled(false));
     }
 }

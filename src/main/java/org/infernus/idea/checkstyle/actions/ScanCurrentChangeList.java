@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
@@ -53,29 +52,23 @@ public class ScanCurrentChangeList extends BaseAction {
 
     @Override
     public void update(final @NotNull AnActionEvent event) {
-        super.update(event);
-
         final Presentation presentation = event.getPresentation();
-        final Optional<Project> projectFromEvent = project(event);
-        if (projectFromEvent.isEmpty()) { // check if we're loading...
-            presentation.setEnabled(false);
-            return;
-        }
 
-        projectFromEvent.ifPresent(project -> ReadAction.nonBlocking(() -> {
-            try {
-                return ChangeListManager.getInstance(project).getDefaultChangeList();
+        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
+                    try {
+                        return ChangeListManager.getInstance(project).getDefaultChangeList();
 
-            } catch (Throwable e) {
-                LOG.warn("Button update failed.", e);
-                return null;
-            }
-        }).finishOnUiThread(ModalityState.any(), (changeList) -> {
-            if (changeList != null && (changeList.getChanges() == null || changeList.getChanges().size() == 0)) {
-                presentation.setEnabled(false);
-            } else {
-                presentation.setEnabled(!staticScanner(project).isScanInProgress());
-            }
-        }).submit(NonUrgentExecutor.getInstance()));
+                    } catch (Throwable e) {
+                        LOG.warn("Button update failed.", e);
+                        return null;
+                    }
+                }).finishOnUiThread(ModalityState.any(), (changeList) -> {
+                    if (changeList != null && (changeList.getChanges() == null || changeList.getChanges().size() == 0)) {
+                        presentation.setEnabled(false);
+                    } else {
+                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
+                    }
+                }).submit(NonUrgentExecutor.getInstance()),
+                () -> presentation.setEnabled(false));
     }
 }
