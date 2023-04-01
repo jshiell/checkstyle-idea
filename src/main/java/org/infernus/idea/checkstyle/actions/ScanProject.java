@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -10,7 +9,6 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.util.ThrowableRunnable;
-import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,29 +60,8 @@ public class ScanProject extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         final Presentation presentation = event.getPresentation();
 
-        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
-                    try {
-                        final ScanScope scope = configurationManager(project).getCurrent().getScanScope();
-
-                        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
-                        if (scope == ScanScope.Everything) {
-                            return projectRootManager.getContentRoots();
-                        } else {
-                            return projectRootManager.getContentSourceRoots();
-                        }
-                    } catch (Throwable e) {
-                        LOG.warn("Project button update failed", e);
-                        return VirtualFile.EMPTY_ARRAY;
-                    }
-
-                }).finishOnUiThread(ModalityState.any(), (sourceRoots) -> {
-                    // disable if no files are selected or scan in progress
-                    if (containsAtLeastOneFile(sourceRoots)) {
-                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                    } else {
-                        presentation.setEnabled(false);
-                    }
-                }).submit(NonUrgentExecutor.getInstance()),
+        project(event).ifPresentOrElse(
+                project -> presentation.setEnabled(!staticScanner(project).isScanInProgress()),
                 () -> presentation.setEnabled(false));
     }
 

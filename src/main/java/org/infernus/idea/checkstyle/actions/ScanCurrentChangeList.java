@@ -2,14 +2,11 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.LocalChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -54,21 +51,18 @@ public class ScanCurrentChangeList extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         final Presentation presentation = event.getPresentation();
 
-        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
-                    try {
-                        return ChangeListManager.getInstance(project).getDefaultChangeList();
+        project(event).ifPresentOrElse(project -> {
+            try {
+                final LocalChangeList changeList = ChangeListManager.getInstance(project).getDefaultChangeList();
+                if (changeList.getChanges() == null || changeList.getChanges().isEmpty()) {
+                    presentation.setEnabled(false);
+                } else {
+                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
+                }
 
-                    } catch (Throwable e) {
-                        LOG.warn("Button update failed.", e);
-                        return null;
-                    }
-                }).finishOnUiThread(ModalityState.any(), (changeList) -> {
-                    if (changeList != null && (changeList.getChanges() == null || changeList.getChanges().size() == 0)) {
-                        presentation.setEnabled(false);
-                    } else {
-                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                    }
-                }).submit(NonUrgentExecutor.getInstance()),
-                () -> presentation.setEnabled(false));
+            } catch (Throwable e) {
+                LOG.warn("Button update failed.", e);
+            }
+        }, () -> presentation.setEnabled(false));
     }
 }

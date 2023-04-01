@@ -2,8 +2,6 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -15,7 +13,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
-import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
@@ -173,23 +170,12 @@ public class ScanCurrentFile extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         final Presentation presentation = event.getPresentation();
 
-        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
-                    try {
-                        return getSelectedValidFile(project,
-                                getSelectedOverride(toolWindow(project)));
-
-                    } catch (Throwable e) {
-                        LOG.warn("Current File button update failed", e);
-                        return null;
-                    }
-                }).finishOnUiThread(ModalityState.any(), (selectedFile) -> {
-                    // disable if no file is selected or scan in progress
-                    if (selectedFile != null) {
-                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                    } else {
-                        presentation.setEnabled(false);
-                    }
-                }).submit(NonUrgentExecutor.getInstance()),
-                () -> presentation.setEnabled(false));
+        project(event).ifPresentOrElse(project -> {
+            if (getSelectedFile(project) != null) {
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
+            } else {
+                presentation.setEnabled(false);
+            }
+        }, () -> presentation.setEnabled(false));
     }
 }

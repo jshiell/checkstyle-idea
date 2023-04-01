@@ -2,14 +2,9 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
-import com.intellij.util.concurrency.NonUrgentExecutor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collections;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -40,22 +35,17 @@ public class ScanModifiedFiles extends BaseAction {
     public void update(final @NotNull AnActionEvent event) {
         final Presentation presentation = event.getPresentation();
 
-        project(event).ifPresentOrElse(project -> ReadAction.nonBlocking(() -> {
-                    try {
-                        return ChangeListManager.getInstance(project).getAffectedFiles();
+        project(event).ifPresentOrElse(project -> {
+            try {
+                if (ChangeListManager.getInstance(project).getAffectedFiles().isEmpty()) {
+                    presentation.setEnabled(false);
+                } else {
+                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
+                }
 
-                    } catch (Throwable e) {
-                        LOG.warn("Button update failed.", e);
-                        return Collections.EMPTY_LIST;
-                    }
-                }).finishOnUiThread(ModalityState.any(), (modifiedFiles) -> {
-                    // disable if no files are modified
-                    if (modifiedFiles.isEmpty()) {
-                        presentation.setEnabled(false);
-                    } else {
-                        presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                    }
-                }).submit(NonUrgentExecutor.getInstance()),
-                () -> presentation.setEnabled(false));
+            } catch (Throwable e) {
+                LOG.warn("Button update failed.", e);
+            }
+        }, () -> presentation.setEnabled(false));
     }
 }
