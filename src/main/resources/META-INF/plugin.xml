@@ -24,7 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.70.0: New: Added Checkstyle 10.10.0.</li>
+    <li>5.79.0: New: Added Checkstyle 10.10.0.</li>
     <li>5.78.0: New: Added Checkstyle 10.9.3.</li>
     <li>5.78.0: Fixed: Colour mismatch in new UI (#608).</li>
     <li>5.78.0: Fixed: Improved action update handling to reduce pauses (#601).</li>
