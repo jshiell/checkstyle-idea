@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.80.0** New: Added Checkstyle 10.12.0.
 * **5.79.0** New: Added Checkstyle 10.10.0.
 * **5.78.0** New: Added Checkstyle 10.9.3.
 * **5.78.0** Fixed: Colour mismatch in new UI (#608).

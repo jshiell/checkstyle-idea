@@ -1,7 +1,7 @@
 package org.infernus.idea.checkstyle;
 
 import com.intellij.AbstractBundle;
-import org.jetbrains.annotations.NonNls;gca
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.PropertyKey;
 
 public final class CheckStyleBundle extends AbstractBundle {
