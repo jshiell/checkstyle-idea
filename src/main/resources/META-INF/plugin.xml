@@ -7,7 +7,7 @@
         <![CDATA[
 <p>
     This plugin provides both real-time and on-demand scanning
-    of Java files with CheckStyle from within IDEA.
+    of Java files with Checkstyle from within IDEA.
 </p>
 <p>
     Please note this is not an official part of Checkstyle - they neither endorse
