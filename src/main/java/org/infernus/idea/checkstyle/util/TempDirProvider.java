@@ -1,8 +1,5 @@
 package org.infernus.idea.checkstyle.util;
 
-import com.intellij.openapi.components.ServiceKt;
-import com.intellij.openapi.components.StorageScheme;
-import com.intellij.openapi.components.impl.stores.IProjectStore;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
@@ -58,14 +55,11 @@ public class TempDirProvider {
     }
 
     Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
-        final IProjectStore projectStore = (IProjectStore) ServiceKt.getStateStore(project);
-        if (projectStore.getStorageScheme() == StorageScheme.DIRECTORY_BASED) {
-            VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
-            if (projectDir != null) {
-                final VirtualFile ideaStorageDir = projectDir.findChild(Project.DIRECTORY_STORE_FOLDER);
-                if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
-                    return Optional.of(ideaStorageDir);
-                }
+        VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            final VirtualFile ideaStorageDir = projectDir.findChild(Project.DIRECTORY_STORE_FOLDER);
+            if (ideaStorageDir != null && ideaStorageDir.exists() && ideaStorageDir.isDirectory()) {
+                return Optional.of(ideaStorageDir);
             }
         }
         return Optional.empty();
@@ -115,9 +109,8 @@ public class TempDirProvider {
 
     @NotNull
     private File determineCopiedLibrariesDir(@NotNull final Project pProject) {
-        return getIdeaFolder(pProject).map(pVirtualFile -> new File(pVirtualFile.getPath(),
-                "checkstyleidea-libs")).orElseGet(() -> new File(System.getProperty("java.io.tmpdir"),
-                "csi-" + projectUnique(pProject) + "-libs"));
+        return getIdeaFolder(pProject).map(pVirtualFile -> new File(pVirtualFile.getPath(), "checkstyleidea-libs"))
+                .orElseGet(() -> new File(System.getProperty("java.io.tmpdir"), "csi-" + projectUnique(pProject) + "-libs"));
     }
 
     @NotNull
