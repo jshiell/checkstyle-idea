@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,7 +26,12 @@ public class ScanModifiedFiles extends BaseAction {
         project(event).ifPresent(project -> {
             try {
                 List<VirtualFile> affectedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
-                if (!affectedFiles.isEmpty()) {
+                if (affectedFiles.isEmpty()) {
+                    CheckStyleToolWindowPanel checkStyleToolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
+                    if (checkStyleToolWindowPanel != null) {
+                        checkStyleToolWindowPanel.displayWarningResult("plugin.status.in-progress.no-modified-files");
+                    }
+                } else {
                     staticScanner(project).asyncScanFiles(
                             affectedFiles,
                             getSelectedOverride(toolWindow(project)));
