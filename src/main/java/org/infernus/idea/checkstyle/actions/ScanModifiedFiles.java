@@ -4,7 +4,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -21,10 +24,12 @@ public class ScanModifiedFiles extends BaseAction {
     public final void actionPerformed(final @NotNull AnActionEvent event) {
         project(event).ifPresent(project -> {
             try {
-                final ChangeListManager changeListManager = ChangeListManager.getInstance(project);
-                staticScanner(project).asyncScanFiles(
-                        changeListManager.getAffectedFiles(),
-                        getSelectedOverride(toolWindow(project)));
+                List<VirtualFile> affectedFiles = ChangeListManager.getInstance(project).getAffectedFiles();
+                if (!affectedFiles.isEmpty()) {
+                    staticScanner(project).asyncScanFiles(
+                            affectedFiles,
+                            getSelectedOverride(toolWindow(project)));
+                }
             } catch (Throwable e) {
                 LOG.warn("Modified files scan failed", e);
             }
@@ -37,11 +42,7 @@ public class ScanModifiedFiles extends BaseAction {
 
         project(event).ifPresentOrElse(project -> {
             try {
-                if (ChangeListManager.getInstance(project).getAffectedFiles().isEmpty()) {
-                    presentation.setEnabled(false);
-                } else {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                }
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
                 LOG.warn("Button update failed.", e);
