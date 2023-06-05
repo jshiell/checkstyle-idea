@@ -79,12 +79,7 @@ public class ScanModule extends BaseAction {
 
         project(event).ifPresentOrElse(project -> {
             try {
-                final VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
-                if (selectedFiles.length > 0 && ModuleUtil.findModuleForFile(selectedFiles[0], project) != null) {
-                    presentation.setEnabled(!staticScanner(project).isScanInProgress());
-                } else {
-                    presentation.setEnabled(false);
-                }
+                presentation.setEnabled(!staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
                 LOG.warn("Current Module button update failed", e);
