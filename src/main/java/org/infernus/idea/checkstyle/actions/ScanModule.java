@@ -77,13 +77,8 @@ public class ScanModule extends BaseAction {
     public final void update(final @NotNull AnActionEvent event) {
         final Presentation presentation = event.getPresentation();
 
-        project(event).ifPresentOrElse(project -> {
-            try {
-                presentation.setEnabled(!staticScanner(project).isScanInProgress());
-
-            } catch (Throwable e) {
-                LOG.warn("Current Module button update failed", e);
-            }
-        }, () -> presentation.setEnabled(false));
+        project(event).ifPresentOrElse(
+                project -> presentation.setEnabled(!staticScanner(project).isScanInProgress()),
+                () -> presentation.setEnabled(false));
     }
 }
