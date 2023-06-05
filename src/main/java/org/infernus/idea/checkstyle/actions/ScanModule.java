@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.model.ScanScope;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
@@ -27,6 +28,7 @@ public class ScanModule extends BaseAction {
         project(event).ifPresent(project -> {
             try {
                 final ToolWindow toolWindow = toolWindow(project);
+                CheckStyleToolWindowPanel checkStyleToolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
 
                 final VirtualFile[] selectedFiles
                         = FileEditorManager.getInstance(project).getSelectedFiles();
@@ -38,7 +40,9 @@ public class ScanModule extends BaseAction {
                 final Module module = ModuleUtil.findModuleForFile(
                         selectedFiles[0], project);
                 if (module == null) {
-                    setProgressText(toolWindow, "plugin.status.in-progress.no-module");
+                    if (checkStyleToolWindowPanel != null) {
+                        checkStyleToolWindowPanel.displayWarningResult("plugin.status.in-progress.no-module");
+                    }
                     return;
                 }
 
@@ -46,8 +50,6 @@ public class ScanModule extends BaseAction {
 
                 toolWindow.activate(() -> {
                     try {
-                        setProgressText(toolWindow, "plugin.status.in-progress.module");
-
                         ThrowableRunnable<RuntimeException> scanAction = null;
                         if (scope == ScanScope.Everything) {
                             scanAction = new ScanAllFilesInModuleTask(module, getSelectedOverride(toolWindow));
@@ -57,9 +59,12 @@ public class ScanModule extends BaseAction {
                             if (moduleSourceRoots.length > 0) {
                                 scanAction = new ScanAllGivenFilesTask(project, moduleSourceRoots,
                                         getSelectedOverride(toolWindow));
+                            } else if (checkStyleToolWindowPanel != null) {
+                                checkStyleToolWindowPanel.displayWarningResult("plugin.status.in-progress.no-module-source-roots");
                             }
                         }
                         if (scanAction != null) {
+                            setProgressText(toolWindow, "plugin.status.in-progress.module");
                             ReadAction.run(scanAction);
                         }
                     } catch (Throwable e) {
