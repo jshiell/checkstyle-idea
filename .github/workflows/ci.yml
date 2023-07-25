@@ -21,3 +21,8 @@ jobs:
     
     - name: Build
       run: ./gradlew check
+      
+    - name: 'Qodana Scan'
+      uses: JetBrains/qodana-action@main
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
