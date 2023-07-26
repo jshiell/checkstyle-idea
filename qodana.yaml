@@ -4,3 +4,5 @@ projectJDK: 11
 include:
   - name: FieldCanBeLocal
   - name: TrivialStringConcatenation
+  - name: CheckDependencyLicenses
+  - name: VulnerableLibrariesGlobal
