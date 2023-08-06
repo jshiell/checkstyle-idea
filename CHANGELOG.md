@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.82.0** New: Added Checkstyle 10.12.2.
 * **5.81.0** New: Added Checkstyle 10.12.1.
 * **5.80.1** Fixed: Skip changelist & module checks to ensure update action is fast enough on toolbar actions (#612, #615).
 * **5.80.0** New: Added Checkstyle 10.12.0.
