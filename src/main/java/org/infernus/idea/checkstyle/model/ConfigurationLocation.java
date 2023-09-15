@@ -422,15 +422,14 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return description;
     }
 
-
     @Override
     public final int compareTo(@NotNull final ConfigurationLocation other) {
         int result;
         // bundled configs go first, ordered by their position in the BundledConfig enum
         if (other instanceof BundledConfigurationLocation) {
             if (this instanceof BundledConfigurationLocation) {
-                final int o1 = ((BundledConfigurationLocation) this).getBundledConfig().ordinal();
-                final int o2 = ((BundledConfigurationLocation) other).getBundledConfig().ordinal();
+                final int o1 = ((BundledConfigurationLocation) this).getBundledConfig().getSortOrder();
+                final int o2 = ((BundledConfigurationLocation) other).getBundledConfig().getSortOrder();
                 result = Integer.compare(o1, o2);
             } else {
                 result = 1;
