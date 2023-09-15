@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
@@ -216,13 +217,13 @@ public class LegacyProjectConfigurationStateDeserialiser {
     }
 
     private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
-        final ConfigurationLocation sunChecks = configurationLocationFactory().create(BundledConfig.SUN_CHECKS, project);
-        final ConfigurationLocation googleChecks = configurationLocationFactory().create(BundledConfig.GOOGLE_CHECKS, project);
-        if (!configurationLocations.contains(sunChecks)) {
-            configurationLocations.add(sunChecks);
-        }
-        if (!configurationLocations.contains(googleChecks)) {
-            configurationLocations.add(googleChecks);
+
+        List<BundledConfigurationLocation> bundledConfigurationLocations = BundledConfig.getAllBundledConfigs().stream().map(bc -> configurationLocationFactory().create(bc, project)).collect(Collectors.toList());
+
+        for (BundledConfigurationLocation bundledConfigurationLocation : bundledConfigurationLocations) {
+            if (!configurationLocations.contains(bundledConfigurationLocation)) {
+                configurationLocations.add(bundledConfigurationLocation);
+            }
         }
     }
 

@@ -48,8 +48,8 @@ public final class PluginConfigurationBuilder {
         final String csDefaultVersion = new VersionListReader().getDefaultVersion();
 
         final SortedSet<ConfigurationLocation> defaultLocations = new TreeSet<>();
-        defaultLocations.add(configurationLocationFactory(project).create(BundledConfig.SUN_CHECKS, project));
-        defaultLocations.add(configurationLocationFactory(project).create(BundledConfig.GOOGLE_CHECKS, project));
+
+        BundledConfig.getAllBundledConfigs().stream().map(bc -> configurationLocationFactory(project).create(bc, project)).forEach(defaultLocations::add);
 
         final boolean copyLibs = OS.isWindows();
 

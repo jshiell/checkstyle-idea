@@ -1,24 +1,36 @@
 package org.infernus.idea.checkstyle.csapi;
 
+import com.intellij.openapi.diagnostic.Logger;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 
 /**
  * The configuration files bundled with Checkstyle-IDEA as provided by Checkstyle.
  */
-public enum BundledConfig {
+public class BundledConfig {
+
+    private static final Logger LOG = Logger.getInstance(BundledConfig.class);
+
+    private static final String BUNDLED_LOCATION = "(bundled)";
 
     /** the Sun checks */
-    SUN_CHECKS("bundled-sun-checks", "(bundled)", "Sun Checks", "/sun_checks.xml"),
+    public static final BundledConfig SUN_CHECKS = new BundledConfig(0, "bundled-sun-checks", BUNDLED_LOCATION, "Sun Checks", "/sun_checks.xml");
 
     /** the Google checks */
-    GOOGLE_CHECKS("bundled-google-checks", "(bundled)", "Google Checks", "/google_checks.xml");
+    public static final BundledConfig GOOGLE_CHECKS = new BundledConfig(1, "bundled-google-checks", BUNDLED_LOCATION, "Google Checks", "/google_checks.xml");
 
-
+    private final int sortOrder;
     private final String id;
 
     private final String location;
@@ -28,14 +40,29 @@ public enum BundledConfig {
     private final String path;
 
 
-    BundledConfig(@NotNull final String id,
+    private BundledConfig(final int sortOrder,
+                  @NotNull final String id,
                   @NotNull final String location,
                   @NotNull final String description,
                   @NotNull final String path) {
+        this.sortOrder = sortOrder;
         this.id = id;
         this.location = location;
         this.description = description;
         this.path = path;
+    }
+
+    private BundledConfig(final int sortOrder, final String id, final BundledConfigProvider.BasicConfig baseConfig) {
+        this.sortOrder = sortOrder;
+        this.id = id;
+        this.description = baseConfig.getDescription();
+        this.location = BUNDLED_LOCATION;
+        this.path = baseConfig.getPath();
+    }
+
+
+    public int getSortOrder() {
+        return sortOrder;
     }
 
     public String getId() {
@@ -71,5 +98,45 @@ public enum BundledConfig {
             result = SUN_CHECKS;
         }
         return result;
+    }
+
+    public static BundledConfig getDefault() {
+        return SUN_CHECKS;
+    }
+
+    public static Collection<BundledConfig> getAllBundledConfigs() {
+
+        Map<String,BundledConfig> map = new HashMap<>();
+
+        map.put(SUN_CHECKS.getId(), SUN_CHECKS);
+        map.put(GOOGLE_CHECKS.getId(), GOOGLE_CHECKS);
+
+        LOG.info("Loading additional BundledConfigs");
+
+
+        for (BundledConfigProvider bundledConfigProvider : ServiceLoader.load(BundledConfigProvider.class, BundledConfig.class.getClassLoader())) {
+
+            LOG.info("Loading additional BundledConfig " + bundledConfigProvider.getClass() + " from " + bundledConfigProvider.getClass().getProtectionDomain().getCodeSource());
+            for (BundledConfigProvider.BasicConfig config : bundledConfigProvider.getConfigs()) {
+
+                int i = 0;
+                String id = config.getId();
+                while(map.containsKey(id)) {
+                    id = config.getId() + (++i);
+                }
+                BundledConfig bundledConfig = new BundledConfig(map.size(), id, config);
+                map.put(id, bundledConfig);
+            }
+        }
+        List<BundledConfig> ret = new ArrayList<>(map.values());
+        ret.sort((bc1, bc2) -> Integer.compare(bc1.getSortOrder(), bc2.getSortOrder()));
+        return ret;
+    }
+
+
+
+    public static Optional<BundledConfig> getById(final String id) {
+
+        return getAllBundledConfigs().stream().filter(bc -> bc.getId().equals(id)).findAny();
     }
 }

@@ -157,7 +157,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                     .map(location -> deserialiseLocation(project, location))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toCollection(TreeSet::new));
-            List.of(BundledConfig.values()).forEach(bundleConfig -> {
+            BundledConfig.getAllBundledConfigs().forEach(bundleConfig -> {
                 if (configurationLocations.stream().noneMatch(bundleConfig::matches)) {
                     configurationLocations.add(configurationLocationFactory(project).create(bundleConfig, project));
                 }
