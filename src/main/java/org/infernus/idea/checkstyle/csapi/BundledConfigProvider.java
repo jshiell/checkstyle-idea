@@ -16,13 +16,13 @@ public interface BundledConfigProvider {
     @NotNull
     Collection<BasicConfig> getConfigs();
 
-    class BasicConfig {
+    public class BasicConfig {
 
         private final String id;
         private final String path;
         private final String description;
 
-        BasicConfig(final String id, final String description, final String path) {
+        public BasicConfig(final String id, final String description, final String path) {
             this.id = requiredNotBlank(id, "id");
             this.path = requiredNotBlank(path, "path");
             this.description = requiredNotBlank(description, "description");
