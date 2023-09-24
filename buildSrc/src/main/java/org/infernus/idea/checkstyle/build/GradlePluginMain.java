@@ -145,7 +145,7 @@ public class GradlePluginMain
             }
 
             copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(project.getBuildDir(), "idea-sandbox/plugins" + (test ? "-test" : "")
+            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), "idea-sandbox/plugins" + (test ? "-test" : "")
                     + "/CheckStyle-IDEA/" + CSLIB_TARGET_SUBFOLDER));
         });
     }
@@ -188,7 +188,7 @@ public class GradlePluginMain
 
             final String targetSubfolder = "checkstyle/classes";
             copyTask.from(csaccessSourceSet.getOutput());
-            copyTask.into(new File(pProject.getBuildDir(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
+            copyTask.into(new File(pProject.getLayout().getBuildDirectory().getAsFile().get(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
                     + "/CheckStyle-IDEA/" + targetSubfolder));
         });
     }

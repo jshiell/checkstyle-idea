@@ -9,17 +9,19 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
  * Gradle task that runs the unit tests in 'csaccessTest' against one of the supported Checkstyle versions.
  */
-public class CsaccessTestTask
-    extends Test {
+public class CsaccessTestTask extends Test {
+
     public static final String XTEST_GROUP_NAME = "xtest";
     public static final String XTEST_TASK_NAME = "xtest";
 
@@ -28,10 +30,11 @@ public class CsaccessTestTask
     public static final String CSVERSION_SYSPROP_NAME = "org.infernus.idea.checkstyle.version";
 
     private String csVersion = null;
-
+    private Property<Boolean> dryRun;
 
     public CsaccessTestTask() {
         super();
+
         final Project project = getProject();
         final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
         final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator
@@ -43,11 +46,9 @@ public class CsaccessTestTask
         setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
     }
 
-
     public static String getTaskName(final String pCheckstyleVersion) {
         return "xtest_" + CheckstyleVersions.toGradleVersion(pCheckstyleVersion);
     }
-
 
     public void setCheckstyleVersion(final String pCheckstyleVersion, final boolean isBaseVersion) {
         csVersion = pCheckstyleVersion;
@@ -117,5 +118,13 @@ public class CsaccessTestTask
             }
         }
         return effectiveClasspath;
+    }
+
+    @Override
+    public @NotNull Property<Boolean> getDryRun() {
+        if (dryRun == null) {
+            dryRun = getObjectFactory().property(Boolean.class).value(false);
+        }
+        return dryRun;
     }
 }

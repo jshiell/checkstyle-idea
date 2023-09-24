@@ -170,7 +170,7 @@ public class CustomSourceSetCreator {
         jacocoTask.getSourceDirectories().from(csaccessSourceSet.getJava().getSourceDirectories());
 
         final FileCollection execFiles = project.files(project.getTasks().withType(CsaccessTestTask.class).stream()
-                .map((final CsaccessTestTask task) -> new File(project.getBuildDir() + "/jacoco", task.getName() + ".exec"))
+                .map((final CsaccessTestTask task) -> new File(project.getLayout().getBuildDirectory().get().getAsFile() + "/jacoco", task.getName() + ".exec"))
                 .collect(Collectors.toList()));
         jacocoTask.getExecutionData().from(execFiles);
     }

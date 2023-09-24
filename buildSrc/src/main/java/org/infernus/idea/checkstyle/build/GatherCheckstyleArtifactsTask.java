@@ -49,7 +49,7 @@ public class GatherCheckstyleArtifactsTask
 
         // Task Outputs: the directory full of JARs, and the classpath info file
         bundledJarsDir = getTemporaryDir();
-        classPathsInfoFile = new File(project.getBuildDir(), "resources-generated/checkstyle-classpaths.properties");
+        classPathsInfoFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources-generated/checkstyle-classpaths.properties");
     }
 
 
