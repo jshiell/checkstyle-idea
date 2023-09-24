@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.83.0: New: New: Add ability to add bundled rules via the `BundledConfigProvider` interface (#622) - thanks to @rhierlmeier.</li>
     <li>5.83.0: New: Added Checkstyle 10.12.3.</li>
     <li>5.82.0: New: Added Checkstyle 10.12.2.</li>
     <li>5.81.0: New: Added Checkstyle 10.12.1.</li>
