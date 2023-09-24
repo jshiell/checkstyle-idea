@@ -66,7 +66,7 @@ test {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 dependencies {
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
 
     csaccessCompileOnly ("com.puppycrawl.tools:checkstyle:${supportedCsVersions.getBaseVersion()}") {
