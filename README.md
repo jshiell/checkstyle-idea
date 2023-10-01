@@ -77,6 +77,16 @@ all your libraries reside outside of the project (as is often the case when buil
 used), then you can disable this feature. Since it slows down checker creation, you might want to keep it disabled
 until necessary. After changing this option, it may be necessary to restart IDEA to see the effects.
 
+## Adding additional pre-bundled configurations
+
+Where you have a shared distribution it may be useful to add additional pre-bundled configurations. This can be done
+by placing a JAR into the `lib` directory of the plugin. The JAR should contain:
+
+* A class that implements the `org.infernus.idea.checkstyle.csapi.BundledConfigProvider` interface
+* A text file `META-INF/service/org.infernus.idea.checkstyle.csapi.BundledConfigProvider` that contains the fully qualified classname of the `BundledConfigProvider`
+* The Checkstyle rules XML file
+
+At present the `BundledConfigProvider` interface isn't available separately; hence you'll need the plugin JAR to compile.
 
 ## Troubleshooting
 
