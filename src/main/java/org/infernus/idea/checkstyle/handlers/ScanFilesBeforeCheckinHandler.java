@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.handlers;
 
 import com.intellij.CommonBundle;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -11,6 +12,7 @@ import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitExecutor;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
@@ -27,6 +29,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.intellij.openapi.vcs.checkin.CheckinHandler.ReturnResult.*;
 import static java.util.Optional.ofNullable;
@@ -85,7 +88,8 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
-                        scanResults.putAll(staticScanner.scanFiles(new ArrayList<>(checkinPanel.getVirtualFiles())));
+                        scanResults.putAll(staticScanner.scanFiles(
+                                new ArrayList<>(getVirtualFiles())));
                     }
                 }.queue();
 
@@ -98,6 +102,12 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         } else {
             return COMMIT;
         }
+    }
+
+    private Collection<VirtualFile> getVirtualFiles() {
+        AtomicReference<Collection<VirtualFile>> files = new AtomicReference<>();
+        ApplicationManager.getApplication().invokeAndWait(() -> files.set(checkinPanel.getVirtualFiles()));
+        return files.get();
     }
 
     private Optional<PluginConfigurationManager> settings() {
