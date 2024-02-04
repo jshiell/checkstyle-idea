@@ -10,11 +10,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.AnActionButton;
-import com.intellij.ui.AnActionButtonRunnable;
-import com.intellij.ui.AnActionButtonUpdater;
-import com.intellij.ui.TitledSeparator;
-import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
@@ -29,24 +25,11 @@ import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.TableColumn;
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,14 +61,13 @@ public class CheckStyleConfigPanel extends JPanel {
     private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache checkerFactoryCache;
 
-    public CheckStyleConfigPanel(@NotNull final Project project,
-                                 @NotNull final CheckstyleProjectService checkstyleProjectService,
-                                 @NotNull final CheckerFactoryCache checkerFactoryCache) {
+    public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
 
         this.project = project;
-        this.checkstyleProjectService = checkstyleProjectService;
-        this.checkerFactoryCache = checkerFactoryCache;
+
+        this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
+        this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
 
         csVersionDropdown = buildCheckstyleVersionComboBox();
 

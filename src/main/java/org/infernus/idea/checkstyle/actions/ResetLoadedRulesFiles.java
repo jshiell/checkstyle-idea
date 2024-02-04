@@ -4,9 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
-import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.ConfigurationInvalidator;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,12 +24,6 @@ public class ResetLoadedRulesFiles extends BaseAction {
             });
         }
 
-        project(event).ifPresent(project -> {
-            project.getService(PluginConfigurationManager.class)
-                    .getCurrent()
-                    .getLocations()
-                    .forEach(ConfigurationLocation::reset);
-            project.getService(CheckerFactoryCache.class).invalidate();
-        });
+        project(event).ifPresent(project -> project.getService(ConfigurationInvalidator.class).invalidateCachedResources());
     }
 }
