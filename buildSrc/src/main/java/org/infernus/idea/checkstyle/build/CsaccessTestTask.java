@@ -5,9 +5,12 @@ import java.util.Set;
 
 import groovy.lang.Closure;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.CapabilityResolutionDetails;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.internal.artifacts.transform.ComponentVariantIdentifier;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
@@ -96,7 +99,13 @@ public class CsaccessTestTask extends Test {
 
         final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, csVersion);
         final ConfigurationContainer configurations = project.getConfigurations();
-        final Set<File> csJars = configurations.detachedConfiguration(csDep).getFiles();
+        final Configuration detachedConfiguration = configurations.detachedConfiguration(csDep);
+        // workaround for Checkstyle#14123
+        detachedConfiguration
+                .getResolutionStrategy()
+                .getCapabilitiesResolution()
+                .withCapability("com.google.collections", "google-collections", resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
+        final Set<File> csJars = detachedConfiguration.getFiles();
 
         FileCollection effectiveClasspath = project.files(
                 csaccessTestSrcSet.getOutput().getResourcesDir(),

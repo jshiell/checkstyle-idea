@@ -90,6 +90,10 @@ public class GatherCheckstyleArtifactsTask
     private Set<File> resolveDependencies(final Project project, final String checkstyleVersion) {
         final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
         final Configuration csConf = project.getConfigurations().detachedConfiguration(csDep);
+        // workaround for Checkstyle#14123
+        csConf.getResolutionStrategy()
+                .getCapabilitiesResolution()
+                .withCapability("com.google.collections", "google-collections", resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
         return csConf.resolve();
     }
 

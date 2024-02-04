@@ -16,7 +16,7 @@ repositories {
 //   Project Metadata
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-version = '5.85.1'
+version = '5.86.0'
 
 intellij {
     version = 'IC-2022.1.4'
@@ -33,6 +33,13 @@ verifyPlugin {
 
 publishPlugin {
     token.set(System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN"))
+}
+
+// workaround for Checkstyle#14123
+configurations.all {
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+        select("com.google.guava:guava:0")
+    }
 }
 
 

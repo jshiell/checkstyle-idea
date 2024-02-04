@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.85.0</version>
+    <version>5.86.0</version>
     <idea-version since-build="221.6008.13"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.86.0: New: Added Checkstyle 10.13.0, 10.12.7.</li>
     <li>5.85.1: Fixed: EDT access error in commit dialogue (#626).</li>
     <li>5.85.0: New: Added Checkstyle 10.12.5.</li>
     <li>5.84.0: New: Added Checkstyle 10.12.4.</li>

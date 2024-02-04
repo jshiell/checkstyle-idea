@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.86.0** New: Added Checkstyle 10.13.0, 10.12.7.
 * **5.85.1** Fixed: EDT access error in commit dialogue (#626).
 * **5.85.0** New: Added Checkstyle 10.12.5.
 * **5.84.0** New: Added Checkstyle 10.12.4.
