@@ -24,6 +24,8 @@ import java.util.Map;
 
 /**
  * Allows selection of the location of the CheckStyle file.
+ *
+ * TODO: migrate to DialogWrapper - https://plugins.jetbrains.com/docs/intellij/dialog-wrapper.html?from=jetbrains.org#input-validation
  */
 public class LocationDialogue extends JDialog {
 
@@ -166,7 +168,9 @@ public class LocationDialogue extends JDialog {
         if (visible) {
             this.committed = false;
         }
-        super.setVisible(visible);
+        try (var token = com.intellij.concurrency.ThreadContext.resetThreadContext()) {
+            super.setVisible(visible);
+        }
     }
 
     /**

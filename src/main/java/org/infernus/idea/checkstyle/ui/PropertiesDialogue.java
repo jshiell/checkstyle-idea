@@ -16,6 +16,8 @@ import java.awt.event.KeyEvent;
 
 /**
  * Allows setting of file properties.
+ *
+ * TODO: migrate to DialogWrapper - https://plugins.jetbrains.com/docs/intellij/dialog-wrapper.html?from=jetbrains.org#input-validation
  */
 public class PropertiesDialogue extends JDialog {
     private final PropertiesPanel propertiesPanel;
@@ -83,7 +85,9 @@ public class PropertiesDialogue extends JDialog {
         if (visible) {
             this.committed = false;
         }
-        super.setVisible(visible);
+        try (var token = com.intellij.concurrency.ThreadContext.resetThreadContext()) {
+            super.setVisible(visible);
+        }
     }
 
     /**
