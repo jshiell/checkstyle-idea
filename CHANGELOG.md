@@ -1,6 +1,6 @@
 
-# CheckStyle-IDEA Changelog
-
+# CheckStyle-IDEA Changel
+* **5.87.0** New: Now built against IDEA 2023.1.5 (was 2022.1.4).
 * **5.86.0** New: Added Checkstyle 10.13.0, 10.12.7.
 * **5.85.1** Fixed: EDT access error in commit dialogue (#626).
 * **5.85.0** New: Added Checkstyle 10.12.5.

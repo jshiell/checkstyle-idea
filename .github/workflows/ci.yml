@@ -13,10 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Java 11
+    - name: Set up Java 17
       uses: actions/setup-java@v3
       with:
-        java-version: 11
+        java-version: 17
         distribution: liberica
     
     - name: Build
