@@ -69,9 +69,9 @@ public class OpPeruseConfiguration implements CheckstyleCommand<Void> {
 
         final Map<String, String> properties = new HashMap<>();
         Set<KnownTokenTypes> knownTokenTypes = EnumSet.noneOf(KnownTokenTypes.class);
-        for (String key : currentConfig.getAttributeNames()) {
+        for (String key : currentConfig.getPropertyNames()) {
             if (key != null) {
-                String value = currentConfig.getAttribute(key);
+                String value = currentConfig.getProperty(key);
                 if (value != null) {
                     if (TOKENS_PROP.equals(key)) {
                         knownTokenTypes = buildKnownTokenTypesSet(value);

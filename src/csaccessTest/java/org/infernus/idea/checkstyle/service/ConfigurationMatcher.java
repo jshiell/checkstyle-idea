@@ -37,7 +37,7 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
         return config1 != null
                 && Objects.equals(config1.getName(), config2.getName())
                 && config1.getChildren().length == config2.getChildren().length
-                && Arrays.equals(config1.getAttributeNames(), config2.getAttributeNames())
+                && Arrays.equals(config1.getPropertyNames(), config2.getPropertyNames())
                 && !childrenAreNotEqual(config1, config2)
                 && !attributesAreNotEqual(config1, config2)
                 && !messagesAreNotEqual(config1, config2);
@@ -48,8 +48,8 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     }
 
     private boolean attributesAreNotEqual(final Configuration config1, final Configuration config2) {
-        for (String attributeName : config1.getAttributeNames()) {
-            if (!Objects.equals(attrValue(config1, attributeName), attrValue(config2, attributeName))) {
+        for (String attributeName : config1.getPropertyNames()) {
+            if (!Objects.equals(propertyValue(config1, attributeName), propertyValue(config2, attributeName))) {
                 return true;
             }
         }
@@ -91,8 +91,8 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
     private String toString(final Configuration configuration, final int indentLevel) {
         final StringBuilder out = new StringBuilder();
         out.append(indent(indentLevel)).append("<module name=\"").append(configuration.getName()).append("\"");
-        for (String attrName : configuration.getAttributeNames()) {
-            out.append(" ").append(attrName).append("=\"").append(attrValue(configuration, attrName)).append("\"");
+        for (String attrName : configuration.getPropertyNames()) {
+            out.append(" ").append(attrName).append("=\"").append(propertyValue(configuration, attrName)).append("\"");
         }
         if (configuration.getChildren().length > 0) {
             out.append(">\n");
@@ -106,9 +106,9 @@ public class ConfigurationMatcher extends TypeSafeMatcher<Configuration> {
         return out.toString();
     }
 
-    private String attrValue(final Configuration configuration, final String attributeName) {
+    private String propertyValue(final Configuration configuration, final String propertyName) {
         try {
-            return configuration.getAttribute(attributeName);
+            return configuration.getProperty(propertyName);
         } catch (CheckstyleException e) {
             return "";
         }

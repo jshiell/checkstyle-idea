@@ -341,6 +341,16 @@ public class OpLoadConfigurationTest {
     public void testWrongConfigurationClass() {
         Configuration config = new Configuration() {
             @Override
+            public String[] getPropertyNames() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String getProperty(String name) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public String[] getAttributeNames() {
                 throw new UnsupportedOperationException();
             }

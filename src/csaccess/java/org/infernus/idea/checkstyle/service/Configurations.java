@@ -30,7 +30,7 @@ public class Configurations implements TabWidthAndBaseDirProvider {
     public int tabWidth() {
         for (final Configuration currentChild : rootElement.getChildren()) {
             if (TREE_WALKER_ELEMENT.equals(currentChild.getName())) {
-                return intValueOrDefault(getAttributeOrNull(currentChild, "tabWidth"), defaultTabSize());
+                return intValueOrDefault(getPropertyOrNull(currentChild, "tabWidth"), defaultTabSize());
             }
         }
         return defaultTabSize();
@@ -55,9 +55,9 @@ public class Configurations implements TabWidthAndBaseDirProvider {
     }
 
     public Optional<String> baseDir() {
-        for (final String attributeName : rootElement.getAttributeNames()) {
-            if ("basedir".equals(attributeName)) {
-                return ofNullable(getAttributeOrNull(rootElement, "basedir"));
+        for (final String propertyName : rootElement.getPropertyNames()) {
+            if ("basedir".equals(propertyName)) {
+                return ofNullable(getPropertyOrNull(rootElement, "basedir"));
             }
         }
         return empty();
@@ -73,9 +73,9 @@ public class Configurations implements TabWidthAndBaseDirProvider {
         return defaultValue;
     }
 
-    private String getAttributeOrNull(final Configuration element, final String attributeName) {
+    private String getPropertyOrNull(final Configuration element, final String attributeName) {
         try {
-            return element.getAttribute(attributeName);
+            return element.getProperty(attributeName);
         } catch (CheckstyleException e) {
             return null;
         }

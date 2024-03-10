@@ -207,7 +207,7 @@ public class OpLoadConfiguration
                                           final DefaultConfiguration configRoot,
                                           final Configuration configModule,
                                           final String propertyName) {
-        final String fileName = getAttributeOrNull(configModule, propertyName);
+        final String fileName = getPropertyOrNull(configModule, propertyName);
         if (!isBlank(fileName)) {
             try {
                 resolveAndUpdateFile(project, configRoot, configModule, propertyName, fileName);
@@ -239,12 +239,12 @@ public class OpLoadConfiguration
     }
 
     private boolean isNotOptional(final Configuration configModule) {
-        return !"true".equalsIgnoreCase(getAttributeOrNull(configModule, "optional"));
+        return !"true".equalsIgnoreCase(getPropertyOrNull(configModule, "optional"));
     }
 
-    private String getAttributeOrNull(final Configuration element, final String attributeName) {
+    private String getPropertyOrNull(final Configuration element, final String attributeName) {
         try {
-            return element.getAttribute(attributeName);
+            return element.getProperty(attributeName);
         } catch (CheckstyleException e) {
             return null;
         }
@@ -262,7 +262,7 @@ public class OpLoadConfiguration
         copyMessages(originalElement, target);
         copyAttributes(originalElement, propertyName, target);
 
-        target.addAttribute(propertyName, filename);
+        target.addProperty(propertyName, filename);
 
         return target;
     }
@@ -270,12 +270,12 @@ public class OpLoadConfiguration
     private void copyAttributes(@NotNull final Configuration source,
                                 @NotNull final String propertyName,
                                 @NotNull final DefaultConfiguration target) {
-        if (source.getAttributeNames() != null) {
-            for (String attributeName : source.getAttributeNames()) {
-                if (attributeName.equals(propertyName)) {
+        if (source.getPropertyNames() != null) {
+            for (String sourcePropertyName : source.getPropertyNames()) {
+                if (sourcePropertyName.equals(propertyName)) {
                     continue;
                 }
-                target.addAttribute(attributeName, getAttributeOrNull(source, attributeName));
+                target.addProperty(sourcePropertyName, getPropertyOrNull(source, sourcePropertyName));
             }
         }
     }

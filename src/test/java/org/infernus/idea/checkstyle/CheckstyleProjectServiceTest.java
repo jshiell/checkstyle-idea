@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 
 public class CheckstyleProjectServiceTest {
-    private static final String CHECKSTYLE_VERSION = "8.0";
+    private static final String CHECKSTYLE_VERSION = "9.0.1";
 
     private CheckstyleProjectService underTest;
 

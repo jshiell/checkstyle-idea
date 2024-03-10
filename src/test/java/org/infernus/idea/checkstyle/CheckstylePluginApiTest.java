@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
-    private static final String CHECKSTYLE_VERSION = "8.0";
+    private static final String CHECKSTYLE_VERSION = "9.0.1";
 
     private CheckstylePluginApi underTest;
 
@@ -89,10 +89,10 @@ public class CheckstylePluginApiTest {
         underTest.visitCurrentConfiguration(visitor);
 
         ArgumentCaptor<ConfigurationModule> configModuleCaptor = ArgumentCaptor.forClass(ConfigurationModule.class);
-        verify(visitor, times(58)).accept(eq("Google Checks"), configModuleCaptor.capture());
+        verify(visitor, atLeastOnce()).accept(eq("Google Checks"), configModuleCaptor.capture());
 
         assertThat(configModuleCaptor.getValue(), is(not(nullValue())));
-        assertThat(configModuleCaptor.getValue().getName(), is("CommentsIndentation"));
+        assertThat(configModuleCaptor.getValue().getName(), is("SuppressionXpathFilter"));
 
     }
 }

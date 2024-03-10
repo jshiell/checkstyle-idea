@@ -25,7 +25,7 @@ public class ConfigurationBuilder {
     }
 
     public ConfigurationBuilder withAttribute(final String name, final String value) {
-        configuration.addAttribute(name, value);
+        configuration.addProperty(name, value);
         return this;
     }
 
