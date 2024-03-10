@@ -346,7 +346,7 @@ public class OpLoadConfigurationTest {
             }
 
             @Override
-            public String getProperty(String name) {
+            public String getProperty(final String name) {
                 throw new UnsupportedOperationException();
             }
 
