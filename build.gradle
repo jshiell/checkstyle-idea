@@ -69,6 +69,11 @@ test {
     forkEvery = 1
 }
 
+tasks.named("classpathIndexCleanup") {
+    dependsOn(tasks.named("compileCsaccessJava"))
+    dependsOn(tasks.named("compileCsaccessTestJava"))
+}
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //   Dependencies
