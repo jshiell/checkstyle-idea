@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.88.0** New: Added Checkstyle 10.14.0.
 * **5.87.1** New: Third-party classpath is re-read on configuration reset (#630).
 * **5.87.0** Fixed: Exceptions when opening modal dialogues (#628).
 * **5.87.0** New: Now built against IDEA 2023.1.5 (was 2022.1.4).
