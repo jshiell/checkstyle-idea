@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
@@ -78,6 +79,11 @@ public abstract class BaseAction extends DumbAwareAction {
 
     protected StaticScanner staticScanner(final Project project) {
         return project.getService(StaticScanner.class);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
     }
 
     protected boolean containsAtLeastOneFile(@NotNull final VirtualFile... files) {

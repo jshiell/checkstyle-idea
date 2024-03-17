@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.openapi.project.Project;
@@ -37,5 +38,10 @@ public class DisplayErrors extends DumbAwareToggleAction {
             panel.setDisplayingErrors(selected);
             panel.filterDisplayedResults();
         });
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
     }
 }

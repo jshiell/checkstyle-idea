@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.88.0</version>
+    <version>5.88.1</version>
     <idea-version since-build="231.9392.1"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>>5.88.1: Fixed: Defined action update thread for actions (#634).</li>
     <li>5.88.0: New: Added Checkstyle 10.14.0.</li>
     <li>5.88.0: Breaking: Drop support for Checkstyle 8, to reduce archive size.</li>
     <li>5.87.1: New: Third-party classpath is re-read on configuration reset (#630).</li>
