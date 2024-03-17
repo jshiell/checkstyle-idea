@@ -48,11 +48,11 @@ public class CodeStyleImporterTest
     private static final String FILE_SUFFIX =
             "</module>";
 
-    private void importConfiguration(@NotNull String configuration) {
-        configuration = FILE_PREFIX + configuration + FILE_SUFFIX;
+    private void importConfiguration(@NotNull final String configuration) {
+        String fullConfiguration = FILE_PREFIX + configuration + FILE_SUFFIX;
 
         new CheckStyleCodeStyleImporter(csService).importConfiguration(
-                csService, loadConfiguration(configuration), codeStyleSettings);
+                csService, loadConfiguration(fullConfiguration), codeStyleSettings);
     }
 
     private String inTreeWalker(@NotNull final String configuration) {

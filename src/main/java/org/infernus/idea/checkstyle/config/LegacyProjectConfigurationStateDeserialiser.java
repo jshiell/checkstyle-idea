@@ -217,8 +217,10 @@ public class LegacyProjectConfigurationStateDeserialiser {
     }
 
     private void ensureBundledConfigs(@NotNull final List<ConfigurationLocation> configurationLocations) {
-
-        List<BundledConfigurationLocation> bundledConfigurationLocations = BundledConfig.getAllBundledConfigs().stream().map(bc -> configurationLocationFactory().create(bc, project)).collect(Collectors.toList());
+        List<BundledConfigurationLocation> bundledConfigurationLocations = BundledConfig.getAllBundledConfigs()
+                .stream()
+                .map(bc -> configurationLocationFactory().create(bc, project))
+                .toList();
 
         for (BundledConfigurationLocation bundledConfigurationLocation : bundledConfigurationLocations) {
             if (!configurationLocations.contains(bundledConfigurationLocation)) {

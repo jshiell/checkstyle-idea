@@ -27,7 +27,9 @@ public class DescriptorTest {
 
     @Test
     public void aFileConfigurationLocationIsCorrectlyParsed() {
-        assertThat(Descriptor.parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules", project).toConfigurationLocation(project),
+        assertThat(Descriptor
+                        .parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml:Some checkstyle rules", project)
+                        .toConfigurationLocation(project),
                 allOf(
                         hasProperty("location", is(oneOf(
                                 "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml",

@@ -16,8 +16,7 @@ public interface BundledConfigProvider {
     @NotNull
     Collection<BasicConfig> getConfigs();
 
-    public class BasicConfig {
-
+    class BasicConfig {
         private final String id;
         private final String path;
         private final String description;
@@ -29,7 +28,7 @@ public interface BundledConfigProvider {
         }
 
         static String requiredNotBlank(final String val, final String name) {
-            if(StringUtils.isBlank(val)) {
+            if (StringUtils.isBlank(val)) {
                 throw new IllegalArgumentException(name + " must not be blank");
             }
             return val;

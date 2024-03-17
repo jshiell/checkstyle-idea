@@ -29,7 +29,8 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void aFileConfigurationLocationIsCorrectlyParsed() {
-        assertThat(underTest.create(project, "anId", ConfigurationType.LOCAL_FILE, "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", "Some checkstyle rules", allScope),
+        assertThat(underTest.create(project, "anId", ConfigurationType.LOCAL_FILE,
+                        "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", "Some checkstyle rules", allScope),
                 allOf(
                         hasProperty("location", is(oneOf(
                                 "/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml",
@@ -42,7 +43,8 @@ public class ConfigurationLocationFactoryTest {
      */
     @Test
     public void testBundledConfigMigration() {
-        ConfigurationLocation cl = underTest.create(project, "anId", ConfigurationType.LEGACY_CLASSPATH, "/sun_checks.xml", "The default Checkstyle rules", allScope);
+        ConfigurationLocation cl = underTest.create(project, "anId", ConfigurationType.LEGACY_CLASSPATH,
+                "/sun_checks.xml", "The default Checkstyle rules", allScope);
         assertNotNull(cl);
         assertEquals(BundledConfigurationLocation.class, cl.getClass());
         assertEquals(BundledConfig.SUN_CHECKS, ((BundledConfigurationLocation) cl).getBundledConfig());
@@ -50,7 +52,8 @@ public class ConfigurationLocationFactoryTest {
 
     @Test
     public void testBundledConfigSun() {
-        ConfigurationLocation cls = underTest.create(project, "anId", ConfigurationType.BUNDLED, "(bundled)", "Sun Checks", allScope);
+        ConfigurationLocation cls = underTest.create(project, "anId", ConfigurationType.BUNDLED,
+                "(bundled)", "Sun Checks", allScope);
         assertNotNull(cls);
         assertEquals(BundledConfigurationLocation.class, cls.getClass());
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;

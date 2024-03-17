@@ -46,7 +46,10 @@ public class CheckStyleConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         final PluginConfiguration oldConfig = pluginConfigurationManager.getCurrent();
-        final PluginConfiguration newConfig = PluginConfigurationBuilder.from(configPanel.getPluginConfiguration()).withScanBeforeCheckin(oldConfig.isScanBeforeCheckin()).build();
+        final PluginConfiguration newConfig = PluginConfigurationBuilder
+                .from(configPanel.getPluginConfiguration())
+                .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
+                .build();
 
         boolean result = !oldConfig.hasChangedFrom(newConfig);
         if (LOG.isDebugEnabled()) {
@@ -56,7 +59,10 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void apply() {
-        final PluginConfiguration newConfig = PluginConfigurationBuilder.from(configPanel.getPluginConfiguration()).withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin()).build();
+        final PluginConfiguration newConfig = PluginConfigurationBuilder
+                .from(configPanel.getPluginConfiguration())
+                .withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin())
+                .build();
         pluginConfigurationManager.setCurrent(newConfig, true);
 
         configurationInvalidator.invalidateCachedResources();

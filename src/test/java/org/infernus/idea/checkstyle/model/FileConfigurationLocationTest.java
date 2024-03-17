@@ -141,7 +141,7 @@ public class FileConfigurationLocationTest {
     }
 
     @NotNull
-    private ProjectFilePaths testProjectFilePaths(char separatorChar, Project project) {
+    private ProjectFilePaths testProjectFilePaths(final char separatorChar, final Project project) {
         Function<File, String> absolutePathOf = file -> {
             // a nasty hack to pretend we're on a Windows box when required...
             if (file.getPath().startsWith("c:")) {

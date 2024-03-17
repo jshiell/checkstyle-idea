@@ -16,7 +16,7 @@ import static org.mockito.Mockito.mock;
 public class OpDestroyCheckerTest {
     private static final Project PROJECT = mock(Project.class);
 
-    private static class WrongObject implements CheckstyleInternalObject {
+    private static final class WrongObject implements CheckstyleInternalObject {
         // does not matter
     }
 

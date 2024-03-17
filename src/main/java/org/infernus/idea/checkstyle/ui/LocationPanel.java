@@ -96,7 +96,11 @@ public class LocationPanel extends JPanel {
         this.scopeComboBox.setSelectedItem(NamedScopeHelper.getDefaultScope(project));
         this.scopeComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(final JList<?> list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
+            public Component getListCellRendererComponent(final JList<?> list,
+                                                          final Object value,
+                                                          final int index,
+                                                          final boolean isSelected,
+                                                          final boolean cellHasFocus) {
                 var presentableName = ((NamedScope) value).getPresentableName();
                 super.getListCellRendererComponent(list, presentableName, index, isSelected, cellHasFocus);
                 return this;

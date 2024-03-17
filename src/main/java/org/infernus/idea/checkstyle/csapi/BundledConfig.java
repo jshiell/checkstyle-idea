@@ -5,20 +5,13 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
+import java.util.*;
 
 
 /**
  * The configuration files bundled with Checkstyle-IDEA as provided by Checkstyle.
  */
-public class BundledConfig {
+public final class BundledConfig {
 
     private static final Logger LOG = Logger.getInstance(BundledConfig.class);
 
@@ -39,7 +32,6 @@ public class BundledConfig {
 
     private final String path;
 
-
     private BundledConfig(final int sortOrder,
                   @NotNull final String id,
                   @NotNull final String location,
@@ -59,7 +51,6 @@ public class BundledConfig {
         this.location = BUNDLED_LOCATION;
         this.path = baseConfig.getPath();
     }
-
 
     public int getSortOrder() {
         return sortOrder;
@@ -90,7 +81,6 @@ public class BundledConfig {
                 && Objects.equals(configurationLocation.getDescription(), description);
     }
 
-
     @NotNull
     public static BundledConfig fromDescription(@NotNull final String pDescription) {
         BundledConfig result = GOOGLE_CHECKS;
@@ -105,23 +95,20 @@ public class BundledConfig {
     }
 
     public static Collection<BundledConfig> getAllBundledConfigs() {
-
-        Map<String,BundledConfig> map = new HashMap<>();
+        Map<String, BundledConfig> map = new HashMap<>();
 
         map.put(SUN_CHECKS.getId(), SUN_CHECKS);
         map.put(GOOGLE_CHECKS.getId(), GOOGLE_CHECKS);
 
         LOG.info("Loading additional BundledConfigs");
 
-
         for (BundledConfigProvider bundledConfigProvider : ServiceLoader.load(BundledConfigProvider.class, BundledConfig.class.getClassLoader())) {
-
-            LOG.info("Loading additional BundledConfig " + bundledConfigProvider.getClass() + " from " + bundledConfigProvider.getClass().getProtectionDomain().getCodeSource());
+            LOG.info("Loading additional BundledConfig " + bundledConfigProvider.getClass() + " from "
+                    + bundledConfigProvider.getClass().getProtectionDomain().getCodeSource());
             for (BundledConfigProvider.BasicConfig config : bundledConfigProvider.getConfigs()) {
-
                 int i = 0;
                 String id = config.getId();
-                while(map.containsKey(id)) {
+                while (map.containsKey(id)) {
                     id = config.getId() + (++i);
                 }
                 BundledConfig bundledConfig = new BundledConfig(map.size(), id, config);
@@ -129,14 +116,11 @@ public class BundledConfig {
             }
         }
         List<BundledConfig> ret = new ArrayList<>(map.values());
-        ret.sort((bc1, bc2) -> Integer.compare(bc1.getSortOrder(), bc2.getSortOrder()));
+        ret.sort(Comparator.comparingInt(BundledConfig::getSortOrder));
         return ret;
     }
 
-
-
     public static Optional<BundledConfig> getById(final String id) {
-
         return getAllBundledConfigs().stream().filter(bc -> bc.getId().equals(id)).findAny();
     }
 }

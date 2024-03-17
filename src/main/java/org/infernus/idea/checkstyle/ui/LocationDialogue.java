@@ -237,7 +237,7 @@ public class LocationDialogue extends JDialog {
         return Step.COMPLETE;
     }
 
-    private class NextAction extends AbstractAction {
+    private final class NextAction extends AbstractAction {
         private static final long serialVersionUID = 3800521701284308642L;
 
         @Override

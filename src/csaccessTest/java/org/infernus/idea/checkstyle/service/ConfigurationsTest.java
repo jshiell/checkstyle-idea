@@ -51,8 +51,8 @@ public class ConfigurationsTest {
 
 
     @Test
-    public void testNoTreeWalker_useDefault() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+    public void testNoTreeWalkerUseDefault() throws IOException {
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("FileTabCharacter")).build();
         assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
@@ -60,7 +60,7 @@ public class ConfigurationsTest {
 
     @Test
     public void tabWidthPropertyValueIsReturnedWhenPresent() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "7")).build();
         assertEquals(7, createClassUnderTest(config).tabWidth());
     }
@@ -68,7 +68,7 @@ public class ConfigurationsTest {
 
     @Test
     public void aTabWidthPropertyWithANonIntegerValueReturnsTheDefault() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "dd")).build();
         assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
@@ -76,7 +76,7 @@ public class ConfigurationsTest {
 
     @Test
     public void aTabWidthPropertyWithNoValueReturnsTheDefault() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "")).build();
         assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
@@ -84,7 +84,7 @@ public class ConfigurationsTest {
 
     @Test
     public void tabWidthNullAttribute() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", null)).build();
         assertEquals(CODE_STYLE_TAB_SIZE, createClassUnderTest(config).tabWidth());
     }
@@ -92,7 +92,7 @@ public class ConfigurationsTest {
 
     @Test
     public void testBaseDir() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withChild( //
+        final Configuration config = ConfigurationBuilder.checker().withChild(
                 ConfigurationBuilder.config("TreeWalker").withAttribute("tabWidth", "7")).build();
         assertEquals(Optional.empty(), createClassUnderTest(config).baseDir());
     }
@@ -100,7 +100,7 @@ public class ConfigurationsTest {
 
     @Test
     public void testBaseDirFromAttribute() throws IOException {
-        final Configuration config = ConfigurationBuilder.checker().withAttribute("foo", "bar") //
+        final Configuration config = ConfigurationBuilder.checker().withAttribute("foo", "bar")
                 .withAttribute("basedir", "/some/dir").build();
         assertEquals(Optional.of("/some/dir"), createClassUnderTest(config).baseDir());
     }

@@ -88,9 +88,9 @@ public class HTTPURLConfigurationLocationTest {
         return location;
     }
 
-    private class TestHandler implements HttpHandler {
+    private final class TestHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange exch) throws IOException {
+        public void handle(final HttpExchange exch) throws IOException {
             String response;
             int status;
             switch (exch.getRequestURI().getPath()) {

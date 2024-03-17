@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 
-class ModuleImporterFactory {
+final class ModuleImporterFactory {
 
     private ModuleImporterFactory() {
     }

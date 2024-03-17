@@ -161,7 +161,8 @@ public class ImportOrderImporter extends ModuleImporter {
                     // arrive at the non-static import.
                     // If no non-static import exists we add the current static import to the table along with a
                     // non-static import above or under it.
-                    if (entry == PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY && !nonStaticImports.contains(PackageEntry.ALL_OTHER_IMPORTS_ENTRY.getPackageName())) {
+                    if (entry == PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY
+                            && !nonStaticImports.contains(PackageEntry.ALL_OTHER_IMPORTS_ENTRY.getPackageName())) {
                         if (staticImportPosition == StaticImportPosition.ABOVE) {
                             importTable.addEntry(PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY);
                             importTable.addEntry(PackageEntry.ALL_OTHER_IMPORTS_ENTRY);

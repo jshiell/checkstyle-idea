@@ -153,7 +153,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
 
         @NotNull
         private TreeSet<org.infernus.idea.checkstyle.model.ConfigurationLocation> deserialiseLocations(@NotNull final Project project) {
-            TreeSet<org.infernus.idea.checkstyle.model.ConfigurationLocation> configurationLocations = requireNonNullElseGet(this.locations, () -> new ArrayList<ConfigurationLocation>()).stream()
+            TreeSet<org.infernus.idea.checkstyle.model.ConfigurationLocation> configurationLocations
+                    = requireNonNullElseGet(this.locations, () -> new ArrayList<ConfigurationLocation>()).stream()
                     .map(location -> deserialiseLocation(project, location))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toCollection(TreeSet::new));

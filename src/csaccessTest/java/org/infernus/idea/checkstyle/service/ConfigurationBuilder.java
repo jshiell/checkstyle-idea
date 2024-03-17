@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.service;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 
-public class ConfigurationBuilder {
+public final class ConfigurationBuilder {
 
     private final DefaultConfiguration configuration;
 

@@ -14,7 +14,7 @@ class TestSuiteStatsReporter
     private final Logger logger;
 
 
-    public TestSuiteStatsReporter(final Logger pLogger) {
+    TestSuiteStatsReporter(final Logger pLogger) {
         logger = pLogger;
     }
 

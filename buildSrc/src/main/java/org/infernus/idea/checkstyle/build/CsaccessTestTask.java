@@ -5,12 +5,10 @@ import java.util.Set;
 
 import groovy.lang.Closure;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.CapabilityResolutionDetails;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.internal.artifacts.transform.ComponentVariantIdentifier;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
@@ -24,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
  * Gradle task that runs the unit tests in 'csaccessTest' against one of the supported Checkstyle versions.
  */
 public class CsaccessTestTask extends Test {
-
     public static final String XTEST_GROUP_NAME = "xtest";
     public static final String XTEST_TASK_NAME = "xtest";
 

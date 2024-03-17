@@ -193,7 +193,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
     /**
      * Listener to update UI based on radio button selections.
      */
-    private class RadioListener implements ActionListener {
+    private final class RadioListener implements ActionListener {
 
         @Override
         public void actionPerformed(final ActionEvent e) {

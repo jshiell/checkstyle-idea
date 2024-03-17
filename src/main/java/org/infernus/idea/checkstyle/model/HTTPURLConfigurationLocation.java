@@ -43,7 +43,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 	}
 
 	@NotNull
-	protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException {
+	protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
 		if (cachedContent != null && cacheExpiry > System.currentTimeMillis()) {
 			return new ByteArrayInputStream(cachedContent);
 		}

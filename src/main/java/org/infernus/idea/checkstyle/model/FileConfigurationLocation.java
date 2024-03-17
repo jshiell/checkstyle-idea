@@ -67,7 +67,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     @NotNull
-    protected InputStream resolveFile(@NotNull ClassLoader checkstyleClassLoader) throws IOException {
+    protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
         final String detokenisedLocation = getLocation();
         if (isInJarFile(detokenisedLocation)) {
             return readLocationFromJar(detokenisedLocation);

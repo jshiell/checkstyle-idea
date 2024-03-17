@@ -5,7 +5,10 @@ import com.intellij.util.lang.UrlClassLoader;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-public class ClassLoaderDumper {
+public final class ClassLoaderDumper {
+
+    private ClassLoaderDumper() {
+    }
 
     public static String dumpClassLoader(final ClassLoader classLoader) {
         StringBuilder dump = new StringBuilder();

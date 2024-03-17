@@ -25,7 +25,8 @@ public class ExceptionWrapperTest {
         assumeTrue(classExists("antlr.RecognitionException"));
 
         assertThat(
-                new ExceptionWrapper().wrap(null, new CheckstyleException("aTestException", instantiateExceptionByNameWithMessage("antlr.RecognitionException"))),
+                new ExceptionWrapper().wrap(null,
+                        new CheckstyleException("aTestException", instantiateExceptionByNameWithMessage("antlr.RecognitionException"))),
                 is(instanceOf(CheckStylePluginParseException.class)));
     }
 
@@ -97,7 +98,7 @@ public class ExceptionWrapperTest {
     }
 
     @NotNull
-    private Throwable instantiateExceptionByName(String s) {
+    private Throwable instantiateExceptionByName(final String s) {
         try {
             return (Throwable) Class.forName(s).getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -106,7 +107,7 @@ public class ExceptionWrapperTest {
     }
 
     @NotNull
-    private Throwable instantiateExceptionByNameWithMessage(String s) {
+    private Throwable instantiateExceptionByNameWithMessage(final String s) {
         try {
             return (Throwable) Class.forName(s).getDeclaredConstructor(String.class).newInstance("aTestException");
         } catch (Exception e) {
@@ -114,7 +115,7 @@ public class ExceptionWrapperTest {
         }
     }
 
-    private boolean classExists(String className) {
+    private boolean classExists(final String className) {
         try {
             Class.forName(className);
             return true;

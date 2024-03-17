@@ -32,7 +32,7 @@ public class OpPeruseConfigurationTest {
         assertNull(cmd.execute(PROJECT));
     }
 
-    private static class StubVisitor implements ConfigVisitor {
+    private static final class StubVisitor implements ConfigVisitor {
         @Override
         public void visit(@NotNull final ConfigurationModule module) {
 

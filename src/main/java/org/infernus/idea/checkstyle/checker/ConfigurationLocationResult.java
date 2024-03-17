@@ -4,7 +4,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ConfigurationLocationResult {
+public final class ConfigurationLocationResult {
 
     public final ConfigurationLocation location;
     public final ConfigurationLocationStatus status;
