@@ -70,6 +70,8 @@ test {
 }
 
 tasks.named("classpathIndexCleanup") {
+    dependsOn(tasks.named("processCsaccessResources"))
+    dependsOn(tasks.named("processCsaccessTestResources"))
     dependsOn(tasks.named("compileCsaccessJava"))
     dependsOn(tasks.named("compileCsaccessTestJava"))
 }
