@@ -6,8 +6,8 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 
 [![Build Status](https://github.com/jshiell/checkstyle-idea/workflows/Build/badge.svg)](https://github.com/jshiell/checkstyle-idea/actions?query=workflow%3A%22Build%22)
 
-A plug-in for JetBrains' IntelliJ IDEA 2022-23 which provides real-time feedback against a given
-[CheckStyle 8-10](https://checkstyle.sourceforge.io) profile by way of an inspection.
+A plug-in for JetBrains' IntelliJ IDEA 2023 which provides real-time feedback against a given
+[CheckStyle 9-10](https://checkstyle.sourceforge.io) profile by way of an inspection.
 
 Please note this is not an official part of Checkstyle - they neither endorse
     nor bear responsibility for this plugin. The logo is sourced from the [Checkstyle resources
@@ -130,7 +130,7 @@ mode.
 
 ## Frequently Asked Questions
 
-If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 8 or later.
+If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 11 or later.
 [Jetbrains offer a support document on this
 subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
 
