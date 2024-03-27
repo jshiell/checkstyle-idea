@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.project.Project;
@@ -9,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;
 import static com.intellij.notification.NotificationType.*;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
@@ -25,10 +25,11 @@ public final class Notifications {
     }
 
     public static void showInfo(final Project project,
-                                final String infoText) {
+                                final String infoText,
+                                final NotificationAction action) {
         BALLOON_GROUP
                 .createNotification("", infoText, INFORMATION)
-                .setListener(URL_OPENING_LISTENER)
+                .addAction(action)
                 .notify(project);
     }
 
@@ -36,7 +37,6 @@ public final class Notifications {
                                    final String warningText) {
         BALLOON_GROUP
                 .createNotification("", warningText, WARNING)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
@@ -44,7 +44,6 @@ public final class Notifications {
                                  final String errorText) {
         BALLOON_GROUP
                 .createNotification("", errorText, ERROR)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
@@ -52,7 +51,6 @@ public final class Notifications {
                                      final Throwable t) {
         LOG_ONLY_GROUP
                 .createNotification(titleFor(t), messageFor(t), ERROR)
-                .setListener(URL_OPENING_LISTENER)
                 .notify(project);
     }
 
@@ -80,7 +78,7 @@ public final class Notifications {
     @NotNull
     private static String detailSuffixOf(final Throwable t) {
         if (isParseException(t)) {
-            return  ".parse";
+            return ".parse";
         }
         return "";
     }
