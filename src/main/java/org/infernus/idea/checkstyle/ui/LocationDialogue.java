@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -149,18 +150,12 @@ public class LocationDialogue extends JDialog {
     }
 
     private JPanel panelForCurrentStep() {
-        switch (currentStep) {
-            case SELECT:
-                return locationPanel;
-            case PROPERTIES:
-                return propertiesPanel;
-            case ERROR:
-                return errorPanel;
-            case COMPLETE:
-                return completePanel;
-            default:
-                throw new IllegalStateException("Unknown step: " + currentStep);
-        }
+        return switch (currentStep) {
+            case SELECT -> locationPanel;
+            case PROPERTIES -> propertiesPanel;
+            case ERROR -> errorPanel;
+            case COMPLETE -> completePanel;
+        };
     }
 
     @Override
@@ -168,7 +163,7 @@ public class LocationDialogue extends JDialog {
         if (visible) {
             this.committed = false;
         }
-        try (var token = com.intellij.concurrency.ThreadContext.resetThreadContext()) {
+        try (var ignored = com.intellij.concurrency.ThreadContext.resetThreadContext()) {
             super.setVisible(visible);
         }
     }
@@ -238,6 +233,7 @@ public class LocationDialogue extends JDialog {
     }
 
     private final class NextAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = 3800521701284308642L;
 
         @Override
@@ -301,6 +297,7 @@ public class LocationDialogue extends JDialog {
     }
 
     private class PreviousAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = 3800521701284308642L;
 
         PreviousAction() {
@@ -338,6 +335,7 @@ public class LocationDialogue extends JDialog {
      * Respond to a cancel action.
      */
     private class CancelAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = -994620715558602656L;
 
         CancelAction() {

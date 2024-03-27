@@ -297,11 +297,10 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     private void scrollToError(final TreePath treePath) {
         final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-        if (treeNode == null || !(treeNode.getUserObject() instanceof ResultTreeNode)) {
+        if (treeNode == null || !(treeNode.getUserObject() instanceof ResultTreeNode nodeInfo)) {
             return;
         }
 
-        final ResultTreeNode nodeInfo = (ResultTreeNode) treeNode.getUserObject();
         if (nodeInfo.getFile() == null || nodeInfo.getProblem() == null) {
             return; // no problem here :-)
         }

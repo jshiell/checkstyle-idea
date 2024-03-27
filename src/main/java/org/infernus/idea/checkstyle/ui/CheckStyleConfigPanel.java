@@ -29,6 +29,7 @@ import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.Serial;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -261,6 +262,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the addition of a configuration location.
      */
     private final class AddLocationAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -7266120887003483814L;
 
         AddLocationAction() {
@@ -302,6 +304,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the removal of a configuration location.
      */
     private final class RemoveLocationAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -799542186049804472L;
 
         RemoveLocationAction() {
@@ -325,6 +328,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Edit the properties of a configuration location.
      */
     private final class EditPropertiesAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -799542186049804472L;
 
         EditPropertiesAction() {
@@ -356,6 +360,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     abstract static class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
+        @Serial
         private static final long serialVersionUID = 7091312536206510956L;
 
         @Override
@@ -368,6 +373,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the addition of a path element.
      */
     private final class AddPathAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -1389576037231727360L;
 
         /**
@@ -398,6 +404,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the editing of a path element.
      */
     private final class EditPathAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -1455378231580505750L;
 
         /**
@@ -438,6 +445,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the removal of a path element.
      */
     private final class RemovePathAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = 7339136485307147623L;
 
         /**
@@ -467,6 +475,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the move up of a path element.
      */
     private final class MoveUpPathAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = -1230778908605654344L;
 
         /**
@@ -497,6 +506,7 @@ public class CheckStyleConfigPanel extends JPanel {
      * Process the move down of a path element.
      */
     private final class MoveDownPathAction extends ToolbarAction {
+        @Serial
         private static final long serialVersionUID = 1222511743014969175L;
 
         /**
@@ -523,7 +533,7 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    private class EnableWhenSelectedAndRemovable implements AnActionButtonUpdater {
+    private final class EnableWhenSelectedAndRemovable implements AnActionButtonUpdater {
         @Override
         public boolean isEnabled(@NotNull final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
@@ -531,7 +541,7 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    private class EnableWhenSelected implements AnActionButtonUpdater {
+    private final class EnableWhenSelected implements AnActionButtonUpdater {
         @Override
         public boolean isEnabled(@NotNull final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();

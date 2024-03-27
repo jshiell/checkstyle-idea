@@ -45,20 +45,17 @@ public class ResultTreeRenderer extends JLabel
     @Override
     public Component getTreeCellRendererComponent(final JTree tree,
                                                   final Object value,
-                                                  final boolean selected,
+                                                  final boolean cellSelected,
                                                   final boolean expanded,
                                                   final boolean leaf,
                                                   final int row,
                                                   final boolean hasFocus) {
-        this.selected = selected;
+        this.selected = cellSelected;
 
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         if (node != null) {
             final Object userObject = node.getUserObject();
-            if (userObject instanceof ResultTreeNode) {
-                final ResultTreeNode treeNode
-                        = (ResultTreeNode) userObject;
-
+            if (userObject instanceof ResultTreeNode treeNode) {
                 if (expanded) {
                     setIcon(treeNode.getExpandedIcon());
                 } else {
@@ -75,9 +72,13 @@ public class ResultTreeRenderer extends JLabel
 
         setFont(tree.getFont());
 
-        setForeground(JBColor.getColor(selected ? "Tree.selectionForeground" : "Tree.textForeground"));
-        setBackground(JBColor.getColor(selected ? "Tree.selectionBackground" : "Tree.textBackground"));
-
+        if (cellSelected) {
+            setForeground(JBColor.getColor("Tree.selectionForeground"));
+            setBackground(JBColor.getColor("Tree.selectionBackground"));
+        } else {
+            setForeground(JBColor.getColor("Tree.textForeground"));
+            setBackground(JBColor.getColor("Tree.textBackground"));
+        }
 
         return this;
     }

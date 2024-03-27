@@ -1,6 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
-public class OS {
+public final class OS {
 
     private static final String OPERATING_SYSTEM = System.getProperty("os.name").toLowerCase();
 

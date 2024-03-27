@@ -98,22 +98,13 @@ public class CheckStyleAuditListener
     private SeverityLevel readSeverityLevel(final com.puppycrawl.tools.checkstyle.api.SeverityLevel severityLevel) {
         SeverityLevel result = null;
         if (severityLevel != null) {
-            switch (severityLevel) {
-                case ERROR:
-                    result = SeverityLevel.Error;
-                    break;
-                case WARNING:
-                    result = SeverityLevel.Warning;
-                    break;
-                case INFO:
-                    result = SeverityLevel.Info;
-                    break;
-                case IGNORE:
-                    // fall through
-                default:
-                    result = SeverityLevel.Ignore;
-                    break;
-            }
+            result = switch (severityLevel) {
+                case ERROR -> SeverityLevel.Error;
+                case WARNING -> SeverityLevel.Warning;
+                case INFO -> SeverityLevel.Info;
+                // fall through
+                default -> SeverityLevel.Ignore;
+            };
         }
         return result;
     }

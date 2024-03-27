@@ -25,21 +25,23 @@ import static org.mockito.Mockito.when;
 
 public class ConfigurationLocationTest {
 
-    private static final String TEST_FILE = "<module name=\"Checker\">\n"
-            + "<module name=\"TestFilter\">\n"
-            + "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n"
-            + "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n"
-            + "  <property name=\"something\" value=\"${property-three}\"/>\n"
-            + "</module>\n"
-            + "</module>";
+    private static final String TEST_FILE = """
+            <module name="Checker">
+            <module name="TestFilter">
+              <property name="file" value="${property-one}/a-file.xml"/>
+              <property name="url" value="http://${property-two}/somewhere.xml"/>
+              <property name="something" value="${property-three}"/>
+            </module>
+            </module>""";
 
-    private static final String TEST_FILE_2 = "<module name=\"Checker\">\n"
-            + "<module name=\"TestFilter\">\n"
-            + "  <property name=\"file\" value=\"${property-one}/a-file.xml\"/>\n"
-            + "  <property name=\"url\" value=\"http://${property-two}/somewhere.xml\"/>\n"
-            + "  <property name=\"something\" value=\"${property-four}\"/>\n"
-            + "</module>\n"
-            + "</module>";
+    private static final String TEST_FILE_2 = """
+            <module name="Checker">
+            <module name="TestFilter">
+              <property name="file" value="${property-one}/a-file.xml"/>
+              <property name="url" value="http://${property-two}/somewhere.xml"/>
+              <property name="something" value="${property-four}"/>
+            </module>
+            </module>""";
 
     private TestConfigurationLocation underTest;
 

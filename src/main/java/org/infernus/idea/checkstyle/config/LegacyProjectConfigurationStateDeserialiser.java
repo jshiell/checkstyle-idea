@@ -104,7 +104,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
         if (value != null) {
             final String[] parts = value.toString().split(";");
             for (final String part : parts) {
-                if (part.length() > 0) {
+                if (!part.isEmpty()) {
                     thirdPartyClasspath.add(projectFilePaths().detokenise(part));
                 }
             }

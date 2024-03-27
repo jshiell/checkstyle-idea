@@ -3,12 +3,14 @@ package org.infernus.idea.checkstyle.ui;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
 import javax.swing.table.AbstractTableModel;
+import java.io.Serial;
 import java.util.*;
 
 /**
  * A table model for editing CheckStyle properties.
  */
 public class PropertiesTableModel extends AbstractTableModel {
+    @Serial
     private static final long serialVersionUID = -5666606037841678795L;
 
     private static final int COLUMN_NAME = 0;
@@ -87,8 +89,7 @@ public class PropertiesTableModel extends AbstractTableModel {
                            final int columnIndex) {
         if (columnIndex == COLUMN_VALUE) {
             final String propertyName = orderedNames.get(rowIndex);
-            properties.put(propertyName, aValue != null
-                    ? aValue.toString() : null);
+            properties.put(propertyName, Objects.toString(aValue, null));
         } else {
                 throw new IllegalArgumentException("Invalid column: "
                         + columnIndex);
@@ -102,15 +103,10 @@ public class PropertiesTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
-        switch (columnIndex) {
-            case COLUMN_NAME:
-                return orderedNames.get(rowIndex);
-            case COLUMN_VALUE:
-                return properties.get(orderedNames.get(rowIndex));
-
-            default:
-                throw new IllegalArgumentException("Invalid column: "
-                        + columnIndex);
-        }
+        return switch (columnIndex) {
+            case COLUMN_NAME -> orderedNames.get(rowIndex);
+            case COLUMN_VALUE -> properties.get(orderedNames.get(rowIndex));
+            default -> throw new IllegalArgumentException("Invalid column: " + columnIndex);
+        };
     }
 }

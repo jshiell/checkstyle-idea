@@ -91,17 +91,12 @@ public class Problem implements Comparable<Problem> {
 
     private ProblemHighlightType problemHighlightType() {
         if (!suppressErrors) {
-            switch (severityLevel()) {
-                case Error:
-                    return ProblemHighlightType.GENERIC_ERROR;
-                case Info:
-                    return ProblemHighlightType.WEAK_WARNING;
-                case Ignore:
-                    return ProblemHighlightType.INFORMATION;
-                case Warning:
-                default:
-                    return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
-            }
+            return switch (severityLevel()) {
+                case Error -> ProblemHighlightType.GENERIC_ERROR;
+                case Info -> ProblemHighlightType.WEAK_WARNING;
+                case Ignore -> ProblemHighlightType.INFORMATION;
+                default -> ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
+            };
         }
         return ProblemHighlightType.GENERIC_ERROR_OR_WARNING;
     }

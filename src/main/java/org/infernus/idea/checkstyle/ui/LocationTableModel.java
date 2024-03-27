@@ -5,6 +5,7 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.table.AbstractTableModel;
@@ -16,6 +17,7 @@ import static java.util.function.Predicate.not;
  * A table model for editing CheckStyle file locations.
  */
 public class LocationTableModel extends AbstractTableModel {
+    @Serial
     private static final long serialVersionUID = -7914774770821623832L;
 
     private static final int COLUMN_ACTIVE = 0;

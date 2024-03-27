@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.regex.Pattern;
 
 public final class FilePaths {
@@ -110,6 +111,7 @@ public final class FilePaths {
 
 
     public static class PathResolutionException extends RuntimeException {
+        @Serial
         private static final long serialVersionUID = -8628071255737767040L;
 
         PathResolutionException(final String msg) {

@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.Serial;
 
 /**
  * Allows setting of file properties.
@@ -121,6 +122,7 @@ public class PropertiesDialogue extends JDialog {
      * Respond to an okay action.
      */
     private class OkayAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = 3800521701284308642L;
 
         /**
@@ -146,6 +148,7 @@ public class PropertiesDialogue extends JDialog {
      * Respond to a cancel action.
      */
     private class CancelAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = -994620715558602656L;
 
         /**

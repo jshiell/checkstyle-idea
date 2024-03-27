@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.regex.Matcher;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
  */
 public final class VersionComparator implements Comparator<String>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0L;
 
     private static final Pattern PATTERN = Pattern.compile("(\\d+)\\.(\\d+)(?:\\.(\\d+))?");

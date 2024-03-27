@@ -269,7 +269,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                             final Module module,
                             final ClassLoader checkstyleClassLoader) {
         if (fileName == null
-                || "".equals(fileName.trim())
+                || fileName.trim().isEmpty()
                 || fileName.toLowerCase().startsWith("http://")
                 || fileName.toLowerCase().startsWith("https://")) {
             return fileName;
@@ -399,10 +399,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         if (this == other) {
             return true;
         }
-        if (!(other instanceof ConfigurationLocation)) {
+        if (!(other instanceof ConfigurationLocation that)) {
             return false;
         }
-        final ConfigurationLocation that = (ConfigurationLocation) other;
         return compareTo(that) == 0;
     }
 

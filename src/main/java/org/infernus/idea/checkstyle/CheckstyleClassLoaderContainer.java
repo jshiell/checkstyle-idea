@@ -142,17 +142,7 @@ public class CheckstyleClassLoaderContainer {
         try {
             final List<URL> urls = new ArrayList<>();
             final String buildPath = guessBuildPathFromClasspath();
-            URL unitTestingClassPath = null;
-            if (buildPath != null) {
-                final File classesDir4UnitTesting = new File(buildPath, "classes/java/csaccess");
-                if (classesDir4UnitTesting.exists()) {
-                    unitTestingClassPath = classesDir4UnitTesting.toURI().toURL();
-                }
-            }
-
-            if (unitTestingClassPath == null) {
-                throw new CheckStylePluginException("Could not determine plugin directory or build directory");
-            }
+            URL unitTestingClassPath = getUnitTestingClassPath(buildPath);
 
             urls.add(unitTestingClassPath);
 
@@ -170,6 +160,22 @@ public class CheckstyleClassLoaderContainer {
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("Failed to parse classpath URL", e);
         }
+    }
+
+    @NotNull
+    private static URL getUnitTestingClassPath(final String buildPath) throws MalformedURLException {
+        URL unitTestingClassPath = null;
+        if (buildPath != null) {
+            final File classesDir4UnitTesting = new File(buildPath, "classes/java/csaccess");
+            if (classesDir4UnitTesting.exists()) {
+                unitTestingClassPath = classesDir4UnitTesting.toURI().toURL();
+            }
+        }
+
+        if (unitTestingClassPath == null) {
+            throw new CheckStylePluginException("Could not determine plugin directory or build directory");
+        }
+        return unitTestingClassPath;
     }
 
     @NotNull

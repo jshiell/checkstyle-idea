@@ -152,8 +152,7 @@ public class CheckerFactory {
 
         if (workerResult instanceof CheckstyleToolException) {
             return blockAndShowMessageFromException(location, module, (CheckstyleToolException) workerResult);
-        } else if (workerResult instanceof IOException) {
-            IOException ioExceptionResult = (IOException) workerResult;
+        } else if (workerResult instanceof IOException ioExceptionResult) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), ioExceptionResult);
             return blockAndShowMessage(location, module, ioExceptionResult, "checkstyle.file-not-found", location.getLocation());
         } else if (workerResult instanceof Throwable) {

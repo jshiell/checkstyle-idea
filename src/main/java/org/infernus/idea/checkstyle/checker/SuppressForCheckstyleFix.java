@@ -5,7 +5,7 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.jetbrains.annotations.NotNull;
 
 public class SuppressForCheckstyleFix extends SuppressFix {
-    SuppressForCheckstyleFix(@NotNull String sourceCheckName) {
+    SuppressForCheckstyleFix(@NotNull final String sourceCheckName) {
         super("checkstyle:" + sourceCheckName);
     }
 

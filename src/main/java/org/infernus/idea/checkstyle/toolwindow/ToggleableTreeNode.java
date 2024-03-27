@@ -2,21 +2,23 @@ package org.infernus.idea.checkstyle.toolwindow;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Tree node with togglable visibility.
+ * Tree node with toggleable visibility.
  */
-public class TogglableTreeNode extends DefaultMutableTreeNode {
+public class ToggleableTreeNode extends DefaultMutableTreeNode {
+    @Serial
     private static final long serialVersionUID = -4490734768175672868L;
 
     private boolean visible = true;
 
-    public TogglableTreeNode() {
+    public ToggleableTreeNode() {
     }
 
-    public TogglableTreeNode(final Object userObject) {
+    public ToggleableTreeNode(final Object userObject) {
         super(userObject);
     }
 
@@ -28,9 +30,9 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
-    List<TogglableTreeNode> getAllChildren() {
+    List<ToggleableTreeNode> getAllChildren() {
         return children.stream()
-                .map(child -> (TogglableTreeNode) child)
+                .map(child -> (ToggleableTreeNode) child)
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +42,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
         int visibleIndex = -1;
 
         for (final Object child : children) {
-            final TogglableTreeNode node = (TogglableTreeNode) child;
+            final ToggleableTreeNode node = (ToggleableTreeNode) child;
             if (node.isVisible()) {
                 ++visibleIndex;
             }
@@ -61,7 +63,7 @@ public class TogglableTreeNode extends DefaultMutableTreeNode {
 
         int count = 0;
         for (final Object child : children) {
-            final TogglableTreeNode node = (TogglableTreeNode) child;
+            final ToggleableTreeNode node = (ToggleableTreeNode) child;
             if (node.isVisible()) {
                 ++count;
             }

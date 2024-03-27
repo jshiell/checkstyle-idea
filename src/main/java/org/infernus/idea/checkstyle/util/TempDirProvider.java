@@ -66,7 +66,7 @@ public class TempDirProvider {
     }
 
     private char driveLetterOf(final String windowsPath) {
-        if (windowsPath != null && windowsPath.length() > 0) {
+        if (windowsPath != null && !windowsPath.isEmpty()) {
             final Path normalisedPath = Paths.get(windowsPath).normalize().toAbsolutePath();
             return normalisedPath.toFile().toString().charAt(0);
         }
@@ -127,7 +127,7 @@ public class TempDirProvider {
             if (template != null) {
                 template = MessageFormat.format(template, project.getName(), CheckStylePlugin.ID_PLUGIN);
                 template = template.replaceAll("[\r\n]+", System.lineSeparator());
-                Files.write(readme, template.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+                Files.writeString(readme, template, StandardOpenOption.CREATE);
             }
         }
     }

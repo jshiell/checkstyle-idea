@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import java.io.Serial;
 import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -16,6 +17,7 @@ import static java.util.Comparator.*;
 
 public class ResultTreeModel extends DefaultTreeModel {
 
+    @Serial
     private static final long serialVersionUID = 2161855162879365203L;
 
     private final DefaultMutableTreeNode visibleRootNode;
@@ -81,12 +83,12 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private void filter(final boolean sendEvents, final SeverityLevel... levels) {
-        final Set<TogglableTreeNode> changedNodes = new HashSet<>();
+        final Set<ToggleableTreeNode> changedNodes = new HashSet<>();
 
         for (int fileIndex = 0; fileIndex < visibleRootNode.getChildCount(); ++fileIndex) {
-            final TogglableTreeNode fileNode = (TogglableTreeNode) visibleRootNode.getChildAt(fileIndex);
+            final ToggleableTreeNode fileNode = (ToggleableTreeNode) visibleRootNode.getChildAt(fileIndex);
 
-            for (final TogglableTreeNode problemNode : fileNode.getAllChildren()) {
+            for (final ToggleableTreeNode problemNode : fileNode.getAllChildren()) {
                 final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
 
                 final boolean currentVisible = problemNode.isVisible();
@@ -100,7 +102,7 @@ public class ResultTreeModel extends DefaultTreeModel {
         }
 
         if (sendEvents) {
-            for (final TogglableTreeNode node : changedNodes) {
+            for (final ToggleableTreeNode node : changedNodes) {
                 nodeStructureChanged(node);
             }
         }
@@ -151,7 +153,7 @@ public class ResultTreeModel extends DefaultTreeModel {
 
         int itemCount = 0;
         for (final PsiFile file : sortedFileNames(results)) {
-            final TogglableTreeNode fileNode = new TogglableTreeNode();
+            final ToggleableTreeNode fileNode = new ToggleableTreeNode();
             final List<Problem> problems = results.get(file);
 
             int problemCount = 0;
@@ -160,7 +162,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                     if (problem.severityLevel() != SeverityLevel.Ignore) {
                         final ResultTreeNode problemObj = new ResultTreeNode(file, problem);
 
-                        final TogglableTreeNode problemNode = new TogglableTreeNode(problemObj);
+                        final ToggleableTreeNode problemNode = new ToggleableTreeNode(problemObj);
                         fileNode.add(problemNode);
 
                         ++problemCount;

@@ -82,7 +82,7 @@ public class CsaccessTestTask extends Test {
      * @return the classpath to use to execute the tests
      */
     @Override
-    public FileCollection getClasspath() {
+    public @NotNull FileCollection getClasspath() {
         final FileCollection originalClasspath = super.getClasspath();
 
         final Project project = getProject();

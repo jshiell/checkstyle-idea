@@ -43,7 +43,7 @@ public class PluginConfiguration {
         this.thirdPartyClasspath = Collections.unmodifiableList(thirdPartyClasspath);
         this.activeLocationIds = activeLocationIds.stream()
                 .filter(Objects::nonNull)
-		        .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
     }

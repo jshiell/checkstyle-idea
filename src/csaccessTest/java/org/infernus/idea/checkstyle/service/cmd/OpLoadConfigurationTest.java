@@ -71,8 +71,6 @@ public class OpLoadConfigurationTest {
                 anyString(),
                 ArgumentMatchers.any(NotificationType.class)))
                 .thenReturn(notification);
-        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
-                .thenReturn(notification);
 
         final NotificationGroupManager notificationGroupManager = mock(NotificationGroupManager.class);
         when(notificationGroupManager.getNotificationGroup("CheckStyleIDEABalloonGroup"))
@@ -197,8 +195,6 @@ public class OpLoadConfigurationTest {
                 eq(CheckStyleBundle.message("checkstyle.checker-failed", "aTriggeredIoException")),
                 eq(NotificationType.ERROR)))
                 .thenReturn(notification);
-        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
-                .thenReturn(notification);
 
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()
                 .withChild(ConfigurationBuilder.config("SuppressionFilter")
@@ -215,8 +211,6 @@ public class OpLoadConfigurationTest {
                 eq(""),
                 eq(CheckStyleBundle.message("checkstyle.not-found.RegexpHeader")),
                 eq(NotificationType.WARNING)))
-                .thenReturn(notification);
-        when(notification.setListener(ArgumentMatchers.any(NotificationListener.class)))
                 .thenReturn(notification);
 
         underTest.resolveFilePaths(PROJECT, ConfigurationBuilder.checker()

@@ -21,6 +21,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.Serial;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -326,6 +327,7 @@ public class LocationPanel extends JPanel {
     }
 
     private final class BrowseAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = -992858528081327052L;
 
         BrowseAction() {
