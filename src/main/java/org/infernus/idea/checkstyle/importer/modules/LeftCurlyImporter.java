@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.importer.modules;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class LeftCurlyImporter extends ModuleImporter {
+
+    private static final Logger LOG = Logger.getInstance(LeftCurlyImporter.class);
 
     private static final String OPTION_PROP = "option";
 
@@ -45,6 +48,10 @@ public class LeftCurlyImporter extends ModuleImporter {
                 case LEFT_CURLY_POLICY_NLOW:
                     leftCurlyPolicy = CommonCodeStyleSettings.NEXT_LINE_IF_WRAPPED;
                     break;
+                default:
+                    // uncharted territory - https://checkstyle.org/property_types.html#LeftCurlyOption
+                    LOG.warn("Unexpected left curly policy: " + attrValue);
+                    break;
             }
         }
     }
@@ -54,12 +61,25 @@ public class LeftCurlyImporter extends ModuleImporter {
         CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
         if (appliesTo(KnownTokenTypes.CLASS_DEF) || appliesTo(KnownTokenTypes.INTERFACE_DEF)) {
             javaSettings.CLASS_BRACE_STYLE = leftCurlyPolicy;
+            if (policyRequiresANewLine()) {
+                javaSettings.KEEP_SIMPLE_CLASSES_IN_ONE_LINE = false;
+            }
         }
         if (appliesTo(KnownTokenTypes.METHOD_DEF) || appliesTo(KnownTokenTypes.CTOR_DEF)) {
             javaSettings.METHOD_BRACE_STYLE = leftCurlyPolicy;
+            if (policyRequiresANewLine()) {
+                javaSettings.KEEP_SIMPLE_METHODS_IN_ONE_LINE = false;
+            }
         }
         if (appliesToOneOf(CONDITIONAL_TOKENS)) {
             javaSettings.BRACE_STYLE = leftCurlyPolicy;
+            if (policyRequiresANewLine()) {
+                javaSettings.KEEP_SIMPLE_BLOCKS_IN_ONE_LINE = false;
+            }
         }
+    }
+
+    private boolean policyRequiresANewLine() {
+        return leftCurlyPolicy == CommonCodeStyleSettings.NEXT_LINE || leftCurlyPolicy == CommonCodeStyleSettings.NEXT_LINE_IF_WRAPPED;
     }
 }

@@ -27,7 +27,7 @@ final class ModuleImporterFactory {
             throws IllegalAccessException, InstantiationException {
         String fqn = getFullyQualifiedClassName(name);
         try {
-            Class c = Class.forName(fqn);
+            Class<?> c = Class.forName(fqn);
             Object o = c.getDeclaredConstructor().newInstance();
             return o instanceof ModuleImporter ? (ModuleImporter) o : null;
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
