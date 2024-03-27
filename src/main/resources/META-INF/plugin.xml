@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.89.0: New: Added CheckStyle 10.14.2.</li>
     <li>5.89.0: Fixed: Updated API usage for notifications.</li>
     <li>5.88.1: Fixed: Defined action update thread for actions (#634).</li>
     <li>5.88.0: New: Added Checkstyle 10.14.0.</li>
@@ -41,7 +42,6 @@
     <li>5.81.0: New: Added Checkstyle 10.12.1.</li>
     <li>5.80.1: Fixed: Skip changelist & module checks to ensure update action is fast enough on toolbar actions (#612, #615).</li>
     <li>5.80.0: New: Added Checkstyle 10.12.0.</li>
-    <li>5.79.0: New: Added Checkstyle 10.10.0.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
