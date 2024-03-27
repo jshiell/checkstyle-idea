@@ -20,7 +20,6 @@ public class FileTabCharacterImporter extends ModuleImporter {
         }
     }
 
-
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         if (extensions != null) {

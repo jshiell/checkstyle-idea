@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class AvoidStarImportImporter extends ModuleImporter {
+    private static final Logger LOG = Logger.getInstance(AvoidStarImportImporter.class);
 
     private static final String EXCLUDES = "excludes";
     private static final String ALLOW_CLASS_STAR_IMPORT = "allowClassImports";
@@ -31,19 +33,22 @@ public class AvoidStarImportImporter extends ModuleImporter {
             case ALLOW_STATIC_STAR_IMPORT:
                 allowStaticStarImports = Boolean.parseBoolean(attrValue);
                 break;
+            default:
+                LOG.warn("Unexpected avoid star import policy: " + attrValue);
+                break;
         }
 
     }
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
+        JavaCodeStyleSettings javaSettings = getJavaSettings(settings);
         if (!allowClassStarImports) {
-            customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = MAXIMUM_INPUTS;
+            javaSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = MAXIMUM_INPUTS;
         }
 
         if (!allowStaticStarImports) {
-            customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = MAXIMUM_INPUTS;
+            javaSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = MAXIMUM_INPUTS;
         }
 
         PackageEntryTable excludeTable = new PackageEntryTable();
@@ -52,6 +57,6 @@ public class AvoidStarImportImporter extends ModuleImporter {
                 excludeTable.addEntry(new PackageEntry(false, exclude, false));
             }
         }
-        customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(excludeTable);
+        javaSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(excludeTable);
     }
 }

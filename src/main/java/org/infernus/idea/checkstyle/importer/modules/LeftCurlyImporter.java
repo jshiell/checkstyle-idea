@@ -58,7 +58,7 @@ public class LeftCurlyImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        CommonCodeStyleSettings javaSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.CLASS_DEF) || appliesTo(KnownTokenTypes.INTERFACE_DEF)) {
             javaSettings.CLASS_BRACE_STYLE = leftCurlyPolicy;
             if (policyRequiresANewLine()) {

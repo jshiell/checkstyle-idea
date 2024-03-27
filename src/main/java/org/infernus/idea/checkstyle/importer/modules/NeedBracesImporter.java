@@ -24,18 +24,18 @@ public class NeedBracesImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        CommonCodeStyleSettings commonSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.LITERAL_DO)) {
-            javaSettings.DOWHILE_BRACE_FORCE = forceBraces;
+            commonSettings.DOWHILE_BRACE_FORCE = forceBraces;
         }
         if (appliesTo(KnownTokenTypes.LITERAL_FOR)) {
-            javaSettings.FOR_BRACE_FORCE = forceBraces;
+            commonSettings.FOR_BRACE_FORCE = forceBraces;
         }
         if (appliesTo(KnownTokenTypes.LITERAL_IF)) {
-            javaSettings.IF_BRACE_FORCE = forceBraces;
+            commonSettings.IF_BRACE_FORCE = forceBraces;
         }
         if (appliesTo(KnownTokenTypes.LITERAL_WHILE)) {
-            javaSettings.WHILE_BRACE_FORCE = forceBraces;
+            commonSettings.WHILE_BRACE_FORCE = forceBraces;
         }
     }
 }

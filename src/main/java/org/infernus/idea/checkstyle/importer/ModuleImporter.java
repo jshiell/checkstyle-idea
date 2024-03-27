@@ -7,6 +7,7 @@ import java.util.Set;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +17,12 @@ public abstract class ModuleImporter {
     private Set<KnownTokenTypes> tokens;
 
     @NotNull
-    protected CommonCodeStyleSettings getJavaSettings(@NotNull final CodeStyleSettings settings) {
+    protected CommonCodeStyleSettings getCommonSettings(@NotNull final CodeStyleSettings settings) {
         return settings.getCommonSettings(JavaLanguage.INSTANCE);
+    }
+    @NotNull
+    protected JavaCodeStyleSettings getJavaSettings(@NotNull final CodeStyleSettings settings) {
+        return settings.getCustomSettings(JavaCodeStyleSettings.class);
     }
 
     public void setFrom(@NotNull final ConfigurationModule moduleConfig) {

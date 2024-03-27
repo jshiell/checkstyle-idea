@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
@@ -7,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class IndentationImporter extends ModuleImporter {
+
+    private static final Logger LOG = Logger.getInstance(IndentationImporter.class);
 
     private static final String BASIC_OFFSET_PROP = "basicOffset";
     private static final String CASE_INDENT_PROP = "caseIndent";
@@ -33,17 +36,22 @@ public class IndentationImporter extends ModuleImporter {
             case LINE_WRAP_INDENT_PROP:
                 continuationIndent = getIntOrDefault(attrValue, DEFAULT_LINE_WRAP_INDENT);
                 break;
+
+            default:
+                // uncharted territory - https://checkstyle.org/property_types.html#LeftCurlyOption
+                LOG.warn("Unexpected indentation policy: " + attrValue);
+                break;
         }
     }
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
-        CommonCodeStyleSettings.IndentOptions indentOptions = javaSettings.getIndentOptions();
+        CommonCodeStyleSettings commonSettings = getCommonSettings(settings);
+        CommonCodeStyleSettings.IndentOptions indentOptions = commonSettings.getIndentOptions();
         if (indentOptions != null) {
             indentOptions.INDENT_SIZE = basicIndent;
             indentOptions.CONTINUATION_INDENT_SIZE = continuationIndent;
         }
-        javaSettings.INDENT_CASE_FROM_SWITCH = indentCase;
+        commonSettings.INDENT_CASE_FROM_SWITCH = indentCase;
     }
 }

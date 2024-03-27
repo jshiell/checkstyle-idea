@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class ImportOrderImporter extends ModuleImporter {
+
+    private static final Logger LOG = Logger.getInstance(ImportOrderImporter.class);
 
     private static final String GROUPS = "groups";
     private static final String SEPARATED = "separated";
@@ -31,28 +34,31 @@ public class ImportOrderImporter extends ModuleImporter {
             case OPTION:
                 staticPosition = StaticImportPosition.valueOf(attrValue.toUpperCase());
                 break;
+            default:
+                LOG.warn("Unexpected import order policy: " + attrValue);
+                break;
         }
     }
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
+        JavaCodeStyleSettings javaSettings = getJavaSettings(settings);
 
         if (groups != null) {
-            processGroupsAttribute(groups, customSettings);
+            processGroupsAttribute(groups, javaSettings);
         }
 
         if (staticPosition == null) {
-            processSeparatedAttribute(separated, customSettings);
+            processSeparatedAttribute(separated, javaSettings);
         } else {
             if (staticPosition == StaticImportPosition.ABOVE || staticPosition == StaticImportPosition.UNDER) {
                 // we are applying the attributes in reverse so that we do not separate blocks containing static and
                 // non-static imports for the same package
-                processSeparatedAttribute(separated, customSettings);
-                processOptionAttribute(staticPosition, customSettings);
+                processSeparatedAttribute(separated, javaSettings);
+                processOptionAttribute(staticPosition, javaSettings);
             } else {
-                processOptionAttribute(staticPosition, customSettings);
-                processSeparatedAttribute(separated, customSettings);
+                processOptionAttribute(staticPosition, javaSettings);
+                processSeparatedAttribute(separated, javaSettings);
             }
         }
     }
@@ -197,6 +203,9 @@ public class ImportOrderImporter extends ModuleImporter {
                     }
                 }
                 settings.IMPORT_LAYOUT_TABLE.copyFrom(importTable);
+                break;
+            default:
+                LOG.warn("Unexpected static import position: " + staticImportPosition);
                 break;
         }
     }

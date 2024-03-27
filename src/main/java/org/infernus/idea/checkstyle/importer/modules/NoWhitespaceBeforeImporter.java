@@ -17,12 +17,12 @@ public class NoWhitespaceBeforeImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        CommonCodeStyleSettings commonSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.COMMA)) {
-            javaSettings.SPACE_BEFORE_COMMA = false;
+            commonSettings.SPACE_BEFORE_COMMA = false;
         }
         if (appliesTo(KnownTokenTypes.SEMI)) {
-            javaSettings.SPACE_BEFORE_SEMICOLON = false;
+            commonSettings.SPACE_BEFORE_SEMICOLON = false;
         }
     }
 }

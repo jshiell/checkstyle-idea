@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
 import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
@@ -26,7 +25,6 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
     private List<ImportGroup> customImportOrder;
     private boolean separateLineBetweenGroups;
-    private boolean sortImportsInGroupAlphabetically;
     private List<String> standardPackageRegExp;
     private List<String> thirdPartyPackageRegExp;
     private List<String> specialImportsRegExp;
@@ -60,7 +58,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
                 separateLineBetweenGroups = Boolean.parseBoolean(attrValue);
                 break;
             case SORT_IMPORTS_IN_GROUP_ALPHABETICALLY_PROP:
-                sortImportsInGroupAlphabetically = Boolean.parseBoolean(attrValue);
+                boolean sortImportsInGroupAlphabetically = Boolean.parseBoolean(attrValue);
                 break;
             case SEVERITY:
                 // ignored, but valid
@@ -73,8 +71,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        JavaCodeStyleSettings customSettings = settings.getCustomSettings(JavaCodeStyleSettings.class);
-        customSettings.IMPORT_LAYOUT_TABLE.copyFrom(createCustomImportTable());
+        getJavaSettings(settings).IMPORT_LAYOUT_TABLE.copyFrom(createCustomImportTable());
     }
 
     private PackageEntryTable createCustomImportTable() {
@@ -91,15 +88,15 @@ public class CustomImportOrderImporter extends ModuleImporter {
                         break;
                     case THIRD_PARTY_PACKAGE:
                         thirdPartyPackageRegExp.forEach(createPackageEntry);
-                        entryAdded = thirdPartyPackageRegExp.size() > 0;
+                        entryAdded = !thirdPartyPackageRegExp.isEmpty();
                         break;
                     case SPECIAL_IMPORTS:
                         specialImportsRegExp.forEach(createPackageEntry);
-                        entryAdded = specialImportsRegExp.size() > 0;
+                        entryAdded = !specialImportsRegExp.isEmpty();
                         break;
                     case STANDARD_JAVA_PACKAGE:
                         standardPackageRegExp.forEach(createPackageEntry);
-                        entryAdded = standardPackageRegExp.size() > 0;
+                        entryAdded = !standardPackageRegExp.isEmpty();
                         break;
                     default:
                         // IntelliJ does not support this option or group does not exist

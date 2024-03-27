@@ -21,21 +21,22 @@ public class EmptyLineSeparatorImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        CommonCodeStyleSettings commonSettings = getCommonSettings(settings);
+
         if (noEmptyLinesBetweenFields) {
-            javaSettings.BLANK_LINES_AROUND_FIELD = 0;
+            commonSettings.BLANK_LINES_AROUND_FIELD = 0;
         } else if (appliesTo(KnownTokenTypes.VARIABLE_DEF)) {
-            javaSettings.BLANK_LINES_AROUND_FIELD = 1;
+            commonSettings.BLANK_LINES_AROUND_FIELD = 1;
         }
         if (appliesTo(KnownTokenTypes.PACKAGE_DEF)) {
-            javaSettings.BLANK_LINES_AFTER_PACKAGE = 1;
-            javaSettings.BLANK_LINES_BEFORE_PACKAGE = 1;
+            commonSettings.BLANK_LINES_AFTER_PACKAGE = 1;
+            commonSettings.BLANK_LINES_BEFORE_PACKAGE = 1;
         }
         if (appliesTo(KnownTokenTypes.IMPORT)) {
-            javaSettings.BLANK_LINES_AFTER_IMPORTS = 1;
+            commonSettings.BLANK_LINES_AFTER_IMPORTS = 1;
         }
         if (appliesTo(KnownTokenTypes.METHOD_DEF)) {
-            javaSettings.BLANK_LINES_AROUND_METHOD = 1;
+            commonSettings.BLANK_LINES_AROUND_METHOD = 1;
         }
     }
 }

@@ -16,15 +16,15 @@ public class WhitespaceAfterImporter extends ModuleImporter {
 
     @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
-        CommonCodeStyleSettings javaSettings = getJavaSettings(settings);
+        CommonCodeStyleSettings commonSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.COMMA)) {
-            javaSettings.SPACE_AFTER_COMMA = true;
+            commonSettings.SPACE_AFTER_COMMA = true;
         }
         if (appliesTo(KnownTokenTypes.SEMI)) {
-            javaSettings.SPACE_AFTER_SEMICOLON = true;
+            commonSettings.SPACE_AFTER_SEMICOLON = true;
         }
         if (appliesTo(KnownTokenTypes.TYPECAST)) {
-            javaSettings.SPACE_AFTER_TYPE_CAST = true;
+            commonSettings.SPACE_AFTER_TYPE_CAST = true;
         }
     }
 }

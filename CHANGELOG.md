@@ -2,6 +2,7 @@
 # CheckStyle-IDEA Changelog
 
 * **5.89.0** New: Added CheckStyle 10.14.2.
+* **5.89.0** Fixed: Better match format checks by disabling retentions when left curly policy requires a new line (#633).
 * **5.89.0** Fixed: Updated API usage for notifications.
 * **5.88.1** Fixed: Defined action update thread for actions (#634).
 * **5.88.0** New: Added Checkstyle 10.14.0.
