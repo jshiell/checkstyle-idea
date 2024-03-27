@@ -25,6 +25,7 @@
         <![CDATA[
 <ul>
     <li>5.89.0: New: Added CheckStyle 10.14.2.</li>
+    <li>5.89.0: Fixed: Icons now match new UI style.</li>
     <li>5.89.0: Fixed: Better match format checks by disabling retentions when left curly policy requires a new line (#633).</li>
     <li>5.89.0: Fixed: Updated API usage for notifications.</li>
     <li>5.88.1: Fixed: Defined action update thread for actions (#634).</li>
@@ -89,7 +90,7 @@
                     anchor="bottom"
                     canCloseContents="false"
                     factoryClass="org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowFactory"
-                    icon="/org/infernus/idea/checkstyle/images/checkstyle13.png"/>
+                    icon="/org/infernus/idea/checkstyle/images/checkstyle.svg"/>
         <schemeImporter name="Checkstyle configuration"
                         schemeClass="com.intellij.psi.codeStyle.CodeStyleScheme"
                         implementationClass="org.infernus.idea.checkstyle.importer.CheckStyleCodeStyleImporter"/>
