@@ -100,11 +100,11 @@ public final class BundledConfig {
         map.put(SUN_CHECKS.getId(), SUN_CHECKS);
         map.put(GOOGLE_CHECKS.getId(), GOOGLE_CHECKS);
 
-        LOG.info("Loading additional BundledConfigs");
+        LOG.debug("Loading additional BundledConfigs");
 
         for (BundledConfigProvider bundledConfigProvider : ServiceLoader.load(BundledConfigProvider.class, BundledConfig.class.getClassLoader())) {
-            LOG.info("Loading additional BundledConfig " + bundledConfigProvider.getClass() + " from "
-                    + bundledConfigProvider.getClass().getProtectionDomain().getCodeSource());
+            LOG.debug("Loading additional BundledConfig {} from {}%s from %s"
+                    .formatted(bundledConfigProvider.getClass(), bundledConfigProvider.getClass().getProtectionDomain().getCodeSource()));
             for (BundledConfigProvider.BasicConfig config : bundledConfigProvider.getConfigs()) {
                 int i = 0;
                 String id = config.getId();
