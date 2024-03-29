@@ -1,8 +1,9 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -15,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serial;
@@ -25,10 +25,8 @@ import java.util.Map;
 
 /**
  * Allows selection of the location of the CheckStyle file.
- *
- * TODO: migrate to DialogWrapper - https://plugins.jetbrains.com/docs/intellij/dialog-wrapper.html?from=jetbrains.org#input-validation
  */
-public class LocationDialogue extends JDialog {
+public class LocationDialogue extends DialogWrapper {
 
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
     private static final int WIDTH = 500;
@@ -68,15 +66,17 @@ public class LocationDialogue extends JDialog {
     private final String checkstyleVersion;
     private final List<String> thirdPartyClasspath;
 
+    private final JPanel centrePanel = new JPanel(new BorderLayout());
     private final LocationPanel locationPanel;
     private final PropertiesPanel propertiesPanel;
-    private final ErrorPanel errorPanel;
-    private final CompletePanel completePanel;
+    private final ErrorPanel errorPanel = new ErrorPanel();
+    private final CompletePanel completePanel = new CompletePanel();
 
-    private JButton commitButton;
-    private JButton previousButton;
+    private final JButton commitButton = new JButton(new NextAction());
+    private final JButton previousButton = new JButton(new PreviousAction());
+
     private Step currentStep = Step.SELECT;
-    private boolean committed = true;
+
     private ConfigurationLocation configurationLocation;
 
 
@@ -85,7 +85,7 @@ public class LocationDialogue extends JDialog {
                             @Nullable final String checkstyleVersion,
                             @Nullable final List<String> thirdPartyClasspath,
                             @NotNull final CheckstyleProjectService checkstyleProjectService) {
-        super(parent);
+        super(project, parent, false, IdeModalityType.PROJECT);
 
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
@@ -94,25 +94,35 @@ public class LocationDialogue extends JDialog {
 
         this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);
-        this.errorPanel = new ErrorPanel();
-        this.completePanel = new CompletePanel();
 
-        initialise();
+        initialiseComponents();
     }
 
-    public void initialise() {
-        setLayout(new BorderLayout());
-        setMinimumSize(new Dimension(WIDTH, HEIGHT));
-        setModal(true);
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        return centrePanel;
+    }
 
-        commitButton = new JButton(new NextAction());
-        previousButton = new JButton(new PreviousAction());
-        final JButton cancelButton = new JButton(new CancelAction());
+    private void initialiseComponents() {
+        setTitle(CheckStyleBundle.message("config.file.add.title"));
+        setSize(WIDTH, HEIGHT);
 
+        centrePanel.add(panelForCurrentStep(), BorderLayout.CENTER);
+
+        getRootPane().setDefaultButton(commitButton);
+        moveToStep(Step.SELECT);
+
+        init();
+    }
+
+    @Override
+    protected JComponent createSouthPanel() {
         final JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setBorder(JBUI.Borders.empty(4, 8, 8, 8));
 
-        if (SystemInfo.isMac) {
+        final JButton cancelButton = new JButton(getCancelAction());
+
+        if (SystemInfoRt.isMac) {
             bottomPanel.add(cancelButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.WEST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
             bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0,
@@ -128,25 +138,7 @@ public class LocationDialogue extends JDialog {
         bottomPanel.add(commitButton, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
-        add(panelForCurrentStep(), BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        getRootPane().setDefaultButton(commitButton);
-        moveToStep(Step.SELECT);
-
-        pack();
-
-        addEscapeListener();
-
-        final Toolkit toolkit = Toolkit.getDefaultToolkit();
-        setLocation((toolkit.getScreenSize().width - getSize().width) / 2,
-                (toolkit.getScreenSize().height - getSize().height) / 2);
-    }
-
-    private void addEscapeListener() {
-        getRootPane().registerKeyboardAction((event) ->  setVisible(false),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        return bottomPanel;
     }
 
     private JPanel panelForCurrentStep() {
@@ -156,16 +148,6 @@ public class LocationDialogue extends JDialog {
             case ERROR -> errorPanel;
             case COMPLETE -> completePanel;
         };
-    }
-
-    @Override
-    public void setVisible(final boolean visible) {
-        if (visible) {
-            this.committed = false;
-        }
-        try (var ignored = com.intellij.concurrency.ThreadContext.resetThreadContext()) {
-            super.setVisible(visible);
-        }
     }
 
     /**
@@ -178,7 +160,7 @@ public class LocationDialogue extends JDialog {
     }
 
     private void moveToStep(final Step newStep) {
-        remove(panelForCurrentStep());
+        centrePanel.remove(panelForCurrentStep());
         currentStep = newStep;
 
         if (currentStep.isAllowCommit()) {
@@ -192,18 +174,9 @@ public class LocationDialogue extends JDialog {
         previousButton.setEnabled(currentStep.isAllowPrevious());
         commitButton.setEnabled(currentStep.isAllowNext() || currentStep.isAllowCommit());
 
-        getContentPane().add(panelForCurrentStep(), BorderLayout.CENTER);
-        getContentPane().validate();
-        getContentPane().repaint();
-    }
-
-    /**
-     * Was okay clicked?
-     *
-     * @return true if okay clicked, false if cancelled.
-     */
-    public boolean isCommitted() {
-        return committed;
+        centrePanel.add(panelForCurrentStep(), BorderLayout.CENTER);
+        centrePanel.validate();
+        centrePanel.repaint();
     }
 
     private Step attemptLoadOfFile(final ConfigurationLocation location) {
@@ -281,8 +254,7 @@ public class LocationDialogue extends JDialog {
                     return;
 
                 case COMPLETE:
-                    committed = true;
-                    setVisible(false);
+                    close(OK_EXIT_CODE);
                     return;
 
                 default:
@@ -292,7 +264,7 @@ public class LocationDialogue extends JDialog {
     }
 
     private void showError(final String formattedMessage) {
-        Messages.showErrorDialog(this, formattedMessage, CheckStyleBundle.message("config.file.error.title"));
+        Messages.showErrorDialog(getContentPanel(), formattedMessage, CheckStyleBundle.message("config.file.error.title"));
         commitButton.setEnabled(true);
     }
 
@@ -328,27 +300,6 @@ public class LocationDialogue extends JDialog {
                 default:
                     throw new IllegalStateException("Unexpected previous call for step " + currentStep);
             }
-        }
-    }
-
-    /**
-     * Respond to a cancel action.
-     */
-    private class CancelAction extends AbstractAction {
-        @Serial
-        private static final long serialVersionUID = -994620715558602656L;
-
-        CancelAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.file.cancel.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.cancel.tooltip"));
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            committed = false;
-
-            setVisible(false);
         }
     }
 }

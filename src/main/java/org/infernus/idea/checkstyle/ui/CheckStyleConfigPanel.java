@@ -280,9 +280,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     getThirdPartyClasspath(),
                     checkstyleProjectService);
 
-            dialogue.setVisible(true);
-
-            if (dialogue.isCommitted()) {
+            if (dialogue.showAndGet()) {
                 final ConfigurationLocation newLocation = dialogue.getConfigurationLocation();
                 if (locationModel.getLocations().contains(newLocation)) {
                     Messages.showWarningDialog(project,
@@ -350,9 +348,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     parentDialogue(), project, checkstyleProjectService);
             propertiesDialogue.setConfigurationLocation(location);
 
-            propertiesDialogue.setVisible(true);
-
-            if (propertiesDialogue.isCommitted()) {
+            if (propertiesDialogue.showAndGet()) {
                 final ConfigurationLocation editedLocation = propertiesDialogue.getConfigurationLocation();
                 locationModel.updateLocation(location, editedLocation);
             }
