@@ -80,16 +80,7 @@ public final class FilePaths {
         //
         // The following is a heuristic to figure out if the base refers to a file or dir. It's not perfect, because
         // the resource referred to by this path may not actually exist, but it's the best I can do
-        boolean baseIsFile = true;
-
-        File baseResource = new File(normalizedBasePath);
-
-        if (baseResource.exists()) {
-            baseIsFile = baseResource.isFile();
-
-        } else if (basePath.endsWith(pathSeparator)) {
-            baseIsFile = false;
-        }
+        boolean baseIsFile = isBaseFile(basePath, pathSeparator, normalizedBasePath);
 
         final StringBuilder relative = new StringBuilder();
 
@@ -107,6 +98,22 @@ public final class FilePaths {
 
         relative.append(normalizedTargetPath.substring(common.length()));
         return relative.toString();
+    }
+
+    private static boolean isBaseFile(@NotNull final String basePath,
+                                      @NotNull final String pathSeparator,
+                                      final String normalizedBasePath) {
+        boolean baseIsFile = true;
+
+        File baseResource = new File(normalizedBasePath);
+
+        if (baseResource.exists()) {
+            baseIsFile = baseResource.isFile();
+
+        } else if (basePath.endsWith(pathSeparator)) {
+            baseIsFile = false;
+        }
+        return baseIsFile;
     }
 
 

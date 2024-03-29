@@ -140,12 +140,7 @@ public class ImportOrderImporter extends ModuleImporter {
                 // non-static import will be used for the import group.
                 // To be able to decide whether we have to insert a non-static import when encountering a static import
                 // we build an index here for all non-static imports.
-                HashSet<String> nonStaticImports = new HashSet<>();
-                for (PackageEntry entry : settings.IMPORT_LAYOUT_TABLE.getEntries()) {
-                    if (!entry.isStatic()) {
-                        nonStaticImports.add(entry.getPackageName());
-                    }
-                }
+                HashSet<String> nonStaticImports = findNonStaticImports(settings);
 
                 PackageEntryTable importTable = new PackageEntryTable();
 
@@ -208,6 +203,17 @@ public class ImportOrderImporter extends ModuleImporter {
                 LOG.warn("Unexpected static import position: " + staticImportPosition);
                 break;
         }
+    }
+
+    @NotNull
+    private static HashSet<String> findNonStaticImports(@NotNull final JavaCodeStyleSettings settings) {
+        final HashSet<String> nonStaticImports = new HashSet<>();
+        for (PackageEntry entry : settings.IMPORT_LAYOUT_TABLE.getEntries()) {
+            if (!entry.isStatic()) {
+                nonStaticImports.add(entry.getPackageName());
+            }
+        }
+        return nonStaticImports;
     }
 
     private enum StaticImportPosition {

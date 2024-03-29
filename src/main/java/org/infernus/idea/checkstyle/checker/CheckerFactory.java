@@ -178,7 +178,7 @@ public class CheckerFactory {
                                  final ListPropertyResolver resolver,
                                  @NotNull final ClassLoader loaderOfCheckedCode) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
-                resolver.getPropertyNamesToValues(), project, module, checkstyleProjectService, loaderOfCheckedCode);
+                resolver.getPropertyNamesToValues(), module, checkstyleProjectService, loaderOfCheckedCode);
         worker.start();
 
         while (worker.isAlive()) {

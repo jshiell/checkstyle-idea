@@ -18,10 +18,10 @@ public final class BundledConfig {
     private static final String BUNDLED_LOCATION = "(bundled)";
 
     /** the Sun checks */
-    public static final BundledConfig SUN_CHECKS = new BundledConfig(0, "bundled-sun-checks", BUNDLED_LOCATION, "Sun Checks", "/sun_checks.xml");
+    public static final BundledConfig SUN_CHECKS = new BundledConfig(0, "bundled-sun-checks", "Sun Checks", "/sun_checks.xml");
 
     /** the Google checks */
-    public static final BundledConfig GOOGLE_CHECKS = new BundledConfig(1, "bundled-google-checks", BUNDLED_LOCATION, "Google Checks", "/google_checks.xml");
+    public static final BundledConfig GOOGLE_CHECKS = new BundledConfig(1, "bundled-google-checks", "Google Checks", "/google_checks.xml");
 
     private final int sortOrder;
     private final String id;
@@ -34,12 +34,11 @@ public final class BundledConfig {
 
     private BundledConfig(final int sortOrder,
                   @NotNull final String id,
-                  @NotNull final String location,
                   @NotNull final String description,
                   @NotNull final String path) {
         this.sortOrder = sortOrder;
         this.id = id;
-        this.location = location;
+        this.location = BUNDLED_LOCATION;
         this.description = description;
         this.path = path;
     }
@@ -118,9 +117,5 @@ public final class BundledConfig {
         List<BundledConfig> ret = new ArrayList<>(map.values());
         ret.sort(Comparator.comparingInt(BundledConfig::getSortOrder));
         return ret;
-    }
-
-    public static Optional<BundledConfig> getById(final String id) {
-        return getAllBundledConfigs().stream().filter(bc -> bc.getId().equals(id)).findAny();
     }
 }

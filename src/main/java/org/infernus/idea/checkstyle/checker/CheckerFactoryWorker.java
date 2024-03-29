@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +12,6 @@ import java.util.Map;
 class CheckerFactoryWorker extends Thread {
     private final ConfigurationLocation location;
     private final Map<String, String> properties;
-    private final Project project;
     private final Module module;
     private final CheckstyleProjectService checkstyleProjectService;
     private final ClassLoader loaderOfCheckedCode;
@@ -22,13 +20,11 @@ class CheckerFactoryWorker extends Thread {
 
     CheckerFactoryWorker(@NotNull final ConfigurationLocation location,
                          @Nullable final Map<String, String> properties,
-                         @NotNull final Project project,
                          @Nullable final Module module,
                          @NotNull final CheckstyleProjectService checkstyleProjectService,
                          @NotNull final ClassLoader loaderOfCheckedCode) {
         this.location = location;
         this.properties = properties;
-        this.project = project;
         this.module = module;
         this.checkstyleProjectService = checkstyleProjectService;
         this.loaderOfCheckedCode = loaderOfCheckedCode;
