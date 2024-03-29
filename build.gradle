@@ -36,7 +36,7 @@ publishPlugin {
 }
 
 // workaround for Checkstyle#14123
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
         select("com.google.guava:guava:0")
     }
