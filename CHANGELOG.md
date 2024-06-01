@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.92.0** New: Added CheckStyle 10.17.0.
 * **5.91.0** New: Added CheckStyle 10.16.0.
 * **5.90.0** New: Added CheckStyle 10.15.0.
 * **5.89.1** Fixed: Incorrect icon sizing on some platforms (#637).

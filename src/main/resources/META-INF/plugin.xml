@@ -15,7 +15,7 @@
 </p>
         ]]>
     </description>
-    <version>5.91.0</version>
+    <version>5.92.0</version>
     <idea-version since-build="231.9392.1"/>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
@@ -24,6 +24,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.92.0: New: Added CheckStyle 10.17.0.</li>
     <li>5.91.0: New: Added CheckStyle 10.16.0.</li>
     <li>5.90.0: New: Added CheckStyle 10.15.0.</li>
     <li>5.89.1: Fixed: Incorrect icon sizing on some platforms (#637).</li>
