@@ -4,7 +4,6 @@ import java.io.Serial;
 import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import com.intellij.psi.PsiFile;
@@ -86,7 +85,7 @@ public class ResultTreeModel extends DefaultTreeModel {
     private void filter(final boolean sendEvents, final SeverityLevel... levels) {
         for (final ToggleableTreeNode fileNode : visibleRootNode.getAllChildren()) {
             for (final ToggleableTreeNode problemNode : fileNode.getAllChildren()) {
-                final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
+                final ProblemResultTreeNode result = (ProblemResultTreeNode) problemNode.getUserObject();
 
                 final boolean resultShouldBeVisible = contains(levels, result.getSeverity());
                 if (problemNode.isVisible() != resultShouldBeVisible) {
@@ -94,7 +93,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                 }
             }
 
-            ((ResultTreeNode) fileNode.getUserObject()).setVisibleProblems(fileNode.getChildCount());
+            ((FileResultTreeNode) fileNode.getUserObject()).setVisibleProblems(fileNode.getChildCount());
             final boolean fileNodeShouldBeVisible = fileNode.getChildCount() > 0;
             if (fileNode.isVisible() != fileNodeShouldBeVisible) {
                 fileNode.setVisible(fileNodeShouldBeVisible);
@@ -158,7 +157,7 @@ public class ResultTreeModel extends DefaultTreeModel {
             if (problems != null) {
                 for (final Problem problem : problems) {
                     if (problem.severityLevel() != SeverityLevel.Ignore) {
-                        final ResultTreeNode problemObj = new ResultTreeNode(file, problem);
+                        final ResultTreeNode problemObj = new ProblemResultTreeNode(file, problem);
 
                         final ToggleableTreeNode problemNode = new ToggleableTreeNode(problemObj);
                         fileNode.add(problemNode);
@@ -171,7 +170,7 @@ public class ResultTreeModel extends DefaultTreeModel {
             itemCount += problemCount;
 
             if (problemCount > 0) {
-                final ResultTreeNode nodeObject = new ResultTreeNode(file.getName(), problemCount);
+                final ResultTreeNode nodeObject = new FileResultTreeNode(file.getName(), problemCount);
                 fileNode.setUserObject(nodeObject);
 
                 visibleRootNode.add(fileNode);

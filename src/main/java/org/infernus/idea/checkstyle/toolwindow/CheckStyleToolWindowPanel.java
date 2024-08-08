@@ -297,7 +297,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     private void scrollToError(final TreePath treePath) {
         final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-        if (treeNode == null || !(treeNode.getUserObject() instanceof ResultTreeNode nodeInfo)) {
+        if (treeNode == null || !(treeNode.getUserObject() instanceof ProblemResultTreeNode nodeInfo)) {
             return;
         }
 
@@ -326,11 +326,11 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         }, ModalityState.NON_MODAL);
     }
 
-    private int lineFor(final ResultTreeNode nodeInfo) {
+    private int lineFor(final ProblemResultTreeNode nodeInfo) {
         return nodeInfo.getProblem().line();
     }
 
-    private int columnFor(final ResultTreeNode nodeInfo) {
+    private int columnFor(final ProblemResultTreeNode nodeInfo) {
         return nodeInfo.getProblem().column();
     }
 
