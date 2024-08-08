@@ -13,6 +13,8 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
  * The user object for meta-data on tree nodes in the tool window.
+ *
+ * TODO this is covering for both files & problems at present, which is messy
  */
 public class ResultTreeNode {
 
@@ -22,6 +24,9 @@ public class ResultTreeNode {
     private String text;
     private String description;
     private SeverityLevel severity;
+    private String fileName;
+    private int totalProblems;
+    private int visibleProblems;
 
     /**
      * Construct an informational node.
@@ -49,8 +54,19 @@ public class ResultTreeNode {
             throw new IllegalArgumentException("Filename may not be null");
         }
 
-        this.text = CheckStyleBundle.message("plugin.results.scan-file-result", fileName, problemCount);
+        this.fileName = fileName;
+        this.totalProblems = problemCount;
+        this.visibleProblems = problemCount;
+        updateTextForFileNode();
         icon = Icons.icon("/fileTypes/java.png");
+    }
+
+    private void updateTextForFileNode() {
+        if (totalProblems == visibleProblems) {
+            this.text = CheckStyleBundle.message("plugin.results.scan-file-result", fileName, totalProblems);
+        } else {
+            this.text = CheckStyleBundle.message("plugin.results.scan-file-result.filtered", fileName, visibleProblems, totalProblems - visibleProblems);
+        }
     }
 
     /**
@@ -163,6 +179,12 @@ public class ResultTreeNode {
      */
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    public void setVisibleProblems(final int visibleProblems) {
+        this.visibleProblems = visibleProblems;
+
+        updateTextForFileNode();
     }
 
     @Override

@@ -98,6 +98,7 @@ public class ResultTreeModel extends DefaultTreeModel {
                 }
             }
 
+            ((ResultTreeNode) fileNode.getUserObject()).setVisibleProblems(fileNode.getChildCount());
             final boolean fileNodeShouldBeVisible = fileNode.getChildCount() > 0;
             if (fileNode.isVisible() != fileNodeShouldBeVisible) {
                 fileNode.setVisible(fileNodeShouldBeVisible);
