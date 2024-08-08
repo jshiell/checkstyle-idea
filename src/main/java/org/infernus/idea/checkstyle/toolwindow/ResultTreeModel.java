@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import com.intellij.psi.PsiFile;
@@ -20,12 +21,12 @@ public class ResultTreeModel extends DefaultTreeModel {
     @Serial
     private static final long serialVersionUID = 2161855162879365203L;
 
-    private final DefaultMutableTreeNode visibleRootNode;
+    private final ToggleableTreeNode visibleRootNode;
 
     public ResultTreeModel() {
         super(new DefaultMutableTreeNode());
 
-        visibleRootNode = new DefaultMutableTreeNode();
+        visibleRootNode = new ToggleableTreeNode();
         ((DefaultMutableTreeNode) getRoot()).add(visibleRootNode);
 
         setRootMessage(null);
@@ -83,26 +84,31 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private void filter(final boolean sendEvents, final SeverityLevel... levels) {
-        final Set<ToggleableTreeNode> changedNodes = new HashSet<>();
+        final Set<MutableTreeNode> changedNodes = new HashSet<>();
 
-        for (int fileIndex = 0; fileIndex < visibleRootNode.getChildCount(); ++fileIndex) {
-            final ToggleableTreeNode fileNode = (ToggleableTreeNode) visibleRootNode.getChildAt(fileIndex);
-
+        for (final ToggleableTreeNode fileNode : visibleRootNode.getAllChildren()) {
+            boolean childChanged = false;
             for (final ToggleableTreeNode problemNode : fileNode.getAllChildren()) {
                 final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
 
-                final boolean currentVisible = problemNode.isVisible();
-                final boolean desiredVisible = contains(levels, result.getSeverity());
-                if (currentVisible != desiredVisible) {
-                    problemNode.setVisible(desiredVisible);
-
-                    changedNodes.add(fileNode);
+                final boolean resultShouldBeVisible = contains(levels, result.getSeverity());
+                if (problemNode.isVisible() != resultShouldBeVisible) {
+                    problemNode.setVisible(resultShouldBeVisible);
+                    childChanged = true;
                 }
+            }
+
+            final boolean fileNodeShouldBeVisible = fileNode.getChildCount() > 0;
+            if (fileNode.isVisible() != fileNodeShouldBeVisible) {
+                fileNode.setVisible(fileNodeShouldBeVisible);
+                changedNodes.add(visibleRootNode);
+            } else if (childChanged) {
+                changedNodes.add(fileNode);
             }
         }
 
         if (sendEvents) {
-            for (final ToggleableTreeNode node : changedNodes) {
+            for (final MutableTreeNode node : changedNodes) {
                 nodeStructureChanged(node);
             }
         }

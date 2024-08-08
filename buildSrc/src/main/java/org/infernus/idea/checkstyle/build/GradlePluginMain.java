@@ -192,8 +192,8 @@ public class GradlePluginMain
         });
     }
 
-    // TODO this will break when we change the base IDEA version; it should use SandboxAware or similar: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-task-awares.html#SandboxAware
     private @NotNull String pluginSandboxDir(final boolean test, final String subDirectory) {
+        // must remain in sync with task configuration in Gradle file
         return "idea-sandbox/IC-2023.1.5/plugins"
                 + (test ? "-test" : "")
                 + "/CheckStyle-IDEA/" + subDirectory;

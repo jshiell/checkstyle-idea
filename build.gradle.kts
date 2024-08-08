@@ -11,7 +11,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "5.92.0"
+version = "5.93.0"
 
 repositories {
     mavenCentral()
@@ -48,6 +48,11 @@ java {
 }
 
 tasks {
+    // doesn't work, maybe waiting on https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1723
+//    prepareSandbox {
+//        sandboxDirectory = intellijPlatform.sandboxContainer.dir("current")
+//    }
+
     withType<VerifyPluginTask> {
         dependsOn(copyClassesToSandbox, copyCheckstyleArtifactsToSandbox)
     }

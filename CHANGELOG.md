@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.93.0** New: Files in results are now hidden when all of their children aren't visible in the current filtering state (#644).
 * **5.92.0** New: Added CheckStyle 10.17.0.
 * **5.91.0** New: Added CheckStyle 10.16.0.
 * **5.90.0** New: Added CheckStyle 10.15.0.
