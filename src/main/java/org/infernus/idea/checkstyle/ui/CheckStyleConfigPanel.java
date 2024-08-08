@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
@@ -21,7 +22,6 @@ import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
-import org.infernus.idea.checkstyle.util.Icons;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
@@ -153,7 +153,7 @@ public class CheckStyleConfigPanel extends JPanel {
         container.add(new TitledSeparator(CheckStyleBundle.message("config.file.tab")), BorderLayout.NORTH);
         container.add(tableDecorator.createPanel(), BorderLayout.CENTER);
         final JLabel infoLabel = new JLabel(CheckStyleBundle.message("config.file.description"),
-                Icons.icon("/general/information.png"), SwingConstants.LEFT);
+                AllIcons.General.Information, SwingConstants.LEFT);
         infoLabel.setBorder(JBUI.Borders.empty(8, 0, 4, 0));
         container.add(infoLabel, BorderLayout.SOUTH);
         return container;

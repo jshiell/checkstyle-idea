@@ -2,11 +2,11 @@ package org.infernus.idea.checkstyle.toolwindow;
 
 import javax.swing.Icon;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
-import org.infernus.idea.checkstyle.util.Icons;
 import org.jetbrains.annotations.NotNull;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
@@ -39,7 +39,7 @@ public class ResultTreeNode {
         }
 
         this.text = text;
-        icon = Icons.icon("/general/information.png");
+        icon = AllIcons.General.Information;
     }
 
 
@@ -58,7 +58,7 @@ public class ResultTreeNode {
         this.totalProblems = problemCount;
         this.visibleProblems = problemCount;
         updateTextForFileNode();
-        icon = Icons.icon("/fileTypes/java.png");
+        icon = AllIcons.FileTypes.Java;
     }
 
     private void updateTextForFileNode() {
@@ -87,13 +87,13 @@ public class ResultTreeNode {
 
     private void updateIconsForProblem() {
         if (SeverityLevel.Ignore.equals(severity)) {
-            icon = Icons.icon("/general/hideWarnings.png");
+            icon = AllIcons.General.Note;
         } else if (SeverityLevel.Warning.equals(severity)) {
-            icon = Icons.icon("/general/warning.png");
+            icon = AllIcons.General.Warning;
         } else if (SeverityLevel.Info.equals(severity)) {
-            icon = Icons.icon("/general/information.png");
+            icon = AllIcons.General.Information;
         } else {
-            icon = Icons.icon("/general/error.png");
+            icon = AllIcons.General.Error;
         }
     }
 

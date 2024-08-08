@@ -1,10 +1,10 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.Icons;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -60,7 +60,7 @@ public class CheckStyleModuleConfigPanel extends JPanel {
         final JPanel configPanel = new JPanel(new GridBagLayout());
 
         final JLabel informationLabel = new JLabel(CheckStyleBundle.message("config.module.information"),
-                Icons.icon("/general/information.png"), SwingConstants.LEFT);
+                AllIcons.General.Information, SwingConstants.LEFT);
         configPanel.add(informationLabel, new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, JBUI.insets(16, 8), 0, 0));
 
