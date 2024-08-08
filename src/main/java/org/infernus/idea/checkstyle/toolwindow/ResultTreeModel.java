@@ -84,17 +84,13 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private void filter(final boolean sendEvents, final SeverityLevel... levels) {
-        final Set<MutableTreeNode> changedNodes = new HashSet<>();
-
         for (final ToggleableTreeNode fileNode : visibleRootNode.getAllChildren()) {
-            boolean childChanged = false;
             for (final ToggleableTreeNode problemNode : fileNode.getAllChildren()) {
                 final ResultTreeNode result = (ResultTreeNode) problemNode.getUserObject();
 
                 final boolean resultShouldBeVisible = contains(levels, result.getSeverity());
                 if (problemNode.isVisible() != resultShouldBeVisible) {
                     problemNode.setVisible(resultShouldBeVisible);
-                    childChanged = true;
                 }
             }
 
@@ -102,16 +98,11 @@ public class ResultTreeModel extends DefaultTreeModel {
             final boolean fileNodeShouldBeVisible = fileNode.getChildCount() > 0;
             if (fileNode.isVisible() != fileNodeShouldBeVisible) {
                 fileNode.setVisible(fileNodeShouldBeVisible);
-                changedNodes.add(visibleRootNode);
-            } else if (childChanged) {
-                changedNodes.add(fileNode);
             }
         }
 
         if (sendEvents) {
-            for (final MutableTreeNode node : changedNodes) {
-                nodeStructureChanged(node);
-            }
+            nodeStructureChanged(visibleRootNode);
         }
     }
 

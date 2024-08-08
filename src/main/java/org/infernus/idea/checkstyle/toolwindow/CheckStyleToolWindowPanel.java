@@ -543,9 +543,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      * Refresh the displayed results based on the current filter settings.
      */
     public void filterDisplayedResults() {
-        // TODO be a little nicer here, maintain display state
-
         treeModel.filter(getDisplayedSeverities());
+        expandTree();
     }
 
     /**
