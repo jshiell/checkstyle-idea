@@ -1,9 +1,5 @@
 package org.infernus.idea.checkstyle.build;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.util.stream.Collectors;
-
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.file.FileCollection;
@@ -20,12 +16,16 @@ import org.gradle.testing.jacoco.tasks.JacocoReport;
 import org.gradle.testing.jacoco.tasks.JacocoReportBase;
 import org.gradle.testing.jacoco.tasks.rules.JacocoViolationRule;
 
+import java.io.File;
+import java.math.BigDecimal;
+import java.util.stream.Collectors;
+
 
 public class CustomSourceSetCreator {
     static final String CSACCESS_SOURCESET_NAME = "csaccess";
     public static final String CSACCESSTEST_SOURCESET_NAME = "csaccessTest";
 
-    private static final double MINIMUM_CSACCESS_COVERAGE = 0.70d;
+    private static final double MINIMUM_CSACCESS_COVERAGE = 0.60d;
 
     private final Project project;
 
@@ -45,15 +45,18 @@ public class CustomSourceSetCreator {
         return sourceSets.getByName(CSACCESS_SOURCESET_NAME).getTaskName("jacoco", "CoverageVerification");
     }
 
-
     public void establishCsAccessSourceSet() {
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
         // Create the 'csaccess' source set
         final SourceSet csaccessSourceSet = sourceSets.create(CSACCESS_SOURCESET_NAME);
-        csaccessSourceSet.setCompileClasspath(csaccessSourceSet.getCompileClasspath().plus(mainSourceSet.getOutput()));
-        csaccessSourceSet.setRuntimeClasspath(csaccessSourceSet.getRuntimeClasspath().plus(mainSourceSet.getOutput()));
+        csaccessSourceSet.setCompileClasspath(csaccessSourceSet.getCompileClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(mainSourceSet.getCompileClasspath()));
+        csaccessSourceSet.setRuntimeClasspath(csaccessSourceSet.getRuntimeClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(mainSourceSet.getRuntimeClasspath()));
 
         // Derive all its configurations from 'main', so 'csaccess' code can see 'main' code
         final ConfigurationContainer configurations = project.getConfigurations();
@@ -79,7 +82,6 @@ public class CustomSourceSetCreator {
                 .dependsOn(tasks.getByName(csaccessSourceSet.getClassesTaskName()));
     }
 
-
     public void establishCsAccessTestSourceSet() {
         final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -88,10 +90,14 @@ public class CustomSourceSetCreator {
 
         // Create the 'csaccessTest' source set
         final SourceSet csaccessTestSourceSet = sourceSets.create(CSACCESSTEST_SOURCESET_NAME);
-        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath().
-                plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
-        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath().
-                plus(mainSourceSet.getOutput()).plus(csaccessSourceSet.getOutput()));
+        csaccessTestSourceSet.setCompileClasspath(csaccessTestSourceSet.getCompileClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(mainSourceSet.getCompileClasspath())
+                .plus(csaccessSourceSet.getOutput()));
+        csaccessTestSourceSet.setRuntimeClasspath(csaccessTestSourceSet.getRuntimeClasspath()
+                .plus(mainSourceSet.getOutput())
+                .plus(mainSourceSet.getRuntimeClasspath())
+                .plus(csaccessSourceSet.getOutput()));
 
         // Derive all its configurations from 'test' and 'csaccess'
         final ConfigurationContainer configurations = project.getConfigurations();

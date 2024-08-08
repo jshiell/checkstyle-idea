@@ -19,6 +19,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat;
 import org.gradle.api.tasks.testing.logging.TestLogEvent;
 import org.gradle.api.tasks.testing.logging.TestLoggingContainer;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The main plugin class. The action starts here.
@@ -135,7 +136,7 @@ public class GradlePluginMain
 
             final GatherCheckstyleArtifactsTask gatherTask =
                     (GatherCheckstyleArtifactsTask) tasks.getByName(GatherCheckstyleArtifactsTask.NAME);
-            copyTask.dependsOn(gatherTask, "prepareTestingSandbox");
+            copyTask.dependsOn(gatherTask, "prepareTestSandbox");
             if (test) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
@@ -145,8 +146,7 @@ public class GradlePluginMain
             }
 
             copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), "idea-sandbox/plugins" + (test ? "-test" : "")
-                    + "/CheckStyle-IDEA/" + CSLIB_TARGET_SUBFOLDER));
+            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, CSLIB_TARGET_SUBFOLDER)));
         });
     }
 
@@ -164,21 +164,21 @@ public class GradlePluginMain
      * copying it to the sandbox. Test code from csaccessTest sourceset not affected.
      *
      * @param pProject the Gradle project
-     * @param pIsTest {@code true} if the target is the test sandbox, {@code false} for the main sandbox
+     * @param test {@code true} if the target is the test sandbox, {@code false} for the main sandbox
      */
-    private void createCopyClassesToSandboxTask(final Project pProject, final boolean pIsTest) {
+    private void createCopyClassesToSandboxTask(final Project pProject, final boolean test) {
         final TaskContainer tasks = pProject.getTasks();
-        final String taskName = pIsTest ? "copyClassesToTestSandbox" : "copyClassesToSandbox";
+        final String taskName = test ? "copyClassesToTestSandbox" : "copyClassesToSandbox";
         final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
         taskProvider.configure((Copy copyTask) -> {
             copyTask.setGroup("intellij");
             copyTask.setDescription("Copy classes from '" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
-                    + "' sourceset into the prepared " + (pIsTest ? "test " : "") + "sandbox");
+                    + "' sourceset into the prepared " + (test ? "test " : "") + "sandbox");
 
             final JavaPluginExtension jpc = pProject.getExtensions().getByType(JavaPluginExtension.class);
             SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
             copyTask.dependsOn(tasks.getByName(csaccessSourceSet.getClassesTaskName()));
-            if (pIsTest) {
+            if (test) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
                 forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
@@ -188,11 +188,16 @@ public class GradlePluginMain
 
             final String targetSubfolder = "checkstyle/classes";
             copyTask.from(csaccessSourceSet.getOutput());
-            copyTask.into(new File(pProject.getLayout().getBuildDirectory().getAsFile().get(), "idea-sandbox/plugins" + (pIsTest ? "-test" : "")
-                    + "/CheckStyle-IDEA/" + targetSubfolder));
+            copyTask.into(new File(pProject.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, targetSubfolder)));
         });
     }
 
+    // TODO this will break when we change the base IDEA version; it should use SandboxAware or similar: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-task-awares.html#SandboxAware
+    private @NotNull String pluginSandboxDir(final boolean test, final String subDirectory) {
+        return "idea-sandbox/IC-2023.1.5/plugins"
+                + (test ? "-test" : "")
+                + "/CheckStyle-IDEA/" + subDirectory;
+    }
 
     /**
      * Defer some of the wiring until after the intellij plugin's tasks have been created.

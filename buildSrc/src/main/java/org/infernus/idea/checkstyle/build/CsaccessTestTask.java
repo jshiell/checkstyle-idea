@@ -33,17 +33,17 @@ public class CsaccessTestTask extends Test {
     private Property<Boolean> dryRun;
 
     public CsaccessTestTask() {
-        super();
-
         final Project project = getProject();
         final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
-        final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator
-                .CSACCESSTEST_SOURCESET_NAME);
+        final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(
+                CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME);
 
         dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
 
         GradlePluginMain.configureTestTask(this);
         setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
+        setClasspath(csaccessTestSourceSet.getRuntimeClasspath()
+                .plus(csaccessTestSourceSet.getCompileClasspath()));
     }
 
     public static String getTaskName(final String pCheckstyleVersion) {

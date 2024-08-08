@@ -13,3 +13,4 @@ gradle-app.setting
 /.gradletasknamecache
 _support/
 /out/
+.intellijPlatform/
