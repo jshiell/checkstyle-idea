@@ -15,6 +15,13 @@
     </description>
     <vendor url="https://infernus.org/" email="jamie@infernus.org">Jamie Shiell</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.xml</depends>
+    <depends>com.intellij.modules.vcs</depends>
+
+    <depends>com.intellij.modules.java</depends>
+
     <change-notes>
         <![CDATA[
 <ul>
