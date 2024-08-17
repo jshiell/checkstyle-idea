@@ -6,7 +6,7 @@ plugins {
     id("java")
     id("jacoco")
     id("idea")
-    id("org.jetbrains.intellij.platform") version "2.0.0"
+    id("org.jetbrains.intellij.platform") version "2.0.1"
     id("com.dorongold.task-tree") version "2.1.1"
     id("org.infernus.idea.checkstyle.build")
 }
