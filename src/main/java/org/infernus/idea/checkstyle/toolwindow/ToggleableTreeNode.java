@@ -1,8 +1,11 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.io.Serial;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,14 +33,22 @@ public class ToggleableTreeNode extends DefaultMutableTreeNode {
         this.visible = visible;
     }
 
+    @NotNull
     List<ToggleableTreeNode> getAllChildren() {
-        return children.stream()
-                .map(child -> (ToggleableTreeNode) child)
-                .collect(Collectors.toList());
+        if (children != null) {
+            return children.stream()
+                    .map(child -> (ToggleableTreeNode) child)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @Override
     public TreeNode getChildAt(final int index) {
+        if (children == null) {
+            throw new ArrayIndexOutOfBoundsException("Invalid index: " + index + " (no children)");
+        }
+
         int realIndex = -1;
         int visibleIndex = -1;
 
