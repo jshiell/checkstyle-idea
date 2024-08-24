@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.93.4** Fixed: resolved case-sensitivity problem that was breaking builds on case-sensitive FSs (in particular, CI) (#646).
 * **5.93.3** WiP: test release to verify artefact generation on CI (#646).
 * **5.93.2** WiP: test release to verify distribution workflow (#646).
 * **5.93.1** Fixed: NPE when filtering tree results with no children.

@@ -11,7 +11,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "5.93.3"
+version = "5.93.4"
 
 repositories {
     mavenCentral()
@@ -35,10 +35,6 @@ intellijPlatform {
 
     publishing {
         token.set(System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN"))
-
-        // Test release
-        channels.set(listOf("Testing"))
-        hidden.set(true)
     }
 }
 

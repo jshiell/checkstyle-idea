@@ -196,7 +196,7 @@ public class GradlePluginMain
         // must remain in sync with task configuration in Gradle file
         return "idea-sandbox/IC-2023.1.5/plugins"
                 + (test ? "-test" : "")
-                + "/CheckStyle-IDEA/" + subDirectory;
+                + "/checkstyle-idea/" + subDirectory;
     }
 
     /**

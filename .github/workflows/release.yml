@@ -34,7 +34,7 @@ jobs:
         body_path: ${{ github.workspace }}-CHANGELOG.txt
         fail_on_unmatched_files: true
         draft: false
-        prerelease: true
+        prerelease: false
         files:
           build/distributions/checkstyle-idea-${{ steps.build_info.outputs.build_tag }}.zip
 
