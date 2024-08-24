@@ -26,7 +26,7 @@ jobs:
         distribution: liberica
     
     - name: Build
-      run: ./gradlew check buildPlugin
+      run: ./gradlew build
 
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -34,7 +34,7 @@ jobs:
         body_path: ${{ github.workspace }}-CHANGELOG.txt
         fail_on_unmatched_files: true
         draft: false
-        prerelease: false
+        prerelease: true
         files:
           build/distributions/checkstyle-idea-${{ steps.build_info.outputs.build_tag }}.zip
 

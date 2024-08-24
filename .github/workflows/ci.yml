@@ -20,4 +20,4 @@ jobs:
         distribution: liberica
     
     - name: Build
-      run: ./gradlew check
+      run: ./gradlew build
