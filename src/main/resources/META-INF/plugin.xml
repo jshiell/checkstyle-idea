@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.93.2: WiP: test release to verify distribution workflow (#646).</li>
     <li>5.93.1: Fixed: NPE when filtering tree results with no children.</li>
     <li>5.93.0: New: Files in results are now hidden when all of their children aren't visible in the current filtering state (#644).</li>
     <li>5.92.0: New: Added CheckStyle 10.17.0.</li>

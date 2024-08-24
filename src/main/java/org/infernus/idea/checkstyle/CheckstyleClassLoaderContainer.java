@@ -121,8 +121,8 @@ public class CheckstyleClassLoaderContainer {
                                                                 @NotNull final String basePath) {
         try {
             final List<URL> urls = new ArrayList<>();
+            urls.add(getClassesDirectory(basePath).toURI().toURL());
 
-            urls.add(new File(basePath, "checkstyle/classes").toURI().toURL());
             for (String jar : splitClassPathFromProperties(classPathFromProps)) {
                 File jarLocation = new File(basePath, jar);
                 if (!jarLocation.exists()) {
@@ -136,6 +136,20 @@ public class CheckstyleClassLoaderContainer {
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("Failed to parse classpath URL", e);
         }
+    }
+
+    private static @NotNull File getClassesDirectory(@NotNull final String basePath) {
+        final File basePathFile = new File(basePath);
+        if (!new File(basePath).exists()) {
+            throw new CheckStylePluginException("Cannot find plugin directory: " + basePathFile.getAbsolutePath());
+        }
+
+        final File classesDirectory = new File(basePathFile, "checkstyle/classes");
+        if (!classesDirectory.exists()) {
+            throw new CheckStylePluginException("Cannot find Checkstyle classes directory: " + classesDirectory.getAbsolutePath());
+        }
+
+        return classesDirectory;
     }
 
     private List<URL> baseClasspathUrlsForIDEAUnitTests(@NotNull final String classPathFromProps) {
