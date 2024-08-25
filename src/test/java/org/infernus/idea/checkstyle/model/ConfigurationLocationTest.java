@@ -5,6 +5,7 @@ import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -240,7 +241,7 @@ public class ConfigurationLocationTest {
     @Test
     public void testSorting() {
         final Project project = TestHelper.mockProject();
-        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project, new ProjectPaths()));
 
         List<ConfigurationLocation> list = new ArrayList<>();
         FileConfigurationLocation fcl = new FileConfigurationLocation(project, "id1", ConfigurationType.LOCAL_FILE);

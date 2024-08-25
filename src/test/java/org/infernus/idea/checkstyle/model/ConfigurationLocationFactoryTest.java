@@ -5,6 +5,7 @@ import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class ConfigurationLocationFactoryTest {
     @Before
     public void setUp() {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(underTest);
-        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project, new ProjectPaths()));
     }
 
     @Test

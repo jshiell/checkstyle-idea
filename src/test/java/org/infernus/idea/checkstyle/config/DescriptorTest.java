@@ -7,6 +7,7 @@ import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ public class DescriptorTest {
     @Before
     public void setUp() {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(new ConfigurationLocationFactory());
-        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project, new ProjectPaths()));
     }
 
     @Test

@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.94.0** New: Added CheckStyle 10.18.0.
 * **5.93.5** Fixed: Improve fallback when the serialised Checkstyle version to use is absent (#648).
 * **5.93.4** Fixed: resolved case-sensitivity problem that was breaking builds on case-sensitive FSs (in particular, CI) (#646).
 * **5.93.3** WiP: test release to verify artefact generation on CI (#646).

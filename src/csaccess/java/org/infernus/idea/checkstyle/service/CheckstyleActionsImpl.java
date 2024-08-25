@@ -80,15 +80,8 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final ConfigurationLocation inputFile,
-                                                      final boolean ignoreVariables,
                                                       @Nullable final Map<String, String> variables) {
-        OpLoadConfiguration cmd;
-        if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile, checkstyleProjectService);
-        } else {
-            cmd = new OpLoadConfiguration(inputFile, variables, checkstyleProjectService);
-        }
-        return executeCommand(cmd);
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, checkstyleProjectService));
     }
 
     @Override
@@ -100,15 +93,8 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
 
     @Override
     public CheckstyleInternalObject loadConfiguration(@NotNull final VirtualFile inputFile,
-                                                      final boolean ignoreVariables,
                                                       @Nullable final Map<String, String> variables) {
-        OpLoadConfiguration cmd;
-        if (ignoreVariables) {
-            cmd = new OpLoadConfiguration(inputFile, checkstyleProjectService);
-        } else {
-            cmd = new OpLoadConfiguration(inputFile, variables, checkstyleProjectService);
-        }
-        return executeCommand(cmd);
+        return executeCommand(new OpLoadConfiguration(inputFile, variables, checkstyleProjectService));
     }
 
     @Override

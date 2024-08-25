@@ -4,7 +4,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -14,6 +13,7 @@ import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -323,7 +323,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     private File checkProjectBaseDir(final String fileName) {
-        VirtualFile baseDir = ProjectUtil.guessProjectDir(project);
+        VirtualFile baseDir = projectPaths().projectPath(project);
         if (baseDir != null) {
             final File projectRelativePath = new File(baseDir.getPath(), fileName);
             if (projectRelativePath.exists()) {
@@ -335,7 +335,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private File checkModuleFile(final Module module,
                                  final String fileName) {
-        VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
+        VirtualFile moduleDir = projectPaths().modulePath(module);
         if (moduleDir != null) {
             final File moduleRelativePath = new File(moduleDir.getPath(), fileName);
             if (moduleRelativePath.exists()) {
@@ -463,6 +463,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return result;
     }
 
+    @NotNull
+    protected ProjectPaths projectPaths() {
+        return getProject().getService(ProjectPaths.class);
+    }
 
     public synchronized boolean isBlocked() {
         return blockedUntil > currentTimeMillis();

@@ -24,7 +24,12 @@ public class ProjectFilePaths {
     private final Function<File, String> absolutePathOf;
 
     public ProjectFilePaths(@NotNull final Project project) {
-        this(project, File.separatorChar, File::getAbsolutePath, new ProjectPaths());
+        this(project, File.separatorChar, File::getAbsolutePath, project.getService(ProjectPaths.class));
+    }
+
+    public ProjectFilePaths(@NotNull final Project project,
+                            @NotNull final ProjectPaths projectPaths) {
+        this(project, File.separatorChar, File::getAbsolutePath, projectPaths);
     }
 
     public ProjectFilePaths(@NotNull final Project project,

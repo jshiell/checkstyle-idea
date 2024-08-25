@@ -81,13 +81,10 @@ public interface CheckstyleActions {
      * Load a Checkstyle configuration file.
      *
      * @param inputFile       the file to load
-     * @param ignoreVariables if <code>true</code>, all variables in the config file wil be replaced with the empty
-     *                        String; if <code>false</code>, the variables will be filled from the given map
      * @param variables       variables to substitute in the loaded config file
      * @return a Checkstyle configuration object
      */
     CheckstyleInternalObject loadConfiguration(@NotNull ConfigurationLocation inputFile,
-                                               boolean ignoreVariables,
                                                @Nullable Map<String, String> variables);
 
     /**
@@ -106,13 +103,10 @@ public interface CheckstyleActions {
      * Load a Checkstyle configuration file.
      *
      * @param inputFile       the file to load
-     * @param ignoreVariables if <code>true</code>, all variables in the config file wil be replaced with the empty
-     *                        String; if <code>false</code>, the variables will be filled from the given map
      * @param variables       variables to substitute in the loaded config file
      * @return a Checkstyle configuration object
      */
     CheckstyleInternalObject loadConfiguration(@NotNull VirtualFile inputFile,
-                                               boolean ignoreVariables,
                                                @Nullable Map<String, String> variables);
 
     /**

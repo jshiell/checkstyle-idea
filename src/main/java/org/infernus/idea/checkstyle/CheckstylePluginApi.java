@@ -38,7 +38,6 @@ public class CheckstylePluginApi {
             checkstyleInstance.peruseConfiguration(
                     checkstyleInstance.loadConfiguration(
                             it,
-                            true,
                             new HashMap<>()),
                     module -> visitor.accept(it.getDescription(), module));
         });

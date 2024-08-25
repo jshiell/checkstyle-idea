@@ -6,6 +6,7 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.model.*;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.csapi.BundledConfig.GOOGLE_CHECKS;
-
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -73,6 +73,9 @@ public class CheckstylePluginApiTest {
         BundledConfigurationLocation googleChecks = new ConfigurationLocationFactory().create(GOOGLE_CHECKS, project);
         TreeSet<ConfigurationLocation> locations = new TreeSet<>();
         locations.add(googleChecks);
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
+        when(projectPaths.projectPath(project)).thenReturn(null);
+        when(project.getService(ProjectPaths.class)).thenReturn(projectPaths);
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder
                         .testInstance(CHECKSTYLE_VERSION)
@@ -92,7 +95,7 @@ public class CheckstylePluginApiTest {
         verify(visitor, atLeastOnce()).accept(eq("Google Checks"), configModuleCaptor.capture());
 
         assertThat(configModuleCaptor.getValue(), is(not(nullValue())));
-        assertThat(configModuleCaptor.getValue().getName(), is("SuppressionXpathFilter"));
-
+        // note that SuppressionXpathFilter is filtered out as there's no valid suppressions file found
+        assertThat(configModuleCaptor.getValue().getName(), is("CommentsIndentation"));
     }
 }

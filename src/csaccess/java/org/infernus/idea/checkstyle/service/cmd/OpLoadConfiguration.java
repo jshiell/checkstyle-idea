@@ -12,7 +12,6 @@ import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.service.IgnoringResolver;
 import org.infernus.idea.checkstyle.service.RulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.ConfigurationLocationRulesContainer;
 import org.infernus.idea.checkstyle.service.RulesContainer.ContentRulesContainer;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNullElseGet;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
@@ -108,11 +108,7 @@ public class OpLoadConfiguration
         this.module = module;
         this.checkstyleProjectService = checkstyleProjectService;
 
-        if (properties != null) {
-            resolver = new SimpleResolver(properties);
-        } else {
-            resolver = new IgnoringResolver();
-        }
+        resolver = new SimpleResolver(requireNonNullElseGet(properties, Map::of));
     }
 
     private static Map<String, String> buildReplacementsMap() {

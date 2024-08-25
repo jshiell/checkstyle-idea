@@ -79,7 +79,7 @@ public class CheckStyleCodeStyleImporter
                                                        @NotNull final VirtualFile selectedFile) {
         return checkstyleProjectService(project)
                 .getCheckstyleInstance()
-                .loadConfiguration(selectedFile, true, null);
+                .loadConfiguration(selectedFile, null);
     }
 
 

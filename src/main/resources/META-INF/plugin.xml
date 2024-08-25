@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.94.0: New: Added Checkstyle 10.18.0.</li>
     <li>5.93.5: Fixed: Improve fallback when the serialised Checkstyle version to use is absent (#648).</li>
     <li>5.93.4: Fixed: resolved case-sensitivity problem that was breaking builds on case-sensitive FSs (in particular, CI) (#646).</li>
     <li>5.93.3: WiP: test release to verify artefact generation on CI (#646).</li>
@@ -48,13 +49,6 @@
     <li>5.86.0: New: Added Checkstyle 10.13.0, 10.12.7.</li>
     <li>5.85.1: Fixed: EDT access error in commit dialogue (#626).</li>
     <li>5.85.0: New: Added Checkstyle 10.12.5.</li>
-    <li>5.84.0: New: Added Checkstyle 10.12.4.</li>
-    <li>5.83.0: New: New: Add ability to add bundled rules via the `BundledConfigProvider` interface (#622) - thanks to @rhierlmeier.</li>
-    <li>5.83.0: New: Added Checkstyle 10.12.3.</li>
-    <li>5.82.0: New: Added Checkstyle 10.12.2.</li>
-    <li>5.81.0: New: Added Checkstyle 10.12.1.</li>
-    <li>5.80.1: Fixed: Skip changelist & module checks to ensure update action is fast enough on toolbar actions (#612, #615).</li>
-    <li>5.80.0: New: Added Checkstyle 10.12.0.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
@@ -73,6 +67,7 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.PluginConfigurationManager"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.config.ProjectConfigurationState"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.CheckstylePluginApi"/>
+        <projectService serviceImplementation="org.infernus.idea.checkstyle.util.ProjectPaths"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.util.ProjectFilePaths"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.ConfigurationInvalidator"/>
 

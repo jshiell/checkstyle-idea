@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -404,7 +405,10 @@ public class OpLoadConfigurationTest {
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
 
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
-                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, TestHelper.mockProject()), true, null);
+                .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, TestHelper.mockProject()), Map.of(
+                        "org.checkstyle.sun.suppressionfilter.config", "",
+                        "org.checkstyle.sun.suppressionxpathfilter.config", ""
+                ));
         Assert.assertNotNull(csConfig);
     }
 
@@ -415,7 +419,10 @@ public class OpLoadConfigurationTest {
         CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
-                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, TestHelper.mockProject()), true, null);
+                .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, TestHelper.mockProject()), Map.of(
+                        "org.checkstyle.google.suppressionfilter.config", "",
+                        "org.checkstyle.google.suppressionxpathfilter.config", ""
+                ));
         Assert.assertNotNull(csConfig);
     }
 }
