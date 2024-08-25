@@ -44,7 +44,7 @@ public final class PluginConfigurationBuilder {
         this.lastActivePluginVersion = lastActivePluginVersion;
     }
 
-    public static PluginConfigurationBuilder defaultConfiguration(final Project project) {
+    public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
         final String csDefaultVersion = new VersionListReader().getDefaultVersion();
 
         final SortedSet<ConfigurationLocation> defaultLocations = new TreeSet<>();
@@ -65,7 +65,7 @@ public final class PluginConfigurationBuilder {
                 CheckStylePlugin.version());
     }
 
-    public static PluginConfigurationBuilder testInstance(final String checkstyleVersion) {
+    public static PluginConfigurationBuilder testInstance(@NotNull final String checkstyleVersion) {
         return new PluginConfigurationBuilder(
                 checkstyleVersion,
                 ScanScope.AllSources,
@@ -78,7 +78,7 @@ public final class PluginConfigurationBuilder {
                 "aVersion");
     }
 
-    public static PluginConfigurationBuilder from(final PluginConfiguration source) {
+    public static PluginConfigurationBuilder from(@NotNull final PluginConfiguration source) {
         return new PluginConfigurationBuilder(source.getCheckstyleVersion(),
                 source.getScanScope(),
                 source.isSuppressErrors(),
@@ -90,7 +90,7 @@ public final class PluginConfigurationBuilder {
                 source.getLastActivePluginVersion());
     }
 
-    public PluginConfigurationBuilder withCheckstyleVersion(@Nullable final String newCheckstyleVersion) {
+    public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
         this.checkstyleVersion = newCheckstyleVersion;
         return this;
     }

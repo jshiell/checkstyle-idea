@@ -17,6 +17,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -33,6 +34,8 @@ import java.io.Serial;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNullElseGet;
 
 
 /**
@@ -237,7 +240,9 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     public PluginConfiguration getPluginConfiguration() {
-        final String checkstyleVersion = (String) csVersionDropdown.getSelectedItem();
+        final String checkstyleVersion = requireNonNullElseGet(
+                (String) csVersionDropdown.getSelectedItem(),
+                () -> new VersionListReader().getDefaultVersion());
         ScanScope scanScope = (ScanScope) scopeDropdown.getSelectedItem();
         if (scanScope == null) {
             scanScope = ScanScope.getDefaultValue();

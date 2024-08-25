@@ -11,7 +11,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "5.93.4"
+version = "5.93.5"
 
 repositories {
     mavenCentral()

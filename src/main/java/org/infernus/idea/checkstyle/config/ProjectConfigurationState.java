@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.xmlb.annotations.*;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.*;
 import org.jetbrains.annotations.NotNull;
@@ -137,7 +138,9 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                                             @NotNull final Project project) {
             if (Objects.equals(serialisationVersion, "2")) {
                 return builder
-                        .withCheckstyleVersion(checkstyleVersion)
+                        .withCheckstyleVersion(requireNonNullElseGet(
+                                checkstyleVersion,
+                                () -> new VersionListReader().getDefaultVersion()))
                         .withScanScope(lookupScanScope())
                         .withSuppressErrors(suppressErrors)
                         .withCopyLibraries(copyLibs)

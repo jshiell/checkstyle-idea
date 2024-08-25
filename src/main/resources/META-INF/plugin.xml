@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.93.5: Fixed: Improve fallback when the serialised Checkstyle version to use is absent (#648).</li>
     <li>5.93.4: Fixed: resolved case-sensitivity problem that was breaking builds on case-sensitive FSs (in particular, CI) (#646).</li>
     <li>5.93.3: WiP: test release to verify artefact generation on CI (#646).</li>
     <li>5.93.2: WiP: test release to verify distribution workflow (#646).</li>
