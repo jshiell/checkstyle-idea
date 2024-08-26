@@ -263,7 +263,7 @@ public class CheckstyleClassLoaderContainer {
     @Nullable
     private String getPluginPath() {
         try {
-            File pluginDir = new File(PathManager.getPluginsPath(), CheckStylePlugin.ID_PLUGIN);
+            File pluginDir = new File(PathManager.getPluginsPath(), pluginDirectory());
             if (pluginDir.exists()) {
                 return pluginDir.getAbsolutePath();
             }
@@ -273,10 +273,15 @@ public class CheckstyleClassLoaderContainer {
         return null;
     }
 
+    @NotNull
+    private static String pluginDirectory() {
+        return CheckStylePlugin.ID_PLUGIN.toLowerCase();
+    }
+
     @Nullable
     private String getPreinstalledPluginPath() {
         try {
-            File preInstalledPluginDir = new File(PathManager.getPreInstalledPluginsPath(), CheckStylePlugin.ID_PLUGIN);
+            File preInstalledPluginDir = new File(PathManager.getPreInstalledPluginsPath(), pluginDirectory());
             if (preInstalledPluginDir.exists()) {
                 return preInstalledPluginDir.getAbsolutePath();
             }

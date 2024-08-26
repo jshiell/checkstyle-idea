@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.94.1** Fixed: Error on case-sensitive FSs due to change in plugin directory name with new build plugin (#650).
 * **5.94.0** New: Added CheckStyle 10.18.0.
 * **5.93.5** Fixed: Improve fallback when the serialised Checkstyle version to use is absent (#648).
 * **5.93.4** Fixed: resolved case-sensitivity problem that was breaking builds on case-sensitive FSs (in particular, CI) (#646).
