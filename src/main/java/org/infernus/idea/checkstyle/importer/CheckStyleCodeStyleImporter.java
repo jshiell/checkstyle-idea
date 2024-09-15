@@ -11,8 +11,19 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.function.Function.identity;
 
 /**
  * Imports code style settings from check style configuration file.
@@ -67,6 +78,10 @@ public class CheckStyleCodeStyleImporter
         return project.getService(CheckstyleProjectService.class);
     }
 
+    private ConfigurationLocationFactory configurationLocationFactory(@NotNull final Project project) {
+        return project.getService(ConfigurationLocationFactory.class);
+    }
+
     @Nullable
     @Override
     public String getAdditionalImportInfo(@NotNull final CodeStyleScheme scheme) {
@@ -79,9 +94,30 @@ public class CheckStyleCodeStyleImporter
                                                        @NotNull final VirtualFile selectedFile) {
         return checkstyleProjectService(project)
                 .getCheckstyleInstance()
-                .loadConfiguration(selectedFile, null);
+                .loadConfiguration(selectedFile, defaultPropertiesForFile(project, selectedFile));
     }
 
+    @NotNull
+    private Map<String, String> defaultPropertiesForFile(@NotNull final Project project,
+                                                         @NotNull final VirtualFile selectedFile) {
+        try {
+            ConfigurationLocation codeImportHolder = configurationLocationFactory(project).create(
+                    project,
+                    UUID.randomUUID().toString(),
+                    ConfigurationType.LOCAL_FILE,
+                    selectedFile.getPath(),
+                    "Code Import Holder",
+                    NamedScopeHelper.getDefaultScope(project));
+            codeImportHolder.resolve(checkstyleProjectService(project).underlyingClassLoader());
+            final Map<String, String> properties = codeImportHolder.getProperties();
+            return properties.keySet().stream().
+                    collect(Collectors.toMap(identity(), k -> properties.getOrDefault(k, "")));
+
+        } catch (Exception e) {
+            LOG.error("Unable to construct defaulted properties", e);
+            return Collections.emptyMap();
+        }
+    }
 
     void importConfiguration(@NotNull final CheckstyleProjectService checkstyleProjectService,
                              @NotNull final CheckstyleInternalObject configuration,

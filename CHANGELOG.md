@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.95.0** Fixed: Improved property substitution for code-style importer (#651).
 * **5.95.0** New: Added CheckStyle 10.18.1.
 * **5.94.1** Fixed: Error on case-sensitive FSs due to change in plugin directory name with new build plugin (#650).
 * **5.94.0** New: Added CheckStyle 10.18.0.

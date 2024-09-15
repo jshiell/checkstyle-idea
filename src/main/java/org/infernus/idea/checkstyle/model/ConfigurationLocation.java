@@ -13,6 +13,7 @@ import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
+import org.infernus.idea.checkstyle.util.Pair;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
@@ -171,11 +171,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         unblock();
     }
 
-    private List<String> extractProperties(@Nullable final InputStream inputStream,
+    private Map<String, String> extractProperties(@Nullable final InputStream inputStream,
                                            @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
-                final List<String> propertyNames = new ArrayList<>();
+                final Map<String, String> propertiesAndDefaults = new HashMap<>();
 
                 final XMLInputFactory factory = XMLInputFactory.newInstance();
                 factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
@@ -185,32 +185,38 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                     final XMLEvent event = eventReader.nextEvent();
 
                     if (event.isStartElement()) {
-                        final String propertyName = extractNameIfPropertyElement((StartElement) event);
-                        if (propertyName != null) {
-                            propertyNames.add(propertyName);
+                        final var property = extractNameAndDefaultIfPropertyElement((StartElement) event);
+                        if (property != null) {
+                            propertiesAndDefaults.put(property.first(), property.second());
                         }
                     }
                 }
 
-                return propertyNames;
+                return propertiesAndDefaults;
 
             } catch (Exception e) {
                 LOG.warn("CheckStyle file could not be parsed for properties.", e);
             }
         }
 
-        return new ArrayList<>();
+        return Collections.emptyMap();
     }
 
-    private static String extractNameIfPropertyElement(final StartElement startElement) {
+    private static Pair<String, String> extractNameAndDefaultIfPropertyElement(final StartElement startElement) {
         if ("property".equals(startElement.getName().getLocalPart())) {
-            final Attribute valueAttribute = startElement.getAttributeByName(new QName("value"));
+            final var valueAttribute = startElement.getAttributeByName(new QName("value"));
             if (valueAttribute != null) {
                 final String value = valueAttribute.getValue();
                 final int propertyStart = value.indexOf("${");
                 final int propertyEnd = value.indexOf('}');
                 if (propertyStart >= 0 && propertyEnd >= 0) {
-                    return value.substring(propertyStart + 2, propertyEnd);
+                    final String propertyName = value.substring(propertyStart + 2, propertyEnd);
+
+                    final var defaultAttribute = startElement.getAttributeByName(new QName("default"));
+                    if (defaultAttribute != null) {
+                        return Pair.of(propertyName, defaultAttribute.getValue());
+                    }
+                    return Pair.of(propertyName, "");
                 }
             }
         }
@@ -230,15 +236,15 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         InputStream is = resolveFile(checkstyleClassLoader);
 
         if (!propertiesCheckedThisSession) {
-            final List<String> propertiesInFile = extractProperties(is, checkstyleClassLoader);
+            final Map<String, String> propertiesInFile = extractProperties(is, checkstyleClassLoader);
 
-            for (final String propertyName : propertiesInFile) {
+            for (final String propertyName : propertiesInFile.keySet()) {
                 if (!properties.containsKey(propertyName)) {
-                    properties.put(propertyName, "");
+                    properties.put(propertyName, propertiesInFile.getOrDefault(propertyName, ""));
                 }
             }
 
-            properties.keySet().removeIf(propertyName -> !propertiesInFile.contains(propertyName));
+            properties.keySet().removeIf(propertyName -> !propertiesInFile.keySet().contains(propertyName));
 
             try {
                 is.reset();
