@@ -46,7 +46,7 @@ public class RelativeFileConfigurationLocationTest {
         };
 
         final Project project = TestHelper.mockProject();
-        ProjectFilePaths testProjectFilePaths = new ProjectFilePaths(project, '/', absolutePathOf, projectPaths);
+        ProjectFilePaths testProjectFilePaths = ProjectFilePaths.testInstanceWith(project, '/', absolutePathOf, projectPaths);
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
 
         when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);

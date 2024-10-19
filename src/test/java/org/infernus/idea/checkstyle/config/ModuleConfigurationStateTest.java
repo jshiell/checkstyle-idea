@@ -36,7 +36,7 @@ public class ModuleConfigurationStateTest {
     private final PluginConfigurationManager pluginConfigurationManager = new PluginConfigurationManager(project);
     private final ProjectPaths projectPaths = mock(ProjectPaths.class);
     private final ConfigurationLocationFactory configurationLocationFactory = new ConfigurationLocationFactory();
-    private final ProjectFilePaths projectFilePaths = new ProjectFilePaths(project, File.separatorChar, File::getAbsolutePath, projectPaths);
+    private final ProjectFilePaths projectFilePaths = ProjectFilePaths.testInstanceWith(project, File.separatorChar, File::getAbsolutePath, projectPaths);
     private final NamedScope allScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "All");
 
     private ConfigurationLocation expectedLocation;

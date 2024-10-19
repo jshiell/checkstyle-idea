@@ -241,7 +241,7 @@ public class ConfigurationLocationTest {
     @Test
     public void testSorting() {
         final Project project = TestHelper.mockProject();
-        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project, new ProjectPaths()));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(ProjectFilePaths.testInstanceWith(project, new ProjectPaths()));
 
         List<ConfigurationLocation> list = new ArrayList<>();
         FileConfigurationLocation fcl = new FileConfigurationLocation(project, "id1", ConfigurationType.LOCAL_FILE);

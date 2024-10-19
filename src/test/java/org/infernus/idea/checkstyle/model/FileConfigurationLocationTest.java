@@ -151,7 +151,7 @@ public class FileConfigurationLocationTest {
             return FilenameUtils.separatorsToUnix(file.getPath());
         };
 
-        return new ProjectFilePaths(project, separatorChar, absolutePathOf, projectPaths);
+        return ProjectFilePaths.testInstanceWith(project, separatorChar, absolutePathOf, projectPaths);
     }
 
 }

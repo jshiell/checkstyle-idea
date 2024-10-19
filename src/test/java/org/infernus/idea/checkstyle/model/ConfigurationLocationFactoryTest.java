@@ -25,7 +25,7 @@ public class ConfigurationLocationFactoryTest {
     @Before
     public void setUp() {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(underTest);
-        when(project.getService(ProjectFilePaths.class)).thenReturn(new ProjectFilePaths(project, new ProjectPaths()));
+        when(project.getService(ProjectFilePaths.class)).thenReturn(ProjectFilePaths.testInstanceWith(project, new ProjectPaths()));
     }
 
     @Test

@@ -29,7 +29,7 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
     private final Project project = TestHelper.mockProject();
     private final ProjectPaths projectPaths = mock(ProjectPaths.class);
     private final ConfigurationLocationFactory configurationLocationFactory = new ConfigurationLocationFactory();
-    private final ProjectFilePaths projectFilePaths = new ProjectFilePaths(project, File.separatorChar, File::getAbsolutePath, projectPaths);
+    private final ProjectFilePaths projectFilePaths = ProjectFilePaths.testInstanceWith(project, File.separatorChar, File::getAbsolutePath, projectPaths);
 
     @Before
     public void configureMocks() {

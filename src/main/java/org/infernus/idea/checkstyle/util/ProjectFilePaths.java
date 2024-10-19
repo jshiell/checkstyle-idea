@@ -27,20 +27,27 @@ public class ProjectFilePaths {
         this(project, File.separatorChar, File::getAbsolutePath, project.getService(ProjectPaths.class));
     }
 
-    public ProjectFilePaths(@NotNull final Project project,
-                            @NotNull final ProjectPaths projectPaths) {
-        this(project, File.separatorChar, File::getAbsolutePath, projectPaths);
-    }
-
-    public ProjectFilePaths(@NotNull final Project project,
-                            final char separatorChar,
-                            @NotNull final Function<File, String> absolutePathOf,
-                            @NotNull final ProjectPaths projectPaths) {
+    private ProjectFilePaths(@NotNull final Project project,
+                             final char separatorChar,
+                             @NotNull final Function<File, String> absolutePathOf,
+                             @NotNull final ProjectPaths projectPaths) {
         this.project = project;
         this.separatorChar = separatorChar;
         this.absolutePathOf = absolutePathOf;
 
         this.projectPaths = projectPaths;
+    }
+
+    public static ProjectFilePaths testInstanceWith(@NotNull final Project project,
+                                                    @NotNull final ProjectPaths projectPaths) {
+        return new ProjectFilePaths(project, File.separatorChar, File::getAbsolutePath, projectPaths);
+    }
+
+    public static ProjectFilePaths testInstanceWith(@NotNull final Project project,
+                                                    final char separatorChar,
+                                                    @NotNull final Function<File, String> absolutePathOf,
+                                                    @NotNull final ProjectPaths projectPaths) {
+        return new ProjectFilePaths(project, separatorChar, absolutePathOf, projectPaths);
     }
 
     @Nullable

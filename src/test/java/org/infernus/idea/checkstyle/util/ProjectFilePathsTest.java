@@ -145,7 +145,7 @@ public class ProjectFilePathsTest {
         when(projectBaseFile.getPath()).thenReturn(UNIX_PROJECT_BASE_PATH);
         when(projectPaths.projectPath(project)).thenReturn(projectBaseFile);
 
-        return new ProjectFilePaths(project, '/', File::getAbsolutePath, projectPaths);
+        return ProjectFilePaths.testInstanceWith(project, '/', File::getAbsolutePath, projectPaths);
     }
 
     private ProjectFilePaths projectFilePathsForWindows() {
@@ -156,7 +156,7 @@ public class ProjectFilePathsTest {
         when(projectBaseFile.getPath()).thenReturn(WINDOWS_PROJECT_BASE_PATH);
         when(projectPaths.projectPath(project)).thenReturn(projectBaseFile);
 
-        return new ProjectFilePaths(project, '\\',  file -> {
+        return ProjectFilePaths.testInstanceWith(project, '\\',  file -> {
             // a nasty hack to pretend we're on a Windows box when required...
             if (file.getPath().startsWith("c:")) {
                 return file.getPath().replace('/', '\\').replaceAll("\\\\\\\\", "\\\\");
