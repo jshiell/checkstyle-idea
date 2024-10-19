@@ -6,8 +6,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
 
@@ -176,7 +175,7 @@ public class LocationTableModel extends AbstractTableModel {
             case COLUMN_FILE:
                 String locationFile = locations.get(rowIndex).getLocation();
                 try {
-                    String userInfo = new URL(locationFile).getUserInfo();
+                    String userInfo = URI.create(locationFile).getUserInfo();
                     if (userInfo != null) {
                         return locationFile.replace(
                                 userInfo,
@@ -184,7 +183,7 @@ public class LocationTableModel extends AbstractTableModel {
                         );
                     }
                     return locationFile;
-                } catch (MalformedURLException e) {
+                } catch (IllegalArgumentException e) {
                     return locationFile;
                 }
 

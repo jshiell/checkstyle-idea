@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Objects;
 
@@ -38,7 +39,7 @@ public class NotifyUserIfPluginUpdated implements ProjectActivity {
                 public void actionPerformed(@NotNull final AnActionEvent event,
                                             @NotNull final Notification notification) {
                     try {
-                        final URL updateUrl = new URL("https://github.com/jshiell/checkstyle-idea/releases/tag/%s".formatted(version()));
+                        final URL updateUrl = URI.create("https://github.com/jshiell/checkstyle-idea/releases/tag/%s".formatted(version())).toURL();
                         IdeUiService.getInstance().browse(updateUrl);
                         notification.expire();
                     } catch (MalformedURLException e) {

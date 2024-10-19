@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
@@ -28,9 +29,9 @@ public class ResourceFilteringURLClassLoaderTest {
 
     @Before
     public void prepareParentClassLoader() throws IOException {
-        passedUrl = new URL("file:///passed.file");
+        passedUrl = URI.create("file:///passed.file").toURL();
 
-        when(parentClassLoader.getResource(FILTERED_FILE)).thenReturn(new URL("file:///filtered.file"));
+        when(parentClassLoader.getResource(FILTERED_FILE)).thenReturn(URI.create("file:///filtered.file").toURL());
         when(parentClassLoader.getResource(PASSED_FILE)).thenReturn(passedUrl);
         when(parentClassLoader.getResources(PASSED_FILE)).thenReturn(enumeration(List.of(passedUrl)));
     }

@@ -14,10 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -215,9 +212,9 @@ public class CheckstyleClassLoaderContainer {
         } else {
             URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
             try {
-                URL trimmedUrl = new URL(Objects.requireNonNull(classResource).toString().replaceFirst("org[/\\\\]infernus.*", ""));
-                result = Collections.singletonList(trimmedUrl);
-            } catch (MalformedURLException e) {
+                URI trimmedUrl = URI.create(Objects.requireNonNull(classResource).toString().replaceFirst("org[/\\\\]infernus.*", ""));
+                result = Collections.singletonList(trimmedUrl.toURL());
+            } catch (IllegalArgumentException | MalformedURLException e) {
                 result = Collections.singletonList(classResource);
             }
         }
