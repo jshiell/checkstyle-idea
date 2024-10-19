@@ -4,22 +4,25 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.vfs.VirtualFile;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNullElse;
 
 /**
  * Custom FileChooser Descriptor that allows the specification of a file extension.
  */
 public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
-    private static final String JAR_EXTENSION = "jar";
 
-    private final String[] fileExtensions;
-    private final boolean allowFilesInJars;
+    private final Set<String> fileExtensions;
 
     /**
      * Construct a file chooser descriptor for the given file extension.
-     *  @param title          the dialog title.
-     * @param description    the dialog description.
+     *
+     * @param title            the dialog title.
+     * @param description      the dialog description.
      * @param allowFilesInJars may files within JARs be selected?
-     * @param fileExtensions the file extension(s).
+     * @param fileExtensions   the file extension(s).
      */
     public ExtensionFileChooserDescriptor(final String title,
                                           final String description,
@@ -30,8 +33,10 @@ public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
         setTitle(title);
         setDescription(description);
 
-        this.fileExtensions = sortAndMakeLowercase(fileExtensions);
-        this.allowFilesInJars = allowFilesInJars;
+        // well, this is clumsy...
+        withFileFilter(this::fileExtensionMatches);
+
+        this.fileExtensions = lowerCase(fileExtensions);
     }
 
     private static boolean containsJar(final String[] extensions) {
@@ -46,12 +51,10 @@ public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
         return false;
     }
 
-    private String[] sortAndMakeLowercase(final String[] strings) {
-        Arrays.sort(strings);
-        for (int i = 0; i < strings.length; i++) {
-            strings[i] = strings[i].toLowerCase();
-        }
-        return strings;
+    private Set<String> lowerCase(final String[] strings) {
+        return Arrays.stream(requireNonNullElse(strings, new String[0]))
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -59,20 +62,8 @@ public class ExtensionFileChooserDescriptor extends FileChooserDescriptor {
         return fileExtensionMatches(file);
     }
 
-    @Override
-    public boolean isFileVisible(final VirtualFile file, final boolean showHiddenFiles) {
-        return file.isDirectory()
-                || fileExtensionMatches(file)
-                || (isJar(file) && allowFilesInJars);
-    }
-
-    private boolean isJar(final VirtualFile file) {
-        final String currentExtension = file.getExtension();
-        return JAR_EXTENSION.equalsIgnoreCase(currentExtension);
-    }
-
     private boolean fileExtensionMatches(final VirtualFile file) {
         final String currentExtension = file.getExtension();
-        return currentExtension != null && Arrays.binarySearch(fileExtensions, currentExtension.toLowerCase()) >= 0;
+        return currentExtension != null && fileExtensions.contains(currentExtension);
     }
 }
