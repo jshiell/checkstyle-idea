@@ -6,11 +6,14 @@ import com.intellij.notification.NotificationAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity;
+import com.intellij.openapi.startup.ProjectActivity;
+import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,12 +22,14 @@ import java.util.Objects;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.CheckStylePlugin.version;
 
-public class NotifyUserIfPluginUpdated implements StartupActivity {
+public class NotifyUserIfPluginUpdated implements ProjectActivity {
 
     private static final Logger LOG = Logger.getInstance(NotifyUserIfPluginUpdated.class);
 
+    @Nullable
     @Override
-    public void runActivity(@NotNull final Project project) {
+    public Object execute(@NotNull final Project project,
+                          @NotNull final Continuation<? super Unit> continuation) {
         final PluginConfigurationManager pluginConfigurationManager = pluginConfigurationManager(project);
         if (!Objects.equals(version(), lastActivePluginVersion(pluginConfigurationManager))) {
             Notifications.showInfo(project, message("plugin.update"), new NotificationAction(message("plugin.update.action")) {
@@ -46,6 +51,7 @@ public class NotifyUserIfPluginUpdated implements StartupActivity {
                     .withLastActivePluginVersion(version())
                     .build(), false);
         }
+        return null;
     }
 
     private String lastActivePluginVersion(final PluginConfigurationManager pluginConfigurationManager) {
