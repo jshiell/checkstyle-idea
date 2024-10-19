@@ -78,7 +78,9 @@
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.NotifyUserIfPluginUpdated"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
 
-        <projectConfigurable instance="org.infernus.idea.checkstyle.CheckStyleConfigurable" parentId="tools"/>
+        <projectConfigurable key="plugin.configuration-name"
+                             instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
+                             parentId="tools" />
 
         <moduleConfigurationEditorProvider implementation="org.infernus.idea.checkstyle.CheckstyleModuleConfigurationEditorProvider"/>
 
