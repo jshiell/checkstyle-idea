@@ -16,18 +16,13 @@ import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 
 public final class Notifications {
 
-    private static final NotificationGroup BALLOON_GROUP =
-            NotificationGroupManager.getInstance().getNotificationGroup("CheckStyleIDEABalloonGroup");
-    private static final NotificationGroup LOG_ONLY_GROUP =
-            NotificationGroupManager.getInstance().getNotificationGroup("CheckStyleIDEALogOnlyGroup");
-
     private Notifications() {
     }
 
     public static void showInfo(final Project project,
                                 final String infoText,
                                 final NotificationAction action) {
-        BALLOON_GROUP
+        balloonGroup()
                 .createNotification("", infoText, INFORMATION)
                 .addAction(action)
                 .notify(project);
@@ -35,23 +30,33 @@ public final class Notifications {
 
     public static void showWarning(final Project project,
                                    final String warningText) {
-        BALLOON_GROUP
+        balloonGroup()
                 .createNotification("", warningText, WARNING)
                 .notify(project);
     }
 
     public static void showError(final Project project,
                                  final String errorText) {
-        BALLOON_GROUP
+        balloonGroup()
                 .createNotification("", errorText, ERROR)
                 .notify(project);
     }
 
     public static void showException(final Project project,
                                      final Throwable t) {
-        LOG_ONLY_GROUP
+        logOnlyGroup()
                 .createNotification(titleFor(t), messageFor(t), ERROR)
                 .notify(project);
+    }
+
+    private static NotificationGroup balloonGroup() {
+        return NotificationGroupManager.getInstance()
+                .getNotificationGroup("CheckStyleIDEABalloonGroup");
+    }
+
+    private static NotificationGroup logOnlyGroup() {
+        return NotificationGroupManager.getInstance()
+                .getNotificationGroup("CheckStyleIDEALogOnlyGroup");
     }
 
     @NotNull

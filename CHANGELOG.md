@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.97.0** Fixed: Refactored code to fix exception around API dependencies at initialisation (#655).
 * **5.96.0** Fixed: Refactored code to avoid IDEA triggering the wrong constructor (#653).
 * **5.96.0** New: Added Checkstyle 10.18.2.
 * **5.95.0** Fixed: Improved property substitution for code-style importer (#651).
