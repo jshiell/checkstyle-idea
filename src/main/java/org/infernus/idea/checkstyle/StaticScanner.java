@@ -67,7 +67,7 @@ public class StaticScanner {
     }
 
     public void asyncScanFiles(final List<VirtualFile> files, final ConfigurationLocation overrideConfigLocation) {
-        LOG.info("Scanning current file(s).");
+        LOG.debug("Scanning current file(s).");
 
         if (files == null || files.isEmpty()) {
             LOG.debug("No files provided.");
