@@ -26,7 +26,7 @@ jobs:
         distribution: liberica
     
     - name: Build
-      run: ./gradlew build
+      run: ./gradlew build buildPlugin
 
     - name: Release
       uses: softprops/action-gh-release@v2
