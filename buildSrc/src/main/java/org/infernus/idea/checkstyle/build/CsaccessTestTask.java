@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.build;
 
 import java.io.File;
-import java.util.Set;
 
 import groovy.lang.Closure;
 import org.gradle.api.Project;
@@ -29,7 +28,8 @@ public class CsaccessTestTask extends Test {
 
     public static final String CSVERSION_SYSPROP_NAME = "org.infernus.idea.checkstyle.version";
 
-    private String csVersion = null;
+    private FileCollection effectiveClassPath = null;
+
     private Property<Boolean> dryRun;
 
     public CsaccessTestTask() {
@@ -43,17 +43,16 @@ public class CsaccessTestTask extends Test {
         GradlePluginMain.configureTestTask(this);
         setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
         setClasspath(csaccessTestSourceSet.getRuntimeClasspath()
-                .plus(csaccessTestSourceSet.getCompileClasspath()));
+                .plus(csaccessTestSourceSet.getCompileClasspath())); // TODO delete?
     }
 
     public static String getTaskName(final String pCheckstyleVersion) {
         return "xtest_" + CheckstyleVersions.toGradleVersion(pCheckstyleVersion);
     }
 
-    public void setCheckstyleVersion(final String pCheckstyleVersion, final boolean isBaseVersion) {
-        csVersion = pCheckstyleVersion;
+    public void setCheckstyleVersion(final String checkstyleVersion, final boolean isBaseVersion) {
         setDescription("Runs the '" + CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME + "' unit tests against a "
-                + "Checkstyle " + pCheckstyleVersion + " runtime.");
+                + "Checkstyle " + checkstyleVersion + " runtime.");
         getReports().getJunitXml().getRequired().set(false);
         if (isBaseVersion) {
             setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
@@ -67,12 +66,44 @@ public class CsaccessTestTask extends Test {
         configure(new Closure<Void>(this) {
             @Override
             public Void call() {
-                systemProperty(CSVERSION_SYSPROP_NAME, pCheckstyleVersion);
+                systemProperty(CSVERSION_SYSPROP_NAME, checkstyleVersion);
                 return null;
             }
         });
+
+        effectiveClassPath = setClassPathForVersion(checkstyleVersion, getProject());
     }
 
+    private @NotNull FileCollection setClassPathForVersion(final String checkstyleVersion, final Project project) {
+        final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
+        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
+        final ConfigurationContainer configurations = project.getConfigurations();
+        final Configuration detachedConfiguration = configurations.detachedConfiguration(csDep);
+        // workaround for Checkstyle#14123
+        detachedConfiguration
+                .getResolutionStrategy()
+                .getCapabilitiesResolution()
+                .withCapability("com.google.collections", "google-collections", resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
+
+        final SourceSetContainer sourceSets = jpc.getSourceSets();
+        final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+        final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
+        final SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
+        final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME);
+
+        return project.files(
+                        csaccessTestSourceSet.getOutput().getResourcesDir(),
+                        csaccessSourceSet.getOutput().getResourcesDir(),
+                        mainSourceSet.getOutput().getResourcesDir())
+                .plus(csaccessTestSourceSet.getOutput().getClassesDirs())
+                .plus(csaccessSourceSet.getOutput().getClassesDirs())
+                .plus(mainSourceSet.getOutput().getClassesDirs())
+                .plus(project.files(detachedConfiguration.getFiles()))
+                .plus(csaccessTestSourceSet.getRuntimeClasspath())
+                .plus(csaccessTestSourceSet.getCompileClasspath())
+                .minus(testSourceSet.getOutput().getClassesDirs())
+                .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
+    }
 
     /**
      * Overriding getClasspath() in order to set the final classpath is an unusual solution, but it was the only
@@ -83,47 +114,18 @@ public class CsaccessTestTask extends Test {
      */
     @Override
     public @NotNull FileCollection getClasspath() {
-        final FileCollection originalClasspath = super.getClasspath();
-
-        final Project project = getProject();
-        final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
-        final SourceSetContainer sourceSets = jpc.getSourceSets();
-        final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
-        final SourceSet csaccessSourceSet = sourceSets.getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
-        final SourceSet csaccessTestSrcSet = sourceSets.getByName(CustomSourceSetCreator
-                .CSACCESSTEST_SOURCESET_NAME);
-
-        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, csVersion);
-        final ConfigurationContainer configurations = project.getConfigurations();
-        final Configuration detachedConfiguration = configurations.detachedConfiguration(csDep);
-        // workaround for Checkstyle#14123
-        detachedConfiguration
-                .getResolutionStrategy()
-                .getCapabilitiesResolution()
-                .withCapability("com.google.collections", "google-collections", resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
-        final Set<File> csJars = detachedConfiguration.getFiles();
-
-        FileCollection effectiveClasspath = project.files(
-                csaccessTestSrcSet.getOutput().getResourcesDir(),
-                csaccessSourceSet.getOutput().getResourcesDir(),
-                mainSourceSet.getOutput().getResourcesDir())
-            .plus(csaccessTestSrcSet.getOutput().getClassesDirs())
-            .plus(csaccessSourceSet.getOutput().getClassesDirs())
-            .plus(mainSourceSet.getOutput().getClassesDirs())
-            .plus(project.files(csJars))
-            .plus(originalClasspath)
-            .minus(testSourceSet.getOutput().getClassesDirs())
-            .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
+        if (effectiveClassPath == null) {
+            throw new IllegalStateException("setCheckstyleVersion has not been called");
+        }
 
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("--------------------------------------------------------------------------");
             getLogger().debug("Effective classpath of " + getName() + ":");
-            for (File f : effectiveClasspath) {
+            for (File f : effectiveClassPath) {
                 getLogger().debug("\t- " + f.getAbsolutePath());
             }
         }
-        return effectiveClasspath;
+        return effectiveClassPath;
     }
 
     @Override

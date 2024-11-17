@@ -2,17 +2,6 @@ import org.infernus.idea.checkstyle.build.CheckstyleVersions
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
-plugins {
-    id("java")
-    id("jacoco")
-    id("idea")
-    id("org.jetbrains.intellij.platform") version "2.1.0"
-    id("com.dorongold.task-tree") version "2.1.1"
-    id("org.infernus.idea.checkstyle.build")
-}
-
-version = "5.98.0"
-
 repositories {
     mavenCentral()
 
@@ -20,6 +9,17 @@ repositories {
         defaultRepositories()
     }
 }
+
+plugins {
+    id("java")
+    id("jacoco")
+    id("idea")
+    id("org.jetbrains.intellij.platform") version "2.1.0"
+
+    id("org.infernus.idea.checkstyle.build")
+}
+
+version = "5.98.0"
 
 intellijPlatform {
     pluginConfiguration {
@@ -59,6 +59,7 @@ tasks {
 
     withType<Test> {
         setForkEvery(1)
+        jvmArgs("-Xshare:off")
     }
 
     withType<JavaCompile> {

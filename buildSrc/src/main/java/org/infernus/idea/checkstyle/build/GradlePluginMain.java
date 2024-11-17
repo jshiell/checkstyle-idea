@@ -21,68 +21,64 @@ import org.gradle.api.tasks.testing.logging.TestLoggingContainer;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.jetbrains.annotations.NotNull;
 
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.println;
+
 /**
  * The main plugin class. The action starts here.
  */
-public class GradlePluginMain
-    implements Plugin<Project> {
+public class GradlePluginMain implements Plugin<Project> {
     public static final String CSLIB_TARGET_SUBFOLDER = "checkstyle/lib";
+    private static final String CSCLASSES_TARGET_SUBFOLDER = "checkstyle/classes";
 
     private CheckstyleVersions supportedCsVersions = null;
 
-
     @Override
-    @SuppressWarnings("NullableProblems")
-    public void apply(final Project pProject) {
-        establishSourceSets(pProject);
-        readSupportedCheckstyleVersions(pProject);
-        configureTestTask((Test) pProject.getTasks().getByName(JavaPlugin.TEST_TASK_NAME));
-        createCsAccessTestTask(pProject);
-        createCrossCheckTasks(pProject);
-        new CustomSourceSetCreator(pProject).setupCoverageVerification();
-        createCheckstyleArtifactTasks(pProject);
-        wireIntellijPluginTasks(pProject);
+    public void apply(final Project project) {
+        Test testTask = (Test) project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME);
+        configureTestTask(testTask);
+
+        establishSourceSets(project);
+        readSupportedCheckstyleVersions(project);
+        createCsAccessTestTask(project);
+        createCrossCheckTasks(project);
+        createCheckstyleArtifactTasks(project);
+        new CustomSourceSetCreator(project).setupCoverageVerification();
+        wireIntellijPluginTasks(project);
     }
 
-
-    private void establishSourceSets(final Project pProject) {
-        final CustomSourceSetCreator sourceSetFactory = new CustomSourceSetCreator(pProject);
+    private void establishSourceSets(final Project project) {
+        final CustomSourceSetCreator sourceSetFactory = new CustomSourceSetCreator(project);
         sourceSetFactory.establishCsAccessSourceSet();
         sourceSetFactory.establishCsAccessTestSourceSet();
     }
 
-
-    private void readSupportedCheckstyleVersions(final Project pProject) {
-        supportedCsVersions = new CheckstyleVersions(pProject);
-        pProject.getExtensions().getExtraProperties().set("supportedCsVersions", supportedCsVersions);
+    private void readSupportedCheckstyleVersions(final Project project) {
+        supportedCsVersions = new CheckstyleVersions(project);
+        project.getExtensions().getExtraProperties().set("supportedCsVersions", supportedCsVersions);
     }
 
-
-    static void configureTestTask(final Test pTestTask) {
-        pTestTask.testLogging((TestLoggingContainer tlc) -> {
+    static void configureTestTask(final Test testTask) {
+        testTask.testLogging((TestLoggingContainer tlc) -> {
             tlc.setEvents(Collections.singleton(TestLogEvent.FAILED));
             tlc.setShowStackTraces(true);
             tlc.setShowExceptions(true);
             tlc.setShowCauses(true);
-            //tlc.setShowStandardStreams(true);
             tlc.setExceptionFormat(TestExceptionFormat.FULL);
         });
-        pTestTask.addTestListener(new TestSuiteStatsReporter(pTestTask.getLogger()));
+        testTask.addTestListener(new TestSuiteStatsReporter(testTask.getLogger()));
     }
 
-
-    private void createCsAccessTestTask(final Project pProject) {
-        TaskProvider<CsaccessTestTask> provider = pProject.getTasks().register(CsaccessTestTask.NAME,
+    private void createCsAccessTestTask(final Project project) {
+        TaskProvider<CsaccessTestTask> provider = project.getTasks().register(CsaccessTestTask.NAME,
                 CsaccessTestTask.class);
         provider.configure((CsaccessTestTask rct) -> {
             rct.setCheckstyleVersion(supportedCsVersions.getBaseVersion(), true);
-            pProject.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(rct);
+            project.getTasks().getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(rct);
         });
     }
 
-
-    private void createCrossCheckTasks(final Project pProject) {
-        final TaskContainer tasks = pProject.getTasks();
+    private void createCrossCheckTasks(final Project project) {
+        final TaskContainer tasks = project.getTasks();
 
         TaskProvider<Task> provider = tasks.register(CsaccessTestTask.XTEST_TASK_NAME);
         provider.configure((Task xtestTask) -> {
@@ -104,26 +100,24 @@ public class GradlePluginMain
         });
     }
 
-
-    private void createCheckstyleArtifactTasks(final Project pProject) {
+    private void createCheckstyleArtifactTasks(final Project project) {
         TaskProvider<GatherCheckstyleArtifactsTask> taskProvider =
-                pProject.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+                project.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
         taskProvider.configure((GatherCheckstyleArtifactsTask task) -> {
-            pProject.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
+            project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
 
             // Add generated classpath info file to resources
-            SourceSetContainer sourceSets = (SourceSetContainer) pProject.getProperties().get("sourceSets");
+            SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
             SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
             mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
         });
 
-        createCopyCheckstyleArtifactsToSandboxTask(pProject, false);
-        createCopyCheckstyleArtifactsToSandboxTask(pProject, true);
+        createCopyCheckstyleArtifactsToSandboxTask(project, false);
+        createCopyCheckstyleArtifactsToSandboxTask(project, true);
 
-        createCopyClassesToSandboxTask(pProject, false);
-        createCopyClassesToSandboxTask(pProject, true);
+        createCopyClassesToSandboxTask(project, false);
+        createCopyClassesToSandboxTask(project, true);
     }
-
 
     private void createCopyCheckstyleArtifactsToSandboxTask(final Project project, final boolean test) {
         final TaskContainer tasks = project.getTasks();
@@ -163,11 +157,11 @@ public class GradlePluginMain
      * This task makes the compiled classes and resources from the 'csaccess' sourceset available to the plugin by
      * copying it to the sandbox. Test code from csaccessTest sourceset not affected.
      *
-     * @param pProject the Gradle project
+     * @param project the Gradle project
      * @param test {@code true} if the target is the test sandbox, {@code false} for the main sandbox
      */
-    private void createCopyClassesToSandboxTask(final Project pProject, final boolean test) {
-        final TaskContainer tasks = pProject.getTasks();
+    private void createCopyClassesToSandboxTask(final Project project, final boolean test) {
+        final TaskContainer tasks = project.getTasks();
         final String taskName = test ? "copyClassesToTestSandbox" : "copyClassesToSandbox";
         final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
         taskProvider.configure((Copy copyTask) -> {
@@ -175,20 +169,21 @@ public class GradlePluginMain
             copyTask.setDescription("Copy classes from '" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
                     + "' sourceset into the prepared " + (test ? "test " : "") + "sandbox");
 
-            final JavaPluginExtension jpc = pProject.getExtensions().getByType(JavaPluginExtension.class);
+            final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
             SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
             copyTask.dependsOn(tasks.getByName(csaccessSourceSet.getClassesTaskName()));
             if (test) {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
                 forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
+                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToTestSandbox"));
             } else {
                 tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
+                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
             }
 
-            final String targetSubfolder = "checkstyle/classes";
             copyTask.from(csaccessSourceSet.getOutput());
-            copyTask.into(new File(pProject.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, targetSubfolder)));
+            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, CSCLASSES_TARGET_SUBFOLDER)));
         });
     }
 
@@ -202,10 +197,10 @@ public class GradlePluginMain
     /**
      * Defer some of the wiring until after the intellij plugin's tasks have been created.
      *
-     * @param pProject the Gradle project
+     * @param project the Gradle project
      */
-    private void wireIntellijPluginTasks(final Project pProject) {
-        final TaskContainer tasks = pProject.getTasks();
+    private void wireIntellijPluginTasks(final Project project) {
+        final TaskContainer tasks = project.getTasks();
         tasks.all((Task task) -> {
             if ("buildPlugin".equals(task.getName()) || "runIdea".equals(task.getName()) || "runIde".equals(task.getName())) {
                 task.dependsOn(tasks.getByName("copyCheckstyleArtifactsToSandbox"));

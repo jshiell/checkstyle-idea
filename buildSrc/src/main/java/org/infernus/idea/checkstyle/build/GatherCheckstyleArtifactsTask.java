@@ -28,6 +28,7 @@ public class GatherCheckstyleArtifactsTask
         extends DefaultTask {
     public static final String NAME = "gatherCheckstyleArtifacts";
 
+    private final Map<String, Set<File>> rawVersionsToDependencies = new HashMap<>();
     private final CheckstyleVersions csVersions;
 
     @OutputDirectory
@@ -35,7 +36,6 @@ public class GatherCheckstyleArtifactsTask
 
     @OutputFile
     private final File classPathsInfoFile;
-
 
     public GatherCheckstyleArtifactsTask() {
         super();
@@ -50,19 +50,21 @@ public class GatherCheckstyleArtifactsTask
         // Task Outputs: the directory full of JARs, and the classpath info file
         bundledJarsDir = getTemporaryDir();
         classPathsInfoFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources-generated/checkstyle-classpaths.properties");
-    }
 
+        for (final String csVersion : csVersions.getVersions()) {
+            final Set<File> dependencies = resolveDependencies(project, csVersion);
+            rawVersionsToDependencies.put(csVersion, dependencies);
+        }
+    }
 
     @TaskAction
     public void runTask() {
         final Set<File> bundledFiles = new TreeSet<>();
         final Properties classPaths = new SortedProperties();
-        final Map<String, Set<File>> rawVersionsToDependencies = new HashMap<>();
         final Set<String> availableFileNames = new HashSet<>();
 
         for (final String csVersion : csVersions.getVersions()) {
-            final Set<File> dependencies = resolveDependencies(getProject(), csVersion);
-            rawVersionsToDependencies.put(csVersion, dependencies);
+            Set<File> dependencies = rawVersionsToDependencies.get(csVersion);
             availableFileNames.addAll(dependencies.stream().map(File::getName).collect(toSet()));
         }
 
@@ -109,7 +111,6 @@ public class GatherCheckstyleArtifactsTask
         return sb.toString();
     }
 
-
     private void copyFiles(final Set<File> bundledJars) {
         for (final File bundledJar : bundledJars) {
             try {
@@ -119,7 +120,6 @@ public class GatherCheckstyleArtifactsTask
             }
         }
     }
-
 
     private void createClassPathsFile(final Properties classPaths) {
         //noinspection ResultOfMethodCallIgnored
@@ -132,7 +132,6 @@ public class GatherCheckstyleArtifactsTask
                     e);
         }
     }
-
 
     public File getBundledJarsDir() {
         return bundledJarsDir;
