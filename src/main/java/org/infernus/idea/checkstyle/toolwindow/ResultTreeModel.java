@@ -84,8 +84,9 @@ public class ResultTreeModel extends DefaultTreeModel {
         visibleRootNode.removeAllChildren();
 
         switch (grouping) {
-            case BY_FILE -> groupResultsByFile();
             case BY_PACKAGE -> groupResultsByPackage();
+            case BY_SEVERITY -> groupResultsBySeverity();
+            default -> groupResultsByFile();
         }
 
         filterDisplayedTree();
@@ -125,12 +126,8 @@ public class ResultTreeModel extends DefaultTreeModel {
             filterNodeAndChildren(childNode);
         }
 
-        if (node.getUserObject() instanceof FileResultTreeInfo fileResultTreeInfo) {
-            fileResultTreeInfo.setVisibleProblems(node.getChildCount());
-            nodeShouldBeVisible = node.getChildCount() > 0;
-
-        } else if (node.getUserObject() instanceof PackageTreeInfo packageTreeInfo) {
-            packageTreeInfo.setVisibleProblems(node.getChildCount());
+        if (node.getUserObject() instanceof GroupTreeInfo groupTreeInfo) {
+            groupTreeInfo.setVisibleProblems(node.getChildCount());
             nodeShouldBeVisible = node.getChildCount() > 0;
 
         } else if (node.getUserObject() instanceof ProblemResultTreeInfo problemResultTreeInfo) {
@@ -166,8 +163,38 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private void groupResultsByFile() {
-        int problemCount = createFileNodes(sortByFileName(lastResults), visibleRootNode);
+        int problemCount = createFileNodes(sortByFileName(lastResults), lastResults, visibleRootNode);
         setRootMessage(problemCount);
+    }
+
+    private int createFileNodes(final List<PsiFile> sortedFiles,
+                                final Map<PsiFile, List<Problem>> problemsForAllFiles,
+                                final ToggleableTreeNode parentNode) {
+        int problemCount = 0;
+        for (final PsiFile file : sortedFiles) {
+            final var fileNode = new ToggleableTreeNode();
+            final var problems = problemsForAllFiles.getOrDefault(file, emptyList());
+
+            int childProblemCount = 0;
+            for (final Problem problem : problems) {
+                if (problem.severityLevel() != SeverityLevel.Ignore) {
+                    final var problemInfo = new ProblemResultTreeInfo(file, problem);
+                    fileNode.add(new ToggleableTreeNode(problemInfo));
+
+                    ++childProblemCount;
+                }
+            }
+
+            if (childProblemCount > 0) {
+                var nodeObject = new FileGroupTreeInfo(file.getName(), childProblemCount);
+                fileNode.setUserObject(nodeObject);
+
+                parentNode.add(fileNode);
+            }
+
+            problemCount += childProblemCount;
+        }
+        return problemCount;
     }
 
     private List<PsiFile> sortByFileName(final Map<PsiFile, List<Problem>> results) {
@@ -186,9 +213,9 @@ public class ResultTreeModel extends DefaultTreeModel {
         for (String packageName : groupedByPackage.keySet()) {
             final var packageNode = new ToggleableTreeNode();
 
-            var childProblemCount = createFileNodes(groupedByPackage.getOrDefault(packageName, emptyList()), packageNode);
+            var childProblemCount = createFileNodes(groupedByPackage.getOrDefault(packageName, emptyList()), lastResults, packageNode);
             if (childProblemCount > 0) {
-                final var packageInfo = new PackageTreeInfo(packageName, childProblemCount);
+                final var packageInfo = new PackageGroupTreeInfo(packageName, childProblemCount);
                 packageNode.setUserObject(packageInfo);
                 visibleRootNode.add(packageNode);
             }
@@ -197,35 +224,6 @@ public class ResultTreeModel extends DefaultTreeModel {
         }
 
         setRootMessage(problemCount);
-    }
-
-    private int createFileNodes(final List<PsiFile> files,
-                                final ToggleableTreeNode parentNode) {
-        int problemCount = 0;
-        for (final PsiFile file : files) {
-            final var fileNode = new ToggleableTreeNode();
-            final var problems = lastResults.getOrDefault(file, emptyList());
-
-            int childProblemCount = 0;
-            for (final Problem problem : problems) {
-                if (problem.severityLevel() != SeverityLevel.Ignore) {
-                    final var problemInfo = new ProblemResultTreeInfo(file, problem);
-                    fileNode.add(new ToggleableTreeNode(problemInfo));
-
-                    ++childProblemCount;
-                }
-            }
-
-            if (childProblemCount > 0) {
-                var nodeObject = new FileResultTreeInfo(file.getName(), childProblemCount);
-                fileNode.setUserObject(nodeObject);
-
-                parentNode.add(fileNode);
-            }
-
-            problemCount += childProblemCount;
-        }
-        return problemCount;
     }
 
     private SortedMap<String, List<PsiFile>> groupByPackageName(final Map<PsiFile, List<Problem>> results) {
@@ -245,6 +243,48 @@ public class ResultTreeModel extends DefaultTreeModel {
             groupedByPackage.computeIfAbsent(filePackage,  key -> new ArrayList<>()).add(result);
         }
         return groupedByPackage;
+    }
+
+    private void groupResultsBySeverity() {
+        int problemCount = 0;
+
+        var groupedBySeverity = groupBySeverity(lastResults);
+        for (SeverityLevel severityLevel : groupedBySeverity.keySet()) {
+            final var severityNode = new ToggleableTreeNode();
+
+            var fileToProblems = groupedBySeverity.get(severityLevel);
+            var childProblemCount = createFileNodes(sortByFileName(fileToProblems), fileToProblems, severityNode);
+            if (childProblemCount > 0) {
+                final var packageInfo = new SeverityGroupTreeInfo(severityLevel, childProblemCount);
+                severityNode.setUserObject(packageInfo);
+                visibleRootNode.add(severityNode);
+            }
+
+            problemCount += childProblemCount;
+        }
+
+        setRootMessage(problemCount);
+    }
+
+    private SortedMap<SeverityLevel, Map<PsiFile, List<Problem>>> groupBySeverity(final Map<PsiFile, List<Problem>> results) {
+        if (results == null || results.isEmpty()) {
+            return Collections.emptySortedMap();
+        }
+        var severities = List.of(SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
+
+        var groupedBySeverity = new TreeMap<SeverityLevel, Map<PsiFile, List<Problem>>>();
+        severities.forEach(severityLevel -> groupedBySeverity.put(severityLevel, new HashMap<>()));
+
+        for (var resultFile : results.keySet()) {
+            var problems = results.get(resultFile);
+
+            for (SeverityLevel severityLevel : severities) {
+                groupedBySeverity.get(severityLevel).put(
+                        resultFile,
+                        problems.stream().filter(item -> item.severityLevel() == severityLevel).toList());
+            }
+        }
+        return groupedBySeverity;
     }
 
     private void setRootMessage(final int problemCount) {

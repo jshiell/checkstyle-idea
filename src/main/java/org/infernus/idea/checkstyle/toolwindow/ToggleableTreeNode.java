@@ -44,6 +44,13 @@ public class ToggleableTreeNode extends DefaultMutableTreeNode {
     }
 
     @Override
+    public void removeAllChildren() {
+        if (children != null) {
+            children.clear();
+        }
+    }
+
+    @Override
     public TreeNode getChildAt(final int index) {
         if (children == null) {
             throw new ArrayIndexOutOfBoundsException("Invalid index: " + index + " (no children)");

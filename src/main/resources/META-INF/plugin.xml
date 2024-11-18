@@ -25,7 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.99.0: Added option to group results by package (#3).</li>
+    <li>5.99.0: Added option to group results by package and severity (#3).</li>
     <li>5.98.0: New: Added Checkstyle 10.20.1.</li>
     <li>5.97.0: Fixed: Refactored code to fix exception around API dependencies at initialisation (#655).</li>
     <li>5.97.0: New: Added Checkstyle 10.19.0.</li>1
@@ -168,6 +168,12 @@
                     text="Group Results By Package"
                     description="Group the displayed results by their package"
                     icon="/actions/GroupByPackage.svg"/>
+
+            <action id="CheckStyleGroupBySeverityAction"
+                    class="org.infernus.idea.checkstyle.actions.GroupBySeverity"
+                    text="Group Results By Severity"
+                    description="Group the displayed results by their level of severity"
+                    icon="/nodes/sortBySeverity.svg"/>
         </group>
 
         <group id="CheckStylePluginActions" text="CheckStyle" popup="true">
