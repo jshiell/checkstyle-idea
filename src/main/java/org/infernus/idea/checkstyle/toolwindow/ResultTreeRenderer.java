@@ -19,7 +19,6 @@ public class ResultTreeRenderer extends JLabel
      * Create a new cell renderer.
      */
     public ResultTreeRenderer() {
-        super();
         setOpaque(false);
     }
 

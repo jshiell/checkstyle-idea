@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.icons.AllIcons;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 
-public class FileResultTreeNode extends ResultTreeNode {
+public class FileResultTreeInfo extends ResultTreeNode {
 
     private final String fileName;
     private final int totalProblems;
@@ -15,7 +15,7 @@ public class FileResultTreeNode extends ResultTreeNode {
      * @param fileName     the name of the file.
      * @param problemCount the number of problems in the file.
      */
-    public FileResultTreeNode(final String fileName, final int problemCount) {
+    public FileResultTreeInfo(final String fileName, final int problemCount) {
         super(CheckStyleBundle.message("plugin.results.scan-file-result", fileName, problemCount));
 
         if (fileName == null) {

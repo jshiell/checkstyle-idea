@@ -40,10 +40,8 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -297,7 +295,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     private void scrollToError(final TreePath treePath) {
         final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-        if (treeNode == null || !(treeNode.getUserObject() instanceof ProblemResultTreeNode nodeInfo)) {
+        if (treeNode == null || !(treeNode.getUserObject() instanceof ProblemResultTreeInfo nodeInfo)) {
             return;
         }
 
@@ -326,11 +324,11 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         }, ModalityState.NON_MODAL);
     }
 
-    private int lineFor(final ProblemResultTreeNode nodeInfo) {
+    private int lineFor(final ProblemResultTreeInfo nodeInfo) {
         return nodeInfo.getProblem().line();
     }
 
-    private int columnFor(final ProblemResultTreeNode nodeInfo) {
+    private int columnFor(final ProblemResultTreeInfo nodeInfo) {
         return nodeInfo.getProblem().column();
     }
 
@@ -521,8 +519,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         clearProgress();
     }
 
-    private SeverityLevel[] getDisplayedSeverities() {
-        final List<SeverityLevel> severityLevels = new ArrayList<>();
+    private Set<SeverityLevel> getDisplayedSeverities() {
+        final var severityLevels = new HashSet<SeverityLevel>();
 
         if (displayingErrors) {
             severityLevels.add(SeverityLevel.Error);
@@ -536,7 +534,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             severityLevels.add(SeverityLevel.Info);
         }
 
-        return severityLevels.toArray(new SeverityLevel[0]);
+        return severityLevels;
     }
 
     /**
@@ -584,6 +582,14 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     public void setDisplayingInfo(final boolean displayingInfo) {
         this.displayingInfo = displayingInfo;
+    }
+
+    public void groupBy(final ResultGrouping grouping) {
+        treeModel.groupBy(grouping);
+    }
+
+    public ResultGrouping groupedBy() {
+        return treeModel.groupedBy();
     }
 
     private PluginConfigurationManager configurationManager() {

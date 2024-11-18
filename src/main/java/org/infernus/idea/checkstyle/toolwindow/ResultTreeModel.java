@@ -8,19 +8,27 @@ import javax.swing.tree.TreeNode;
 
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileSystemItem;
+import com.intellij.psi.PsiJavaFile;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.*;
 
 public class ResultTreeModel extends DefaultTreeModel {
 
     @Serial
     private static final long serialVersionUID = 2161855162879365203L;
+    public static final Set<SeverityLevel> DEFAULT_SEVERITIES = Set.of(SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
 
     private final ToggleableTreeNode visibleRootNode;
+
+    private Set<SeverityLevel> displayedSeverities = DEFAULT_SEVERITIES;
+    private ResultGrouping grouping = ResultGrouping.BY_FILE;
+    private Map<PsiFile, List<Problem>> lastResults;
 
     public ResultTreeModel() {
         super(new DefaultMutableTreeNode());
@@ -67,66 +75,71 @@ public class ResultTreeModel extends DefaultTreeModel {
                                @Nullable final Object... messageArgs) {
         if (messageKey == null) {
             setRootText(null);
-
         } else {
             setRootText(CheckStyleBundle.message(messageKey, messageArgs));
         }
     }
 
+    private void rebuildTree() {
+        visibleRootNode.removeAllChildren();
+
+        switch (grouping) {
+            case BY_FILE -> groupResultsByFile();
+            case BY_PACKAGE -> groupResultsByPackage();
+        }
+
+        filterDisplayedTree();
+        nodeStructureChanged(visibleRootNode);
+    }
+
     /**
      * Display only the passed severity levels.
      *
-     * @param levels the levels. Null is treated as 'none'.
+     * @param severityLevels the levels. An empty set is treated as 'none'.
      */
-    public void filter(final SeverityLevel... levels) {
-        filter(true, levels);
+    public void filter(@NotNull final Set<SeverityLevel> severityLevels) {
+        this.displayedSeverities = severityLevels;
+
+        filterDisplayedTree();
+        nodeStructureChanged(visibleRootNode);
     }
 
-    private void filter(final boolean sendEvents, final SeverityLevel... levels) {
-        for (final ToggleableTreeNode fileNode : visibleRootNode.getAllChildren()) {
-            for (final ToggleableTreeNode problemNode : fileNode.getAllChildren()) {
-                final ProblemResultTreeNode result = (ProblemResultTreeNode) problemNode.getUserObject();
+    public void groupBy(@NotNull final ResultGrouping resultGrouping) {
+        this.grouping = resultGrouping;
 
-                final boolean resultShouldBeVisible = contains(levels, result.getSeverity());
-                if (problemNode.isVisible() != resultShouldBeVisible) {
-                    problemNode.setVisible(resultShouldBeVisible);
-                }
-            }
-
-            ((FileResultTreeNode) fileNode.getUserObject()).setVisibleProblems(fileNode.getChildCount());
-            final boolean fileNodeShouldBeVisible = fileNode.getChildCount() > 0;
-            if (fileNode.isVisible() != fileNodeShouldBeVisible) {
-                fileNode.setVisible(fileNodeShouldBeVisible);
-            }
-        }
-
-        if (sendEvents) {
-            nodeStructureChanged(visibleRootNode);
-        }
+        rebuildTree();
     }
 
-    /*
-     * This is a port from commons-lang 2.4, in order to get around the absence of commons-lang in
-     * some packages of IDEA 7.x.
-     */
-    private boolean contains(final Object[] array, final Object objectToFind) {
-        if (array == null) {
-            return false;
+    public ResultGrouping groupedBy() {
+        return grouping;
+    }
+
+    private void filterDisplayedTree() {
+        filterNodeAndChildren(visibleRootNode);
+    }
+
+    private void filterNodeAndChildren(final ToggleableTreeNode node) {
+        boolean nodeShouldBeVisible = true;
+
+        for (final var childNode : node.getAllChildren()) {
+            filterNodeAndChildren(childNode);
         }
-        if (objectToFind == null) {
-            for (final Object anArray : array) {
-                if (anArray == null) {
-                    return true;
-                }
-            }
-        } else {
-            for (final Object anArray : array) {
-                if (objectToFind.equals(anArray)) {
-                    return true;
-                }
-            }
+
+        if (node.getUserObject() instanceof FileResultTreeInfo fileResultTreeInfo) {
+            fileResultTreeInfo.setVisibleProblems(node.getChildCount());
+            nodeShouldBeVisible = node.getChildCount() > 0;
+
+        } else if (node.getUserObject() instanceof PackageTreeInfo packageTreeInfo) {
+            packageTreeInfo.setVisibleProblems(node.getChildCount());
+            nodeShouldBeVisible = node.getChildCount() > 0;
+
+        } else if (node.getUserObject() instanceof ProblemResultTreeInfo problemResultTreeInfo) {
+            nodeShouldBeVisible = displayedSeverities.contains(problemResultTreeInfo.getSeverity());
         }
-        return false;
+
+        if (node.isVisible() != nodeShouldBeVisible) {
+            node.setVisible(nodeShouldBeVisible);
+        }
     }
 
     /**
@@ -134,8 +147,8 @@ public class ResultTreeModel extends DefaultTreeModel {
      *
      * @param results the model.
      */
-    public void setModel(final Map<PsiFile, List<Problem>> results) {
-        setModel(results, SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
+    public void setModel(@NotNull  final Map<PsiFile, List<Problem>> results) {
+        setModel(results, DEFAULT_SEVERITIES);
     }
 
     /**
@@ -144,55 +157,101 @@ public class ResultTreeModel extends DefaultTreeModel {
      * @param results the model.
      * @param levels  the levels to display.
      */
-    public void setModel(final Map<PsiFile, List<Problem>> results,
-                         final SeverityLevel... levels) {
-        visibleRootNode.removeAllChildren();
+    public void setModel(@NotNull final Map<PsiFile, List<Problem>> results,
+                         @NotNull final Set<SeverityLevel> levels) {
+        this.lastResults = results;
+        this.displayedSeverities = levels;
 
-        int itemCount = 0;
-        for (final PsiFile file : sortedFileNames(results)) {
-            final ToggleableTreeNode fileNode = new ToggleableTreeNode();
-            final List<Problem> problems = results.get(file);
+        rebuildTree();
+    }
 
-            int problemCount = 0;
-            if (problems != null) {
-                for (final Problem problem : problems) {
-                    if (problem.severityLevel() != SeverityLevel.Ignore) {
-                        final ResultTreeNode problemObj = new ProblemResultTreeNode(file, problem);
+    private void groupResultsByFile() {
+        int problemCount = createFileNodes(sortByFileName(lastResults), visibleRootNode);
+        setRootMessage(problemCount);
+    }
 
-                        final ToggleableTreeNode problemNode = new ToggleableTreeNode(problemObj);
-                        fileNode.add(problemNode);
+    private List<PsiFile> sortByFileName(final Map<PsiFile, List<Problem>> results) {
+        if (results == null || results.isEmpty()) {
+            return emptyList();
+        }
+        var sortedFiles = new ArrayList<>(results.keySet());
+        sortedFiles.sort(comparing(PsiFileSystemItem::getName));
+        return sortedFiles;
+    }
 
-                        ++problemCount;
-                    }
+    private void groupResultsByPackage() {
+        int problemCount = 0;
+
+        var groupedByPackage = groupByPackageName(lastResults);
+        for (String packageName : groupedByPackage.keySet()) {
+            final var packageNode = new ToggleableTreeNode();
+
+            var childProblemCount = createFileNodes(groupedByPackage.getOrDefault(packageName, emptyList()), packageNode);
+            if (childProblemCount > 0) {
+                final var packageInfo = new PackageTreeInfo(packageName, childProblemCount);
+                packageNode.setUserObject(packageInfo);
+                visibleRootNode.add(packageNode);
+            }
+
+            problemCount += childProblemCount;
+        }
+
+        setRootMessage(problemCount);
+    }
+
+    private int createFileNodes(final List<PsiFile> files,
+                                final ToggleableTreeNode parentNode) {
+        int problemCount = 0;
+        for (final PsiFile file : files) {
+            final var fileNode = new ToggleableTreeNode();
+            final var problems = lastResults.getOrDefault(file, emptyList());
+
+            int childProblemCount = 0;
+            for (final Problem problem : problems) {
+                if (problem.severityLevel() != SeverityLevel.Ignore) {
+                    final var problemInfo = new ProblemResultTreeInfo(file, problem);
+                    fileNode.add(new ToggleableTreeNode(problemInfo));
+
+                    ++childProblemCount;
                 }
             }
 
-            itemCount += problemCount;
-
-            if (problemCount > 0) {
-                final ResultTreeNode nodeObject = new FileResultTreeNode(file.getName(), problemCount);
+            if (childProblemCount > 0) {
+                var nodeObject = new FileResultTreeInfo(file.getName(), childProblemCount);
                 fileNode.setUserObject(nodeObject);
 
-                visibleRootNode.add(fileNode);
+                parentNode.add(fileNode);
             }
-        }
 
-        if (itemCount == 0) {
-            setRootMessage("plugin.results.scan-no-results");
-        } else {
-            setRootText(CheckStyleBundle.message("plugin.results.scan-results", itemCount, results.size()));
+            problemCount += childProblemCount;
         }
-
-        filter(false, levels);
-        nodeStructureChanged(visibleRootNode);
+        return problemCount;
     }
 
-    private Iterable<PsiFile> sortedFileNames(final Map<PsiFile, List<Problem>> results) {
+    private SortedMap<String, List<PsiFile>> groupByPackageName(final Map<PsiFile, List<Problem>> results) {
         if (results == null || results.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptySortedMap();
         }
-        final List<PsiFile> sortedFiles = new ArrayList<>(results.keySet());
-        sortedFiles.sort(comparing(PsiFileSystemItem::getName));
-        return sortedFiles;
+        var groupedByPackage = new TreeMap<String, List<PsiFile>>();
+        for (var result : results.keySet()) {
+            var filePackage = CheckStyleBundle.message("plugin.results.unknown-package");
+            if (result instanceof PsiJavaFile javaFile) {
+                filePackage = javaFile.getPackageName();
+
+                if (filePackage.trim().isEmpty()) {
+                    filePackage = CheckStyleBundle.message("plugin.results.root-package");
+                }
+            }
+            groupedByPackage.computeIfAbsent(filePackage,  key -> new ArrayList<>()).add(result);
+        }
+        return groupedByPackage;
+    }
+
+    private void setRootMessage(final int problemCount) {
+        if (problemCount == 0) {
+            setRootMessage("plugin.results.scan-no-results");
+        } else {
+            setRootText(CheckStyleBundle.message("plugin.results.scan-results", problemCount, lastResults.size()));
+        }
     }
 }

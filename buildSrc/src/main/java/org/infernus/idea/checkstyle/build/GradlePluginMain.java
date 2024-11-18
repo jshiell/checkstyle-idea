@@ -21,8 +21,6 @@ import org.gradle.api.tasks.testing.logging.TestLoggingContainer;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.jetbrains.annotations.NotNull;
 
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.println;
-
 /**
  * The main plugin class. The action starts here.
  */

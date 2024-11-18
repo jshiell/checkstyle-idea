@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.99.0** New: Added option to group results by package (#3).
 * **5.98.0** New: Added Checkstyle 10.20.1.
 * **5.97.0** Fixed: Refactored code to fix exception around API dependencies at initialisation (#655).
 * **5.97.0** New: Added Checkstyle 10.19.0.

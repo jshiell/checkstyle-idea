@@ -7,7 +7,7 @@ import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
 
-public class ProblemResultTreeNode extends ResultTreeNode {
+public class ProblemResultTreeInfo extends ResultTreeNode {
 
     private final PsiFile file;
     private final Problem problem;
@@ -19,7 +19,7 @@ public class ProblemResultTreeNode extends ResultTreeNode {
      * @param file    the file the problem exists in.
      * @param problem the problem.
      */
-    public ProblemResultTreeNode(@NotNull final PsiFile file,
+    public ProblemResultTreeInfo(@NotNull final PsiFile file,
                                  @NotNull final Problem problem) {
         super(CheckStyleBundle.message("plugin.results.file-result",
                 file.getName(),
