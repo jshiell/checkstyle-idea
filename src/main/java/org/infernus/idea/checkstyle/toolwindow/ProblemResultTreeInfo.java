@@ -18,8 +18,8 @@ public class ProblemResultTreeInfo extends ResultTreeNode {
      * @param file    the file the problem exists in.
      * @param problem the problem.
      */
-    public ProblemResultTreeInfo(@NotNull final PsiFile file,
-                                 @NotNull final ResultProblem problem) {
+    ProblemResultTreeInfo(@NotNull final PsiFile file,
+                          @NotNull final ResultProblem problem) {
         super(CheckStyleBundle.message("plugin.results.file-result",
                 file.getName(),
                 problem.message(),
@@ -62,7 +62,7 @@ public class ProblemResultTreeInfo extends ResultTreeNode {
      *
      * @return the problem associated with this node.
      */
-    public ResultProblem getProblem() {
+    ResultProblem getProblem() {
         return problem;
     }
 
