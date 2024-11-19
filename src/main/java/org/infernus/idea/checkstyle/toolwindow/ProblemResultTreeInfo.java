@@ -25,7 +25,8 @@ public class ProblemResultTreeInfo extends ResultTreeNode {
                 problem.message(),
                 problem.line(),
                 Integer.toString(problem.column()),
-                problem.sourceCheck()));
+                problem.sourceCheck(),
+                problem.locationDescription()));
 
         this.file = file;
         this.problem = problem;

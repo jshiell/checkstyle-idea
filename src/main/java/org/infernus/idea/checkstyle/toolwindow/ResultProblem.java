@@ -21,9 +21,9 @@ record ResultProblem(
         boolean afterEndOfLine,
         boolean suppressErrors) {
 
-    ResultProblem(final ConfigurationLocationResult configurationLocationResult,
-                  final Module module,
-                  final Problem csProblem) {
+    ResultProblem(@NotNull final ConfigurationLocationResult configurationLocationResult,
+                  @NotNull final Module module,
+                  @NotNull final Problem csProblem) {
         this(configurationLocationResult, module, csProblem.target(), csProblem.severityLevel(), csProblem.line(),
                 csProblem.column(), csProblem.sourceName(), csProblem.message(), csProblem.afterEndOfLine(),
                 csProblem.suppressErrors());
@@ -37,4 +37,10 @@ record ResultProblem(
         return CheckStyleBundle.message("plugin.results.unknown-source");
     }
 
+    public String locationDescription() {
+        if (configurationLocationResult.location() != null) {
+            return configurationLocationResult().location().getDescription();
+        }
+        return CheckStyleBundle.message("plugin.results.unknown-location");
+    }
 }
