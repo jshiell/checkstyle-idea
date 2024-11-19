@@ -3,11 +3,14 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UiFeedbackScannerListener implements ScannerListener {
@@ -39,21 +42,33 @@ public class UiFeedbackScannerListener implements ScannerListener {
     }
 
     @Override
-    public void scanCompletedSuccessfully(final ScanResult scanResult) {
+    public void scanCompletedSuccessfully(final List<ScanResult> scanResults) {
         ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
-                switch (scanResult.configurationLocationResult().status()) {
-                    case NOT_PRESENT:
-                        toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
-                        break;
-                    case BLOCKED:
-                        toolWindowPanel.displayWarningResult("plugin.results.rules-blocked",
-                                scanResult.configurationLocationResult().location().blockedForSeconds());
-                        break;
-                    default:
-                        toolWindowPanel.displayResults(scanResult);
+                var notPresent = new ArrayList<ConfigurationLocation>();
+                var blocked = new ArrayList<ConfigurationLocation>();
+                var validResults = new ArrayList<ScanResult>();
+
+                for (ScanResult scanResult : scanResults) {
+                    switch (scanResult.configurationLocationResult().status()) {
+                        case NOT_PRESENT -> notPresent.add(scanResult.configurationLocationResult().location());
+                        case BLOCKED -> blocked.add(scanResult.configurationLocationResult().location());
+                        default -> validResults.add(scanResult);
+                    }
                 }
+
+                var warningMessages = new ArrayList<String>();
+                if (!notPresent.isEmpty()) {
+                    warningMessages.add(CheckStyleBundle.message("plugin.results.no-rules-file"));
+                }
+                if (!blocked.isEmpty()) {
+                    var maxTimeBlocked = blocked.stream().map(ConfigurationLocation::blockedForSeconds).reduce(Long::max).get();
+                    var blockedLocations = String.join(", ", blocked.stream().map(ConfigurationLocation::getDescription).toList());
+                    warningMessages.add(CheckStyleBundle.message("plugin.results.rules-blocked", maxTimeBlocked, blockedLocations));
+                }
+
+                toolWindowPanel.displayResults(validResults, String.join("; ", warningMessages));
             }
         });
     }

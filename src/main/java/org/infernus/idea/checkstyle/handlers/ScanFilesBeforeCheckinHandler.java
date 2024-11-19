@@ -84,7 +84,7 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
         if (configurationManager(project).getCurrent().isScanBeforeCheckin()) {
             try {
-                var scanResult = new AtomicReference<ScanResult>();
+                var scanResult = new AtomicReference<List<ScanResult>>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
@@ -115,18 +115,18 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         return ofNullable(configurationManager(project));
     }
 
-    private ReturnResult processScanResults(final ScanResult scanResult,
+    private ReturnResult processScanResults(final List<ScanResult> scanResults,
                                             final CommitExecutor executor,
                                             final Project project) {
-        final long errorCount = countOf(scanResult.problems(), SeverityLevel.Error);
-        final long warningCount = countOf(scanResult.problems(), SeverityLevel.Warning);
+        final long errorCount = countOf(scanResults, SeverityLevel.Error);
+        final long warningCount = countOf(scanResults, SeverityLevel.Warning);
         if (errorCount == 0 && warningCount == 0) {
             return COMMIT;
         }
 
         final int answer = promptUser(project, errorCount, warningCount, executor);
         if (answer == Messages.OK) {
-            showResultsInToolWindow(scanResult, project);
+            showResultsInToolWindow(scanResults, project);
             return CLOSE_WINDOW;
 
         } else if (answer == Messages.CANCEL || answer < 0) {
@@ -136,8 +136,9 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         return COMMIT;
     }
 
-    private long countOf(final Map<PsiFile, List<Problem>> results, final SeverityLevel level) {
-        return results.entrySet().stream()
+    private long countOf(final List<ScanResult> scanResults, final SeverityLevel level) {
+        return scanResults.stream().map(ScanResult::problems)
+                .flatMap(problems -> problems.entrySet().stream())
                 .map(entry -> problemsAtLevel(entry, level))
                 .mapToLong(Long::longValue)
                 .sum();
@@ -175,11 +176,11 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 buttons, 0, UIUtil.getWarningIcon());
     }
 
-    private void showResultsInToolWindow(final ScanResult scanResult,
+    private void showResultsInToolWindow(final List<ScanResult> scanResults,
                                          final Project project) {
         final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
         if (toolWindowPanel != null) {
-            toolWindowPanel.displayResults(scanResult);
+            toolWindowPanel.displayResults(scanResults, null);
             toolWindowPanel.showToolWindow();
         }
     }

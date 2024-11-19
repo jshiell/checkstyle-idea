@@ -12,7 +12,7 @@ public interface ScannerListener {
 
     void filesScanned(int count);
 
-    void scanCompletedSuccessfully(ScanResult scanResult);
+    void scanCompletedSuccessfully(List<ScanResult> scanResults);
 
     void scanFailedWithError(CheckStylePluginException error);
 

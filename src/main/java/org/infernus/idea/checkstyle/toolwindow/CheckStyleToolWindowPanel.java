@@ -40,6 +40,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -475,6 +476,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         clearProgress();
 
         treeModel.clear();
+
         treeModel.setRootMessage(messageKey, messageArgs);
     }
 
@@ -546,16 +548,21 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     /**
      * Display the passed results.
      *
-     * @param scanResult the result of the scan.
+     * @param scanResults the results of the scan.
+     * @param warningMessage a warning message to display about the results, if appropriate.
      */
-    public void displayResults(final ScanResult scanResult) {
-        treeModel.setModel(scanResult.problems(), getDisplayedSeverities());
+    public void displayResults(final List<ScanResult> scanResults,
+                               final String warningMessage) {
+        treeModel.setModel(scanResults, getDisplayedSeverities());
 
         invalidate();
         repaint();
 
         expandTree();
         clearProgress();
+        if (warningMessage != null) {
+            setProgressText(warningMessage);
+        }
     }
 
     public boolean isDisplayingErrors() {

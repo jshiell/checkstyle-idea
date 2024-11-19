@@ -10,8 +10,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileSystemItem;
 import com.intellij.psi.PsiJavaFile;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
-import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,13 +22,14 @@ public class ResultTreeModel extends DefaultTreeModel {
 
     @Serial
     private static final long serialVersionUID = 2161855162879365203L;
-    public static final Set<SeverityLevel> DEFAULT_SEVERITIES = Set.of(SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
+
+    private static final Set<SeverityLevel> DEFAULT_SEVERITIES = Set.of(SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
 
     private final ToggleableTreeNode visibleRootNode;
 
     private Set<SeverityLevel> displayedSeverities = DEFAULT_SEVERITIES;
     private ResultGrouping grouping = ResultGrouping.BY_FILE;
-    private Map<PsiFile, List<Problem>> lastResults;
+    private Map<PsiFile, List<ResultProblem>> lastResults;
 
     public ResultTreeModel() {
         super(new DefaultMutableTreeNode());
@@ -142,24 +143,30 @@ public class ResultTreeModel extends DefaultTreeModel {
     /**
      * Set the displayed model.
      *
-     * @param results the model.
-     */
-    public void setModel(@NotNull  final Map<PsiFile, List<Problem>> results) {
-        setModel(results, DEFAULT_SEVERITIES);
-    }
-
-    /**
-     * Set the displayed model.
-     *
-     * @param results the model.
+     * @param scanResults the model.
      * @param levels  the levels to display.
      */
-    public void setModel(@NotNull final Map<PsiFile, List<Problem>> results,
+    public void setModel(@NotNull final List<ScanResult> scanResults,
                          @NotNull final Set<SeverityLevel> levels) {
-        this.lastResults = results;
+        this.lastResults = flattenResults(scanResults);
         this.displayedSeverities = levels;
 
         rebuildTree();
+    }
+
+    private Map<PsiFile, List<ResultProblem>> flattenResults(final List<ScanResult> scanResult) {
+        final var flattened = new HashMap<PsiFile, List<ResultProblem>>();
+
+        for (ScanResult result : scanResult) {
+            result.problems().forEach((file, problems) -> {
+                flattened.computeIfAbsent(file, psiFile -> new ArrayList<>())
+                        .addAll(problems.stream()
+                                .map(csProblem -> new ResultProblem(result.configurationLocationResult(), result.module(), csProblem))
+                                .toList());
+            });
+        }
+
+        return flattened;
     }
 
     private void groupResultsByFile() {
@@ -168,7 +175,7 @@ public class ResultTreeModel extends DefaultTreeModel {
     }
 
     private int createFileNodes(final List<PsiFile> sortedFiles,
-                                final Map<PsiFile, List<Problem>> problemsForAllFiles,
+                                final Map<PsiFile, List<ResultProblem>> problemsForAllFiles,
                                 final ToggleableTreeNode parentNode) {
         int problemCount = 0;
         for (final PsiFile file : sortedFiles) {
@@ -176,7 +183,7 @@ public class ResultTreeModel extends DefaultTreeModel {
             final var problems = problemsForAllFiles.getOrDefault(file, emptyList());
 
             int childProblemCount = 0;
-            for (final Problem problem : problems) {
+            for (final ResultProblem problem : problems) {
                 if (problem.severityLevel() != SeverityLevel.Ignore) {
                     final var problemInfo = new ProblemResultTreeInfo(file, problem);
                     fileNode.add(new ToggleableTreeNode(problemInfo));
@@ -197,7 +204,7 @@ public class ResultTreeModel extends DefaultTreeModel {
         return problemCount;
     }
 
-    private List<PsiFile> sortByFileName(final Map<PsiFile, List<Problem>> results) {
+    private List<PsiFile> sortByFileName(final Map<PsiFile, List<ResultProblem>> results) {
         if (results == null || results.isEmpty()) {
             return emptyList();
         }
@@ -226,7 +233,7 @@ public class ResultTreeModel extends DefaultTreeModel {
         setRootMessage(problemCount);
     }
 
-    private SortedMap<String, List<PsiFile>> groupByPackageName(final Map<PsiFile, List<Problem>> results) {
+    private SortedMap<String, List<PsiFile>> groupByPackageName(final Map<PsiFile, List<ResultProblem>> results) {
         if (results == null || results.isEmpty()) {
             return Collections.emptySortedMap();
         }
@@ -266,13 +273,13 @@ public class ResultTreeModel extends DefaultTreeModel {
         setRootMessage(problemCount);
     }
 
-    private SortedMap<SeverityLevel, Map<PsiFile, List<Problem>>> groupBySeverity(final Map<PsiFile, List<Problem>> results) {
+    private SortedMap<SeverityLevel, Map<PsiFile, List<ResultProblem>>> groupBySeverity(final Map<PsiFile, List<ResultProblem>> results) {
         if (results == null || results.isEmpty()) {
             return Collections.emptySortedMap();
         }
         var severities = List.of(SeverityLevel.Error, SeverityLevel.Warning, SeverityLevel.Info);
 
-        var groupedBySeverity = new TreeMap<SeverityLevel, Map<PsiFile, List<Problem>>>();
+        var groupedBySeverity = new TreeMap<SeverityLevel, Map<PsiFile, List<ResultProblem>>>();
         severities.forEach(severityLevel -> groupedBySeverity.put(severityLevel, new HashMap<>()));
 
         for (var resultFile : results.keySet()) {

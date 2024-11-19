@@ -24,14 +24,14 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.resultOf;
-import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.*;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.of;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.BLOCKED;
+import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.PRESENT;
 
 
-public class ScanFiles implements Callable<ScanResult> {
+public class ScanFiles implements Callable<List<ScanResult>> {
 
     private static final Logger LOG = Logger.getInstance(ScanFiles.class);
 
@@ -74,11 +74,11 @@ public class ScanFiles implements Callable<ScanResult> {
     }
 
     @Override
-    public final ScanResult call() {
+    public final List<ScanResult> call() {
         try {
             fireCheckStarting(files);
-            final ScanResult scanResult = processFilesForModuleInfoAndScan();
-            return scanCompletedSuccessfully(scanResult);
+            final List<ScanResult> scanResults = processFilesForModuleInfoAndScan();
+            return scanCompletedSuccessfully(scanResults);
 
         } catch (CheckStylePluginParseException e) {
             LOG.debug("Parse exception caught during scan", e);
@@ -92,7 +92,7 @@ public class ScanFiles implements Callable<ScanResult> {
         }
     }
 
-    private ScanResult scanFailedWithError(
+    private List<ScanResult> scanFailedWithError(
             final CheckStylePluginException e,
             final boolean recordExceptionInEventLog) {
         if (recordExceptionInEventLog) {
@@ -100,12 +100,12 @@ public class ScanFiles implements Callable<ScanResult> {
         }
         fireScanFailedWithError(e);
 
-        return ScanResult.EMPTY;
+        return List.of(ScanResult.EMPTY);
     }
 
-    private ScanResult scanCompletedSuccessfully(final ScanResult result) {
-        fireScanCompletedSuccessfully(result);
-        return result;
+    private List<ScanResult> scanCompletedSuccessfully(final List<ScanResult> results) {
+        fireScanCompletedSuccessfully(results);
+        return results;
     }
 
     public void addListener(final ScannerListener listener) {
@@ -116,8 +116,8 @@ public class ScanFiles implements Callable<ScanResult> {
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireScanCompletedSuccessfully(final ScanResult scanResult) {
-        listeners.forEach(listener -> listener.scanCompletedSuccessfully(scanResult));
+    private void fireScanCompletedSuccessfully(final List<ScanResult> scanResults) {
+        listeners.forEach(listener -> listener.scanCompletedSuccessfully(scanResults));
     }
 
     private void fireScanFailedWithError(final CheckStylePluginException error) {
@@ -136,8 +136,8 @@ public class ScanFiles implements Callable<ScanResult> {
         });
     }
 
-    private ScanResult processFilesForModuleInfoAndScan() {
-        final Map<PsiFile, List<Problem>> fileResults = new HashMap<>();
+    private List<ScanResult> processFilesForModuleInfoAndScan() {
+        final List<ScanResult> scanResults = new ArrayList<>();
 
         for (final Module module : moduleToFiles.keySet()) {
             if (module == null) {
@@ -146,7 +146,7 @@ public class ScanFiles implements Callable<ScanResult> {
 
             final List<ConfigurationLocationResult> locationResults = configurationLocation(overrideConfigLocation, module);
             if (locationResults.isEmpty()) {
-                return new ScanResult(resultOf(NOT_PRESENT), emptyMap());
+                return List.of(new ScanResult(ConfigurationLocationResult.NOT_PRESENT, module, emptyMap()));
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
@@ -159,25 +159,12 @@ public class ScanFiles implements Callable<ScanResult> {
                     .map(ConfigurationLocationResult::location)
                     .collect(Collectors.toList());
 
-            fileResults.putAll(filesWithProblems(filesForModule,
-                    checkFiles(module, filesForModule, locationsToCheck)));
+            scanResults.addAll(checkFiles(module, filesForModule, locationsToCheck));
+
             fireFilesScanned(filesForModule.size());
         }
 
-        return new ScanResult(resultOf(PRESENT), fileResults);
-    }
-
-    @NotNull
-    private Map<PsiFile, List<Problem>> filesWithProblems(final Set<PsiFile> filesForModule,
-                                                          final Map<PsiFile, List<Problem>> moduleFileResults) {
-        final Map<PsiFile, List<Problem>> moduleResults = new HashMap<>();
-        for (final PsiFile psiFile : filesForModule) {
-            final List<Problem> resultsForFile = moduleFileResults.get(psiFile);
-            if (resultsForFile != null && !resultsForFile.isEmpty()) {
-                moduleResults.put(psiFile, new ArrayList<>(resultsForFile));
-            }
-        }
-        return moduleResults;
+        return scanResults;
     }
 
     @NotNull
@@ -188,32 +175,30 @@ public class ScanFiles implements Callable<ScanResult> {
                 configurationLocationSource().getConfigurationLocations(module, override);
 
         return locations.stream().map(it -> it.isBlocked()
-                        ? resultOf(it, BLOCKED)
-                        : resultOf(it, PRESENT))
+                        ? of(it, BLOCKED)
+                        : of(it, PRESENT))
                 .collect(Collectors.toList());
     }
 
-    private Map<PsiFile, List<Problem>> checkFiles(final Module module,
-                                                   final Set<PsiFile> filesToScan,
-                                                   final List<ConfigurationLocation> configurationLocations) {
+    private List<ScanResult> checkFiles(final Module module,
+                                        final Set<PsiFile> filesToScan,
+                                        final List<ConfigurationLocation> configurationLocations) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module, this.overrideConfigLocation));
 
-            return configurationLocations.stream().map(configurationLocation -> checkerFactory().checker(module, configurationLocation)
-                    .map(checker -> checker.scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors()))
-                    .orElseThrow(() -> new CheckStylePluginException("Could not create checker")))
-                    .flatMap(e -> e.entrySet().stream())
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (List<Problem> e1, List<Problem> e2) -> {
-                                // Merge function to join multiple list of problems for the same file
-                                // If the same (equals) problem is contained in e1 and e2 only one gets added
-                                return Stream.concat(e1.stream(), e2.stream())
-                                        .distinct()
-                                        .collect(Collectors.toList());
-                            }));
+            final List<ScanResult> scanResults = new ArrayList<>();
+            for (ConfigurationLocation configurationLocation : configurationLocations) {
+                var checker = checkerFactory().checker(module, configurationLocation);
+                if (checker.isPresent()) {
+                    var problems = checker.get().scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors());
+                    scanResults.add(new ScanResult(ConfigurationLocationResult.of(configurationLocation, PRESENT), module, problems));
+                } else {
+                    throw new CheckStylePluginException("Could not create checker for location " + configurationLocation);
+                }
+            }
+            return scanResults;
+
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }

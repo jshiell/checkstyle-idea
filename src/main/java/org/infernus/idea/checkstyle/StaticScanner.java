@@ -80,30 +80,30 @@ public class StaticScanner {
         runAsyncCheck(checkFiles);
     }
 
-    public ScanResult scanFiles(@NotNull final List<VirtualFile> files) {
+    public List<ScanResult> scanFiles(@NotNull final List<VirtualFile> files) {
         if (files.isEmpty()) {
-            return ScanResult.EMPTY;
+            return List.of(ScanResult.EMPTY);
         }
 
         try {
             return whenFinished(runAsyncCheck(new ScanFiles(project, files, null)), NO_TIMEOUT).get();
         } catch (final Throwable e) {
             LOG.warn("Error scanning files", e);
-            return ScanResult.EMPTY;
+            return List.of(ScanResult.EMPTY);
         }
     }
 
-    private Future<ScanResult> runAsyncCheck(final ScanFiles checker) {
-        final Future<ScanResult> checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
+    private Future<List<ScanResult>> runAsyncCheck(final ScanFiles checker) {
+        final var checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
         checker.addListener(new ScanCompletionTracker(checkFilesFuture));
         return checkFilesFuture;
     }
 
     private class ScanCompletionTracker implements ScannerListener {
 
-        private final Future<ScanResult> future;
+        private final Future<List<ScanResult>> future;
 
-        ScanCompletionTracker(final Future<ScanResult> future) {
+        ScanCompletionTracker(final Future<List<ScanResult>> future) {
             this.future = future;
         }
 
@@ -116,7 +116,7 @@ public class StaticScanner {
         }
 
         @Override
-        public void scanCompletedSuccessfully(final ScanResult scanResult) {
+        public void scanCompletedSuccessfully(final List<ScanResult> scanResults) {
             checkComplete(future);
         }
 

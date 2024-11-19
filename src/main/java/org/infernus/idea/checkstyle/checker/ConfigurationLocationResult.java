@@ -6,13 +6,11 @@ import org.jetbrains.annotations.Nullable;
 
 public record ConfigurationLocationResult(ConfigurationLocation location, ConfigurationLocationStatus status) {
 
-    public static ConfigurationLocationResult resultOf(@Nullable final ConfigurationLocation configurationLocation,
-                                                       @NotNull final ConfigurationLocationStatus status) {
-        return new ConfigurationLocationResult(configurationLocation, status);
-    }
+    public static final ConfigurationLocationResult NOT_PRESENT = new ConfigurationLocationResult(null, ConfigurationLocationStatus.NOT_PRESENT);
 
-    public static ConfigurationLocationResult resultOf(@NotNull final ConfigurationLocationStatus status) {
-        return new ConfigurationLocationResult(null, status);
+    public static ConfigurationLocationResult of(@Nullable final ConfigurationLocation configurationLocation,
+                                                 @NotNull final ConfigurationLocationStatus status) {
+        return new ConfigurationLocationResult(configurationLocation, status);
     }
 
 }
