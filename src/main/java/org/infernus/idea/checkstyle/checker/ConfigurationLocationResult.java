@@ -4,16 +4,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ConfigurationLocationResult {
-
-    public final ConfigurationLocation location;
-    public final ConfigurationLocationStatus status;
-
-    private ConfigurationLocationResult(final ConfigurationLocation location,
-                                        final ConfigurationLocationStatus status) {
-        this.location = location;
-        this.status = status;
-    }
+public record ConfigurationLocationResult(ConfigurationLocation location, ConfigurationLocationStatus status) {
 
     public static ConfigurationLocationResult resultOf(@Nullable final ConfigurationLocation configurationLocation,
                                                        @NotNull final ConfigurationLocationStatus status) {

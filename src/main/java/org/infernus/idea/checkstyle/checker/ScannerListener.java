@@ -2,9 +2,9 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ScanResult;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ScannerListener {
 
@@ -12,8 +12,7 @@ public interface ScannerListener {
 
     void filesScanned(int count);
 
-    void scanCompletedSuccessfully(ConfigurationLocationResult configurationLocationResult,
-                                   Map<PsiFile, List<Problem>> scanResults);
+    void scanCompletedSuccessfully(ScanResult scanResult);
 
     void scanFailedWithError(CheckStylePluginException error);
 

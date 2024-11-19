@@ -21,6 +21,7 @@ import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,17 +84,16 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
         if (configurationManager(project).getCurrent().isScanBeforeCheckin()) {
             try {
-                final Map<PsiFile, List<Problem>> scanResults = new HashMap<>();
+                var scanResult = new AtomicReference<ScanResult>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
-                        scanResults.putAll(staticScanner.scanFiles(
-                                new ArrayList<>(getVirtualFiles())));
+                        scanResult.set(staticScanner.scanFiles(new ArrayList<>(getVirtualFiles())));
                     }
                 }.queue();
 
-                return processScanResults(scanResults, executor, project);
+                return processScanResults(scanResult.get(), executor, project);
 
             } catch (ProcessCanceledException e) {
                 return CANCEL;
@@ -115,18 +115,18 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         return ofNullable(configurationManager(project));
     }
 
-    private ReturnResult processScanResults(final Map<PsiFile, List<Problem>> results,
+    private ReturnResult processScanResults(final ScanResult scanResult,
                                             final CommitExecutor executor,
                                             final Project project) {
-        final long errorCount = countOf(results, SeverityLevel.Error);
-        final long warningCount = countOf(results, SeverityLevel.Warning);
+        final long errorCount = countOf(scanResult.problems(), SeverityLevel.Error);
+        final long warningCount = countOf(scanResult.problems(), SeverityLevel.Warning);
         if (errorCount == 0 && warningCount == 0) {
             return COMMIT;
         }
 
         final int answer = promptUser(project, errorCount, warningCount, executor);
         if (answer == Messages.OK) {
-            showResultsInToolWindow(results, project);
+            showResultsInToolWindow(scanResult, project);
             return CLOSE_WINDOW;
 
         } else if (answer == Messages.CANCEL || answer < 0) {
@@ -175,11 +175,11 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
                 buttons, 0, UIUtil.getWarningIcon());
     }
 
-    private void showResultsInToolWindow(final Map<PsiFile, List<Problem>> results,
+    private void showResultsInToolWindow(final ScanResult scanResult,
                                          final Project project) {
         final CheckStyleToolWindowPanel toolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
         if (toolWindowPanel != null) {
-            toolWindowPanel.displayResults(results);
+            toolWindowPanel.displayResults(scanResult);
             toolWindowPanel.showToolWindow();
         }
     }

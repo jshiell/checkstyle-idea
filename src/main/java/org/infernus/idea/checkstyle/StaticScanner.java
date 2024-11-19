@@ -7,6 +7,7 @@ import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.*;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -79,30 +80,30 @@ public class StaticScanner {
         runAsyncCheck(checkFiles);
     }
 
-    public Map<PsiFile, List<Problem>> scanFiles(@NotNull final List<VirtualFile> files) {
+    public ScanResult scanFiles(@NotNull final List<VirtualFile> files) {
         if (files.isEmpty()) {
-            return Collections.emptyMap();
+            return ScanResult.EMPTY;
         }
 
         try {
             return whenFinished(runAsyncCheck(new ScanFiles(project, files, null)), NO_TIMEOUT).get();
         } catch (final Throwable e) {
             LOG.warn("Error scanning files", e);
-            return Collections.emptyMap();
+            return ScanResult.EMPTY;
         }
     }
 
-    private Future<Map<PsiFile, List<Problem>>> runAsyncCheck(final ScanFiles checker) {
-        final Future<Map<PsiFile, List<Problem>>> checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
+    private Future<ScanResult> runAsyncCheck(final ScanFiles checker) {
+        final Future<ScanResult> checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
         checker.addListener(new ScanCompletionTracker(checkFilesFuture));
         return checkFilesFuture;
     }
 
     private class ScanCompletionTracker implements ScannerListener {
 
-        private final Future<Map<PsiFile, List<Problem>>> future;
+        private final Future<ScanResult> future;
 
-        ScanCompletionTracker(final Future<Map<PsiFile, List<Problem>>> future) {
+        ScanCompletionTracker(final Future<ScanResult> future) {
             this.future = future;
         }
 
@@ -115,8 +116,7 @@ public class StaticScanner {
         }
 
         @Override
-        public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
-                                              final Map<PsiFile, List<Problem>> scanResults) {
+        public void scanCompletedSuccessfully(final ScanResult scanResult) {
             checkComplete(future);
         }
 

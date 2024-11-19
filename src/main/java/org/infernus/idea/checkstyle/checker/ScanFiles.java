@@ -5,7 +5,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
@@ -16,6 +15,7 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,13 +26,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.intellij.openapi.util.Pair.pair;
 import static java.util.Collections.emptyMap;
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationResult.resultOf;
 import static org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus.*;
 
 
-public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
+public class ScanFiles implements Callable<ScanResult> {
 
     private static final Logger LOG = Logger.getInstance(ScanFiles.class);
 
@@ -75,12 +74,11 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
     }
 
     @Override
-    public final Map<PsiFile, List<Problem>> call() {
+    public final ScanResult call() {
         try {
             fireCheckStarting(files);
-            final Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> scanResult =
-                    processFilesForModuleInfoAndScan();
-            return scanCompletedSuccessfully(scanResult.first, scanResult.second);
+            final ScanResult scanResult = processFilesForModuleInfoAndScan();
+            return scanCompletedSuccessfully(scanResult);
 
         } catch (CheckStylePluginParseException e) {
             LOG.debug("Parse exception caught during scan", e);
@@ -94,20 +92,20 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         }
     }
 
-    private Map<PsiFile, List<Problem>> scanFailedWithError(final CheckStylePluginException e,
-                                                            final boolean recordExceptionInEventLog) {
+    private ScanResult scanFailedWithError(
+            final CheckStylePluginException e,
+            final boolean recordExceptionInEventLog) {
         if (recordExceptionInEventLog) {
             Notifications.showException(project, e);
         }
         fireScanFailedWithError(e);
 
-        return emptyMap();
+        return ScanResult.EMPTY;
     }
 
-    private Map<PsiFile, List<Problem>> scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
-                                                                  final Map<PsiFile, List<Problem>> filesToProblems) {
-        fireScanCompletedSuccessfully(configurationLocationResult, filesToProblems);
-        return filesToProblems;
+    private ScanResult scanCompletedSuccessfully(final ScanResult result) {
+        fireScanCompletedSuccessfully(result);
+        return result;
     }
 
     public void addListener(final ScannerListener listener) {
@@ -118,9 +116,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         listeners.forEach(listener -> listener.scanStarting(filesToScan));
     }
 
-    private void fireScanCompletedSuccessfully(final ConfigurationLocationResult configLocationResult,
-                                               final Map<PsiFile, List<Problem>> fileResults) {
-        listeners.forEach(listener -> listener.scanCompletedSuccessfully(configLocationResult, fileResults));
+    private void fireScanCompletedSuccessfully(final ScanResult scanResult) {
+        listeners.forEach(listener -> listener.scanCompletedSuccessfully(scanResult));
     }
 
     private void fireScanFailedWithError(final CheckStylePluginException error) {
@@ -139,7 +136,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
         });
     }
 
-    private Pair<ConfigurationLocationResult, Map<PsiFile, List<Problem>>> processFilesForModuleInfoAndScan() {
+    private ScanResult processFilesForModuleInfoAndScan() {
         final Map<PsiFile, List<Problem>> fileResults = new HashMap<>();
 
         for (final Module module : moduleToFiles.keySet()) {
@@ -149,7 +146,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
 
             final List<ConfigurationLocationResult> locationResults = configurationLocation(overrideConfigLocation, module);
             if (locationResults.isEmpty()) {
-                return pair(resultOf(NOT_PRESENT), emptyMap());
+                return new ScanResult(resultOf(NOT_PRESENT), emptyMap());
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
@@ -158,8 +155,8 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             }
 
             final List<ConfigurationLocation> locationsToCheck = locationResults.stream()
-                    .filter(configurationLocationResult -> configurationLocationResult.status != BLOCKED)
-                    .map(configurationLocationResult -> configurationLocationResult.location)
+                    .filter(configurationLocationResult -> configurationLocationResult.status() != BLOCKED)
+                    .map(ConfigurationLocationResult::location)
                     .collect(Collectors.toList());
 
             fileResults.putAll(filesWithProblems(filesForModule,
@@ -167,7 +164,7 @@ public class ScanFiles implements Callable<Map<PsiFile, List<Problem>>> {
             fireFilesScanned(filesForModule.size());
         }
 
-        return pair(resultOf(PRESENT), fileResults);
+        return new ScanResult(resultOf(PRESENT), fileResults);
     }
 
     @NotNull

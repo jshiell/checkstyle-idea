@@ -6,6 +6,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
@@ -13,7 +14,6 @@ import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
 import org.infernus.idea.checkstyle.util.Objects;
-import org.infernus.idea.checkstyle.util.Pair;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.intellij.openapi.util.Pair.pair;
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
@@ -187,7 +188,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                     if (event.isStartElement()) {
                         final var property = extractNameAndDefaultIfPropertyElement((StartElement) event);
                         if (property != null) {
-                            propertiesAndDefaults.put(property.first(), property.second());
+                            propertiesAndDefaults.put(property.first, property.second);
                         }
                     }
                 }
@@ -214,9 +215,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
                     final var defaultAttribute = startElement.getAttributeByName(new QName("default"));
                     if (defaultAttribute != null) {
-                        return Pair.of(propertyName, defaultAttribute.getValue());
+                        return pair(propertyName, defaultAttribute.getValue());
                     }
-                    return Pair.of(propertyName, "");
+                    return pair(propertyName, "");
                 }
             }
         }
@@ -244,7 +245,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 }
             }
 
-            properties.keySet().removeIf(propertyName -> !propertiesInFile.keySet().contains(propertyName));
+            properties.keySet().removeIf(propertyName -> !propertiesInFile.containsKey(propertyName));
 
             try {
                 is.reset();

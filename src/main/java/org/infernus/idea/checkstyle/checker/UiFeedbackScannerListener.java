@@ -4,11 +4,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 public class UiFeedbackScannerListener implements ScannerListener {
     private final Project project;
@@ -39,21 +39,20 @@ public class UiFeedbackScannerListener implements ScannerListener {
     }
 
     @Override
-    public void scanCompletedSuccessfully(final ConfigurationLocationResult configurationLocationResult,
-                                          final Map<PsiFile, List<Problem>> scanResults) {
+    public void scanCompletedSuccessfully(final ScanResult scanResult) {
         ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
-                switch (configurationLocationResult.status) {
+                switch (scanResult.configurationLocationResult().status()) {
                     case NOT_PRESENT:
                         toolWindowPanel.displayWarningResult("plugin.results.no-rules-file");
                         break;
                     case BLOCKED:
                         toolWindowPanel.displayWarningResult("plugin.results.rules-blocked",
-                                configurationLocationResult.location.blockedForSeconds());
+                                scanResult.configurationLocationResult().location().blockedForSeconds());
                         break;
                     default:
-                        toolWindowPanel.displayResults(scanResults);
+                        toolWindowPanel.displayResults(scanResult);
                 }
             }
         });

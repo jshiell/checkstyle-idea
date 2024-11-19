@@ -18,18 +18,17 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
-import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -41,7 +40,6 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -548,10 +546,10 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     /**
      * Display the passed results.
      *
-     * @param results the map of checked files to problem descriptors.
+     * @param scanResult the result of the scan.
      */
-    public void displayResults(final Map<PsiFile, List<Problem>> results) {
-        treeModel.setModel(results, getDisplayedSeverities());
+    public void displayResults(final ScanResult scanResult) {
+        treeModel.setModel(scanResult.problems(), getDisplayedSeverities());
 
         invalidate();
         repaint();
