@@ -87,6 +87,7 @@ public class ResultTreeModel extends DefaultTreeModel {
         switch (grouping) {
             case BY_PACKAGE -> groupResultsByPackage();
             case BY_SEVERITY -> groupResultsBySeverity();
+            case BY_CONFIGURATION_LOCATION -> groupResultsByConfigurationLocation();
             default -> groupResultsByFile();
         }
 
@@ -292,6 +293,42 @@ public class ResultTreeModel extends DefaultTreeModel {
             }
         }
         return groupedBySeverity;
+    }
+
+    private void groupResultsByConfigurationLocation() {
+        int problemCount = 0;
+
+        var groupedByConfigurationLocation = groupByConfigurationLocation(lastResults);
+        for (String locationDescription : groupedByConfigurationLocation.keySet()) {
+            final var locationNode = new ToggleableTreeNode();
+
+            final var fileToProblems = groupedByConfigurationLocation.get(locationDescription);
+            final var childProblemCount = createFileNodes(sortByFileName(fileToProblems), fileToProblems, locationNode);
+            if (childProblemCount > 0) {
+                final var packageInfo = new ConfigurationLocationGroupTreeInfo(locationDescription, childProblemCount);
+                locationNode.setUserObject(packageInfo);
+                visibleRootNode.add(locationNode);
+            }
+
+            problemCount += childProblemCount;
+        }
+
+        setRootMessage(problemCount);
+    }
+
+    private SortedMap<String, Map<PsiFile, List<ResultProblem>>> groupByConfigurationLocation(final Map<PsiFile, List<ResultProblem>> results) {
+        if (results == null || results.isEmpty()) {
+            return Collections.emptySortedMap();
+        }
+        final var groupedByConfigurationLocation = new TreeMap<String, Map<PsiFile, List<ResultProblem>>>();
+        results.forEach((file, problems) -> {
+            for (ResultProblem problem : problems) {
+                groupedByConfigurationLocation
+                        .computeIfAbsent(problem.locationDescription(), locationKey -> new HashMap<>())
+                        .computeIfAbsent(file, keyFile -> new ArrayList<>()).add(problem);
+            }
+        });
+        return groupedByConfigurationLocation;
     }
 
     private void setRootMessage(final int problemCount) {

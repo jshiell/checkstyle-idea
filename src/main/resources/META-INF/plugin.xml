@@ -25,7 +25,8 @@
     <change-notes>
         <![CDATA[
 <ul>
-    <li>5.99.0: Added option to group results by package and severity (#3).</li>
+    <li>5.99.0: New: Problems in the static scan now show the rules file that was the source of the check (#5).</li>
+    <li>5.99.0: New: Added option to group results by package, severity, and rules file (#3).</li>
     <li>5.98.0: New: Added Checkstyle 10.20.1.</li>
     <li>5.97.0: Fixed: Refactored code to fix exception around API dependencies at initialisation (#655).</li>
     <li>5.97.0: New: Added Checkstyle 10.19.0.</li>1
@@ -44,15 +45,6 @@
     <li>5.92.0: New: Added CheckStyle 10.17.0.</li>
     <li>5.91.0: New: Added CheckStyle 10.16.0.</li>
     <li>5.90.0: New: Added CheckStyle 10.15.0.</li>
-    <li>5.89.1: Fixed: Incorrect icon sizing on some platforms (#637).</li>
-    <li>5.89.0: New: Added CheckStyle 10.14.2.</li>
-    <li>5.89.0: Fixed: Icons now match new UI style.</li>
-    <li>5.89.0: Fixed: Better match format checks by disabling retentions when left curly policy requires a new line (#633).</li>
-    <li>5.89.0: Fixed: Updated API usage for notifications.</li>
-    <li>5.88.1: Fixed: Defined action update thread for actions (#634).</li>
-    <li>5.88.0: New: Added Checkstyle 10.14.0.</li>
-    <li>5.88.0: Breaking: Drop support for Checkstyle 8, to reduce archive size.</li>
-    <li>5.87.1: New: Third-party classpath is re-read on configuration reset (#630).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
@@ -174,6 +166,12 @@
                     text="Group Results By Severity"
                     description="Group the displayed results by their level of severity"
                     icon="/nodes/sortBySeverity.svg"/>
+
+            <action id="CheckStyleGroupByConfigurationLocationAction"
+                    class="org.infernus.idea.checkstyle.actions.GroupByConfigurationLocation"
+                    text="Group Results By Rules File"
+                    description="Group the displayed results by the rules files that contained the rule"
+                    icon="/actions/GroupByPrefix.svg"/>
         </group>
 
         <group id="CheckStylePluginActions" text="CheckStyle" popup="true">

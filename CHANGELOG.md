@@ -1,7 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
-* **5.99.0** New: Added option to group results by package and severity (#3).
+* **5.99.0** New: Problems in the static scan now show the rules file that was the source of the check (#5).
+* **5.99.0** New: Added option to group results by package, severity, and rules file (#3).
 * **5.98.0** New: Added Checkstyle 10.20.1.
 * **5.97.0** Fixed: Refactored code to fix exception around API dependencies at initialisation (#655).
 * **5.97.0** New: Added Checkstyle 10.19.0.

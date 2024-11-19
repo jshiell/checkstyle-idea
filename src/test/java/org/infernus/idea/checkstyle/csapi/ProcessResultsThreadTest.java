@@ -60,7 +60,7 @@ public class ProcessResultsThreadTest {
     }
 
     private Issue anIssueFor(final String aFileName) {
-        return new Issue(aFileName, 1, 7, "aMessage", SeverityLevel.Error, "aSourceName");
+        return new Issue(aFileName, 1, 7, "aMessage", SeverityLevel.Error, "com.checkstyle.rules.aCheck");
     }
 
     private Problem aProblemFor(final PsiFile expectedFile) {
