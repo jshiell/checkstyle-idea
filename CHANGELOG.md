@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.99.0** New: Added Checkstyle 10.20.2.
 * **5.99.0** New: Problems in the static scan now show the rules file that was the source of the check (#5).
 * **5.99.0** New: Added option to group results by package, severity, and rules file (#3).
 * **5.98.0** New: Added Checkstyle 10.20.1.
