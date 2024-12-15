@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.100.0: New: Added Checkstyle 10.21.0.</li>
     <li>5.99.0: New: Added Checkstyle 10.20.2.</li>
     <li>5.99.0: New: Problems in the static scan now show the rules file that was the source of the check (#5).</li>
     <li>5.99.0: New: Added option to group results by package, severity, and rules file (#3).</li>
