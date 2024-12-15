@@ -14,7 +14,7 @@ plugins {
     id("java")
     id("jacoco")
     id("idea")
-    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.2.1"
 
     id("org.infernus.idea.checkstyle.build")
 }
@@ -86,7 +86,6 @@ dependencies {
 
         bundledPlugin("com.intellij.java")
 
-        instrumentationTools()
         testFramework(TestFrameworkType.Platform)
     }
 
