@@ -1,6 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.102.0** New: Added Checkstyle 10.21.2.
+* **5.101.0** New: Added Checkstyle 10.21.1.
 * **5.100.0** New: Added Checkstyle 10.21.0.
 * **5.99.0** New: Added Checkstyle 10.20.2.
 * **5.99.0** New: Problems in the static scan now show the rules file that was the source of the check (#5).
