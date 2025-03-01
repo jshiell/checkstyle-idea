@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.103.0** New: Added Checkstyle 10.21.3.
 * **5.102.0** New: Added Checkstyle 10.21.2.
 * **5.101.0** New: Added Checkstyle 10.21.1.
 * **5.100.0** New: Added Checkstyle 10.21.0.
