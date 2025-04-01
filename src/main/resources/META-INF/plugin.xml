@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.104.0: New: Added Checkstyle 10.22.0 (#661).</li>
     <li>5.103.0: New: Added Checkstyle 10.21.3.</li>
     <li>5.102.0: New: Added Checkstyle 10.21.2.</li>
     <li>5.101.0: New: Added Checkstyle 10.21.1.</li>
