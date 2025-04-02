@@ -21,7 +21,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
     private static final String SEPARATE_LINE_BETWEEN_GROUPS_PROP = "separateLineBetweenGroups";
     private static final String SORT_IMPORTS_IN_GROUP_ALPHABETICALLY_PROP = "sortImportsInGroupAlphabetically";
     private static final String SEVERITY = "severity";
-    private static final String IMPORT_GROUP_SEPARATOR = "###";
+    private static final String IMPORT_GROUP_SEPARATOR = "(###|,)";
 
     private List<ImportGroup> customImportOrder;
     private boolean separateLineBetweenGroups;
@@ -135,6 +135,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
         String[] groups = value.split(IMPORT_GROUP_SEPARATOR);
         customImportOrder = Arrays.stream(groups)
                 .map(group -> group.replaceAll("\\(\\d+\\)", ""))
+                .map(String::strip)
                 .map(ImportGroup::valueOf)
                 .collect(Collectors.toList());
     }
