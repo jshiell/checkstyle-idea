@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.104.1** Fixed: Code importer now correctly parses tokens in newer Google configurations (#657).
 * **5.104.0** New: Added Checkstyle 10.22.0 (#661).
 * **5.103.0** New: Added Checkstyle 10.21.3.
 * **5.102.0** New: Added Checkstyle 10.21.2.
