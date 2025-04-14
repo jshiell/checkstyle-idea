@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.105.0** New: Added Checkstyle 10.23.0 (#663).
 * **5.104.1** Fixed: Code importer now parses import order with comma separators (#658).
 * **5.104.1** Fixed: Code importer now correctly parses tokens in newer Google configurations (#657).
 * **5.104.0** New: Added Checkstyle 10.22.0 (#661).

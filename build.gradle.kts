@@ -19,7 +19,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "5.104.1"
+version = "5.105.0"
 
 intellijPlatform {
     pluginConfiguration {
