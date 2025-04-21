@@ -85,7 +85,7 @@ public class LocationDialogue extends DialogWrapper {
                             @Nullable final String checkstyleVersion,
                             @Nullable final List<String> thirdPartyClasspath,
                             @NotNull final CheckstyleProjectService checkstyleProjectService) {
-        super(project, parent, false, IdeModalityType.PROJECT);
+        super(project, parent, false, IdeModalityType.IDE);
 
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;

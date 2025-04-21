@@ -29,10 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.Serial;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElseGet;
@@ -266,18 +264,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the addition of a configuration location.
      */
-    private final class AddLocationAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -7266120887003483814L;
-
-        AddLocationAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.file.add.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.add.tooltip"));
-        }
-
+    private final class AddLocationAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final LocationDialogue dialogue = new LocationDialogue(
                     parentDialogue(),
                     project,
@@ -306,18 +295,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a configuration location.
      */
-    private final class RemoveLocationAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -799542186049804472L;
-
-        RemoveLocationAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.file.remove.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.remove.tooltip"));
-        }
-
+    private final class RemoveLocationAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
                 return;
@@ -330,18 +310,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Edit the properties of a configuration location.
      */
-    private final class EditPropertiesAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -799542186049804472L;
-
-        EditPropertiesAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.file.properties.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.file.properties.tooltip"));
-        }
-
+    private final class EditPropertiesAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final int selectedIndex = locationTable.getSelectedRow();
             if (selectedIndex == -1) {
                 return;
@@ -360,39 +331,13 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    abstract static class ToolbarAction extends AbstractAction implements AnActionButtonRunnable {
-        @Serial
-        private static final long serialVersionUID = 7091312536206510956L;
-
-        @Override
-        public void run(final AnActionButton anActionButton) {
-            actionPerformed(null);
-        }
-    }
-
     /**
      * Process the addition of a path element.
      */
-    private final class AddPathAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -1389576037231727360L;
-
-        /**
-         * Create a new add path action.
-         */
-        AddPathAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.path.add.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.add.tooltip"));
-        }
-
+    private final class AddPathAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
-            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
-                    (String) getValue(Action.NAME),
-                    (String) getValue(Action.SHORT_DESCRIPTION),
-                    false, "jar");
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
+        public void run(final AnActionButton anActionButton) {
+            final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(), CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
@@ -401,24 +346,20 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
+    private FileChooserDescriptor checkStyleRulesFileChooserDescriptor() {
+        return new FileChooserDescriptor(true, false, true, true, false, false)
+                .withFileFilter((file) -> {
+                    final String currentExtension = file.getExtension();
+                    return currentExtension != null && "jar".equalsIgnoreCase(currentExtension.trim());
+                });
+    }
+
     /**
      * Process the editing of a path element.
      */
-    private final class EditPathAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -1455378231580505750L;
-
-        /**
-         * Create a new edit path action.
-         */
-        EditPathAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.path.edit.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.edit.tooltip"));
-        }
-
+    private final class EditPathAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 0) {
                 return;
@@ -427,12 +368,8 @@ public class CheckStyleConfigPanel extends JPanel {
             final DefaultListModel<String> listModel = pathListModel();
             final String selectedFile = listModel.get(selected);
 
-            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
-                    (String) getValue(Action.NAME),
-                    (String) getValue(Action.SHORT_DESCRIPTION),
-                    false, "jar");
             final VirtualFile toSelect = LocalFileSystem.getInstance().findFileByPath(selectedFile);
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, project, toSelect);
+            final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(), project, toSelect);
             if (chosen != null) {
                 listModel.remove(selected);
                 listModel.add(selected, VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
@@ -445,21 +382,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the removal of a path element.
      */
-    private final class RemovePathAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = 7339136485307147623L;
-
-        /**
-         * Create a new add path action.
-         */
-        RemovePathAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.path.remove.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.remove.tooltip"));
-        }
-
+    private final class RemovePathAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final int[] selected = pathList.getSelectedIndices();
             if (selected == null || selected.length == 0) {
                 return;
@@ -475,21 +400,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move up of a path element.
      */
-    private final class MoveUpPathAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = -1230778908605654344L;
-
-        /**
-         * Create a new move-up path action.
-         */
-        MoveUpPathAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.path.move-up.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-up.tooltip"));
-        }
-
+    private final class MoveUpPathAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final int selected = pathList.getSelectedIndex();
             if (selected < 1) {
                 return;
@@ -506,21 +419,9 @@ public class CheckStyleConfigPanel extends JPanel {
     /**
      * Process the move down of a path element.
      */
-    private final class MoveDownPathAction extends ToolbarAction {
-        @Serial
-        private static final long serialVersionUID = 1222511743014969175L;
-
-        /**
-         * Create a new move-down path action.
-         */
-        MoveDownPathAction() {
-            putValue(Action.NAME, CheckStyleBundle.message("config.path.move-down.text"));
-            putValue(Action.SHORT_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
-            putValue(Action.LONG_DESCRIPTION, CheckStyleBundle.message("config.path.move-down.tooltip"));
-        }
-
+    private final class MoveDownPathAction implements AnActionButtonRunnable {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void run(final AnActionButton anActionButton) {
             final DefaultListModel<String> listModel = pathListModel();
             final int selected = pathList.getSelectedIndex();
             if (selected == -1 || selected == (listModel.getSize() - 1)) {

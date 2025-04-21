@@ -320,7 +320,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                 textEditor.getCaretModel().moveToLogicalPosition(problemPos);
                 textEditor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
             }
-        }, ModalityState.NON_MODAL);
+        }, ModalityState.nonModal());
     }
 
     private int lineFor(final ProblemResultTreeInfo nodeInfo) {

@@ -22,7 +22,7 @@ public class PropertiesDialogue extends DialogWrapper {
     public PropertiesDialogue(@Nullable final Dialog parent,
                               @NotNull final Project project,
                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
-        super(project, parent, false, IdeModalityType.PROJECT);
+        super(project, parent, false, IdeModalityType.IDE);
 
         this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);
 

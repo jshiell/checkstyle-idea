@@ -19,7 +19,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "5.105.0"
+version = "5.106.0"
 
 intellijPlatform {
     pluginConfiguration {
@@ -82,7 +82,8 @@ configurations.configureEach {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2023.1.5")
+        // Update reference in GradlePluginMain on change
+        intellijIdeaCommunity("2024.1.7")
 
         bundledPlugin("com.intellij.java")
 

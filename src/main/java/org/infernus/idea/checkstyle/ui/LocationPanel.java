@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.Serial;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.infernus.idea.checkstyle.model.ConfigurationType.*;
@@ -229,7 +230,6 @@ public class LocationPanel extends JPanel {
         }
 
 
-
         return null;
     }
 
@@ -349,15 +349,19 @@ public class LocationPanel extends JPanel {
                 toSelect = ProjectUtil.guessProjectDir(project);
             }
 
-            final FileChooserDescriptor descriptor = new ExtensionFileChooserDescriptor(
-                    (String) getValue(Action.NAME),
-                    (String) getValue(Action.SHORT_DESCRIPTION),
-                    true, "xml", "checkstyle");
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, LocationPanel.this, project, toSelect);
+            final VirtualFile chosen = FileChooser.chooseFile(jarFileChooserDescriptor(), LocationPanel.this, project, toSelect);
             if (chosen != null) {
                 final File newConfigFile = VfsUtilCore.virtualToIoFile(chosen);
                 fileLocationField.setText(newConfigFile.getAbsolutePath());
             }
+        }
+
+        private static FileChooserDescriptor jarFileChooserDescriptor() {
+            return new FileChooserDescriptor(true, false, false, false, true, false)
+                    .withFileFilter((file) -> {
+                        final String currentExtension = file.getExtension();
+                        return currentExtension != null && Set.of("xml", "checkstyle").contains(currentExtension.trim().toLowerCase());
+                    });
         }
     }
 

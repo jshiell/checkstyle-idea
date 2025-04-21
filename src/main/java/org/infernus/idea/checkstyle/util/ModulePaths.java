@@ -4,9 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.libraries.LibraryUtil;
-import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.impl.jar.JarFileSystemImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -14,10 +12,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static java.util.Optional.empty;
 
 public final class ModulePaths {
 
@@ -63,23 +59,7 @@ public final class ModulePaths {
 
     @NotNull
     private static String pathOf(final VirtualFile file) {
-        String filePath = stripJarFileSuffix(file);
-        if (filePath.endsWith(".jar")) {
-            return mirrorPathOf(file).orElse(filePath);
-        }
-        return filePath;
-    }
-
-    @NotNull
-    private static Optional<String> mirrorPathOf(final VirtualFile file) {
-        final JarFileSystem jarFileSystem = JarFileSystem.getInstance();
-        if (jarFileSystem instanceof JarFileSystemImpl) {
-            final File mirroredFile = ((JarFileSystemImpl) jarFileSystem).getMirroredFile(file);
-            if (mirroredFile != null) {
-                return Optional.of(mirroredFile.getPath());
-            }
-        }
-        return empty();
+        return stripJarFileSuffix(file);
     }
 
     @NotNull
