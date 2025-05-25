@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.106.0** New: Added Checkstyle 10.24.0.
 * **5.106.0** New: Now built against IDEA 2024.1.7 (was 2023.1.5).
 * **5.105.0** New: Added Checkstyle 10.23.0 (#663).
 * **5.104.1** Fixed: Code importer now parses import order with comma separators (#658).
