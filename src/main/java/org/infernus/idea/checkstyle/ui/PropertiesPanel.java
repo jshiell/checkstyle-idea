@@ -60,7 +60,7 @@ public class PropertiesPanel extends JPanel {
         propertiesTable.getTableHeader().setReorderingAllowed(false);
 
         final JScrollPane propertiesScrollPane = new JBScrollPane(propertiesTable,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         add(propertiesScrollPane, BorderLayout.CENTER);
     }
 

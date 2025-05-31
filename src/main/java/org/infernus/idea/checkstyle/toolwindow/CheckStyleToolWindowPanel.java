@@ -162,14 +162,14 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         resultsTree.setCellRenderer(new ResultTreeRenderer());
 
         progressLabel = new JLabel(" ");
-        progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+        progressBar = new JProgressBar(SwingConstants.HORIZONTAL);
         progressBar.setMinimum(0);
         final Dimension progressBarSize = new Dimension(100, progressBar.getPreferredSize().height);
         progressBar.setMinimumSize(progressBarSize);
         progressBar.setPreferredSize(progressBarSize);
         progressBar.setMaximumSize(progressBarSize);
 
-        progressPanel = new JToolBar(JToolBar.HORIZONTAL);
+        progressPanel = new JToolBar(SwingConstants.HORIZONTAL);
         progressPanel.add(Box.createHorizontalStrut(4));
         progressPanel.add(new JLabel(message("plugin.toolwindow.override")));
         progressPanel.add(Box.createHorizontalStrut(4));
