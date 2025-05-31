@@ -28,7 +28,7 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
         TrustManager[] trustAllCerts = new TrustManager[]{new AllTrustingTrustManager()};
 
         try {
-            final SSLContext sc = SSLContext.getInstance("SSL");
+            final SSLContext sc = SSLContext.getInstance("TLSv1.3");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception ignored) {
