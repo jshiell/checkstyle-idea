@@ -99,7 +99,7 @@ public class HTTPURLConfigurationLocationTest {
                 status = 200;
                 break;
             case "/delayed":
-                waitFor(100);
+                waitFor();
                 response = "A delayed test response";
                 status = 200;
                 break;
@@ -119,9 +119,9 @@ public class HTTPURLConfigurationLocationTest {
             os.close();
         }
 
-        private void waitFor(final int millis) {
+        private void waitFor() {
             try {
-                Thread.sleep(millis);
+                Thread.sleep(100);
             } catch (InterruptedException ignored) {
             }
         }
