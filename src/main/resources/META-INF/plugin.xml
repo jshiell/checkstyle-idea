@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.108.0: New: Added Checkstyle 10.25.1.</li>
     <li>5.107.0: New: Added Checkstyle 10.25.0.</li>
     <li>5.106.0: New: Added Checkstyle 10.24.0.</li>
     <li>5.106.0: New: Now built against IDEA 2024.1.7 (was 2023.1.5).</li>
