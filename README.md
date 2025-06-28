@@ -218,6 +218,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Jeremy Ziegler (@Uschi003)
 * Ali Ustek (@austek)
 * Richard (@rhierlmeier)
+* James Baker (@james-baker-aera)
 
 And also thanks are due to the authors and contributors of:
 
