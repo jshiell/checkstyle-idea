@@ -194,7 +194,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
                     var problems = checker.get().scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors());
                     scanResults.add(new ScanResult(ConfigurationLocationResult.of(configurationLocation, PRESENT), module, problems));
                 } else {
-                    throw new CheckStylePluginException("Could not create checker for location " + configurationLocation);
+                    throw new CheckStylePluginException("Could not create checker for location " + configurationLocation + ", see logs for details.");
                 }
             }
             return scanResults;

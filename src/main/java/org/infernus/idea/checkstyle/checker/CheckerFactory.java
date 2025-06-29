@@ -199,6 +199,7 @@ public class CheckerFactory {
                                               final Object... messageArgs) {
         return blockAnd(location, () -> {
             if (module != null) {
+                LOG.warn("Blocking configuration due to exception", cause);
                 Notifications.showError(module.getProject(), message(messageKey, messageArgs));
             } else {
                 throw new CheckStylePluginException(message(messageKey, messageArgs), cause);
