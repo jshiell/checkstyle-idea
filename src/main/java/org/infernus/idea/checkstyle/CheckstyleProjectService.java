@@ -43,7 +43,20 @@ public class CheckstyleProjectService {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
 
+        ensureAValidatingParsingIsSetIfPiccoloIsInClasspath();
+
         activateCheckstyleVersion(requestedVersion, thirdPartyJars);
+    }
+
+    private static void ensureAValidatingParsingIsSetIfPiccoloIsInClasspath() {
+        // Piccolo is non-validating, but CS needs a validating parser, so we need to ensure that a validating parser
+        // is available if Piccolo is on the project classpath
+        try {
+            Class.forName("org.apache.xerces.jaxp.SAXParserFactoryImpl");
+            System.setProperty("com.bluecast.xml.ValidatingSAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+        } catch (ClassNotFoundException ignored) {
+            // ignored
+        }
     }
 
     @NotNull

@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.108.1** Fixed: Resolved edge case if Piccolo is in the project classpath (#668).
 * **5.108.0** New: Added Checkstyle 10.25.1 & 10.26.0.
 * **5.107.0** New: Added Checkstyle 10.25.0.
 * **5.106.0** New: Added Checkstyle 10.24.0.
