@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.109.1** New: Added grouping of results by the source check (#670).
 * **5.109.0** New: Added Checkstyle 10.26.1.
 * **5.108.1** Fixed: Resolved edge case if Piccolo is in the project classpath (#668).
 * **5.108.0** New: Added Checkstyle 10.25.1 & 10.26.0.

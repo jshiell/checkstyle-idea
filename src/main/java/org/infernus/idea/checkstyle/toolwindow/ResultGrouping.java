@@ -5,6 +5,7 @@ public enum ResultGrouping {
     BY_FILE,
     BY_PACKAGE,
     BY_SEVERITY,
-    BY_CONFIGURATION_LOCATION
+    BY_CONFIGURATION_LOCATION,
+    BY_SOURCE_CHECK
 
 }

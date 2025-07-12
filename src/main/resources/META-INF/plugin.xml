@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.109.1: New: Added grouping of results by the source check (#670).</li>
     <li>5.109.0: New: Added Checkstyle 10.26.1.</li>
     <li>5.108.1: Fixed: Resolved edge case if Piccolo is in the project classpath (#668).</li>
     <li>5.108.0: New: Added Checkstyle 10.25.1 & 10.26.0.</li>
@@ -169,6 +170,12 @@
                     text="Group Results By Rules File"
                     description="Group the displayed results by the rules files that contained the rule"
                     icon="/actions/GroupByPrefix.svg"/>
+
+            <action id="CheckStyleGroupBySourceCheckAction"
+                    class="org.infernus.idea.checkstyle.actions.GroupBySourceCheck"
+                    text="Group Results By Source Check"
+                    description="Group the displayed results by their check that was the source of the problem"
+                    icon="/actions/GroupByClass.svg"/>
         </group>
 
         <group id="CheckStylePluginActions" text="CheckStyle" popup="true">

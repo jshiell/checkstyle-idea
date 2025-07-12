@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.toolwindow;
 
 import java.io.Serial;
 import java.util.*;
+import java.util.function.Function;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -87,7 +88,8 @@ public class ResultTreeModel extends DefaultTreeModel {
         switch (grouping) {
             case BY_PACKAGE -> groupResultsByPackage();
             case BY_SEVERITY -> groupResultsBySeverity();
-            case BY_CONFIGURATION_LOCATION -> groupResultsByConfigurationLocation();
+            case BY_CONFIGURATION_LOCATION -> groupResultsBy(ResultProblem::locationDescription);
+            case BY_SOURCE_CHECK -> groupResultsBy(ResultProblem::sourceCheck);
             default -> groupResultsByFile();
         }
 
@@ -295,14 +297,14 @@ public class ResultTreeModel extends DefaultTreeModel {
         return groupedBySeverity;
     }
 
-    private void groupResultsByConfigurationLocation() {
+    private void groupResultsBy(final Function<ResultProblem, String> groupingKeyFunction) {
         int problemCount = 0;
 
-        var groupedByConfigurationLocation = groupByConfigurationLocation(lastResults);
-        for (String locationDescription : groupedByConfigurationLocation.keySet()) {
+        var groupsResults = groupBy(lastResults, groupingKeyFunction);
+        for (String locationDescription : groupsResults.keySet()) {
             final var locationNode = new ToggleableTreeNode();
 
-            final var fileToProblems = groupedByConfigurationLocation.get(locationDescription);
+            final var fileToProblems = groupsResults.get(locationDescription);
             final var childProblemCount = createFileNodes(sortByFileName(fileToProblems), fileToProblems, locationNode);
             if (childProblemCount > 0) {
                 final var packageInfo = new ConfigurationLocationGroupTreeInfo(locationDescription, childProblemCount);
@@ -316,19 +318,20 @@ public class ResultTreeModel extends DefaultTreeModel {
         setRootMessage(problemCount);
     }
 
-    private SortedMap<String, Map<PsiFile, List<ResultProblem>>> groupByConfigurationLocation(final Map<PsiFile, List<ResultProblem>> results) {
+    private SortedMap<String, Map<PsiFile, List<ResultProblem>>> groupBy(final Map<PsiFile, List<ResultProblem>> results,
+                                                                         final Function<ResultProblem, String> groupingKeyFunction) {
         if (results == null || results.isEmpty()) {
             return Collections.emptySortedMap();
         }
-        final var groupedByConfigurationLocation = new TreeMap<String, Map<PsiFile, List<ResultProblem>>>();
+        final var groupedProblems = new TreeMap<String, Map<PsiFile, List<ResultProblem>>>();
         results.forEach((file, problems) -> {
             for (ResultProblem problem : problems) {
-                groupedByConfigurationLocation
-                        .computeIfAbsent(problem.locationDescription(), locationKey -> new HashMap<>())
+                groupedProblems
+                        .computeIfAbsent(groupingKeyFunction.apply(problem), key -> new HashMap<>())
                         .computeIfAbsent(file, keyFile -> new ArrayList<>()).add(problem);
             }
         });
-        return groupedByConfigurationLocation;
+        return groupedProblems;
     }
 
     private void setRootMessage(final int problemCount) {
