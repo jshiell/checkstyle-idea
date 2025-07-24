@@ -71,8 +71,10 @@ dependencies {
         intellijIdeaCommunity(libs.versions.intellij.idea.community.get())
 
         bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.idea.maven")
 
         testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Maven)
     }
 
     implementation(libs.commons.io)
