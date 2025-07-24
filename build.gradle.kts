@@ -86,6 +86,7 @@ dependencies {
         intellijIdeaCommunity("2024.1.7")
 
         bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.idea.maven")
 
         testFramework(TestFrameworkType.Platform)
     }
