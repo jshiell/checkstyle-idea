@@ -93,7 +93,7 @@ public class LegacyProjectConfigurationStateDeserialiser {
         if (result == null) {
             return vlr.getDefaultVersion();
         }
-        return vlr.getReplacementMap().getOrDefault(result.toString(), result.toString());
+        return result.toString();
     }
 
     @NotNull

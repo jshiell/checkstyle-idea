@@ -13,8 +13,6 @@ public class VersionListReaderTest {
         Assert.assertNotNull(underTest.getSupportedVersions());
         Assert.assertTrue(underTest.getSupportedVersions().size() > 1);
         Assert.assertNotNull(underTest.getDefaultVersion());
-        Assert.assertNotNull(underTest.getReplacementMap());
-        Assert.assertTrue(underTest.getReplacementMap().size() > 1);
     }
 
 

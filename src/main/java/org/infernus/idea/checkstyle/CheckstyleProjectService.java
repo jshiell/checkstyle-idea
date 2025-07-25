@@ -2,20 +2,22 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.io.HttpRequests;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.concurrent.Callable;
-
 
 /**
  * Makes the Checkstyle tool available to the plugin in the correct version. Registered in {@code plugin.xml}.
@@ -79,33 +81,55 @@ public class CheckstyleProjectService {
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
-        synchronized (project) {
+        try {
+          // TODO: File IO and Network IO shouldn't happen on the EDT. Need to move this work to a
+          //  background thread which will introduce the need to communicate the background
+          //  downloads to users and prevent scans while downloads are in progress.
+          // TODO: Should be a configurable cache directory.
+          final var cacheDirectoryPath = Path.of(System.getProperty("java.io.tmpdir"), "checkstyle-idea-cache");
+          if (!Files.exists(cacheDirectoryPath)) {
+            Files.createDirectory(cacheDirectoryPath);
+          }
+          final String artifactName = "checkstyle-" + checkstyleVersionToLoad + "-all.jar";
+          final var jarPath = cacheDirectoryPath.resolve(artifactName);
+          if (!Files.exists(jarPath)) {
+            HttpRequests.request("https://github.com/checkstyle/checkstyle/releases/download/checkstyle-" + checkstyleVersionToLoad + "/" + artifactName)
+              .forceHttps(false)
+              .connectTimeout(10_000)
+              .readTimeout(30_000)
+              .saveToFile(jarPath, null);
+          }
+
+          synchronized (project) {
             checkstyleClassLoaderContainer = null;
             checkstyleClassLoaderFactory = new Callable<>() {
-                @Override
-                public CheckstyleClassLoaderContainer call() {
-                    return new CheckstyleClassLoaderContainer(
-                            project,
-                            CheckstyleProjectService.this,
-                            checkstyleVersionToLoad,
-                            toListOfUrls(thirdPartyJars));
-                }
+              @Override
+              public CheckstyleClassLoaderContainer call() {
+                return new CheckstyleClassLoaderContainer(
+                  project,
+                  CheckstyleProjectService.this,
+                  jarPath,
+                  toListOfUrls(thirdPartyJars));
+              }
 
-                @NotNull
-                private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
-                    List<URL> result = new ArrayList<>();
-                    if (jarFilePaths != null) {
-                        for (final String absolutePath : jarFilePaths) {
-                            try {
-                                result.add(new File(absolutePath).toURI().toURL());
-                            } catch (MalformedURLException e) {
-                                LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
-                            }
-                        }
+              @NotNull
+              private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
+                List<URL> result = new ArrayList<>();
+                if (jarFilePaths != null) {
+                  for (final String absolutePath : jarFilePaths) {
+                    try {
+                      result.add(new File(absolutePath).toURI().toURL());
+                    } catch (MalformedURLException e) {
+                      LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
                     }
-                    return result;
+                  }
                 }
+                return result;
+              }
             };
+          }
+        } catch (IOException e) {
+          throw new RuntimeException(e);
         }
     }
 

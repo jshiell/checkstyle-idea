@@ -54,7 +54,7 @@ tasks {
 //    }
 
     withType<VerifyPluginTask> {
-        dependsOn(copyClassesToSandbox, copyCheckstyleArtifactsToSandbox)
+        dependsOn(copyClassesToSandbox)
     }
 
     withType<Test> {
