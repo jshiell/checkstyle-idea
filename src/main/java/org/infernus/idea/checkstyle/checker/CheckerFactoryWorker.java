@@ -34,8 +34,6 @@ class CheckerFactoryWorker extends Thread {
     public void run() {
         super.run();
 
-        setContextClassLoader(loaderOfCheckedCode);
-
         try {
             final CheckStyleChecker checker = checkstyleProjectService
                     .getCheckstyleInstance()
