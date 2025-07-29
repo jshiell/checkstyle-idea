@@ -89,7 +89,7 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
-    implementation("commons-io:commons-io:2.15.1")
+    implementation("commons-io:commons-io:2.20.0")
     implementation("commons-codec:commons-codec:1.19.0")
 
     val checkStyleBaseVersion = (project.extra["supportedCsVersions"] as CheckstyleVersions).baseVersion
