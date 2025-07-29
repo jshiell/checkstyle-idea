@@ -110,9 +110,6 @@ public class GradlePluginMain implements Plugin<Project> {
             mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
         });
 
-        createCopyCheckstyleArtifactsToSandboxTask(project, false);
-        createCopyCheckstyleArtifactsToSandboxTask(project, true);
-
         createCopyClassesToSandboxTask(project, false);
         createCopyClassesToSandboxTask(project, true);
     }
@@ -174,10 +171,8 @@ public class GradlePluginMain implements Plugin<Project> {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
                 forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToTestSandbox"));
             } else {
                 tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
             }
 
             copyTask.from(csaccessSourceSet.getOutput());
@@ -201,13 +196,10 @@ public class GradlePluginMain implements Plugin<Project> {
         final TaskContainer tasks = project.getTasks();
         tasks.all((Task task) -> {
             if ("buildPlugin".equals(task.getName()) || "runIdea".equals(task.getName()) || "runIde".equals(task.getName())) {
-                task.dependsOn(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
                 task.dependsOn(tasks.getByName("copyClassesToSandbox"));
             } else if ("prepareSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToSandbox").dependsOn(task);
                 tasks.getByName("copyClassesToSandbox").dependsOn(task);
             } else if ("prepareTestsSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToTestSandbox").dependsOn(task);
                 tasks.getByName("copyClassesToTestSandbox").dependsOn(task);
             }
         });

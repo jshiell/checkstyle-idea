@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
+import java.nio.file.Path;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.util.ChildFirstURLClassLoader;
@@ -21,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
-import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 
 /**
@@ -60,17 +60,12 @@ public class CheckstyleClassLoaderContainer {
 
     public CheckstyleClassLoaderContainer(@NotNull final Project project,
                                           @NotNull final CheckstyleProjectService checkstyleProjectService,
-                                          @NotNull final String checkstyleVersion,
+                                          @NotNull final Path jarPath,
                                           @Nullable final List<URL> thirdPartyClassPath) {
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
 
-        final Properties classPathInfos = loadClassPathInfos();
-        final String cpProp = classPathInfos.getProperty(checkstyleVersion);
-        if (isBlank(cpProp)) {
-            throw new CheckStylePluginException("Unsupported Checkstyle version: " + checkstyleVersion);
-        }
-        classLoader = buildClassLoader(cpProp, emptyListIfNull(thirdPartyClassPath));
+        classLoader = buildClassLoader(jarPath, emptyListIfNull(thirdPartyClassPath));
     }
 
     @NotNull
@@ -90,15 +85,15 @@ public class CheckstyleClassLoaderContainer {
     }
 
     @NotNull
-    private ClassLoader buildClassLoader(@NotNull final String classPathFromProps,
+    private ClassLoader buildClassLoader(@NotNull final Path jarPath,
                                          @NotNull final List<URL> thirdPartyClasspath) {
         final String basePluginPath = getBasePluginPath();
 
         List<URL> urls;
         if (basePluginPath != null) {
-            urls = baseClasspathUrlsForPackagedPlugin(classPathFromProps, basePluginPath);
+            urls = baseClasspathUrlsForPackagedPlugin(jarPath, basePluginPath);
         } else {
-            urls = baseClasspathUrlsForIDEAUnitTests(classPathFromProps);
+            urls = baseClasspathUrlsForIDEAUnitTests(jarPath);
         }
 
         urls.addAll(thirdPartyClasspath);
@@ -114,19 +109,12 @@ public class CheckstyleClassLoaderContainer {
         return newClassLoader;
     }
 
-    private static List<URL> baseClasspathUrlsForPackagedPlugin(@NotNull final String classPathFromProps,
+    private static List<URL> baseClasspathUrlsForPackagedPlugin(@NotNull final Path jarPath,
                                                                 @NotNull final String basePath) {
         try {
             final List<URL> urls = new ArrayList<>();
             urls.add(getClassesDirectory(basePath).toURI().toURL());
-
-            for (String jar : splitClassPathFromProperties(classPathFromProps)) {
-                File jarLocation = new File(basePath, jar);
-                if (!jarLocation.exists()) {
-                    throw new CheckStylePluginException("Cannot find packaged artefact: " + jarLocation.getAbsolutePath());
-                }
-                urls.add(jarLocation.toURI().toURL());
-            }
+            urls.add(jarPath.toUri().toURL());
 
             return urls;
 
@@ -137,7 +125,7 @@ public class CheckstyleClassLoaderContainer {
 
     private static @NotNull File getClassesDirectory(@NotNull final String basePath) {
         final File basePathFile = new File(basePath);
-        if (!new File(basePath).exists()) {
+        if (!basePathFile.exists()) {
             throw new CheckStylePluginException("Cannot find plugin directory: " + basePathFile.getAbsolutePath());
         }
 
@@ -149,22 +137,14 @@ public class CheckstyleClassLoaderContainer {
         return classesDirectory;
     }
 
-    private List<URL> baseClasspathUrlsForIDEAUnitTests(@NotNull final String classPathFromProps) {
+    private List<URL> baseClasspathUrlsForIDEAUnitTests(@NotNull final Path jarPath) {
         try {
             final List<URL> urls = new ArrayList<>();
             final String buildPath = guessBuildPathFromClasspath();
             URL unitTestingClassPath = getUnitTestingClassPath(buildPath);
 
             urls.add(unitTestingClassPath);
-
-            for (String jar : splitClassPathFromProperties(classPathFromProps)) {
-                String testJarLocation = "tmp/gatherCheckstyleArtifacts" + jar.substring(jar.lastIndexOf('/'));
-                File jarLocation = new File(buildPath, testJarLocation);
-                if (!jarLocation.exists()) {
-                    throw new CheckStylePluginException("Cannot find collected artefact: " + jarLocation.getAbsolutePath());
-                }
-                urls.add(jarLocation.toURI().toURL());
-            }
+            urls.add(jarPath.toUri().toURL());
 
             return urls;
 

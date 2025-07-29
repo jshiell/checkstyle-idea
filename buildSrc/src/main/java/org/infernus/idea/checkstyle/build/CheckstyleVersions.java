@@ -21,13 +21,11 @@ public class CheckstyleVersions {
     private static final String PROP_FILE = "src/main/resources/checkstyle-idea.properties";
 
     private static final String PROP_VERSIONS_SUPPORTED = "checkstyle.versions.supported";
-    private static final String PROP_DEPENDENCY_MAP = "checkstyle.dependencies.map";
     private static final String PROP_NAME_BASEVERSION = "baseVersion";
 
     private final File propertyFile;
 
     private final SortedSet<String> versions;
-    private final Map<String, String> dependencyMappings;
 
     private final String baseVersion;
 
@@ -37,7 +35,6 @@ public class CheckstyleVersions {
         final Properties properties = readProperties();
         versions = buildVersionSet(properties);
         baseVersion = readBaseVersion(properties);
-        dependencyMappings = readDependencyMap(properties);
     }
 
     private SortedSet<String> buildVersionSet(final Properties properties) {
@@ -89,22 +86,6 @@ public class CheckstyleVersions {
         return baseVersionValue;
     }
 
-    private Map<String, String> readDependencyMap(final Properties properties) {
-        final String propertyValue = properties.getProperty(PROP_DEPENDENCY_MAP);
-        if (propertyValue == null || propertyValue.trim().isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        final Map<String, String> mappings = new HashMap<>();
-        for (final String mapping : propertyValue.trim().split("\\s*,\\s*")) {
-            if (!mapping.isEmpty()) {
-                final String[] oldDependencyToNewDependency = parseKeyValueMapping(mapping);
-                mappings.put(oldDependencyToNewDependency[0], oldDependencyToNewDependency[1]);
-            }
-        }
-        return Collections.unmodifiableMap(mappings);
-    }
-
     public File getPropertyFile() {
         return propertyFile;
     }
@@ -129,18 +110,5 @@ public class CheckstyleVersions {
         ex.put("module", "commons-logging");
         csDep.exclude(ex);
         return csDep;
-    }
-
-    private String[] parseKeyValueMapping(final String mapping) {
-        final String[] kv = mapping.split("\\s*->\\s*");
-        if (kv.length != 2) {
-            throw new GradleException("Internal error: Property '" + CheckstyleVersions.PROP_DEPENDENCY_MAP
-                    + "' contains invalid mapping '" + mapping + "'");
-        }
-        return kv;
-    }
-
-    public Map<String, String> getDependencyMappings() {
-        return dependencyMappings;
     }
 }

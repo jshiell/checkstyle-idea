@@ -61,29 +61,6 @@ public class GatherCheckstyleArtifactsTask
     public void runTask() {
         final Set<File> bundledFiles = new TreeSet<>();
         final Properties classPaths = new SortedProperties();
-        final Set<String> availableFileNames = new HashSet<>();
-
-        for (final String csVersion : csVersions.getVersions()) {
-            Set<File> dependencies = rawVersionsToDependencies.get(csVersion);
-            availableFileNames.addAll(dependencies.stream().map(File::getName).collect(toSet()));
-        }
-
-        final Map<String, String> dependencyMappings = csVersions.getDependencyMappings();
-        for (final String csVersion : csVersions.getVersions()) {
-            Set<String> processedDependencies = rawVersionsToDependencies.get(csVersion).stream()
-                    .map(dependencyFile -> {
-                        if (csVersions.getDependencyMappings().containsKey(dependencyFile.getName())
-                                && availableFileNames.contains(dependencyMappings.get(dependencyFile.getName()))) {
-                            return dependencyMappings.get(dependencyFile.getName());
-                        } else {
-                            bundledFiles.add(dependencyFile);
-                            return dependencyFile.getName();
-                        }
-                    })
-                    .collect(toSet());
-
-            classPaths.setProperty(csVersion, convertToClassPath(processedDependencies));
-        }
 
         copyFiles(bundledFiles);
         createClassPathsFile(classPaths);
