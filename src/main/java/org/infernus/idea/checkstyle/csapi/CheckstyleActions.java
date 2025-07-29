@@ -23,15 +23,11 @@ public interface CheckstyleActions {
      * @param module              IntelliJ module
      * @param location            configuration location
      * @param properties          property values needed in the configuration file
-     * @param loaderOfCheckedCode class loader which Checkstyle shall use to load classes and resources of the code
-     *                            that it is checking - this is not for loading checks and modules, the module class
-     *                            loader is used for that
      * @return the new checker
      */
     CheckStyleChecker createChecker(@Nullable Module module,
                                     @NotNull ConfigurationLocation location,
-                                    @Nullable Map<String, String> properties,
-                                    @NotNull ClassLoader loaderOfCheckedCode);
+                                    @Nullable Map<String, String> properties);
 
     /**
      * Create a new Checkstyle checker.
@@ -40,16 +36,12 @@ public interface CheckstyleActions {
      * @param location            configuration location
      * @param properties          property values needed in the configuration file
      * @param configurations      an internal object, intended for mocking in unit tests
-     * @param loaderOfCheckedCode class loader which Checkstyle shall use to load classes and resources of the code
-     *                            that it is checking - this is not for loading checks and modules, the module class
-     *                            loader is used for that
      * @return the new checker
      */
     CheckStyleChecker createChecker(@Nullable Module module,
                                     @NotNull ConfigurationLocation location,
                                     @Nullable Map<String, String> properties,
-                                    @Nullable TabWidthAndBaseDirProvider configurations,
-                                    @NotNull ClassLoader loaderOfCheckedCode);
+                                    @Nullable TabWidthAndBaseDirProvider configurations);
 
 
     /**

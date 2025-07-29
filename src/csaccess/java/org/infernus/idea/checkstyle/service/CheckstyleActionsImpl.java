@@ -46,19 +46,17 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     @Override
     public CheckStyleChecker createChecker(@Nullable final Module module,
                                            @NotNull final ConfigurationLocation location,
-                                           final Map<String, String> properties,
-                                           @NotNull final ClassLoader loaderOfCheckedCode) {
-        return createChecker(module, location, properties, null, loaderOfCheckedCode);
+                                           final Map<String, String> properties) {
+        return createChecker(module, location, properties, null);
     }
 
     @Override
     public CheckStyleChecker createChecker(@Nullable final Module module,
                                            @NotNull final ConfigurationLocation location,
                                            final Map<String, String> properties,
-                                           @Nullable final TabWidthAndBaseDirProvider configurations,
-                                           @NotNull final ClassLoader loaderOfCheckedCode) {
+                                           @Nullable final TabWidthAndBaseDirProvider configurations) {
         return executeCommand(new OpCreateChecker(
-                module, location, properties, configurations, loaderOfCheckedCode, checkstyleProjectService));
+                module, location, properties, configurations, checkstyleProjectService));
     }
 
     @Override

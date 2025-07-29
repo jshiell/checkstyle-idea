@@ -120,7 +120,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
     }
 
 
-    private CheckStyleChecker createChecker(@NotNull final Module pModule) throws URISyntaxException, IOException {
+    private CheckStyleChecker createChecker(@NotNull final Module module) throws URISyntaxException, IOException {
         final ConfigurationLocation configLoc = new StringConfigurationLocation(readFile(CONFIG_FILE), TestHelper.mockProject());
 
         final TabWidthAndBaseDirProvider configurations = mock(TabWidthAndBaseDirProvider.class);
@@ -128,8 +128,8 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         final String baseDir = new File(Objects.requireNonNull(getClass().getResource(CONFIG_FILE)).toURI()).getParent();
         when(configurations.baseDir()).thenReturn(Optional.of(baseDir));
 
-        return csService.getCheckstyleInstance().createChecker(pModule, configLoc,
-                Collections.emptyMap(), configurations, getClass().getClassLoader());
+        return csService.getCheckstyleInstance()
+                .createChecker(module, configLoc, Collections.emptyMap(), configurations);
     }
 
 

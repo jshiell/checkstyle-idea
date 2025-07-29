@@ -21,12 +21,6 @@ Released under a BSD-style licence - please see the LICENCE file for details.
 Once installed, a new inspection will be available in the group 'CheckStyle'. The 'Inspections' item in the preferences
 panel will allow you to turn this on and to configure it.
 
-Project exceptions are treated a little oddly. Because CheckStyle demands these to be on the current classpath, errors
-will appear if these have not as yet been compiled. Further, because we cache the real-time checkers for performance
-reasons, real-time scans may continue to show the errors after a compilation. A static scan will force a reload of the
-Checker and should resolve this.
-
-
 ## Configuration
 
 Configuration is available under the *Settings* dialogue, under *Tools* -> *Checkstyle*. This controls configuration for both the inspection and static
@@ -92,7 +86,6 @@ If an error occurs during the check an exception will be thrown, which IDEA will
 exceptions dialogue. If you're unsure as to why things are awry this would be your best bet - chances are it's a missing
 property or classpath pre-requisite.
 
-
 ## Notable Extensions
 
 ### [sevntu.checkstyle](http://sevntu-checkstyle.github.io/sevntu.checkstyle/)
@@ -104,7 +97,6 @@ property or classpath pre-requisite.
 
 *Checkstyle Addons* offers additional Checkstyle checks not found in other Checkstyle extensions, and it's easy to
 [set up in Checkstyle-IDEA](http://checkstyle-addons.thomasjensen.com/run.html#run-intellij).
-
 
 ## Development
 
@@ -134,12 +126,6 @@ If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA 
 [Jetbrains offer a support document on this
 subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
 
-### I see 'Got an exception - java.lang.RuntimeException: Unable to get class information for <Exception Class>. (0:0)'
-
-CheckStyle is unable to retrieve information on exceptions in your project until you have built it. Build your project
-in IDEA and then rescan.
-
-
 ## Limitations
 
 * If you import Gradle project withs **Create separate module per source set** active in IDEA 2016 or above then the
@@ -155,12 +141,10 @@ in IDEA and then rescan.
 * CheckStyle errors and warnings from the inspection are both shown at a single level, as IDEA will only allow one
   warning level for an inspection.
 
-
 ## Feedback
 
 Any comments or bug reports are most welcome - please visit
 the project website on [GitHub](https://github.com/jshiell/checkstyle-idea/).
-
 
 ## I need debug information!
 
@@ -168,7 +152,6 @@ The debug logging of the plugin is arcane and not particularly well done, for wh
 such context is needed then it can be seen by using IDEA's **Help** -> **Debug Log Settings...** and adding:
 
     #org.infernus.idea.checkstyle
-
 
 ## Acknowledgements
 
@@ -219,6 +202,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Ali Ustek (@austek)
 * Richard (@rhierlmeier)
 * James Baker (@james-baker-aera)
+* @LlamaLad7
 
 And also thanks are due to the authors and contributors of:
 

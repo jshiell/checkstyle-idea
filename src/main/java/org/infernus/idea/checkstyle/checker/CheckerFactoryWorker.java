@@ -14,32 +14,27 @@ class CheckerFactoryWorker extends Thread {
     private final Map<String, String> properties;
     private final Module module;
     private final CheckstyleProjectService checkstyleProjectService;
-    private final ClassLoader loaderOfCheckedCode;
 
     private Object threadReturn = null;
 
     CheckerFactoryWorker(@NotNull final ConfigurationLocation location,
                          @Nullable final Map<String, String> properties,
                          @Nullable final Module module,
-                         @NotNull final CheckstyleProjectService checkstyleProjectService,
-                         @NotNull final ClassLoader loaderOfCheckedCode) {
+                         @NotNull final CheckstyleProjectService checkstyleProjectService) {
         this.location = location;
         this.properties = properties;
         this.module = module;
         this.checkstyleProjectService = checkstyleProjectService;
-        this.loaderOfCheckedCode = loaderOfCheckedCode;
     }
 
     @Override
     public void run() {
         super.run();
 
-        setContextClassLoader(loaderOfCheckedCode);
-
         try {
             final CheckStyleChecker checker = checkstyleProjectService
                     .getCheckstyleInstance()
-                    .createChecker(module, location, properties, loaderOfCheckedCode);
+                    .createChecker(module, location, properties);
             threadReturn = new CachedChecker(checker);
         } catch (RuntimeException e) {
             threadReturn = e;

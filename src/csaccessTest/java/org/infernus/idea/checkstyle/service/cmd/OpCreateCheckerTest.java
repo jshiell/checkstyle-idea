@@ -52,34 +52,31 @@ public class OpCreateCheckerTest {
 
     @Test
     public void testCreateCheckerWithConfigsMock() throws IOException, URISyntaxException {
-
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
                 FileUtil.readFile("cmd/" + CONFIG_FILE), TestHelper.mockProject());
 
-        final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, configLoc,
-                emptyMap(), configurationsMock, getClass().getClassLoader());
+        final CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock)
+                .createChecker(moduleMock, configLoc, emptyMap(), configurationsMock);
         assertNotNull(checker);
     }
 
 
     @Test(expected = CheckStylePluginException.class)
     public void testCreateCheckerWithNoConfigLoc() {
-
         //noinspection ConstantConditions
-        new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(moduleMock, null, emptyMap(),
-                configurationsMock, getClass().getClassLoader());
+        new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock)
+                .createChecker(moduleMock, null, emptyMap(), configurationsMock);
         fail("expected exception was not thrown");
     }
 
 
     @Test
     public void testCreateCheckerWithNoModule() throws IOException, URISyntaxException {
-
         final ConfigurationLocation configLoc = new StringConfigurationLocation(
                 FileUtil.readFile("cmd/" + CONFIG_FILE), TestHelper.mockProject());
 
-        CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock).createChecker(null, configLoc,
-                emptyMap(), configurationsMock, getClass().getClassLoader());
+        CheckStyleChecker checker = new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock)
+                .createChecker(null, configLoc, emptyMap(), configurationsMock);
         assertNotNull(checker);
     }
 }

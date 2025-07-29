@@ -9,7 +9,6 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.util.ClassLoaderDumper;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,10 +123,6 @@ public class CheckerFactory {
         }
     }
 
-    private ModuleClassPathBuilder moduleClassPathBuilder() {
-        return project.getService(ModuleClassPathBuilder.class);
-    }
-
     private CachedChecker createChecker(@NotNull final ConfigurationLocation location,
                                         @Nullable final Module module) {
         final ListPropertyResolver propertyResolver;
@@ -140,15 +135,7 @@ public class CheckerFactory {
             return blockAndShowMessage(location, module, e, "checkstyle.file-io-failed", location.getLocation());
         }
 
-        final ClassLoader loaderOfCheckedCode = moduleClassPathBuilder().build(module);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Call to create new checker with properties:\n"
-                    + dumpProperties(propertyResolver)
-                    + "With plugin classloader:"
-                    + ClassLoaderDumper.dumpClassLoader(loaderOfCheckedCode));
-        }
-
-        final Object workerResult = executeWorker(location, module, propertyResolver, loaderOfCheckedCode);
+        final Object workerResult = executeWorker(location, module, propertyResolver);
 
         if (workerResult instanceof CheckstyleToolException) {
             return blockAndShowMessageFromException(location, module, (CheckstyleToolException) workerResult);
@@ -175,10 +162,9 @@ public class CheckerFactory {
 
     private Object executeWorker(@NotNull final ConfigurationLocation location,
                                  @Nullable final Module module,
-                                 final ListPropertyResolver resolver,
-                                 @NotNull final ClassLoader loaderOfCheckedCode) {
+                                 final ListPropertyResolver resolver) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
-                resolver.getPropertyNamesToValues(), module, checkstyleProjectService, loaderOfCheckedCode);
+                resolver.getPropertyNamesToValues(), module, checkstyleProjectService);
         worker.start();
 
         while (worker.isAlive()) {
@@ -247,18 +233,4 @@ public class CheckerFactory {
                 "checkstyle.parse-failed", checkstyleException.getMessage());
     }
 
-    private String dumpProperties(final ListPropertyResolver resolver) {
-        StringBuilder dump = new StringBuilder();
-        if (resolver != null) {
-            final Map<String, String> propertiesToValues = resolver.getPropertyNamesToValues();
-            for (final Map.Entry<String, String> propertyEntry : propertiesToValues.entrySet()) {
-                dump.append("- Property: ")
-                        .append(propertyEntry.getKey())
-                        .append("=")
-                        .append(propertyEntry.getValue())
-                        .append('\n');
-            }
-        }
-        return dump.toString();
-    }
 }

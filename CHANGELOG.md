@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.109.2** Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.
 * **5.109.1** New: Added grouping of results by the source check (#670).
 * **5.109.0** New: Added Checkstyle 10.26.1.
 * **5.108.1** Fixed: Resolved edge case if Piccolo is in the project classpath (#668).
