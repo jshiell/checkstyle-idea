@@ -14,7 +14,7 @@ plugins {
     id("java")
     id("jacoco")
     id("idea")
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.7.0"
 
     id("org.infernus.idea.checkstyle.build")
 }
@@ -28,7 +28,6 @@ intellijPlatform {
         version = project.version.toString()
 
         ideaVersion {
-            sinceBuild = "231.9392.1"
             untilBuild = provider { null }
         }
     }
@@ -42,9 +41,9 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-
 }
 
 tasks {
