@@ -104,6 +104,15 @@
     </extensions>
 
     <actions>
+        <action
+                id="AnalyseCurrentFileAction"
+                class="org.infernus.idea.checkstyle.actions.AnalyseCurrentFile"
+                text="Scan with Checkstyle..."
+                description="Scan the current file with the configured rules for Checkstyle">
+
+            <add-to-group group-id="AnalyzeMenu" anchor="last"/>
+        </action>
+
         <group id="CheckStylePluginTreeActions" text="Filter" popup="true">
             <action id="CheckStyleScrollToSourceAction"
                     class="org.infernus.idea.checkstyle.actions.ScrollToSource"

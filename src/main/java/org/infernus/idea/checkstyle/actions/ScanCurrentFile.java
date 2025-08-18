@@ -43,13 +43,12 @@ public class ScanCurrentFile extends BaseAction {
                 final ToolWindow toolWindow = toolWindow(project);
                 toolWindow.activate(() -> {
                     try {
+                        final VirtualFile selectedFile = selectedFile(project, event);
+
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
                         final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow);
-                        final VirtualFile selectedFile = getSelectedValidFile(
-                                project,
-                                overrideIfExists);
-                        if (selectedFile != null) {
+                        if (validForScanning(selectedFile, project, overrideIfExists)) {
                             staticScanner(project).asyncScanFiles(
                                     singletonList(selectedFile),
                                     overrideIfExists);
@@ -68,32 +67,30 @@ public class ScanCurrentFile extends BaseAction {
         });
     }
 
-    @Nullable
-    private VirtualFile getSelectedValidFile(
-            final Project project,
-            final @Nullable ConfigurationLocation overrideIfExists) {
-        final VirtualFile selectedFile = getSelectedFile(project);
+    protected @Nullable VirtualFile selectedFile(@NotNull final Project project,
+                                                 @NotNull final AnActionEvent event) {
+        return getSelectedFile(project);
+    }
+
+    protected boolean validForScanning(final VirtualFile selectedFile,
+                                       final @NotNull Project project,
+                                       final @Nullable ConfigurationLocation overrideIfExists) {
         if (selectedFile == null) {
-            return null;
+            return false;
         }
 
         final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
         if (!isFileValidAgainstScanScope(project, pluginConfiguration, selectedFile)) {
-            return null;
+            return false;
         }
 
         final List<NamedScope> namedScopes = getNamedScopesToCheck(pluginConfiguration, overrideIfExists);
         if (!namedScopes.isEmpty() && namedScopes.stream().map(NamedScope::getValue).allMatch(Objects::isNull)) {
-            return selectedFile;
+            return true;
         }
 
-        final boolean isFileInScope = namedScopes.stream()
+        return namedScopes.stream()
                 .anyMatch((NamedScope namedScope) -> NamedScopeHelper.isFileInScope(psiFileFor(project, selectedFile), namedScope));
-        if (isFileInScope) {
-            return selectedFile;
-        }
-
-        return null;
     }
 
     @NotNull
@@ -171,7 +168,9 @@ public class ScanCurrentFile extends BaseAction {
         final Presentation presentation = event.getPresentation();
 
         project(event).ifPresentOrElse(project -> {
-            if (getSelectedFile(project) != null) {
+            final VirtualFile selectedFile = selectedFile(project, event);
+            final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow(project));
+            if (selectedFile != null && validForScanning(selectedFile, project, overrideIfExists)) {
                 presentation.setEnabled(!staticScanner(project).isScanInProgress());
             } else {
                 presentation.setEnabled(false);
