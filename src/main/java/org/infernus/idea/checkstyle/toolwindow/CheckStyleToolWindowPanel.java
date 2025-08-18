@@ -28,7 +28,9 @@ import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanResult;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -39,6 +41,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -61,15 +64,14 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private static final String MAIN_ACTION_GROUP = "CheckStylePluginActions";
     private static final String TREE_ACTION_GROUP = "CheckStylePluginTreeActions";
-    private static final String DEFAULT_OVERRIDE = message("plugin.toolwindow.default-file");
 
-    private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS
-            = new HashMap<>();
+    private static final Map<Pattern, String> CHECKSTYLE_ERROR_PATTERNS = new HashMap<>();
 
     private final Project project;
     private final ToolWindow toolWindow;
-    private final ComboBox configurationOverrideCombo = new ComboBox();
-    private final DefaultComboBoxModel configurationOverrideModel = new DefaultComboBoxModel();
+    private final ConfigurationLocation defaultOverride;
+    private final ComboBox<ConfigurationLocation> configurationOverrideCombo = new ComboBox<>();
+    private final DefaultComboBoxModel<ConfigurationLocation> configurationOverrideModel = new DefaultComboBoxModel<>();
 
     private boolean displayingErrors = true;
     private boolean displayingWarnings = true;
@@ -107,6 +109,8 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         this.toolWindow = toolWindow;
         this.project = project;
 
+        defaultOverride = createDefaultOverride();
+
         configurationChanged();
         configurationManager().addConfigurationListener(this);
 
@@ -135,9 +139,25 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         mainToolbar.getComponent().setVisible(true);
     }
 
+    private @NotNull ConfigurationLocation createDefaultOverride() {
+        final ConfigurationLocation overrideLocation = new ConfigurationLocation("default", ConfigurationType.LOCAL_FILE, project) {
+            @Override
+            protected @NotNull InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) {
+                throw new UnsupportedOperationException("Default override should never be resolved to a file.");
+            }
+
+            @Override
+            public Object clone() {
+                return this;
+            }
+        };
+        overrideLocation.setDescription(message("plugin.toolwindow.default-file"));
+        return overrideLocation;
+    }
+
     public ConfigurationLocation getSelectedOverride() {
         final Object selectedItem = configurationOverrideModel.getSelectedItem();
-        if (DEFAULT_OVERRIDE.equals(selectedItem)) {
+        if (defaultOverride.equals(selectedItem)) {
             return null;
         }
         return (ConfigurationLocation) selectedItem;
@@ -216,9 +236,9 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     public void configurationChanged() {
         configurationOverrideModel.removeAllElements();
 
-        configurationOverrideModel.addElement(DEFAULT_OVERRIDE);
+        configurationOverrideModel.addElement(defaultOverride);
         configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
-        configurationOverrideModel.setSelectedItem(DEFAULT_OVERRIDE);
+        configurationOverrideModel.setSelectedItem(defaultOverride);
     }
 
     public void showToolWindow() {
