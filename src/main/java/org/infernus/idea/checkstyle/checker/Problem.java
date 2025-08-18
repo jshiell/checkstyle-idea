@@ -23,14 +23,15 @@ public record Problem(@NotNull PsiElement target,
     @NotNull
     public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager,
                                                  final boolean onTheFly) {
+        String sourceCheck = DisplayFormats.shortenClassName(sourceName);
         return inspectionManager.createProblemDescriptor(target,
-                CheckStyleBundle.message("inspection.message", message()),
-                quickFixes(), problemHighlightType(), onTheFly, afterEndOfLine);
+                CheckStyleBundle.message("inspection.message", message, sourceCheck),
+                quickFixes(sourceCheck), problemHighlightType(), onTheFly, afterEndOfLine);
     }
 
-    private LocalQuickFix[] quickFixes() {
-        if (sourceName != null) {
-            return new LocalQuickFix[]{new SuppressForCheckstyleFix(DisplayFormats.shortenClassName(sourceName))};
+    private LocalQuickFix[] quickFixes(final String sourceCheck) {
+        if (sourceCheck != null) {
+            return new LocalQuickFix[]{new SuppressForCheckstyleFix(sourceCheck)};
         }
         return null;
     }
