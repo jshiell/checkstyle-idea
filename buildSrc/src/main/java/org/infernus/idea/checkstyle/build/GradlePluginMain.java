@@ -11,7 +11,6 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
@@ -25,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
  * The main plugin class. The action starts here.
  */
 public class GradlePluginMain implements Plugin<Project> {
-    public static final String CSLIB_TARGET_SUBFOLDER = "checkstyle/lib";
     private static final String CSCLASSES_TARGET_SUBFOLDER = "checkstyle/classes";
 
     private CheckstyleVersions supportedCsVersions = null;
@@ -99,47 +97,8 @@ public class GradlePluginMain implements Plugin<Project> {
     }
 
     private void createCheckstyleArtifactTasks(final Project project) {
-        TaskProvider<GatherCheckstyleArtifactsTask> taskProvider =
-                project.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
-        taskProvider.configure((GatherCheckstyleArtifactsTask task) -> {
-            project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
-
-            // Add generated classpath info file to resources
-            SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
-            SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
-        });
-
-        createCopyCheckstyleArtifactsToSandboxTask(project, false);
-        createCopyCheckstyleArtifactsToSandboxTask(project, true);
-
         createCopyClassesToSandboxTask(project, false);
         createCopyClassesToSandboxTask(project, true);
-    }
-
-    private void createCopyCheckstyleArtifactsToSandboxTask(final Project project, final boolean test) {
-        final TaskContainer tasks = project.getTasks();
-        final String taskName = test ? "copyCheckstyleArtifactsToTestSandbox" : "copyCheckstyleArtifactsToSandbox";
-        final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
-        taskProvider.configure((Copy copyTask) -> {
-            copyTask.setGroup("intellij");
-            copyTask.setDescription("Adds the gathered Checkstyle artifacts to the prepared "
-                    + (test ? "test " : "") + "sandbox");
-
-            final GatherCheckstyleArtifactsTask gatherTask =
-                    (GatherCheckstyleArtifactsTask) tasks.getByName(GatherCheckstyleArtifactsTask.NAME);
-            copyTask.dependsOn(gatherTask, "prepareTestSandbox");
-            if (test) {
-                tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
-                tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
-                forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
-            } else {
-                tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
-            }
-
-            copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, CSLIB_TARGET_SUBFOLDER)));
-        });
     }
 
     private void forEachXTest(final TaskContainer tasks, final Consumer<Task> taskConsumer) {
@@ -174,10 +133,8 @@ public class GradlePluginMain implements Plugin<Project> {
                 tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
                 tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
                 forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToTestSandbox"));
             } else {
                 tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
             }
 
             copyTask.from(csaccessSourceSet.getOutput());
@@ -201,13 +158,10 @@ public class GradlePluginMain implements Plugin<Project> {
         final TaskContainer tasks = project.getTasks();
         tasks.all((Task task) -> {
             if ("buildPlugin".equals(task.getName()) || "runIdea".equals(task.getName()) || "runIde".equals(task.getName())) {
-                task.dependsOn(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
                 task.dependsOn(tasks.getByName("copyClassesToSandbox"));
             } else if ("prepareSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToSandbox").dependsOn(task);
                 tasks.getByName("copyClassesToSandbox").dependsOn(task);
             } else if ("prepareTestsSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToTestSandbox").dependsOn(task);
                 tasks.getByName("copyClassesToTestSandbox").dependsOn(task);
             }
         });

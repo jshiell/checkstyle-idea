@@ -9,13 +9,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
-
 
 /**
  * Makes the Checkstyle tool available to the plugin in the correct version. Registered in {@code plugin.xml}.
@@ -79,33 +80,52 @@ public class CheckstyleProjectService {
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
-        synchronized (project) {
-            checkstyleClassLoaderContainer = null;
-            checkstyleClassLoaderFactory = new Callable<>() {
-                @Override
-                public CheckstyleClassLoaderContainer call() {
-                    return new CheckstyleClassLoaderContainer(
-                            project,
-                            CheckstyleProjectService.this,
-                            checkstyleVersionToLoad,
-                            toListOfUrls(thirdPartyJars));
+        // TODO: Need to offer an option for users to pre-download library versions.
+        // TODO: Need to offer an option for users to download the library through an external tool,
+        //  and place it into the cache directory for later use.
+        final var checkstyleDownloader = project.getService(CheckstyleDownloader.class);
+        try {
+            synchronized (project) {
+                final var jarPath = checkstyleDownloader.getPathToVersion(checkstyleVersionToLoad);
+
+                if (!Files.exists(jarPath)) {
+                    checkstyleDownloader.downloadVersion(checkstyleVersionToLoad, jarPath);
+
+                    if (!Files.exists(jarPath)) {
+                        throw new RuntimeException("Failed to download checkstyle jar");
+                    }
                 }
 
-                @NotNull
-                private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
-                    List<URL> result = new ArrayList<>();
-                    if (jarFilePaths != null) {
-                        for (final String absolutePath : jarFilePaths) {
-                            try {
-                                result.add(new File(absolutePath).toURI().toURL());
-                            } catch (MalformedURLException e) {
-                                LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
+                checkstyleClassLoaderContainer = null;
+                checkstyleClassLoaderFactory = new Callable<>() {
+                    @Override
+                    public CheckstyleClassLoaderContainer call() {
+                        return new CheckstyleClassLoaderContainer(
+                            project,
+                            CheckstyleProjectService.this,
+                            jarPath,
+                            toListOfUrls(thirdPartyJars));
+                    }
+
+                    @NotNull
+                    private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
+                        List<URL> result = new ArrayList<>();
+                        if (jarFilePaths != null) {
+                            for (final String absolutePath : jarFilePaths) {
+                                try {
+                                    result.add(new File(absolutePath).toURI().toURL());
+                                } catch (MalformedURLException e) {
+                                    LOG.warn("Skipping malformed third party classpath entry: "
+                                             + absolutePath, e);
+                                }
                             }
                         }
+                        return result;
                     }
-                    return result;
-                }
-            };
+                };
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

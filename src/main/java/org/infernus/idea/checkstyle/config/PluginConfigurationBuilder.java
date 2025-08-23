@@ -11,6 +11,7 @@ import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public final class PluginConfigurationBuilder {
@@ -23,6 +24,8 @@ public final class PluginConfigurationBuilder {
     private SortedSet<String> activeLocationIds;
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
+    private String baseDownloadUrl;
+    private Path cachePath;
 
     private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
                                        @NotNull final ScanScope scanScope,
@@ -32,7 +35,9 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final List<String> thirdPartyClasspath,
                                        @NotNull final SortedSet<String> activeLocationIds,
                                        final boolean scanBeforeCheckin,
-                                       @Nullable final String lastActivePluginVersion) {
+                                       @Nullable final String lastActivePluginVersion,
+                                       @NotNull final String baseDownloadUrl,
+                                       @NotNull final Path cachePath) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -42,6 +47,8 @@ public final class PluginConfigurationBuilder {
         this.activeLocationIds = activeLocationIds;
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
+        this.baseDownloadUrl = baseDownloadUrl;
+        this.cachePath = cachePath;
     }
 
     public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
@@ -62,7 +69,9 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
-                CheckStylePlugin.version());
+                CheckStylePlugin.version(),
+                "https://github.com/checkstyle/checkstyle/releases/download",
+                Path.of(System.getProperty("java.io.tmpdir"), "checkstyle-idea-cache"));
     }
 
     public static PluginConfigurationBuilder testInstance(@NotNull final String checkstyleVersion) {
@@ -75,7 +84,9 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
-                "aVersion");
+                "aVersion",
+                "",
+                Path.of(System.getProperty("java.io.tmpdir"), "checkstyle-idea-test-cache"));
     }
 
     public static PluginConfigurationBuilder from(@NotNull final PluginConfiguration source) {
@@ -87,7 +98,9 @@ public final class PluginConfigurationBuilder {
                 source.getThirdPartyClasspath(),
                 source.getActiveLocationIds(),
                 source.isScanBeforeCheckin(),
-                source.getLastActivePluginVersion());
+                source.getLastActivePluginVersion(),
+                source.getBaseDownloadUrl(),
+                source.getCachePath());
     }
 
     public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
@@ -135,6 +148,16 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
+    public PluginConfigurationBuilder withBaseDownloadUrl(@NotNull final String newBaseDownloadUrl) {
+      this.baseDownloadUrl = newBaseDownloadUrl;
+      return this;
+    }
+
+    public PluginConfigurationBuilder withCachePath(@NotNull final Path newCachePath) {
+      this.cachePath = newCachePath;
+      return this;
+    }
+
     public PluginConfiguration build() {
         return new PluginConfiguration(
                 checkstyleVersion,
@@ -145,7 +168,9 @@ public final class PluginConfigurationBuilder {
                 Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
                 scanBeforeCheckin,
-                lastActivePluginVersion);
+                lastActivePluginVersion,
+                baseDownloadUrl,
+                cachePath);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {
