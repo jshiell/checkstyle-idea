@@ -6,6 +6,7 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,8 @@ public class PluginConfiguration {
     private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
     private final String lastActivePluginVersion;
+    private final String baseDownloadUrl;
+    private final Path cachePath;
 
     PluginConfiguration(@NotNull final String checkstyleVersion,
                         @NotNull final ScanScope scanScope,
@@ -34,7 +37,9 @@ public class PluginConfiguration {
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
                         final boolean scanBeforeCheckin,
-                        @Nullable final String lastActivePluginVersion) {
+                        @Nullable final String lastActivePluginVersion,
+                        @NotNull final String baseDownloadUrl,
+                        @NotNull final Path cachePath) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -46,6 +51,8 @@ public class PluginConfiguration {
                 .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
+        this.baseDownloadUrl = baseDownloadUrl;
+        this.cachePath = cachePath;
     }
 
     @NotNull
@@ -88,7 +95,17 @@ public class PluginConfiguration {
         return lastActivePluginVersion;
     }
 
-    public SortedSet<String> getActiveLocationIds() {
+    @NotNull
+    public String getBaseDownloadUrl() {
+      return baseDownloadUrl;
+    }
+
+    @NotNull
+    public Path getCachePath() {
+      return cachePath;
+    }
+
+  public SortedSet<String> getActiveLocationIds() {
         return this.activeLocationIds;
     }
 

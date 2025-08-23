@@ -6,6 +6,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.ControlFlowException;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.xmlb.annotations.*;
 import org.infernus.idea.checkstyle.CheckStylePlugin;
@@ -15,6 +16,7 @@ import org.infernus.idea.checkstyle.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,6 +90,10 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         private List<String> activeLocationIds;
         @MapAnnotation
         private List<ConfigurationLocation> locations;
+        @Tag
+        private String baseDownloadUrl;
+        @Tag
+        private String cachePath;
 
         @MapAnnotation
         private Map<String, String> configuration;
@@ -116,6 +122,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                             location.getProperties()
                     ))
                     .collect(Collectors.toList());
+            projectSettings.baseDownloadUrl = currentPluginConfig.getBaseDownloadUrl();
+            projectSettings.cachePath = currentPluginConfig.getCachePath().toString();
 
             return projectSettings;
         }
@@ -147,7 +155,12 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                         .withScanBeforeCheckin(scanBeforeCheckin)
                         .withThirdPartyClassPath(requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
                         .withLocations(deserialiseLocations(project))
-                        .withActiveLocationIds(new TreeSet<>(requireNonNullElseGet(activeLocationIds, ArrayList::new)));
+                        .withActiveLocationIds(new TreeSet<>(requireNonNullElseGet(activeLocationIds, ArrayList::new)))
+                        .withBaseDownloadUrl(requireNonNullElseGet(baseDownloadUrl, () -> PluginConfigurationBuilder.defaultConfiguration(project).build().getBaseDownloadUrl()))
+                        .withCachePath(Path.of(FileUtilRt.toSystemDependentName(
+                            requireNonNullElseGet(cachePath,
+                                () -> defaultConfiguration(project).build().getCachePath()
+                                    .toString()))));
             }
 
             return new LegacyProjectConfigurationStateDeserialiser(project)
