@@ -11,7 +11,6 @@ import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.*;
 
 public final class PluginConfigurationBuilder {
@@ -25,7 +24,6 @@ public final class PluginConfigurationBuilder {
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
     private String baseDownloadUrl;
-    private Path cachePath;
 
     private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
                                        @NotNull final ScanScope scanScope,
@@ -36,8 +34,7 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final SortedSet<String> activeLocationIds,
                                        final boolean scanBeforeCheckin,
                                        @Nullable final String lastActivePluginVersion,
-                                       @NotNull final String baseDownloadUrl,
-                                       @NotNull final Path cachePath) {
+                                       @NotNull final String baseDownloadUrl) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -48,7 +45,6 @@ public final class PluginConfigurationBuilder {
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
         this.baseDownloadUrl = baseDownloadUrl;
-        this.cachePath = cachePath;
     }
 
     public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
@@ -70,8 +66,7 @@ public final class PluginConfigurationBuilder {
                 Collections.emptySortedSet(),
                 false,
                 CheckStylePlugin.version(),
-                "https://github.com/checkstyle/checkstyle/releases/download",
-                Path.of(System.getProperty("java.io.tmpdir"), "checkstyle-idea-cache"));
+                "https://github.com/checkstyle/checkstyle/releases/download");
     }
 
     public static PluginConfigurationBuilder testInstance(@NotNull final String checkstyleVersion) {
@@ -85,8 +80,7 @@ public final class PluginConfigurationBuilder {
                 Collections.emptySortedSet(),
                 false,
                 "aVersion",
-                "",
-                Path.of(System.getProperty("java.io.tmpdir"), "checkstyle-idea-test-cache"));
+                "");
     }
 
     public static PluginConfigurationBuilder from(@NotNull final PluginConfiguration source) {
@@ -99,8 +93,7 @@ public final class PluginConfigurationBuilder {
                 source.getActiveLocationIds(),
                 source.isScanBeforeCheckin(),
                 source.getLastActivePluginVersion(),
-                source.getBaseDownloadUrl(),
-                source.getCachePath());
+                source.getBaseDownloadUrl());
     }
 
     public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
@@ -153,11 +146,6 @@ public final class PluginConfigurationBuilder {
       return this;
     }
 
-    public PluginConfigurationBuilder withCachePath(@NotNull final Path newCachePath) {
-      this.cachePath = newCachePath;
-      return this;
-    }
-
     public PluginConfiguration build() {
         return new PluginConfiguration(
                 checkstyleVersion,
@@ -169,8 +157,7 @@ public final class PluginConfigurationBuilder {
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
                 scanBeforeCheckin,
                 lastActivePluginVersion,
-                baseDownloadUrl,
-                cachePath);
+                baseDownloadUrl);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {

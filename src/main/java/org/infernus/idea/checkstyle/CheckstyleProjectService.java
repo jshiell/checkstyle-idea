@@ -1,26 +1,28 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.platform.ide.progress.TasksKt;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.concurrent.Callable;
-
 /**
- * Makes the Checkstyle tool available to the plugin in the correct version. Registered in {@code plugin.xml}.
- * This must be a project-level service because the Checkstyle version is chosen per project.
+ * Makes the Checkstyle tool available to the plugin in the correct version. Registered in
+ * {@code plugin.xml}. This must be a project-level service because the Checkstyle version is chosen
+ * per project.
  */
 public class CheckstyleProjectService {
 
@@ -35,12 +37,12 @@ public class CheckstyleProjectService {
 
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
-                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath());
+            pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath());
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
-                                     @Nullable final String requestedVersion,
-                                     @Nullable final List<String> thirdPartyJars) {
+        @Nullable final String requestedVersion,
+        @Nullable final List<String> thirdPartyJars) {
         this.project = project;
         supportedVersions = new VersionListReader().getSupportedVersions();
 
@@ -54,7 +56,8 @@ public class CheckstyleProjectService {
         // is available if Piccolo is on the project classpath
         try {
             Class.forName("org.apache.xerces.jaxp.SAXParserFactoryImpl");
-            System.setProperty("com.bluecast.xml.ValidatingSAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+            System.setProperty("com.bluecast.xml.ValidatingSAXParserFactory",
+                "org.apache.xerces.jaxp.SAXParserFactoryImpl");
         } catch (ClassNotFoundException ignored) {
             // ignored
         }
@@ -62,8 +65,8 @@ public class CheckstyleProjectService {
 
     @NotNull
     public static CheckstyleProjectService forVersion(@NotNull final Project project,
-                                                      @Nullable final String requestedVersion,
-                                                      @Nullable final List<String> thirdPartyJars) {
+        @Nullable final String requestedVersion,
+        @Nullable final List<String> thirdPartyJars) {
         return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars);
     }
 
@@ -78,54 +81,55 @@ public class CheckstyleProjectService {
     }
 
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
-                                          @Nullable final List<String> thirdPartyJars) {
+        @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
         // TODO: Need to offer an option for users to pre-download library versions.
         // TODO: Need to offer an option for users to download the library through an external tool,
         //  and place it into the cache directory for later use.
-        final var checkstyleDownloader = project.getService(CheckstyleDownloader.class);
-        try {
-            synchronized (project) {
-                final var jarPath = checkstyleDownloader.getPathToVersion(checkstyleVersionToLoad);
+        final var checkstyleDownloader = ApplicationManager.getApplication()
+            .getService(CheckstyleDownloader.class);
+        synchronized (project) {
 
-                if (!Files.exists(jarPath)) {
-                    checkstyleDownloader.downloadVersion(checkstyleVersionToLoad, jarPath);
-
-                    if (!Files.exists(jarPath)) {
-                        throw new RuntimeException("Failed to download checkstyle jar");
+            TasksKt.runWithModalProgressBlocking(project,
+                "Downloading Checkstyle Versions",
+                (scope, continuation) -> {
+                    try {
+                        checkstyleDownloader.downloadVersion(checkstyleVersionToLoad);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
                     }
+
+                    return null;
+                });
+
+            final var jarPath = checkstyleDownloader.getArtifactPath(checkstyleVersionToLoad);
+            checkstyleClassLoaderContainer = null;
+            checkstyleClassLoaderFactory = new Callable<>() {
+                @Override
+                public CheckstyleClassLoaderContainer call() {
+                    return new CheckstyleClassLoaderContainer(
+                        project,
+                        CheckstyleProjectService.this,
+                        jarPath,
+                        toListOfUrls(thirdPartyJars));
                 }
 
-                checkstyleClassLoaderContainer = null;
-                checkstyleClassLoaderFactory = new Callable<>() {
-                    @Override
-                    public CheckstyleClassLoaderContainer call() {
-                        return new CheckstyleClassLoaderContainer(
-                            project,
-                            CheckstyleProjectService.this,
-                            jarPath,
-                            toListOfUrls(thirdPartyJars));
-                    }
-
-                    @NotNull
-                    private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
-                        List<URL> result = new ArrayList<>();
-                        if (jarFilePaths != null) {
-                            for (final String absolutePath : jarFilePaths) {
-                                try {
-                                    result.add(new File(absolutePath).toURI().toURL());
-                                } catch (MalformedURLException e) {
-                                    LOG.warn("Skipping malformed third party classpath entry: "
-                                             + absolutePath, e);
-                                }
+                @NotNull
+                private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
+                    List<URL> result = new ArrayList<>();
+                    if (jarFilePaths != null) {
+                        for (final String absolutePath : jarFilePaths) {
+                            try {
+                                result.add(new File(absolutePath).toURI().toURL());
+                            } catch (MalformedURLException e) {
+                                LOG.warn("Skipping malformed third party classpath entry: "
+                                         + absolutePath, e);
                             }
                         }
-                        return result;
                     }
-                };
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                    return result;
+                }
+            };
         }
     }
 

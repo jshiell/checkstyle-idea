@@ -1,59 +1,51 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.platform.ide.progress.TasksKt;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.io.HttpRequests;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.jetbrains.annotations.NotNull;
 
 public class CheckstyleDownloader {
 
-    private final Project project;
-
-    public CheckstyleDownloader(@NotNull final Project project) {
-        this.project = project;
+    public void deleteVersion(@NotNull final String version) throws IOException {
+        Files.delete(getArtifactPath(version));
     }
 
-    public void downloadVersion(@NotNull final String version, @NotNull final Path outputPath)
-        throws IOException {
+    public void downloadVersion(@NotNull final String version) throws IOException {
+        final var outputPath = getArtifactPath(version);
         if (!Files.exists(outputPath.getParent())) {
             Files.createDirectories(outputPath.getParent());
         }
 
-        TasksKt.runWithModalProgressBlocking(project, "Downloading Checkstyle",
-            (scope, continuation) -> {
+        try {
+            var currentDownloadAttempt = 0;
+            IOException exception = null;
+            while (currentDownloadAttempt < 3) {
+                currentDownloadAttempt++;
+
                 try {
-                    var currentDownloadAttempt = 0;
-                    IOException exception = null;
-                    final var maxDownloadAttempts = 3;
-                    while (currentDownloadAttempt < maxDownloadAttempts) {
-                        currentDownloadAttempt++;
-
-                        try {
-                            tryDownload(version, outputPath);
-                            exception = null;
-                        } catch (final IOException ioException) {
-                            exception = ioException;
-                        }
-                    }
-
-                    if (exception != null) {
-                        throw exception;
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    tryDownload(version, outputPath);
+                    exception = null;
+                } catch (final IOException ioException) {
+                    exception = ioException;
                 }
+            }
 
-                return null;
-            });
+            if (exception != null) {
+                throw exception;
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    @NotNull
-    public Path getPathToVersion(@NotNull final String version) {
-        return getCacheDirectoryPath().resolve(getArtifactName(version));
+    public Path getArtifactPath(final String version) {
+        return ApplicationManager.getApplication().getService(ApplicationConfigurationState.class)
+            .getState().getCachePath().resolve(getArtifactName(version));
     }
 
     @NotNull
@@ -62,25 +54,18 @@ public class CheckstyleDownloader {
     }
 
     @NotNull
-    private Path getCacheDirectoryPath() {
-        final var pluginConfiguration = project.getService(PluginConfigurationManager.class)
-            .getCurrent();
-
-        return pluginConfiguration.getCachePath();
+    private String getBaseDownloadUrl() {
+        return ApplicationManager.getApplication().getService(ApplicationConfigurationState.class)
+            .getState().getBaseDownloadUrl();
     }
 
     private void tryDownload(final String version, final Path outputPath) throws IOException {
-        final var pluginConfiguration = project.getService(PluginConfigurationManager.class)
-            .getCurrent();
-        String baseUrl = pluginConfiguration.getBaseDownloadUrl();
+        var baseUrl = getBaseDownloadUrl();
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
-        final var finalBaseUrl = baseUrl;
-
-        HttpRequests.request(
-                finalBaseUrl + "/checkstyle-" + version + "/" + getArtifactName(version))
+        HttpRequests.request(baseUrl + "/checkstyle-" + version + "/" + getArtifactName(version))
             .saveToFile(outputPath.toFile(), null);
     }
 }
