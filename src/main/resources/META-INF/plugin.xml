@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.111.0: New: Added Checkstyle 11.0.1.</li>
     <li>5.110.0: New: Added Checkstyle 11.0.0.</li>
     <li>5.109.2: Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.</li>
     <li>5.109.1: New: Added grouping of results by the source check (#670).</li>

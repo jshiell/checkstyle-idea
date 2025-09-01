@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.111.0** New: Added Checkstyle 11.0.1.
 * **5.110.0** New: Added Checkstyle 11.0.0.
 * **5.109.2** Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.
 * **5.109.1** New: Added grouping of results by the source check (#670).
