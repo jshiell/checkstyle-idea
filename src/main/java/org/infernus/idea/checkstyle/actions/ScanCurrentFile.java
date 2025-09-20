@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -17,6 +19,7 @@ import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanScope;
+import org.infernus.idea.checkstyle.util.Async;
 import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,14 +50,18 @@ public class ScanCurrentFile extends BaseAction {
 
                         setProgressText(toolWindow, "plugin.status.in-progress.current");
 
-                        final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow);
-                        if (validForScanning(selectedFile, project, overrideIfExists)) {
-                            staticScanner(project).asyncScanFiles(
-                                    singletonList(selectedFile),
-                                    overrideIfExists);
-                        } else {
-                            setProgressText(toolWindow, "plugin.status.in-progress.out-of-scope");
-                        }
+                        Async.executeOnPooledThread(() -> {
+                            final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow);
+                            if (validForScanning(selectedFile, project, overrideIfExists)) {
+                                staticScanner(project).asyncScanFiles(
+                                        singletonList(selectedFile),
+                                        overrideIfExists);
+                            } else {
+                                ApplicationManager.getApplication().invokeLater(() ->
+                                        setProgressText(toolWindow, "plugin.status.in-progress.out-of-scope"));
+                            }
+                            return null;
+                        });
 
                     } catch (Throwable e) {
                         LOG.warn("Current File scan failed", e);
@@ -96,11 +103,13 @@ public class ScanCurrentFile extends BaseAction {
     @NotNull
     private static PsiFile psiFileFor(@NotNull final Project project,
                                       @NotNull final VirtualFile selectedFile) {
-        final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
-        if (psiFile == null) {
-            throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
-        }
-        return psiFile;
+        return ReadAction.compute(() -> {
+            final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
+            if (psiFile == null) {
+                throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
+            }
+            return psiFile;
+        });
     }
 
     private static boolean isFileValidAgainstScanScope(@NotNull final Project project,
@@ -109,16 +118,19 @@ public class ScanCurrentFile extends BaseAction {
         final ScanScope scanScope = pluginConfiguration.getScanScope();
 
         if (scanScope != ScanScope.Everything) {
-            final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
-            if (!projectFileIndex.isInSourceContent(selectedFile)) {
-                return false;
-            }
-            if (!scanScope.includeNonJavaSources() && !FileTypes.isJava(selectedFile.getFileType())) {
-                return false;
-            }
-            if (!scanScope.includeTestClasses()) {
-                return !projectFileIndex.isInTestSourceContent(selectedFile);
-            }
+            return ReadAction.compute(() -> {
+                final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
+                if (!projectFileIndex.isInSourceContent(selectedFile)) {
+                    return false;
+                }
+                if (!scanScope.includeNonJavaSources() && !FileTypes.isJava(selectedFile.getFileType())) {
+                    return false;
+                }
+                if (!scanScope.includeTestClasses()) {
+                    return !projectFileIndex.isInTestSourceContent(selectedFile);
+                }
+                return true;
+            });
         }
 
         return true;
