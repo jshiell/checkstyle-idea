@@ -169,8 +169,7 @@ public class ScanCurrentFile extends BaseAction {
 
         project(event).ifPresentOrElse(project -> {
             final VirtualFile selectedFile = selectedFile(project, event);
-            final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow(project));
-            if (selectedFile != null && validForScanning(selectedFile, project, overrideIfExists)) {
+            if (selectedFile != null) {
                 presentation.setEnabled(!staticScanner(project).isScanInProgress());
             } else {
                 presentation.setEnabled(false);

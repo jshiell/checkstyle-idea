@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.111.1** Fixed: Removed scope check when enabling scan current file button to improve performance (#675).
 * **5.111.1** New: Add keyboard shortcuts for next/previous result (#676).
 * **5.111.0** New: Added Checkstyle 11.0.1.
 * **5.110.0** New: Added Checkstyle 11.0.0.
