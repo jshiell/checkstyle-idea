@@ -21,7 +21,6 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.Function;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -50,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
+import static org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel.Direction.FORWARD;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -395,21 +395,16 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 
     private TreePath findPreviousLeaf(@NotNull final JTree tree,
-                                       @Nullable final TreePath startingPath) {
-        // TODO: edge case here when current path is not a leaf, we still go forward
-        // TODO: bug, when changing parent, we skip to first child leaf of previous parent, rather than last
+                                      @Nullable final TreePath startingPath) {
+        if (startingPath == null) {
+            return null;
+        }
 
-        return findSubsequentLeaf(tree, startingPath, i -> i - 1);
+        return findSubsequentLeaf(tree, startingPath, Direction.BACKWARD);
     }
 
     private TreePath findNextLeaf(@NotNull final JTree tree,
-                                       @Nullable final TreePath startingPath) {
-        return findSubsequentLeaf(tree, startingPath, i -> i + 1);
-    }
-
-    private TreePath findSubsequentLeaf(@NotNull final JTree tree,
-                                       @Nullable final TreePath startingPath,
-                                       @NotNull final Function<Integer, Integer> nextIndexFunction) {
+                                  @Nullable final TreePath startingPath) {
         if (startingPath == null) {
             return null;
         }
@@ -425,17 +420,36 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             return next;
         }
 
+        return findSubsequentLeaf(tree, startingPath, FORWARD);
+    }
+
+    private TreePath findSubsequentLeaf(@NotNull final JTree tree,
+                                        @NotNull final TreePath startingPath,
+                                        final Direction direction) {
+        final TreeModel model = tree.getModel();
+
         TreePath currentPath = startingPath;
         TreePath parentPath = currentPath.getParentPath();
         while (parentPath != null) {
             final Object parent = parentPath.getLastPathComponent();
             final int childIndex = model.getIndexOfChild(parent, currentPath.getLastPathComponent());
-            final int nextChildIndex = nextIndexFunction.apply(childIndex);
-            if (nextChildIndex >= 0 && nextChildIndex < model.getChildCount(parent)) {
-                final Object nextSibling = model.getChild(parent, nextChildIndex);
+            final int adjacentChildIndex;
+            if (direction == FORWARD) {
+                adjacentChildIndex = childIndex + 1;
+            } else {
+                adjacentChildIndex = childIndex - 1;
+            }
+            if (adjacentChildIndex >= 0 && adjacentChildIndex < model.getChildCount(parent)) {
+                final Object nextSibling = model.getChild(parent, adjacentChildIndex);
                 TreePath nextSiblingPath = parentPath.pathByAddingChild(nextSibling);
                 while (!model.isLeaf(nextSiblingPath.getLastPathComponent())) {
-                    nextSiblingPath = nextSiblingPath.pathByAddingChild(model.getChild(nextSiblingPath.getLastPathComponent(), 0));
+                    final int startingChildIndex;
+                    if (direction == FORWARD) {
+                        startingChildIndex = 0;
+                    } else {
+                        startingChildIndex = model.getChildCount(nextSiblingPath.getLastPathComponent()) - 1;
+                    }
+                    nextSiblingPath = nextSiblingPath.pathByAddingChild(model.getChild(nextSiblingPath.getLastPathComponent(), startingChildIndex));
                 }
                 return nextSiblingPath;
             }
@@ -637,7 +651,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     /**
      * Display the passed results.
      *
-     * @param scanResults the results of the scan.
+     * @param scanResults    the results of the scan.
      * @param warningMessage a warning message to display about the results, if appropriate.
      */
     public void displayResults(final List<ScanResult> scanResults,
@@ -688,5 +702,9 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private PluginConfigurationManager configurationManager() {
         return project.getService(PluginConfigurationManager.class);
+    }
+
+    enum Direction {
+        FORWARD, BACKWARD
     }
 }
