@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
@@ -10,10 +9,12 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.infernus.idea.checkstyle.util.Async;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Callable;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
 
@@ -50,7 +51,7 @@ public class ScanModule extends BaseAction {
 
                 toolWindow.activate(() -> {
                     try {
-                        ThrowableRunnable<RuntimeException> scanAction = null;
+                        final Callable<Void> scanAction;
                         if (scope == ScanScope.Everything) {
                             scanAction = new ScanAllFilesInModuleTask(module, getSelectedOverride(toolWindow));
                         } else {
@@ -61,11 +62,14 @@ public class ScanModule extends BaseAction {
                                         getSelectedOverride(toolWindow));
                             } else if (checkStyleToolWindowPanel != null) {
                                 checkStyleToolWindowPanel.displayWarningResult("plugin.status.in-progress.no-module-source-roots");
+                                scanAction = null;
+                            } else {
+                                scanAction = null;
                             }
                         }
                         if (scanAction != null) {
                             setProgressText(toolWindow, "plugin.status.in-progress.module");
-                            ReadAction.run(scanAction);
+                            Async.executeOnPooledThread(scanAction);
                         }
                     } catch (Throwable e) {
                         LOG.warn("Current Module scan failed", e);

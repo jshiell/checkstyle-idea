@@ -1,19 +1,20 @@
 package org.infernus.idea.checkstyle.actions;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
-import com.intellij.util.ThrowableRunnable;
 import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 
-abstract class ScanAllFilesTask implements ThrowableRunnable<RuntimeException> {
+abstract class ScanAllFilesTask implements Callable<Void> {
 
     private final Project project;
     private final ConfigurationLocation selectedOverride;
@@ -25,9 +26,10 @@ abstract class ScanAllFilesTask implements ThrowableRunnable<RuntimeException> {
     }
 
     @Override
-    public void run() {
+    public Void call() {
         project.getService(StaticScanner.class)
                 .asyncScanFiles(flattenFiles(files()), selectedOverride);
+        return null;
     }
 
     protected abstract VirtualFile[] files();
@@ -37,14 +39,18 @@ abstract class ScanAllFilesTask implements ThrowableRunnable<RuntimeException> {
         if (files != null) {
             for (final VirtualFile file : files) {
                 flattened.add(file);
-                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<>() {
-                    @Override
-                    @NotNull
-                    public Result visitFileEx(@NotNull final VirtualFile file) {
-                        flattened.add(file);
-                        return CONTINUE;
-                    }
-                });
+                flattened.addAll(ReadAction.compute(() -> {
+                    final List<VirtualFile> flattenedChildren = new ArrayList<>();
+                    VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor<>() {
+                        @Override
+                        @NotNull
+                        public Result visitFileEx(@NotNull final VirtualFile file) {
+                            flattenedChildren.add(file);
+                            return CONTINUE;
+                        }
+                    });
+                    return flattenedChildren;
+                }));
             }
         }
         return flattened;
