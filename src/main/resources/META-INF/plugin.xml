@@ -250,6 +250,13 @@
             </action>
         </group>
 
+        <action id="JumpToErrorSource"
+                class="org.infernus.idea.checkstyle.actions.JumpToSource"
+                text="Jump to Source"
+                description="Jump to the source of the file"
+                popup="false"
+                use-shortcut-of="EditSource"/>
+
         <action id="PreviousResultAction"
                 class="org.infernus.idea.checkstyle.actions.PreviousResult"
                 text="Previous Result"

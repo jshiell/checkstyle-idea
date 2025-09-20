@@ -371,6 +371,13 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         return scrollToSource;
     }
 
+    public void jumpToSource() {
+        final TreePath treePath = resultsTree.getSelectionPath();
+        if (treePath != null) {
+            scrollToError(treePath);
+        }
+    }
+
     public void selectPreviousResult() {
         final TreePath previousResultPath = findPreviousLeaf(resultsTree, resultsTree.getSelectionPath());
         if (previousResultPath != null) {
@@ -467,10 +474,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                 return;
             }
 
-            final TreePath treePath = resultsTree.getSelectionPath();
-            if (treePath != null) {
-                scrollToError(treePath);
-            }
+            jumpToSource();
         }
     }
 
