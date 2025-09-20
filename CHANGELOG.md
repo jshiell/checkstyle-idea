@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.111.1** New: Add keyboard shortcuts for next/previous result (#676).
 * **5.111.0** New: Added Checkstyle 11.0.1.
 * **5.110.0** New: Added Checkstyle 11.0.0.
 * **5.109.2** Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.

@@ -5,7 +5,10 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -34,5 +37,14 @@ public final class ToolWindowAccess {
         return ToolWindowManager
                 .getInstance(project)
                 .getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+    }
+
+    static boolean isFocusInToolWindow(@NotNull final Project project) {
+        final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CheckStyleToolWindowPanel.ID_TOOLWINDOW);
+        if (toolWindow == null || !toolWindow.isVisible()) {
+            return false;
+        }
+        final Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        return focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, toolWindow.getComponent());
     }
 }

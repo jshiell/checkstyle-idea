@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.111.1: New: Add keyboard shortcuts for next/previous result (#676).</li>
     <li>5.111.0: New: Added Checkstyle 11.0.1.</li>
     <li>5.110.0: New: Added Checkstyle 11.0.0.</li>
     <li>5.109.2: Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.</li>
@@ -248,6 +249,20 @@
                     icon="/actions/refresh.svg">
             </action>
         </group>
+
+        <action id="PreviousResultAction"
+                class="org.infernus.idea.checkstyle.actions.PreviousResult"
+                text="Previous Result"
+                description="Go to the previous Checkstyle result"
+                popup="false"
+                use-shortcut-of="PreviousOccurence"/>
+
+        <action id="NextResultAction"
+                class="org.infernus.idea.checkstyle.actions.NextResult"
+                text="Next Result"
+                description="Go to the next Checkstyle result"
+                use-shortcut-of="NextOccurence"
+                popup="false"/>
 
     </actions>
 </idea-plugin>

@@ -21,6 +21,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.Function;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -37,6 +38,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -369,6 +371,72 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         return scrollToSource;
     }
 
+    public void selectPreviousResult() {
+        final TreePath previousResultPath = findPreviousLeaf(resultsTree, resultsTree.getSelectionPath());
+        if (previousResultPath != null) {
+            resultsTree.setSelectionPath(previousResultPath);
+            resultsTree.scrollPathToVisible(previousResultPath);
+        }
+    }
+
+    public void selectNextResult() {
+        final TreePath nextResultPath = findNextLeaf(resultsTree, resultsTree.getSelectionPath());
+        if (nextResultPath != null) {
+            resultsTree.setSelectionPath(nextResultPath);
+            resultsTree.scrollPathToVisible(nextResultPath);
+        }
+    }
+
+    private TreePath findPreviousLeaf(@NotNull final JTree tree,
+                                       @Nullable final TreePath startingPath) {
+        // TODO: edge case here when current path is not a leaf, we still go forward
+
+        return findSubsequentLeaf(tree, startingPath, i -> i - 1);
+    }
+
+    private TreePath findNextLeaf(@NotNull final JTree tree,
+                                       @Nullable final TreePath startingPath) {
+        return findSubsequentLeaf(tree, startingPath, i -> i + 1);
+    }
+
+    private TreePath findSubsequentLeaf(@NotNull final JTree tree,
+                                       @Nullable final TreePath startingPath,
+                                       @NotNull final Function<Integer, Integer> nextIndexFunction) {
+        if (startingPath == null) {
+            return null;
+        }
+
+        final TreeModel model = tree.getModel();
+        final Object node = startingPath.getLastPathComponent();
+
+        if (!model.isLeaf(node)) {
+            TreePath next = startingPath.pathByAddingChild(model.getChild(node, 0));
+            while (!model.isLeaf(next.getLastPathComponent())) {
+                next = next.pathByAddingChild(model.getChild(next.getLastPathComponent(), 0));
+            }
+            return next;
+        }
+
+        TreePath currentPath = startingPath;
+        TreePath parentPath = currentPath.getParentPath();
+        while (parentPath != null) {
+            final Object parent = parentPath.getLastPathComponent();
+            final int childIndex = model.getIndexOfChild(parent, currentPath.getLastPathComponent());
+            final int nextChildIndex = nextIndexFunction.apply(childIndex);
+            if (nextChildIndex >= 0 && nextChildIndex < model.getChildCount(parent)) {
+                final Object nextSibling = model.getChild(parent, nextChildIndex);
+                TreePath nextSiblingPath = parentPath.pathByAddingChild(nextSibling);
+                while (!model.isLeaf(nextSiblingPath.getLastPathComponent())) {
+                    nextSiblingPath = nextSiblingPath.pathByAddingChild(model.getChild(nextSiblingPath.getLastPathComponent(), 0));
+                }
+                return nextSiblingPath;
+            }
+            currentPath = parentPath;
+            parentPath = currentPath.getParentPath();
+        }
+
+        return null;
+    }
 
     /**
      * Listen for clicks and scroll to the error's source as necessary.
@@ -381,14 +449,11 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                 return;
             }
 
-            final TreePath treePath = resultsTree.getPathForLocation(
-                    e.getX(), e.getY());
-
+            final TreePath treePath = resultsTree.getPathForLocation(e.getX(), e.getY());
             if (treePath != null) {
                 scrollToError(treePath);
             }
         }
-
     }
 
     /**
@@ -403,7 +468,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             }
 
             final TreePath treePath = resultsTree.getSelectionPath();
-
             if (treePath != null) {
                 scrollToError(treePath);
             }
