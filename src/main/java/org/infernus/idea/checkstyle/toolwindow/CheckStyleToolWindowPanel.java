@@ -397,6 +397,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private TreePath findPreviousLeaf(@NotNull final JTree tree,
                                        @Nullable final TreePath startingPath) {
         // TODO: edge case here when current path is not a leaf, we still go forward
+        // TODO: bug, when changing parent, we skip to first child leaf of previous parent, rather than last
 
         return findSubsequentLeaf(tree, startingPath, i -> i - 1);
     }
