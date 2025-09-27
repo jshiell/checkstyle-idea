@@ -25,6 +25,7 @@ public class PluginConfiguration {
     private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
     private final String lastActivePluginVersion;
+    private final boolean importSettingsFromMaven;
 
     PluginConfiguration(@NotNull final String checkstyleVersion,
                         @NotNull final ScanScope scanScope,
@@ -34,7 +35,8 @@ public class PluginConfiguration {
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
                         final boolean scanBeforeCheckin,
-                        @Nullable final String lastActivePluginVersion) {
+                        @Nullable final String lastActivePluginVersion,
+                        final boolean importSettingsFromMaven) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -46,6 +48,7 @@ public class PluginConfiguration {
                 .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
+        this.importSettingsFromMaven = importSettingsFromMaven;
     }
 
     @NotNull
@@ -105,6 +108,10 @@ public class PluginConfiguration {
         return scanBeforeCheckin;
     }
 
+    public boolean isImportSettingsFromMaven() {
+        return importSettingsFromMaven;
+    }
+
     public boolean hasChangedFrom(final Object other) {
         return this.equals(other) && locationsAreEqual((PluginConfiguration) other);
     }
@@ -139,13 +146,14 @@ public class PluginConfiguration {
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
                 && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
                 && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
-                && Objects.equals(lastActivePluginVersion, otherDto.lastActivePluginVersion);
+                && Objects.equals(lastActivePluginVersion, otherDto.lastActivePluginVersion)
+                && Objects.equals(importSettingsFromMaven, otherDto.importSettingsFromMaven);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, locations, thirdPartyClasspath,
-                activeLocationIds, scanBeforeCheckin, lastActivePluginVersion);
+                activeLocationIds, scanBeforeCheckin, lastActivePluginVersion, importSettingsFromMaven);
     }
 
 }

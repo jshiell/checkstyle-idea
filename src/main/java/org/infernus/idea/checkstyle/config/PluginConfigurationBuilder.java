@@ -23,6 +23,7 @@ public final class PluginConfigurationBuilder {
     private SortedSet<String> activeLocationIds;
     private boolean scanBeforeCheckin;
     private String lastActivePluginVersion;
+    private boolean importSettingsFromMaven;
 
     private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
                                        @NotNull final ScanScope scanScope,
@@ -32,7 +33,8 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final List<String> thirdPartyClasspath,
                                        @NotNull final SortedSet<String> activeLocationIds,
                                        final boolean scanBeforeCheckin,
-                                       @Nullable final String lastActivePluginVersion) {
+                                       @Nullable final String lastActivePluginVersion,
+                                       final boolean importSettingsFromMaven) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -42,6 +44,7 @@ public final class PluginConfigurationBuilder {
         this.activeLocationIds = activeLocationIds;
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.lastActivePluginVersion = lastActivePluginVersion;
+        this.importSettingsFromMaven = importSettingsFromMaven;
     }
 
     public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
@@ -62,7 +65,8 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
-                CheckStylePlugin.version());
+                CheckStylePlugin.version(),
+                false);
     }
 
     public static PluginConfigurationBuilder testInstance(@NotNull final String checkstyleVersion) {
@@ -75,7 +79,8 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
-                "aVersion");
+                "aVersion",
+                false);
     }
 
     public static PluginConfigurationBuilder from(@NotNull final PluginConfiguration source) {
@@ -87,7 +92,8 @@ public final class PluginConfigurationBuilder {
                 source.getThirdPartyClasspath(),
                 source.getActiveLocationIds(),
                 source.isScanBeforeCheckin(),
-                source.getLastActivePluginVersion());
+                source.getLastActivePluginVersion(),
+                source.isImportSettingsFromMaven());
     }
 
     public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
@@ -135,6 +141,11 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
+    public PluginConfigurationBuilder withImportSettingsFromMaven(final boolean importSettingsFromMaven) {
+        this.importSettingsFromMaven = importSettingsFromMaven;
+        return this;
+    }
+
     public PluginConfiguration build() {
         return new PluginConfiguration(
                 checkstyleVersion,
@@ -145,7 +156,8 @@ public final class PluginConfigurationBuilder {
                 Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
                 scanBeforeCheckin,
-                lastActivePluginVersion);
+                lastActivePluginVersion,
+                importSettingsFromMaven);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {
