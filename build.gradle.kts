@@ -94,7 +94,7 @@ dependencies {
 
     val checkStyleBaseVersion = (project.extra["supportedCsVersions"] as CheckstyleVersions).baseVersion
     csaccessCompileOnly("com.puppycrawl.tools:checkstyle:${checkStyleBaseVersion}") {
-        exclude(group = "commons-logging", module = "commons-logging")
+        exclude("commons-logging:commons-logging")
     }
 
     testImplementation("junit:junit:4.13.2")
