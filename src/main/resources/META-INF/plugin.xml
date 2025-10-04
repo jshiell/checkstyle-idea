@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.112.0: New: Added Checkstyle 11.1.0.</li>
     <li>5.111.1: Fixed: Removed scope check when enabling scan current file button to improve performance (#675).</li>
     <li>5.111.1: New: Add keyboard shortcuts for next/previous result (#676).</li>
     <li>5.111.0: New: Added Checkstyle 11.0.1.</li>
