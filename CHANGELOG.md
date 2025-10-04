@@ -2,6 +2,7 @@
 # CheckStyle-IDEA Changelog
 
 * **5.112.0** Fixed: Keep focus in tool window when scrolling result, matching find results behaviour (#676).
+* **5.112.0** Removed: Removed update notification, as IDEA now notifies when plugins are updated.
 * **5.112.0** New: Added Checkstyle 11.1.0.
 * **5.111.1** Fixed: Removed scope check when enabling scan current file button to improve performance (#675).
 * **5.111.1** New: Add keyboard shortcuts for next/previous result (#676).

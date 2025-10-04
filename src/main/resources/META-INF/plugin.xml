@@ -26,6 +26,7 @@
         <![CDATA[
 <ul>
     <li>5.112.0: Fixed: Keep focus in tool window when scrolling result, matching find results behaviour (#676).</li>
+    <li>5.112.0: Removed: Removed update notification, as IDEA now notifies when plugins are updated.</li>
     <li>5.112.0: New: Added Checkstyle 11.1.0.</li>
     <li>5.111.1: Fixed: Removed scope check when enabling scan current file button to improve performance (#675).</li>
     <li>5.111.1: New: Add keyboard shortcuts for next/previous result (#676).</li>
@@ -44,17 +45,12 @@
     <li>5.104.1: Fixed: Code importer now correctly parses tokens in newer Google configurations (#657).</li>
     <li>5.104.0: New: Added Checkstyle 10.22.0 (#661).</li>
     <li>5.103.0: New: Added Checkstyle 10.21.3.</li>
-    <li>5.102.0: New: Added Checkstyle 10.21.2.</li>
-    <li>5.101.0: New: Added Checkstyle 10.21.1.</li>
-    <li>5.100.0: New: Added Checkstyle 10.21.0.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
     </change-notes>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
-
         <projectService serviceImplementation="org.infernus.idea.checkstyle.StaticScanner"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactory"/>
@@ -68,7 +64,6 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.util.ProjectFilePaths"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.ConfigurationInvalidator"/>
 
-        <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.NotifyUserIfPluginUpdated"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
 
         <projectConfigurable key="plugin.configuration-name"

@@ -53,10 +53,8 @@ public class ModuleConfigurationStateTest {
         when(project.getService(ProjectFilePaths.class)).thenReturn(projectFilePaths);
         when(project.getService(PluginConfigurationManager.class)).thenReturn(pluginConfigurationManager);
 
-        final ApplicationConfigurationState applicationConfigurationState = new ApplicationConfigurationState();
         final Application application = mock(Application.class);
         when(application.isUnitTestMode()).thenReturn(true);
-        when(application.getService(ApplicationConfigurationState.class)).thenReturn(applicationConfigurationState);
         ApplicationManager.setApplication(application, mock(Disposable.class));
 
         ProjectConfigurationState projectConfigurationState = new ProjectConfigurationState(project);

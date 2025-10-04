@@ -1,7 +1,6 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.project.Project;
-import org.infernus.idea.checkstyle.CheckStylePlugin;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -9,7 +8,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.OS;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -23,7 +21,6 @@ public final class PluginConfigurationBuilder {
     private List<String> thirdPartyClasspath;
     private SortedSet<String> activeLocationIds;
     private boolean scanBeforeCheckin;
-    private String lastActivePluginVersion;
 
     private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
                                        @NotNull final ScanScope scanScope,
@@ -33,8 +30,7 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final SortedSet<ConfigurationLocation> locations,
                                        @NotNull final List<String> thirdPartyClasspath,
                                        @NotNull final SortedSet<String> activeLocationIds,
-                                       final boolean scanBeforeCheckin,
-                                       @Nullable final String lastActivePluginVersion) {
+                                       final boolean scanBeforeCheckin) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -44,7 +40,6 @@ public final class PluginConfigurationBuilder {
         this.thirdPartyClasspath = thirdPartyClasspath;
         this.activeLocationIds = activeLocationIds;
         this.scanBeforeCheckin = scanBeforeCheckin;
-        this.lastActivePluginVersion = lastActivePluginVersion;
     }
 
     public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
@@ -65,8 +60,7 @@ public final class PluginConfigurationBuilder {
                 defaultLocations,
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
-                false,
-                CheckStylePlugin.version());
+                false);
     }
 
     public static PluginConfigurationBuilder testInstance(@NotNull final String checkstyleVersion) {
@@ -79,8 +73,7 @@ public final class PluginConfigurationBuilder {
                 Collections.emptySortedSet(),
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
-                false,
-                "aVersion");
+                false);
     }
 
     public static PluginConfigurationBuilder from(@NotNull final PluginConfiguration source) {
@@ -92,8 +85,7 @@ public final class PluginConfigurationBuilder {
                 source.getLocations(),
                 source.getThirdPartyClasspath(),
                 source.getActiveLocationIds(),
-                source.isScanBeforeCheckin(),
-                source.getLastActivePluginVersion());
+                source.isScanBeforeCheckin());
     }
 
     public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
@@ -141,11 +133,6 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
-    public PluginConfigurationBuilder withLastActivePluginVersion(final String newLastActivePluginVersion) {
-        this.lastActivePluginVersion = newLastActivePluginVersion;
-        return this;
-    }
-
     public PluginConfiguration build() {
         return new PluginConfiguration(
                 checkstyleVersion,
@@ -156,8 +143,7 @@ public final class PluginConfigurationBuilder {
                 Objects.requireNonNullElseGet(locations, TreeSet::new),
                 Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
-                scanBeforeCheckin,
-                lastActivePluginVersion);
+                scanBeforeCheckin);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {

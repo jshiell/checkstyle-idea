@@ -4,7 +4,6 @@ import net.jcip.annotations.Immutable;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ public class PluginConfiguration {
     private final List<String> thirdPartyClasspath;
     private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
-    private final String lastActivePluginVersion;
 
     PluginConfiguration(@NotNull final String checkstyleVersion,
                         @NotNull final ScanScope scanScope,
@@ -35,8 +33,7 @@ public class PluginConfiguration {
                         @NotNull final SortedSet<ConfigurationLocation> locations,
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
-                        final boolean scanBeforeCheckin,
-                        @Nullable final String lastActivePluginVersion) {
+                        final boolean scanBeforeCheckin) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -48,7 +45,6 @@ public class PluginConfiguration {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
-        this.lastActivePluginVersion = lastActivePluginVersion;
     }
 
     @NotNull
@@ -88,11 +84,6 @@ public class PluginConfiguration {
     @NotNull
     public List<String> getThirdPartyClasspath() {
         return thirdPartyClasspath;
-    }
-
-    @Nullable
-    public String getLastActivePluginVersion() {
-        return lastActivePluginVersion;
     }
 
     public SortedSet<String> getActiveLocationIds() {
@@ -146,14 +137,13 @@ public class PluginConfiguration {
                 && Objects.equals(locations, otherDto.locations)
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
                 && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
-                && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
-                && Objects.equals(lastActivePluginVersion, otherDto.lastActivePluginVersion);
+                && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, scrollToSource,
-                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin, lastActivePluginVersion);
+                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin);
     }
 
 }

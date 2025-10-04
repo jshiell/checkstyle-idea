@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,13 +42,12 @@ public class PluginConfigurationManager {
     public PluginConfiguration getCurrent() {
         final PluginConfigurationBuilder defaultConfig = PluginConfigurationBuilder.defaultConfiguration(project);
         return projectConfigurationState()
-                .populate(applicationConfigurationState().populate(defaultConfig))
+                .populate(defaultConfig)
                 .build();
     }
 
     public void setCurrent(@NotNull final PluginConfiguration updatedConfiguration, final boolean fireEvents) {
         projectConfigurationState().setCurrentConfig(updatedConfiguration);
-        applicationConfigurationState().setCurrentConfig(updatedConfiguration);
         if (fireEvents) {
             fireConfigurationChanged();
         }
@@ -57,9 +55,5 @@ public class PluginConfigurationManager {
 
     private ProjectConfigurationState projectConfigurationState() {
         return project.getService(ProjectConfigurationState.class);
-    }
-
-    private ApplicationConfigurationState applicationConfigurationState() {
-        return ApplicationManager.getApplication().getService(ApplicationConfigurationState.class);
     }
 }
