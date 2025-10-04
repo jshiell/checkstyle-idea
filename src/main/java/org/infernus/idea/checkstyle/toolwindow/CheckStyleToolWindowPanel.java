@@ -314,7 +314,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      *
      * @param treePath the tree path to scroll to.
      */
-    private void scrollToError(final TreePath treePath) {
+    private void scrollToError(final TreePath treePath, final boolean focusEditor) {
         final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
         if (treeNode == null || !(treeNode.getUserObject() instanceof ProblemResultTreeInfo nodeInfo)) {
             return;
@@ -331,7 +331,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         ApplicationManager.getApplication().invokeLater(() -> {
-            final FileEditor[] editor = fileEditorManager.openFile(virtualFile, false);
+            final FileEditor[] editor = fileEditorManager.openFile(virtualFile, focusEditor);
 
             if (editor.length > 0 && editor[0] instanceof TextEditor) {
                 final LogicalPosition problemPos = new LogicalPosition(
@@ -376,7 +376,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     public void jumpToSource() {
         final TreePath treePath = resultsTree.getSelectionPath();
         if (treePath != null) {
-            scrollToError(treePath);
+            scrollToError(treePath, true);
         }
     }
 
@@ -475,7 +475,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
             final TreePath treePath = resultsTree.getPathForLocation(e.getX(), e.getY());
             if (treePath != null) {
-                scrollToError(treePath);
+                scrollToError(treePath, false);
             }
         }
     }
@@ -507,7 +507,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
             }
 
             if (e.getPath() != null) {
-                scrollToError(e.getPath());
+                scrollToError(e.getPath(), false);
             }
         }
 
