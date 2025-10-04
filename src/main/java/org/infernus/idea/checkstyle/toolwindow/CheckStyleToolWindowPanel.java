@@ -331,8 +331,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         ApplicationManager.getApplication().invokeLater(() -> {
-            final FileEditor[] editor = fileEditorManager.openFile(
-                    virtualFile, true);
+            final FileEditor[] editor = fileEditorManager.openFile(virtualFile, false);
 
             if (editor.length > 0 && editor[0] instanceof TextEditor) {
                 final LogicalPosition problemPos = new LogicalPosition(
