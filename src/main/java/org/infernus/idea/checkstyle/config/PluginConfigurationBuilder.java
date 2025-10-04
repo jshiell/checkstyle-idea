@@ -18,6 +18,7 @@ public final class PluginConfigurationBuilder {
     private ScanScope scanScope;
     private boolean suppressErrors;
     private boolean copyLibraries;
+    private boolean scrollToSource;
     private SortedSet<ConfigurationLocation> locations;
     private List<String> thirdPartyClasspath;
     private SortedSet<String> activeLocationIds;
@@ -28,6 +29,7 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final ScanScope scanScope,
                                        final boolean suppressErrors,
                                        final boolean copyLibraries,
+                                       final boolean scrollToSource,
                                        @NotNull final SortedSet<ConfigurationLocation> locations,
                                        @NotNull final List<String> thirdPartyClasspath,
                                        @NotNull final SortedSet<String> activeLocationIds,
@@ -37,6 +39,7 @@ public final class PluginConfigurationBuilder {
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
         this.copyLibraries = copyLibraries;
+        this.scrollToSource = scrollToSource;
         this.locations = locations;
         this.thirdPartyClasspath = thirdPartyClasspath;
         this.activeLocationIds = activeLocationIds;
@@ -58,6 +61,7 @@ public final class PluginConfigurationBuilder {
                 ScanScope.getDefaultValue(),
                 false,
                 copyLibs,
+                false,
                 defaultLocations,
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
@@ -69,6 +73,7 @@ public final class PluginConfigurationBuilder {
         return new PluginConfigurationBuilder(
                 checkstyleVersion,
                 ScanScope.AllSources,
+                false,
                 false,
                 false,
                 Collections.emptySortedSet(),
@@ -83,6 +88,7 @@ public final class PluginConfigurationBuilder {
                 source.getScanScope(),
                 source.isSuppressErrors(),
                 source.isCopyLibs(),
+                source.isScrollToSource(),
                 source.getLocations(),
                 source.getThirdPartyClasspath(),
                 source.getActiveLocationIds(),
@@ -107,6 +113,11 @@ public final class PluginConfigurationBuilder {
 
     public PluginConfigurationBuilder withCopyLibraries(final boolean newCopyLibraries) {
         this.copyLibraries = newCopyLibraries;
+        return this;
+    }
+
+    public PluginConfigurationBuilder withScrollToSource(final boolean newScrollToSource) {
+        this.scrollToSource = newScrollToSource;
         return this;
     }
 
@@ -141,6 +152,7 @@ public final class PluginConfigurationBuilder {
                 scanScope,
                 suppressErrors,
                 copyLibraries,
+                scrollToSource,
                 Objects.requireNonNullElseGet(locations, TreeSet::new),
                 Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),

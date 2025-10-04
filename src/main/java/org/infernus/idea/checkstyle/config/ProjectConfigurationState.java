@@ -81,6 +81,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         @Tag
         private boolean copyLibs;
         @Tag
+        private boolean scrollToSource;
+        @Tag
         private boolean scanBeforeCheckin;
         @XCollection
         private List<String> thirdPartyClasspath;
@@ -101,6 +103,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             projectSettings.scanScope = currentPluginConfig.getScanScope().name();
             projectSettings.suppressErrors = currentPluginConfig.isSuppressErrors();
             projectSettings.copyLibs = currentPluginConfig.isCopyLibs();
+            projectSettings.scrollToSource = currentPluginConfig.isScrollToSource();
             projectSettings.scanBeforeCheckin = currentPluginConfig.isScanBeforeCheckin();
 
             projectSettings.thirdPartyClasspath = new ArrayList<>(currentPluginConfig.getThirdPartyClasspath());
@@ -144,6 +147,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                         .withScanScope(lookupScanScope())
                         .withSuppressErrors(suppressErrors)
                         .withCopyLibraries(copyLibs)
+                        .withScrollToSource(scrollToSource)
                         .withScanBeforeCheckin(scanBeforeCheckin)
                         .withThirdPartyClassPath(requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
                         .withLocations(deserialiseLocations(project))

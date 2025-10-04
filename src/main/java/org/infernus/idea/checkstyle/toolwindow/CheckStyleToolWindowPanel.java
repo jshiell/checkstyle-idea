@@ -23,6 +23,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
@@ -84,7 +85,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     private JProgressBar progressBar;
     private JLabel progressLabel;
     private ResultTreeModel treeModel;
-    private boolean scrollToSource;
 
     static {
         try {
@@ -358,7 +358,10 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      * @param scrollToSource true if the error should be scrolled to automatically.
      */
     public void setScrollToSource(final boolean scrollToSource) {
-        this.scrollToSource = scrollToSource;
+        final var updatedConfig = PluginConfigurationBuilder.from(configurationManager().getCurrent())
+                .withScrollToSource(scrollToSource)
+                .build();
+        configurationManager().setCurrent(updatedConfig, false);
     }
 
     /**
@@ -367,7 +370,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      * @return true if the error should be scrolled to automatically.
      */
     public boolean isScrollToSource() {
-        return scrollToSource;
+        return configurationManager().getCurrent().isScrollToSource();
     }
 
     public void jumpToSource() {
@@ -466,7 +469,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         @Override
         public void mouseClicked(final MouseEvent e) {
-            if (!scrollToSource && e.getClickCount() < 2) {
+            if (e.getClickCount() < 2 && !isScrollToSource()) {
                 return;
             }
 
@@ -499,7 +502,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
         @Override
         public void valueChanged(final TreeSelectionEvent e) {
-            if (!scrollToSource) {
+            if (!isScrollToSource()) {
                 return;
             }
 

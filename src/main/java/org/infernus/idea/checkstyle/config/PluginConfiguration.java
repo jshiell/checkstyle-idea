@@ -20,6 +20,7 @@ public class PluginConfiguration {
     private final ScanScope scanScope;
     private final boolean suppressErrors;
     private final boolean copyLibs;
+    private final boolean scrollToSource;
     private final SortedSet<ConfigurationLocation> locations;
     private final List<String> thirdPartyClasspath;
     private final SortedSet<String> activeLocationIds;
@@ -30,6 +31,7 @@ public class PluginConfiguration {
                         @NotNull final ScanScope scanScope,
                         final boolean suppressErrors,
                         final boolean copyLibs,
+                        final boolean scrollToSource,
                         @NotNull final SortedSet<ConfigurationLocation> locations,
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
@@ -39,6 +41,7 @@ public class PluginConfiguration {
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
         this.copyLibs = copyLibs;
+        this.scrollToSource = scrollToSource;
         this.locations = Collections.unmodifiableSortedSet(locations);
         this.thirdPartyClasspath = Collections.unmodifiableList(thirdPartyClasspath);
         this.activeLocationIds = activeLocationIds.stream()
@@ -64,6 +67,10 @@ public class PluginConfiguration {
 
     public boolean isCopyLibs() {
         return copyLibs;
+    }
+
+    public boolean isScrollToSource() {
+        return scrollToSource;
     }
 
     @NotNull
@@ -135,6 +142,7 @@ public class PluginConfiguration {
                 && Objects.equals(scanScope, otherDto.scanScope)
                 && Objects.equals(suppressErrors, otherDto.suppressErrors)
                 && Objects.equals(copyLibs, otherDto.copyLibs)
+                && Objects.equals(scrollToSource, otherDto.scrollToSource)
                 && Objects.equals(locations, otherDto.locations)
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
                 && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
@@ -144,8 +152,8 @@ public class PluginConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, locations, thirdPartyClasspath,
-                activeLocationIds, scanBeforeCheckin, lastActivePluginVersion);
+        return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, scrollToSource,
+                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin, lastActivePluginVersion);
     }
 
 }
