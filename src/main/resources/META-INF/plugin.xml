@@ -21,6 +21,7 @@
     <depends>com.intellij.modules.vcs</depends>
 
     <depends>com.intellij.modules.java</depends>
+    <depends optional="true" config-file="checkstyle-idea-maven.xml">org.jetbrains.idea.maven</depends>
 
     <change-notes>
         <![CDATA[
