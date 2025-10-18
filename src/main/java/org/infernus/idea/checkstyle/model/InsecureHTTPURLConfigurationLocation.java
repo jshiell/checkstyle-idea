@@ -8,7 +8,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
 /**
@@ -22,20 +24,22 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
         super(id, ConfigurationType.INSECURE_HTTP_URL, project);
     }
 
-    @NotNull
     @Override
-    protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
-        TrustManager[] trustAllCerts = new TrustManager[]{new AllTrustingTrustManager()};
+    @NotNull URLConnection connectionTo(final String location) throws IOException {
+        final URLConnection urlConnection = super.connectionTo(location);
 
-        try {
-            final SSLContext sc = SSLContext.getInstance("TLSv1.3");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception ignored) {
-            // we care not for security
+        if (urlConnection instanceof HttpsURLConnection httpsURLConnection) {
+            try {
+                final TrustManager[] trustAllCerts = new TrustManager[]{new AllTrustingTrustManager()};
+                final SSLContext sc = SSLContext.getInstance("TLSv1.3");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                httpsURLConnection.setSSLSocketFactory(sc.getSocketFactory());
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new IOException("Failed to set an insecure SSL socket factory", e);
+            }
         }
 
-        return super.resolveFile(checkstyleClassLoader);
+        return urlConnection;
     }
 
     private static final class AllTrustingTrustManager implements X509TrustManager {
