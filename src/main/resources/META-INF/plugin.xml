@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.113.0: New: Added Checkstyle 12.0.1.</li>
     <li>5.112.0: Fixed: Keep focus in tool window when scrolling result, matching find results behaviour (#676).</li>
     <li>5.112.0: Removed: Removed update notification, as IDEA now notifies when plugins are updated.</li>
     <li>5.112.0: New: Added Checkstyle 11.1.0.</li>
@@ -44,7 +45,6 @@
     <li>5.104.1: Fixed: Code importer now parses import order with comma separators (#658).</li>
     <li>5.104.1: Fixed: Code importer now correctly parses tokens in newer Google configurations (#657).</li>
     <li>5.104.0: New: Added Checkstyle 10.22.0 (#661).</li>
-    <li>5.103.0: New: Added Checkstyle 10.21.3.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
