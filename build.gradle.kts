@@ -85,8 +85,10 @@ dependencies {
         intellijIdeaCommunity("2024.1.7")
 
         bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.idea.maven")
 
         testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Maven)
     }
 
     implementation("commons-io:commons-io:2.20.0")
