@@ -1,7 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
-* **5.113.1** Fixed: Insecure socket factory is now only set for the current connection (#678).
+* **5.114.0** New: Added Checkstyle 12.1.0.
+* **5.114.0** Fixed: Insecure socket factory is now only set for the current connection (#678).
 * **5.113.0** New: Added Checkstyle 12.0.1.
 * **5.112.0** Fixed: Keep focus in tool window when scrolling result, matching find results behaviour (#676).
 * **5.112.0** Removed: Removed update notification, as IDEA now notifies when plugins are updated.
