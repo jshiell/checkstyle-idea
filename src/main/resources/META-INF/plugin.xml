@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>5.114.0: New: Added Checkstyle 12.1.2.</li>
     <li>5.115.0: Fixed: Ensure lower-casing for internal comparisons with constants is done in the English locale (#681). Thanks to @thorpp.</li>
     <li>5.114.0: New: Added Checkstyle 12.1.0.</li>
     <li>5.114.0: Fixed: Insecure socket factory is now only set for the current connection (#678).</li>
@@ -45,9 +46,6 @@
     <li>5.106.0: New: Added Checkstyle 10.24.0.</li>
     <li>5.106.0: New: Now built against IDEA 2024.1.7 (was 2023.1.5).</li>
     <li>5.105.0: New: Added Checkstyle 10.23.0 (#663).</li>
-    <li>5.104.1: Fixed: Code importer now parses import order with comma separators (#658).</li>
-    <li>5.104.1: Fixed: Code importer now correctly parses tokens in newer Google configurations (#657).</li>
-    <li>5.104.0: New: Added Checkstyle 10.22.0 (#661).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
