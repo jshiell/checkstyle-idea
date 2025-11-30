@@ -38,7 +38,7 @@ import static java.util.Optional.ofNullable;
 /**
  * A representation of a file able to be scanned.
  */
-public class ScannableFile {
+ public class ScannableFile {
     private static final Logger LOG = Logger.getInstance(ScannableFile.class);
 
     private static final String TEMPFILE_DIR_PREFIX = "csi-";
@@ -78,8 +78,8 @@ public class ScannableFile {
         ThrowableComputable<List<ScannableFile>, RuntimeException> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(
                         currentFile,
-                        ofNullable(module),
-                        configurationManager(project),
+                        module,
+                        configurationManager(project).getCurrent(),
                         overrideConfigLocation))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)

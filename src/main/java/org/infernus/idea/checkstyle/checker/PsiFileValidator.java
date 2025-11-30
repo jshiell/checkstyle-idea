@@ -9,7 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanScope;
@@ -27,8 +27,8 @@ final class PsiFileValidator {
     }
 
     public static boolean isScannable(@Nullable final PsiFile psiFile,
-                                      @NotNull final Optional<Module> module,
-                                      @NotNull final PluginConfigurationManager pluginConfig,
+                                      @Nullable final Module module,
+                                      @NotNull final PluginConfiguration pluginConfig,
                                       @Nullable final ConfigurationLocation overrideConfigLocation) {
         return psiFile != null
                 && psiFile.isValid()
@@ -46,14 +46,14 @@ final class PsiFileValidator {
     }
 
     private static boolean isValidFileType(final PsiFile psiFile,
-                                           final PluginConfigurationManager pluginConfig) {
-        return pluginConfig.getCurrent().getScanScope().includeNonJavaSources()
+                                           final PluginConfiguration pluginConfig) {
+        return pluginConfig.getScanScope().includeNonJavaSources()
                 || FileTypes.isJava(psiFile.getFileType());
     }
 
     private static boolean isScannableIfTest(final PsiFile psiFile,
-                                             final PluginConfigurationManager pluginConfig) {
-        return pluginConfig.getCurrent().getScanScope().includeTestClasses()
+                                             final PluginConfiguration pluginConfig) {
+        return pluginConfig.getScanScope().includeTestClasses()
                 || !isTestClass(psiFile);
     }
 
@@ -63,16 +63,16 @@ final class PsiFileValidator {
 
     private static boolean isInSource(
             @NotNull final PsiFile psiFile,
-            @NotNull final PluginConfigurationManager pluginConfig,
+            @NotNull final PluginConfiguration pluginConfig,
             @Nullable final ConfigurationLocation overrideConfigLocation) {
-        final boolean shouldBeScanned = pluginConfig.getCurrent().getScanScope() == ScanScope.Everything
+        final boolean shouldBeScanned = pluginConfig.getScanScope() == ScanScope.Everything
                 || (psiFile.getVirtualFile() != null
                         && ProjectFileIndex.getInstance(psiFile.getProject()).isInSourceContent(psiFile.getVirtualFile()));
         return shouldBeScanned && isInNamedScopeIfPresent(
                 psiFile,
                 overrideConfigLocation != null
                         ? Collections.singletonList(overrideConfigLocation)
-                        : pluginConfig.getCurrent().getActiveLocations());
+                        : pluginConfig.getActiveLocations());
     }
 
     /**
@@ -104,12 +104,12 @@ final class PsiFileValidator {
     }
 
     private static boolean modulesMatch(final PsiFile psiFile,
-                                        final Optional<Module> module) {
-        if (module.isEmpty()) {
+                                        final Module module) {
+        if (module == null) {
             return true;
         }
         final Module elementModule = ModuleUtil.findModuleForPsiElement(psiFile);
-        return elementModule != null && elementModule.equals(module.get());
+        return elementModule != null && elementModule.equals(module);
     }
 
 }
