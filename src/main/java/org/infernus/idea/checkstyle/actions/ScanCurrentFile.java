@@ -87,7 +87,7 @@ public class ScanCurrentFile extends BaseAction {
         }
 
         final PluginConfiguration pluginConfiguration = configurationManager(project).getCurrent();
-        if (!isFileValidAgainstScanScope(project, pluginConfiguration, selectedFile)) {
+        if (!isFileValidAgainstScanScope(project, selectedFile, pluginConfiguration.getScanScope())) {
             return false;
         }
 
@@ -113,10 +113,8 @@ public class ScanCurrentFile extends BaseAction {
     }
 
     private static boolean isFileValidAgainstScanScope(@NotNull final Project project,
-                                                       @NotNull final PluginConfiguration pluginConfiguration,
-                                                       @NotNull final VirtualFile selectedFile) {
-        final ScanScope scanScope = pluginConfiguration.getScanScope();
-
+                                                       @NotNull final VirtualFile selectedFile,
+                                                       @NotNull ScanScope scanScope) {
         if (scanScope != ScanScope.Everything) {
             return ReadAction.compute(() -> {
                 final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);

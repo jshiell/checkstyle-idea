@@ -5,7 +5,6 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.ThrowableComputable;
@@ -13,7 +12,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
-import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
@@ -72,23 +71,19 @@ import static java.util.Optional.ofNullable;
     }
 
     public static List<ScannableFile> createAndValidate(@NotNull final Collection<PsiFile> psiFiles,
-                                                        @NotNull final Project project,
                                                         @Nullable final Module module,
-                                                        @Nullable final ConfigurationLocation overrideConfigLocation) {
+                                                        @Nullable final ConfigurationLocation overrideConfigLocation,
+                                                        @NotNull final PluginConfiguration pluginConfiguration) {
         ThrowableComputable<List<ScannableFile>, RuntimeException> action = () -> psiFiles.stream()
                 .filter(currentFile -> PsiFileValidator.isScannable(
                         currentFile,
                         module,
-                        configurationManager(project).getCurrent(),
+                        pluginConfiguration,
                         overrideConfigLocation))
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         return ReadAction.compute(action);
-    }
-
-    private static PluginConfigurationManager configurationManager(final Project project) {
-        return project.getService(PluginConfigurationManager.class);
     }
 
     @Nullable

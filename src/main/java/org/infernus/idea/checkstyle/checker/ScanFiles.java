@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import org.infernus.idea.checkstyle.config.ConfigurationLocationSource;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
@@ -185,13 +186,14 @@ public class ScanFiles implements Callable<List<ScanResult>> {
                                         final List<ConfigurationLocation> configurationLocations) {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
-            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module.getProject(), module, this.overrideConfigLocation));
+            PluginConfiguration pluginConfiguration = configurationManager().getCurrent();
+            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module, this.overrideConfigLocation, pluginConfiguration));
 
             final List<ScanResult> scanResults = new ArrayList<>();
             for (ConfigurationLocation configurationLocation : configurationLocations) {
                 var checker = checkerFactory().checker(module, configurationLocation);
                 if (checker.isPresent()) {
-                    var problems = checker.get().scan(scannableFiles, configurationManager().getCurrent().isSuppressErrors());
+                    var problems = checker.get().scan(scannableFiles, pluginConfiguration.isSuppressErrors());
                     scanResults.add(new ScanResult(ConfigurationLocationResult.of(configurationLocation, PRESENT), module, problems));
                 } else {
                     throw new CheckStylePluginException("Could not create checker for location " + configurationLocation + ", see logs for details.");

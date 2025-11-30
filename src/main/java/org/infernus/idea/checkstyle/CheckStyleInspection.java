@@ -14,6 +14,7 @@ import org.infernus.idea.checkstyle.checker.CheckerFactory;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.config.ConfigurationLocationSource;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
@@ -68,11 +69,13 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
 
         final Module module = moduleOf(psiFile);
+        final PluginConfiguration pluginConfiguration = configurationManager(manager.getProject()).getCurrent();
+
         List<ScannableFile> scannableFiles = ScannableFile.createAndValidate(
                 singletonList(psiFile),
-                manager.getProject(),
                 module,
-                null);
+                null,
+                pluginConfiguration);
         if (scannableFiles.isEmpty()) {
             LOG.debug("Inspection has been cancelled as file is not scannable: " + psiFile.getName());
             return noProblemsFound(manager);
@@ -82,7 +85,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
             return asProblemDescriptors(
                     asyncResultOf(() -> {
                         try {
-                            return inspectFile(psiFile, scannableFiles, module, manager);
+                            return inspectFile(psiFile, scannableFiles, module, manager, pluginConfiguration);
                         } finally {
                             scannableFiles.forEach(ScannableFile::deleteIfRequired);
                         }
@@ -117,7 +120,8 @@ public class CheckStyleInspection extends LocalInspectionTool {
     private List<Problem> inspectFile(@NotNull final PsiFile psiFile,
                                       @NotNull final List<ScannableFile> scannableFiles,
                                       @Nullable final Module module,
-                                      @NotNull final InspectionManager manager) {
+                                      @NotNull final InspectionManager manager,
+                                      @NotNull final PluginConfiguration pluginConfiguration) {
         LOG.debug("Inspection has been invoked for " + psiFile.getName());
 
         ArrayList<ConfigurationLocation> configurationLocations = new ArrayList<>();
@@ -131,7 +135,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
                     .filter(not(ConfigurationLocation::isBlocked))
                     .map(configurationLocation -> checkerFactory(psiFile.getProject())
                             .checker(module, configurationLocation)
-                            .map(checker -> checker.scan(scannableFiles, configurationManager(psiFile.getProject()).getCurrent().isSuppressErrors()))
+                            .map(checker -> checker.scan(scannableFiles, pluginConfiguration.isSuppressErrors()))
                             .map(results -> results.get(psiFile))
                             .map(this::dropIgnoredProblems)
                             .orElse(NO_PROBLEMS_FOUND)
