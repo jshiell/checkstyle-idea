@@ -272,7 +272,7 @@ public class CheckstyleClassLoaderContainer {
 
     @NotNull
     private static String pluginDirectory() {
-        return CheckStylePlugin.ID_PLUGIN.toLowerCase();
+        return CheckStylePlugin.ID_PLUGIN.toLowerCase(Locale.ENGLISH);
     }
 
     @Nullable

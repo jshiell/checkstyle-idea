@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.Serial;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -360,7 +361,7 @@ public class LocationPanel extends JPanel {
             return new FileChooserDescriptor(true, false, false, false, true, false)
                     .withFileFilter((file) -> {
                         final String currentExtension = file.getExtension();
-                        return currentExtension != null && Set.of("xml", "checkstyle").contains(currentExtension.trim().toLowerCase());
+                        return currentExtension != null && Set.of("xml", "checkstyle").contains(currentExtension.trim().toLowerCase(Locale.ENGLISH));
                     });
         }
     }

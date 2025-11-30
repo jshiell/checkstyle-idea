@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -140,7 +141,7 @@ public class FileConfigurationLocation extends ConfigurationLocation {
     }
 
     private boolean isInJarFile(final String detokenisedLocation) {
-        return detokenisedLocation != null && detokenisedLocation.toLowerCase().contains(JAR_DELIMITER);
+        return detokenisedLocation != null && detokenisedLocation.toLowerCase(Locale.ENGLISH).contains(JAR_DELIMITER);
     }
 
     private InputStream readFileFromJar(final String jarPath, final String filePath) throws IOException {

@@ -203,6 +203,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * Richard (@rhierlmeier)
 * James Baker (@james-baker-aera)
 * @LlamaLad7
+* @thorpp
 
 And also thanks are due to the authors and contributors of:
 

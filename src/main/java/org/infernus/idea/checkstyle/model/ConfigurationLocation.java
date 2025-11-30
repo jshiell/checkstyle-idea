@@ -277,8 +277,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                             final ClassLoader checkstyleClassLoader) {
         if (fileName == null
                 || fileName.trim().isEmpty()
-                || fileName.toLowerCase().startsWith("http://")
-                || fileName.toLowerCase().startsWith("https://")) {
+                || fileName.toLowerCase(Locale.ENGLISH).startsWith("http://")
+                || fileName.toLowerCase(Locale.ENGLISH).startsWith("https://")) {
             return fileName;
         }
 

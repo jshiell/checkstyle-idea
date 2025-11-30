@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **5.115.0** Fixed: Ensure lower-casing for internal comparisons with constants is done in the English locale (#681). Thanks to @thorpp.
 * **5.114.0** New: Added Checkstyle 12.1.0.
 * **5.114.0** Fixed: Insecure socket factory is now only set for the current connection (#678).
 * **5.113.0** New: Added Checkstyle 12.0.1.

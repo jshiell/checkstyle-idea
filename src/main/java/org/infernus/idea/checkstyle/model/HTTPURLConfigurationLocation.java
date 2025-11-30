@@ -8,10 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -71,6 +68,10 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         urlConnection.setDoInput(true);
         urlConnection.setDoOutput(false);
         urlConnection.setAllowUserInteraction(false);
+
+        if (urlConnection instanceof HttpURLConnection httpURLConnection) {
+            httpURLConnection.setInstanceFollowRedirects(true);
+        }
 
         return withBasicAuth(url, urlConnection);
     }
