@@ -14,6 +14,8 @@ public class PluginConfigurationManager {
 
     private final Project project;
 
+    private volatile PluginConfiguration cachedConfiguration;
+
     public PluginConfigurationManager(@NotNull final Project project) {
         this.project = project;
     }
@@ -32,21 +34,27 @@ public class PluginConfigurationManager {
         }
     }
 
-    public void disableActiveConfiguration() {
+    public synchronized void disableActiveConfiguration() {
         setCurrent(PluginConfigurationBuilder.from(getCurrent())
                 .withActiveLocationIds(new TreeSet<>())
                 .build(), true);
     }
 
     @NotNull
-    public PluginConfiguration getCurrent() {
-        final PluginConfigurationBuilder defaultConfig = PluginConfigurationBuilder.defaultConfiguration(project);
-        return projectConfigurationState()
-                .populate(defaultConfig)
+    public synchronized PluginConfiguration getCurrent() {
+        if (cachedConfiguration != null) {
+            return cachedConfiguration;
+        }
+
+        cachedConfiguration = projectConfigurationState()
+                .populate(PluginConfigurationBuilder.defaultConfiguration(project))
                 .build();
+        return cachedConfiguration;
     }
 
-    public void setCurrent(@NotNull final PluginConfiguration updatedConfiguration, final boolean fireEvents) {
+    public synchronized void setCurrent(@NotNull final PluginConfiguration updatedConfiguration, final boolean fireEvents) {
+        cachedConfiguration = null;
+
         projectConfigurationState().setCurrentConfig(updatedConfiguration);
         if (fireEvents) {
             fireConfigurationChanged();
