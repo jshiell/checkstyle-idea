@@ -1,7 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
-* **5.116.0** New: Added Checkstyle 12.2.0 and 12.3.0.
+* **5.116.0** New: Added Checkstyle 12.2.0 and 12.3.0. Thanks to @james-baker-aera.
 * **5.115.0** New: Added Checkstyle 12.1.2.
 * **5.115.0** Fixed: Ensure lower-casing for internal comparisons with constants is done in the English locale (#681). Thanks to @thorpp.
 * **5.114.0** New: Added Checkstyle 12.1.0.
