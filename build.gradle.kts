@@ -14,7 +14,7 @@ plugins {
     id("java")
     id("jacoco")
     id("idea")
-    id("org.jetbrains.intellij.platform") version "2.10.4"
+    id("org.jetbrains.intellij.platform") version "2.10.5"
 
     id("org.infernus.idea.checkstyle.build")
 }
