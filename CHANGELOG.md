@@ -1,7 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
-* **5.118.0** New: Checkstyle 10 is now the minimum support version; version 9 is no longer supported.
+* **26.0.0** New: Checkstyle 10 is now the minimum support version; version 9 is no longer supported.
+* **26.0.0** New: Change version number to align with release year
 * **5.117.0** New: Added Checkstyle 12.3.1.
 * **5.116.0** New: Added Checkstyle 12.2.0 and 12.3.0. Thanks to @james-baker-aera.
 * **5.115.0** New: Added Checkstyle 12.1.2.
