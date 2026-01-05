@@ -55,6 +55,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final ComboBox<ScanScope> scopeDropdown = new ComboBox<>(ScanScope.values());
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
     private final JCheckBox copyLibsCheckbox = new JCheckBox();
+    private final JCheckBox importSettingsFromMavenCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
@@ -104,6 +105,9 @@ public class CheckStyleConfigPanel extends JPanel {
         copyLibsCheckbox.setText(CheckStyleBundle.message("config.stabilize-classpath.text"));
         copyLibsCheckbox.setToolTipText(CheckStyleBundle.message("config.stabilize-classpath.tooltip"));
 
+        importSettingsFromMavenCheckbox.setText(CheckStyleBundle.message("config.import-maven-settings.text"));
+        importSettingsFromMavenCheckbox.setToolTipText(CheckStyleBundle.message("config.import-maven-settings.tooltip"));
+
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
@@ -125,11 +129,14 @@ public class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
                 2, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(importSettingsFromMavenCheckbox, new GridBagConstraints(
+                2, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 2, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 3, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 3, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 4, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
@@ -232,6 +239,7 @@ public class CheckStyleConfigPanel extends JPanel {
         scopeDropdown.setSelectedItem(pluginConfig.getScanScope());
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
+        importSettingsFromMavenCheckbox.setSelected(pluginConfig.isImportSettingsFromMaven());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
         locationModel.setActiveLocations(pluginConfig.getActiveLocations());
@@ -252,6 +260,7 @@ public class CheckStyleConfigPanel extends JPanel {
                 .withScanScope(scanScope)
                 .withSuppressErrors(suppressErrorsCheckbox.isSelected())
                 .withCopyLibraries(copyLibsCheckbox.isSelected())
+                .withImportSettingsFromMaven(importSettingsFromMavenCheckbox.isSelected())
                 .withLocations(new TreeSet<>(locationModel.getLocations()))
                 .withThirdPartyClassPath(getThirdPartyClasspath())
                 .withActiveLocationIds(locationModel.getActiveLocations().stream()
