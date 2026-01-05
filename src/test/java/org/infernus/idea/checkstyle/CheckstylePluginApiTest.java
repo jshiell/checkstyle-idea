@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
-    private static final String CHECKSTYLE_VERSION = "9.0.1";
+    private static final String CHECKSTYLE_VERSION = "10.0";
 
     private CheckstylePluginApi underTest;
 
