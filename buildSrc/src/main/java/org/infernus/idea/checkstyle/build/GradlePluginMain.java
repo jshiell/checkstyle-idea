@@ -187,7 +187,7 @@ public class GradlePluginMain implements Plugin<Project> {
 
     private @NotNull String pluginSandboxDir(final boolean test, final String subDirectory) {
         // must remain in sync with task configuration in Gradle file
-        return "idea-sandbox/IC-2024.1.7/plugins"
+        return "idea-sandbox/IC-2024.3.7/plugins"
                 + (test ? "-test" : "")
                 + "/checkstyle-idea/" + subDirectory;
     }

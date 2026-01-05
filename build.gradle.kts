@@ -39,11 +39,11 @@ intellijPlatform {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks {
@@ -64,7 +64,7 @@ tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
         options.compilerArgs.addAll(listOf("-Xlint:deprecation"))
-        options.release.set(17)
+        options.release.set(21)
 
         if (name == "compileCsaccessJava" || name == "compileCsaccessTestJava") {
             options.compilerArgs.addAll(listOf("-Xlint:unchecked"))
@@ -82,7 +82,7 @@ configurations.configureEach {
 dependencies {
     intellijPlatform {
         // Update reference in GradlePluginMain on change
-        intellijIdeaCommunity("2024.1.7")
+        intellijIdeaCommunity("2024.3.7")
 
         bundledPlugin("com.intellij.java")
 

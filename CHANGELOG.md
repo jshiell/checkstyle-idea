@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.0.0** New: Now built again IDEA 2024.3.7 (was 2024.1.7); minimum JVM runtime is now 21.
 * **26.0.0** New: Checkstyle 10 is now the minimum support version; version 9 is no longer supported.
 * **26.0.0** New: Change version number to align with release year
 * **5.117.0** New: Added Checkstyle 12.3.1.
