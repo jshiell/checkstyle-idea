@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.0.0: New: Added Checkstyle 13.0.0.</li>
     <li>26.0.0: New: Now built again IDEA 2024.3.7 (was 2024.1.7); minimum JVM runtime is now 21.</li>
     <li>26.0.0: New: Checkstyle 10 is now the minimum support version; version 9 is no longer supported.</li>
     <li>26.0.0: New: Change version number to align with release year.</li>
@@ -47,9 +48,6 @@
     <li>5.109.0: New: Added Checkstyle 10.26.1.</li>
     <li>5.108.1: Fixed: Resolved edge case if Piccolo is in the project classpath (#668).</li>
     <li>5.108.0: New: Added Checkstyle 10.25.1 & 10.26.0.</li>
-    <li>5.107.0: New: Added Checkstyle 10.25.0.</li>
-    <li>5.106.0: New: Added Checkstyle 10.24.0.</li>
-    <li>5.106.0: New: Now built against IDEA 2024.1.7 (was 2023.1.5).</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>

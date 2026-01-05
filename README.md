@@ -7,7 +7,7 @@ Hosted on [GitHub](https://github.com/jshiell/checkstyle-idea)
 [![Build Status](https://github.com/jshiell/checkstyle-idea/workflows/Build/badge.svg)](https://github.com/jshiell/checkstyle-idea/actions?query=workflow%3A%22Build%22)
 
 A plug-in for JetBrains' IntelliJ IDEA 2024 and 2025 which provides real-time feedback against a given
-[CheckStyle 10-12](https://checkstyle.sourceforge.io) profile by way of an inspection.
+[CheckStyle 10-13](https://checkstyle.sourceforge.io) profile by way of an inspection.
 
 Please note this is not an official part of Checkstyle - they neither endorse
     nor bear responsibility for this plugin. The logo is sourced from the [Checkstyle resources
