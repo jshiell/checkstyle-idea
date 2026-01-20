@@ -53,6 +53,13 @@
         ]]>
     </change-notes>
 
+    <extensionPoints>
+        <extensionPoint name="checkstyleQuickFixProvider"
+                        interface="org.infernus.idea.checkstyle.checker.CheckstyleQuickFixProvider"
+                        dynamic="true"
+                        area="IDEA_PROJECT"/>
+    </extensionPoints>
+
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="org.infernus.idea.checkstyle.StaticScanner"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.checker.CheckerFactoryCache"/>
