@@ -204,6 +204,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * James Baker (@james-baker-aera)
 * @LlamaLad7
 * @thorpp
+* @dong4j
 
 And also thanks are due to the authors and contributors of:
 
