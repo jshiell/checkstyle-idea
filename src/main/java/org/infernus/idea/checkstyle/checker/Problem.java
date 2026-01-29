@@ -36,7 +36,7 @@ public record Problem(@NotNull PsiElement target,
     @NotNull
     public ProblemDescriptor toProblemDescriptor(final InspectionManager inspectionManager,
                                                  final boolean onTheFly) {
-        String sourceCheck = DisplayFormats.shortenClassName(sourceName);
+        final String sourceCheck = DisplayFormats.shortenClassName(sourceName);
         return inspectionManager.createProblemDescriptor(target,
                 CheckStyleBundle.message("inspection.message", message, sourceCheck),
                 quickFixes(sourceCheck), problemHighlightType(), onTheFly, afterEndOfLine);
@@ -52,7 +52,7 @@ public record Problem(@NotNull PsiElement target,
      * @param sourceCheck The source check name used to create a suppress fix, or {@code null} if not applicable
      * @return An array of {@link LocalQuickFix} instances, or {@code null} if no fixes are available
      */
-    private LocalQuickFix[] quickFixes(final String sourceCheck) {
+    private LocalQuickFix @Nullable [] quickFixes(@Nullable final String sourceCheck) {
         List<LocalQuickFix> fixes = new ArrayList<>();
 
         if (sourceCheck != null) {
@@ -72,12 +72,13 @@ public record Problem(@NotNull PsiElement target,
      * @param fixes The list to which collected quick fixes will be added
      * @return An array of {@link LocalQuickFix} instances, or {@code null} if no fixes are available
      */
-    private LocalQuickFix @Nullable [] addLocalQuickFixes(List<LocalQuickFix> fixes) {
-        Project project = target.getProject();
+    @NotNull
+    private LocalQuickFix @Nullable [] addLocalQuickFixes(@NotNull final List<LocalQuickFix> fixes) {
+        final Project project = target.getProject();
         if (!project.isDisposed()) {
             try {
                 for (CheckstyleQuickFixProvider provider : QUICK_FIX_PROVIDER_EP.getExtensions(project)) {
-                    LocalQuickFix[] providedFixes = provider.getQuickFixes(this);
+                    final LocalQuickFix[] providedFixes = provider.getQuickFixes(this);
                     if (providedFixes != null && providedFixes.length > 0) {
                         fixes.addAll(Arrays.asList(providedFixes));
                     }
@@ -86,7 +87,11 @@ public record Problem(@NotNull PsiElement target,
                 // The extension point remains backward compatible when not available.
             }
         }
-        return fixes.isEmpty() ? null : fixes.toArray(new LocalQuickFix[0]);
+
+        if (fixes.isEmpty()) {
+            return null;
+        }
+        return fixes.toArray(new LocalQuickFix[0]);
     }
 
     private ProblemHighlightType problemHighlightType() {
