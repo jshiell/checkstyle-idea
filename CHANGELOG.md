@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.2.0** New: Add Checkstyle 13.1.0.
 * **26.1.0** New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.
 * **26.0.0** New: Added Checkstyle 13.0.0.
 * **26.0.0** New: Now built again IDEA 2024.3.7 (was 2024.1.7); minimum JVM runtime is now 21.
