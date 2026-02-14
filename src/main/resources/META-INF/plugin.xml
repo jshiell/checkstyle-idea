@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.3.0: New: Added Checkstyle 13.2.0.</li>
     <li>26.2.0: New: Added Checkstyle 13.1.0.</li>
     <li>26.1.0: New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.</li>
     <li>26.0.0: New: Added Checkstyle 13.0.0.</li>
@@ -44,12 +45,6 @@
     <li>5.111.1: Fixed: Removed scope check when enabling scan current file button to improve performance (#675).</li>
     <li>5.111.1: New: Add keyboard shortcuts for next/previous result (#676).</li>
     <li>5.111.0: New: Added Checkstyle 11.0.1.</li>
-    <li>5.110.0: New: Added Checkstyle 11.0.0.</li>
-    <li>5.109.2: Fixed: Removed project code from classpath, as it hasn't been required since Checkstyle 6.2 (#673). Thanks to @LlamaLad7.</li>
-    <li>5.109.1: New: Added grouping of results by the source check (#670).</li>
-    <li>5.109.0: New: Added Checkstyle 10.26.1.</li>
-    <li>5.108.1: Fixed: Resolved edge case if Piccolo is in the project classpath (#668).</li>
-    <li>5.108.0: New: Added Checkstyle 10.25.1 & 10.26.0.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
