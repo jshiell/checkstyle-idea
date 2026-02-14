@@ -9,14 +9,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.function.Function;
 
-import static java.util.Arrays.asList;
-
 public class ProjectFilePaths {
 
     private static final Logger LOG = Logger.getInstance(ProjectFilePaths.class);
 
     private static final String IDEA_PROJECT_DIR = "$PROJECT_DIR$";
-    private static final String LEGACY_PROJECT_DIR = "$PRJ_DIR$";
 
     private final ProjectPaths projectPaths;
     private final Project project;
@@ -114,18 +111,16 @@ public class ProjectFilePaths {
     }
 
     private String replaceProjectToken(final String path) {
-        for (String projectDirToken : asList(IDEA_PROJECT_DIR, LEGACY_PROJECT_DIR)) {
-            int prefixLocation = path.indexOf(projectDirToken);
-            if (prefixLocation >= 0) {
-                final File projectPath = projectPath();
-                if (projectPath != null) {
-                    final String projectRelativePath = toSystemPath(path.substring(prefixLocation + projectDirToken.length()));
-                    final String completePath = projectPath + File.separator + projectRelativePath;
-                    return absolutePathOf.apply(new File(completePath));
+        int prefixLocation = path.indexOf(IDEA_PROJECT_DIR);
+        if (prefixLocation >= 0) {
+            final File projectPath = projectPath();
+            if (projectPath != null) {
+                final String projectRelativePath = toSystemPath(path.substring(prefixLocation + IDEA_PROJECT_DIR.length()));
+                final String completePath = projectPath + File.separator + projectRelativePath;
+                return absolutePathOf.apply(new File(completePath));
 
-                } else {
-                    LOG.warn("Could not detokenise path as project dir is unset: " + path);
-                }
+            } else {
+                LOG.warn("Could not detokenise path as project dir is unset: " + path);
             }
         }
         return null;

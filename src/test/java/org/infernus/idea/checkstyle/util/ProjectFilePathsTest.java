@@ -62,12 +62,6 @@ public class ProjectFilePathsTest {
     }
 
     @Test
-    public void aUnixLocationContainingTheLegacyProjectPathTokenShouldBeDetokenisedCorrectly() {
-        assertThat(underTest.detokenise("$PRJ_DIR$/a-path/to/checkstyle.xml"),
-                is(equalTo(UNIX_PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml")));
-    }
-
-    @Test
     public void directoryTraversalsInARelativePathShouldNotBeAlteredByDetokenisation() {
         assertThat(underTest.detokenise(UNIX_PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml"),
                 is(equalTo(UNIX_PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml")));
