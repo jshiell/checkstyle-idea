@@ -72,13 +72,6 @@ public class RelativeFileConfigurationLocationTest {
     }
 
     @Test
-    public void aTokenisedPathWithRelativeElementsIsStoredAsProjectRelative() {
-        underTest.setLocation("$PROJECT_DIR$/../../../somewhere/rules.xml");
-
-        assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "/../../../somewhere/rules.xml")));
-    }
-
-    @Test
     public void aPathWithNoCommonElementsIsStoredAsProjectRelative() {
         underTest.setLocation("/somewhere/else/entirely/another-project/rules.xml");
 

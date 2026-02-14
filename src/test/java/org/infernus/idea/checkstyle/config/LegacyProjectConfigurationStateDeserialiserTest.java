@@ -72,8 +72,8 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
         assertThat(configList, equalTo(List.of(
                 Descriptor.parse("BUNDLED:(bundled):Sun Checks;All", project).toConfigurationLocation(project),
                 Descriptor.parse("BUNDLED:(bundled):Google Checks;All", project).toConfigurationLocation(project),
-                Descriptor.parse("LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-545.xml:545;All", project).toConfigurationLocation(project),
-                Descriptor.parse("LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All", project).toConfigurationLocation(project),
+                Descriptor.parse("LOCAL_FILE:/a/project/path/test-configs/issue-545.xml:545;All", project).toConfigurationLocation(project),
+                Descriptor.parse("LOCAL_FILE:/a/project/path/test-configs/working-checkstyle-rules-8.24.xml:Working;All", project).toConfigurationLocation(project),
                 Descriptor.parse("HTTP_URL:http://demo:demo@localhost:8000/working-checkstyle-rules-8.24.xml:Working HTTP;All", project).toConfigurationLocation(project))
         ));
         assertThat(pluginConfiguration.getActiveLocations(), hasSize(1));
@@ -90,13 +90,13 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
     @NotNull
     private ProjectConfigurationState.ProjectSettings testConfiguration() {
         final Map<String, String> configuration = new HashMap<>();
-        configuration.put("active-configuration-0", "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
+        configuration.put("active-configuration-0", "LOCAL_FILE:/a/project/path/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
         configuration.put("checkstyle-version", "10.2");
         configuration.put("copy-libs", "false");
         configuration.put("location-0", "BUNDLED:(bundled):Sun Checks;All");
         configuration.put("location-1", "BUNDLED:(bundled):Google Checks;All");
-        configuration.put("location-2", "LOCAL_FILE:$PROJECT_DIR$/test-configs/issue-545.xml:545;All");
-        configuration.put("location-3", "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
+        configuration.put("location-2", "LOCAL_FILE:/a/project/path/test-configs/issue-545.xml:545;All");
+        configuration.put("location-3", "LOCAL_FILE:/a/project/path/test-configs/working-checkstyle-rules-8.24.xml:Working;All");
         configuration.put("location-7", "HTTP_URL:http://demo:demo@localhost:8000/working-checkstyle-rules-8.24.xml:Working HTTP;All");
         configuration.put("property-1.org.checkstyle.google.suppressionfilter.config", "notxpath");
         configuration.put("property-1.org.checkstyle.google.suppressionxpathfilter.config", "xpath");
@@ -104,7 +104,7 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
         configuration.put("scan-before-checkin", "false");
         configuration.put("scanscope", "JavaOnlyWithTests");
         configuration.put("suppress-errors", "false");
-        configuration.put("thirdparty-classpath", "$PROJECT_DIR$/test-configs/spring-javaformat-checkstyle-0.0.31.jar;$PROJECT_DIR$/test-configs/spring-javaformat-config-0.0.31.jar");
+        configuration.put("thirdparty-classpath", "/a/project/path/test-configs/spring-javaformat-checkstyle-0.0.31.jar;/a/project/path/test-configs/spring-javaformat-config-0.0.31.jar");
 
         return new ProjectConfigurationState.ProjectSettings(configuration);
     }

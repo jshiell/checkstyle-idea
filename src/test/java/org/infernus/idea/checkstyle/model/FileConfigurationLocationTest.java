@@ -50,30 +50,6 @@ public class FileConfigurationLocationTest {
     }
 
     @Test
-    public void theProjectDirectoryShouldBeTokenisedInDescriptorForUnixPaths() {
-        underTest.setLocation(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml");
-
-        assertThat(Descriptor.of(underTest, project).toString(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a-path/to/checkstyle.xml:aDescription;test")));
-    }
-
-    @Test
-    public void directoryTraversalsInARelativePathShouldNotBeAlteredByTokenisation() {
-        underTest.setLocation(PROJECT_BASE_PATH + "/../a-path/to/checkstyle.xml");
-
-        assertThat(Descriptor.of(underTest, project).toString(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/../a-path/to/checkstyle.xml:aDescription;test")));
-    }
-
-    @Test
-    public void theProjectDirectoryShouldBeTokenisedInDescriptorForWindowsPaths() {
-        underTest = useWindowsFilePaths();
-
-        underTest.setLocation("c:\\some-where\\a-project\\a\\file\\location-in\\checkstyle.xml");
-        underTest.setDescription("aDescription");
-
-        assertThat(Descriptor.of(underTest, project).toString(), is(equalTo("LOCAL_FILE:$PROJECT_DIR$/a/file/location-in/checkstyle.xml:aDescription;test")));
-    }
-
-    @Test
     public void aUnixLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
         underTest.setLocation(PROJECT_BASE_PATH + "/a-path/to/checkstyle.xml");
 
@@ -103,39 +79,9 @@ public class FileConfigurationLocationTest {
         assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "-sibling/a-path/to/checkstyle.xml")));
     }
 
-    @Test
-    public void aWindowsLocationContainingTheProjectPathShouldBeDetokenisedCorrectly() {
-        underTest = useWindowsFilePaths();
-
-        underTest.setLocation("c:\\some-where\\a-project\\a\\file\\location\\checkstyle.xml");
-
-        assertThat(underTest.getLocation(), is(equalTo("c:\\some-where\\a-project\\a\\file\\location\\checkstyle.xml")));
-    }
-
-    @Test
-    public void aWindowsLocationShouldBeStoredAndRetrievedCorrectlyWhenTheProjectPathIsNotUsed() {
-        underTest = useWindowsFilePaths();
-
-        underTest.setLocation("c:\\a\\file\\location\\checkstyle.xml");
-
-        assertThat(underTest.getLocation(), is(equalTo("c:\\a\\file\\location\\checkstyle.xml")));
-    }
-
-    private FileConfigurationLocation useWindowsFilePaths() {
-        ProjectFilePaths testProjectFilePaths = testProjectFilePaths('\\', project);
-        when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
-        when(projectPaths.projectPath(project)).thenReturn(projectBase);
-        when(projectPaths.projectPath(project)).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn("c:/some-where/a-project");
-
-        return new FileConfigurationLocation(project, "winTest");
-    }
-
     private FileConfigurationLocation useUnixPaths() {
         ProjectFilePaths testProjectFilePaths = testProjectFilePaths('/', project);
         when(project.getService(ProjectFilePaths.class)).thenReturn(testProjectFilePaths);
-        when(projectPaths.projectPath(project)).thenReturn(projectBase);
-        when(projectBase.getPath()).thenReturn(PROJECT_BASE_PATH);
 
         return new FileConfigurationLocation(project, "unixTest");
     }

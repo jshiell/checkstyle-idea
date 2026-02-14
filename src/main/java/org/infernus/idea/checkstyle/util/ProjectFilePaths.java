@@ -13,8 +13,6 @@ public class ProjectFilePaths {
 
     private static final Logger LOG = Logger.getInstance(ProjectFilePaths.class);
 
-    private static final String IDEA_PROJECT_DIR = "$PROJECT_DIR$";
-
     private final ProjectPaths projectPaths;
     private final Project project;
     private final char separatorChar;
@@ -75,69 +73,12 @@ public class ProjectFilePaths {
 
     @Nullable
     public String tokenise(@Nullable final String fsPath) {
-        if (fsPath == null) {
-            return null;
-        }
-
-        if (project.isDefault()) {
-            if (new File(fsPath).exists() || fsPath.startsWith(IDEA_PROJECT_DIR)) {
-                return toUnixPath(fsPath);
-            } else {
-                return IDEA_PROJECT_DIR + toUnixPath(separatorChar + fsPath);
-            }
-        }
-
-        final File projectPath = projectPath();
-        if (projectPath != null && fsPath.startsWith(absolutePathOf.apply(projectPath) + separatorChar)) {
-            return IDEA_PROJECT_DIR
-                    + toUnixPath(fsPath.substring(absolutePathOf.apply(projectPath).length()));
-        }
-
-        return toUnixPath(fsPath);
+        return fsPath;
     }
 
     @Nullable
     public String detokenise(@Nullable final String tokenisedPath) {
-        if (tokenisedPath == null) {
-            return null;
-        }
-
-        String detokenisedPath = replaceProjectToken(tokenisedPath);
-
-        if (detokenisedPath == null) {
-            detokenisedPath = toSystemPath(tokenisedPath);
-        }
-        return detokenisedPath;
-    }
-
-    private String replaceProjectToken(final String path) {
-        int prefixLocation = path.indexOf(IDEA_PROJECT_DIR);
-        if (prefixLocation >= 0) {
-            final File projectPath = projectPath();
-            if (projectPath != null) {
-                final String projectRelativePath = toSystemPath(path.substring(prefixLocation + IDEA_PROJECT_DIR.length()));
-                final String completePath = projectPath + File.separator + projectRelativePath;
-                return absolutePathOf.apply(new File(completePath));
-
-            } else {
-                LOG.warn("Could not detokenise path as project dir is unset: " + path);
-            }
-        }
-        return null;
-    }
-
-    private String toUnixPath(final String systemPath) {
-        if (separatorChar == '/') {
-            return systemPath;
-        }
-        return systemPath.replace(separatorChar, '/');
-    }
-
-    private String toSystemPath(final String unixPath) {
-        if (separatorChar == '/') {
-            return unixPath;
-        }
-        return unixPath.replace('/', separatorChar);
+        return tokenisedPath;
     }
 
     @Nullable

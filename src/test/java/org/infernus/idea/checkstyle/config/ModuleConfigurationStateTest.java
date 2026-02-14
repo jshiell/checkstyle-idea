@@ -98,7 +98,7 @@ public class ModuleConfigurationStateTest {
     @NotNull
     private Map<String, String> testConfiguration() {
         return Map.of(
-                "active-configuration", "LOCAL_FILE:$PROJECT_DIR$/test-configs/working-checkstyle-rules-module.xml:Working Module;All"
+                "active-configuration", "LOCAL_FILE:/a/project/path/test-configs/working-checkstyle-rules-module.xml:Working Module;All"
         );
     }
 
