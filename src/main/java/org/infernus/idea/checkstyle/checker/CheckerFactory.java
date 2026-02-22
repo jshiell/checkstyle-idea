@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
@@ -165,17 +168,17 @@ public class CheckerFactory {
                                  final ListPropertyResolver resolver) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
                 resolver.getPropertyNamesToValues(), module, checkstyleProjectService);
-        worker.start();
-
-        while (worker.isAlive()) {
-            try {
-                worker.join();
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            }
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            return executor.submit(worker).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return e;
+        } catch (ExecutionException e) {
+            return e.getCause() != null ? e.getCause() : e;
+        } finally {
+            executor.shutdown();
         }
-
-        return worker.getResult();
     }
 
     private CachedChecker blockAndShowMessage(final ConfigurationLocation location,

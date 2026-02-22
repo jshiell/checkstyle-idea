@@ -7,15 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 
-class CheckerFactoryWorker extends Thread {
+class CheckerFactoryWorker implements Callable<Object> {
     private final ConfigurationLocation location;
     private final Map<String, String> properties;
     private final Module module;
     private final CheckstyleProjectService checkstyleProjectService;
-
-    private Object threadReturn = null;
 
     CheckerFactoryWorker(@NotNull final ConfigurationLocation location,
                          @Nullable final Map<String, String> properties,
@@ -28,20 +27,14 @@ class CheckerFactoryWorker extends Thread {
     }
 
     @Override
-    public void run() {
-        super.run();
-
+    public Object call() {
         try {
             final CheckStyleChecker checker = checkstyleProjectService
                     .getCheckstyleInstance()
                     .createChecker(module, location, properties);
-            threadReturn = new CachedChecker(checker);
+            return new CachedChecker(checker);
         } catch (RuntimeException e) {
-            threadReturn = e;
+            return e;
         }
-    }
-
-    public Object getResult() {
-        return threadReturn;
     }
 }
