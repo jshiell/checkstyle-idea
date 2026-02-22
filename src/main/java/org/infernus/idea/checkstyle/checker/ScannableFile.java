@@ -210,15 +210,10 @@ import static java.util.Optional.ofNullable;
 
     private void writeContentsToFile(final PsiFile file, final File outFile) throws IOException {
         final String lineSeparator = CodeStyle.getSettings(file.getProject()).getLineSeparator();
+        final String content = file.getText().replace("\n", lineSeparator); // IDEA uses \n internally
 
         final Writer tempFileOut = writerTo(outFile, charSetOf(file));
-        for (final char character : file.getText().toCharArray()) {
-            if (character == '\n') { // IDEA uses \n internally
-                tempFileOut.write(lineSeparator);
-            } else {
-                tempFileOut.write(character);
-            }
-        }
+        tempFileOut.write(content);
         tempFileOut.flush();
         tempFileOut.close();
     }
