@@ -15,15 +15,15 @@ abstract class GroupTreeInfo extends ResultTreeNode {
     /**
      * Construct a group node.
      *
-     * @param name     the name of the group.
-     * @param groupId the ID used as part of message lookup.
-     * @param icon the icon of the group.
+     * @param name         the name of the group.
+     * @param groupId      the ID used as part of message lookup.
+     * @param icon         the icon of the group.
      * @param problemCount the number of problems in the group.
      */
-    public GroupTreeInfo(@NotNull final String name,
-                         @NotNull final String groupId,
-                         @NotNull final Icon icon,
-                         final int problemCount) {
+    GroupTreeInfo(@NotNull final String name,
+                  @NotNull final String groupId,
+                  @NotNull final Icon icon,
+                  final int problemCount) {
         super(CheckStyleBundle.message("plugin.results.scan-" + groupId + "-result", name, problemCount));
 
         this.name = name;

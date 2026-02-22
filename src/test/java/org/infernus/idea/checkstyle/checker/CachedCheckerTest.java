@@ -60,7 +60,7 @@ class CachedCheckerTest {
         verify(checkStyleChecker).destroy();
     }
 
-    private void backdateTimestamp(CachedChecker cachedChecker, long millisInThePast) throws Exception {
+    private void backdateTimestamp(final CachedChecker cachedChecker, final long millisInThePast) throws Exception {
         Field field = CachedChecker.class.getDeclaredField("timeStamp");
         field.setAccessible(true);
         field.set(cachedChecker, System.currentTimeMillis() - millisInThePast);
