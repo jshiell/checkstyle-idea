@@ -169,20 +169,18 @@ public class CheckStyleInspection extends LocalInspectionTool {
                                        final @NotNull PsiFile psiFile,
                                        final List<ConfigurationLocation> configurationLocations,
                                        final @NotNull Project project) {
-        if (e.getCause() != null && e.getCause() instanceof ProcessCanceledException) {
-            LOG.debug("Process cancelled when scanning: " + psiFile.getName());
-
-        } else if (e.getCause() != null && e.getCause() instanceof FileNotFoundException) {
-            disableActiveConfiguration(project);
-
-        } else if (e.getCause() != null && e.getCause() instanceof IOException) {
-            showWarning(project, message("checkstyle.file-io-failed"));
-            block(configurationLocations);
-
-        } else {
-            LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
-            showException(project, e);
-            block(configurationLocations);
+        switch (e.getCause()) {
+            case ProcessCanceledException ignored -> LOG.debug("Process cancelled when scanning: " + psiFile.getName());
+            case FileNotFoundException ignored -> disableActiveConfiguration(project);
+            case IOException ignored -> {
+                showWarning(project, message("checkstyle.file-io-failed"));
+                block(configurationLocations);
+            }
+             default -> {
+                LOG.warn("CheckStyle threw an exception when scanning: " + psiFile.getName(), e);
+                showException(project, e);
+                block(configurationLocations);
+            }
         }
     }
 
