@@ -4,7 +4,7 @@ commons-codec = "1.19.0"
 junit-jupiter = "5.12.0"
 junit-platform = "1.12.0"
 hamcrest = "3.0"
-mockito = "5.18.0"
+mockito = "5.21.0"
 intellij-platform-plugin = "2.11.0"
 intellij-idea-community = "2024.3.7"
 
