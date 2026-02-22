@@ -57,7 +57,6 @@ tasks {
     }
 
     withType<Test> {
-        forkEvery = 1
         jvmArgs("-Xshare:off")
         useJUnitPlatform()
     }
