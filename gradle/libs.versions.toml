@@ -2,7 +2,6 @@
 commons-io = "2.20.0"
 commons-codec = "1.19.0"
 junit = "4.13.2"
-junit-buildsrc = "4.12"
 hamcrest = "3.0"
 mockito = "5.18.0"
 intellij-platform-plugin = "2.11.0"
@@ -12,7 +11,6 @@ intellij-idea-community = "2024.3.7"
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
 junit = { module = "junit:junit", version.ref = "junit" }
-junit-buildsrc = { module = "junit:junit", version.ref = "junit-buildsrc" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 

@@ -8,7 +8,7 @@ repositories {
 
 dependencies {
     implementation(libs.commons.io)
-    testImplementation(libs.junit.buildsrc)
+    testImplementation(libs.junit)
 }
 
 java {
