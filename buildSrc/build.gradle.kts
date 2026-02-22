@@ -7,8 +7,8 @@ repositories {
 }
 
 dependencies {
-    implementation("commons-io:commons-io:2.20.0")
-    testImplementation("junit:junit:4.12")
+    implementation(libs.commons.io)
+    testImplementation(libs.junit.buildsrc)
 }
 
 java {

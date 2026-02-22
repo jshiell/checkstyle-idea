@@ -14,7 +14,7 @@ plugins {
     id("java")
     id("jacoco")
     id("idea")
-    id("org.jetbrains.intellij.platform") version "2.11.0"
+    alias(libs.plugins.intellij.platform)
 
     id("org.infernus.idea.checkstyle.build")
 }
@@ -82,24 +82,24 @@ configurations.configureEach {
 dependencies {
     intellijPlatform {
         // Update reference in GradlePluginMain on change
-        intellijIdeaCommunity("2024.3.7")
+        intellijIdeaCommunity(libs.versions.intellij.idea.community.get())
 
         bundledPlugin("com.intellij.java")
 
         testFramework(TestFrameworkType.Platform)
     }
 
-    implementation("commons-io:commons-io:2.20.0")
-    implementation("commons-codec:commons-codec:1.19.0")
+    implementation(libs.commons.io)
+    implementation(libs.commons.codec)
 
     val checkStyleBaseVersion = (project.extra["supportedCsVersions"] as CheckstyleVersions).baseVersion
     csaccessCompileOnly("com.puppycrawl.tools:checkstyle:${checkStyleBaseVersion}") {
         exclude("commons-logging:commons-logging")
     }
 
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.hamcrest:hamcrest:3.0")
-    testImplementation("org.mockito:mockito-core:5.18.0")
+    testImplementation(libs.junit)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.mockito.core)
 }
 
 idea.module {
