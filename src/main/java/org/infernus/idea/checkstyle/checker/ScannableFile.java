@@ -137,8 +137,9 @@ import static java.util.Optional.ofNullable;
             tmpDirForFile = baseTmpDir;
         }
 
-        //noinspection ResultOfMethodCallIgnored
-        tmpDirForFile.mkdirs();
+        if (!tmpDirForFile.exists() && !tmpDirForFile.mkdirs()) {
+            LOG.debug("Failed to create temporary directory: " + tmpDirForFile.getAbsolutePath());
+        }
 
         return tmpDirForFile;
     }
@@ -268,8 +269,9 @@ import static java.util.Optional.ofNullable;
             }
         }
 
-        //noinspection ResultOfMethodCallIgnored
-        file.delete();
+        if (!file.delete()) {
+            LOG.debug("Failed to delete temporary file: " + file.getAbsolutePath());
+        }
     }
 
     public String getAbsolutePath() {
