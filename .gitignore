@@ -14,3 +14,4 @@ gradle-app.setting
 _support/
 /out/
 .intellijPlatform/
+/improvements.md

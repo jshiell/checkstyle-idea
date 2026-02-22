@@ -131,7 +131,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
 
     private List<PsiFile> buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
         return ReadAction.compute(() -> {
-            final FindChildFiles visitor = new FindChildFiles(virtualFile, psiManager);
+            final FindChildFiles visitor = new FindChildFiles(psiManager);
             VfsUtilCore.visitChildrenRecursively(virtualFile, visitor);
             return visitor.locatedFiles;
         });
@@ -218,22 +218,20 @@ public class ScanFiles implements Callable<List<ScanResult>> {
         return project.getService(ConfigurationLocationSource.class);
     }
 
-    private static class FindChildFiles extends VirtualFileVisitor {
+    private static class FindChildFiles extends VirtualFileVisitor<Void> {
 
-        private final VirtualFile virtualFile;
         private final PsiManager psiManager;
 
         private final List<PsiFile> locatedFiles = new ArrayList<>();
 
-        FindChildFiles(final VirtualFile virtualFile, final PsiManager psiManager) {
-            this.virtualFile = virtualFile;
+        FindChildFiles(final PsiManager psiManager) {
             this.psiManager = psiManager;
         }
 
         @Override
         public boolean visitFile(@NotNull final VirtualFile file) {
             if (!file.isDirectory()) {
-                final PsiFile psiFile = psiManager.findFile(virtualFile);
+                final PsiFile psiFile = psiManager.findFile(file);
                 if (psiFile != null) {
                     locatedFiles.add(psiFile);
                 }
