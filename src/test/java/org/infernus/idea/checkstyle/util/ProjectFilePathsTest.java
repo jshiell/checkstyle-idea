@@ -2,8 +2,8 @@ package org.infernus.idea.checkstyle.util;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
@@ -18,7 +18,7 @@ public class ProjectFilePathsTest {
 
     private ProjectFilePaths underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = projectFilePathsForUnix();
     }

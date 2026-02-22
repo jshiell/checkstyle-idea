@@ -14,7 +14,6 @@ import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -166,7 +166,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         } catch (IOException e) {
             throw new CheckStylePluginException("internal error - Failed to read property file: " + PROPS_FILE_NAME, e);
         }
-        Assert.assertNotNull(result);
+        assertNotNull(result);
         return result;
     }
 }

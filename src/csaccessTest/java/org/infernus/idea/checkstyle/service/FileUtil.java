@@ -1,13 +1,14 @@
 package org.infernus.idea.checkstyle.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public final class FileUtil {
@@ -22,7 +23,7 @@ public final class FileUtil {
         if (url == null) {
             url = Thread.currentThread().getContextClassLoader().getResource(filename);
         }
-        Assert.assertNotNull("File not found: " + filename, url);
+        assertNotNull(url, "File not found: " + filename);
         return Files.readString(Paths.get(url.toURI()));
     }
 }

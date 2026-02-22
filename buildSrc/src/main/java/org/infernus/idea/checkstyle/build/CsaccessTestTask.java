@@ -101,6 +101,7 @@ public abstract class CsaccessTestTask extends Test {
                 .plus(project.files(detachedConfiguration.getFiles()))
                 .plus(csaccessTestSourceSet.getRuntimeClasspath())
                 .plus(csaccessTestSourceSet.getCompileClasspath())
+                .plus(testSourceSet.getRuntimeClasspath())
                 .minus(testSourceSet.getOutput().getClassesDirs())
                 .minus(project.files(testSourceSet.getOutput().getResourcesDir()));
     }

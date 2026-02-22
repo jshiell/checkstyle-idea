@@ -1,20 +1,20 @@
 package org.infernus.idea.checkstyle.service;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class SimpleResolverTest {
     private Map<String, String> props;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         props = new HashMap<>();
         props.put("key1", "value1");

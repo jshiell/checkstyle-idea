@@ -15,8 +15,8 @@ import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
@@ -41,7 +41,7 @@ public class ModuleConfigurationStateTest {
 
     private ConfigurationLocation expectedLocation;
 
-    @Before
+    @BeforeEach
     public void configureMocks() {
         when(module.getProject()).thenReturn(project);
 

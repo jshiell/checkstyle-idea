@@ -8,19 +8,19 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 public class DescriptorTest {
 
     private final Project project = TestHelper.mockProject();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(new ConfigurationLocationFactory());
         when(project.getService(ProjectFilePaths.class)).thenReturn(ProjectFilePaths.testInstanceWith(project, new ProjectPaths()));
@@ -38,14 +38,16 @@ public class DescriptorTest {
                         hasProperty("description", is("Some checkstyle rules"))));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void aTruncatedConfigurationLocationThrowsAnIllegalArgumentException() {
-        Descriptor.parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", project).toConfigurationLocation(project);
+        assertThrows(IllegalArgumentException.class, () ->
+                Descriptor.parse("LOCAL_FILE:/Users/aUser/Projects/aProject/checkstyle/cs-rules.xml", project).toConfigurationLocation(project));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void aConfigurationLocationWithNoFieldSeparatorsThrowsAnIllegalArgumentException() {
-        Descriptor.parse("LOCAL_FILE", project).toConfigurationLocation(project);
+        assertThrows(IllegalArgumentException.class, () ->
+                Descriptor.parse("LOCAL_FILE", project).toConfigurationLocation(project));
     }
 
     /**

@@ -8,11 +8,13 @@ import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.util.function.Function;
@@ -22,7 +24,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FileConfigurationLocationTest {
 
     private static final String PROJECT_BASE_PATH = "/the/base-project/path";
@@ -35,7 +38,7 @@ public class FileConfigurationLocationTest {
 
     private FileConfigurationLocation underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = useUnixPaths();
 

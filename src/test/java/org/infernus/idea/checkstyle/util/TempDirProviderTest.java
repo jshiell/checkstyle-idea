@@ -2,19 +2,20 @@ package org.infernus.idea.checkstyle.util;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -23,17 +24,17 @@ import org.mockito.Mockito;
 public class TempDirProviderTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
 
-    @Rule
-    public final TemporaryFolder targetFolder = new TemporaryFolder();
+    @TempDir
+    Path targetFolder;
 
 
     private static class TempDirProvider4Test
             extends TempDirProvider {
         private final boolean usesIdeaFolder;
 
-        private final TemporaryFolder junitTempFolder;
+        private final Path junitTempFolder;
 
-        TempDirProvider4Test(final boolean pUsesIdeaFolder, @NotNull final TemporaryFolder pJunitTempFolder) {
+        TempDirProvider4Test(final boolean pUsesIdeaFolder, @NotNull final Path pJunitTempFolder) {
             usesIdeaFolder = pUsesIdeaFolder;
             junitTempFolder = pJunitTempFolder;
         }
@@ -42,7 +43,7 @@ public class TempDirProviderTest {
         Optional<VirtualFile> getIdeaFolder(@NotNull final Project project) {
             if (usesIdeaFolder) {
                 final VirtualFile vf = Mockito.mock(VirtualFile.class);
-                Mockito.when(vf.getPath()).thenReturn(junitTempFolder.getRoot().getAbsolutePath());
+                Mockito.when(vf.getPath()).thenReturn(junitTempFolder.toAbsolutePath().toString());
                 return Optional.of(vf);
             }
             return Optional.empty();
@@ -50,7 +51,7 @@ public class TempDirProviderTest {
     }
 
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         Mockito.when(PROJECT.getName()).thenReturn("project-TempDirProviderTest");
         Mockito.when(PROJECT.getLocationHash()).thenReturn("f2d57494");
@@ -61,8 +62,8 @@ public class TempDirProviderTest {
     public void testCopyLibsTargetIdea() {
         TempDirProvider underTest = new TempDirProvider4Test(true, targetFolder);
         Optional<File> result = underTest.forCopiedLibraries(PROJECT);
-        Assert.assertTrue(result.isPresent());
-        Assert.assertTrue(Files.isRegularFile(Paths.get(targetFolder.getRoot().toURI())
+        assertTrue(result.isPresent());
+        assertTrue(Files.isRegularFile(targetFolder
                 .resolve("checkstyleidea-libs").resolve(TempDirProvider.README_FILE)));
     }
 
@@ -73,8 +74,8 @@ public class TempDirProviderTest {
         try {
             TempDirProvider underTest = new TempDirProvider4Test(false, targetFolder);
             result = underTest.forCopiedLibraries(PROJECT);
-            Assert.assertTrue(result.isPresent());
-            Assert.assertTrue(new File(System.getProperty("java.io.tmpdir"), "csi-f2d57494-libs/" + TempDirProvider
+            assertTrue(result.isPresent());
+            assertTrue(new File(System.getProperty("java.io.tmpdir"), "csi-f2d57494-libs/" + TempDirProvider
                     .README_FILE).isFile());
         } finally {
             deleteTempDir(result);
@@ -90,9 +91,9 @@ public class TempDirProviderTest {
             TempDirProvider underTest = new TempDirProvider4Test(false, targetFolder);
             result1 = underTest.forCopiedLibraries(PROJECT);
             result2 = underTest.forCopiedLibraries(PROJECT);
-            Assert.assertTrue(result1.isPresent());
-            Assert.assertTrue(result2.isPresent());
-            Assert.assertEquals(result1.get(), result2.get());
+            assertTrue(result1.isPresent());
+            assertTrue(result2.isPresent());
+            assertEquals(result1.get(), result2.get());
         } finally {
             deleteTempDir(result1);
             deleteTempDir(result2);

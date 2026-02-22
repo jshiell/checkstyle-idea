@@ -9,8 +9,8 @@ import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
     private final ConfigurationLocationFactory configurationLocationFactory = new ConfigurationLocationFactory();
     private final ProjectFilePaths projectFilePaths = ProjectFilePaths.testInstanceWith(project, File.separatorChar, File::getAbsolutePath, projectPaths);
 
-    @Before
+    @BeforeEach
     public void configureMocks() {
         final VirtualFile projectPath = mock(VirtualFile.class);
         when(projectPath.getPath()).thenReturn("/a/project/path");

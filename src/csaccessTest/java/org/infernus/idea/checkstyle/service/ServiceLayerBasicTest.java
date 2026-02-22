@@ -11,9 +11,9 @@ import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +25,8 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.infernus.idea.checkstyle.service.CsVersionInfo.*;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +38,7 @@ public class ServiceLayerBasicTest {
 
     private static CheckstyleProjectService checkstyleProjectService;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         PluginConfigurationManager mockPluginConfig = mock(PluginConfigurationManager.class);
         final PluginConfiguration mockConfigDto = PluginConfigurationBuilder.testInstance(currentCsVersion()).build();
@@ -48,14 +48,14 @@ public class ServiceLayerBasicTest {
         checkstyleProjectService = new CheckstyleProjectService(PROJECT);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         checkstyleProjectService = null;
     }
 
     @Test
     public void theFileContentsHolderCannotBeUsedWithCheckstyle82AndAbove() throws IOException, URISyntaxException {
-        assumeThat(currentCsVersion(), isGreaterThanOrEqualTo("8.2"));
+        assumeTrue(isGreaterThanOrEqualTo("8.2").matches(currentCsVersion()));
 
         try {
             createChecker(CONFIG_FILE_CONTENTS_HOLDER);

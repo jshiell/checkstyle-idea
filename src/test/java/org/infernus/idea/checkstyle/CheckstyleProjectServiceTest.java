@@ -3,8 +3,8 @@ package org.infernus.idea.checkstyle;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.SortedSet;
 
@@ -19,7 +19,7 @@ public class CheckstyleProjectServiceTest {
 
     private CheckstyleProjectService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Project project = mock(Project.class);
 

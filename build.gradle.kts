@@ -59,6 +59,7 @@ tasks {
     withType<Test> {
         forkEvery = 1
         jvmArgs("-Xshare:off")
+        useJUnitPlatform()
     }
 
     withType<JavaCompile> {
@@ -96,9 +97,13 @@ dependencies {
         exclude("commons-logging:commons-logging")
     }
 
-    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
 }
 
 idea.module {

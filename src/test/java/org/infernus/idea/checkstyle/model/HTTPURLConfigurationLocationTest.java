@@ -5,9 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,13 +22,14 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HTTPURLConfigurationLocationTest {
 
     private HttpServer httpServer;
     private int serverPort = -1;
 
-    @Before
+    @BeforeEach
     public void startHttpServer() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress(0), 0);
         httpServer.createContext("/", new TestHandler());
@@ -37,7 +38,7 @@ public class HTTPURLConfigurationLocationTest {
         serverPort = httpServer.getAddress().getPort();
     }
 
-    @After
+    @AfterEach
     public void stopHttpServer() {
         httpServer.stop(0);
     }
@@ -56,14 +57,16 @@ public class HTTPURLConfigurationLocationTest {
         assertThat(toString(stream), is("A test response"));
     }
 
-    @Test(expected = FileNotFoundException.class)
-    public void aMissingRemoteFileThrowsAFileNotFoundException() throws IOException {
-        aLocationWithPath("/invalid").resolveFile(getClass().getClassLoader());
+    @Test
+    public void aMissingRemoteFileThrowsAFileNotFoundException() {
+        assertThrows(FileNotFoundException.class,
+                () -> aLocationWithPath("/invalid").resolveFile(getClass().getClassLoader()));
     }
 
-    @Test(expected = SocketTimeoutException.class)
-    public void aTimeoutThrowsASocketTimeoutException() throws IOException {
-        aTimingOutLocation().resolveFile(getClass().getClassLoader());
+    @Test
+    public void aTimeoutThrowsASocketTimeoutException() {
+        assertThrows(SocketTimeoutException.class,
+                () -> aTimingOutLocation().resolveFile(getClass().getClassLoader()));
     }
 
     private String toString(final InputStream is) {

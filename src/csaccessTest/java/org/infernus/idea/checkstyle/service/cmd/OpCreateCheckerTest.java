@@ -12,8 +12,8 @@ import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.StringConfigurationLocation;
 import org.infernus.idea.checkstyle.service.TestHelper;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +36,7 @@ public class OpCreateCheckerTest {
     private static TabWidthAndBaseDirProvider configurationsMock;
     private static CheckstyleProjectService checkstyleProjectServiceMock;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws URISyntaxException {
         moduleMock = mock(Module.class);
         when(moduleMock.getProject()).thenReturn(PROJECT);
@@ -61,12 +61,12 @@ public class OpCreateCheckerTest {
     }
 
 
-    @Test(expected = CheckStylePluginException.class)
+    @Test
     public void testCreateCheckerWithNoConfigLoc() {
-        //noinspection ConstantConditions
-        new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock)
-                .createChecker(moduleMock, null, emptyMap(), configurationsMock);
-        fail("expected exception was not thrown");
+        assertThrows(CheckStylePluginException.class, () ->
+                //noinspection ConstantConditions
+                new CheckstyleActionsImpl(PROJECT, checkstyleProjectServiceMock)
+                        .createChecker(moduleMock, null, emptyMap(), configurationsMock));
     }
 
 

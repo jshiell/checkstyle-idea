@@ -4,13 +4,14 @@ import com.puppycrawl.tools.checkstyle.api.AuditEvent;
 import com.puppycrawl.tools.checkstyle.api.SeverityLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class CheckStyleAuditListenerTest {
@@ -35,11 +36,12 @@ public class CheckStyleAuditListenerTest {
                 new IllegalArgumentException("Exception for unit testing only - not a real exception"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testWithoutLocalizedMessage() {
         final CheckStyleAuditListener underTest = new CheckStyleAuditListener(Collections.emptyMap(), false, 2,
                 Optional.empty(), Collections.emptyList());
-        underTest.addError(new AuditEvent("source", "filename.java"));  // quite unlikely to happen in real life
+        assertThrows(NullPointerException.class,
+                () -> underTest.addError(new AuditEvent("source", "filename.java")));
     }
 
     private AuditEvent createDummyEvent(@Nullable final SeverityLevel severityLevel) {

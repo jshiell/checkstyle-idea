@@ -20,9 +20,8 @@ import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.TestHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.io.IOException;
@@ -35,7 +34,8 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.service.ConfigurationMatcher.configEqualTo;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 
@@ -48,7 +48,7 @@ public class OpLoadConfigurationTest {
 
     private OpLoadConfiguration underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         interceptApplicationNotifications();
 
@@ -394,7 +394,7 @@ public class OpLoadConfigurationTest {
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
         final String configXml = FileUtil.readFile("cmd/config-ok.xml");
         CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService).loadConfiguration(configXml);
-        Assert.assertNotNull(csConfig);
+        assertNotNull(csConfig);
     }
 
 
@@ -409,7 +409,7 @@ public class OpLoadConfigurationTest {
                         "org.checkstyle.sun.suppressionfilter.config", "",
                         "org.checkstyle.sun.suppressionxpathfilter.config", ""
                 ));
-        Assert.assertNotNull(csConfig);
+        assertNotNull(csConfig);
     }
 
 
@@ -423,6 +423,6 @@ public class OpLoadConfigurationTest {
                         "org.checkstyle.google.suppressionfilter.config", "",
                         "org.checkstyle.google.suppressionxpathfilter.config", ""
                 ));
-        Assert.assertNotNull(csConfig);
+        assertNotNull(csConfig);
     }
 }

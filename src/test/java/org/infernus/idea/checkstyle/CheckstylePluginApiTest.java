@@ -7,8 +7,8 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.model.*;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.TreeSet;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.csapi.BundledConfig.GOOGLE_CHECKS;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 public class CheckstylePluginApiTest {
@@ -30,7 +30,7 @@ public class CheckstylePluginApiTest {
     private ConfigurationLocationFactory configurationLocationFactory;
     private Project project;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         project = TestHelper.mockProject();
 

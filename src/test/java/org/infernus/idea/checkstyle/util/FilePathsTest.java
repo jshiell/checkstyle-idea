@@ -1,9 +1,9 @@
 package org.infernus.idea.checkstyle.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilePathsTest {
 
@@ -56,13 +56,8 @@ public class FilePathsTest {
         String target = "D:\\sources\\recovery\\RecEnv.exe";
         String base = "C:\\Java\\workspace\\AcceptanceTests\\Standard test data\\geo\\";
 
-        try {
-            FilePaths.relativePath(target, base, "\\");
-            fail();
-
-        } catch (FilePaths.PathResolutionException ex) {
-            // expected exception
-        }
+        assertThrows(FilePaths.PathResolutionException.class,
+                () -> FilePaths.relativePath(target, base, "\\"));
     }
 
     @Test

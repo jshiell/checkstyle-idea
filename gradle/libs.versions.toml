@@ -1,7 +1,8 @@
 [versions]
 commons-io = "2.20.0"
 commons-codec = "1.19.0"
-junit = "4.13.2"
+junit-jupiter = "5.12.0"
+junit-platform = "1.12.0"
 hamcrest = "3.0"
 mockito = "5.18.0"
 intellij-platform-plugin = "2.11.0"
@@ -10,9 +11,13 @@ intellij-idea-community = "2024.3.7"
 [libraries]
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
-junit = { module = "junit:junit", version.ref = "junit" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 
 [plugins]
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform-plugin" }

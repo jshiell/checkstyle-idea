@@ -8,8 +8,9 @@ import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.entities.CheckerWithConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 
@@ -26,15 +27,19 @@ public class OpDestroyCheckerTest {
         new CheckstyleActionsImpl(PROJECT, mock(CheckstyleProjectService.class)).destroyChecker(checkerWithConfig);
     }
 
-    @Test(expected = CheckstyleVersionMixException.class)
+    @Test
     public void testMixExceptionInInit() {
-        new OpDestroyChecker(new WrongObject());
+        assertThrows(CheckstyleVersionMixException.class,
+                () -> new OpDestroyChecker(new WrongObject()));
     }
 
 
-    @Test(expected = CheckstyleVersionMixException.class)
+    @Test
     public void testCheckerNull() {
-        //noinspection ConstantConditions
-        new OpDestroyChecker(null);
+        assertThrows(CheckstyleVersionMixException.class,
+                () -> {
+                    //noinspection ConstantConditions
+                    new OpDestroyChecker(null);
+                });
     }
 }

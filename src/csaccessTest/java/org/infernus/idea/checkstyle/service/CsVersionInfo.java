@@ -6,13 +6,13 @@ import org.hamcrest.TypeSafeMatcher;
 import org.infernus.idea.checkstyle.VersionComparator;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -47,9 +47,9 @@ public final class CsVersionInfo {
         if (sysPropValue == null) {
             return BASE_VERSION;
         } else {
-            Assert.assertTrue("System property \"" + CSVERSION_SYSPROP_NAME //
-                            + "\" does not contain a valid Checkstyle version: " + sysPropValue, //
-                    VersionComparator.isValidVersion(System.getProperty(CSVERSION_SYSPROP_NAME)));
+            assertTrue(VersionComparator.isValidVersion(System.getProperty(CSVERSION_SYSPROP_NAME)),
+                    "System property \"" + CSVERSION_SYSPROP_NAME //
+                            + "\" does not contain a valid Checkstyle version: " + sysPropValue);
             return sysPropValue;
         }
     }

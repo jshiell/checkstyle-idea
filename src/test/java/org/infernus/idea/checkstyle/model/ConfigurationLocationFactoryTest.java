@@ -6,12 +6,12 @@ import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 
@@ -22,7 +22,7 @@ public class ConfigurationLocationFactoryTest {
 
     private final ConfigurationLocationFactory underTest = new ConfigurationLocationFactory();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(underTest);
         when(project.getService(ProjectFilePaths.class)).thenReturn(ProjectFilePaths.testInstanceWith(project, new ProjectPaths()));

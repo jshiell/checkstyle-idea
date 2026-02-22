@@ -3,7 +3,7 @@ package org.infernus.idea.checkstyle.csapi;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.Problem;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 

@@ -57,6 +57,7 @@ public class GradlePluginMain implements Plugin<Project> {
     }
 
     static void configureTestTask(final Test testTask) {
+        testTask.useJUnitPlatform();
         testTask.testLogging((TestLoggingContainer tlc) -> {
             tlc.setEvents(Collections.singleton(TestLogEvent.FAILED));
             tlc.setShowStackTraces(true);

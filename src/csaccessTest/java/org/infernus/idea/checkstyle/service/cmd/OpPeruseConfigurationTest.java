@@ -9,10 +9,11 @@ import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.exception.CheckstyleVersionMixException;
 import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OpPeruseConfigurationTest {
     private static final Project PROJECT = Mockito.mock(Project.class);
@@ -21,9 +22,10 @@ public class OpPeruseConfigurationTest {
         // does not matter
     }
 
-    @Test(expected = CheckstyleVersionMixException.class)
+    @Test
     public void testWrongConfigurationClass() {
-        new OpPeruseConfiguration(new InvalidObject(), new StubVisitor());
+        assertThrows(CheckstyleVersionMixException.class,
+                () -> new OpPeruseConfiguration(new InvalidObject(), new StubVisitor()));
     }
 
     @Test
