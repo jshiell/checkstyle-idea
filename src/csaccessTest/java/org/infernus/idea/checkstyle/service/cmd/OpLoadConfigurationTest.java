@@ -20,8 +20,10 @@ import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.TestHelper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.ArgumentMatchers;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-
+@Isolated
 public class OpLoadConfigurationTest {
     private static final Project PROJECT = mock(Project.class);
     private static final NotificationGroup BALLOON_NOTIFICATION_GROUP = mock(NotificationGroup.class);
@@ -46,10 +48,13 @@ public class OpLoadConfigurationTest {
     private final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
     private final Module module = mock(Module.class);
 
+    private Application previousApplication;
+
     private OpLoadConfiguration underTest;
 
     @BeforeEach
     public void setUp() throws IOException {
+        previousApplication = ApplicationManager.getApplication();
         interceptApplicationNotifications();
 
         final ClassLoader checkstyleClassloader = new URLClassLoader(new URL[]{});
@@ -62,6 +67,13 @@ public class OpLoadConfigurationTest {
                 .thenThrow(new IOException("aTriggeredIoException"));
 
         underTest = new OpLoadConfiguration(configurationLocation, null, module, checkstyleProjectService);
+    }
+
+    @AfterEach
+    public void restoreApplication() {
+        if (previousApplication != null) {
+            ApplicationManager.setApplication(previousApplication, mock(Disposable.class));
+        }
     }
 
     private void interceptApplicationNotifications() {

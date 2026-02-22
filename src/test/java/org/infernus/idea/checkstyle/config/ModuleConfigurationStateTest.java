@@ -1,12 +1,10 @@
 package org.infernus.idea.checkstyle.config;
 
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
@@ -15,8 +13,6 @@ import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
@@ -29,7 +25,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ModuleConfigurationStateTest {
+public class ModuleConfigurationStateTest extends LightPlatformTestCase {
 
     private final Project project = TestHelper.mockProject();
     private final Module module = mock(Module.class);
@@ -41,8 +37,9 @@ public class ModuleConfigurationStateTest {
 
     private ConfigurationLocation expectedLocation;
 
-    @BeforeEach
-    public void configureMocks() {
+    public void setUp() throws Exception {
+        super.setUp();
+
         when(module.getProject()).thenReturn(project);
 
         final VirtualFile projectPath = mock(VirtualFile.class);
@@ -52,10 +49,6 @@ public class ModuleConfigurationStateTest {
         when(project.getService(ConfigurationLocationFactory.class)).thenReturn(configurationLocationFactory);
         when(project.getService(ProjectFilePaths.class)).thenReturn(projectFilePaths);
         when(project.getService(PluginConfigurationManager.class)).thenReturn(pluginConfigurationManager);
-
-        final Application application = mock(Application.class);
-        when(application.isUnitTestMode()).thenReturn(true);
-        ApplicationManager.setApplication(application, mock(Disposable.class));
 
         ProjectConfigurationState projectConfigurationState = new ProjectConfigurationState(project);
         when(project.getService(ProjectConfigurationState.class)).thenReturn(projectConfigurationState);
@@ -81,10 +74,9 @@ public class ModuleConfigurationStateTest {
                 .build(), false);
     }
 
-    @Test
-    public void theActiveLocationCanBeDeserialised() {
+    public void testTheActiveLocationCanBeDeserialised() {
         final ModuleConfigurationState.ModuleSettings moduleSettings
-                = ModuleConfigurationState.ModuleSettings.create(testConfiguration());
+                = ModuleConfigurationState.ModuleSettings.create(generateTestConfiguration());
 
         ModuleConfigurationState underTest = new ModuleConfigurationState(module);
         underTest.loadState(moduleSettings);
@@ -96,7 +88,7 @@ public class ModuleConfigurationStateTest {
     }
 
     @NotNull
-    private Map<String, String> testConfiguration() {
+    private Map<String, String> generateTestConfiguration() {
         return Map.of(
                 "active-configuration", "LOCAL_FILE:/a/project/path/test-configs/working-checkstyle-rules-module.xml:Working Module;All"
         );
