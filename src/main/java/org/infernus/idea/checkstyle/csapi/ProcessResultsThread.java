@@ -169,7 +169,7 @@ public class ProcessResultsThread implements ThrowableRunnable<RuntimeException>
                                                final Issue event,
                                                final char[] text) {
         final Position position;
-        int offset = lineLengthCache.get(lineLengthCache.size() - 1);
+        int offset = lineLengthCache.getLast();
         boolean afterEndOfLine = false;
         int line = lineLengthCache.size();
 
