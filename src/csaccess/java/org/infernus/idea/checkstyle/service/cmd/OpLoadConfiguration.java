@@ -280,8 +280,8 @@ public class OpLoadConfiguration
                               @NotNull final DefaultConfiguration target) {
         final Map<String, String> messages = CheckstyleBridge.messagesFrom(source);
         if (messages != null) {
-            for (String messageKey : messages.keySet()) {
-                target.addMessage(messageKey, messages.get(messageKey));
+            for (Map.Entry<String, String> entry : messages.entrySet()) {
+                target.addMessage(entry.getKey(), entry.getValue());
             }
         }
     }
