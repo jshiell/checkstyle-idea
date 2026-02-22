@@ -147,7 +147,9 @@ import static java.util.Optional.ofNullable;
     private File classPackagePath(final @NotNull PsiJavaFile file, final @NotNull File baseTmpDir) {
         final String packagePath = file.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File.separator));
 
-        return new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+        File tempFile = new File(baseTmpDir.getAbsolutePath() + File.separator + packagePath);
+        tempFile.deleteOnExit();
+        return tempFile;
     }
 
     private File relativePathToProjectRoot(final @NotNull PsiFile file, final @NotNull File baseTmpDir) {
@@ -158,7 +160,9 @@ import static java.util.Optional.ofNullable;
 
                 final String parentUrl = file.getParent().getVirtualFile().getUrl();
                 if (parentUrl.startsWith(baseDirUrl)) {
-                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(baseDirUrl.length()));
+                    File tempFile = new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(baseDirUrl.length()));
+                    tempFile.deleteOnExit();
+                    return tempFile;
                 }
             }
         }
@@ -171,7 +175,9 @@ import static java.util.Optional.ofNullable;
             final String parentUrl = file.getParent().getVirtualFile().getUrl();
             for (String moduleSourceRoot : ModuleRootManager.getInstance(module).getContentRootUrls()) {
                 if (parentUrl.startsWith(moduleSourceRoot)) {
-                    return new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
+                    File tempFile = new File(baseTmpDir.getAbsolutePath() + parentUrl.substring(moduleSourceRoot.length()));
+                    tempFile.deleteOnExit();
+                    return tempFile;
                 }
             }
         }
