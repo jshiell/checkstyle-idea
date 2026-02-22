@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.artifacts.VersionCatalogsExtension;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.Copy;
@@ -138,7 +139,7 @@ public class GradlePluginMain implements Plugin<Project> {
             }
 
             copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, CSLIB_TARGET_SUBFOLDER)));
+            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(project, test, CSLIB_TARGET_SUBFOLDER)));
         });
     }
 
@@ -181,13 +182,19 @@ public class GradlePluginMain implements Plugin<Project> {
             }
 
             copyTask.from(csaccessSourceSet.getOutput());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(test, CSCLASSES_TARGET_SUBFOLDER)));
+            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(project, test, CSCLASSES_TARGET_SUBFOLDER)));
         });
     }
 
-    private @NotNull String pluginSandboxDir(final boolean test, final String subDirectory) {
-        // must remain in sync with task configuration in Gradle file
-        return "idea-sandbox/IC-2024.3.7/plugins"
+    private @NotNull String pluginSandboxDir(final Project project, final boolean test, final String subDirectory) {
+        final String ideaVersion = project.getExtensions()
+                .getByType(VersionCatalogsExtension.class)
+                .named("libs")
+                .findVersion("intellij-idea-community")
+                .orElseThrow(() -> new IllegalStateException(
+                        "Version 'intellij-idea-community' not found in libs.versions.toml"))
+                .getRequiredVersion();
+        return "idea-sandbox/IC-" + ideaVersion + "/plugins"
                 + (test ? "-test" : "")
                 + "/checkstyle-idea/" + subDirectory;
     }

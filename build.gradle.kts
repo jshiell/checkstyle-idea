@@ -81,7 +81,6 @@ configurations.configureEach {
 
 dependencies {
     intellijPlatform {
-        // Update reference in GradlePluginMain on change
         intellijIdeaCommunity(libs.versions.intellij.idea.community.get())
 
         bundledPlugin("com.intellij.java")
