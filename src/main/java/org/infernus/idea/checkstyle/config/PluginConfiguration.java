@@ -24,6 +24,7 @@ public class PluginConfiguration {
     private final List<String> thirdPartyClasspath;
     private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
+    private final boolean importSettingsFromMaven;
 
     PluginConfiguration(@NotNull final String checkstyleVersion,
                         @NotNull final ScanScope scanScope,
@@ -33,7 +34,8 @@ public class PluginConfiguration {
                         @NotNull final SortedSet<ConfigurationLocation> locations,
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
-                        final boolean scanBeforeCheckin) {
+                        final boolean scanBeforeCheckin,
+                        final boolean importSettingsFromMaven) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -45,6 +47,7 @@ public class PluginConfiguration {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
+        this.importSettingsFromMaven = importSettingsFromMaven;
     }
 
     @NotNull
@@ -103,6 +106,10 @@ public class PluginConfiguration {
         return scanBeforeCheckin;
     }
 
+    public boolean isImportSettingsFromMaven() {
+        return importSettingsFromMaven;
+    }
+
     public boolean hasChangedFrom(final Object other) {
         return !this.equals(other) || !locationsAreEqual((PluginConfiguration) other);
     }
@@ -137,13 +144,14 @@ public class PluginConfiguration {
                 && Objects.equals(locations, otherDto.locations)
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
                 && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
-                && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin);
+                && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
+                && Objects.equals(importSettingsFromMaven, otherDto.importSettingsFromMaven);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, scrollToSource,
-                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin);
+                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin, importSettingsFromMaven);
     }
 
 }
