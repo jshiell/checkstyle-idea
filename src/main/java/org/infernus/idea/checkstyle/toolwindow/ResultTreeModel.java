@@ -130,12 +130,14 @@ public class ResultTreeModel extends DefaultTreeModel {
             filterNodeAndChildren(childNode);
         }
 
-        if (node.getUserObject() instanceof GroupTreeInfo groupTreeInfo) {
-            groupTreeInfo.setVisibleProblems(node.getChildCount());
-            nodeShouldBeVisible = node.getChildCount() > 0;
-
-        } else if (node.getUserObject() instanceof ProblemResultTreeInfo problemResultTreeInfo) {
-            nodeShouldBeVisible = displayedSeverities.contains(problemResultTreeInfo.getSeverity());
+        switch (node.getUserObject()) {
+            case GroupTreeInfo groupTreeInfo -> {
+                groupTreeInfo.setVisibleProblems(node.getChildCount());
+                nodeShouldBeVisible = node.getChildCount() > 0;
+            }
+            case ProblemResultTreeInfo problemResultTreeInfo ->
+                    nodeShouldBeVisible = displayedSeverities.contains(problemResultTreeInfo.getSeverity());
+            default -> { }
         }
 
         if (node.isVisible() != nodeShouldBeVisible) {

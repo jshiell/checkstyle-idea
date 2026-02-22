@@ -204,21 +204,21 @@ public class CheckstyleClassLoaderContainer {
 
     @NotNull
     private List<URL> getUrls(@NotNull final ClassLoader sourceClassLoader) {
-        List<URL> result;
-        if (sourceClassLoader instanceof UrlClassLoader urlClassLoader) {          // happens normally
-            result = urlClassLoader.getUrls();
-        } else if (sourceClassLoader instanceof URLClassLoader urlClassLoader) {   // happens in test cases
-            result = Arrays.asList(urlClassLoader.getURLs());
-        } else {
-            URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
-            try {
-                URI trimmedUrl = URI.create(Objects.requireNonNull(classResource).toString().replaceFirst("org[/\\\\]infernus.*", ""));
-                result = Collections.singletonList(trimmedUrl.toURL());
-            } catch (IllegalArgumentException | MalformedURLException e) {
-                result = Collections.singletonList(classResource);
+        return switch (sourceClassLoader) {
+            case UrlClassLoader urlClassLoader ->                     // happens normally
+                    urlClassLoader.getUrls();
+            case URLClassLoader urlClassLoader ->                     // happens in test cases
+                    Arrays.asList(urlClassLoader.getURLs());
+            default -> {
+                URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
+                try {
+                    URI trimmedUrl = URI.create(Objects.requireNonNull(classResource).toString().replaceFirst("org[/\\\\]infernus.*", ""));
+                    yield Collections.singletonList(trimmedUrl.toURL());
+                } catch (IllegalArgumentException | MalformedURLException e) {
+                    yield Collections.singletonList(classResource);
+                }
             }
-        }
-        return result;
+        };
     }
 
     /**
