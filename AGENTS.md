@@ -699,3 +699,37 @@ When making changes:
 8. Custom Gradle plugin in `buildSrc/` handles special build logic
 9. Enable debug logging: `#org.infernus.idea.checkstyle`
 10. Plugin requires IDEA restart after installation/update
+
+## Known Non-Issues
+
+The following patterns have been investigated and confirmed to be working correctly. Do not re-raise them as bugs.
+
+### `ConfigurationLocation.resolve()` — `InputStream.reset()` without `markSupported()` check
+**File:** `src/main/java/org/infernus/idea/checkstyle/model/ConfigurationLocation.java`
+
+`resolve()` calls `is.reset()` on the stream after extracting properties, but does **not** call `is.mark()` first. This looks like a bug but is intentional: the `reset()` call is wrapped in a `try/catch (IOException)`, and the catch block recovers by calling `resolveFile()` again to obtain a fresh stream. The comment in the catch block says "JAR IS doesn't support this, for instance". Both paths (reset succeeds / reset fails and stream is re-opened) produce a valid, readable stream for the caller.
+
+### `StaticScanner.checksInProgress` — potential unbounded growth
+**File:** `src/main/java/org/infernus/idea/checkstyle/StaticScanner.java`
+
+`checksInProgress` is a `Set<Future<?>>` used to track in-flight scans. It appears that completed futures could accumulate, but every exit path from `ScanFiles.call()` — including the catch-all `Throwable` handler — fires either `scanCompletedSuccessfully()` or `scanFailedWithError()` on all listeners, which triggers `ScanCompletionTracker.checkComplete()` and removes the future from the set. Additionally, `checkInProgress()` guards against inserting an already-done future. There is no leak.
+
+### `CheckerFactory` — `blockAndShow*` method proliferation
+**File:** `src/main/java/org/infernus/idea/checkstyle/checker/CheckerFactory.java`
+
+`blockAndShowMessage()` and `blockAndShowException()` appear repetitive but already share their common structure via the `blockAnd()` helper. Their bodies differ meaningfully (message-key notification vs exception display/rethrow). `blockAndShowMessageFromException()` is a dispatcher with distinct logic. There is no useful consolidation to be made.
+
+### `CheckStyleInspection` — nested thread inside `checkFile()`
+**File:** `src/main/java/org/infernus/idea/checkstyle/CheckStyleInspection.java`
+
+`checkFile()` calls `asyncResultOf()`, which submits work to a second pooled thread and polls with `ProgressManager.checkCanceled()` every 50ms. This is intentional: Checkstyle's scan is a blocking, non-cooperative operation with no cancellation hooks. The polling loop on the calling thread is the only way to honour IDEA's cancellation contract and enforce the 5-second timeout. Removing it would make inspections uncancellable and unbounded in duration.
+
+### `VirtualFileVisitor.visitFile()` — `super.visitFile()` not called
+**File:** `src/main/java/org/infernus/idea/checkstyle/checker/ScanFiles.java`
+
+`FindChildFiles.visitFile()` does not call `super.visitFile()`. The base class `visitFile()` simply returns `true` (continue traversal) with no side effects. The override already returns `true` explicitly. Calling super would be a no-op. The suggestion to return `CONTINUE` instead is based on a misreading of the API: `CONTINUE` is a `VirtualFileVisitor.Result` used by `visitFileEx()`, not by the `boolean visitFile()` override used here.
+
+### `setForkEvery(1)` — test suite forking
+**File:** `build.gradle.kts`
+
+`setForkEvery(1)` is not set anywhere in the build. The `withType<Test>` block at line 59 only sets `jvmArgs("-Xshare:off")` and `useJUnitPlatform()`. There is no per-class JVM forking.
