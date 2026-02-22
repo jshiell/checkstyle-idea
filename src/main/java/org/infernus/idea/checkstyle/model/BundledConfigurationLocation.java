@@ -57,6 +57,23 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
         return false;
     }
 
+    @Override
+    protected boolean isPrioritySortOrder() {
+        return true;
+    }
+
+    @Override
+    protected BundledConfig additionalHashCodeComponents() {
+        return bundledConfig;
+    }
+
+    @Override
+    protected int compareForPrioritySortOrder(@NotNull final ConfigurationLocation other) {
+        return Integer.compare(
+                bundledConfig.getSortOrder(),
+                ((BundledConfigurationLocation) other).bundledConfig.getSortOrder());
+    }
+
 
     @Override
     @NotNull

@@ -43,7 +43,8 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 public abstract class ConfigurationLocation implements Cloneable, Comparable<ConfigurationLocation> {
     private static final Logger LOG = Logger.getInstance(ConfigurationLocation.class);
 
-    private static final long BLOCK_TIME_MS = 1000 * 60;
+    private static final int ONE_SECOND = 1000;
+    private static final long BLOCK_TIME_MS = ONE_SECOND * 60;
 
     private final Map<String, String> properties = new ConcurrentHashMap<>();
     private final String id;
@@ -415,10 +416,20 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     @Override
     public final int hashCode() {
         int result = java.util.Objects.hash(getDescription(), getLocation(), getType());
-        if (this instanceof BundledConfigurationLocation) {
-            result = java.util.Objects.hash(result, ((BundledConfigurationLocation) this).getBundledConfig());
-        }
+        result = java.util.Objects.hash(result, additionalHashCodeComponents());
         return result;
+    }
+
+
+    /**
+     * Subclasses may override this to contribute additional components to {@link #hashCode()}.
+     * The default implementation returns {@code null} (no additional contribution).
+     *
+     * @return an additional value to fold into the hash, or {@code null}
+     */
+    @Nullable
+    protected Object additionalHashCodeComponents() {
+        return null;
     }
 
 
@@ -431,17 +442,14 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     @Override
     public final int compareTo(@NotNull final ConfigurationLocation other) {
         int result;
-        // bundled configs go first, ordered by their position in the BundledConfig enum
-        if (other instanceof BundledConfigurationLocation) {
-            if (this instanceof BundledConfigurationLocation) {
-                final int o1 = ((BundledConfigurationLocation) this).getBundledConfig().getSortOrder();
-                final int o2 = ((BundledConfigurationLocation) other).getBundledConfig().getSortOrder();
-                result = Integer.compare(o1, o2);
+        if (other.isPrioritySortOrder()) {
+            if (this.isPrioritySortOrder()) {
+                result = compareForPrioritySortOrder(other);
             } else {
                 result = 1;
             }
         } else {
-            if (this instanceof BundledConfigurationLocation) {
+            if (this.isPrioritySortOrder()) {
                 result = -1;
             } else {
                 result = compareStrings(getDescription(), other.getDescription());
@@ -454,6 +462,22 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             }
         }
         return result;
+    }
+
+    /**
+     * Returns {@code true} if this location has priority in the sorting.
+     */
+    protected boolean isPrioritySortOrder() {
+        return false;
+    }
+
+    /**
+     * Compares this location to another location by priority sort order.
+     * Only called when both {@code this} and {@code other} satisfy {@link #isPrioritySortOrder()}.
+     * The default implementation returns 0; subclasses that require priority must override it.
+     */
+    protected int compareForPrioritySortOrder(@NotNull final ConfigurationLocation other) {
+        return 0;
     }
 
     private int compareStrings(@Nullable final String pStr1, @Nullable final String pStr2) {
@@ -480,7 +504,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     public synchronized long blockedForSeconds() {
-        return Math.max((blockedUntil - currentTimeMillis()) / 1000, 0);
+        return Math.max((blockedUntil - currentTimeMillis()) / ONE_SECOND, 0);
     }
 
     public synchronized void block() {
