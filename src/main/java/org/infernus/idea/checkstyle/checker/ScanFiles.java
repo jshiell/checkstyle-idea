@@ -142,6 +142,11 @@ public class ScanFiles implements Callable<List<ScanResult>> {
 
         for (final Module module : moduleToFiles.keySet()) {
             if (module == null) {
+                if (LOG.isDebugEnabled()) {
+                    final Set<PsiFile> nullModuleFiles = moduleToFiles.get(null);
+                    LOG.debug("Skipping " + (nullModuleFiles != null ? nullModuleFiles.size() : 0)
+                            + " file(s) with no associated module: " + nullModuleFiles);
+                }
                 continue;
             }
 
