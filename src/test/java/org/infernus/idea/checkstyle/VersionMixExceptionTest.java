@@ -4,6 +4,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.checker.CheckStyleChecker;
+import org.infernus.idea.checkstyle.checker.CheckStyleCheckerTestAccess;
 import org.infernus.idea.checkstyle.checker.ScannableFile;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -142,7 +143,7 @@ public class VersionMixExceptionTest extends LightPlatformTestCase {
         final List<ScannableFile> filesToScan = Collections.singletonList(file1);
 
         final CheckstyleActions csInstance = csService.getCheckstyleInstance();
-        csInstance.scan(checker.getCheckerWithConfig4UnitTest(), filesToScan, false, 2, //
+        csInstance.scan(CheckStyleCheckerTestAccess.checkerWithConfig(checker), filesToScan, false, 2, //
                 Optional.of(sourceFile.getParent()));
     }
 

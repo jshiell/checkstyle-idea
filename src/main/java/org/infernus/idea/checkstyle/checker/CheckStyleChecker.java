@@ -63,8 +63,7 @@ public class CheckStyleChecker {
         csServiceInstance.destroyChecker(checkerWithConfig);
     }
 
-
-    public CheckstyleInternalObject getCheckerWithConfig4UnitTest() {
+    CheckstyleInternalObject checkerWithConfig() {
         return checkerWithConfig;
     }
 }
