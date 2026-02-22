@@ -57,7 +57,7 @@ tasks {
     }
 
     withType<Test> {
-        setForkEvery(1)
+        forkEvery = 1
         jvmArgs("-Xshare:off")
     }
 
