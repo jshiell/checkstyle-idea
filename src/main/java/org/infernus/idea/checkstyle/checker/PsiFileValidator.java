@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
@@ -19,7 +20,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 final class PsiFileValidator {
 
@@ -81,10 +84,14 @@ final class PsiFileValidator {
      */
     private static boolean isInNamedScopeIfPresent(@NotNull final PsiFile psiFile,
                                                    final Collection<ConfigurationLocation> activeLocations) {
-        return activeLocations.stream()
+        final List<NamedScope> namedScopes = activeLocations.stream()
                 .map(ConfigurationLocation::getNamedScope)
                 .flatMap(Optional::stream)
-                .anyMatch(scope -> NamedScopeHelper.isFileInScope(psiFile, scope));
+                .collect(Collectors.toList());
+        if (namedScopes.isEmpty()) {
+            return true;
+        }
+        return namedScopes.stream().anyMatch(scope -> NamedScopeHelper.isFileInScope(psiFile, scope));
     }
 
     private static boolean isTestClass(final PsiElement element) {

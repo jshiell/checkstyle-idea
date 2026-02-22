@@ -733,3 +733,13 @@ The following patterns have been investigated and confirmed to be working correc
 **File:** `build.gradle.kts`
 
 `setForkEvery(1)` is not set anywhere in the build. The `withType<Test>` block at line 59 only sets `jvmArgs("-Xshare:off")` and `useJUnitPlatform()`. There is no per-class JVM forking.
+
+### `CheckerFactoryCacheTest` — 8 pre-existing test failures
+**File:** `src/test/java/org/infernus/idea/checkstyle/checker/CheckerFactoryCacheTest.java`
+
+All 8 tests in this class fail with `IllegalStateException: @NotNull method DependencyValidationManager.getInstance must not return null`. This occurs because the test creates a `StringConfigurationLocation`, whose constructor calls `NamedScopeHelper.getDefaultScope(project)` → `DependencyValidationManager.getInstance(project)`, which returns null in a plain JUnit context that does not have the full IntelliJ platform services loaded. These failures pre-exist and are not regressions. The tests require a `BasePlatformTestCase` environment or a mock-based approach that avoids constructing `ConfigurationLocation` directly.
+
+### `PsiFileValidator.isInNamedScopeIfPresent()` — named scope stream semantics
+**File:** `src/main/java/org/infernus/idea/checkstyle/checker/PsiFileValidator.java`
+
+The method's Javadoc states "If no NamedScope is provided, true will be returned." The original implementation used `flatMap(Optional::stream).anyMatch(...)`: when all active locations have `namedScope = null` (which occurs when `DependencyValidationManager.getScope("All")` returns null in some environments), the stream is empty and `anyMatch` returns `false`, contradicting the documented contract. This was a real bug, fixed by collecting non-empty scopes first and returning `true` if that collection is empty.
