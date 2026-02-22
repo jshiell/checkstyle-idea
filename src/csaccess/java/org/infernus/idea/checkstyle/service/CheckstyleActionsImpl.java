@@ -114,14 +114,14 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
             result = command.execute(project);
         } catch (CheckstyleException e) {
             CheckStylePluginException wrapped = new ExceptionWrapper().wrap(null, e);
-            if (wrapped instanceof CheckStylePluginParseException) {
-                throw wrapped;
+            if (wrapped instanceof CheckStylePluginParseException parseException) {
+                throw parseException;
             }
             throw new CheckstyleToolException(e);
         } catch (RuntimeException | ExceptionInInitializerError e) {
             CheckStylePluginException wrapped = new ExceptionWrapper().wrap(null, e);
-            if (wrapped instanceof CheckStylePluginParseException) {
-                throw wrapped;
+            if (wrapped instanceof CheckStylePluginParseException parseException) {
+                throw parseException;
             }
             final CheckstyleException csCause = digUpCheckstyleCause(e);
             if (csCause != null) {
@@ -139,8 +139,8 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
     private CheckstyleException digUpCheckstyleCause(@Nullable final Throwable pThrowable) {
         CheckstyleException result = null;
         if (pThrowable != null) {
-            if (pThrowable.getCause() instanceof CheckstyleException) {
-                result = (CheckstyleException) pThrowable.getCause();
+            if (pThrowable.getCause() instanceof CheckstyleException checkstyleException) {
+                result = checkstyleException;
             } else {
                 result = digUpCheckstyleCause(pThrowable.getCause());
             }

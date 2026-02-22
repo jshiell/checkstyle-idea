@@ -205,10 +205,10 @@ public class CheckstyleClassLoaderContainer {
     @NotNull
     private List<URL> getUrls(@NotNull final ClassLoader sourceClassLoader) {
         List<URL> result;
-        if (sourceClassLoader instanceof UrlClassLoader) {          // happens normally
-            result = ((UrlClassLoader) sourceClassLoader).getUrls();
-        } else if (sourceClassLoader instanceof URLClassLoader) {   // happens in test cases
-            result = Arrays.asList(((URLClassLoader) sourceClassLoader).getURLs());
+        if (sourceClassLoader instanceof UrlClassLoader urlClassLoader) {          // happens normally
+            result = urlClassLoader.getUrls();
+        } else if (sourceClassLoader instanceof URLClassLoader urlClassLoader) {   // happens in test cases
+            result = Arrays.asList(urlClassLoader.getURLs());
         } else {
             URL classResource = CheckstyleClassLoaderContainer.class.getResource("CheckstyleClassLoaderContainer.class");
             try {

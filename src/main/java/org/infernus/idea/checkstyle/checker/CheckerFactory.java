@@ -140,13 +140,13 @@ public class CheckerFactory {
 
         final Object workerResult = executeWorker(location, module, propertyResolver);
 
-        if (workerResult instanceof CheckstyleToolException) {
-            return blockAndShowMessageFromException(location, module, (CheckstyleToolException) workerResult);
+        if (workerResult instanceof CheckstyleToolException csToolException) {
+            return blockAndShowMessageFromException(location, module, csToolException);
         } else if (workerResult instanceof IOException ioExceptionResult) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), ioExceptionResult);
             return blockAndShowMessage(location, module, ioExceptionResult, "checkstyle.file-not-found", location.getLocation());
-        } else if (workerResult instanceof Throwable) {
-            return blockAndShowException(location, module, (Throwable) workerResult);
+        } else if (workerResult instanceof Throwable throwableResult) {
+            return blockAndShowException(location, module, throwableResult);
         }
 
         return (CachedChecker) workerResult;
@@ -202,8 +202,8 @@ public class CheckerFactory {
         return blockAnd(location, () -> {
             if (module != null) {
                 Notifications.showException(module.getProject(), t);
-            } else if (t instanceof CheckStylePluginException) {
-                throw (CheckStylePluginException) t;
+            } else if (t instanceof CheckStylePluginException csPluginException) {
+                throw csPluginException;
             } else {
                 throw new CheckStylePluginException(message("checkstyle.parse-failed", rootCauseOf(t).getMessage()), t);
             }
