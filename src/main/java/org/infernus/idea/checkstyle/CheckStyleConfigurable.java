@@ -51,11 +51,11 @@ public class CheckStyleConfigurable implements Configurable {
                 .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
                 .build();
 
-        boolean result = !oldConfig.hasChangedFrom(newConfig);
+        boolean modified = oldConfig.hasChangedFrom(newConfig);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Has config changed? " + result);
+            LOG.debug("Has config changed? " + modified);
         }
-        return result;
+        return modified;
     }
 
     public void apply() {

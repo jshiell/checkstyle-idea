@@ -104,7 +104,7 @@ public class PluginConfiguration {
     }
 
     public boolean hasChangedFrom(final Object other) {
-        return this.equals(other) && locationsAreEqual((PluginConfiguration) other);
+        return !this.equals(other) || !locationsAreEqual((PluginConfiguration) other);
     }
 
     private boolean locationsAreEqual(final PluginConfiguration other) {
