@@ -26,6 +26,7 @@ public class CheckstyleProjectService {
     private static final Logger LOG = Logger.getInstance(CheckstyleProjectService.class);
 
     private final Project project;
+    private final Object lock = new Object();
 
     private Callable<CheckstyleClassLoaderContainer> checkstyleClassLoaderFactory = null;
     private CheckstyleClassLoaderContainer checkstyleClassLoaderContainer = null;
@@ -79,7 +80,7 @@ public class CheckstyleProjectService {
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
-        synchronized (project) {
+        synchronized (lock) {
             checkstyleClassLoaderContainer = null;
             checkstyleClassLoaderFactory = new Callable<>() {
                 @Override
@@ -119,7 +120,7 @@ public class CheckstyleProjectService {
 
     public CheckstyleActions getCheckstyleInstance() {
         try {
-            synchronized (project) {
+            synchronized (lock) {
                 return checkstyleClassLoaderContainer().loadCheckstyleImpl();
             }
         } catch (CheckStylePluginException e) {
@@ -132,7 +133,7 @@ public class CheckstyleProjectService {
     @NotNull
     public ClassLoader underlyingClassLoader() {
         try {
-            synchronized (project) {
+            synchronized (lock) {
                 return checkstyleClassLoaderContainer().getClassLoader();
             }
         } catch (CheckStylePluginException e) {
