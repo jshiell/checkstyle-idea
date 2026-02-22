@@ -156,9 +156,6 @@ public class CheckStyleInspection extends LocalInspectionTool {
             // it would be nice to only block the locations which caused the exception to occur
             handlePluginException(e, psiFile, configurationLocations, manager.getProject());
             return NO_PROBLEMS_FOUND;
-
-        } finally {
-            scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
     }
 
