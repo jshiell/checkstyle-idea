@@ -1,13 +1,8 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.openapi.project.Project;
+import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.StringConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -15,33 +10,30 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
-class CheckerFactoryCacheTest {
+public class CheckerFactoryCacheTest extends LightPlatformTestCase {
 
-    @Mock
     private CheckStyleChecker checkStyleChecker;
-
-    @Mock
-    private Project project;
 
     private CheckerFactoryCache underTest;
     private ConfigurationLocation location;
 
-    @BeforeEach
-    void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
+
+        checkStyleChecker = mock(CheckStyleChecker.class);
+
         underTest = new CheckerFactoryCache();
-        location = new StringConfigurationLocation("<module/>", project);
+        location = new StringConfigurationLocation("<module/>", getProject());
     }
 
-    @Test
-    void getReturnsEmptyWhenNothingHasBeenPut() {
+    public void testGetReturnsEmptyWhenNothingHasBeenPut() {
         assertThat(underTest.get(location, null), is(Optional.empty()));
     }
 
-    @Test
-    void getReturnsTheCachedCheckerAfterPut() {
+    public void testGetReturnsTheCachedCheckerAfterPut() {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
 
         underTest.put(location, null, cachedChecker);
@@ -49,8 +41,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null), is(Optional.of(cachedChecker)));
     }
 
-    @Test
-    void getReturnsTheSameInstanceThatWasPut() {
+    public void testGetReturnsTheSameInstanceThatWasPut() {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
 
         underTest.put(location, null, cachedChecker);
@@ -58,8 +49,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null).orElseThrow(), is(sameInstance(cachedChecker)));
     }
 
-    @Test
-    void getReturnsEmptyForAnExpiredEntry() throws Exception {
+    public void testGetReturnsEmptyForAnExpiredEntry() throws Exception {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
         backdateTimestamp(cachedChecker, 61_000);
 
@@ -68,8 +58,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null), is(Optional.empty()));
     }
 
-    @Test
-    void getRemovesExpiredEntryFromCacheSoSubsequentGetAlsoReturnsEmpty() throws Exception {
+    public void testGetRemovesExpiredEntryFromCacheSoSubsequentGetAlsoReturnsEmpty() throws Exception {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
         backdateTimestamp(cachedChecker, 61_000);
         underTest.put(location, null, cachedChecker);
@@ -79,8 +68,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null), is(Optional.empty()));
     }
 
-    @Test
-    void invalidateClearsAllEntries() {
+    public void testInvalidateClearsAllEntries() {
         underTest.put(location, null, new CachedChecker(checkStyleChecker));
 
         underTest.invalidate();
@@ -88,8 +76,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null), is(Optional.empty()));
     }
 
-    @Test
-    void invalidateDestroysAllCachedCheckers() {
+    public void testInvalidateDestroysAllCachedCheckers() {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
         underTest.put(location, null, cachedChecker);
 
@@ -98,8 +85,7 @@ class CheckerFactoryCacheTest {
         verify(checkStyleChecker).destroy();
     }
 
-    @Test
-    void disposeCallsInvalidate() {
+    public void testDisposeCallsInvalidate() {
         CachedChecker cachedChecker = new CachedChecker(checkStyleChecker);
         underTest.put(location, null, cachedChecker);
 
@@ -108,7 +94,7 @@ class CheckerFactoryCacheTest {
         assertThat(underTest.get(location, null), is(Optional.empty()));
     }
 
-    private void backdateTimestamp(CachedChecker cachedChecker, long millisInThePast) throws Exception {
+    private void backdateTimestamp(final CachedChecker cachedChecker, final long millisInThePast) throws Exception {
         Field field = CachedChecker.class.getDeclaredField("timeStamp");
         field.setAccessible(true);
         field.set(cachedChecker, System.currentTimeMillis() - millisInThePast);

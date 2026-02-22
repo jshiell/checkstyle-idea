@@ -159,7 +159,7 @@ public class CheckStyleInspection extends LocalInspectionTool {
         }
     }
 
-    private List<Problem> dropIgnoredProblems(final List<Problem> problems) {
+    List<Problem> dropIgnoredProblems(final List<Problem> problems) {
         return problems.stream()
                 .filter(problem -> problem.severityLevel() != SeverityLevel.Ignore)
                 .collect(toList());
