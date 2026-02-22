@@ -123,7 +123,9 @@ public class CodeStyleImporterTest
         xmlIndentOptions.USE_TAB_CHARACTER = true;
         importConfiguration(
                 inTreeWalker(
-                        "<module name=\"FileTabCharacter\"/>\n"
+                        """
+                                <module name="FileTabCharacter"/>
+                                """
                 )
         );
         assertFalse(javaIndentOptions.USE_TAB_CHARACTER);
@@ -490,8 +492,9 @@ public class CodeStyleImporterTest
         resetAvoidStarImportSettings(codeStyleSettings);
         importConfiguration(
                 inTreeWalker(
-                        " <module name=\"AvoidStarImport\">\n"
-                                + "</module>"
+                        """
+                                 <module name="AvoidStarImport">
+                                </module>"""
                 )
         );
         JavaCodeStyleSettings customSettings = codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class);
