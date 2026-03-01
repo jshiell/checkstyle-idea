@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.4.0** New: Add Checkstyle 13.3.0.
 * **26.3.0** New: Add Checkstyle 13.2.0.
 * **26.2.0** New: Add Checkstyle 13.1.0.
 * **26.1.0** New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.

@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.4.0: New: Added Checkstyle 13.3.0.</li>
     <li>26.3.0: New: Added Checkstyle 13.2.0.</li>
     <li>26.2.0: New: Added Checkstyle 13.1.0.</li>
     <li>26.1.0: New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.</li>
@@ -42,9 +43,6 @@
     <li>5.112.0: Fixed: Keep focus in tool window when scrolling result, matching find results behaviour (#676).</li>
     <li>5.112.0: Removed: Removed update notification, as IDEA now notifies when plugins are updated.</li>
     <li>5.112.0: New: Added Checkstyle 11.1.0.</li>
-    <li>5.111.1: Fixed: Removed scope check when enabling scan current file button to improve performance (#675).</li>
-    <li>5.111.1: New: Add keyboard shortcuts for next/previous result (#676).</li>
-    <li>5.111.0: New: Added Checkstyle 11.0.1.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
