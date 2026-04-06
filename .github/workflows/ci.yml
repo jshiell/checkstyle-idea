@@ -1,5 +1,9 @@
 name: Build
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   push:
     branches: [ main ]

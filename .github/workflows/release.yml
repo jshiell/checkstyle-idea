@@ -1,5 +1,9 @@
 name: Release
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   push: 
     tags: 
