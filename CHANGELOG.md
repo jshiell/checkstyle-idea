@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.6.0** New: Add Checkstyle 13.4.1.
 * **26.5.0** New: Add Checkstyle 13.4.0.
 * **26.4.0** New: Add Checkstyle 13.3.0.
 * **26.3.0** New: Add Checkstyle 13.2.0.
