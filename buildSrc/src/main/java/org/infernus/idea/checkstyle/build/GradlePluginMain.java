@@ -1,26 +1,18 @@
 package org.infernus.idea.checkstyle.build;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.function.Consumer;
-
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.gradle.api.artifacts.VersionCatalogsExtension;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.tasks.Copy;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.TaskContainer;
-import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat;
 import org.gradle.api.tasks.testing.logging.TestLogEvent;
 import org.gradle.api.tasks.testing.logging.TestLoggingContainer;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
 
 /**
  * The main plugin class. The action starts here.
@@ -42,7 +34,9 @@ public class GradlePluginMain implements Plugin<Project> {
         createCrossCheckTasks(project);
         createCheckstyleArtifactTasks(project);
         new CustomSourceSetCreator(project).setupCoverageVerification();
-        wireIntellijPluginTasks(project);
+
+        addCheckstyleFilesToSandbox(project, false);
+        addCheckstyleFilesToSandbox(project, true);
     }
 
     private void establishSourceSets(final Project project) {
@@ -108,116 +102,42 @@ public class GradlePluginMain implements Plugin<Project> {
 
             // Add generated classpath info file to resources
             SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
-            SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
+            if (sourceSets != null) {
+                SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+                mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
+            }
         });
-
-        createCopyCheckstyleArtifactsToSandboxTask(project, false);
-        createCopyCheckstyleArtifactsToSandboxTask(project, true);
-
-        createCopyClassesToSandboxTask(project, false);
-        createCopyClassesToSandboxTask(project, true);
     }
 
-    private void createCopyCheckstyleArtifactsToSandboxTask(final Project project, final boolean test) {
+    private void addCheckstyleFilesToSandbox(final Project project, final boolean test) {
         final TaskContainer tasks = project.getTasks();
-        final String taskName = test ? "copyCheckstyleArtifactsToTestSandbox" : "copyCheckstyleArtifactsToSandbox";
-        final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
-        taskProvider.configure((Copy copyTask) -> {
-            copyTask.setGroup("intellij");
-            copyTask.setDescription("Adds the gathered Checkstyle artifacts to the prepared "
-                    + (test ? "test " : "") + "sandbox");
+        final String prepareTaskName;
+        if (test) {
+            prepareTaskName = "prepareTestSandbox";
+        } else {
+            prepareTaskName = "prepareSandbox";
+        }
 
-            final GatherCheckstyleArtifactsTask gatherTask =
-                    (GatherCheckstyleArtifactsTask) tasks.getByName(GatherCheckstyleArtifactsTask.NAME);
-            copyTask.dependsOn(gatherTask, "prepareTestSandbox");
-            if (test) {
-                tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
-                tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
-                forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
-            } else {
-                tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
-            }
-
-            copyTask.from(gatherTask.getBundledJarsDir());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(project, test, CSLIB_TARGET_SUBFOLDER)));
-        });
-    }
-
-    private void forEachXTest(final TaskContainer tasks, final Consumer<Task> taskConsumer) {
-        supportedCsVersions.getVersions().forEach((final String csVersion) -> {
-            if (!supportedCsVersions.getBaseVersion().equals(csVersion)) {
-                taskConsumer.accept(tasks.getByName(CsaccessTestTask.getTaskName(csVersion)));
-            }
-        });
-    }
+        final TaskProvider<Sync> prepareSandbox = tasks.named(prepareTaskName, Sync.class);
+        final TaskProvider<GatherCheckstyleArtifactsTask> gatherTask =
+                tasks.named(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
 
 
-    /**
-     * This task makes the compiled classes and resources from the 'csaccess' sourceset available to the plugin by
-     * copying it to the sandbox. Test code from csaccessTest sourceset not affected.
-     *
-     * @param project the Gradle project
-     * @param test {@code true} if the target is the test sandbox, {@code false} for the main sandbox
-     */
-    private void createCopyClassesToSandboxTask(final Project project, final boolean test) {
-        final TaskContainer tasks = project.getTasks();
-        final String taskName = test ? "copyClassesToTestSandbox" : "copyClassesToSandbox";
-        final TaskProvider<Copy> taskProvider = tasks.register(taskName, Copy.class);
-        taskProvider.configure((Copy copyTask) -> {
-            copyTask.setGroup("intellij");
-            copyTask.setDescription("Copy classes from '" + CustomSourceSetCreator.CSACCESS_SOURCESET_NAME
-                    + "' sourceset into the prepared " + (test ? "test " : "") + "sandbox");
+        final JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
+        final SourceSet csaccessSourceSet =
+                java.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
 
-            final JavaPluginExtension jpc = project.getExtensions().getByType(JavaPluginExtension.class);
-            SourceSet csaccessSourceSet = jpc.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
-            copyTask.dependsOn(tasks.getByName(csaccessSourceSet.getClassesTaskName()));
-            if (test) {
-                tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn(copyTask);
-                tasks.getByName(CsaccessTestTask.NAME).dependsOn(copyTask);
-                forEachXTest(tasks, xTask -> xTask.dependsOn(copyTask));
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToTestSandbox"));
-            } else {
-                tasks.getByName("buildSearchableOptions").dependsOn(copyTask);
-                copyTask.mustRunAfter(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
-            }
+        tasks.named("processResources").configure(task -> task.dependsOn(gatherTask));
 
-            copyTask.from(csaccessSourceSet.getOutput());
-            copyTask.into(new File(project.getLayout().getBuildDirectory().getAsFile().get(), pluginSandboxDir(project, test, CSCLASSES_TARGET_SUBFOLDER)));
-        });
-    }
+        prepareSandbox.configure(task -> {
+            task.dependsOn(gatherTask);
+            task.dependsOn(tasks.named(csaccessSourceSet.getClassesTaskName()));
 
-    private @NotNull String pluginSandboxDir(final Project project, final boolean test, final String subDirectory) {
-        final String ideaVersion = project.getExtensions()
-                .getByType(VersionCatalogsExtension.class)
-                .named("libs")
-                .findVersion("intellij-idea-community")
-                .orElseThrow(() -> new IllegalStateException(
-                        "Version 'intellij-idea-community' not found in libs.versions.toml"))
-                .getRequiredVersion();
-        return "idea-sandbox/IC-" + ideaVersion + "/plugins"
-                + (test ? "-test" : "")
-                + "/checkstyle-idea/" + subDirectory;
-    }
+            task.from(gatherTask.map(GatherCheckstyleArtifactsTask::getBundledJarsDir), spec ->
+                    spec.into("checkstyle-idea/" + CSLIB_TARGET_SUBFOLDER));
 
-    /**
-     * Defer some of the wiring until after the intellij plugin's tasks have been created.
-     *
-     * @param project the Gradle project
-     */
-    private void wireIntellijPluginTasks(final Project project) {
-        final TaskContainer tasks = project.getTasks();
-        tasks.all((Task task) -> {
-            if ("buildPlugin".equals(task.getName()) || "runIdea".equals(task.getName()) || "runIde".equals(task.getName())) {
-                task.dependsOn(tasks.getByName("copyCheckstyleArtifactsToSandbox"));
-                task.dependsOn(tasks.getByName("copyClassesToSandbox"));
-            } else if ("prepareSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToSandbox").dependsOn(task);
-                tasks.getByName("copyClassesToSandbox").dependsOn(task);
-            } else if ("prepareTestsSandbox".equals(task.getName())) {
-                tasks.getByName("copyCheckstyleArtifactsToTestSandbox").dependsOn(task);
-                tasks.getByName("copyClassesToTestSandbox").dependsOn(task);
-            }
+            task.from(csaccessSourceSet.getOutput(), spec ->
+                    spec.into("checkstyle-idea/" + CSCLASSES_TARGET_SUBFOLDER));
         });
     }
 }

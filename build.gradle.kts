@@ -47,15 +47,6 @@ java {
 }
 
 tasks {
-    // doesn't work, maybe waiting on https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1723
-//    prepareSandbox {
-//        sandboxDirectory = intellijPlatform.sandboxContainer.dir("current")
-//    }
-
-    withType<VerifyPluginTask> {
-        dependsOn(copyClassesToSandbox, copyCheckstyleArtifactsToSandbox)
-    }
-
     withType<Test> {
         jvmArgs("-Xshare:off")
         useJUnitPlatform()
