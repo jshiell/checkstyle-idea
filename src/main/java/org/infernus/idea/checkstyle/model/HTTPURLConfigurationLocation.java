@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
 import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
 /**
@@ -51,7 +50,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
-            LOG.info("Couldn't read URL: " + getLocation(), e);
+            LOG.info("Couldn't read URL: " + redactedLocation(), e);
             cachedContent = null;
             cacheExpiry = 0;
             throw e;
@@ -93,5 +92,21 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     @Override
     public Object clone() {
         return cloneCommonPropertiesTo(new HTTPURLConfigurationLocation(getProject(), getId()));
+    }
+
+    /**
+     * Returns the location URL with any embedded credentials (userInfo) removed, to prevent
+     * logging plaintext passwords to idea.log.
+     */
+    private String redactedLocation() {
+        try {
+            URI uri = new URI(getLocation());
+            if (uri.getUserInfo() != null) {
+                return new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(),
+                        uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
+            }
+        } catch (URISyntaxException ignored) {
+        }
+        return getLocation();
     }
 }
