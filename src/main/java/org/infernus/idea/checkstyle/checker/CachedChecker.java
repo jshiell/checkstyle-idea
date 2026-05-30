@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.checker;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Value for checker cache.
  */
@@ -14,6 +16,7 @@ class CachedChecker {
     private static final int CACHE_VALID_TIME = 60000;
 
     private final CheckStyleChecker checkStyleChecker;
+    private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
     private long timeStamp;
 
@@ -36,6 +39,8 @@ class CachedChecker {
     }
 
     public void destroy() {
-        checkStyleChecker.destroy();
+        if (destroyed.compareAndSet(false, true)) {
+            checkStyleChecker.destroy();
+        }
     }
 }
