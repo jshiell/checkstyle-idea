@@ -18,6 +18,15 @@ public final class Async {
 
     private static final int POLL_INTERVAL_MS = 50;
 
+    /**
+     * Sentinel value for {@link #whenFinished} indicating no timeout: the future will be awaited
+     * indefinitely (only IDEA progress cancellation applies).
+     * <p>
+     * Previously this was {@code 0L}, which caused {@code deadline = now + 0}, so the deadline was
+     * immediately in the past and the future was cancelled on the first iteration.
+     */
+    public static final long NO_TIMEOUT = -1L;
+
     private Async() {
     }
 
@@ -27,7 +36,6 @@ public final class Async {
                                       final long timeoutInMs) {
         try {
             return whenFinished(executeOnPooledThread(callable), timeoutInMs).get();
-
         } catch (Exception e) {
             return defaultValue;
         }
@@ -39,17 +47,23 @@ public final class Async {
 
     public static <T> Future<T> whenFinished(final Future<T> future,
                                              final long timeoutInMs) {
-        final long deadline = System.currentTimeMillis() + timeoutInMs;
+        final boolean hasTimeout = timeoutInMs > 0;
+        final long deadline = hasTimeout ? System.currentTimeMillis() + timeoutInMs : Long.MAX_VALUE;
         while (!future.isCancelled()) {
             ProgressManager.checkCanceled();
-            final long remaining = deadline - System.currentTimeMillis();
-            if (remaining <= 0) {
-                LOG.debug("Async task exhausted timeout of " + timeoutInMs + "ms, cancelling.");
-                future.cancel(true);
-                throw new ProcessCanceledException();
+            if (hasTimeout) {
+                final long remaining = deadline - System.currentTimeMillis();
+                if (remaining <= 0) {
+                    LOG.debug("Async task exhausted timeout of " + timeoutInMs + "ms, cancelling.");
+                    future.cancel(true);
+                    throw new ProcessCanceledException();
+                }
             }
             try {
-                future.get(Math.min(remaining, POLL_INTERVAL_MS), TimeUnit.MILLISECONDS);
+                final long pollMs = hasTimeout
+                        ? Math.min(deadline - System.currentTimeMillis(), POLL_INTERVAL_MS)
+                        : POLL_INTERVAL_MS;
+                future.get(Math.max(pollMs, 1), TimeUnit.MILLISECONDS);
                 return future;
             } catch (TimeoutException e) {
                 // not yet done; loop to check cancellation and deadline

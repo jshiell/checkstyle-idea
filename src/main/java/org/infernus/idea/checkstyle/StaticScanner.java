@@ -13,13 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.Future;
 
+import static org.infernus.idea.checkstyle.util.Async.NO_TIMEOUT;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
 public class StaticScanner {
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(StaticScanner.class);
-
-    private static final long NO_TIMEOUT = 0L;
 
     private final Set<Future<?>> checksInProgress = new HashSet<>();
     private final Project project;
