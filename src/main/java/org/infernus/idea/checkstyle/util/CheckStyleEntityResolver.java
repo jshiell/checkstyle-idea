@@ -137,7 +137,9 @@ public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
             if ("file".equals(systemIdUrl.getScheme())) {
                 return loadFromLocalFile(systemIdUrl);
             } else {
-                return new InputSource(systemId);
+                // Return null for non-file URIs (e.g. http/https) to prevent the XML parser from
+                // fetching arbitrary remote URLs, which would be an SSRF vector.
+                return null;
             }
         } catch (Exception e) {
             LOG.warn("Entity lookup failed for system id " + systemId, e);
