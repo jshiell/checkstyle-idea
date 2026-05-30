@@ -18,8 +18,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class ResultTreeBuilderTest {
@@ -76,7 +78,7 @@ class ResultTreeBuilderTest {
     void enablingOnlyErrorsProducesSingletonSet() {
         underTest.setDisplayingWarnings(false);
         underTest.setDisplayingInfo(false);
-        assertThat(underTest.getDisplayedSeverities(), contains(SeverityLevel.Error));
+        assertThat(underTest.getDisplayedSeverities(), containsInAnyOrder(SeverityLevel.Error));
     }
 
     // --- getter/setter round-trips ---
@@ -161,7 +163,7 @@ class ResultTreeBuilderTest {
         underTest.displayResults(results, null);
 
         verify(progressManager).clearProgress();
-        org.mockito.Mockito.verify(progressManager, org.mockito.Mockito.never()).setProgressText(any());
+        verify(progressManager, never()).setProgressText(any());
     }
 
     @Test
@@ -209,14 +211,18 @@ class ResultTreeBuilderTest {
     void displayErrorResultSetsRootTextOnModel() {
         underTest.displayErrorResult(new RuntimeException("some error"));
 
-        verify(treeModel).setRootText(any());
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(), containsString("scan failed"));
     }
 
     @Test
     void displayErrorResultForParseExceptionSetsRootText() {
         underTest.displayErrorResult(new CheckStylePluginParseException("parse failure", null));
 
-        verify(treeModel).setRootText(any());
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(), containsString("could not be parsed"));
     }
 
     @Test
@@ -226,7 +232,9 @@ class ResultTreeBuilderTest {
 
         underTest.displayErrorResult(toolException);
 
-        verify(treeModel).setRootText(any());
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(), containsString("my.property"));
     }
 
     @Test
@@ -236,6 +244,8 @@ class ResultTreeBuilderTest {
 
         underTest.displayErrorResult(toolException);
 
-        verify(treeModel).setRootText(any());
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(), containsString("com.example.MyCheck"));
     }
 }
