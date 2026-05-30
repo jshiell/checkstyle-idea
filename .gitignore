@@ -20,3 +20,8 @@ _support/
 /.settings/
 /.project
 /bin/
+/buildSrc/.classpath
+/buildSrc/.settings/
+/buildSrc/.project
+/buildSrc/bin/
+/.opencode/
