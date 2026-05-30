@@ -1,6 +1,9 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.7.1** Fixed: Remove commons-text as a transitive dep, as it appears (probably) that Checkstyle doesn't need it, and it triggers enterprise CVE rules (#688).
+* **26.7.1** Fixed: Redirects are now supported during protocol upgrades (#682).
+* **26.7.1** Fixed: An attempted fix for the Windows issue with tokenised paths, thanks to Opus (#691).
 * **26.7.0** New: Add Checkstyle 13.4.2.
 * **26.6.0** New: Add Checkstyle 13.4.1.
 * **26.5.0** New: Add Checkstyle 13.4.0.
