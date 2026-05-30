@@ -50,6 +50,20 @@ public class StaticScanner {
         return checkFuture;
     }
 
+    private Future<List<ScanResult>> addToProgressAndRegisterListener(final Future<List<ScanResult>> checkFuture,
+                                                                       final ScanFiles checker) {
+        // Both operations share the same lock: checkComplete() (called by ScanCompletionTracker) also
+        // synchronizes on checksInProgress, so it cannot execute between our isDone() check and the
+        // listener registration, eliminating the race where the future could be stranded in the set.
+        synchronized (checksInProgress) {
+            checker.addListener(new ScanCompletionTracker(checkFuture));
+            if (!checkFuture.isDone()) {
+                checksInProgress.add(checkFuture);
+            }
+        }
+        return checkFuture;
+    }
+
     public void stopChecks() {
         synchronized (checksInProgress) {
             checksInProgress.forEach(task -> task.cancel(true));
@@ -94,9 +108,7 @@ public class StaticScanner {
     }
 
     private Future<List<ScanResult>> runAsyncCheck(final ScanFiles checker) {
-        final var checkFilesFuture = checkInProgress(executeOnPooledThread(checker));
-        checker.addListener(new ScanCompletionTracker(checkFilesFuture));
-        return checkFilesFuture;
+        return addToProgressAndRegisterListener(executeOnPooledThread(checker), checker);
     }
 
     private class ScanCompletionTracker implements ScannerListener {
