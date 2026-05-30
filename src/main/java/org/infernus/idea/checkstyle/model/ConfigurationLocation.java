@@ -27,8 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.intellij.openapi.util.Pair.pair;
 import static java.lang.System.currentTimeMillis;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -46,7 +44,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     private static final int ONE_SECOND = 1000;
     private static final long BLOCK_TIME_MS = ONE_SECOND * 60;
 
-    private final Map<String, String> properties = new ConcurrentHashMap<>();
+    private final Map<String, String> properties = new HashMap<>();
     private final String id;
     private final ConfigurationType type;
     private final Project project;
@@ -77,8 +75,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     }
 
     private void scopeChanged() {
-        this.getNamedScope().ifPresent(scope ->
-                this.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(project, scope.getScopeId())));
+        synchronized (this) {
+            if (namedScope != null) {
+                namedScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, namedScope.getScopeId());
+            }
+        }
     }
 
     public boolean canBeResolvedInDefaultProject() {
