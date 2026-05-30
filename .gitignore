@@ -15,3 +15,8 @@ _support/
 /out/
 .intellijPlatform/
 /improvements.md
+/plan.md
+/.classpath
+/.settings/
+/.project
+/bin/
