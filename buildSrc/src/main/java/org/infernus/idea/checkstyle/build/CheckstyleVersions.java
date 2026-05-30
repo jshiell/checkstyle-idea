@@ -134,6 +134,10 @@ public class CheckstyleVersions {
         ex.put("group", "commons-logging");
         ex.put("module", "commons-logging");
         csDep.exclude(ex);
+        final Map<String, String> textEx = new HashMap<>();
+        textEx.put("group", "org.apache.commons");
+        textEx.put("module", "commons-text");
+        csDep.exclude(textEx);
         return csDep;
     }
 
