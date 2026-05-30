@@ -61,24 +61,23 @@ public class CheckerFactoryCache implements Disposable {
             if (cachedChecker != null) {
                 cachedChecker.destroy();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOG.warn("Failed to destroy checker", e);
         }
     }
 
     private void cleanUpExpiredCachedCheckers() {
         try {
-            List<CachedChecker> checkersToDestroy = new ArrayList<>();
-
-            for (Iterator<Map.Entry<CheckerFactoryCacheKey, CachedChecker>> i = cache.entrySet().iterator(); i.hasNext();) {
-                Map.Entry<CheckerFactoryCacheKey, CachedChecker> cacheEntry = i.next();
-                if (cacheEntry.getValue() == null || !cacheEntry.getValue().isValid()) {
-                    checkersToDestroy.add(cacheEntry.getValue());
-                    i.remove();
+            // removeIf is atomic per-entry on ConcurrentHashMap; collect removed values for destruction
+            final List<CachedChecker> checkersToDestroy = new ArrayList<>();
+            cache.entrySet().removeIf(entry -> {
+                if (entry.getValue() == null || !entry.getValue().isValid()) {
+                    checkersToDestroy.add(entry.getValue());
+                    return true;
                 }
-            }
-
+                return false;
+            });
             checkersToDestroy.forEach(this::destroyChecker);
-
         } catch (Exception e) {
             LOG.error("Cleanup failed", e);
         }
