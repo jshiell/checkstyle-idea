@@ -180,6 +180,8 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 final Map<String, String> propertiesAndDefaults = new HashMap<>();
 
                 final XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+                factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
                 factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
                 final XMLEventReader eventReader = factory.createXMLEventReader(inputStream);
 
