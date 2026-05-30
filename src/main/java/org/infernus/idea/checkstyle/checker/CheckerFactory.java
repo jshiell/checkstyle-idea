@@ -175,6 +175,9 @@ public class CheckerFactory {
             Thread.currentThread().interrupt();
             return e;
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException re) {
+                return re;
+            }
             return e.getCause() != null ? e.getCause() : e;
         } finally {
             executor.shutdown();

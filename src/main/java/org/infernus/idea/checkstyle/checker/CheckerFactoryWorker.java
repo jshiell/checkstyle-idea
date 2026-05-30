@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 
-class CheckerFactoryWorker implements Callable<Object> {
+class CheckerFactoryWorker implements Callable<CachedChecker> {
     private final ConfigurationLocation location;
     private final Map<String, String> properties;
     private final Module module;
@@ -27,14 +27,10 @@ class CheckerFactoryWorker implements Callable<Object> {
     }
 
     @Override
-    public Object call() {
-        try {
-            final CheckStyleChecker checker = checkstyleProjectService
-                    .getCheckstyleInstance()
-                    .createChecker(module, location, properties);
-            return new CachedChecker(checker);
-        } catch (RuntimeException e) {
-            return e;
-        }
+    public CachedChecker call() {
+        final CheckStyleChecker checker = checkstyleProjectService
+                .getCheckstyleInstance()
+                .createChecker(module, location, properties);
+        return new CachedChecker(checker);
     }
 }
