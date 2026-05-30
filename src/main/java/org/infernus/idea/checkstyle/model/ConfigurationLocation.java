@@ -184,16 +184,18 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
                 factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
                 final XMLEventReader eventReader = factory.createXMLEventReader(inputStream);
-
-                while (eventReader.hasNext()) {
-                    final XMLEvent event = eventReader.nextEvent();
-
-                    if (event.isStartElement()) {
-                        final var property = extractNameAndDefaultIfPropertyElement((StartElement) event);
-                        if (property != null) {
-                            propertiesAndDefaults.put(property.first, property.second);
+                try {
+                    while (eventReader.hasNext()) {
+                        final XMLEvent event = eventReader.nextEvent();
+                        if (event.isStartElement()) {
+                            final var property = extractNameAndDefaultIfPropertyElement((StartElement) event);
+                            if (property != null) {
+                                propertiesAndDefaults.put(property.first, property.second);
+                            }
                         }
                     }
+                } finally {
+                    eventReader.close();
                 }
 
                 return propertiesAndDefaults;
