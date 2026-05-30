@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -219,10 +220,10 @@ import static java.util.Optional.ofNullable;
         final String lineSeparator = CodeStyle.getSettings(file.getProject()).getLineSeparator();
         final String content = file.getText().replace("\n", lineSeparator); // IDEA uses \n internally
 
-        final Writer tempFileOut = writerTo(outFile, charSetOf(file));
-        tempFileOut.write(content);
-        tempFileOut.flush();
-        tempFileOut.close();
+        try (BufferedWriter tempFileOut = new BufferedWriter(
+                new OutputStreamWriter(Files.newOutputStream(outFile.toPath()), charSetOf(file)))) {
+            tempFileOut.write(content);
+        }
     }
 
     @NotNull
@@ -232,11 +233,6 @@ import static java.util.Optional.ofNullable;
 
     private Optional<VirtualFile> virtualFileOf(final PsiFile file) {
         return ofNullable(file.getVirtualFile());
-    }
-
-    @NotNull
-    private Writer writerTo(final File outFile, final Charset charset) throws FileNotFoundException {
-        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), charset.newEncoder()));
     }
 
     public File getFile() {
