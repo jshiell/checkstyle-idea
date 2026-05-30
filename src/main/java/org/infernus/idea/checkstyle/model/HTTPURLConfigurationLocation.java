@@ -23,6 +23,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private static final int CONTENT_CACHE_SECONDS = 2;
     private static final int ONE_SECOND = 1000;
     private static final int HTTP_TIMEOUT_IN_MS = 5000;
+    private static final int MAX_REDIRECTS = 5;
 
     private byte[] cachedContent;
     private long cacheExpiry;
@@ -69,7 +70,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         urlConnection.setAllowUserInteraction(false);
 
         if (urlConnection instanceof HttpURLConnection httpURLConnection) {
-            httpURLConnection.setInstanceFollowRedirects(true);
+            httpURLConnection.setInstanceFollowRedirects(false);
         }
 
         return withBasicAuth(url, urlConnection);
@@ -85,8 +86,26 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     }
 
     private InputStream streamFrom(final URLConnection urlConnection) throws IOException {
-        urlConnection.connect();
-        return new BufferedInputStream(urlConnection.getInputStream());
+        URLConnection current = urlConnection;
+        for (int hops = 0; hops < MAX_REDIRECTS; hops++) {
+            if (!(current instanceof HttpURLConnection httpConn)) {
+                break;
+            }
+            httpConn.connect();
+            final int status = httpConn.getResponseCode();
+            if (status == 301 || status == 302 || status == 307 || status == 308) {
+                final String newUrl = httpConn.getHeaderField("Location");
+                httpConn.disconnect();
+                if (newUrl == null) {
+                    throw new IOException("Redirect response missing Location header");
+                }
+                current = connectionTo(newUrl);
+            } else {
+                return new BufferedInputStream(httpConn.getInputStream());
+            }
+        }
+        current.connect();
+        return new BufferedInputStream(current.getInputStream());
     }
 
     @Override
