@@ -81,4 +81,19 @@ public class RelativeFileConfigurationLocationTest {
         assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "/../../../somewhere/else/entirely/another-project/rules.xml")));
     }
 
+    @Test
+    public void anAbsolutePathIsPersistedWithProjectDirToken() {
+        underTest.setLocation("/the/base-project/another-project/rules.xml");
+
+        assertThat(underTest.getRawLocation(), is(equalTo("$PROJECT_DIR$/../another-project/rules.xml")));
+    }
+
+    @Test
+    public void aTokenisedPathIsStoredStably() {
+        // Simulate IntelliJ expanding $PROJECT_DIR$ on load then plugin re-tokenising on setLocation
+        underTest.setLocation(PROJECT_BASE_PATH + "/../another-project/rules.xml");
+
+        assertThat(underTest.getRawLocation(), is(equalTo("$PROJECT_DIR$/../another-project/rules.xml")));
+    }
+
 }

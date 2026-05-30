@@ -13,6 +13,8 @@ public class ProjectFilePaths {
 
     private static final Logger LOG = Logger.getInstance(ProjectFilePaths.class);
 
+    static final String PROJECT_DIR_TOKEN = "$PROJECT_DIR$";
+
     private final ProjectPaths projectPaths;
     private final Project project;
     private final char separatorChar;
@@ -58,8 +60,8 @@ public class ProjectFilePaths {
         }
 
         try {
-            final String basePath = absolutePathOf.apply(projectPath) + separatorChar;
-            return basePath + FilePaths.relativePath(path, basePath, "" + separatorChar);
+            final String basePath = toUnix(absolutePathOf.apply(projectPath)) + '/';
+            return FilePaths.relativePath(toUnix(path), basePath, "/");
 
         } catch (FilePaths.PathResolutionException e) {
             LOG.debug("No common path was found between " + path + " and " + projectPath.getAbsolutePath());
@@ -73,12 +75,66 @@ public class ProjectFilePaths {
 
     @Nullable
     public String tokenise(@Nullable final String fsPath) {
+        if (fsPath == null) {
+            return null;
+        }
+
+        final String basePath = projectBasePath();
+        if (basePath == null) {
+            return fsPath;
+        }
+
+        final String unixPath = toUnix(fsPath);
+
+        // Already tokenised — return unchanged (idempotent)
+        if (unixPath.startsWith(PROJECT_DIR_TOKEN)) {
+            return fsPath;
+        }
+
+        // Absolute path rooted at the project directory
+        if (unixPath.startsWith(basePath + '/')) {
+            return PROJECT_DIR_TOKEN + unixPath.substring(basePath.length());
+        }
+
+        // Relative path returned by makeProjectRelative — prepend the token
+        if (!isAbsolute(unixPath)) {
+            return PROJECT_DIR_TOKEN + '/' + unixPath;
+        }
+
         return fsPath;
     }
 
     @Nullable
     public String detokenise(@Nullable final String tokenisedPath) {
-        return tokenisedPath;
+        if (tokenisedPath == null || !tokenisedPath.startsWith(PROJECT_DIR_TOKEN)) {
+            return tokenisedPath;
+        }
+
+        final String basePath = projectBasePath();
+        if (basePath == null) {
+            return tokenisedPath;
+        }
+
+        return basePath + tokenisedPath.substring(PROJECT_DIR_TOKEN.length());
+    }
+
+    @Nullable
+    private String projectBasePath() {
+        final File pp = projectPath();
+        if (pp == null) {
+            return null;
+        }
+        return toUnix(absolutePathOf.apply(pp));
+    }
+
+    private static String toUnix(@NotNull final String path) {
+        return path.replace('\\', '/');
+    }
+
+    private static boolean isAbsolute(@NotNull final String unixPath) {
+        // Unix absolute: starts with /
+        // Windows absolute: starts with drive letter e.g. c:/
+        return unixPath.startsWith("/") || (unixPath.length() > 2 && unixPath.charAt(1) == ':');
     }
 
     @Nullable
