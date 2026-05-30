@@ -2,8 +2,10 @@ package org.infernus.idea.checkstyle.build;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.dsl.DependencyHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -122,7 +124,11 @@ public class CheckstyleVersions {
     }
 
     public static Dependency createCheckstyleDependency(final Project project, final String checkstyleVersion) {
-        final ModuleDependency csDep = (ModuleDependency) project.getDependencies().create(
+        return createCheckstyleDependency(project.getDependencies(), checkstyleVersion);
+    }
+
+    public static Dependency createCheckstyleDependency(final DependencyHandler dependencies, final String checkstyleVersion) {
+        final ModuleDependency csDep = (ModuleDependency) dependencies.create(
                 "com.puppycrawl.tools:checkstyle:" + checkstyleVersion);
         final Map<String, String> ex = new HashMap<>();
         ex.put("group", "commons-logging");
@@ -142,5 +148,16 @@ public class CheckstyleVersions {
 
     public Map<String, String> getDependencyMappings() {
         return dependencyMappings;
+    }
+
+    /**
+     * Workaround for <a href="https://github.com/checkstyle/checkstyle/issues/14123">Checkstyle#14123</a>:
+     * resolve the {@code com.google.collections:google-collections} capability conflict by selecting Guava.
+     */
+    public static void applyGoogleCollectionsWorkaround(final Configuration configuration) {
+        configuration.getResolutionStrategy()
+                .getCapabilitiesResolution()
+                .withCapability("com.google.collections", "google-collections",
+                        resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
     }
 }

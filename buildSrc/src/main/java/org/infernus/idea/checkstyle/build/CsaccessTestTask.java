@@ -2,7 +2,6 @@ package org.infernus.idea.checkstyle.build;
 
 import java.io.File;
 
-import groovy.lang.Closure;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -38,7 +37,7 @@ public abstract class CsaccessTestTask extends Test {
         final SourceSet csaccessTestSourceSet = jpc.getSourceSets().getByName(
                 CustomSourceSetCreator.CSACCESSTEST_SOURCESET_NAME);
 
-        dependsOn(project.getTasks().getByName(csaccessTestSourceSet.getClassesTaskName()));
+        dependsOn(project.getTasks().named(csaccessTestSourceSet.getClassesTaskName()));
 
         GradlePluginMain.configureTestTask(this);
         setTestClassesDirs(csaccessTestSourceSet.getOutput().getClassesDirs());
@@ -63,13 +62,7 @@ public abstract class CsaccessTestTask extends Test {
         }
 
         // Make the Checkstyle version available to the test cases via a system property.
-        configure(new Closure<Void>(this) {
-            @Override
-            public Void call() {
-                systemProperty(CSVERSION_SYSPROP_NAME, checkstyleVersion);
-                return null;
-            }
-        });
+        systemProperty(CSVERSION_SYSPROP_NAME, checkstyleVersion);
 
         effectiveClassPath = setClassPathForVersion(checkstyleVersion, getProject());
     }
@@ -79,11 +72,7 @@ public abstract class CsaccessTestTask extends Test {
         final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
         final ConfigurationContainer configurations = project.getConfigurations();
         final Configuration detachedConfiguration = configurations.detachedConfiguration(csDep);
-        // workaround for Checkstyle#14123
-        detachedConfiguration
-                .getResolutionStrategy()
-                .getCapabilitiesResolution()
-                .withCapability("com.google.collections", "google-collections", resolutionDetails -> resolutionDetails.select("com.google.guava:guava:0"));
+        CheckstyleVersions.applyGoogleCollectionsWorkaround(detachedConfiguration);
 
         final SourceSetContainer sourceSets = jpc.getSourceSets();
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);

@@ -33,49 +33,26 @@ public final class VersionComparator implements Comparator<String>, Serializable
 
     @Override
     public int compare(final String pStr1, final String pStr2) {
-        int result = 0;
         if (pStr1 == null) {
-            if (pStr2 != null) {
-                result = 1;
-            }
-        } else {
-            if (pStr2 == null) {
-                result = -1;
-            } else {
-                Matcher matcher1 = PATTERN.matcher(pStr1);
-                Matcher matcher2 = PATTERN.matcher(pStr2);
-                if (matcher1.matches() && matcher2.matches()) {
-                    final int major1 = Integer.parseInt(matcher1.group(VE.Major.ordinal()));
-                    final int major2 = Integer.parseInt(matcher2.group(VE.Major.ordinal()));
-                    final int minor1 = Integer.parseInt(matcher1.group(VE.Minor.ordinal()));
-                    final int minor2 = Integer.parseInt(matcher2.group(VE.Minor.ordinal()));
-                    final int micro1 = matcher1.group(VE.Micro.ordinal()) != null ? Integer.parseInt(matcher1.group(
-                            VE.Micro.ordinal())) : 0;
-                    final int micro2 = matcher2.group(VE.Micro.ordinal()) != null ? Integer.parseInt(matcher2.group(
-                            VE.Micro.ordinal())) : 0;
-
-                    if (major1 > major2) {
-                        result = 1;
-                    } else if (major1 < major2) {
-                        result = -1;
-                    } else {
-                        if (minor1 > minor2) {
-                            result = 1;
-                        } else if (minor1 < minor2) {
-                            result = -1;
-                        } else {
-                            if (micro1 > micro2) {
-                                result = 1;
-                            } else if (micro1 < micro2) {
-                                result = -1;
-                            }
-                        }
-                    }
-                } else {
-                    result = pStr1.compareTo(pStr2);
-                }
-            }
+            return pStr2 == null ? 0 : 1;
         }
-        return result;
+        if (pStr2 == null) {
+            return -1;
+        }
+        final Matcher matcher1 = PATTERN.matcher(pStr1);
+        final Matcher matcher2 = PATTERN.matcher(pStr2);
+        if (matcher1.matches() && matcher2.matches()) {
+            return Integer.compare(intGroup(matcher1, VE.Major), intGroup(matcher2, VE.Major)) != 0
+                    ? Integer.compare(intGroup(matcher1, VE.Major), intGroup(matcher2, VE.Major))
+                    : Integer.compare(intGroup(matcher1, VE.Minor), intGroup(matcher2, VE.Minor)) != 0
+                    ? Integer.compare(intGroup(matcher1, VE.Minor), intGroup(matcher2, VE.Minor))
+                    : Integer.compare(intGroup(matcher1, VE.Micro), intGroup(matcher2, VE.Micro));
+        }
+        return pStr1.compareTo(pStr2);
+    }
+
+    private static int intGroup(final Matcher matcher, final VE group) {
+        final String value = matcher.group(group.ordinal());
+        return value != null ? Integer.parseInt(value) : 0;
     }
 }
