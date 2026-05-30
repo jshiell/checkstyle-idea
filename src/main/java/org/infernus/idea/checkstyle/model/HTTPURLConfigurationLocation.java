@@ -97,6 +97,8 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     /**
      * Returns the location URL with any embedded credentials (userInfo) removed, to prevent
      * logging plaintext passwords to idea.log.
+     * <p>
+     * Package-private (rather than private) to allow direct unit testing.
      */
     String redactedLocation() {
         try {

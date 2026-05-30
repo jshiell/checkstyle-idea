@@ -78,6 +78,10 @@ public class CheckerFactoryCacheConcurrencyTest {
             executor.shutdown();
             executor.awaitTermination(5, TimeUnit.SECONDS);
 
+            for (java.util.concurrent.Future<?> f : futures) {
+                f.get();
+            }
+
             assertThat(
                     "Checker must not be destroyed more than once in iteration " + iter,
                     destroyCount.get(),
@@ -94,7 +98,7 @@ public class CheckerFactoryCacheConcurrencyTest {
     }
 
     @Test
-    public void cacheIsEmptyAfterConcurrentInvalidateAndGet() throws Exception {
+    public void cacheIsConsistentAfterConcurrentInvalidateAndGet() throws Exception {
         final CheckerFactoryCache cache = new CheckerFactoryCache();
         final CheckStyleChecker mockChecker = mock(CheckStyleChecker.class);
 

@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Note: these tests do not call {@code Async.executeOnPooledThread()} because that
  * requires a running IntelliJ application. {@link CompletableFuture} is used instead
  * to exercise the waiting/timeout logic in isolation.
+ * <p>
+ * {@code Async.whenFinished()} internally calls {@code ProgressManager.checkCanceled()}
+ * on each poll iteration. In a unit test environment without a running platform,
+ * this is expected to be a safe no-op (no active progress indicator).
  */
 public class AsyncWhenFinishedTest {
 
