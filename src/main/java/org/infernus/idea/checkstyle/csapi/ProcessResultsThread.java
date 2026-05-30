@@ -75,7 +75,7 @@ public class ProcessResultsThread implements ThrowableRunnable<RuntimeException>
             final PsiFile psiFile = fileNamesToPsiFiles.get(filenameFrom(event));
             if (psiFile == null) {
                 LOG.info("Could not find mapping for file: " + event.fileName + " in " + fileNamesToPsiFiles);
-                return;
+                continue;
             }
 
             List<Integer> lineLengthCache = lineLengthCachesByFile.get(psiFile);
@@ -156,9 +156,9 @@ public class ProcessResultsThread implements ThrowableRunnable<RuntimeException>
     @NotNull
     private Position findPosition(final List<Integer> lineLengthCache, final Issue event, final char[] text) {
         if (event.lineNumber == 0) {
-            return Position.at(event.columnNumber);
+            return Position.at(0);
         } else if (event.lineNumber <= lineLengthCache.size()) {
-            return Position.at(lineLengthCache.get(event.lineNumber - 1) + event.columnNumber);
+            return Position.at(lineLengthCache.get(event.lineNumber - 1) + event.columnNumber - 1);
         } else {
             return searchFromEndOfCachedData(lineLengthCache, event, text);
         }
@@ -202,7 +202,7 @@ public class ProcessResultsThread implements ThrowableRunnable<RuntimeException>
             }
         }
 
-        position = Position.at(offset, afterEndOfLine);
+        position = Position.at(offset - 1, afterEndOfLine);
         return position;
     }
 
