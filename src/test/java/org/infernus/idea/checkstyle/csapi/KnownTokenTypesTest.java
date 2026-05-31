@@ -11,7 +11,7 @@ class KnownTokenTypesTest {
     @Test
     void allExpectedTokensAreDeclared() {
         KnownTokenTypes[] values = KnownTokenTypes.values();
-        assertThat(values.length, is(57));
+        assertThat(values.length, is(61));
     }
 
     @Test

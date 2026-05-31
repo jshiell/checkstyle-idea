@@ -6,6 +6,7 @@ package org.infernus.idea.checkstyle.csapi;
 //@formatter:off
 public enum KnownTokenTypes {
     ASSIGN,
+    ARRAY_DECLARATOR,
     BAND,
     BAND_ASSIGN,
     BOR,
@@ -21,6 +22,8 @@ public enum KnownTokenTypes {
     DIV,
     DIV_ASSIGN,
     DO_WHILE,
+    DOT,
+    ELLIPSIS,
     EQUAL,
     GE,
     GT,
@@ -44,6 +47,7 @@ public enum KnownTokenTypes {
     LOR,
     LT,
     METHOD_DEF,
+    METHOD_REF,
     MINUS,
     MINUS_ASSIGN,
     MOD,

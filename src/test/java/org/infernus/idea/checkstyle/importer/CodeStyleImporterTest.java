@@ -482,6 +482,30 @@ public class CodeStyleImporterTest
         }
     }
 
+    public void testSeparatorWrapImporter() {
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="SeparatorWrap">
+                                    <property name="option" value="nl"/>
+                                    <property name="tokens" value="DOT"/>
+                                </module>"""
+                )
+        );
+        assertTrue(javaSettings.WRAP_FIRST_METHOD_IN_CALL_CHAIN);
+
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="SeparatorWrap">
+                                    <property name="option" value="eol"/>
+                                    <property name="tokens" value="DOT"/>
+                                </module>"""
+                )
+        );
+        assertFalse(javaSettings.WRAP_FIRST_METHOD_IN_CALL_CHAIN);
+    }
+
     public void testOperatorWrapImporter() {
         importConfiguration(
                 inTreeWalker(
