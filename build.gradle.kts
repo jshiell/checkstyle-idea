@@ -1,6 +1,5 @@
 import org.infernus.idea.checkstyle.build.CheckstyleVersions
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 repositories {
     mavenCentral()
@@ -19,7 +18,7 @@ plugins {
     id("org.infernus.idea.checkstyle.build")
 }
 
-version = "26.7.1"
+version = "26.7.2"
 
 intellijPlatform {
     pluginConfiguration {
