@@ -25,6 +25,8 @@ public class SeparatorWrapImporter extends ModuleImporter {
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.DOT)) {
+            // Approximate: Checkstyle's DOT token covers all dot separators,
+            // but IDEA only has a setting for the first method in a call chain.
             javaSettings.WRAP_FIRST_METHOD_IN_CALL_CHAIN = placeOnNextLine;
         }
         // COMMA is a no-op: IDEA has no generic "comma on next line" setting.
