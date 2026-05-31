@@ -482,6 +482,22 @@ public class CodeStyleImporterTest
         }
     }
 
+    public void testOperatorWrapImporter() {
+        importConfiguration(
+                inTreeWalker(
+                        "<module name=\"OperatorWrap\"><property name=\"option\" value=\"eol\"/></module>"
+                )
+        );
+        assertFalse(javaSettings.BINARY_OPERATION_SIGN_ON_NEXT_LINE);
+
+        importConfiguration(
+                inTreeWalker(
+                        "<module name=\"OperatorWrap\"><property name=\"option\" value=\"nl\"/></module>"
+                )
+        );
+        assertTrue(javaSettings.BINARY_OPERATION_SIGN_ON_NEXT_LINE);
+    }
+
     private static void comparePackageEntries(final PackageEntry[] expected, final PackageEntryTable actual) {
         assertEquals(expected.length, actual.getEntryCount());
         for (int x = 0; x < expected.length; x++) {
