@@ -75,6 +75,7 @@ public class CodeStyleImporterTest
                 )
         );
         assertEquals(100, javaSettings.RIGHT_MARGIN);
+        assertTrue(javaSettings.WRAP_LONG_LINES);
     }
 
     public void testEmptyLineSeparator() {

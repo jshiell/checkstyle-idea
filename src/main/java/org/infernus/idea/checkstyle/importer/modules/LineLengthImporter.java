@@ -48,5 +48,6 @@ public class LineLengthImporter extends ModuleImporter {
         commonSettings.PARAMETER_ANNOTATION_WRAP = WRAP_AS_NEEDED;
         commonSettings.VARIABLE_ANNOTATION_WRAP = WRAP_AS_NEEDED;
         commonSettings.ENUM_CONSTANTS_WRAP = WRAP_AS_NEEDED;
+        commonSettings.WRAP_LONG_LINES = true;
     }
 }
