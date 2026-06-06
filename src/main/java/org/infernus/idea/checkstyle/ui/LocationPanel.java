@@ -40,6 +40,9 @@ public class LocationPanel extends JPanel {
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
 
     private final JButton browseButton = new JButton(new BrowseAction());
+    private final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
+    private final JLabel urlLocationLabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
+    private final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
     private final JTextField fileLocationField = new JTextField(20);
     private final JTextField urlLocationField = new JTextField(20);
     private final JTextField classpathLocationField = new JTextField(20);
@@ -90,10 +93,6 @@ public class LocationPanel extends JPanel {
         final JLabel descriptionLabel = new JLabel(CheckStyleBundle.message("config.file.description.text"));
         descriptionField.setToolTipText(CheckStyleBundle.message("config.file.description.tooltip"));
 
-        final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
-        final JLabel urlLocationlabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
-        final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
-
         final JLabel scopeLabel = new JLabel(CheckStyleBundle.message("config.file.scope.label"));
         NamedScopeHelper.getAllScopes(project).forEach(this.scopeComboBox::addItem);
         this.scopeComboBox.setSelectedItem(NamedScopeHelper.getDefaultScope(project));
@@ -133,7 +132,7 @@ public class LocationPanel extends JPanel {
         add(urlLocationRadio, new GridBagConstraints(0, 4, 3, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, JBUI.insets(8, 4, 4, 4), 0, 0));
 
-        add(urlLocationlabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
+        add(urlLocationLabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         add(urlLocationField, new GridBagConstraints(1, 5, 2, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
@@ -163,14 +162,18 @@ public class LocationPanel extends JPanel {
     }
 
     private void enabledLocation(final LocationType locationType) {
+        fileLocationLabel.setEnabled(locationType == FILE);
         fileLocationField.setEnabled(locationType == FILE);
         browseButton.setEnabled(locationType == FILE);
         relativeFileCheckbox.setEnabled(locationType == FILE);
 
+        urlLocationLabel.setEnabled(locationType == HTTP);
         urlLocationField.setEnabled(locationType == HTTP);
         insecureHttpCheckbox.setEnabled(locationType == HTTP);
 
+        classpathLocationLabel.setEnabled(locationType == CLASSPATH);
         classpathLocationField.setEnabled(locationType == CLASSPATH);
+        classpathLocationReminderLabel.setEnabled(locationType == CLASSPATH);
     }
 
     private ConfigurationType typeOfFile() {
@@ -338,10 +341,10 @@ public class LocationPanel extends JPanel {
     /**
      * Disable radio buttons to prevent changing the location type (for edit mode).
      */
-    public void setTypeSelectionEnabled(final boolean enabled) {
-        fileLocationRadio.setEnabled(enabled);
-        urlLocationRadio.setEnabled(enabled);
-        classpathLocationRadio.setEnabled(enabled);
+    public void disableTypeSelection() {
+        fileLocationRadio.setEnabled(false);
+        urlLocationRadio.setEnabled(false);
+        classpathLocationRadio.setEnabled(false);
     }
 
     /**

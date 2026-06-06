@@ -58,7 +58,7 @@ public class PropertiesDialogue extends DialogWrapper {
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
         locationPanel.setConfigurationLocation(configurationLocation);
-        locationPanel.setTypeSelectionEnabled(false);
+        locationPanel.disableTypeSelection();
         propertiesPanel.setConfigurationLocation(configurationLocation);
     }
 }
