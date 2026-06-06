@@ -57,8 +57,12 @@ public class LocationTableModel extends AbstractTableModel {
         if (location != null && newLocation != null) {
             final int index = locations.indexOf(location);
             if (index != -1) {
+                final boolean wasActive = activeLocations.remove(location);
                 locations.remove(index);
                 locations.add(index, newLocation);
+                if (wasActive) {
+                    activeLocations.add(newLocation);
+                }
                 fireTableRowsUpdated(index, index);
             }
         }
