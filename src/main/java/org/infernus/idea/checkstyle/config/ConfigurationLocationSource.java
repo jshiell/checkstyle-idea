@@ -22,14 +22,14 @@ public class ConfigurationLocationSource {
 
     public SortedSet<ConfigurationLocation> getConfigurationLocations(@Nullable final Module module,
                                                                       @Nullable final ConfigurationLocation override) {
-        if (override != null) {
-            return new TreeSet<>(Collections.singleton(override));
-        }
-
         if (module != null) {
             ModuleConfigurationState moduleConfiguration = checkstyleModuleConfiguration(module);
             if (moduleConfiguration.isExcluded()) {
                 return Collections.emptySortedSet();
+            }
+
+            if (override != null) {
+                return new TreeSet<>(Collections.singleton(override));
             }
 
             PluginConfiguration configuration = configurationManager().getCurrent();
@@ -40,6 +40,8 @@ public class ConfigurationLocationSource {
             if (!moduleActiveConfigurations.isEmpty()) {
                 return moduleActiveConfigurations;
             }
+        } else if (override != null) {
+            return new TreeSet<>(Collections.singleton(override));
         }
 
         return configurationManager().getCurrent().getActiveLocations();
