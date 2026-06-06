@@ -12,10 +12,11 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Allows setting of file properties.
+ * Allows editing of a configuration location's description, path, and properties.
  */
 public class PropertiesDialogue extends DialogWrapper {
 
+    private final LocationPanel locationPanel;
     private final PropertiesPanel propertiesPanel;
 
 
@@ -24,15 +25,19 @@ public class PropertiesDialogue extends DialogWrapper {
                               @NotNull final CheckstyleProjectService checkstyleProjectService) {
         super(project, parent, false, IdeModalityType.IDE);
 
+        this.locationPanel = new LocationPanel(project);
         this.propertiesPanel = new PropertiesPanel(project, checkstyleProjectService);
 
-        setTitle(CheckStyleBundle.message("config.file.properties.title"));
+        setTitle(CheckStyleBundle.message("config.file.edit.title"));
         init();
     }
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        return propertiesPanel;
+        final JPanel panel = new JPanel(new BorderLayout());
+        panel.add(locationPanel, BorderLayout.NORTH);
+        panel.add(propertiesPanel, BorderLayout.CENTER);
+        return panel;
     }
 
     /**
@@ -41,7 +46,9 @@ public class PropertiesDialogue extends DialogWrapper {
      * @return the location or null if no valid location entered.
      */
     public ConfigurationLocation getConfigurationLocation() {
-        return propertiesPanel.getConfigurationLocation();
+        final ConfigurationLocation location = propertiesPanel.getConfigurationLocation();
+        locationPanel.applyChangesTo(location);
+        return location;
     }
 
     /**
@@ -50,6 +57,8 @@ public class PropertiesDialogue extends DialogWrapper {
      * @param configurationLocation the location.
      */
     public void setConfigurationLocation(final ConfigurationLocation configurationLocation) {
+        locationPanel.setConfigurationLocation(configurationLocation);
+        locationPanel.setTypeSelectionEnabled(false);
         propertiesPanel.setConfigurationLocation(configurationLocation);
     }
 }

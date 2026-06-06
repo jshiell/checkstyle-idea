@@ -303,27 +303,60 @@ public class LocationPanel extends JPanel {
         insecureHttpCheckbox.setSelected(false);
 
         if (configurationLocation == null) {
-            fileLocationRadio.setEnabled(true);
+            fileLocationRadio.setSelected(true);
             fileLocationField.setText(null);
+            enabledLocation(FILE);
+            descriptionField.setText(null);
 
         } else if (configurationLocation.getType() == LOCAL_FILE
                 || configurationLocation.getType() == PROJECT_RELATIVE) {
-            fileLocationRadio.setEnabled(true);
+            fileLocationRadio.setSelected(true);
             fileLocationField.setText(configurationLocation.getLocation());
             relativeFileCheckbox.setSelected(configurationLocation.getType() == PROJECT_RELATIVE);
+            enabledLocation(FILE);
+            descriptionField.setText(configurationLocation.getDescription());
 
         } else if (configurationLocation.getType() == HTTP_URL
                 || configurationLocation.getType() == INSECURE_HTTP_URL) {
-            urlLocationRadio.setEnabled(true);
+            urlLocationRadio.setSelected(true);
             urlLocationField.setText(configurationLocation.getLocation());
             insecureHttpCheckbox.setSelected(configurationLocation.getType() == INSECURE_HTTP_URL);
+            enabledLocation(HTTP);
+            descriptionField.setText(configurationLocation.getDescription());
 
         } else if (configurationLocation.getType() == PLUGIN_CLASSPATH) {
-            classpathLocationField.setEnabled(true);
+            classpathLocationRadio.setSelected(true);
             classpathLocationField.setText(configurationLocation.getLocation());
+            enabledLocation(CLASSPATH);
+            descriptionField.setText(configurationLocation.getDescription());
 
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());
+        }
+    }
+
+    /**
+     * Disable radio buttons to prevent changing the location type (for edit mode).
+     */
+    public void setTypeSelectionEnabled(final boolean enabled) {
+        fileLocationRadio.setEnabled(enabled);
+        urlLocationRadio.setEnabled(enabled);
+        classpathLocationRadio.setEnabled(enabled);
+    }
+
+    /**
+     * Apply description and location changes to an existing location without creating a new one.
+     *
+     * @param location the location to update in place.
+     */
+    public void applyChangesTo(final ConfigurationLocation location) {
+        location.setDescription(descriptionField.getText());
+        if (fileLocationField.isEnabled() && isNotBlank(fileLocation())) {
+            location.setLocation(fileLocation());
+        } else if (urlLocationField.isEnabled() && isNotBlank(urlLocation())) {
+            location.setLocation(urlLocation());
+        } else if (classpathLocationField.isEnabled() && isNotBlank(classpathLocation())) {
+            location.setLocation(classpathLocation());
         }
     }
 
