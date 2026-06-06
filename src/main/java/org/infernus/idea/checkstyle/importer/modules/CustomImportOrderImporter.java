@@ -25,6 +25,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
     private List<ImportGroup> customImportOrder;
     private boolean separateLineBetweenGroups;
+    private boolean sortImportsInGroupAlphabetically;
     private List<String> standardPackageRegExp;
     private List<String> thirdPartyPackageRegExp;
     private List<String> specialImportsRegExp;
@@ -58,7 +59,7 @@ public class CustomImportOrderImporter extends ModuleImporter {
                 separateLineBetweenGroups = Boolean.parseBoolean(attrValue);
                 break;
             case SORT_IMPORTS_IN_GROUP_ALPHABETICALLY_PROP:
-                boolean sortImportsInGroupAlphabetically = Boolean.parseBoolean(attrValue);
+                sortImportsInGroupAlphabetically = Boolean.parseBoolean(attrValue);
                 break;
             case SEVERITY:
                 // ignored, but valid
@@ -87,19 +88,22 @@ public class CustomImportOrderImporter extends ModuleImporter {
                         entryAdded = true;
                         break;
                     case THIRD_PARTY_PACKAGE:
-                        thirdPartyPackageRegExp.forEach(createPackageEntry);
+                        sorted(thirdPartyPackageRegExp).forEach(createPackageEntry);
                         entryAdded = !thirdPartyPackageRegExp.isEmpty();
                         break;
                     case SPECIAL_IMPORTS:
-                        specialImportsRegExp.forEach(createPackageEntry);
+                        sorted(specialImportsRegExp).forEach(createPackageEntry);
                         entryAdded = !specialImportsRegExp.isEmpty();
                         break;
                     case STANDARD_JAVA_PACKAGE:
-                        standardPackageRegExp.forEach(createPackageEntry);
+                        sorted(standardPackageRegExp).forEach(createPackageEntry);
                         entryAdded = !standardPackageRegExp.isEmpty();
                         break;
+                    case SAME_PACKAGE:
+                        // IntelliJ has no equivalent for same-package import grouping; silently skip
+                        break;
                     default:
-                        // IntelliJ does not support this option or group does not exist
+                        // IntelliJ does not support this import group
                         break;
                 }
 
@@ -111,6 +115,13 @@ public class CustomImportOrderImporter extends ModuleImporter {
 
         table.addEntry(PackageEntry.ALL_OTHER_IMPORTS_ENTRY);
         return table;
+    }
+
+    private List<String> sorted(final List<String> packages) {
+        if (sortImportsInGroupAlphabetically) {
+            return packages.stream().sorted().collect(Collectors.toList());
+        }
+        return packages;
     }
 
     private List<String> parseCustomPackagesRegExp(@NotNull final String value) {

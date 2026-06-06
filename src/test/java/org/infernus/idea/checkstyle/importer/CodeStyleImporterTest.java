@@ -522,6 +522,60 @@ public class CodeStyleImporterTest
         assertTrue(javaSettings.BINARY_OPERATION_SIGN_ON_NEXT_LINE);
     }
 
+    public void testCustomImportOrderImporterSamePackageIsSkipped() {
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="CustomImportOrder">
+                                    <property name="customImportOrderRules" value="SAME_PACKAGE(2)###STATIC"/>
+                                </module>"""
+                )
+        );
+        PackageEntry[] expected = {
+                PackageEntry.ALL_OTHER_STATIC_IMPORTS_ENTRY,
+                PackageEntry.ALL_OTHER_IMPORTS_ENTRY
+        };
+        comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
+    }
+
+    public void testCustomImportOrderImporterSortAlphabetically() {
+        // Default standardPackageRegExp is ["javax", "java"]; with sortImportsInGroupAlphabetically=true → ["java", "javax"]
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="CustomImportOrder">
+                                    <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE"/>
+                                    <property name="sortImportsInGroupAlphabetically" value="true"/>
+                                </module>"""
+                )
+        );
+        PackageEntry[] expected = {
+                new PackageEntry(false, "java", true),
+                new PackageEntry(false, "javax", true),
+                PackageEntry.ALL_OTHER_IMPORTS_ENTRY
+        };
+        comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
+    }
+
+    public void testCustomImportOrderImporterNoSortPreservesDefinedOrder() {
+        // Default standardPackageRegExp is ["javax", "java"]; without sorting → defined order preserved
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="CustomImportOrder">
+                                    <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE"/>
+                                    <property name="sortImportsInGroupAlphabetically" value="false"/>
+                                </module>"""
+                )
+        );
+        PackageEntry[] expected = {
+                new PackageEntry(false, "javax", true),
+                new PackageEntry(false, "java", true),
+                PackageEntry.ALL_OTHER_IMPORTS_ENTRY
+        };
+        comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
+    }
+
     private static void comparePackageEntries(final PackageEntry[] expected, final PackageEntryTable actual) {
         assertEquals(expected.length, actual.getEntryCount());
         for (int x = 0; x < expected.length; x++) {
