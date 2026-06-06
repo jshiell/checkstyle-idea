@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.8.0: New: Added Checkstyle 13.5.0.</li>
     <li>26.8.0: New: description and file path of a rules file can now be edited (#337).
     <li>26.7.2: Fixed: OperatorWrap is now included in code formatter imports (#540).</li>
     <li>26.7.2: Fixed: Long lines are now wrapped when line length is imported to code setting (#354).</li>
@@ -45,11 +46,6 @@
     <li>26.0.0: New: Change version number to align with release year.</li>
     <li>5.117.0: New: Added Checkstyle 12.3.1.</li>
     <li>5.116.0: New: Added Checkstyle 12.2.0 and 12.3.0. Thanks to @james-baker-aera.</li>
-    <li>5.115.0: New: Added Checkstyle 12.1.2.</li>
-    <li>5.115.0: Fixed: Ensure lower-casing for internal comparisons with constants is done in the English locale (#681). Thanks to @thorpp.</li>
-    <li>5.114.0: New: Added Checkstyle 12.1.0.</li>
-    <li>5.114.0: Fixed: Insecure socket factory is now only set for the current connection (#678).</li>
-    <li>5.113.0: New: Added Checkstyle 12.0.1.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
