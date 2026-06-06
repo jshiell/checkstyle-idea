@@ -18,11 +18,13 @@ import com.intellij.util.PairConsumer;
 import com.intellij.util.ui.UIUtil;
 import org.infernus.idea.checkstyle.StaticScanner;
 import org.infernus.idea.checkstyle.checker.Problem;
+import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +33,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static com.intellij.openapi.vcs.checkin.CheckinHandler.ReturnResult.*;
 import static java.util.Optional.ofNullable;
@@ -84,12 +87,18 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
         if (configurationManager(project).getCurrent().isScanBeforeCheckin()) {
             try {
+                final var config = configurationManager(project).getCurrent();
+                final var filesToScan = preFilterFiles(getVirtualFiles(), config);
+                if (filesToScan.isEmpty()) {
+                    return COMMIT;
+                }
+
                 var scanResult = new AtomicReference<List<ScanResult>>();
                 new Task.Modal(project, message("handler.before.checkin.scan.text"), false) {
                     public void run(@NotNull final ProgressIndicator progressIndicator) {
                         progressIndicator.setText(message("handler.before.checkin.scan.in-progress"));
                         progressIndicator.setIndeterminate(true);
-                        scanResult.set(staticScanner.scanFiles(new ArrayList<>(getVirtualFiles())));
+                        scanResult.set(staticScanner.scanFiles(new ArrayList<>(filesToScan)));
                     }
                 }.queue();
 
@@ -102,6 +111,16 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
         } else {
             return COMMIT;
         }
+    }
+
+    private Collection<VirtualFile> preFilterFiles(final Collection<VirtualFile> files,
+                                                    final PluginConfiguration config) {
+        if (config.getScanScope().includeNonJavaSources()) {
+            return files;
+        }
+        return files.stream()
+                .filter(FileTypes::hasJavaExtension)
+                .collect(Collectors.toList());
     }
 
     private Collection<VirtualFile> getVirtualFiles() {
