@@ -22,6 +22,7 @@ import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -146,7 +147,7 @@ public class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setAddAction(new AddLocationAction());
         tableDecorator.setEditAction(new EditPropertiesAction());
         tableDecorator.setRemoveAction(new RemoveLocationAction());
-        tableDecorator.setEditActionUpdater(new EnableWhenSelected());
+        tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndNotBundled());
         tableDecorator.setRemoveActionUpdater(new EnableWhenSelectedAndRemovable());
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
@@ -443,11 +444,11 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
-    private final class EnableWhenSelected implements AnActionButtonUpdater {
+    private final class EnableWhenSelectedAndNotBundled implements AnActionButtonUpdater {
         @Override
         public boolean isEnabled(@NotNull final AnActionEvent e) {
             final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem >= 0;
+            return selectedItem >= 0 && locationModel.getLocationAt(selectedItem).getType() != ConfigurationType.BUNDLED;
         }
     }
 }
