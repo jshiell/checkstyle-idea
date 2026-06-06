@@ -25,6 +25,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.8.0: New: description and file path of a rules file can now be edited (#337).
     <li>26.7.2: Fixed: OperatorWrap is now included in code formatter imports (#540).</li>
     <li>26.7.2: Fixed: Long lines are now wrapped when line length is imported to code setting (#354).</li>
     <li>26.7.2: Fixed: SeparatorWrap is now included in code formatter imports (#335).</li>
