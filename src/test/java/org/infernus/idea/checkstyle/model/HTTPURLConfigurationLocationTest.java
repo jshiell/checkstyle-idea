@@ -19,6 +19,8 @@ import java.net.URLConnection;
 import java.util.Scanner;
 import java.util.UUID;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -67,6 +69,25 @@ public class HTTPURLConfigurationLocationTest {
     public void aTimeoutThrowsASocketTimeoutException() {
         assertThrows(SocketTimeoutException.class,
                 () -> aTimingOutLocation().resolveFile(getClass().getClassLoader()));
+    }
+
+    @Test
+    public void aFailedFetchIsNotRetriedWithinTheCooldownPeriod() throws IOException {
+        final AtomicInteger connectionAttempts = new AtomicInteger(0);
+        final HTTPURLConfigurationLocation location = new HTTPURLConfigurationLocation(TestHelper.mockProject(), UUID.randomUUID().toString()) {
+            @Override
+            URLConnection connectionTo(final String loc) throws IOException {
+                connectionAttempts.incrementAndGet();
+                throw new IOException("simulated failure");
+            }
+        };
+        location.setDescription("aFailingLocation");
+        location.setLocation("http://localhost:1/does-not-exist");
+
+        assertThrows(IOException.class, () -> location.resolveFile(getClass().getClassLoader()));
+        assertThrows(IOException.class, () -> location.resolveFile(getClass().getClassLoader()));
+
+        assertThat("second call within cooldown should not retry connection", connectionAttempts.get(), is(1));
     }
 
     private String toString(final InputStream is) {

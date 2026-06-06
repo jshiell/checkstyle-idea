@@ -21,12 +21,14 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private static final Logger LOG = Logger.getInstance(HTTPURLConfigurationLocation.class);
 
     private static final int CONTENT_CACHE_SECONDS = 2;
+    private static final int FAILURE_CACHE_SECONDS = 60;
     private static final int ONE_SECOND = 1000;
     private static final int HTTP_TIMEOUT_IN_MS = 5000;
     private static final int MAX_REDIRECTS = 5;
 
     private byte[] cachedContent;
     private long cacheExpiry;
+    private long failureExpiry;
 
     HTTPURLConfigurationLocation(@NotNull final Project project,
                                  @NotNull final String id) {
@@ -45,15 +47,21 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             return new ByteArrayInputStream(cachedContent);
         }
 
+        if (failureExpiry > System.currentTimeMillis()) {
+            throw new IOException("Skipping unavailable HTTP configuration (in cooldown): " + redactedLocation());
+        }
+
         try {
             cachedContent = readContentOf(streamFrom(connectionTo(getLocation())));
             cacheExpiry = System.currentTimeMillis() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
+            failureExpiry = 0;
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
             LOG.info("Couldn't read URL: " + redactedLocation(), e);
             cachedContent = null;
             cacheExpiry = 0;
+            failureExpiry = System.currentTimeMillis() + (FAILURE_CACHE_SECONDS * ONE_SECOND);
             throw e;
         }
     }
