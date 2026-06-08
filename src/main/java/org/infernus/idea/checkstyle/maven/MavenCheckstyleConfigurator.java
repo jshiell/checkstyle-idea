@@ -15,6 +15,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -158,15 +159,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         if (configLocation == null) {
             configLocation = createConfigLocationPathForPluginClasspath(mavenPluginConfigLocation,
                 checkstyleProjectService.underlyingClassLoader());
-            if (configLocation != null) {
-                configurationType = ConfigurationType.PLUGIN_CLASSPATH;
-            }
-        }
-
-        if (configurationType == null) {
-            throw new CheckStylePluginException(
-                "Unable to identify ConfigurationType for configured location: "
-                + mavenPluginConfigLocation);
+            configurationType = ConfigurationType.PLUGIN_CLASSPATH;
         }
 
         final var configurationLocationFactory = project.getService(
@@ -228,15 +221,9 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         return null;
     }
 
-    @Nullable
     private static String createConfigLocationPathForPluginClasspath(
         @NotNull final String mavenConfigLocation, @NotNull final ClassLoader classLoader) {
-        final var resource = classLoader.getResource(mavenConfigLocation);
-        if (resource != null) {
-            return mavenConfigLocation;
-        }
-
-        return null;
+        return mavenConfigLocation;
     }
 
     private static List<String> createThirdPartyClasspath(final MavenPlugin checkstyleMavenPlugin,
@@ -458,9 +445,25 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
         final var configurationLocation = createConfigurationLocation(project, mavenProject,
             checkstyleProjectService, mavenPluginConfigLocation);
+        updateSuppressionLocation(checkstyleMavenPluginConfiguration, configurationLocation);
 
         configLocations.add(configurationLocation);
         activeConfigLocationIds.add(configurationLocation.getId());
+    }
+
+    private static void updateSuppressionLocation(Element checkstyleMavenPluginConfiguration, ConfigurationLocation configurationLocation) {
+        final String propertyName;
+        final Element suppressionProperty = checkstyleMavenPluginConfiguration.getChild("suppressionsFileExpression");
+        if (suppressionProperty != null && suppressionProperty.getText() != null) {
+            propertyName = suppressionProperty.getText();
+        } else {
+            propertyName = "checkstyle.suppressions.file";
+        }
+
+        final Element suppressionLocation = checkstyleMavenPluginConfiguration.getChild("suppressionsLocation");
+        if (suppressionLocation != null && suppressionLocation.getText() != null) {
+            configurationLocation.setProperties(Map.of(propertyName, suppressionLocation.getText()));
+        }
     }
 
     private static void updatePluginScanScopeFromMavenPlugin(
