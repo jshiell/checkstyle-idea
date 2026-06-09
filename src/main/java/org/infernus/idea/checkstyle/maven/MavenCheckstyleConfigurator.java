@@ -10,7 +10,6 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -200,7 +199,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     private static String createConfigLocationPathForLocalFileUrl(@NotNull final String mavenConfigLocation) {
         if (mavenConfigLocation.startsWith("file:/")) {
             try {
-                return new File(new URL(mavenConfigLocation).toURI()).getPath();
+                return new File(URI.create(mavenConfigLocation)).getPath();
             } catch (Exception ignored) {
             }
         }
