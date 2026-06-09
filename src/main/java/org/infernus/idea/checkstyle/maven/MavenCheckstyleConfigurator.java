@@ -408,6 +408,14 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return ScanScope.JavaOnly;
         }
 
+        // Maps four explicit (includeResources, includeTestResources, includeTestSourceDirectory) combinations:
+        //   (true,  true,  true ) -> AllSourcesWithTests
+        //   (true,  false, false) -> AllSources
+        //   (false, false, true ) -> JavaOnlyWithTests
+        //   (false, false, false) -> JavaOnly
+        // Other combinations have no exact ScanScope analogue and fall back to the default.
+        LOG.warn("Unrecognised Maven Checkstyle scope combination: includeResources=%s, includeTestResources=%s, includeTestSourceDirectory=%s — falling back to %s"
+            .formatted(includeResources, includeTestResources, includeTestSourceDirectory, ScanScope.getDefaultValue()));
         return ScanScope.getDefaultValue();
     }
 

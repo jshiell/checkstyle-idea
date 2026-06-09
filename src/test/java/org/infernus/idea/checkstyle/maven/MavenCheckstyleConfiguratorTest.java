@@ -551,6 +551,38 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
+    public void afterImport_unrecognisedScanScopeCombination_fallsBackToDefaultScanScope() throws Exception {
+        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
+
+        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
+        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
+            .withScanScope(ScanScope.Everything);
+        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
+
+        createProjectPom(PROJECT_INFO + """
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <includeResources>false</includeResources>
+                            <includeTestResources>true</includeTestResources>
+                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            """.stripIndent());
+
+        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+            (scope, continuation) -> importProjectAsync(continuation));
+
+        assertEquals(ScanScope.getDefaultValue(), pluginConfigurationManager.getCurrent().getScanScope());
+    }
+
+    @Test
     public void afterImport_configLocationNotOnDiskOrClasspath_doesNotAddLocation() throws Exception {
         final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
 
