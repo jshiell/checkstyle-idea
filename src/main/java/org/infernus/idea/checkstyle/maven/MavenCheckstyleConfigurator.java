@@ -116,8 +116,8 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         updatePluginScanScopeFromMavenPlugin(checkstyleMavenPlugin, pluginConfigurationBuilder);
 
         final var newPluginConfiguration = pluginConfigurationBuilder.build();
-        if (!currentPluginConfiguration.equals(newPluginConfiguration)) {
-            pluginConfigurationManager.setCurrent(pluginConfigurationBuilder.build(), true);
+        if (currentPluginConfiguration.hasChangedFrom(newPluginConfiguration)) {
+            pluginConfigurationManager.setCurrent(newPluginConfiguration, true);
         }
     }
 

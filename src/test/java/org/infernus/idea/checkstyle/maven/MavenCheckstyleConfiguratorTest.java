@@ -4,6 +4,7 @@ import com.intellij.maven.testFramework.MavenMultiVersionImportingTestCase;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.BuildersKt;
@@ -469,6 +470,50 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
 
         assertDoesNotThrow(() -> BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation)));
+    }
+
+    @Test
+    public void afterImport_onlySuppressionLocationChanges_updatesProperties() throws Exception {
+        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
+        final var configurationLocationFactory = getProject().getService(ConfigurationLocationFactory.class);
+
+        Files.writeString(getProjectRoot().toNioPath().resolve("checkstyle.xml"), "<config></config>");
+
+        final var mavenConfigLocation = configurationLocationFactory.create(getProject(),
+            "maven-config-location", ConfigurationType.PROJECT_RELATIVE,
+            getProjectRoot().toNioPath().resolve("checkstyle.xml").toString(),
+            "Maven Config Location", NamedScopeHelper.getDefaultScope(getProject()));
+        mavenConfigLocation.setProperties(Map.of("checkstyle.suppressions.file", "old-suppressions.xml"));
+
+        final var initialConfigBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
+        initialConfigBuilder.withImportSettingsFromMaven(true)
+            .withLocations(new TreeSet<>(List.of(mavenConfigLocation)))
+            .withActiveLocationIds(new TreeSet<>(List.of("maven-config-location")));
+        pluginConfigurationManager.setCurrent(initialConfigBuilder.build(), true);
+
+        createProjectPom(PROJECT_INFO + """
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <configLocation>checkstyle.xml</configLocation>
+                            <suppressionsLocation>new-suppressions.xml</suppressionsLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            """.stripIndent());
+
+        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+            (scope, continuation) -> importProjectAsync(continuation));
+
+        final var properties = pluginConfigurationManager.getCurrent().getLocations().stream()
+            .filter(loc -> "maven-config-location".equals(loc.getId()))
+            .findFirst().orElseThrow().getProperties();
+        assertEquals("new-suppressions.xml", properties.get("checkstyle.suppressions.file"));
     }
 
     // TODO: Replace this when migrating to JUnit 5.
