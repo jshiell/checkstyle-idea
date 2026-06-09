@@ -13,12 +13,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.StreamSupport;
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.BuildersKt;
@@ -263,7 +258,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
                 mavenProject.getLocalRepository().toPath(),
                 new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
                 "jar", null))
-            .filter(path -> path != null)
+            .filter(Objects::nonNull)
             .map(Path::toString)
             .toList();
     }
