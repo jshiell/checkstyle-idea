@@ -69,6 +69,8 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         "checkstyle", null);
     private static final MavenId MAVEN_CHECKSTYLE_PLUGIN_MAVEN_ID = new MavenId(
         "org.apache.maven.plugins", "maven-checkstyle-plugin", null);
+    // Reserved ID — must not be used as a user-defined location ID.
+    // On every Maven sync any location with this ID is replaced unconditionally.
     private static final String MAVEN_CONFIG_LOCATION_ID = "maven-config-location";
 
     @Override
@@ -443,6 +445,12 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         final var activeConfigLocationIds = new TreeSet<>(
             currentPluginConfiguration.getActiveLocationIds());
         pluginConfigurationBuilder.withActiveLocationIds(activeConfigLocationIds);
+
+        currentPluginConfiguration.getLocations().stream()
+            .filter(loc -> MAVEN_CONFIG_LOCATION_ID.equals(loc.getId()))
+            .filter(loc -> !"Maven Config Location".equals(loc.getDescription()))
+            .forEach(loc -> LOG.warn("Replacing non-Maven-managed location carrying reserved id '"
+                + MAVEN_CONFIG_LOCATION_ID + "': " + loc));
 
         configLocations.removeIf(location -> MAVEN_CONFIG_LOCATION_ID.equals(location.getId()));
         activeConfigLocationIds.removeIf(MAVEN_CONFIG_LOCATION_ID::equals);
