@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.TreeSet;
@@ -130,11 +129,13 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static ConfigurationLocation createConfigurationLocation(final Project project,
-        final MavenProject mavenProject, final CheckstyleProjectService checkstyleProjectService,
-        final String mavenPluginConfigLocation) {
+    private static ConfigurationLocation createConfigurationLocation(
+            final Project project,
+            final MavenProject mavenProject,
+            final CheckstyleProjectService checkstyleProjectService,
+            final String mavenPluginConfigLocation) {
 
-        String configLocation = null;
+        String configLocation;
         ConfigurationType configurationType = null;
 
         configLocation = createConfigLocationPathForLocalFileUrl(mavenPluginConfigLocation);
@@ -182,8 +183,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static String createConfigLocationPathForLocalAbsoluteFilePath(
-        @NotNull final String mavenConfigLocation) {
+    private static String createConfigLocationPathForLocalAbsoluteFilePath(@NotNull final String mavenConfigLocation) {
         try {
             final Path mavenPluginConfigLocationPath = Path.of(mavenConfigLocation);
             if (mavenPluginConfigLocationPath.isAbsolute() && Files.isReadable(
@@ -197,8 +197,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static String createConfigLocationPathForLocalFileUrl(
-        @NotNull final String mavenConfigLocation) {
+    private static String createConfigLocationPathForLocalFileUrl(@NotNull final String mavenConfigLocation) {
         if (mavenConfigLocation.startsWith("file:/")) {
             try {
                 return new File(new URL(mavenConfigLocation).toURI()).getPath();
@@ -211,7 +210,8 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
 
     @Nullable
     private static String createConfigLocationPathForLocalRelativeFilePath(
-        @NotNull final String mavenConfigLocation, @NotNull final VirtualFile rootDirectory) {
+            @NotNull final String mavenConfigLocation,
+            @NotNull final VirtualFile rootDirectory) {
         try {
             final Path mavenPluginConfigLocationPath = rootDirectory.toNioPath()
                 .resolve(Path.of(mavenConfigLocation));
@@ -225,8 +225,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static String createConfigLocationPathForHttpUrl(
-        @NotNull final String mavenConfigLocation) {
+    private static String createConfigLocationPathForHttpUrl(@NotNull final String mavenConfigLocation) {
         if (isValidHttpUri(mavenConfigLocation)) {
             return mavenConfigLocation;
         }
@@ -235,15 +234,17 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
 
     @Nullable
     private static String createConfigLocationPathForPluginClasspath(
-        @NotNull final String mavenConfigLocation, @NotNull final ClassLoader classLoader) {
+            @NotNull final String mavenConfigLocation,
+            @NotNull final ClassLoader classLoader) {
         if (classLoader.getResource(mavenConfigLocation) == null) {
             return null;
         }
         return mavenConfigLocation;
     }
 
-    private static List<String> createThirdPartyClasspath(final MavenPlugin checkstyleMavenPlugin,
-        final MavenProject mavenProject) {
+    private static List<String> createThirdPartyClasspath(
+            final MavenPlugin checkstyleMavenPlugin,
+            final MavenProject mavenProject) {
         // This does not differentiate between dependencies that are providing rules or anything else.
         // It is possible that a dependency might contribute something that modifies the behavior of Checkstyle causing a problem.
         // The Maven sync does not currently provide a solution or workaround for this.
@@ -257,22 +258,21 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             }
 
             // Ignore the checkstyle dependency, we know it isn't a third party jar.
-            if (CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId(), dependency.getArtifactId())) {
-                return false;
-            }
+            return !CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId(), dependency.getArtifactId());
 
-            return true;
         }).map(dependency -> MavenArtifactUtil.getArtifactFile(
-            mavenProject.getLocalRepository(),
-            new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
-            "jar").toString()
+                mavenProject.getLocalRepository(),
+                new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
+                "jar").toString()
         ).toList();
     }
 
     @Nullable
     private static VirtualFile getOrDownloadCheckstyleMavenPluginPom(
-        @NotNull final MavenPlugin checkstyleMavenPlugin, @NotNull final MavenProject mavenProject,
-        @NotNull final Path pomPath, @NotNull final Project project) {
+            @NotNull final MavenPlugin checkstyleMavenPlugin,
+            @NotNull final MavenProject mavenProject,
+            @NotNull final Path pomPath,
+            @NotNull final Project project) {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
         final var pomVirtualFile = VirtualFileManager.getInstance().findFileByNioPath(pomPath);
         // Pom file may already exist from something such as a previous resolution.
@@ -316,9 +316,10 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static MavenId findCheckstyleMavenIdInPom(@NotNull final Project project,
-        @NotNull final MavenProject mavenProject,
-        @NotNull final MavenPlugin checkstyleMavenPlugin) {
+    private static MavenId findCheckstyleMavenIdInPom(
+            @NotNull final Project project,
+            @NotNull final MavenProject mavenProject,
+            @NotNull final MavenPlugin checkstyleMavenPlugin) {
         final var checkstylePluginPomPath = MavenArtifactUtil.getArtifactFile(
             mavenProject.getLocalRepository(), checkstyleMavenPlugin.getMavenId(), "pom");
         final var checkstylePluginVirtualFile = getOrDownloadCheckstyleMavenPluginPom(
@@ -354,8 +355,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @Nullable
-    private static MavenProject findMavenProject(
-        @NotNull final MavenAfterImportConfigurator.Context context) {
+    private static MavenProject findMavenProject(@NotNull final MavenAfterImportConfigurator.Context context) {
         // The first MavenProject (sorted alphabetically by MavenId#getKey()) found with a Maven
         // Checkstyle Plugin is what will be used to load settings for the project.
         return StreamSupport.stream(
@@ -367,12 +367,15 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
                     MAVEN_CHECKSTYLE_PLUGIN_MAVEN_ID.getArtifactId());
 
                 return checkstyleMavenPlugin != null;
-            }).sorted(Comparator.comparing(o -> o.getMavenProject().getMavenId().getKey())).findFirst()
+            }).sorted(Comparator.comparing(o -> o.getMavenProject().getMavenId().getKey()))
+                .findFirst()
             .map(MavenProjectWithModules::getMavenProject).orElse(null);
     }
 
-    private static boolean getChildElementAsBoolean(@Nullable final Element element,
-        @NotNull final String childName, final boolean defaultValue) {
+    private static boolean getChildElementAsBoolean(
+            @Nullable final Element element,
+            @NotNull final String childName,
+            final boolean defaultValue) {
         if (element == null) {
             return defaultValue;
         }
@@ -386,8 +389,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @NotNull
-    private static ScanScope getScanScopeFromMavenConfig(
-        @Nullable final Element checkstyleMavenPluginConfig) {
+    private static ScanScope getScanScopeFromMavenConfig(@Nullable final Element checkstyleMavenPluginConfig) {
         // Default values here match the defaults from Maven Checkstyle plugin 3.6.0.
         final var includeResources = getChildElementAsBoolean(checkstyleMavenPluginConfig,
             "includeResources", true);
@@ -436,9 +438,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     private static void updatePluginConfigLocationsFromMavenPlugin(
-        final MavenPlugin checkstyleMavenPlugin,
-        final PluginConfiguration currentPluginConfiguration, final MavenProject mavenProject,
-        final PluginConfigurationBuilder pluginConfigurationBuilder, final Project project,
+            final MavenPlugin checkstyleMavenPlugin,
+            final PluginConfiguration currentPluginConfiguration,
+            final MavenProject mavenProject,
+            final PluginConfigurationBuilder pluginConfigurationBuilder,
+            final Project project,
         @Nullable final MavenDomProjectModel mavenDomProjectModel) {
         final var checkstyleMavenPluginConfiguration = checkstyleMavenPlugin.getConfigurationElement();
         final var configLocations = new TreeSet<>(currentPluginConfiguration.getLocations());
@@ -489,8 +493,10 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         activeConfigLocationIds.add(configurationLocation.getId());
     }
 
-    private static void updateSuppressionLocation(Element checkstyleMavenPluginConfiguration,
-        ConfigurationLocation configurationLocation, @Nullable MavenDomProjectModel mavenDomProjectModel) {
+    private static void updateSuppressionLocation(
+            final Element checkstyleMavenPluginConfiguration,
+            final ConfigurationLocation configurationLocation,
+            @Nullable final MavenDomProjectModel mavenDomProjectModel) {
         final String propertyName;
         final Element suppressionProperty = checkstyleMavenPluginConfiguration.getChild("suppressionsFileExpression");
         if (suppressionProperty != null && suppressionProperty.getText() != null) {
@@ -510,18 +516,18 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     private static void updatePluginScanScopeFromMavenPlugin(
-        final MavenPlugin checkstyleMavenPlugin,
-        final PluginConfigurationBuilder pluginConfigurationBuilder) {
-        final var checkstyleMavenPluginConfiguration = checkstyleMavenPlugin.getConfigurationElement();
-        final var scanScope = getScanScopeFromMavenConfig(checkstyleMavenPluginConfiguration);
+            final MavenPlugin checkstyleMavenPlugin,
+            final PluginConfigurationBuilder pluginConfigurationBuilder) {
+            final var checkstyleMavenPluginConfiguration = checkstyleMavenPlugin.getConfigurationElement();
+            final var scanScope = getScanScopeFromMavenConfig(checkstyleMavenPluginConfiguration);
         pluginConfigurationBuilder.withScanScope(scanScope);
     }
 
     // Copy of the private IntelliJ implementation.
-    private static class MavenLogEventHandler implements MavenEventHandler {
+    private static final class MavenLogEventHandler implements MavenEventHandler {
 
         @Override
-        public void handleConsoleEvents(@NotNull List<? extends MavenServerConsoleEvent> list) {
+        public void handleConsoleEvents(@NotNull final List<? extends MavenServerConsoleEvent> list) {
             for (var e : list) {
                 var message = e.getMessage();
                 switch (e.getLevel()) {
@@ -537,7 +543,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
 
         @Override
-        public void handleDownloadEvents(@NotNull List<? extends MavenArtifactEvent> list) {
+        public void handleDownloadEvents(@NotNull final List<? extends MavenArtifactEvent> list) {
             for (var e : list) {
                 final var id = e.getDependencyId();
                 switch (e.getArtifactEventType()) {
