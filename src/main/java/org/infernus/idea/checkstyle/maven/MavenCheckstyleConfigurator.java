@@ -259,16 +259,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             }
 
             return true;
-        }).map(dependency -> {
-            final var dependencyRelativePath = Path.of(
-                dependency.getGroupId().replace(".", File.separator), dependency.getArtifactId(),
-                dependency.getVersion(),
-                dependency.getArtifactId() + "-" + dependency.getVersion() + ".jar");
-            final var dependencyPath = mavenProject.getLocalRepository().toPath()
-                .resolve(dependencyRelativePath);
-
-            return dependencyPath.toAbsolutePath().toString();
-        }).toList();
+        }).map(dependency -> MavenArtifactUtil.getArtifactFile(
+            mavenProject.getLocalRepository(),
+            new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
+            "jar").toString()
+        ).toList();
     }
 
     @Nullable
