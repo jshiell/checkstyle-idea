@@ -18,8 +18,14 @@ import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 import org.junit.Test;
+import org.junit.runners.Parameterized;
 
 public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingTestCase {
+
+    @Parameterized.Parameters(name = "with Maven-{0}")
+    public static List<String[]> getMavenVersions() {
+        return List.of(new String[]{"bundled"});
+    }
 
     private static final String PROJECT_INFO = """
         <groupId>test</groupId>
