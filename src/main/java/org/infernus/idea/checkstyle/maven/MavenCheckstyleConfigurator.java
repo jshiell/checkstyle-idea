@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.maven;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -272,6 +273,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     private static VirtualFile getOrDownloadCheckstyleMavenPluginPom(
         @NotNull final MavenPlugin checkstyleMavenPlugin, @NotNull final MavenProject mavenProject,
         @NotNull final Path pomPath, @NotNull final Project project) {
+        ApplicationManager.getApplication().assertIsNonDispatchThread();
         final var pomVirtualFile = VirtualFileManager.getInstance().findFileByNioPath(pomPath);
         // Pom file may already exist from something such as a previous resolution.
         if (pomVirtualFile != null) {
