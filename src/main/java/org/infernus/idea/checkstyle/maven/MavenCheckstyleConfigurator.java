@@ -50,9 +50,9 @@ import org.jetbrains.idea.maven.server.MavenArtifactEvent;
 import org.jetbrains.idea.maven.server.MavenArtifactResolutionRequest;
 import org.jetbrains.idea.maven.server.MavenServerConsoleEvent;
 import org.jetbrains.idea.maven.server.MavenServerConsoleIndicator;
-import org.jetbrains.idea.maven.utils.MavenArtifactUtil;
 import org.jetbrains.idea.maven.utils.MavenLog;
 import org.jetbrains.idea.maven.utils.MavenProcessCanceledException;
+import org.jetbrains.idea.maven.utils.MavenUtil;
 
 /**
  * Importer to automatically configure the Checkstyle IntelliJ plugin settings based on the
@@ -259,11 +259,13 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             // Ignore the checkstyle dependency, we know it isn't a third party jar.
             return !CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId(), dependency.getArtifactId());
 
-        }).map(dependency -> MavenArtifactUtil.getArtifactFile(
-                mavenProject.getLocalRepository(),
+        }).map(dependency -> MavenUtil.getArtifactPath(
+                mavenProject.getLocalRepository().toPath(),
                 new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
-                "jar").toString()
-        ).toList();
+                "jar", null))
+            .filter(path -> path != null)
+            .map(Path::toString)
+            .toList();
     }
 
     @Nullable
@@ -319,8 +321,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             @NotNull final Project project,
             @NotNull final MavenProject mavenProject,
             @NotNull final MavenPlugin checkstyleMavenPlugin) {
-        final var checkstylePluginPomPath = MavenArtifactUtil.getArtifactFile(
-            mavenProject.getLocalRepository(), checkstyleMavenPlugin.getMavenId(), "pom");
+        final var checkstylePluginPomPath = MavenUtil.getArtifactPath(
+            mavenProject.getLocalRepository().toPath(), checkstyleMavenPlugin.getMavenId(), "pom", null);
+        if (checkstylePluginPomPath == null) {
+            return null;
+        }
         final var checkstylePluginVirtualFile = getOrDownloadCheckstyleMavenPluginPom(
             checkstyleMavenPlugin, mavenProject, checkstylePluginPomPath, project);
         if (checkstylePluginVirtualFile == null) {
