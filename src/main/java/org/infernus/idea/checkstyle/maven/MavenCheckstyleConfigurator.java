@@ -316,8 +316,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
 
         return ReadAction.compute(() -> {
-            final var mavenDomProjectModel = Objects.requireNonNull(
-                MavenDomUtil.getMavenDomProjectModel(project, checkstylePluginVirtualFile));
+            final var mavenDomProjectModel = MavenDomUtil.getMavenDomProjectModel(project, checkstylePluginVirtualFile);
+            if (mavenDomProjectModel == null) {
+                LOG.warn("Maven DOM project model unavailable for " + checkstylePluginVirtualFile.getPath());
+                return null;
+            }
             final var checkstyleDependency = mavenDomProjectModel.getDependencies()
                 .getDependencies().stream().filter(
                     dependency -> CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId().getValue(),
