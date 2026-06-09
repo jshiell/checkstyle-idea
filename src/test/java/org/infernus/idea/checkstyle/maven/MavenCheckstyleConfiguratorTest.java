@@ -24,7 +24,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
 
     @Parameterized.Parameters(name = "with Maven-{0}")
     public static List<String[]> getMavenVersions() {
-        return List.of(new String[]{"bundled"});
+        return List.<String[]>of(new String[]{"bundled"});
     }
 
     private static final String PROJECT_INFO = """
