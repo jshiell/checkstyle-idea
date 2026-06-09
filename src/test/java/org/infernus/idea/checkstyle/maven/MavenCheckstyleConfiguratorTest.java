@@ -551,6 +551,37 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
+    public void afterImport_configLocationNotOnDiskOrClasspath_doesNotAddLocation() throws Exception {
+        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
+
+        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
+        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
+            .withLocations(new TreeSet<>()).withActiveLocationIds(new TreeSet<>());
+        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
+
+        createProjectPom(PROJECT_INFO + """
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <configLocation>nonexistent-resource-that-does-not-exist-anywhere.xml</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            """.stripIndent());
+
+        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+            (scope, continuation) -> importProjectAsync(continuation));
+
+        assertTrue(pluginConfigurationManager.getCurrent().getLocations().stream()
+            .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
+    }
+
+    @Test
     public void afterImport_onlySuppressionLocationChanges_updatesProperties() throws Exception {
         final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
         final var configurationLocationFactory = getProject().getService(ConfigurationLocationFactory.class);

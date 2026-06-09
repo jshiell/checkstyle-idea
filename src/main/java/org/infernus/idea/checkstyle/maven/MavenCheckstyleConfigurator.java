@@ -126,6 +126,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
     }
 
+    @Nullable
     private static ConfigurationLocation createConfigurationLocation(final Project project,
         final MavenProject mavenProject, final CheckstyleProjectService checkstyleProjectService,
         final String mavenPluginConfigLocation) {
@@ -164,6 +165,9 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         if (configLocation == null) {
             configLocation = createConfigLocationPathForPluginClasspath(mavenPluginConfigLocation,
                 checkstyleProjectService.underlyingClassLoader());
+            if (configLocation == null) {
+                return null;
+            }
             configurationType = ConfigurationType.PLUGIN_CLASSPATH;
         }
 
@@ -226,8 +230,12 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         return null;
     }
 
+    @Nullable
     private static String createConfigLocationPathForPluginClasspath(
         @NotNull final String mavenConfigLocation, @NotNull final ClassLoader classLoader) {
+        if (classLoader.getResource(mavenConfigLocation) == null) {
+            return null;
+        }
         return mavenConfigLocation;
     }
 
@@ -457,6 +465,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
         final var configurationLocation = createConfigurationLocation(project, mavenProject,
             checkstyleProjectService, mavenPluginConfigLocation);
+        if (configurationLocation == null) {
+            LOG.warn("Could not resolve <configLocation>" + mavenPluginConfigLocation
+                + "</configLocation> — no matching local file, URL, or classpath resource");
+            return;
+        }
         updateSuppressionLocation(checkstyleMavenPluginConfiguration, configurationLocation, mavenDomProjectModel);
 
         configLocations.add(configurationLocation);
