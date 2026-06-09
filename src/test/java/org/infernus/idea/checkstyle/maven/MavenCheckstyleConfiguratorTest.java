@@ -473,6 +473,84 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
+    public void afterImport_configLocationContainsCustomMavenProperty_resolvesProperty() throws Exception {
+        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
+
+        final var configPath = Files.writeString(
+            getProjectRoot().toNioPath().resolve("checkstyle.xml"), "<config></config>");
+
+        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
+        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
+            .withLocations(new TreeSet<>()).withActiveLocationIds(new TreeSet<>());
+        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
+
+        createProjectPom(PROJECT_INFO + """
+            <properties>
+                <checkstyle.config.file>checkstyle.xml</checkstyle.config.file>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <configLocation>${checkstyle.config.file}</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            """.stripIndent());
+
+        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+            (scope, continuation) -> importProjectAsync(continuation));
+
+        assertEquals(configPath.toString(),
+            pluginConfigurationManager.getCurrent().getLocations().stream()
+                .filter(loc -> "maven-config-location".equals(loc.getId()))
+                .map(ConfigurationLocation::getLocation).findFirst().orElseThrow());
+    }
+
+    @Test
+    public void afterImport_suppressionsLocationContainsCustomMavenProperty_resolvesProperty() throws Exception {
+        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
+
+        Files.writeString(getProjectRoot().toNioPath().resolve("checkstyle.xml"), "<config></config>");
+
+        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
+        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
+            .withLocations(new TreeSet<>()).withActiveLocationIds(new TreeSet<>());
+        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
+
+        createProjectPom(PROJECT_INFO + """
+            <properties>
+                <checkstyle.suppressions.path>suppressions.xml</checkstyle.suppressions.path>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <configLocation>checkstyle.xml</configLocation>
+                            <suppressionsLocation>${checkstyle.suppressions.path}</suppressionsLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            """.stripIndent());
+
+        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+            (scope, continuation) -> importProjectAsync(continuation));
+
+        final var suppressionsValue = pluginConfigurationManager.getCurrent().getLocations().stream()
+            .filter(loc -> "maven-config-location".equals(loc.getId()))
+            .findFirst().orElseThrow().getProperties().get("checkstyle.suppressions.file");
+        assertEquals("suppressions.xml", suppressionsValue);
+    }
+
+    @Test
     public void afterImport_onlySuppressionLocationChanges_updatesProperties() throws Exception {
         final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
         final var configurationLocationFactory = getProject().getService(ConfigurationLocationFactory.class);

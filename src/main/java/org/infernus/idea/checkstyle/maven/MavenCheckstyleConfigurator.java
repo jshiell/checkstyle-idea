@@ -39,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.buildtool.MavenEventHandler;
 import org.jetbrains.idea.maven.dom.MavenDomUtil;
 import org.jetbrains.idea.maven.dom.MavenPropertyResolver;
+import org.jetbrains.idea.maven.dom.model.MavenDomProjectModel;
 import org.jetbrains.idea.maven.importing.MavenAfterImportConfigurator;
 import org.jetbrains.idea.maven.importing.MavenWorkspaceConfigurator.MavenProjectWithModules;
 import org.jetbrains.idea.maven.model.MavenArtifactInfo;
@@ -110,8 +111,12 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         pluginConfigurationBuilder.withThirdPartyClassPath(
             createThirdPartyClasspath(checkstyleMavenPlugin, mavenProject));
 
+        final var mavenDomProjectModel = ReadAction.compute(() ->
+            MavenDomUtil.getMavenDomProjectModel(project, mavenProject.getFile()));
+
         updatePluginConfigLocationsFromMavenPlugin(checkstyleMavenPlugin,
-            currentPluginConfiguration, mavenProject, pluginConfigurationBuilder, project);
+            currentPluginConfiguration, mavenProject, pluginConfigurationBuilder, project,
+            mavenDomProjectModel);
 
         updatePluginScanScopeFromMavenPlugin(checkstyleMavenPlugin, pluginConfigurationBuilder);
 
@@ -418,7 +423,8 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     private static void updatePluginConfigLocationsFromMavenPlugin(
         final MavenPlugin checkstyleMavenPlugin,
         final PluginConfiguration currentPluginConfiguration, final MavenProject mavenProject,
-        final PluginConfigurationBuilder pluginConfigurationBuilder, final Project project) {
+        final PluginConfigurationBuilder pluginConfigurationBuilder, final Project project,
+        @Nullable final MavenDomProjectModel mavenDomProjectModel) {
         final var checkstyleMavenPluginConfiguration = checkstyleMavenPlugin.getConfigurationElement();
         final var configLocations = new TreeSet<>(currentPluginConfiguration.getLocations());
         pluginConfigurationBuilder.withLocations(configLocations);
@@ -440,7 +446,10 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return;
         }
 
-        final String mavenPluginConfigLocation = configLocationElement.getText();
+        final String rawConfigLocation = configLocationElement.getText();
+        final String mavenPluginConfigLocation = mavenDomProjectModel != null
+            ? ReadAction.compute(() -> MavenPropertyResolver.resolve(rawConfigLocation, mavenDomProjectModel))
+            : rawConfigLocation;
         // This must come after the PluginConfigurationBuilder is modified with the new
         // Checkstyle version and the new third party classpath.
         final var tempConfiguration = pluginConfigurationBuilder.build();
@@ -448,13 +457,14 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
         final var configurationLocation = createConfigurationLocation(project, mavenProject,
             checkstyleProjectService, mavenPluginConfigLocation);
-        updateSuppressionLocation(checkstyleMavenPluginConfiguration, configurationLocation);
+        updateSuppressionLocation(checkstyleMavenPluginConfiguration, configurationLocation, mavenDomProjectModel);
 
         configLocations.add(configurationLocation);
         activeConfigLocationIds.add(configurationLocation.getId());
     }
 
-    private static void updateSuppressionLocation(Element checkstyleMavenPluginConfiguration, ConfigurationLocation configurationLocation) {
+    private static void updateSuppressionLocation(Element checkstyleMavenPluginConfiguration,
+        ConfigurationLocation configurationLocation, @Nullable MavenDomProjectModel mavenDomProjectModel) {
         final String propertyName;
         final Element suppressionProperty = checkstyleMavenPluginConfiguration.getChild("suppressionsFileExpression");
         if (suppressionProperty != null && suppressionProperty.getText() != null) {
@@ -465,7 +475,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
 
         final Element suppressionLocation = checkstyleMavenPluginConfiguration.getChild("suppressionsLocation");
         if (suppressionLocation != null && suppressionLocation.getText() != null) {
-            configurationLocation.setProperties(Map.of(propertyName, suppressionLocation.getText()));
+            final String rawValue = suppressionLocation.getText();
+            final String resolvedValue = mavenDomProjectModel != null
+                ? ReadAction.compute(() -> MavenPropertyResolver.resolve(rawValue, mavenDomProjectModel))
+                : rawValue;
+            configurationLocation.setProperties(Map.of(propertyName, resolvedValue));
         }
     }
 
