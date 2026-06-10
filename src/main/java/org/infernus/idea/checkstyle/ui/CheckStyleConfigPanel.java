@@ -131,7 +131,7 @@ public class CheckStyleConfigPanel extends JPanel {
                 2, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(importSettingsFromMavenCheckbox, new GridBagConstraints(
-                2, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                0, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
                 0, 3, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
