@@ -38,12 +38,14 @@ import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.service.ConfigurationMatcher.configEqualTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.mockito.MockMakers;
+
 import static org.mockito.Mockito.*;
 
 @Isolated
 public class OpLoadConfigurationTest {
     private static final Project PROJECT = mock(Project.class);
-    private static final NotificationGroup BALLOON_NOTIFICATION_GROUP = mock(NotificationGroup.class);
+    private static final NotificationGroup BALLOON_NOTIFICATION_GROUP = mock(NotificationGroup.class, withSettings().mockMaker(MockMakers.INLINE));
 
     private final ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
     private final Module module = mock(Module.class);

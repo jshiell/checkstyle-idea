@@ -42,9 +42,22 @@ java {
     }
 }
 
+val mockitoAgent: Configuration by configurations.creating { isCanBeConsumed = false }
+
+abstract class MockitoAgentProvider : CommandLineArgumentProvider {
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val agentFiles: ConfigurableFileCollection
+
+    override fun asArguments() = listOf("-javaagent:${agentFiles.asPath}")
+}
+
 tasks {
     withType<Test> {
         jvmArgs("-Xshare:off")
+        val agentProvider = objects.newInstance(MockitoAgentProvider::class)
+        agentProvider.agentFiles.from(mockitoAgent)
+        jvmArgumentProviders.add(agentProvider)
         useJUnitPlatform()
     }
 
@@ -92,6 +105,7 @@ dependencies {
     testImplementation(libs.hamcrest)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
 
 idea.module {
