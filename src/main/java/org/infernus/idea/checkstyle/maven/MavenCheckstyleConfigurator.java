@@ -368,7 +368,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             .map(MavenProjectWithModules::getMavenProject).orElse(null);
     }
 
-    private static boolean getChildElementAsBoolean(
+    static boolean getChildElementAsBoolean(
             @Nullable final Element element,
             @NotNull final String childName,
             final boolean defaultValue) {
@@ -385,7 +385,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     @NotNull
-    private static ScanScope getScanScopeFromMavenConfig(@Nullable final Element checkstyleMavenPluginConfig) {
+    static ScanScope getScanScopeFromMavenConfig(@Nullable final Element checkstyleMavenPluginConfig) {
         // Default values here match the defaults from Maven Checkstyle plugin 3.6.0.
         final var includeResources = getChildElementAsBoolean(checkstyleMavenPluginConfig,
             "includeResources", true);

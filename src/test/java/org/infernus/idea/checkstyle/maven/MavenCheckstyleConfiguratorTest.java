@@ -15,7 +15,6 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
-import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
@@ -204,48 +203,6 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void afterImport_importSettingsFromMavenIsEnabled_updatesScanScope() throws Exception {
-        final var pluginConfigurationManager = getProject().getService(
-            PluginConfigurationManager.class);
-
-        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(
-            pluginConfigurationManager.getCurrent());
-        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withScanScope(ScanScope.Everything);
-        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
-
-        createProjectPom(PROJECT_INFO + """
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <configuration>
-                            <includeResources>true</includeResources>
-                            <includeTestResources>true</includeTestResources>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.puppycrawl.tools</groupId>
-                                <artifactId>checkstyle</artifactId>
-                                <version>10.26.1</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-            """.stripIndent());
-
-        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
-            (scope, continuation) -> importProjectAsync(continuation));
-
-        assertEquals(ScanScope.AllSourcesWithTests,
-            pluginConfigurationManager.getCurrent().getScanScope());
-    }
-
-    @Test
     public void afterImport_importSettingsFromMavenIsEnabledAndInheritingMavenPluginCheckstyleVersion_updatesVersionWithInheritedValue()
         throws Exception {
         final var pluginConfigurationManager = getProject().getService(
@@ -397,71 +354,6 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void updatePluginScanScopeFromMavenPlugin_includeSettingsAreMissingAndScanScopeExists_usesAllSourcesWithTestsScanScope()
-        throws Exception {
-        final var pluginConfigurationManager = getProject().getService(
-            PluginConfigurationManager.class);
-
-        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(
-            pluginConfigurationManager.getCurrent());
-        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withScanScope(ScanScope.Everything);
-        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
-
-        createProjectPom(PROJECT_INFO + """
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
-                    </plugin>
-                </plugins>
-            </build>
-            """.stripIndent());
-
-        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
-            (scope, continuation) -> importProjectAsync(continuation));
-
-        assertEquals(ScanScope.getDefaultValue(),
-            pluginConfigurationManager.getCurrent().getScanScope());
-    }
-
-    @Test
-    public void updatePluginScanScopeFromMavenPlugin_includeSettingsExistsAndScanScopeAlreadyExists_usesNewScanScope()
-        throws Exception {
-        final var pluginConfigurationManager = getProject().getService(
-            PluginConfigurationManager.class);
-
-        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(
-            pluginConfigurationManager.getCurrent());
-        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withScanScope(ScanScope.Everything);
-        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
-
-        createProjectPom(PROJECT_INFO + """
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <configuration>
-                            <includeResources>false</includeResources>
-                            <includeTestResources>false</includeTestResources>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            """.stripIndent());
-
-        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
-            (scope, continuation) -> importProjectAsync(continuation));
-
-        assertEquals(ScanScope.JavaOnly, pluginConfigurationManager.getCurrent().getScanScope());
-    }
-
-    @Test
     public void afterImport_mavenCheckstylePluginNotConfiguredAndSyncEnabled_doesNotThrow()
         throws Exception {
         final var pluginConfigurationManager = getProject().getService(
@@ -554,38 +446,6 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
             .filter(loc -> "maven-config-location".equals(loc.getId()))
             .findFirst().orElseThrow().getProperties().get("checkstyle.suppressions.file");
         assertEquals("suppressions.xml", suppressionsValue);
-    }
-
-    @Test
-    public void afterImport_unrecognisedScanScopeCombination_fallsBackToDefaultScanScope() throws Exception {
-        final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
-
-        final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(pluginConfigurationManager.getCurrent());
-        updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withScanScope(ScanScope.Everything);
-        pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
-
-        createProjectPom(PROJECT_INFO + """
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <configuration>
-                            <includeResources>false</includeResources>
-                            <includeTestResources>true</includeTestResources>
-                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            """.stripIndent());
-
-        BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
-            (scope, continuation) -> importProjectAsync(continuation));
-
-        assertEquals(ScanScope.getDefaultValue(), pluginConfigurationManager.getCurrent().getScanScope());
     }
 
     @Test
