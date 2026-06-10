@@ -21,7 +21,6 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
-import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -336,14 +335,12 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             final var checkstyleDependency = mavenDomProjectModel.getDependencies()
                 .getDependencies().stream().filter(
                     dependency -> CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId().getValue(),
-                        dependency.getArtifactId().getValue())).findFirst().orElseThrow(
-                    () -> {
-                        LOG.warn(
-                                "Checkstyle dependency could not be found within Maven Checkstyle Plugin. Maven DOM project model %s".formatted(
-                                        mavenDomProjectModel.toString()));
-                        return new CheckStylePluginException(
-                                "Failed to find Checkstyle dependency within the Maven Checkstyle Plugin pom");
-                    });
+                        dependency.getArtifactId().getValue())).findFirst().orElse(null);
+            if (checkstyleDependency == null) {
+                LOG.warn("Checkstyle dependency could not be found within Maven Checkstyle Plugin pom %s".formatted(
+                        checkstylePluginVirtualFile.getPath()));
+                return null;
+            }
 
             final var version = MavenPropertyResolver.resolve(
                 checkstyleDependency.getVersion().getValue(), mavenDomProjectModel);
