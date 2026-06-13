@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.9.0** Fixed: Another attempt at improving tokenised paths on Windows (#691).
 * **26.9.0** New: Import Checkstyle rule configuration from Maven POMs (#671, #692) - thanks to @nrayburn-tech and @leonschenk.
 * **26.8.0** New: Add Checkstyle 13.5.0.
 * **26.8.0** New: description and file path of a rules file can now be edited (#337).

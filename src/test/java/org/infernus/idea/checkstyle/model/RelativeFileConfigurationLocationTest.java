@@ -21,6 +21,7 @@ import java.util.function.Function;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,30 @@ public class RelativeFileConfigurationLocationTest {
         underTest.setLocation(PROJECT_BASE_PATH + "/../another-project/rules.xml");
 
         assertThat(underTest.getRawLocation(), is(equalTo("$PROJECT_DIR$/../another-project/rules.xml")));
+    }
+
+    @Test
+    public void anAlreadyTokenisedPathSurvivesUnstableProjectDir() {
+        ProjectPaths unstableProjectPaths = mock(ProjectPaths.class);
+        VirtualFile stableBase = mock(VirtualFile.class);
+        VirtualFile shiftedBase = mock(VirtualFile.class);
+        when(stableBase.getPath()).thenReturn("/stable/base");
+        when(shiftedBase.getPath()).thenReturn("/completely/different");
+        when(unstableProjectPaths.projectPath(any())).thenReturn(stableBase, shiftedBase, stableBase);
+
+        Project mockProject = TestHelper.mockProject();
+        Function<File, String> absolutePathOf =
+                file -> FilenameUtils.separatorsToUnix(file.getPath());
+        ProjectFilePaths filePaths =
+                ProjectFilePaths.testInstanceWith(mockProject, '/', absolutePathOf, unstableProjectPaths);
+        when(mockProject.getService(ProjectFilePaths.class)).thenReturn(filePaths);
+
+        RelativeFileConfigurationLocation loc =
+                new RelativeFileConfigurationLocation(mockProject, UUID.randomUUID().toString());
+        loc.setLocation("$PROJECT_DIR$/codingstyle/etc/checkstyle.xml");
+
+        assertThat(loc.getRawLocation(),
+                is(equalTo("$PROJECT_DIR$/codingstyle/etc/checkstyle.xml")));
     }
 
 }

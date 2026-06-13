@@ -13,7 +13,7 @@ public class ProjectFilePaths {
 
     private static final Logger LOG = Logger.getInstance(ProjectFilePaths.class);
 
-    static final String PROJECT_DIR_TOKEN = "$PROJECT_DIR$";
+    public static final String PROJECT_DIR_TOKEN = "$PROJECT_DIR$";
 
     private final ProjectPaths projectPaths;
     private final Project project;

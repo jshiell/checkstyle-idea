@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +25,11 @@ public class RelativeFileConfigurationLocation extends FileConfigurationLocation
     public void setLocation(final String location) {
         if (Strings.isBlank(location)) {
             throw new IllegalArgumentException("A non-blank location is required");
+        }
+
+        if (location.startsWith(ProjectFilePaths.PROJECT_DIR_TOKEN)) {
+            super.setLocation(location);
+            return;
         }
 
         super.setLocation(projectFilePaths().tokenise(
