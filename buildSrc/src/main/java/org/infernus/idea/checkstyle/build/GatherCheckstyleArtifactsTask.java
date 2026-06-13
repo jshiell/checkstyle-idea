@@ -6,6 +6,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -18,6 +19,7 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -29,6 +31,7 @@ public class GatherCheckstyleArtifactsTask
     public static final String NAME = "gatherCheckstyleArtifacts";
 
     private final Map<String, Set<File>> rawVersionsToDependencies = new HashMap<>();
+    private final Map<String, Set<ResolvedArtifact>> rawNonBundledArtifacts = new HashMap<>();
     private final CheckstyleVersions csVersions;
 
     @OutputDirectory
@@ -36,6 +39,9 @@ public class GatherCheckstyleArtifactsTask
 
     @OutputFile
     private final File classPathsInfoFile;
+
+    @OutputFile
+    private final File downloadManifestFile;
 
     public GatherCheckstyleArtifactsTask() {
         super();
@@ -49,11 +55,20 @@ public class GatherCheckstyleArtifactsTask
 
         // Task Outputs: the directory full of JARs, and the classpath info file
         bundledJarsDir = getTemporaryDir();
-        classPathsInfoFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources-generated/checkstyle-classpaths.properties");
+        File resourcesGenDir = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources-generated");
+        classPathsInfoFile = new File(resourcesGenDir, "checkstyle-classpaths.properties");
+        downloadManifestFile = new File(resourcesGenDir, "checkstyle-download-manifest.properties");
 
         for (final String csVersion : csVersions.getBundledVersions()) {
             final Set<File> dependencies = resolveDependencies(project, csVersion);
             rawVersionsToDependencies.put(csVersion, dependencies);
+        }
+
+        SortedSet<String> nonBundledVersions = new TreeSet<>(csVersions.getVersions());
+        nonBundledVersions.removeAll(csVersions.getBundledVersions());
+        for (final String csVersion : nonBundledVersions) {
+            final Set<ResolvedArtifact> artifacts = resolveArtifacts(project, csVersion);
+            rawNonBundledArtifacts.put(csVersion, artifacts);
         }
     }
 
@@ -71,6 +86,7 @@ public class GatherCheckstyleArtifactsTask
 
         copyFiles(bundledFiles);
         createClassPathsFile(classPaths);
+        createDownloadManifestFile();
     }
 
     private Set<File> resolveDependencies(final Project project, final String checkstyleVersion) {
@@ -78,6 +94,13 @@ public class GatherCheckstyleArtifactsTask
         final Configuration csConf = project.getConfigurations().detachedConfiguration(csDep);
         CheckstyleVersions.applyGoogleCollectionsWorkaround(csConf);
         return csConf.resolve();
+    }
+
+    private Set<ResolvedArtifact> resolveArtifacts(final Project project, final String checkstyleVersion) {
+        final Dependency csDep = CheckstyleVersions.createCheckstyleDependency(project, checkstyleVersion);
+        final Configuration csConf = project.getConfigurations().detachedConfiguration(csDep);
+        CheckstyleVersions.applyGoogleCollectionsWorkaround(csConf);
+        return csConf.getResolvedConfiguration().getResolvedArtifacts();
     }
 
     private String convertToClassPath(final Collection<String> resolvedDependencies) {
@@ -114,11 +137,31 @@ public class GatherCheckstyleArtifactsTask
         }
     }
 
+    private void createDownloadManifestFile() {
+        //noinspection ResultOfMethodCallIgnored
+        downloadManifestFile.getParentFile().mkdir();
+
+        final Properties manifest = new SortedProperties();
+        for (Map.Entry<String, Set<ResolvedArtifact>> entry : rawNonBundledArtifacts.entrySet()) {
+            manifest.setProperty(entry.getKey(), ManifestFormatter.buildEntry(entry.getValue()));
+        }
+
+        try (OutputStream os = new FileOutputStream(downloadManifestFile)) {
+            manifest.store(os, " Download manifest for non-bundled Checkstyle versions");
+        } catch (IOException e) {
+            throw new GradleException("Unable to write download manifest file: " + downloadManifestFile.getAbsolutePath(), e);
+        }
+    }
+
     public File getBundledJarsDir() {
         return bundledJarsDir;
     }
 
     public File getClassPathsInfoFile() {
         return classPathsInfoFile;
+    }
+
+    public File getDownloadManifestFile() {
+        return downloadManifestFile;
     }
 }
