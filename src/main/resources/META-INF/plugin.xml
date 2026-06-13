@@ -76,6 +76,7 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.ConfigurationInvalidator"/>
 
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
+        <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.PromptForMissingCheckstyleVersion"/>
 
         <projectConfigurable key="plugin.configuration-name"
                              instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
