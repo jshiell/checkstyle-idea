@@ -86,6 +86,7 @@ public class CheckstyleClassLoaderContainer {
     private ClassLoader buildClassLoaderFromPaths(@NotNull final List<Path> jars) {
         try {
             final List<URL> urls = new ArrayList<>();
+            urls.add(getCsaccessClassesUrl());
             for (final Path jar : jars) {
                 urls.add(jar.toUri().toURL());
             }
@@ -93,6 +94,15 @@ public class CheckstyleClassLoaderContainer {
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("Failed to build classloader from downloaded JARs", e);
         }
+    }
+
+    @NotNull
+    private URL getCsaccessClassesUrl() throws MalformedURLException {
+        final String basePluginPath = getBasePluginPath();
+        if (basePluginPath != null) {
+            return getClassesDirectory(basePluginPath).toURI().toURL();
+        }
+        return getUnitTestingClassPath(guessBuildPathFromClasspath());
     }
 
     @NotNull

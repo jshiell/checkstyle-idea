@@ -45,6 +45,16 @@ public class CheckstyleClassLoaderContainerTest {
     }
 
     @Test
+    void constructorWithDownloadedJars_classLoaderCanFindCheckstyleActionsImpl() throws ClassNotFoundException {
+        var project = mock(com.intellij.openapi.project.Project.class);
+        var service = mock(CheckstyleProjectService.class);
+
+        var container = new CheckstyleClassLoaderContainer(project, service, List.of());
+
+        assertNotNull(container.getClassLoader().loadClass("org.infernus.idea.checkstyle.service.CheckstyleActionsImpl"));
+    }
+
+    @Test
     void originalConstructor_throwsForUnbundledVersion() {
         var project = mock(com.intellij.openapi.project.Project.class);
         var service = mock(CheckstyleProjectService.class);
