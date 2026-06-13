@@ -73,6 +73,11 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
+    public void productionConstructorSetsNonNullDownloader() {
+        assertNotNull(underTest.getDownloader());
+    }
+
+    @Test
     public void bundledVersion_doesNotUseDownloader() {
         CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
 

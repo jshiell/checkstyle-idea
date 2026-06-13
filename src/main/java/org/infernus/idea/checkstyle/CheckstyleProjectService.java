@@ -39,7 +39,11 @@ public class CheckstyleProjectService {
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                null);
+                CheckstyleArtifactDownloader.create(defaultM2Root()));
+    }
+
+    private static Path defaultM2Root() {
+        return Path.of(System.getProperty("user.home"), ".m2", "repository");
     }
 
     CheckstyleProjectService(@NotNull final Project project,
@@ -79,6 +83,11 @@ public class CheckstyleProjectService {
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars) {
         return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null);
+    }
+
+    @Nullable
+    public CheckstyleArtifactDownloader getDownloader() {
+        return downloader;
     }
 
     @NotNull

@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -31,7 +30,7 @@ public class GatherCheckstyleArtifactsTask
     public static final String NAME = "gatherCheckstyleArtifacts";
 
     private final Map<String, Set<File>> rawVersionsToDependencies = new HashMap<>();
-    private final Map<String, Set<ResolvedArtifact>> rawNonBundledArtifacts = new HashMap<>();
+    private final Map<String, String> nonBundledManifestEntries = new HashMap<>();
     private final CheckstyleVersions csVersions;
 
     @OutputDirectory
@@ -67,8 +66,8 @@ public class GatherCheckstyleArtifactsTask
         SortedSet<String> nonBundledVersions = new TreeSet<>(csVersions.getVersions());
         nonBundledVersions.removeAll(csVersions.getBundledVersions());
         for (final String csVersion : nonBundledVersions) {
-            final Set<ResolvedArtifact> artifacts = resolveArtifacts(project, csVersion);
-            rawNonBundledArtifacts.put(csVersion, artifacts);
+            Set<ResolvedArtifact> artifacts = resolveArtifacts(project, csVersion);
+            nonBundledManifestEntries.put(csVersion, ManifestFormatter.buildEntry(artifacts));
         }
     }
 
@@ -142,9 +141,7 @@ public class GatherCheckstyleArtifactsTask
         downloadManifestFile.getParentFile().mkdir();
 
         final Properties manifest = new SortedProperties();
-        for (Map.Entry<String, Set<ResolvedArtifact>> entry : rawNonBundledArtifacts.entrySet()) {
-            manifest.setProperty(entry.getKey(), ManifestFormatter.buildEntry(entry.getValue()));
-        }
+        nonBundledManifestEntries.forEach(manifest::setProperty);
 
         try (OutputStream os = new FileOutputStream(downloadManifestFile)) {
             manifest.store(os, " Download manifest for non-bundled Checkstyle versions");

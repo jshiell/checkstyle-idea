@@ -73,4 +73,10 @@ public class CheckstyleArtifactDownloaderTest {
 
         assertEquals(resolved, result);
     }
+
+    @Test
+    void createFactoryReturnsNonNullDownloader() {
+        CheckstyleArtifactDownloader created = CheckstyleArtifactDownloader.create(m2Root);
+        assertNotNull(created);
+    }
 }
