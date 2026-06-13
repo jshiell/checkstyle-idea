@@ -25,9 +25,11 @@ public class VersionListReader {
     private static final String PROP_FILE = "checkstyle-idea.properties";
 
     private static final String PROP_SUPPORTED_VERSIONS = "checkstyle.versions.supported";
+    private static final String PROP_BUNDLED_VERSIONS = "bundledVersions";
     private static final String PROP_VERSION_MAP = "checkstyle.versions.map";
 
     private final SortedSet<String> supportedVersions;
+    private final SortedSet<String> bundledVersions;
     private final SortedMap<String, String> replacementMap;
 
     public VersionListReader() {
@@ -37,6 +39,7 @@ public class VersionListReader {
     VersionListReader(@NotNull final String propertyFile) {
         final Properties props = readProperties(propertyFile);
         supportedVersions = readSupportedVersions(propertyFile, props);
+        bundledVersions = readBundledVersions(propertyFile, props, supportedVersions);
         replacementMap = readVersionMap(propertyFile, props, supportedVersions);
     }
 
@@ -76,6 +79,22 @@ public class VersionListReader {
         return Collections.unmodifiableSortedSet(theVersions);
     }
 
+
+    @NotNull
+    private SortedSet<String> readBundledVersions(@NotNull final String propertyFile,
+                                                   @NotNull final Properties props,
+                                                   @NotNull final SortedSet<String> pSupportedVersions) {
+        final SortedSet<String> result = new TreeSet<>(new VersionComparator());
+        result.addAll(readVersions(propertyFile, props, PROP_BUNDLED_VERSIONS));
+        for (final String version : result) {
+            if (!pSupportedVersions.contains(version)) {
+                throw new CheckStylePluginException("Internal error: Property '" + PROP_BUNDLED_VERSIONS + "' "
+                        + "contains version " + version + " which is not a supported version in configuration file '"
+                        + propertyFile + "'");
+            }
+        }
+        return Collections.unmodifiableSortedSet(result);
+    }
 
     @NotNull
     private Set<String> readVersions(@NotNull final String propertyFile,
@@ -179,5 +198,14 @@ public class VersionListReader {
     @NotNull
     public SortedMap<String, String> getReplacementMap() {
         return replacementMap;
+    }
+
+    @NotNull
+    public SortedSet<String> getBundledVersions() {
+        return bundledVersions;
+    }
+
+    public boolean isBundled(@NotNull final String version) {
+        return bundledVersions.contains(version);
     }
 }
