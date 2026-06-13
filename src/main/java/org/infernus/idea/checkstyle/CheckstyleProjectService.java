@@ -39,11 +39,7 @@ public class CheckstyleProjectService {
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                CheckstyleArtifactDownloader.create(defaultM2Root()));
-    }
-
-    private static Path defaultM2Root() {
-        return Path.of(System.getProperty("user.home"), ".m2", "repository");
+                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root()));
     }
 
     CheckstyleProjectService(@NotNull final Project project,
@@ -111,10 +107,11 @@ public class CheckstyleProjectService {
                     return new CheckstyleClassLoaderContainer(
                             project, this, checkstyleVersionToLoad, toListOfUrls(thirdPartyJars));
                 } else {
-                    List<Path> jars = downloader != null
-                            ? downloader.download(checkstyleVersionToLoad)
-                            : List.of();
-                    return new CheckstyleClassLoaderContainer(project, this, jars);
+                    if (downloader == null) {
+                        throw new CheckStylePluginException(
+                                "Checkstyle " + checkstyleVersionToLoad + " is not bundled and has not been downloaded");
+                    }
+                    return new CheckstyleClassLoaderContainer(project, this, downloader.download(checkstyleVersionToLoad));
                 }
             };
         }

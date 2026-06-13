@@ -71,6 +71,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final CheckerFactoryCache checkerFactoryCache;
     private final VersionListReader versionListReader;
     private final Path m2Root;
+    private final Map<String, String> versionSuffixCache = new HashMap<>();
 
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
@@ -80,8 +81,9 @@ public class CheckStyleConfigPanel extends JPanel {
         this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
         this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
         this.versionListReader = new VersionListReader();
-        this.m2Root = defaultM2Root();
+        this.m2Root = CheckstyleArtifactDownloader.defaultM2Root();
 
+        refreshVersionSuffixCache();
         csVersionDropdown = buildCheckstyleVersionComboBox();
 
         initialise();
@@ -97,8 +99,18 @@ public class CheckStyleConfigPanel extends JPanel {
         return comboBox;
     }
 
-    private static Path defaultM2Root() {
-        return Path.of(System.getProperty("user.home"), ".m2", "repository");
+    private void refreshVersionSuffixCache() {
+        for (String version : checkstyleProjectService.getSupportedVersions()) {
+            String suffix;
+            if (versionListReader.isBundled(version)) {
+                suffix = " [bundled]";
+            } else if (CheckstyleArtifactDownloader.isAvailableLocally(m2Root, version)) {
+                suffix = " [downloaded]";
+            } else {
+                suffix = " ↓";
+            }
+            versionSuffixCache.put(version, suffix);
+        }
     }
 
     private class VersionStatusRenderer extends DefaultListCellRenderer {
@@ -108,15 +120,7 @@ public class CheckStyleConfigPanel extends JPanel {
                                                       final boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof String version) {
-                String suffix;
-                if (versionListReader.isBundled(version)) {
-                    suffix = " [bundled]";
-                } else if (CheckstyleArtifactDownloader.isAvailableLocally(m2Root, version)) {
-                    suffix = " [downloaded]";
-                } else {
-                    suffix = " ↓";
-                }
-                setText(version + suffix);
+                setText(version + versionSuffixCache.getOrDefault(version, ""));
             }
             return this;
         }
@@ -132,9 +136,12 @@ public class CheckStyleConfigPanel extends JPanel {
                 if (!downloadWithProgress(version, downloader)) {
                     return;
                 }
+                refreshVersionSuffixCache();
+                csVersionDropdown.repaint();
             }
         }
-        checkstyleProjectService.activateCheckstyleVersion(version, getThirdPartyClasspath());
+        // Re-read version: "Use bundled version" path may have changed the dropdown selection.
+        checkstyleProjectService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
     }
 
     private boolean downloadWithProgress(@NotNull final String version,

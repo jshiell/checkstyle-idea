@@ -27,6 +27,11 @@ public class CheckstyleArtifactDownloader {
     }
 
     @NotNull
+    public static Path defaultM2Root() {
+        return Path.of(System.getProperty("user.home"), ".m2", "repository");
+    }
+
+    @NotNull
     public static CheckstyleArtifactDownloader create(@NotNull final Path m2Root) {
         DownloadManifest manifest = DownloadManifest.fromClasspath();
         ManifestBasedArtifactResolver resolver = new ManifestBasedArtifactResolver(
