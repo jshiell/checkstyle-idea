@@ -4,6 +4,9 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.ComboBox;
@@ -121,8 +124,55 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private void activateCurrentClasspath() {
         checkerFactoryCache.invalidate();
+        String version = getCheckstyleVersion();
 
-        checkstyleProjectService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
+        if (!versionListReader.isBundled(version)) {
+            CheckstyleArtifactDownloader downloader = checkstyleProjectService.getDownloader();
+            if (downloader != null && !downloader.isAvailableLocally(version)) {
+                if (!downloadWithProgress(version, downloader)) {
+                    return;
+                }
+            }
+        }
+        checkstyleProjectService.activateCheckstyleVersion(version, getThirdPartyClasspath());
+    }
+
+    private boolean downloadWithProgress(@NotNull final String version,
+                                         @NotNull final CheckstyleArtifactDownloader downloader) {
+        String title = CheckStyleBundle.message("config.download.title", version);
+        while (true) {
+            final Throwable[] failure = {null};
+            ProgressManager.getInstance().run(new Task.Modal(project, title, true) {
+                @Override
+                public void run(@NotNull final ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    indicator.setText(CheckStyleBundle.message("config.download.progress", version));
+                    try {
+                        downloader.download(version);
+                    } catch (Exception e) {
+                        failure[0] = e;
+                    }
+                }
+            });
+
+            if (failure[0] == null) {
+                return true;
+            }
+
+            String msg = CheckStyleBundle.message("config.download.failed", version, failure[0].getMessage());
+            int choice = Messages.showDialog(project, msg, title,
+                    new String[]{"Retry", "Use bundled version", "Cancel"}, 0, Messages.getErrorIcon());
+            if (choice == 0) {
+                continue; // Retry
+            }
+            if (choice == 1) {
+                // Use bundled version
+                String bundled = versionListReader.getBundledVersions().last();
+                csVersionDropdown.setSelectedItem(bundled);
+                return true;
+            }
+            return false; // Cancel
+        }
     }
 
     private void initialise() {
