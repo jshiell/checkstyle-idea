@@ -51,7 +51,7 @@ public class GatherCheckstyleArtifactsTask
         bundledJarsDir = getTemporaryDir();
         classPathsInfoFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources-generated/checkstyle-classpaths.properties");
 
-        for (final String csVersion : csVersions.getVersions()) {
+        for (final String csVersion : csVersions.getBundledVersions()) {
             final Set<File> dependencies = resolveDependencies(project, csVersion);
             rawVersionsToDependencies.put(csVersion, dependencies);
         }
@@ -61,28 +61,12 @@ public class GatherCheckstyleArtifactsTask
     public void runTask() {
         final Set<File> bundledFiles = new TreeSet<>();
         final Properties classPaths = new SortedProperties();
-        final Set<String> availableFileNames = new HashSet<>();
 
-        for (final String csVersion : csVersions.getVersions()) {
+        for (final String csVersion : csVersions.getBundledVersions()) {
             Set<File> dependencies = rawVersionsToDependencies.get(csVersion);
-            availableFileNames.addAll(dependencies.stream().map(File::getName).collect(toSet()));
-        }
-
-        final Map<String, String> dependencyMappings = csVersions.getDependencyMappings();
-        for (final String csVersion : csVersions.getVersions()) {
-            Set<String> processedDependencies = rawVersionsToDependencies.get(csVersion).stream()
-                    .map(dependencyFile -> {
-                        if (csVersions.getDependencyMappings().containsKey(dependencyFile.getName())
-                                && availableFileNames.contains(dependencyMappings.get(dependencyFile.getName()))) {
-                            return dependencyMappings.get(dependencyFile.getName());
-                        } else {
-                            bundledFiles.add(dependencyFile);
-                            return dependencyFile.getName();
-                        }
-                    })
-                    .collect(toSet());
-
-            classPaths.setProperty(csVersion, convertToClassPath(processedDependencies));
+            dependencies.forEach(bundledFiles::add);
+            classPaths.setProperty(csVersion, convertToClassPath(
+                    dependencies.stream().map(File::getName).collect(toSet())));
         }
 
         copyFiles(bundledFiles);
