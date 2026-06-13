@@ -26,8 +26,13 @@ public class CheckstyleArtifactDownloader {
         this.resolver = resolver;
     }
 
+    public static boolean isAvailableLocally(@NotNull final Path m2LocalRepository,
+                                             @NotNull final String version) {
+        return primaryJarPath(m2LocalRepository, version).toFile().exists();
+    }
+
     public boolean isAvailableLocally(@NotNull final String version) {
-        return primaryJarPath(version).toFile().exists();
+        return isAvailableLocally(m2LocalRepository, version);
     }
 
     @NotNull
@@ -41,8 +46,9 @@ public class CheckstyleArtifactDownloader {
     }
 
     @NotNull
-    private Path primaryJarPath(@NotNull final String version) {
-        return m2LocalRepository
+    private static Path primaryJarPath(@NotNull final Path m2Root,
+                                       @NotNull final String version) {
+        return m2Root
                 .resolve("com/puppycrawl/tools/checkstyle")
                 .resolve(version)
                 .resolve("checkstyle-" + version + ".jar");

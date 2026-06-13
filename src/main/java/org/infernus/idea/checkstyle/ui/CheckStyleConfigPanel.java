@@ -16,6 +16,7 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,6 +66,8 @@ public class CheckStyleConfigPanel extends JPanel {
     private final Project project;
     private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache checkerFactoryCache;
+    private final VersionListReader versionListReader;
+    private final Path m2Root;
 
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
@@ -72,6 +76,8 @@ public class CheckStyleConfigPanel extends JPanel {
 
         this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
         this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
+        this.versionListReader = new VersionListReader();
+        this.m2Root = defaultM2Root();
 
         csVersionDropdown = buildCheckstyleVersionComboBox();
 
@@ -83,7 +89,34 @@ public class CheckStyleConfigPanel extends JPanel {
         SortedSet<String> reversedVersions = new TreeSet<>(Collections.reverseOrder(versions.comparator()));
         reversedVersions.addAll(versions);
         String[] supportedVersions = reversedVersions.toArray(new String[0]);
-        return new ComboBox<>(supportedVersions);
+        ComboBox<String> comboBox = new ComboBox<>(supportedVersions);
+        comboBox.setRenderer(new VersionStatusRenderer());
+        return comboBox;
+    }
+
+    private static Path defaultM2Root() {
+        return Path.of(System.getProperty("user.home"), ".m2", "repository");
+    }
+
+    private class VersionStatusRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(final JList<?> list, final Object value,
+                                                      final int index, final boolean isSelected,
+                                                      final boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof String version) {
+                String suffix;
+                if (versionListReader.isBundled(version)) {
+                    suffix = " [bundled]";
+                } else if (CheckstyleArtifactDownloader.isAvailableLocally(m2Root, version)) {
+                    suffix = " [downloaded]";
+                } else {
+                    suffix = " ↓";
+                }
+                setText(version + suffix);
+            }
+            return this;
+        }
     }
 
     private void activateCurrentClasspath() {
