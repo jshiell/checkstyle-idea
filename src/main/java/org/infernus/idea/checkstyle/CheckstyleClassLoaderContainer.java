@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.*;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -71,6 +72,27 @@ public class CheckstyleClassLoaderContainer {
             throw new CheckStylePluginException("Unsupported Checkstyle version: " + checkstyleVersion);
         }
         classLoader = buildClassLoader(cpProp, emptyListIfNull(thirdPartyClassPath));
+    }
+
+    public CheckstyleClassLoaderContainer(@NotNull final Project project,
+                                          @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                          @NotNull final List<Path> downloadedJars) {
+        this.project = project;
+        this.checkstyleProjectService = checkstyleProjectService;
+        classLoader = buildClassLoaderFromPaths(downloadedJars);
+    }
+
+    @NotNull
+    private ClassLoader buildClassLoaderFromPaths(@NotNull final List<Path> jars) {
+        try {
+            final List<URL> urls = new ArrayList<>();
+            for (final Path jar : jars) {
+                urls.add(jar.toUri().toURL());
+            }
+            return new ChildFirstURLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
+        } catch (MalformedURLException e) {
+            throw new CheckStylePluginException("Failed to build classloader from downloaded JARs", e);
+        }
     }
 
     @NotNull
