@@ -58,7 +58,11 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
                 message("startup.download.prompt", version),
                 NotificationAction.createSimple(
                         message("startup.download.action"),
-                        () -> CheckstyleDownloadHelper.downloadWithProgress(project, version, downloader, versionListReader, ignored -> {})
+                        () -> {
+                            if (!project.isDisposed()) {
+                                CheckstyleDownloadHelper.downloadWithProgress(project, version, downloader, versionListReader, null);
+                            }
+                        }
                 )
         );
         return null;

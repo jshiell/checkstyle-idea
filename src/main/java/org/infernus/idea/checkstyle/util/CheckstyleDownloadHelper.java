@@ -8,7 +8,9 @@ import com.intellij.openapi.ui.Messages;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -22,7 +24,7 @@ public final class CheckstyleDownloadHelper {
                                                @NotNull final String version,
                                                @NotNull final CheckstyleArtifactDownloader downloader,
                                                @NotNull final VersionListReader versionListReader,
-                                               @NotNull final Consumer<String> onVersionChanged) {
+                                               @Nullable final Consumer<String> onVersionChanged) {
         String title = message("config.download.title", version);
         while (true) {
             final Throwable[] failure = {null};
@@ -43,13 +45,16 @@ public final class CheckstyleDownloadHelper {
                 return true;
             }
 
-            String msg = message("config.download.failed", version, failure[0].getMessage());
-            int choice = Messages.showDialog(project, msg, title,
-                    new String[]{"Retry", "Use bundled version", "Cancel"}, 0, Messages.getErrorIcon());
+            String errorText = Objects.toString(failure[0].getMessage(), failure[0].getClass().getSimpleName());
+            String msg = message("config.download.failed", version, errorText);
+            String[] buttons = onVersionChanged != null
+                    ? new String[]{"Retry", "Use bundled version", "Cancel"}
+                    : new String[]{"Retry", "Cancel"};
+            int choice = Messages.showDialog(project, msg, title, buttons, 0, Messages.getErrorIcon());
             if (choice == 0) {
                 continue;
             }
-            if (choice == 1) {
+            if (onVersionChanged != null && choice == 1) {
                 String bundled = versionListReader.getBundledVersions().last();
                 onVersionChanged.accept(bundled);
                 return true;
