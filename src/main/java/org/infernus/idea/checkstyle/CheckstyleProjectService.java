@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -31,18 +32,31 @@ public class CheckstyleProjectService {
     private Callable<CheckstyleClassLoaderContainer> checkstyleClassLoaderFactory = null;
     private CheckstyleClassLoaderContainer checkstyleClassLoaderContainer = null;
 
+    private final VersionListReader versionListReader;
     private final SortedSet<String> supportedVersions;
+    private final CheckstyleArtifactDownloader downloader;
 
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
-                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath());
+                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
+                null);
+    }
+
+    CheckstyleProjectService(@NotNull final Project project,
+                             @NotNull final CheckstyleArtifactDownloader downloader) {
+        this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
+                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
+                downloader);
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
                                      @Nullable final String requestedVersion,
-                                     @Nullable final List<String> thirdPartyJars) {
+                                     @Nullable final List<String> thirdPartyJars,
+                                     @Nullable final CheckstyleArtifactDownloader downloaderOverride) {
         this.project = project;
-        supportedVersions = new VersionListReader().getSupportedVersions();
+        versionListReader = new VersionListReader();
+        supportedVersions = versionListReader.getSupportedVersions();
+        this.downloader = downloaderOverride;
 
         ensureAValidatingParsingIsSetIfPiccoloIsInClasspath();
 
@@ -64,7 +78,7 @@ public class CheckstyleProjectService {
     public static CheckstyleProjectService forVersion(@NotNull final Project project,
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars);
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null);
     }
 
     @NotNull
@@ -80,34 +94,36 @@ public class CheckstyleProjectService {
     public void activateCheckstyleVersion(@Nullable final String requestedVersion,
                                           @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
+        boolean isBundled = versionListReader.isBundled(checkstyleVersionToLoad);
         synchronized (lock) {
             checkstyleClassLoaderContainer = null;
-            checkstyleClassLoaderFactory = new Callable<>() {
-                @Override
-                public CheckstyleClassLoaderContainer call() {
+            checkstyleClassLoaderFactory = () -> {
+                if (isBundled) {
                     return new CheckstyleClassLoaderContainer(
-                            project,
-                            CheckstyleProjectService.this,
-                            checkstyleVersionToLoad,
-                            toListOfUrls(thirdPartyJars));
-                }
-
-                @NotNull
-                private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
-                    List<URL> result = new ArrayList<>();
-                    if (jarFilePaths != null) {
-                        for (final String absolutePath : jarFilePaths) {
-                            try {
-                                result.add(new File(absolutePath).toURI().toURL());
-                            } catch (MalformedURLException e) {
-                                LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
-                            }
-                        }
-                    }
-                    return result;
+                            project, this, checkstyleVersionToLoad, toListOfUrls(thirdPartyJars));
+                } else {
+                    List<Path> jars = downloader != null
+                            ? downloader.download(checkstyleVersionToLoad)
+                            : List.of();
+                    return new CheckstyleClassLoaderContainer(project, this, jars);
                 }
             };
         }
+    }
+
+    @NotNull
+    private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
+        List<URL> result = new ArrayList<>();
+        if (jarFilePaths != null) {
+            for (final String absolutePath : jarFilePaths) {
+                try {
+                    result.add(new File(absolutePath).toURI().toURL());
+                } catch (MalformedURLException e) {
+                    LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
+                }
+            }
+        }
+        return result;
     }
 
     @NotNull
