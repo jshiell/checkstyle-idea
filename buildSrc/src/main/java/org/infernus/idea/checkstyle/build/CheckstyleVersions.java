@@ -23,21 +23,28 @@ public class CheckstyleVersions {
     private static final String PROP_FILE = "src/main/resources/checkstyle-idea.properties";
 
     private static final String PROP_VERSIONS_SUPPORTED = "checkstyle.versions.supported";
+    private static final String PROP_BUNDLED_VERSIONS = "bundledVersions";
     private static final String PROP_DEPENDENCY_MAP = "checkstyle.dependencies.map";
     private static final String PROP_NAME_BASEVERSION = "baseVersion";
 
     private final File propertyFile;
 
     private final SortedSet<String> versions;
+    private final SortedSet<String> bundledVersions;
     private final Map<String, String> dependencyMappings;
 
     private final String baseVersion;
 
     public CheckstyleVersions(final Project project) {
-        propertyFile = new File(project.getProjectDir(), PROP_FILE);
+        this(new File(project.getProjectDir(), PROP_FILE));
+    }
+
+    CheckstyleVersions(final File propertyFile) {
+        this.propertyFile = propertyFile;
 
         final Properties properties = readProperties();
         versions = buildVersionSet(properties);
+        bundledVersions = buildBundledVersionSet(properties, versions);
         baseVersion = readBaseVersion(properties);
         dependencyMappings = readDependencyMap(properties);
     }
@@ -46,6 +53,18 @@ public class CheckstyleVersions {
         SortedSet<String> theVersions = new TreeSet<>(new VersionComparator());
         theVersions.addAll(readVersions(properties, PROP_VERSIONS_SUPPORTED));
         return Collections.unmodifiableSortedSet(theVersions);
+    }
+
+    private SortedSet<String> buildBundledVersionSet(final Properties properties, final SortedSet<String> supportedVersions) {
+        SortedSet<String> result = new TreeSet<>(new VersionComparator());
+        result.addAll(readVersions(properties, PROP_BUNDLED_VERSIONS));
+        for (final String version : result) {
+            if (!supportedVersions.contains(version)) {
+                throw new GradleException("Property '" + PROP_BUNDLED_VERSIONS + "' contains version " + version
+                        + " which is not a supported version in configuration file '" + PROP_FILE + "'");
+            }
+        }
+        return Collections.unmodifiableSortedSet(result);
     }
 
     private Properties readProperties() {
@@ -113,6 +132,10 @@ public class CheckstyleVersions {
 
     public SortedSet<String> getVersions() {
         return versions;
+    }
+
+    public SortedSet<String> getBundledVersions() {
+        return bundledVersions;
     }
 
     public String getBaseVersion() {
