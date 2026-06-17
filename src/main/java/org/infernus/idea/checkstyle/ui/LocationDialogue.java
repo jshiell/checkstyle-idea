@@ -196,7 +196,8 @@ public class LocationDialogue extends DialogWrapper {
     @NotNull
     private CheckerFactory checkerFactory() {
         final CheckstyleProjectService editedConfigProjectService = CheckstyleProjectService.forVersion(
-                project, checkstyleVersion, thirdPartyClasspath);
+                project, checkstyleVersion, thirdPartyClasspath,
+                checkstyleProjectService.getDownloader());
         return CheckerFactory.create(project, editedConfigProjectService, new CheckerFactoryCache());
     }
 

@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.10.1** Fixed: Downloaded runtimes work correctly when using location dialogue (#695).
 * **26.10.1** Fixed: Third-party classpath is correctly added to download Checkstyle versions (#694, #696).
 * **26.10.0** New: Checkstyle versions are now downloaded on demand (except base and most recent, which remain pre-packaged) (#496).
 * **26.9.0** Fixed: Another attempt at improving tokenised paths on Windows (#691).

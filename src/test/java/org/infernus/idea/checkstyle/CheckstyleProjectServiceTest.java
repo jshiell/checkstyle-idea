@@ -7,6 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
+
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -15,7 +18,7 @@ import java.util.SortedSet;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -95,6 +98,31 @@ public class CheckstyleProjectServiceTest {
     @Test
     public void productionConstructorSetsNonNullDownloader() {
         assertNotNull(underTest.getDownloader());
+    }
+
+    @Test
+    public void nonBundledVersion_downloadFailure_throwsDescriptiveException() {
+        CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
+        when(mockDownloader.download(NON_BUNDLED_VERSION))
+                .thenThrow(new CheckstyleDownloadException("connection refused"));
+
+        CheckstyleProjectService service = new CheckstyleProjectService(project, mockDownloader);
+        service.activateCheckstyleVersion(NON_BUNDLED_VERSION, null);
+
+        CheckStylePluginException ex = assertThrows(CheckStylePluginException.class,
+                service::getCheckstyleInstance);
+        assertThat(ex.getMessage(), org.hamcrest.Matchers.startsWith("Failed to download Checkstyle " + NON_BUNDLED_VERSION));
+        assertThat(ex.getMessage(), containsString("connection refused"));
+    }
+
+    @Test
+    public void forVersionWithDownloader_exposesDownloaderViaGetter() {
+        CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
+
+        CheckstyleProjectService service =
+                CheckstyleProjectService.forVersion(project, BUNDLED_VERSION, null, mockDownloader);
+
+        assertThat(service.getDownloader(), is(mockDownloader));
     }
 
     @Test

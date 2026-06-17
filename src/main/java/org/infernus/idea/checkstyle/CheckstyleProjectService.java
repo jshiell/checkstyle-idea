@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,6 +82,14 @@ public class CheckstyleProjectService {
         return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null);
     }
 
+    @NotNull
+    public static CheckstyleProjectService forVersion(@NotNull final Project project,
+                                                      @Nullable final String requestedVersion,
+                                                      @Nullable final List<String> thirdPartyJars,
+                                                      @Nullable final CheckstyleArtifactDownloader downloader) {
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader);
+    }
+
     @Nullable
     public CheckstyleArtifactDownloader getDownloader() {
         return downloader;
@@ -111,8 +120,13 @@ public class CheckstyleProjectService {
                         throw new CheckStylePluginException(
                                 "Checkstyle " + checkstyleVersionToLoad + " is not bundled and has not been downloaded");
                     }
-                    return new CheckstyleClassLoaderContainer(
-                            project, this, downloader.download(checkstyleVersionToLoad), toListOfUrls(thirdPartyJars));
+                    try {
+                        return new CheckstyleClassLoaderContainer(
+                                project, this, downloader.download(checkstyleVersionToLoad), toListOfUrls(thirdPartyJars));
+                    } catch (CheckstyleDownloadException e) {
+                        throw new CheckStylePluginException(
+                                "Failed to download Checkstyle " + checkstyleVersionToLoad + ": " + e.getMessage(), e);
+                    }
                 }
             };
         }
