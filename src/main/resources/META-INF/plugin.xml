@@ -26,6 +26,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.10.1: Fixed: Third-party classpath is correctly added to download Checkstyle versions (#694, #696).</li>
     <li>26.10.0: New: Checkstyle versions are now downloaded on demand (except base and most recent, which remain pre-packaged) (#496).</li>
     <li>26.9.0: Fixed: Another attempt at improving tokenised paths on Windows (#691).</li>
     <li>26.9.0: New: Import Checkstyle rule configuration from Maven POMs (#671, #692) - thanks to @nrayburn-tech and @leonschenk.</li>

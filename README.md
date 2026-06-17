@@ -207,6 +207,7 @@ Thanks to those who have contributed work and effort directly to this project:
 * @dong4j
 * Leon Schenk (@leonschenk)
 * Nicholas Rayburn (@nrayburn-tech)
+* Andreas Schrell (@foto-andreas)
 
 And also thanks are due to the authors and contributors of:
 
