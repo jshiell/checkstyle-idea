@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -70,6 +72,24 @@ public class CheckstyleProjectServiceTest {
 
         assertNotNull(serviceWithDownloader.underlyingClassLoader());
         verify(mockDownloader).download(NON_BUNDLED_VERSION);
+    }
+
+    @Test
+    public void nonBundledVersion_addsThirdPartyClasspath(@TempDir Path tempDir) throws Exception {
+        Path fakeCheckstyleJar = tempDir.resolve("checkstyle-10.4.jar");
+        fakeCheckstyleJar.toFile().createNewFile();
+        Path thirdPartyJar = tempDir.resolve("third-party.jar");
+        thirdPartyJar.toFile().createNewFile();
+
+        CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
+        when(mockDownloader.download(NON_BUNDLED_VERSION)).thenReturn(List.of(fakeCheckstyleJar));
+
+        CheckstyleProjectService serviceWithDownloader =
+                new CheckstyleProjectService(project, mockDownloader);
+        serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION, List.of(thirdPartyJar.toString()));
+
+        URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
+        assertThat(Arrays.asList(classLoader.getURLs()), hasItem(thirdPartyJar.toUri().toURL()));
     }
 
     @Test

@@ -77,19 +77,28 @@ public class CheckstyleClassLoaderContainer {
     public CheckstyleClassLoaderContainer(@NotNull final Project project,
                                           @NotNull final CheckstyleProjectService checkstyleProjectService,
                                           @NotNull final List<Path> downloadedJars) {
+        this(project, checkstyleProjectService, downloadedJars, null);
+    }
+
+    public CheckstyleClassLoaderContainer(@NotNull final Project project,
+                                          @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                          @NotNull final List<Path> downloadedJars,
+                                          @Nullable final List<URL> thirdPartyClassPath) {
         this.project = project;
         this.checkstyleProjectService = checkstyleProjectService;
-        classLoader = buildClassLoaderFromPaths(downloadedJars);
+        classLoader = buildClassLoaderFromPaths(downloadedJars, emptyListIfNull(thirdPartyClassPath));
     }
 
     @NotNull
-    private ClassLoader buildClassLoaderFromPaths(@NotNull final List<Path> jars) {
+    private ClassLoader buildClassLoaderFromPaths(@NotNull final List<Path> jars,
+                                                  @NotNull final List<URL> thirdPartyClasspath) {
         try {
             final List<URL> urls = new ArrayList<>();
             urls.add(getCsaccessClassesUrl());
             for (final Path jar : jars) {
                 urls.add(jar.toUri().toURL());
             }
+            urls.addAll(thirdPartyClasspath);
             return new ChildFirstURLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
         } catch (MalformedURLException e) {
             throw new CheckStylePluginException("Failed to build classloader from downloaded JARs", e);

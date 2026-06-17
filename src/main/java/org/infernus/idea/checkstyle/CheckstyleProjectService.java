@@ -111,7 +111,8 @@ public class CheckstyleProjectService {
                         throw new CheckStylePluginException(
                                 "Checkstyle " + checkstyleVersionToLoad + " is not bundled and has not been downloaded");
                     }
-                    return new CheckstyleClassLoaderContainer(project, this, downloader.download(checkstyleVersionToLoad));
+                    return new CheckstyleClassLoaderContainer(
+                            project, this, downloader.download(checkstyleVersionToLoad), toListOfUrls(thirdPartyJars));
                 }
             };
         }
