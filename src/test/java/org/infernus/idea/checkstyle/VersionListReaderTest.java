@@ -76,4 +76,16 @@ public class VersionListReaderTest {
         assertTrue(e.getMessage().contains("bundledVersions"));
         assertTrue(e.getMessage().contains("not a supported version"));
     }
+
+    @Test
+    public void isLatest_returnsTrueForLatestSentinel() {
+        VersionListReader underTest = new VersionListReader();
+        assertTrue(underTest.isLatest("latest"));
+    }
+
+    @Test
+    public void isLatest_returnsFalseForConcreteVersion() {
+        VersionListReader underTest = new VersionListReader();
+        assertFalse(underTest.isLatest("10.0"));
+    }
 }

@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
  * the Java code.
  */
 public class VersionListReader {
+    public static final String LATEST_VERSION = "latest";
+
     private static final String PROP_FILE = "checkstyle-idea.properties";
 
     private static final String PROP_SUPPORTED_VERSIONS = "checkstyle.versions.supported";
@@ -207,5 +209,9 @@ public class VersionListReader {
 
     public boolean isBundled(@NotNull final String version) {
         return bundledVersions.contains(version);
+    }
+
+    public boolean isLatest(@NotNull final String version) {
+        return LATEST_VERSION.equals(version);
     }
 }
