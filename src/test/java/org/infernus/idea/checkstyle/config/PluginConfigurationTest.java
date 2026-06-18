@@ -2,7 +2,9 @@ package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +18,7 @@ import java.util.TreeSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 class PluginConfigurationTest {
 
@@ -240,6 +243,19 @@ class PluginConfigurationTest {
         PluginConfiguration config = PluginConfigurationBuilder.testInstance("10.0.0").build();
         assertThrows(UnsupportedOperationException.class,
                 () -> config.getThirdPartyClasspath().add("/new/path"));
+    }
+
+    // --- config round-trip ---
+
+    @Test
+    void latestVersionSurvivesConfigRoundTrip() {
+        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(new ConfigurationLocationFactory());
+
+        PluginConfiguration original = PluginConfigurationBuilder.testInstance(VersionListReader.LATEST_VERSION).build();
+        ProjectConfigurationState.ProjectSettings settings = ProjectConfigurationState.ProjectSettings.create(original);
+        PluginConfiguration restored = settings.populate(PluginConfigurationBuilder.testInstance(VersionListReader.LATEST_VERSION), project).build();
+
+        assertThat(restored.getCheckstyleVersion(), is(VersionListReader.LATEST_VERSION));
     }
 
     // --- helper ---
