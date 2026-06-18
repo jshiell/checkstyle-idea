@@ -40,7 +40,10 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
     @Override
     public Object execute(@NotNull final Project project,
                           @NotNull final Continuation<? super Unit> continuation) {
-        String version = project.getService(PluginConfigurationManager.class).getCurrent().getCheckstyleVersion();
+        final String configuredVersion = project.getService(PluginConfigurationManager.class).getCurrent().getCheckstyleVersion();
+        final String version = versionListReader.isLatest(configuredVersion)
+                ? versionListReader.getDefaultVersion()
+                : configuredVersion;
 
         if (versionListReader.isBundled(version)) {
             return null;

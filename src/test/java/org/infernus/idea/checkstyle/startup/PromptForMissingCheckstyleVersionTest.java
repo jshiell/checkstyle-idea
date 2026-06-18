@@ -24,6 +24,7 @@ class PromptForMissingCheckstyleVersionTest {
     private PromptForMissingCheckstyleVersion activity;
     private CheckstyleArtifactDownloader downloader;
     private CheckstyleProjectService projectService;
+    private PluginConfiguration pluginConfig;
 
     @BeforeEach
     void setUp() {
@@ -34,7 +35,7 @@ class PromptForMissingCheckstyleVersionTest {
 
         PluginConfigurationManager configManager = mock(PluginConfigurationManager.class);
         projectService = mock(CheckstyleProjectService.class);
-        PluginConfiguration pluginConfig = mock(PluginConfiguration.class);
+        pluginConfig = mock(PluginConfiguration.class);
 
         when(project.getService(PluginConfigurationManager.class)).thenReturn(configManager);
         when(project.getService(CheckstyleProjectService.class)).thenReturn(projectService);
@@ -68,6 +69,18 @@ class PromptForMissingCheckstyleVersionTest {
     void nullDownloader_noNotification() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(false);
         when(projectService.getDownloader()).thenReturn(null);
+
+        activity.execute(project, mock(Continuation.class));
+
+        verify(notifier, never()).showInfo(any(), any(), any());
+    }
+
+    @Test
+    void latestVersion_noNotification() {
+        when(pluginConfig.getCheckstyleVersion()).thenReturn("latest");
+        when(versionListReader.isLatest("latest")).thenReturn(true);
+        when(versionListReader.getDefaultVersion()).thenReturn("13.5.0");
+        when(versionListReader.isBundled("13.5.0")).thenReturn(true);
 
         activity.execute(project, mock(Continuation.class));
 
