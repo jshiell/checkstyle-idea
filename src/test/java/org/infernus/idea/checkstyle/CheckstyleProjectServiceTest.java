@@ -126,6 +126,13 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
+    public void latestVersion_loadsDefaultBundledVersion() throws ClassNotFoundException {
+        underTest.activateCheckstyleVersion(VersionListReader.LATEST_VERSION, null);
+        assertThat(underTest.underlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
+                is(not(nullValue())));
+    }
+
+    @Test
     public void bundledVersion_doesNotUseDownloader() {
         CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
 

@@ -149,6 +149,9 @@ public class CheckstyleProjectService {
 
     @NotNull
     private String versionToLoad(@Nullable final String requestedVersion) {
+        if (requestedVersion != null && versionListReader.isLatest(requestedVersion)) {
+            return getDefaultVersion();
+        }
         if (requestedVersion != null && supportedVersions.contains(requestedVersion)) {
             return requestedVersion;
         }
