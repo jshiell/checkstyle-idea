@@ -91,8 +91,11 @@ public class CheckStyleConfigPanel extends JPanel {
         SortedSet<String> versions = checkstyleProjectService.getSupportedVersions();
         SortedSet<String> reversedVersions = new TreeSet<>(Collections.reverseOrder(versions.comparator()));
         reversedVersions.addAll(versions);
-        String[] supportedVersions = reversedVersions.toArray(new String[0]);
-        ComboBox<String> comboBox = new ComboBox<>(supportedVersions);
+        String[] reversed = reversedVersions.toArray(new String[0]);
+        String[] allVersions = new String[reversed.length + 1];
+        allVersions[0] = VersionListReader.LATEST_VERSION;
+        System.arraycopy(reversed, 0, allVersions, 1, reversed.length);
+        ComboBox<String> comboBox = new ComboBox<>(allVersions);
         comboBox.setRenderer(new VersionStatusRenderer());
         return comboBox;
     }
@@ -118,7 +121,13 @@ public class CheckStyleConfigPanel extends JPanel {
                                                       final boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof String version) {
-                setText(version + versionSuffixCache.getOrDefault(version, ""));
+                if (versionListReader.isLatest(version)) {
+                    final String resolved = versionListReader.getDefaultVersion();
+                    setText(CheckStyleBundle.message("config.csversion.latest", resolved)
+                            + versionSuffixCache.getOrDefault(resolved, ""));
+                } else {
+                    setText(version + versionSuffixCache.getOrDefault(version, ""));
+                }
             }
             return this;
         }
@@ -126,19 +135,22 @@ public class CheckStyleConfigPanel extends JPanel {
 
     private void activateCurrentClasspath() {
         checkerFactoryCache.invalidate();
-        String version = getCheckstyleVersion();
+        final String selectedVersion = getCheckstyleVersion();
+        final String resolvedVersion = versionListReader.isLatest(selectedVersion)
+                ? versionListReader.getDefaultVersion()
+                : selectedVersion;
 
-        if (!versionListReader.isBundled(version)) {
+        if (!versionListReader.isBundled(resolvedVersion)) {
             CheckstyleArtifactDownloader downloader = checkstyleProjectService.getDownloader();
-            if (downloader != null && !downloader.isAvailableLocally(version)) {
-                if (!downloadWithProgress(version, downloader)) {
+            if (downloader != null && !downloader.isAvailableLocally(resolvedVersion)) {
+                if (!downloadWithProgress(resolvedVersion, downloader)) {
                     return;
                 }
                 refreshVersionSuffixCache();
                 csVersionDropdown.repaint();
             }
         }
-        // Re-read version: "Use bundled version" path may have changed the dropdown selection.
+        // Re-read selected version: "Use bundled version" path may have changed the dropdown selection.
         checkstyleProjectService.activateCheckstyleVersion(getCheckstyleVersion(), getThirdPartyClasspath());
     }
 
