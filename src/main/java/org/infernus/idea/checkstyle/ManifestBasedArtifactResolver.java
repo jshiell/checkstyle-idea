@@ -55,6 +55,12 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
         }
         Files.createDirectories(target.getParent());
         jarDownloader.download(entry.mavenCentralUrl(), target);
+        if (!sha256Matches(target, entry.sha256hex())) {
+            Files.deleteIfExists(target);
+            throw new CheckstyleDownloadException(
+                    "SHA-256 mismatch after downloading " + entry.mavenCentralUrl()
+                            + "; expected " + entry.sha256hex());
+        }
         return target;
     }
 

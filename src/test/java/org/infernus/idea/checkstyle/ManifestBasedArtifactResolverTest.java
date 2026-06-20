@@ -82,6 +82,21 @@ public class ManifestBasedArtifactResolverTest {
     }
 
     @Test
+    void verifiesHashOfDownloadedBytes() throws Exception {
+        Path jarPath = expectedJarPath(VERSION);
+
+        doAnswer(inv -> {
+            Files.createDirectories(jarPath.getParent());
+            Files.write(jarPath, new byte[]{9, 9, 9});
+            return null;
+        }).when(mockDownloader).download(anyString(), eq(jarPath));
+
+        assertThrows(CheckstyleDownloadException.class,
+                () -> resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION));
+        assertFalse(Files.exists(jarPath));
+    }
+
+    @Test
     void throwsForVersionNotInManifest() {
         assertThrows(CheckstyleDownloadException.class,
                 () -> resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", "9.0"));
