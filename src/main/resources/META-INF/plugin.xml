@@ -26,6 +26,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.11.0: New: Added option to always use latest supported version of Checkstyle (#680).</li>
     <li>26.10.1: Fixed: Downloaded runtimes work correctly when using location dialogue (#695).</li>
     <li>26.10.1: Fixed: Third-party classpath is correctly added to download Checkstyle versions (#694, #696).</li>
     <li>26.10.0: New: Checkstyle versions are now downloaded on demand (except base and most recent, which remain pre-packaged) (#496).</li>
@@ -46,12 +47,6 @@
     <li>26.3.0: New: Added Checkstyle 13.2.0.</li>
     <li>26.2.0: New: Added Checkstyle 13.1.0.</li>
     <li>26.1.0: New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.</li>
-    <li>26.0.0: New: Added Checkstyle 13.0.0.</li>
-    <li>26.0.0: New: Now built again IDEA 2024.3.7 (was 2024.1.7); minimum JVM runtime is now 21.</li>
-    <li>26.0.0: New: Checkstyle 10 is now the minimum support version; version 9 is no longer supported.</li>
-    <li>26.0.0: New: Change version number to align with release year.</li>
-    <li>5.117.0: New: Added Checkstyle 12.3.1.</li>
-    <li>5.116.0: New: Added Checkstyle 12.2.0 and 12.3.0. Thanks to @james-baker-aera.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
