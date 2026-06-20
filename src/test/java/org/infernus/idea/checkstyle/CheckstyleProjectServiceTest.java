@@ -3,6 +3,8 @@ package org.infernus.idea.checkstyle;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -10,10 +12,13 @@ import org.junit.jupiter.api.io.TempDir;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
 
+import java.io.File;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 
 import static org.hamcrest.Matchers.*;
@@ -142,5 +147,34 @@ public class CheckstyleProjectServiceTest {
         serviceWithDownloader.underlyingClassLoader();
 
         verifyNoInteractions(mockDownloader);
+    }
+
+    @Test
+    public void copyLibsEnabled_stabilizesThirdPartyJarsFromProjectDir(@TempDir Path projectDir,
+                                                                        @TempDir Path copyDir) throws Exception {
+        Path thirdPartyJar = projectDir.resolve("ext.jar");
+        thirdPartyJar.toFile().createNewFile();
+
+        when(project.getBasePath()).thenReturn(projectDir.toString());
+        when(project.getLocationHash()).thenReturn("test-project");
+
+        PluginConfigurationManager copyLibsManager = mock(PluginConfigurationManager.class);
+        when(copyLibsManager.getCurrent())
+                .thenReturn(PluginConfigurationBuilder.testInstance(BUNDLED_VERSION).withCopyLibraries(true).build());
+        when(project.getService(PluginConfigurationManager.class)).thenReturn(copyLibsManager);
+
+        TempDirProvider tempDirProvider = new TempDirProvider() {
+            @Override
+            public Optional<File> forCopiedLibraries(@NotNull final Project p) {
+                return Optional.of(copyDir.toFile());
+            }
+        };
+
+        underTest = new CheckstyleProjectService(project, tempDirProvider);
+        underTest.activateCheckstyleVersion(BUNDLED_VERSION, List.of(thirdPartyJar.toString()));
+
+        URLClassLoader classLoader = (URLClassLoader) underTest.underlyingClassLoader();
+        URL originalUrl = thirdPartyJar.toUri().toURL();
+        assertThat(Arrays.asList(classLoader.getURLs()), not(hasItem(originalUrl)));
     }
 }

@@ -2,10 +2,12 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.checker.ClasspathStabilizer;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
+import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +16,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
 
@@ -36,25 +40,36 @@ public class CheckstyleProjectService {
     private final VersionListReader versionListReader;
     private final SortedSet<String> supportedVersions;
     private final CheckstyleArtifactDownloader downloader;
+    private final TempDirProvider tempDirProvider;
 
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root()));
+                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root()),
+                new TempDirProvider());
     }
 
     CheckstyleProjectService(@NotNull final Project project,
                              @NotNull final CheckstyleArtifactDownloader downloader) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                downloader);
+                downloader, new TempDirProvider());
+    }
+
+    CheckstyleProjectService(@NotNull final Project project,
+                             @NotNull final TempDirProvider tempDirProvider) {
+        this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
+                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
+                null, tempDirProvider);
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
                                      @Nullable final String requestedVersion,
                                      @Nullable final List<String> thirdPartyJars,
-                                     @Nullable final CheckstyleArtifactDownloader downloaderOverride) {
+                                     @Nullable final CheckstyleArtifactDownloader downloaderOverride,
+                                     @NotNull final TempDirProvider tempDirProvider) {
         this.project = project;
+        this.tempDirProvider = tempDirProvider;
         versionListReader = new VersionListReader();
         supportedVersions = versionListReader.getSupportedVersions();
         this.downloader = downloaderOverride;
@@ -79,7 +94,7 @@ public class CheckstyleProjectService {
     public static CheckstyleProjectService forVersion(@NotNull final Project project,
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null);
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null, new TempDirProvider());
     }
 
     @NotNull
@@ -87,7 +102,7 @@ public class CheckstyleProjectService {
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars,
                                                       @Nullable final CheckstyleArtifactDownloader downloader) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader);
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader, new TempDirProvider());
     }
 
     @Nullable
@@ -109,12 +124,14 @@ public class CheckstyleProjectService {
                                           @Nullable final List<String> thirdPartyJars) {
         String checkstyleVersionToLoad = versionToLoad(requestedVersion);
         boolean isBundled = versionListReader.isBundled(checkstyleVersionToLoad);
+        boolean copyLibs = pluginConfigurationManager(project).getCurrent().isCopyLibs();
         synchronized (lock) {
             checkstyleClassLoaderContainer = null;
             checkstyleClassLoaderFactory = () -> {
+                List<URL> thirdPartyUrls = resolveThirdPartyUrls(thirdPartyJars, copyLibs);
                 if (isBundled) {
                     return new CheckstyleClassLoaderContainer(
-                            project, this, checkstyleVersionToLoad, toListOfUrls(thirdPartyJars));
+                            project, this, checkstyleVersionToLoad, thirdPartyUrls);
                 } else {
                     if (downloader == null) {
                         throw new CheckStylePluginException(
@@ -122,7 +139,7 @@ public class CheckstyleProjectService {
                     }
                     try {
                         return new CheckstyleClassLoaderContainer(
-                                project, this, downloader.download(checkstyleVersionToLoad), toListOfUrls(thirdPartyJars));
+                                project, this, downloader.download(checkstyleVersionToLoad), thirdPartyUrls);
                     } catch (CheckstyleDownloadException e) {
                         throw new CheckStylePluginException(
                                 "Failed to download Checkstyle " + checkstyleVersionToLoad + ": " + e.getMessage(), e);
@@ -130,6 +147,18 @@ public class CheckstyleProjectService {
                 }
             };
         }
+    }
+
+    @NotNull
+    private List<URL> resolveThirdPartyUrls(@Nullable final List<String> jarFilePaths, final boolean copyLibs) {
+        List<URL> urls = toListOfUrls(jarFilePaths);
+        if (copyLibs && !urls.isEmpty()) {
+            Optional<File> copyDir = tempDirProvider.forCopiedLibraries(project);
+            if (copyDir.isPresent()) {
+                return Arrays.asList(new ClasspathStabilizer(project, copyDir.get().toPath()).stabilize(urls));
+            }
+        }
+        return urls;
     }
 
     @NotNull
