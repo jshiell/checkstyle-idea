@@ -55,22 +55,26 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
         }
         Files.createDirectories(target.getParent());
         jarDownloader.download(entry.mavenCentralUrl(), target);
-        if (!sha256Matches(target, entry.sha256hex())) {
+        String actualHex = sha256Hex(target);
+        if (!entry.sha256hex().equalsIgnoreCase(actualHex)) {
             Files.deleteIfExists(target);
             throw new CheckstyleDownloadException(
                     "SHA-256 mismatch after downloading " + entry.mavenCentralUrl()
-                            + "; expected " + entry.sha256hex());
+                            + "; expected " + entry.sha256hex() + " but was " + actualHex);
         }
         return target;
     }
 
     private static boolean sha256Matches(@NotNull final Path file, @NotNull final String expectedHex) {
+        return expectedHex.equalsIgnoreCase(sha256Hex(file));
+    }
+
+    private static String sha256Hex(@NotNull final Path file) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] actual = digest.digest(Files.readAllBytes(file));
-            return HexFormat.of().formatHex(actual).equalsIgnoreCase(expectedHex);
+            return HexFormat.of().formatHex(digest.digest(Files.readAllBytes(file)));
         } catch (IOException | NoSuchAlgorithmException e) {
-            return false;
+            return null;
         }
     }
 }
