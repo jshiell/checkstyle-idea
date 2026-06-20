@@ -175,6 +175,7 @@ public class CheckstyleProjectServiceTest {
 
         URLClassLoader classLoader = (URLClassLoader) underTest.underlyingClassLoader();
         URL originalUrl = thirdPartyJar.toUri().toURL();
-        assertThat(Arrays.asList(classLoader.getURLs()), not(hasItem(originalUrl)));
+        URL copiedUrl = copyDir.resolve("ext.jar").toUri().toURL();
+        assertThat(Arrays.asList(classLoader.getURLs()), allOf(not(hasItem(originalUrl)), hasItem(copiedUrl)));
     }
 }
