@@ -184,28 +184,28 @@ public class CheckStyleConfigPanel extends JPanel {
                 0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(csVersionDropdown, new GridBagConstraints(
-                1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                1, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(scopeDropdownLabel, new GridBagConstraints(
-                2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(scopeDropdown, new GridBagConstraints(
-                3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                1, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(suppressErrorsCheckbox, new GridBagConstraints(
-                0, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
-                2, 1, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(importSettingsFromMavenCheckbox, new GridBagConstraints(
                 0, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(importSettingsFromMavenCheckbox, new GridBagConstraints(
+                2, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
+                0, 3, 4, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 3, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 4, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 4, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 5, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
