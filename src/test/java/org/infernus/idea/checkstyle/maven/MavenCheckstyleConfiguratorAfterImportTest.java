@@ -66,7 +66,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     private MavenPlugin pluginWithConfig(Element configElement) {
         MavenPlugin plugin = mock(MavenPlugin.class);
         when(plugin.getConfigurationElement()).thenReturn(configElement);
-        when(plugin.getDependencies()).thenReturn(List.of(dep("com.puppycrawl.tools", "checkstyle", "13.5.0")));
+        when(plugin.getDependencies()).thenReturn(List.of(dep("com.puppycrawl.tools", "checkstyle", "13.6.0")));
         when(plugin.getMavenId()).thenReturn(new MavenId("org.apache.maven.plugins", "maven-checkstyle-plugin", "3.6.0"));
         when(mavenProject.findPlugin("org.apache.maven.plugins", "maven-checkstyle-plugin"))
             .thenReturn(plugin);

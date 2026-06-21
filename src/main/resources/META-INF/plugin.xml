@@ -26,6 +26,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.11.0: New: Added Checkstyle 13.6.0.</li>
     <li>26.11.0: New: Added option to always use latest supported version of Checkstyle (#680).</li>
     <li>26.10.1: Fixed: Downloaded runtimes work correctly when using location dialogue (#695).</li>
     <li>26.10.1: Fixed: Third-party classpath is correctly added to download Checkstyle versions (#694, #696).</li>

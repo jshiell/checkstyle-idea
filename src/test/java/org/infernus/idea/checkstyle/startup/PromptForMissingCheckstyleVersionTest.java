@@ -79,8 +79,8 @@ class PromptForMissingCheckstyleVersionTest {
     void latestVersion_noNotification() {
         when(pluginConfig.getCheckstyleVersion()).thenReturn("latest");
         when(versionListReader.isLatest("latest")).thenReturn(true);
-        when(versionListReader.getDefaultVersion()).thenReturn("13.5.0");
-        when(versionListReader.isBundled("13.5.0")).thenReturn(true);
+        when(versionListReader.getDefaultVersion()).thenReturn("13.6.0");
+        when(versionListReader.isBundled("13.6.0")).thenReturn(true);
 
         activity.execute(project, mock(Continuation.class));
 
