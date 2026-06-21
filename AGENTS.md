@@ -22,7 +22,7 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 - `src/csaccess/java/` — code isolated behind per-version classloaders (compiled against base Checkstyle 10.0)
 - `src/csaccessTest/java/` — tests for csaccess; `xTest` runs against all supported versions
 - `buildSrc/` — custom Gradle plugin: source sets, artifact gathering, cross-version test tasks, JaCoCo (60% min for csaccess)
-- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.10.5; IDEA Community 2024.3.7
+- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.16.0; IDEA Community 2024.3.7
 
 ## Key Concepts
 
@@ -30,7 +30,7 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 
 **Adding a Checkstyle version:** Add to `checkstyle.versions.supported` in `checkstyle-idea.properties`, run `./gradlew gatherCheckstyleArtifacts`, run `./gradlew xTest`, update CHANGELOG.md.
 
-**Tests:** JUnit 4 + Hamcrest + Mockito. `jvmArgs("-Xshare:off")`. Sandbox must have artifacts copied before tests run.
+**Tests:** JUnit 5 (Jupiter) + Hamcrest + Mockito. `jvmArgs("-Xshare:off")`. Sandbox must have artifacts copied before tests run.
 
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
