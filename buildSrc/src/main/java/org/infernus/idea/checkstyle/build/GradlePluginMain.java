@@ -100,7 +100,7 @@ public class GradlePluginMain implements Plugin<Project> {
             project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
 
             // Add generated classpath info file to resources
-            SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+            SourceSetContainer sourceSets = project.getExtensions().findByType(SourceSetContainer.class);
             if (sourceSets != null) {
                 SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
                 mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());

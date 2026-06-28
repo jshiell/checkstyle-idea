@@ -36,17 +36,17 @@ public class CustomSourceSetCreator {
 
 
     private String getJacocoReportTaskName() {
-        final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         return sourceSets.getByName(CSACCESS_SOURCESET_NAME).getTaskName("jacoco", "report");
     }
 
     private String getJacocoVerificationTaskName() {
-        final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         return sourceSets.getByName(CSACCESS_SOURCESET_NAME).getTaskName("jacoco", "CoverageVerification");
     }
 
     public void establishCsAccessSourceSet() {
-        final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
         // Create the 'csaccess' source set
@@ -83,7 +83,7 @@ public class CustomSourceSetCreator {
     }
 
     public void establishCsAccessTestSourceSet() {
-        final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         final SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         final SourceSet csaccessSourceSet = sourceSets.getByName(CSACCESS_SOURCESET_NAME);
         final SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
@@ -170,7 +170,7 @@ public class CustomSourceSetCreator {
 
     private void configureJacocoTask(final JacocoReportBase jacocoTask) {
         jacocoTask.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
-        final SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
         final SourceSet csaccessSourceSet = sourceSets.getByName(CSACCESS_SOURCESET_NAME);
         jacocoTask.getClassDirectories().from(csaccessSourceSet.getOutput().getClassesDirs());
         jacocoTask.getSourceDirectories().from(csaccessSourceSet.getJava().getSourceDirectories());

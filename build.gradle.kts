@@ -42,7 +42,7 @@ java {
     }
 }
 
-val mockitoAgent: Configuration by configurations.creating { isCanBeConsumed = false }
+val mockitoAgent: Configuration = configurations.create("mockitoAgent") { isCanBeConsumed = false }
 
 abstract class MockitoAgentProvider : CommandLineArgumentProvider {
     @get:InputFiles
