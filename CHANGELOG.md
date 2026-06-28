@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.11.1** Fixed: Improved flow for projects with a stored version that isn't bundled (#697).
 * **26.11.0** New: Add Checkstyle 13.6.0.
 * **26.11.0** New: Added option to always use latest supported version of Checkstyle (#680).
 * **26.10.1** Fixed: Downloaded runtimes work correctly when using location dialogue (#695).

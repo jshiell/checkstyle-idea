@@ -11,7 +11,14 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.infernus.idea.checkstyle.model.ScanScope;
+
+import java.util.ArrayList;
+import java.util.TreeSet;
+import java.util.function.Consumer;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +32,7 @@ class PromptForMissingCheckstyleVersionTest {
     private CheckstyleArtifactDownloader downloader;
     private CheckstyleProjectService projectService;
     private PluginConfiguration pluginConfig;
+    private PluginConfigurationManager configManager;
 
     @BeforeEach
     void setUp() {
@@ -33,7 +41,7 @@ class PromptForMissingCheckstyleVersionTest {
         notifier = mock(PromptForMissingCheckstyleVersion.Notifier.class);
         downloader = mock(CheckstyleArtifactDownloader.class);
 
-        PluginConfigurationManager configManager = mock(PluginConfigurationManager.class);
+        configManager = mock(PluginConfigurationManager.class);
         projectService = mock(CheckstyleProjectService.class);
         pluginConfig = mock(PluginConfiguration.class);
 
@@ -41,6 +49,15 @@ class PromptForMissingCheckstyleVersionTest {
         when(project.getService(CheckstyleProjectService.class)).thenReturn(projectService);
         when(configManager.getCurrent()).thenReturn(pluginConfig);
         when(pluginConfig.getCheckstyleVersion()).thenReturn("10.21.0");
+        when(pluginConfig.getScanScope()).thenReturn(ScanScope.JavaOnlyWithTests);
+        when(pluginConfig.getLocations()).thenReturn(new TreeSet<>());
+        when(pluginConfig.getThirdPartyClasspath()).thenReturn(new ArrayList<>());
+        when(pluginConfig.getActiveLocationIds()).thenReturn(new TreeSet<>());
+
+        TreeSet<String> bundled = new TreeSet<>();
+        bundled.add("10.0");
+        bundled.add("13.6.0");
+        when(versionListReader.getBundledVersions()).thenReturn(bundled);
 
         activity = new PromptForMissingCheckstyleVersion(versionListReader, notifier);
     }
@@ -51,7 +68,7 @@ class PromptForMissingCheckstyleVersionTest {
 
         activity.execute(project, mock(Continuation.class));
 
-        verify(notifier, never()).showInfo(any(), any(), any());
+        verifyNoInteractions(notifier);
     }
 
     @Test
@@ -62,7 +79,7 @@ class PromptForMissingCheckstyleVersionTest {
 
         activity.execute(project, mock(Continuation.class));
 
-        verify(notifier, never()).showInfo(any(), any(), any());
+        verifyNoInteractions(notifier);
     }
 
     @Test
@@ -72,7 +89,7 @@ class PromptForMissingCheckstyleVersionTest {
 
         activity.execute(project, mock(Continuation.class));
 
-        verify(notifier, never()).showInfo(any(), any(), any());
+        verifyNoInteractions(notifier);
     }
 
     @Test
@@ -84,17 +101,29 @@ class PromptForMissingCheckstyleVersionTest {
 
         activity.execute(project, mock(Continuation.class));
 
-        verify(notifier, never()).showInfo(any(), any(), any());
+        verifyNoInteractions(notifier);
     }
 
     @Test
-    void nonBundledNotLocal_showsNotification() {
+    void nonBundledNotLocal_showsTwoActions() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(false);
         when(projectService.getDownloader()).thenReturn(downloader);
         when(downloader.isAvailableLocally("10.21.0")).thenReturn(false);
 
         activity.execute(project, mock(Continuation.class));
 
-        verify(notifier).showInfo(eq(project), any(String.class), any(NotificationAction.class));
+        verify(notifier).showInfo(eq(project), any(String.class),
+                any(NotificationAction.class), any(NotificationAction.class));
+    }
+
+    @Test
+    void useBundledAction_updatesCurrent() {
+        Consumer<String> onVersionChanged = activity.buildOnVersionChanged(configManager);
+
+        onVersionChanged.accept("13.6.0");
+
+        verify(configManager).setCurrent(
+                argThat(c -> "13.6.0".equals(c.getCheckstyleVersion())),
+                eq(true));
     }
 }

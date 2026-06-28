@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationGroupManager;
@@ -21,11 +22,12 @@ public final class Notifications {
 
     public static void showInfo(final Project project,
                                 final String infoText,
-                                final NotificationAction action) {
-        balloonGroup()
-                .createNotification("", infoText, INFORMATION)
-                .addAction(action)
-                .notify(project);
+                                final NotificationAction... actions) {
+        Notification n = balloonGroup().createNotification("", infoText, INFORMATION);
+        for (NotificationAction action : actions) {
+            n.addAction(action);
+        }
+        n.notify(project);
     }
 
     public static void showWarning(final Project project,
