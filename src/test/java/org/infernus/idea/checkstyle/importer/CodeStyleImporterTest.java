@@ -482,7 +482,7 @@ public class CodeStyleImporterTest
         }
     }
 
-    public void testSeparatorWrapImporter() {
+    public void testSeparatorWrapImporter_nl() {
         importConfiguration(
                 inTreeWalker(
                         """
@@ -493,7 +493,10 @@ public class CodeStyleImporterTest
                 )
         );
         assertTrue(javaSettings.WRAP_FIRST_METHOD_IN_CALL_CHAIN);
+        assertEquals(CommonCodeStyleSettings.WRAP_ALWAYS, javaSettings.METHOD_CALL_CHAIN_WRAP);
+    }
 
+    public void testSeparatorWrapImporter_eol() {
         importConfiguration(
                 inTreeWalker(
                         """
@@ -504,6 +507,7 @@ public class CodeStyleImporterTest
                 )
         );
         assertFalse(javaSettings.WRAP_FIRST_METHOD_IN_CALL_CHAIN);
+        assertEquals(CommonCodeStyleSettings.DO_NOT_WRAP, javaSettings.METHOD_CALL_CHAIN_WRAP);
     }
 
     public void testOperatorWrapImporter() {
