@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.startup;
 
+import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
@@ -15,6 +16,7 @@ import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
@@ -23,7 +25,7 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
 
     @FunctionalInterface
     interface Notifier {
-        void showInfo(Project project, String text, NotificationAction... actions);
+        Notification showInfo(Project project, String text, NotificationAction... actions);
     }
 
     private final VersionListReader versionListReader;
@@ -70,10 +72,13 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
         }
 
         Consumer<String> onVersionChanged = buildOnVersionChanged(configManager);
+        AtomicReference<Notification> notifRef = new AtomicReference<>();
 
         NotificationAction downloadAction = NotificationAction.createSimple(
                 message("startup.download.action"),
                 () -> {
+                    Notification n = notifRef.get();
+                    if (n != null) n.expire();
                     if (!project.isDisposed()) {
                         CheckstyleDownloadHelper.downloadWithProgress(project, version, downloader, versionListReader, onVersionChanged);
                     }
@@ -84,13 +89,15 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
         NotificationAction useBundledAction = NotificationAction.createSimple(
                 message("startup.use-bundled.action", bundledVersion),
                 () -> {
+                    Notification n = notifRef.get();
+                    if (n != null) n.expire();
                     if (!project.isDisposed()) {
                         onVersionChanged.accept(bundledVersion);
                     }
                 }
         );
 
-        notifier.showInfo(project, message("startup.download.prompt", version), downloadAction, useBundledAction);
+        notifRef.set(notifier.showInfo(project, message("startup.download.prompt", version), downloadAction, useBundledAction));
         return null;
     }
 }

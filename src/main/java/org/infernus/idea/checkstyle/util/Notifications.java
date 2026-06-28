@@ -20,14 +20,15 @@ public final class Notifications {
     private Notifications() {
     }
 
-    public static void showInfo(final Project project,
-                                final String infoText,
-                                final NotificationAction... actions) {
+    public static Notification showInfo(final Project project,
+                                        final String infoText,
+                                        final NotificationAction... actions) {
         Notification n = balloonGroup().createNotification("", infoText, INFORMATION);
         for (NotificationAction action : actions) {
             n.addAction(action);
         }
         n.notify(project);
+        return n;
     }
 
     public static void showWarning(final Project project,
