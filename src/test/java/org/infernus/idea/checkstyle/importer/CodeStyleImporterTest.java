@@ -703,6 +703,22 @@ public class CodeStyleImporterTest
         assertRuleTokens(rules.get(9), METHOD);
     }
 
+    public void testDeclarationOrderIgnoreBoth() {
+        importConfiguration(inTreeWalker(
+                "<module name=\"DeclarationOrder\">" +
+                "<property name=\"ignoreConstructors\" value=\"true\"/>" +
+                "<property name=\"ignoreModifiers\" value=\"true\"/>" +
+                "</module>"));
+
+        StdArrangementSettings arrangementSettings = (StdArrangementSettings) javaSettings.getArrangementSettings();
+        assertNotNull(arrangementSettings);
+        List<StdArrangementMatchRule> rules = arrangementSettings.getRules();
+        assertEquals(3, rules.size());
+        assertRuleTokens(rules.get(0), FIELD, STATIC);
+        assertRuleTokens(rules.get(1), FIELD);
+        assertRuleTokens(rules.get(2), METHOD);
+    }
+
     public void testDeclarationOrderIgnoreModifiers() {
         importConfiguration(inTreeWalker(
                 "<module name=\"DeclarationOrder\"><property name=\"ignoreModifiers\" value=\"true\"/></module>"));
