@@ -4,6 +4,12 @@ import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.codeStyle.*;
+import com.intellij.psi.codeStyle.arrangement.match.StdArrangementMatchRule;
+import com.intellij.psi.codeStyle.arrangement.model.ArrangementAtomMatchCondition;
+import com.intellij.psi.codeStyle.arrangement.model.ArrangementCompositeMatchCondition;
+import com.intellij.psi.codeStyle.arrangement.model.ArrangementMatchCondition;
+import com.intellij.psi.codeStyle.arrangement.std.ArrangementSettingsToken;
+import com.intellij.psi.codeStyle.arrangement.std.StdArrangementSettings;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
@@ -12,6 +18,12 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.EntryType.*;
+import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.Modifier.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -670,6 +682,45 @@ public class CodeStyleImporterTest
         customSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
         customSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = 1;
         customSettings.PACKAGES_TO_USE_IMPORT_ON_DEMAND.copyFrom(new PackageEntryTable());
+    }
+
+    public void testDeclarationOrderDefault() {
+        importConfiguration(inTreeWalker("<module name=\"DeclarationOrder\"/>"));
+
+        StdArrangementSettings arrangementSettings = (StdArrangementSettings) javaSettings.getArrangementSettings();
+        assertNotNull(arrangementSettings);
+        List<StdArrangementMatchRule> rules = arrangementSettings.getRules();
+        assertEquals(10, rules.size());
+        assertRuleTokens(rules.get(0), FIELD, STATIC, PUBLIC);
+        assertRuleTokens(rules.get(1), FIELD, STATIC, PROTECTED);
+        assertRuleTokens(rules.get(2), FIELD, STATIC, PACKAGE_PRIVATE);
+        assertRuleTokens(rules.get(3), FIELD, STATIC, PRIVATE);
+        assertRuleTokens(rules.get(4), FIELD, PUBLIC);
+        assertRuleTokens(rules.get(5), FIELD, PROTECTED);
+        assertRuleTokens(rules.get(6), FIELD, PACKAGE_PRIVATE);
+        assertRuleTokens(rules.get(7), FIELD, PRIVATE);
+        assertRuleTokens(rules.get(8), CONSTRUCTOR);
+        assertRuleTokens(rules.get(9), METHOD);
+    }
+
+    private static void assertRuleTokens(final StdArrangementMatchRule rule,
+                                         final ArrangementSettingsToken... expectedTokens) {
+        assertEquals(tokensOf(rule), Set.of(expectedTokens));
+    }
+
+    private static Set<ArrangementSettingsToken> tokensOf(final StdArrangementMatchRule rule) {
+        ArrangementMatchCondition condition = rule.getMatcher().getCondition();
+        Set<ArrangementSettingsToken> tokens = new HashSet<>();
+        if (condition instanceof ArrangementAtomMatchCondition atom) {
+            tokens.add(atom.getType());
+        } else if (condition instanceof ArrangementCompositeMatchCondition composite) {
+            for (ArrangementMatchCondition operand : composite.getOperands()) {
+                if (operand instanceof ArrangementAtomMatchCondition atom) {
+                    tokens.add(atom.getType());
+                }
+            }
+        }
+        return tokens;
     }
 
 }
