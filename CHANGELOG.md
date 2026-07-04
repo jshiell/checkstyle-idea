@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.11.2** Fixed: Improved import ordering (#623).
 * **26.11.2** Fixed: Improved chained method call formatting (#664).
 * **26.11.1** Fixed: Improved flow for projects with a stored version that isn't bundled (#697).
 * **26.11.0** New: Add Checkstyle 13.6.0.
