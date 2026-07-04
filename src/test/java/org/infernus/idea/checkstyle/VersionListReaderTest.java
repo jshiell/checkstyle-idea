@@ -51,20 +51,19 @@ public class VersionListReaderTest {
         VersionListReader underTest = new VersionListReader();
         assertNotNull(underTest.getBundledVersions());
         assertFalse(underTest.getBundledVersions().isEmpty());
-        assertTrue(underTest.getBundledVersions().contains("10.0"));
         assertTrue(underTest.getBundledVersions().contains("13.6.0"));
     }
 
     @Test
     public void testIsBundledReturnsTrueForBundledVersion() {
         VersionListReader underTest = new VersionListReader();
-        assertTrue(underTest.isBundled("10.0"));
         assertTrue(underTest.isBundled("13.6.0"));
     }
 
     @Test
     public void testIsBundledReturnsFalseForNonBundledVersion() {
         VersionListReader underTest = new VersionListReader();
+        assertFalse(underTest.isBundled("10.0"));
         assertFalse(underTest.isBundled("10.4"));
         assertFalse(underTest.isBundled("11.0.1"));
     }

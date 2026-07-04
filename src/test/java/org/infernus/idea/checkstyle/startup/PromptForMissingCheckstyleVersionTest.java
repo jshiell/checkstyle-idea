@@ -55,7 +55,6 @@ class PromptForMissingCheckstyleVersionTest {
         when(pluginConfig.getActiveLocationIds()).thenReturn(new TreeSet<>());
 
         TreeSet<String> bundled = new TreeSet<>();
-        bundled.add("10.0");
         bundled.add("13.6.0");
         when(versionListReader.getBundledVersions()).thenReturn(bundled);
 
