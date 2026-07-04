@@ -703,6 +703,25 @@ public class CodeStyleImporterTest
         assertRuleTokens(rules.get(9), METHOD);
     }
 
+    public void testDeclarationOrderIgnoreConstructors() {
+        importConfiguration(inTreeWalker(
+                "<module name=\"DeclarationOrder\"><property name=\"ignoreConstructors\" value=\"true\"/></module>"));
+
+        StdArrangementSettings arrangementSettings = (StdArrangementSettings) javaSettings.getArrangementSettings();
+        assertNotNull(arrangementSettings);
+        List<StdArrangementMatchRule> rules = arrangementSettings.getRules();
+        assertEquals(9, rules.size());
+        assertRuleTokens(rules.get(0), FIELD, STATIC, PUBLIC);
+        assertRuleTokens(rules.get(1), FIELD, STATIC, PROTECTED);
+        assertRuleTokens(rules.get(2), FIELD, STATIC, PACKAGE_PRIVATE);
+        assertRuleTokens(rules.get(3), FIELD, STATIC, PRIVATE);
+        assertRuleTokens(rules.get(4), FIELD, PUBLIC);
+        assertRuleTokens(rules.get(5), FIELD, PROTECTED);
+        assertRuleTokens(rules.get(6), FIELD, PACKAGE_PRIVATE);
+        assertRuleTokens(rules.get(7), FIELD, PRIVATE);
+        assertRuleTokens(rules.get(8), METHOD);
+    }
+
     private static void assertRuleTokens(final StdArrangementMatchRule rule,
                                          final ArrangementSettingsToken... expectedTokens) {
         assertEquals(tokensOf(rule), Set.of(expectedTokens));
