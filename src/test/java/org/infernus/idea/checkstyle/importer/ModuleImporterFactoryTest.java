@@ -41,6 +41,7 @@ class ModuleImporterFactoryTest {
         String[] knownModules = {
             "AvoidStarImport",
             "CustomImportOrder",
+            "DeclarationOrder",
             "EmptyLineSeparator",
             "FileTabCharacter",
             "ImportOrder",
