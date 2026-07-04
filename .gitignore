@@ -25,3 +25,4 @@ _support/
 /buildSrc/.project
 /buildSrc/bin/
 /.opencode/
+/.claude/
