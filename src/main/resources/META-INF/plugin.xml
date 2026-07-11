@@ -86,6 +86,10 @@
                              instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
                              parentId="tools" />
 
+        <applicationConfigurable key="config.application.configuration-name"
+                                 instance="org.infernus.idea.checkstyle.CheckStyleApplicationConfigurable"
+                                 parentId="tools" />
+
         <moduleConfigurationEditorProvider implementation="org.infernus.idea.checkstyle.CheckstyleModuleConfigurationEditorProvider"/>
 
         <moduleService serviceImplementation="org.infernus.idea.checkstyle.config.ModuleConfigurationState"/>
