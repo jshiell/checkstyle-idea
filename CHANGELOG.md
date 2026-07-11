@@ -1,8 +1,9 @@
 
 # CheckStyle-IDEA Changelog
 
-* **26.11.2** Fixed: Improved import ordering (#623).
-* **26.11.2** Fixed: Improved chained method call formatting (#664).
+* **26.12.0** New: Non-bundled Checkstyle versions can now be downloaded via a Maven settings.xml mirror or a configurable IDE-wide override, for use behind firewalls where Maven Central is unreachable (#698).
+* **26.12.0** Fixed: Improved import ordering (#623).
+* **26.12.0** Fixed: Improved chained method call formatting (#664).
 * **26.11.1** Fixed: Improved flow for projects with a stored version that isn't bundled (#697).
 * **26.11.0** New: Add Checkstyle 13.6.0.
 * **26.11.0** New: Added option to always use latest supported version of Checkstyle (#680).
