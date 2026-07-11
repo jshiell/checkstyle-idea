@@ -55,7 +55,7 @@ class PromptForMissingCheckstyleVersionTest {
         when(pluginConfig.getActiveLocationIds()).thenReturn(new TreeSet<>());
 
         TreeSet<String> bundled = new TreeSet<>();
-        bundled.add("13.6.0");
+        bundled.add("13.7.0");
         when(versionListReader.getBundledVersions()).thenReturn(bundled);
 
         activity = new PromptForMissingCheckstyleVersion(versionListReader, notifier);
@@ -95,8 +95,8 @@ class PromptForMissingCheckstyleVersionTest {
     void latestVersion_noNotification() {
         when(pluginConfig.getCheckstyleVersion()).thenReturn("latest");
         when(versionListReader.isLatest("latest")).thenReturn(true);
-        when(versionListReader.getDefaultVersion()).thenReturn("13.6.0");
-        when(versionListReader.isBundled("13.6.0")).thenReturn(true);
+        when(versionListReader.getDefaultVersion()).thenReturn("13.7.0");
+        when(versionListReader.isBundled("13.7.0")).thenReturn(true);
 
         activity.execute(project, mock(Continuation.class));
 
@@ -119,10 +119,10 @@ class PromptForMissingCheckstyleVersionTest {
     void useBundledAction_updatesCurrent() {
         Consumer<String> onVersionChanged = activity.buildOnVersionChanged(configManager);
 
-        onVersionChanged.accept("13.6.0");
+        onVersionChanged.accept("13.7.0");
 
         verify(configManager).setCurrent(
-                argThat(c -> "13.6.0".equals(c.getCheckstyleVersion())),
+                argThat(c -> "13.7.0".equals(c.getCheckstyleVersion())),
                 eq(true));
     }
 }

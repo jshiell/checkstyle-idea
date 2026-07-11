@@ -26,6 +26,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.12.0: New: Added Checkstyle 13.7.0.</li>
     <li>26.12.0: New: Non-bundled Checkstyle versions can now be downloaded via a Maven settings.xml mirror or a configurable IDE-wide override, for use behind firewalls where Maven Central is unreachable (#698).</li>
     <li>26.12.0: Fixed: Improved import ordering (#623).</li>
     <li>26.12.0: Fixed: Improved chained method call formatting (#664).</li>
