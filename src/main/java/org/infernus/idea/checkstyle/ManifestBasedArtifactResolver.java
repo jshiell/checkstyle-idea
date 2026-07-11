@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownloader.ArtifactResolver {
@@ -22,13 +23,16 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
     private final DownloadManifest manifest;
     private final Path m2Root;
     private final JarDownloader jarDownloader;
+    private final Supplier<String> baseUrlSupplier;
 
     public ManifestBasedArtifactResolver(@NotNull final DownloadManifest manifest,
                                          @NotNull final Path m2Root,
-                                         @NotNull final JarDownloader jarDownloader) {
+                                         @NotNull final JarDownloader jarDownloader,
+                                         @NotNull final Supplier<String> baseUrlSupplier) {
         this.manifest = manifest;
         this.m2Root = m2Root;
         this.jarDownloader = jarDownloader;
+        this.baseUrlSupplier = baseUrlSupplier;
     }
 
     @Override
@@ -54,12 +58,13 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
             return target;
         }
         Files.createDirectories(target.getParent());
-        jarDownloader.download(entry.mavenCentralUrl(), target);
+        String artifactUrl = entry.artifactUrl(baseUrlSupplier.get());
+        jarDownloader.download(artifactUrl, target);
         String actualHex = sha256Hex(target);
         if (!entry.sha256hex().equalsIgnoreCase(actualHex)) {
             Files.deleteIfExists(target);
             throw new CheckstyleDownloadException(
-                    "SHA-256 mismatch after downloading " + entry.mavenCentralUrl()
+                    "SHA-256 mismatch after downloading " + artifactUrl
                             + "; expected " + entry.sha256hex() + " but was " + actualHex);
         }
         return target;

@@ -32,7 +32,8 @@ public class ManifestBasedArtifactResolverTest {
     void setUp() {
         mockDownloader = mock(ManifestBasedArtifactResolver.JarDownloader.class);
         manifest = DownloadManifest.fromString(VERSION + " = com.puppycrawl.tools:checkstyle:" + VERSION + "::" + SHA256 + "\n");
-        resolver = new ManifestBasedArtifactResolver(manifest, m2Root, mockDownloader);
+        resolver = new ManifestBasedArtifactResolver(manifest, m2Root, mockDownloader,
+                () -> "https://repo1.maven.org/maven2/");
     }
 
     @Test
@@ -94,6 +95,25 @@ public class ManifestBasedArtifactResolverTest {
         assertThrows(CheckstyleDownloadException.class,
                 () -> resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION));
         assertFalse(Files.exists(jarPath));
+    }
+
+    @Test
+    void downloadsJarUsingSuppliedBaseUrl() throws Exception {
+        Path jarPath = expectedJarPath(VERSION);
+        resolver = new ManifestBasedArtifactResolver(manifest, m2Root, mockDownloader,
+                () -> "https://mirror.example.com/repo/");
+
+        doAnswer(inv -> {
+            Files.createDirectories(jarPath.getParent());
+            Files.write(jarPath, new byte[]{1, 2, 3});
+            return null;
+        }).when(mockDownloader).download(anyString(), eq(jarPath));
+
+        resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION);
+
+        verify(mockDownloader).download(
+                "https://mirror.example.com/repo/com/puppycrawl/tools/checkstyle/" + VERSION + "/checkstyle-" + VERSION + ".jar",
+                jarPath);
     }
 
     @Test
