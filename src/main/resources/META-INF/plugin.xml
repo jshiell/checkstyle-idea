@@ -77,6 +77,8 @@
         <projectService serviceImplementation="org.infernus.idea.checkstyle.util.ProjectFilePaths"/>
         <projectService serviceImplementation="org.infernus.idea.checkstyle.ConfigurationInvalidator"/>
 
+        <applicationService serviceImplementation="org.infernus.idea.checkstyle.config.ApplicationConfigurationState"/>
+
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.PromptForMissingCheckstyleVersion"/>
 
