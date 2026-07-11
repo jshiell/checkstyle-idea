@@ -45,7 +45,8 @@ public class CheckstyleProjectService {
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root()),
+                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
+                        () -> "https://repo1.maven.org/maven2/"),
                 new TempDirProvider());
     }
 

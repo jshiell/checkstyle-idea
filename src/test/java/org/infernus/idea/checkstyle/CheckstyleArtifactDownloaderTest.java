@@ -76,7 +76,8 @@ public class CheckstyleArtifactDownloaderTest {
 
     @Test
     void createFactoryReturnsNonNullDownloader() {
-        CheckstyleArtifactDownloader created = CheckstyleArtifactDownloader.create(m2Root);
+        CheckstyleArtifactDownloader created = CheckstyleArtifactDownloader.create(
+                m2Root, () -> "https://repo1.maven.org/maven2/");
         assertNotNull(created);
     }
 }

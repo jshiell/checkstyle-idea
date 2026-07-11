@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -32,10 +33,11 @@ public class CheckstyleArtifactDownloader {
     }
 
     @NotNull
-    public static CheckstyleArtifactDownloader create(@NotNull final Path m2Root) {
+    public static CheckstyleArtifactDownloader create(@NotNull final Path m2Root,
+                                                       @NotNull final Supplier<String> baseUrlSupplier) {
         DownloadManifest manifest = DownloadManifest.fromClasspath();
         ManifestBasedArtifactResolver resolver = new ManifestBasedArtifactResolver(
-                manifest, m2Root, new HttpJarDownloader());
+                manifest, m2Root, new HttpJarDownloader(), baseUrlSupplier);
         return new CheckstyleArtifactDownloader(m2Root, resolver);
     }
 
