@@ -34,20 +34,29 @@ public class ManifestEntryTest {
     }
 
     @Test
-    void mavenCentralUrlWithoutClassifier() {
+    void artifactUrlWithoutClassifierAndTrailingSlashBaseUrl() {
         ManifestEntry entry = new ManifestEntry("com.puppycrawl.tools", "checkstyle", "10.26.1", "", "abc123");
 
         assertEquals(
                 "https://repo1.maven.org/maven2/com/puppycrawl/tools/checkstyle/10.26.1/checkstyle-10.26.1.jar",
-                entry.mavenCentralUrl());
+                entry.artifactUrl("https://repo1.maven.org/maven2/"));
     }
 
     @Test
-    void mavenCentralUrlWithClassifier() {
+    void artifactUrlWithoutClassifierAndNoTrailingSlashBaseUrl() {
+        ManifestEntry entry = new ManifestEntry("com.puppycrawl.tools", "checkstyle", "10.26.1", "", "abc123");
+
+        assertEquals(
+                "https://repo1.maven.org/maven2/com/puppycrawl/tools/checkstyle/10.26.1/checkstyle-10.26.1.jar",
+                entry.artifactUrl("https://repo1.maven.org/maven2"));
+    }
+
+    @Test
+    void artifactUrlWithClassifier() {
         ManifestEntry entry = new ManifestEntry("org.xmlresolver", "xmlresolver", "5.3.3", "data", "def456");
 
         assertEquals(
                 "https://repo1.maven.org/maven2/org/xmlresolver/xmlresolver/5.3.3/xmlresolver-5.3.3-data.jar",
-                entry.mavenCentralUrl());
+                entry.artifactUrl("https://repo1.maven.org/maven2/"));
     }
 }

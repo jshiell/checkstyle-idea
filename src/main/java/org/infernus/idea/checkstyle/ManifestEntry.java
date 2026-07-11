@@ -22,11 +22,12 @@ public record ManifestEntry(
     }
 
     @NotNull
-    public String mavenCentralUrl() {
+    public String artifactUrl(@NotNull final String baseUrl) {
+        String normalisedBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         String groupPath = groupId.replace('.', '/');
         String filename = classifier.isEmpty()
                 ? artifactId + "-" + version + ".jar"
                 : artifactId + "-" + version + "-" + classifier + ".jar";
-        return "https://repo1.maven.org/maven2/" + groupPath + "/" + artifactId + "/" + version + "/" + filename;
+        return normalisedBaseUrl + "/" + groupPath + "/" + artifactId + "/" + version + "/" + filename;
     }
 }
