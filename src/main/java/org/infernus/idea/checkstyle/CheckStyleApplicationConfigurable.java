@@ -2,15 +2,15 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.util.Objects;
 
 
@@ -42,13 +42,21 @@ public class CheckStyleApplicationConfigurable implements Configurable {
     public JComponent createComponent() {
         artifactRepositoryBaseUrlOverrideField = new JTextField();
         artifactRepositoryBaseUrlOverrideField.setToolTipText(
-                CheckStyleBundle.message("config.artifact-repository-base-url-override.tooltip"));
+                CheckStyleBundle.message("config.artefact-repository-base-url-override.tooltip"));
 
         reset();
 
+        final JTextArea description = new JTextArea(CheckStyleBundle.message("config.artefact-repository-base-url-override.description"));
+        description.setFont(UIManager.getFont("Label.font"));
+        description.setEditable(false);
+        description.setOpaque(false);
+        description.setWrapStyleWord(true);
+        description.setLineWrap(true);
+
         return FormBuilder.createFormBuilder()
+                .addComponent(description)
                 .addLabeledComponent(
-                        CheckStyleBundle.message("config.artifact-repository-base-url-override.label.text"),
+                        CheckStyleBundle.message("config.artefact-repository-base-url-override.label.text"),
                         artifactRepositoryBaseUrlOverrideField)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
