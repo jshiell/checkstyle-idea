@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
@@ -26,9 +27,14 @@ public class ArtifactDownloadBaseUrlResolver {
     private final Supplier<Optional<String>> mavenMirrorSupplier;
 
     public ArtifactDownloadBaseUrlResolver() {
-        this(() -> ApplicationManager.getApplication()
-                        .getService(ApplicationConfigurationState.class)
-                        .getArtifactRepositoryBaseUrlOverride(),
+        this(() -> {
+                    Application application = ApplicationManager.getApplication();
+                    if (application == null) {
+                        return null;
+                    }
+                    return application.getService(ApplicationConfigurationState.class)
+                            .getArtifactRepositoryBaseUrlOverride();
+                },
                 MavenMirrorUrlResolver::resolveCentralMirror);
     }
 
