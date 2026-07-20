@@ -2,15 +2,27 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.FormBuilder;
+import com.intellij.util.ui.JBUI;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
+import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.config.ArtifactRepositoryCredentialsStore;
 import org.infernus.idea.checkstyle.config.PasswordSafeArtifactRepositoryCredentialsStore;
+import org.infernus.idea.checkstyle.ui.GlobalLocationDialogue;
+import org.infernus.idea.checkstyle.ui.GlobalLocationTableModel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
+import java.util.HashSet;
 import java.util.Objects;
 
 
@@ -21,11 +33,20 @@ import java.util.Objects;
  */
 public class CheckStyleApplicationConfigurable implements Configurable {
 
+    private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 150);
+
     private final ApplicationConfigurationState applicationConfigurationState;
     private final ArtifactRepositoryCredentialsStore credentialsStore;
+
     private JTextField artifactRepositoryBaseUrlOverrideField;
     private JTextField artifactRepositoryOverrideUsernameField;
     private JPasswordField artifactRepositoryOverridePasswordField;
+
+    private JCheckBox useGlobalRulesByDefaultCheckbox;
+
+    private final GlobalLocationTableModel globalLocationTableModel = new GlobalLocationTableModel();
+
+    private JBTable globalLocationTable;
 
     public CheckStyleApplicationConfigurable() {
         this(ApplicationManager.getApplication().getService(ApplicationConfigurationState.class),
@@ -58,6 +79,15 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         artifactRepositoryOverridePasswordField.setToolTipText(
                 CheckStyleBundle.message("config.artefact-repository-override-password.tooltip"));
 
+        useGlobalRulesByDefaultCheckbox = new JCheckBox(
+                CheckStyleBundle.message("config.global.use-by-default.text"));
+        useGlobalRulesByDefaultCheckbox.setToolTipText(
+                CheckStyleBundle.message("config.global.use-by-default.tooltip"));
+
+        globalLocationTable = new JBTable(globalLocationTableModel);
+        globalLocationTable.setStriped(true);
+        globalLocationTable.getTableHeader().setReorderingAllowed(false);
+
         reset();
 
         final JTextArea description = new JTextArea(CheckStyleBundle.message("config.artefact-repository-base-url-override.description"));
@@ -66,6 +96,37 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         description.setOpaque(false);
         description.setWrapStyleWord(true);
         description.setLineWrap(true);
+
+        final ToolbarDecorator tableDecorator = ToolbarDecorator.createDecorator(globalLocationTable);
+        tableDecorator.setAddAction(button -> {
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+            if (dialogue.showAndGet()) {
+                final GlobalConfigurationLocation newLocation = dialogue.getGlobalConfigurationLocation();
+                if (newLocation != null) {
+                    globalLocationTableModel.addLocation(newLocation);
+                }
+            }
+        });
+        tableDecorator.setEditAction(button -> {
+            final int selectedRow = globalLocationTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(
+                        globalLocationTableModel.getLocationAt(selectedRow));
+                if (dialogue.showAndGet()) {
+                    final GlobalConfigurationLocation updated = dialogue.getGlobalConfigurationLocation();
+                    if (updated != null) {
+                        globalLocationTableModel.updateLocationAt(selectedRow, updated);
+                    }
+                }
+            }
+        });
+        tableDecorator.setRemoveAction(button -> {
+            final int selectedRow = globalLocationTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                globalLocationTableModel.removeLocationAt(selectedRow);
+            }
+        });
+        tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         return FormBuilder.createFormBuilder()
                 .addComponent(description)
@@ -78,6 +139,13 @@ public class CheckStyleApplicationConfigurable implements Configurable {
                 .addLabeledComponent(
                         CheckStyleBundle.message("config.artefact-repository-override-password.label.text"),
                         artifactRepositoryOverridePasswordField)
+                .addComponent(new TitledSeparator(CheckStyleBundle.message("config.global.section.title")))
+                .addComponent(useGlobalRulesByDefaultCheckbox)
+                .addLabeledComponent(
+                        CheckStyleBundle.message("config.global.locations.label"),
+                        tableDecorator.createPanel(),
+                        JBUI.scale(4),
+                        true)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -99,7 +167,18 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         String typedPassword = new String(artifactRepositoryOverridePasswordField.getPassword());
         String storedPassword = persistedUsername.isBlank()
                 ? "" : credentialsStore.getPassword(persistedUsername).orElse("");
-        return !typedPassword.equals(storedPassword);
+        if (!typedPassword.equals(storedPassword)) {
+            return true;
+        }
+
+        if (useGlobalRulesByDefaultCheckbox.isSelected() != applicationConfigurationState.isUseGlobalRulesByDefault()
+                || !globalLocationTableModel.getLocations().equals(applicationConfigurationState.getGlobalLocations())
+                || !new HashSet<>(globalLocationTableModel.getActiveIds()).equals(
+                        new HashSet<>(applicationConfigurationState.getActiveGlobalLocationIds()))) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -119,6 +198,18 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         if (!newUsername.isBlank()) {
             credentialsStore.setPassword(newUsername, typedPassword);
         }
+
+        applicationConfigurationState.setUseGlobalRulesByDefault(useGlobalRulesByDefaultCheckbox.isSelected());
+        applicationConfigurationState.setGlobalLocations(globalLocationTableModel.getLocations());
+        applicationConfigurationState.setActiveGlobalLocationIds(globalLocationTableModel.getActiveIds());
+
+        // Invalidate checker caches in all open projects so stale global-location checkers are evicted.
+        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
+        if (projectManager != null) {
+            for (final Project project : projectManager.getOpenProjects()) {
+                project.getService(CheckerFactoryCache.class).invalidate();
+            }
+        }
     }
 
     @Override
@@ -130,6 +221,11 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         artifactRepositoryOverrideUsernameField.setText(persistedUsername);
         artifactRepositoryOverridePasswordField.setText(
                 persistedUsername.isBlank() ? "" : credentialsStore.getPassword(persistedUsername).orElse(""));
+
+        useGlobalRulesByDefaultCheckbox.setSelected(applicationConfigurationState.isUseGlobalRulesByDefault());
+        globalLocationTableModel.setLocations(
+                applicationConfigurationState.getGlobalLocations(),
+                applicationConfigurationState.getActiveGlobalLocationIds());
     }
 
     JTextField getArtifactRepositoryBaseUrlOverrideField() {
