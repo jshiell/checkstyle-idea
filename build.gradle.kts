@@ -1,5 +1,7 @@
 import org.infernus.idea.checkstyle.build.CheckstyleVersions
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
+import java.io.File
 
 repositories {
     mavenCentral()
@@ -93,6 +95,19 @@ tasks {
 
         if (name == "compileCsaccessJava" || name == "compileCsaccessTestJava") {
             options.compilerArgs.addAll(listOf("-Xlint:unchecked"))
+        }
+    }
+
+    // Workaround for legacy Apache Ant Path.addJavaRuntime() behavior: when java.vendor contains
+    // "microsoft" it adds <java.home>/Packages as a FileSet (support for the old 1990s MS JVM).
+    // Modern Microsoft JDK builds no longer ship this directory, causing a build failure.
+    // Creating the directory (even empty) lets Ant scan it harmlessly.
+    withType<InstrumentCodeTask>().configureEach {
+        doFirst {
+            val packagesDir = File(System.getProperty("java.home"), "Packages")
+            if (!packagesDir.exists()) {
+                packagesDir.mkdirs()
+            }
         }
     }
 }
