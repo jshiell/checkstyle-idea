@@ -14,6 +14,7 @@ import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.config.ArtifactRepositoryCredentialsStore;
 import org.infernus.idea.checkstyle.config.PasswordSafeArtifactRepositoryCredentialsStore;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.ui.GlobalLocationDialogue;
 import org.infernus.idea.checkstyle.ui.GlobalLocationTableModel;
 import org.jetbrains.annotations.Nls;
@@ -28,8 +29,7 @@ import java.util.Objects;
 
 /**
  * The application-level (IDE-wide) "configurable component" for CheckStyle plugin settings that are not
- * scoped to a single project, currently just the artifact download mirror override. Registered in
- * {@code plugin.xml} as an {@code applicationConfigurable} extension.
+ * scoped to a single project. Registered in {@code plugin.xml} as an {@code applicationConfigurable} extension.
  */
 public class CheckStyleApplicationConfigurable implements Configurable {
 
@@ -97,36 +97,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         description.setWrapStyleWord(true);
         description.setLineWrap(true);
 
-        final ToolbarDecorator tableDecorator = ToolbarDecorator.createDecorator(globalLocationTable);
-        tableDecorator.setAddAction(button -> {
-            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
-            if (dialogue.showAndGet()) {
-                final GlobalConfigurationLocation newLocation = dialogue.getGlobalConfigurationLocation();
-                if (newLocation != null) {
-                    globalLocationTableModel.addLocation(newLocation);
-                }
-            }
-        });
-        tableDecorator.setEditAction(button -> {
-            final int selectedRow = globalLocationTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(
-                        globalLocationTableModel.getLocationAt(selectedRow));
-                if (dialogue.showAndGet()) {
-                    final GlobalConfigurationLocation updated = dialogue.getGlobalConfigurationLocation();
-                    if (updated != null) {
-                        globalLocationTableModel.updateLocationAt(selectedRow, updated);
-                    }
-                }
-            }
-        });
-        tableDecorator.setRemoveAction(button -> {
-            final int selectedRow = globalLocationTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                globalLocationTableModel.removeLocationAt(selectedRow);
-            }
-        });
-        tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
+        final JComponent globalRulesEditor = createGlobalRulesEditor();
 
         return FormBuilder.createFormBuilder()
                 .addComponent(description)
@@ -143,7 +114,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
                 .addComponent(useGlobalRulesByDefaultCheckbox)
                 .addLabeledComponent(
                         CheckStyleBundle.message("config.global.locations.label"),
-                        tableDecorator.createPanel(),
+                        globalRulesEditor,
                         JBUI.scale(4),
                         true)
                 .addComponentFillVertically(new JPanel(), 0)
@@ -208,6 +179,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         if (projectManager != null) {
             for (final Project project : projectManager.getOpenProjects()) {
                 project.getService(CheckerFactoryCache.class).invalidate();
+                project.getService(PluginConfigurationManager.class).invalidate();
             }
         }
     }
@@ -251,5 +223,46 @@ public class CheckStyleApplicationConfigurable implements Configurable {
     @NotNull
     private static String emptyIfNull(@Nullable final String value) {
         return value == null ? "" : value;
+    }
+
+    private @NotNull JComponent createGlobalRulesEditor() {
+        if (ApplicationManager.getApplication() == null) {
+            final JScrollPane scrollPane = new JScrollPane(globalLocationTable);
+            scrollPane.setPreferredSize(DECORATOR_DIMENSIONS);
+            return scrollPane;
+        }
+
+        final ToolbarDecorator tableDecorator = ToolbarDecorator.createDecorator(globalLocationTable);
+        tableDecorator.setAddAction(button -> {
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+            if (dialogue.showAndGet()) {
+                final GlobalConfigurationLocation newLocation = dialogue.getGlobalConfigurationLocation();
+                if (newLocation != null) {
+                    globalLocationTableModel.addLocation(newLocation);
+                }
+            }
+        });
+        tableDecorator.setEditAction(button -> {
+            final int selectedRow = globalLocationTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(
+                        globalLocationTableModel.getLocationAt(selectedRow));
+                if (dialogue.showAndGet()) {
+                    final GlobalConfigurationLocation updated = dialogue.getGlobalConfigurationLocation();
+                    if (updated != null) {
+                        globalLocationTableModel.updateLocationAt(selectedRow, updated);
+                    }
+                }
+            }
+        });
+        tableDecorator.setRemoveAction(button -> {
+            final int selectedRow = globalLocationTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                globalLocationTableModel.removeLocationAt(selectedRow);
+            }
+        });
+        tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
+
+        return tableDecorator.createPanel();
     }
 }
