@@ -52,7 +52,8 @@ public final class ApplicationConfigurationState
 
     @NotNull
     public List<GlobalConfigurationLocation> getGlobalLocations() {
-        return Collections.unmodifiableList(requireNonNullElse(applicationSettings.globalLocations, Collections.emptyList()));
+        List<GlobalConfigurationLocation> globalConfigurationLocations = requireNonNullElse(applicationSettings.globalLocations, Collections.emptyList());
+        return Collections.unmodifiableList(globalConfigurationLocations);
     }
 
     public void setGlobalLocations(@NotNull final List<GlobalConfigurationLocation> globalLocations) {
@@ -61,7 +62,8 @@ public final class ApplicationConfigurationState
 
     @NotNull
     public List<String> getActiveGlobalLocationIds() {
-        return Collections.unmodifiableList(requireNonNullElse(applicationSettings.activeGlobalLocationIds, Collections.emptyList()));
+        List<String> activeGlobalLocationIds = requireNonNullElse(applicationSettings.activeGlobalLocationIds, Collections.emptyList());
+        return Collections.unmodifiableList(activeGlobalLocationIds);
     }
 
     public void setActiveGlobalLocationIds(@NotNull final List<String> activeGlobalLocationIds) {
