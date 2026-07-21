@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Objects;
@@ -34,6 +35,14 @@ import java.util.Objects;
 public class CheckStyleApplicationConfigurable implements Configurable {
 
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 150);
+    public static final int ACTIVE_COL_MIN_WIDTH = 40;
+    public static final int ACTIVE_COL_MAX_WIDTH = 50;
+    public static final int LOCATION_INPUT_MIN_WIDTH = 120;
+    public static final int LOCATION_INPUT_PREFERRED_WIDTH = 180;
+    public static final int LOCATION_INPUT_MAX_WIDTH = 240;
+    public static final int TYPE_INPUT_MIN_WDITH = 80;
+    public static final int TYPE_INPUT_PREFERRED_WIDTH = 120;
+    public static final int TYPE_INPUT_MAX_WIDTH = 160;
 
     private final ApplicationConfigurationState applicationConfigurationState;
     private final ArtifactRepositoryCredentialsStore credentialsStore;
@@ -88,19 +97,24 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         globalLocationTable.setStriped(true);
         globalLocationTable.getTableHeader().setReorderingAllowed(false);
 
+        setColumnWidth(globalLocationTable, 1, LOCATION_INPUT_MIN_WIDTH, LOCATION_INPUT_PREFERRED_WIDTH, LOCATION_INPUT_MAX_WIDTH);
+        setColumnWidth(globalLocationTable, 2, TYPE_INPUT_MIN_WDITH, TYPE_INPUT_PREFERRED_WIDTH, TYPE_INPUT_MAX_WIDTH);
+
+        final var activeColumn = globalLocationTable.getColumnModel().getColumn(0);
+        activeColumn.setMinWidth(ACTIVE_COL_MIN_WIDTH);
+        activeColumn.setPreferredWidth(ACTIVE_COL_MAX_WIDTH);
+        activeColumn.setMaxWidth(ACTIVE_COL_MAX_WIDTH);
+        activeColumn.setResizable(false);
+
         reset();
 
-        final JTextArea description = new JTextArea(CheckStyleBundle.message("config.artefact-repository-base-url-override.description"));
-        description.setFont(UIManager.getFont("Label.font"));
-        description.setEditable(false);
-        description.setOpaque(false);
-        description.setWrapStyleWord(true);
-        description.setLineWrap(true);
+        return createForm();
+    }
 
+    private JPanel createForm() {
         final JComponent globalRulesEditor = createGlobalRulesEditor();
-
         return FormBuilder.createFormBuilder()
-                .addComponent(description)
+                .addComponent(getDescriptionTextArea())
                 .addLabeledComponent(
                         CheckStyleBundle.message("config.artefact-repository-base-url-override.label.text"),
                         artifactRepositoryBaseUrlOverrideField)
@@ -119,6 +133,23 @@ public class CheckStyleApplicationConfigurable implements Configurable {
                         true)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+    }
+
+    private @NotNull JTextArea getDescriptionTextArea() {
+        final JTextArea description = new JTextArea(CheckStyleBundle.message("config.artefact-repository-base-url-override.description"));
+        description.setFont(UIManager.getFont("Label.font"));
+        description.setEditable(false);
+        description.setOpaque(false);
+        description.setWrapStyleWord(true);
+        description.setLineWrap(true);
+        return description;
+    }
+
+    private static void setColumnWidth(JTable table, int index, int min, int preferred, int max) {
+        final TableColumn column = table.getColumnModel().getColumn(index);
+        column.setMinWidth(min);
+        column.setPreferredWidth(preferred);
+        column.setMaxWidth(max);
     }
 
     @Override

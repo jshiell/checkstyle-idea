@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.ui;
 
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
+import org.infernus.idea.checkstyle.CheckStyleApplicationConfigurable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.table.AbstractTableModel;
@@ -137,4 +138,5 @@ public class GlobalLocationTableModel extends AbstractTableModel {
             default -> throw new IllegalArgumentException("Invalid column: " + columnIndex);
         };
     }
+
 }

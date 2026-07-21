@@ -7,7 +7,6 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.ui.FormBuilder;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -71,29 +70,34 @@ public class GlobalLocationDialogue extends DialogWrapper {
         typeCombo.addActionListener(e ->
                 browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE));
 
-        final JPanel locationRow = getLocationPanel(browseButton);
-        final JPanel descriptionRow = getDescriptionPanel();
-        return FormBuilder.createFormBuilder()
-                .addLabeledComponent(CheckStyleBundle.message("config.global.location.type.label"), typeCombo)
-                .addComponent(locationRow)
-                .addComponent(descriptionRow)
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
+        return globalSettingsPanelLayout();
     }
 
-    private @NotNull JPanel getDescriptionPanel() {
-        final JPanel descriptionRow = new JPanel(new BorderLayout(4, 0));
-        descriptionRow.add(new JLabel(CheckStyleBundle.message("config.global.location.description.label")), BorderLayout.WEST);
-        descriptionRow.add(descriptionField, BorderLayout.CENTER);
-        return descriptionRow;
-    }
+    private @NotNull JPanel globalSettingsPanelLayout() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final Insets insets = new Insets(4, 4, 4, 4);
 
-    private @NotNull JPanel getLocationPanel(JButton browseButton) {
-        final JPanel locationRow = new JPanel(new BorderLayout(4, 0));
-        locationRow.add(new JLabel(CheckStyleBundle.message("config.global.location.location.label")), BorderLayout.WEST);
-        locationRow.add(locationField, BorderLayout.CENTER);
-        locationRow.add(browseButton, BorderLayout.EAST);
-        return locationRow;
+        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.type.label")),
+                new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(typeCombo,
+                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+
+        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.location.label")),
+                new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(locationField,
+                new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+
+        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.description.label")),
+                new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(descriptionField,
+                new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        return panel;
     }
 
     private void createGlobalConfigurationInputsIfNeeded() {
