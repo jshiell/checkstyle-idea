@@ -23,6 +23,7 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -507,6 +508,9 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
                     Objects.requireNonNullElse(locationDto.location, "").trim(),
                     locationDto.description,
                     null);
+            globalLocation.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(
+                    project,
+                    Objects.requireNonNullElse(locationDto.scope, NamedScopeHelper.DEFAULT_SCOPE_ID)));
             if (locationDto.properties != null) {
                 globalLocation.setProperties(locationDto.properties);
             }
