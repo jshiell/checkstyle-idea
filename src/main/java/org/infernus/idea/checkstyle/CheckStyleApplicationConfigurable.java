@@ -160,7 +160,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             return true;
         }
 
-        String typedUsername = emptyIfNull(normalise(artifactRepositoryOverrideUsernameField.getText()));
+<<        String typedUsername = emptyIfNull(normalise(artifactRepositoryOverrideUsernameField.getText()));
         String persistedUsername = emptyIfNull(applicationConfigurationState.getArtifactRepositoryOverrideUsername());
         if (!typedUsername.equals(persistedUsername)) {
             return true;
@@ -180,8 +180,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             return true;
         }
 
-        return false;\n    }
-
+        return false;\n    }\n
     @Override
     public void apply() {
         String previousUsername = emptyIfNull(applicationConfigurationState.getArtifactRepositoryOverrideUsername());
@@ -304,4 +303,5 @@ public class CheckStyleApplicationConfigurable implements Configurable {
     }
 
 }
+
 
