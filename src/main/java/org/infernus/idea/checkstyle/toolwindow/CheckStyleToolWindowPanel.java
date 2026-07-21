@@ -583,3 +583,4 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 }
 
+
