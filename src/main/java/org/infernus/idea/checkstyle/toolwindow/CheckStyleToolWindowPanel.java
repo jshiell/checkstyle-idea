@@ -484,31 +484,36 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         if (!appState.isUseGlobalRulesByDefault()) {
             return List.of();
         }
-
         final ConfigurationLocationFactory locationFactory = project.getService(ConfigurationLocationFactory.class);
         final List<ConfigurationLocation> locations = new ArrayList<>();
         for (ApplicationConfigurationState.GlobalConfigurationLocation locationDto : appState.getGlobalLocations()) {
-            final ConfigurationType type = ConfigurationType.parse(locationDto.type);
-            if (type == null) {
-                continue;
-            }
-            try {
-                final ConfigurationLocation location = locationFactory.create(
-                        project,
-                        locationDto.id,
-                        type,
-                        Objects.requireNonNullElse(locationDto.location, "").trim(),
-                        locationDto.description,
-                        null);
-                if (locationDto.properties != null) {
-                    location.setProperties(locationDto.properties);
-                }
-                locations.add(location);
-            } catch (Exception e) {
-                LOG.error("Failed to deserialize global location for tool window: " + locationDto, e);
-            }
+            deserializeGlobalLocation(locationDto, locationFactory, locations);
         }
         return locations;
+    }
+
+    private void deserializeGlobalLocation(ApplicationConfigurationState.GlobalConfigurationLocation locationDto,
+                                           ConfigurationLocationFactory locationFactory,
+                                           List<ConfigurationLocation> locations) {
+        final ConfigurationType type = ConfigurationType.parse(locationDto.type);
+        if (type == null) {
+            return;
+        }
+        try {
+            final ConfigurationLocation globalLocation = locationFactory.create(
+                    project,
+                    locationDto.id,
+                    type,
+                    Objects.requireNonNullElse(locationDto.location, "").trim(),
+                    locationDto.description,
+                    null);
+            if (locationDto.properties != null) {
+                globalLocation.setProperties(locationDto.properties);
+            }
+            locations.add(globalLocation);
+        } catch (Exception e) {
+            LOG.error("Failed to deserialize global location for tool window: " + locationDto, e);
+        }
     }
 
     private boolean containsById(@NotNull final String locationId) {
