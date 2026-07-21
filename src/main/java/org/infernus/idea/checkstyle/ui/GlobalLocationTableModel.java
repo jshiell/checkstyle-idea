@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.ui;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.CheckStyleApplicationConfigurable;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.table.AbstractTableModel;
@@ -27,7 +28,8 @@ public class GlobalLocationTableModel extends AbstractTableModel {
     private static final int COLUMN_DESCRIPTION = 1;
     private static final int COLUMN_TYPE = 2;
     private static final int COLUMN_LOCATION = 3;
-    private static final int NUMBER_OF_COLUMNS = 4;
+    private static final int COLUMN_SCOPE = 4;
+    private static final int NUMBER_OF_COLUMNS = 5;
 
     private final List<GlobalConfigurationLocation> locations = new ArrayList<>();
     /** IDs of locations whose "Active" checkbox is checked. Insertion-ordered for stable round-trips. */
@@ -98,6 +100,7 @@ public class GlobalLocationTableModel extends AbstractTableModel {
             case COLUMN_DESCRIPTION -> CheckStyleBundle.message("config.file.locations.table.1");
             case COLUMN_TYPE -> CheckStyleBundle.message("config.global.locations.table.type");
             case COLUMN_LOCATION -> CheckStyleBundle.message("config.file.locations.table.2");
+            case COLUMN_SCOPE -> CheckStyleBundle.message("config.file.locations.table.3");
             default -> throw new IllegalArgumentException("Invalid column: " + column);
         };
     }
@@ -135,6 +138,7 @@ public class GlobalLocationTableModel extends AbstractTableModel {
             case COLUMN_DESCRIPTION -> Objects.requireNonNullElse(location.description, "");
             case COLUMN_TYPE -> Objects.requireNonNullElse(location.type, "");
             case COLUMN_LOCATION -> Objects.requireNonNullElse(location.location, "");
+            case COLUMN_SCOPE -> Objects.requireNonNullElse(location.scope, NamedScopeHelper.DEFAULT_SCOPE_ID);
             default -> throw new IllegalArgumentException("Invalid column: " + columnIndex);
         };
     }

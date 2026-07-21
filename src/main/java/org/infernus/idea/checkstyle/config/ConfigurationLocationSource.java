@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -102,6 +103,9 @@ public class ConfigurationLocationSource {
                     project, dto.id, type,
                     Objects.requireNonNullElse(dto.location, "").trim(),
                     dto.description, null);
+            location.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(
+                    project,
+                    Objects.requireNonNullElse(dto.scope, NamedScopeHelper.DEFAULT_SCOPE_ID)));
             if (dto.properties != null) {
                 location.setProperties(dto.properties);
             }

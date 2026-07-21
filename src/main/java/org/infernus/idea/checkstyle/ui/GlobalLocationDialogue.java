@@ -7,14 +7,19 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,6 +40,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
             ConfigurationType.HTTP_URL,
             ConfigurationType.INSECURE_HTTP_URL
     });
+    private final ComboBox<String> scopeCombo = new ComboBox<>();
     private final JTextField locationField = new JTextField(40);
     private final JTextField descriptionField = new JTextField(40);
 
@@ -54,6 +60,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
+        initialiseScopeChoices();
         createGlobalConfigurationInputsIfNeeded();
         final JButton browseButton = new JButton(CheckStyleBundle.message("config.file.browse.text"));
         browseButton.setToolTipText(CheckStyleBundle.message("config.file.browse.tooltip"));
@@ -97,6 +104,13 @@ public class GlobalLocationDialogue extends DialogWrapper {
         panel.add(descriptionField,
                 new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
                         GridBagConstraints.HORIZONTAL, insets, 0, 0));
+
+        panel.add(new JLabel(CheckStyleBundle.message("config.file.scope.label")),
+                new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(scopeCombo,
+                new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
         return panel;
     }
 
@@ -110,6 +124,11 @@ public class GlobalLocationDialogue extends DialogWrapper {
         }
         locationField.setText(Objects.requireNonNullElse(existingLocation.location, ""));
         descriptionField.setText(Objects.requireNonNullElse(existingLocation.description, ""));
+        final String scope = Objects.requireNonNullElse(existingLocation.scope, NamedScopeHelper.DEFAULT_SCOPE_ID);
+        if (!hasScopeChoice(scope)) {
+            scopeCombo.addItem(scope);
+        }
+        scopeCombo.setSelectedItem(scope);
     }
 
     @Override
@@ -149,7 +168,8 @@ public class GlobalLocationDialogue extends DialogWrapper {
                 id,
                 type != null ? type.name() : ConfigurationType.LOCAL_FILE.name(),
                 locationField.getText().trim(),
-                descriptionField.getText().trim()
+                descriptionField.getText().trim(),
+                (String) scopeCombo.getSelectedItem()
         );
     }
 
@@ -161,6 +181,37 @@ public class GlobalLocationDialogue extends DialogWrapper {
     @NotNull
     JTextField getDescriptionField() {
         return descriptionField;
+    }
+
+    private void initialiseScopeChoices() {
+        if (scopeCombo.getItemCount() > 0) {
+            return;
+        }
+
+        final LinkedHashSet<String> scopeIds = new LinkedHashSet<>();
+        scopeIds.add(NamedScopeHelper.DEFAULT_SCOPE_ID);
+        final var projectManager = ProjectManager.getInstanceIfCreated();
+        if (projectManager != null) {
+            for (var project : projectManager.getOpenProjects()) {
+                NamedScopeHelper.getAllScopes(project)
+                        .map(NamedScope::getScopeId)
+                        .forEach(scopeIds::add);
+            }
+        }
+
+        scopeIds.forEach(scopeCombo::addItem);
+        if (scopeCombo.getSelectedItem() == null) {
+            scopeCombo.setSelectedItem(NamedScopeHelper.DEFAULT_SCOPE_ID);
+        }
+    }
+
+    private boolean hasScopeChoice(@NotNull final String scopeId) {
+        for (int i = 0; i < scopeCombo.getItemCount(); i++) {
+            if (scopeId.equals(scopeCombo.getItemAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }
