@@ -149,8 +149,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             return true;
         }
 
-        return false;
-    }
+        return false;\n    }
 
     @Override
     public void apply() {
@@ -174,8 +173,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         applicationConfigurationState.setGlobalLocations(globalLocationTableModel.getLocations());
         applicationConfigurationState.setActiveGlobalLocationIds(globalLocationTableModel.getActiveIds());
 
-        // Invalidate checker caches in all open projects so stale global-location checkers are evicted.
-        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
+        // Invalidate checker caches in all open projects so stale global-location checkers are evicted.\n        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
         if (projectManager != null) {
             for (final Project project : projectManager.getOpenProjects()) {
                 project.getService(CheckerFactoryCache.class).invalidate();
@@ -231,8 +229,13 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             scrollPane.setPreferredSize(DECORATOR_DIMENSIONS);
             return scrollPane;
         }
-
         final ToolbarDecorator tableDecorator = ToolbarDecorator.createDecorator(globalLocationTable);
+        addActionButtons(tableDecorator);
+        tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
+        return tableDecorator.createPanel();
+    }
+
+    private void addActionButtons(ToolbarDecorator tableDecorator) {
         tableDecorator.setAddAction(button -> {
             final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
             if (dialogue.showAndGet()) {
@@ -261,8 +264,13 @@ public class CheckStyleApplicationConfigurable implements Configurable {
                 globalLocationTableModel.removeLocationAt(selectedRow);
             }
         });
+<<<<<<< HEAD
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         return tableDecorator.createPanel();
+=======
+>>>>>>> 3b0fead4 (Refactor CheckStyleApplicationConfigurable)
     }
+
 }
+
