@@ -50,13 +50,18 @@ public class ConfigurationLocationSource {
         } else if (override != null) {
             return new TreeSet<>(Collections.singleton(override));
         }
-
         final SortedSet<ConfigurationLocation> projectActiveLocations = configurationManager().getCurrent().getActiveLocations();
+        return activeLocationsOrDefault(projectActiveLocations);
+    }
+
+    /**
+     * If there are no project-level active locations — fall back to IDE-wide global rules (if configured)
+     */
+    @NotNull
+    private SortedSet<ConfigurationLocation> activeLocationsOrDefault(SortedSet<ConfigurationLocation> projectActiveLocations) {
         if (!projectActiveLocations.isEmpty()) {
             return projectActiveLocations;
         }
-
-        // No project-level active locations — fall back to IDE-wide global rules if configured.
         return globalActiveLocations();
     }
 
@@ -69,18 +74,14 @@ public class ConfigurationLocationSource {
     private SortedSet<ConfigurationLocation> globalActiveLocations() {
         final ApplicationConfigurationState appState = ApplicationManager.getApplication()
                 .getService(ApplicationConfigurationState.class);
-
         if (!appState.isUseGlobalRulesByDefault()) {
             return Collections.emptySortedSet();
         }
-
         final List<String> activeIds = appState.getActiveGlobalLocationIds();
         if (activeIds.isEmpty()) {
             return Collections.emptySortedSet();
         }
-
         final ConfigurationLocationFactory factory = project.getService(ConfigurationLocationFactory.class);
-
         return appState.getGlobalLocations().stream()
                 .filter(dto -> activeIds.contains(dto.id))
                 .map(dto -> deserializeGlobalLocation(factory, dto))
