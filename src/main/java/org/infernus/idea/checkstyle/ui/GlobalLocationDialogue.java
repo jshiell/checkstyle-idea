@@ -77,12 +77,15 @@ public class GlobalLocationDialogue extends DialogWrapper {
         typeCombo.addActionListener(e ->
                 browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE));
 
-        return globalSettingsPanelLayout();
+        return globalSettingsPanelLayout(browseButton);
     }
 
-    private @NotNull JPanel globalSettingsPanelLayout() {
+    private @NotNull JPanel globalSettingsPanelLayout(@NotNull final JButton browseButton) {
         final JPanel panel = new JPanel(new GridBagLayout());
         final Insets insets = new Insets(4, 4, 4, 4);
+        final JPanel locationRow = new JPanel(new BorderLayout(4, 0));
+        locationRow.add(locationField, BorderLayout.CENTER);
+        locationRow.add(browseButton, BorderLayout.EAST);
 
         panel.add(new JLabel(CheckStyleBundle.message("config.global.location.type.label")),
                 new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
@@ -94,7 +97,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
         panel.add(new JLabel(CheckStyleBundle.message("config.global.location.location.label")),
                 new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
                         GridBagConstraints.NONE, insets, 0, 0));
-        panel.add(locationField,
+        panel.add(locationRow,
                 new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
                         GridBagConstraints.HORIZONTAL, insets, 0, 0));
 
