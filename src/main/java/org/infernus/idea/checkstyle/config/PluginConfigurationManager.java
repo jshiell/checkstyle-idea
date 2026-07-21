@@ -73,6 +73,13 @@ public class PluginConfigurationManager {
         }
     }
 
+    /**
+     * {@link #getCurrent()} and {@link #setCurrent(PluginConfiguration, boolean)} share the same
+     * {@link #cachedConfiguration} field.
+     * <p>
+     * This method needs to be synchronized to avoid a race condition
+     * where one thread is reading the cached configuration while another thread is writing to it.
+     */
     public synchronized void invalidate() {
         cachedConfiguration = null;
         fireConfigurationChanged();
