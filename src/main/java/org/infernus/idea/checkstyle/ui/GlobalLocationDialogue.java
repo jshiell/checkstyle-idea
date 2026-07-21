@@ -55,18 +55,11 @@ public class GlobalLocationDialogue extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        if (existingLocation != null) {
-            final ConfigurationType type = ConfigurationType.parse(existingLocation.type);
-            if (type != null) {
-                typeCombo.setSelectedItem(type);
-            }
-            locationField.setText(Objects.requireNonNullElse(existingLocation.location, ""));
-            descriptionField.setText(Objects.requireNonNullElse(existingLocation.description, ""));
-        }
-
+        createGlobalConfigurationInputsIfNeeded();
         final JButton browseButton = new JButton(CheckStyleBundle.message("config.file.browse.text"));
         browseButton.setToolTipText(CheckStyleBundle.message("config.file.browse.tooltip"));
         browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE);
+        
         browseButton.addActionListener(e -> {
             final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
                     .withFileFilter(file -> "xml".equalsIgnoreCase(file.getExtension()));
@@ -75,20 +68,44 @@ public class GlobalLocationDialogue extends DialogWrapper {
                 locationField.setText(VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
             }
         });
-
         typeCombo.addActionListener(e ->
                 browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE));
 
-        final JPanel locationRow = new JPanel(new BorderLayout(4, 0));
-        locationRow.add(locationField, BorderLayout.CENTER);
-        locationRow.add(browseButton, BorderLayout.EAST);
-
+        final JPanel locationRow = getLocationPanel(browseButton);
+        final JPanel descriptionRow = getDescriptionPanel();
         return FormBuilder.createFormBuilder()
                 .addLabeledComponent(CheckStyleBundle.message("config.global.location.type.label"), typeCombo)
-                .addLabeledComponent(CheckStyleBundle.message("config.global.location.location.label"), locationRow)
-                .addLabeledComponent(CheckStyleBundle.message("config.global.location.description.label"), descriptionField)
+                .addComponent(locationRow)
+                .addComponent(descriptionRow)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+    }
+
+    private @NotNull JPanel getDescriptionPanel() {
+        final JPanel descriptionRow = new JPanel(new BorderLayout(4, 0));
+        descriptionRow.add(new JLabel(CheckStyleBundle.message("config.global.location.description.label")), BorderLayout.WEST);
+        descriptionRow.add(descriptionField, BorderLayout.CENTER);
+        return descriptionRow;
+    }
+
+    private @NotNull JPanel getLocationPanel(JButton browseButton) {
+        final JPanel locationRow = new JPanel(new BorderLayout(4, 0));
+        locationRow.add(new JLabel(CheckStyleBundle.message("config.global.location.location.label")), BorderLayout.WEST);
+        locationRow.add(locationField, BorderLayout.CENTER);
+        locationRow.add(browseButton, BorderLayout.EAST);
+        return locationRow;
+    }
+
+    private void createGlobalConfigurationInputsIfNeeded() {
+        if (existingLocation == null) {
+            return;
+        }
+        final ConfigurationType type = ConfigurationType.parse(existingLocation.type);
+        if (type != null) {
+            typeCombo.setSelectedItem(type);
+        }
+        locationField.setText(Objects.requireNonNullElse(existingLocation.location, ""));
+        descriptionField.setText(Objects.requireNonNullElse(existingLocation.description, ""));
     }
 
     @Override
@@ -141,4 +158,5 @@ public class GlobalLocationDialogue extends DialogWrapper {
     JTextField getDescriptionField() {
         return descriptionField;
     }
+    
 }
