@@ -78,7 +78,9 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
                 message("startup.download.action"),
                 () -> {
                     Notification n = notifRef.get();
-                    if (n != null) n.expire();
+                    if (n != null) {
+                        n.expire();
+                    }
                     if (!project.isDisposed()) {
                         CheckstyleDownloadHelper.downloadWithProgress(project, version, downloader, versionListReader, onVersionChanged);
                     }
@@ -90,7 +92,9 @@ public class PromptForMissingCheckstyleVersion implements ProjectActivity {
                 message("startup.use-bundled.action", bundledVersion),
                 () -> {
                     Notification n = notifRef.get();
-                    if (n != null) n.expire();
+                    if (n != null) {
+                        n.expire();
+                    }
                     if (!project.isDisposed()) {
                         onVersionChanged.accept(bundledVersion);
                     }

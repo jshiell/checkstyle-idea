@@ -2,9 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
