@@ -112,7 +112,14 @@ idea.module {
     isDownloadJavadoc = true
     isDownloadSources = true
 
-    excludeDirs.addAll(listOf(file(".idea"), file("_support")))
+    excludeDirs.addAll(listOf(
+        file(".idea"),
+        file("_support"),
+        file(path = ".claude"),
+        file(path = ".opencode"),
+        file(path = ".settings"),
+        file(path = ".local"),
+        file(path = ".cache")))
 
     // TODO We should also tell IntelliJ automatically that csaccessTest contains test code.
     // The following lines should really do it, but currently don't, which seems like a Gradle bug to me:
