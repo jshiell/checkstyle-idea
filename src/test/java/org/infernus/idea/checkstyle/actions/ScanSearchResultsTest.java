@@ -2,10 +2,13 @@ package org.infernus.idea.checkstyle.actions;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.usages.Usage;
+import com.intellij.usages.UsageView;
 import com.intellij.usages.rules.UsageInFile;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -89,6 +92,20 @@ public class ScanSearchResultsTest {
 
         assertThat(ScanSearchResults.filesFrom(List.of(usageIn(file), usageIn(file), usageIn(file))),
                 contains(file));
+    }
+
+    @Test
+    public void filesOfAllResultsOmitsUsagesExcludedByTheUser() {
+        final VirtualFile includedFile = validFile();
+        final VirtualFile excludedFile = validFile();
+        final Usage includedUsage = usageIn(includedFile);
+        final Usage excludedUsage = usageIn(excludedFile);
+
+        final UsageView usageView = mock(UsageView.class);
+        when(usageView.getUsages()).thenReturn(new LinkedHashSet<>(List.of(includedUsage, excludedUsage)));
+        when(usageView.getExcludedUsages()).thenReturn(Set.of(excludedUsage));
+
+        assertThat(ScanAllSearchResults.filesOfAllResultsIn(usageView), contains(includedFile));
     }
 
     private Usage usageIn(final VirtualFile file) {
