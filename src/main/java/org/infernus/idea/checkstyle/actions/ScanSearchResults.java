@@ -38,17 +38,17 @@ public abstract class ScanSearchResults extends BaseAction {
                 final ToolWindow toolWindow = toolWindow(project);
                 final List<VirtualFile> files = filesToScan(event);
 
-                if (files.isEmpty()) {
-                    final CheckStyleToolWindowPanel panel = CheckStyleToolWindowPanel.panelFor(project);
-                    if (panel != null) {
-                        panel.displayWarningResult("plugin.status.in-progress.no-search-results");
-                    }
-                } else {
-                    toolWindow.activate(() -> {
+                toolWindow.activate(() -> {
+                    if (files.isEmpty()) {
+                        final CheckStyleToolWindowPanel panel = CheckStyleToolWindowPanel.panelFor(project);
+                        if (panel != null) {
+                            panel.displayWarningResult("plugin.status.in-progress.no-search-results");
+                        }
+                    } else {
                         setProgressText(toolWindow, "plugin.status.in-progress.search-results");
                         staticScanner(project).asyncScanFiles(files, getSelectedOverride(toolWindow));
-                    });
-                }
+                    }
+                });
 
             } catch (Throwable e) {
                 LOG.warn("Search results scan failed", e);
