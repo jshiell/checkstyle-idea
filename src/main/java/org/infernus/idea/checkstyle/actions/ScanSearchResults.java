@@ -21,6 +21,8 @@ public abstract class ScanSearchResults extends BaseAction {
                 .map(usage -> ((UsageInFile) usage).getFile())
                 .filter(Objects::nonNull)
                 .filter(VirtualFile::isValid)
+                .filter(file -> !file.isDirectory())
+                .distinct()
                 .toList();
     }
 }

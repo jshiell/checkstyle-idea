@@ -73,6 +73,24 @@ public class ScanSearchResultsTest {
                 contains(file));
     }
 
+    @Test
+    public void filesFromSkipsDirectories() {
+        final VirtualFile directory = validFile();
+        when(directory.isDirectory()).thenReturn(true);
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(usageIn(directory), usageIn(file))),
+                contains(file));
+    }
+
+    @Test
+    public void filesFromReturnsAFileSharedByManyUsagesOnlyOnce() {
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(usageIn(file), usageIn(file), usageIn(file))),
+                contains(file));
+    }
+
     private Usage usageIn(final VirtualFile file) {
         final UsageInFile usage = mock(UsageInFile.class);
         when(usage.isValid()).thenReturn(true);
