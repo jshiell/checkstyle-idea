@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class for actions that scan the files behind a set of search results.
@@ -17,6 +18,7 @@ public abstract class ScanSearchResults extends BaseAction {
         return usages.stream()
                 .filter(UsageInFile.class::isInstance)
                 .map(usage -> ((UsageInFile) usage).getFile())
+                .filter(Objects::nonNull)
                 .toList();
     }
 }

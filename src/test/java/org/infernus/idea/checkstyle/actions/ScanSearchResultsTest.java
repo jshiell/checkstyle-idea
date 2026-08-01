@@ -9,6 +9,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +23,32 @@ public class ScanSearchResultsTest {
 
         assertThat(ScanSearchResults.filesFrom(List.of(usageIn(fileOne), usageIn(fileTwo))),
                 contains(fileOne, fileTwo));
+    }
+
+    @Test
+    public void filesFromReturnsNothingForNoUsages() {
+        assertThat(ScanSearchResults.filesFrom(List.of()), is(empty()));
+    }
+
+    @Test
+    public void filesFromSkipsUsagesThatAreNotInFiles() {
+        final Usage usageWithoutAFile = mock(Usage.class);
+        when(usageWithoutAFile.isValid()).thenReturn(true);
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(usageWithoutAFile, usageIn(file))),
+                contains(file));
+    }
+
+    @Test
+    public void filesFromSkipsUsagesWithNoFile() {
+        final UsageInFile usageWithNullFile = mock(UsageInFile.class);
+        when(usageWithNullFile.isValid()).thenReturn(true);
+        when(usageWithNullFile.getFile()).thenReturn(null);
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(usageWithNullFile, usageIn(file))),
+                contains(file));
     }
 
     private Usage usageIn(final VirtualFile file) {
