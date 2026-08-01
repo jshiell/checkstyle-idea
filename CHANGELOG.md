@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.14.0** New: Added actions to check the selected or all search results (#2).
 * **26.13.0** New: Add Checkstyle 13.8.0.
 * **26.12.0** New: Add Checkstyle 13.7.0.
 * **26.12.0** New: Non-bundled Checkstyle versions can now be downloaded via a Maven settings.xml mirror or a configurable IDE-wide override, for use behind firewalls where Maven Central is unreachable (#698).

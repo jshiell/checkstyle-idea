@@ -26,6 +26,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.14.0: New: Added actions to check the selected or all search results (#2).</li>
     <li>26.13.0: New: Added Checkstyle 13.8.0.</li>
     <li>26.12.0: New: Added Checkstyle 13.7.0.</li>
     <li>26.12.0: New: Non-bundled Checkstyle versions can now be downloaded via a Maven settings.xml mirror or a configurable IDE-wide override, for use behind firewalls where Maven Central is unreachable (#698).</li>
@@ -134,6 +135,26 @@
                 description="Scan the current file with the configured rules for Checkstyle">
 
             <add-to-group group-id="AnalyzeMenu" anchor="last"/>
+        </action>
+
+        <action
+                id="CheckStyleSelectedSearchResultsAction"
+                class="org.infernus.idea.checkstyle.actions.ScanSelectedSearchResults"
+                text="Check Selected Search Results"
+                description="Run Checkstyle on the files selected in the search results"
+                icon="/actions/execute.svg">
+
+            <add-to-group group-id="UsageView.Popup" anchor="last"/>
+        </action>
+
+        <action
+                id="CheckStyleAllSearchResultsAction"
+                class="org.infernus.idea.checkstyle.actions.ScanAllSearchResults"
+                text="Check All Search Results"
+                description="Run Checkstyle on all of the files in the search results"
+                icon="/actions/execute.svg">
+
+            <add-to-group group-id="UsageView.Popup" anchor="last"/>
         </action>
 
         <group id="CheckStylePluginTreeActions" text="Filter" popup="true">
