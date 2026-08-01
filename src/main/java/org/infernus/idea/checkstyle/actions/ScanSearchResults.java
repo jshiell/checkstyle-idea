@@ -16,9 +16,11 @@ public abstract class ScanSearchResults extends BaseAction {
 
     static List<VirtualFile> filesFrom(@NotNull final Collection<Usage> usages) {
         return usages.stream()
+                .filter(Usage::isValid)
                 .filter(UsageInFile.class::isInstance)
                 .map(usage -> ((UsageInFile) usage).getFile())
                 .filter(Objects::nonNull)
+                .filter(VirtualFile::isValid)
                 .toList();
     }
 }

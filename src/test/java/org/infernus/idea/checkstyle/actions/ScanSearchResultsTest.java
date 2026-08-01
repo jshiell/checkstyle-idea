@@ -51,6 +51,28 @@ public class ScanSearchResultsTest {
                 contains(file));
     }
 
+    @Test
+    public void filesFromSkipsInvalidUsages() {
+        final VirtualFile fileOfInvalidUsage = validFile();
+        final UsageInFile invalidUsage = mock(UsageInFile.class);
+        when(invalidUsage.isValid()).thenReturn(false);
+        when(invalidUsage.getFile()).thenReturn(fileOfInvalidUsage);
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(invalidUsage, usageIn(file))),
+                contains(file));
+    }
+
+    @Test
+    public void filesFromSkipsInvalidFiles() {
+        final VirtualFile invalidFile = mock(VirtualFile.class);
+        when(invalidFile.isValid()).thenReturn(false);
+        final VirtualFile file = validFile();
+
+        assertThat(ScanSearchResults.filesFrom(List.of(usageIn(invalidFile), usageIn(file))),
+                contains(file));
+    }
+
     private Usage usageIn(final VirtualFile file) {
         final UsageInFile usage = mock(UsageInFile.class);
         when(usage.isValid()).thenReturn(true);
