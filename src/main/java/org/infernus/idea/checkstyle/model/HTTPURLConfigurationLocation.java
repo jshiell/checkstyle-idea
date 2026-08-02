@@ -105,6 +105,28 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
                 || e instanceof SSLException;
     }
 
+    @Override
+    public synchronized void setLocation(final String location) {
+        final String previousLocation = getRawLocation();
+        super.setLocation(location);
+
+        // only once the new location has been accepted, and only if it is genuinely different: the
+        // settings dialogue re-sets the location on every OK, even when it was never edited.
+        if (!location.equals(previousLocation)) {
+            discardCachedContent();
+        }
+    }
+
+    private void discardCachedContent() {
+        cachedContent = null;
+        etag = null;
+        lastModified = null;
+        validatedLocation = null;
+        cacheExpiry = 0;
+        failureExpiry = 0;
+        lastFailure = null;
+    }
+
     private void markAsFresh() {
         cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
         failureExpiry = 0;

@@ -200,6 +200,38 @@ public class HTTPURLConfigurationLocationTest {
         assertThat(requestsTo("/conditional2"), is(2));
     }
 
+    @Test
+    public void changingTheLocationDiscardsAnyCachedContent() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A test response"));
+
+        location.setLocation(urlOf("/revalidated"));
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+    }
+
+    @Test
+    public void aRejectedLocationChangeLeavesTheCachedContentIntact() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThrows(IllegalArgumentException.class, () -> location.setLocation(""));
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat(requestsTo("/valid"), is(1));
+    }
+
+    @Test
+    public void reapplyingTheSameLocationLeavesTheCachedContentIntact() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.setLocation(urlOf("/valid"));
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat(requestsTo("/valid"), is(1));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
