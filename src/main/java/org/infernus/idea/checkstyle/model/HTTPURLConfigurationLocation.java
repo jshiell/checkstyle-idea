@@ -18,6 +18,17 @@ import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
 /**
  * A configuration file accessible via a HTTP URL.
+ * <p>
+ * The content of a successful fetch is held in memory for a short time, and is revalidated with a
+ * conditional request thereafter, so that an unchanged file costs a 304 rather than a full transfer.
+ * <p>
+ * If the server subsequently cannot be reached at all - the developer is offline, say - the last copy
+ * we retrieved continues to be served, with a single warning per outage. A server that <em>answers</em>
+ * with an error is treated as authoritative and continues to fail: a deleted or moved rules file must
+ * not be papered over by the cache. Note that when stale content is served the property defaults
+ * extracted by {@link ConfigurationLocation#resolve} are likewise those of the stale copy.
+ * <p>
+ * Nothing here survives a restart of the IDE, as none of this state is persisted.
  */
 public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 

@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.14.0** Fixed: HTTP rules files are now reused when the server is unreachable, and revalidated with conditional requests (#67).
 * **26.14.0** New: Added actions to check the selected or all search results (#2).
 * **26.13.0** New: Add Checkstyle 13.8.0.
 * **26.12.0** New: Add Checkstyle 13.7.0.
