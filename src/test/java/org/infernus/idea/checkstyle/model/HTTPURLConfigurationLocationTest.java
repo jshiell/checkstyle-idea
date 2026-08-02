@@ -37,6 +37,7 @@ public class HTTPURLConfigurationLocationTest {
 
     private HttpServer httpServer;
     private int serverPort = -1;
+    private volatile boolean configurationDeleted;
 
     @BeforeEach
     public void startHttpServer() throws IOException {
@@ -143,6 +144,17 @@ public class HTTPURLConfigurationLocationTest {
                 location.connectionAttempts(), is(attemptsAfterFirstFailure));
     }
 
+    @Test
+    public void aMissingRemoteFileThrowsEvenWhenContentIsCached() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/vanishing");
+        location.resolveFile(getClass().getClassLoader());
+
+        configurationDeleted = true;
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+
+        assertThrows(FileNotFoundException.class, () -> location.resolveFile(getClass().getClassLoader()));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -194,6 +206,10 @@ public class HTTPURLConfigurationLocationTest {
             case "/valid":
                 response = "A test response";
                 status = 200;
+                break;
+            case "/vanishing":
+                response = configurationDeleted ? "" : "A test response";
+                status = configurationDeleted ? 404 : 200;
                 break;
             case "/delayed":
                 waitFor();
