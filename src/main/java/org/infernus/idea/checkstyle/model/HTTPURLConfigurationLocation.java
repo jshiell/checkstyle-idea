@@ -31,6 +31,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private long cacheExpiry;
     private long failureExpiry;
     private IOException lastFailure;
+    private String etag;
+    private String lastModified;
+    private String validatedLocation;
 
     HTTPURLConfigurationLocation(@NotNull final Project project,
                                  @NotNull final String id) {
@@ -70,6 +73,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             }
 
             cachedContent = result.body();
+            etag = result.etag();
+            lastModified = result.lastModified();
+            validatedLocation = result.effectiveUrl();
             markAsFresh();
             return new ByteArrayInputStream(cachedContent);
 
@@ -142,7 +148,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     }
 
     private FetchResult fetchFrom(final URLConnection urlConnection) throws IOException {
-        URLConnection current = urlConnection;
+        URLConnection current = withConditionalHeaders(urlConnection);
         for (int hops = 0; hops < MAX_REDIRECTS; hops++) {
             if (!(current instanceof HttpURLConnection httpConn)) {
                 break;
@@ -155,7 +161,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
                 if (newUrl == null) {
                     throw new IOException("Redirect response missing Location header");
                 }
-                current = connectionTo(newUrl);
+                current = withConditionalHeaders(connectionTo(newUrl));
             } else {
                 return resultOf(httpConn, status);
             }
@@ -166,6 +172,23 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             return resultOf(httpConn, httpConn.getResponseCode());
         }
         return contentOf(current, HttpURLConnection.HTTP_OK);
+    }
+
+    /**
+     * Offers our stored validators back to the server, so that an unchanged file costs us a 304
+     * rather than a full transfer. Applied per hop, and only to the hop that issued the validators:
+     * the configured URL of a redirected resource never saw the ETag, so must not be sent it.
+     */
+    private URLConnection withConditionalHeaders(final URLConnection connection) {
+        if (cachedContent != null && connection.getURL().toString().equals(validatedLocation)) {
+            if (etag != null) {
+                connection.setRequestProperty("If-None-Match", etag);
+            }
+            if (lastModified != null) {
+                connection.setRequestProperty("If-Modified-Since", lastModified);
+            }
+        }
+        return connection;
     }
 
     private FetchResult resultOf(final HttpURLConnection connection, final int status) throws IOException {

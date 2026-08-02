@@ -155,6 +155,17 @@ public class HTTPURLConfigurationLocationTest {
         assertThrows(FileNotFoundException.class, () -> location.resolveFile(getClass().getClassLoader()));
     }
 
+    @Test
+    public void aConditionalRequestIsSentOnRevalidation() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/conditional");
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("An unconditional response"));
+
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A conditional response"));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -205,6 +216,13 @@ public class HTTPURLConfigurationLocationTest {
             switch (path) {
             case "/valid":
                 response = "A test response";
+                status = 200;
+                break;
+            case "/conditional":
+                exch.getResponseHeaders().add("ETag", "\"v1\"");
+                response = exch.getRequestHeaders().containsKey("If-None-Match")
+                        ? "A conditional response"
+                        : "An unconditional response";
                 status = 200;
                 break;
             case "/vanishing":
