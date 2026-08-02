@@ -57,10 +57,20 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         }
 
         try {
-            cachedContent = readContentOf(streamFrom(connectionTo(getLocation())));
-            cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
-            failureExpiry = 0;
-            lastFailure = null;
+            final FetchResult result = fetchFrom(connectionTo(getLocation()));
+            if (result.statusCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+                if (cachedContent == null) {
+                    // we never send a conditional request without cached content, so this can only be a
+                    // misbehaving proxy. Thrown from within the try so that it is logged and puts the
+                    // location into cooldown like any other bad response.
+                    throw new IOException("Received an unexpected 304 for " + redactedLocation());
+                }
+                markAsFresh();
+                return new ByteArrayInputStream(cachedContent);
+            }
+
+            cachedContent = result.body();
+            markAsFresh();
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
@@ -87,6 +97,12 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
                 || e instanceof SocketTimeoutException
                 || e instanceof NoRouteToHostException
                 || e instanceof SSLException;
+    }
+
+    private void markAsFresh() {
+        cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
+        failureExpiry = 0;
+        lastFailure = null;
     }
 
     /**
@@ -125,7 +141,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         return urlConnection;
     }
 
-    private InputStream streamFrom(final URLConnection urlConnection) throws IOException {
+    private FetchResult fetchFrom(final URLConnection urlConnection) throws IOException {
         URLConnection current = urlConnection;
         for (int hops = 0; hops < MAX_REDIRECTS; hops++) {
             if (!(current instanceof HttpURLConnection httpConn)) {
@@ -141,11 +157,47 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
                 }
                 current = connectionTo(newUrl);
             } else {
-                return new BufferedInputStream(httpConn.getInputStream());
+                return resultOf(httpConn, status);
             }
         }
+
         current.connect();
-        return new BufferedInputStream(current.getInputStream());
+        if (current instanceof HttpURLConnection httpConn) {
+            return resultOf(httpConn, httpConn.getResponseCode());
+        }
+        return contentOf(current, HttpURLConnection.HTTP_OK);
+    }
+
+    private FetchResult resultOf(final HttpURLConnection connection, final int status) throws IOException {
+        if (status == HttpURLConnection.HTTP_NOT_MODIFIED) {
+            // the body of a 304 must never be read: the JDK's behaviour for such a stream is not
+            // reliably specified, and by definition there is nothing useful in it.
+            connection.disconnect();
+            return new FetchResult(status, null, null, null, null);
+        }
+        return contentOf(connection, status);
+    }
+
+    private FetchResult contentOf(final URLConnection connection, final int status) throws IOException {
+        // for a non-2xx status getInputStream() throws rather than returning a stream, giving us the
+        // JDK's own exception for the status - notably a FileNotFoundException for a 404.
+        final byte[] body = readContentOf(new BufferedInputStream(connection.getInputStream()));
+        return new FetchResult(status, body,
+                connection.getHeaderField("ETag"),
+                connection.getHeaderField("Last-Modified"),
+                connection.getURL().toString());
+    }
+
+    /**
+     * The outcome of a single fetch, after any redirects have been followed. A 304 carries no body
+     * and no validators; {@code effectiveUrl} is the URL that actually served the content, which is
+     * the URL any validators must be presented back to.
+     */
+    private record FetchResult(int statusCode,
+                               byte[] body,
+                               String etag,
+                               String lastModified,
+                               String effectiveUrl) {
     }
 
     @Override
