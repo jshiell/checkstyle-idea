@@ -28,6 +28,7 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.infernus.idea.checkstyle.model.HTTPURLConfigurationLocation.CONTENT_CACHE_SECONDS;
+import static org.infernus.idea.checkstyle.model.HTTPURLConfigurationLocation.FAILURE_CACHE_SECONDS;
 import static org.infernus.idea.checkstyle.model.HTTPURLConfigurationLocation.ONE_SECOND;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -261,6 +262,45 @@ public class HTTPURLConfigurationLocationTest {
                 location.connectionAttempts(), is(attemptsAfterFailure + 1));
     }
 
+    @Test
+    public void goingStaleNotifiesTheUserOncePerOutage() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(new ConnectException("simulated network outage"));
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat(location.staleNotifications(), is(1));
+
+        location.resolveFile(getClass().getClassLoader());
+        location.advanceBy((FAILURE_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat("further stale serves should be log-only", location.staleNotifications(), is(1));
+    }
+
+    @Test
+    public void aLocationThatRecoversNotifiesAgainIfItGoesStaleOnceMore() throws IOException {
+        final ConnectException outage = new ConnectException("simulated network outage");
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(outage);
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(null);
+        location.reset();
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(outage);
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat(location.staleNotifications(), is(2));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -379,6 +419,7 @@ public class HTTPURLConfigurationLocationTest {
      */
     private static class FakeClockLocation extends HTTPURLConfigurationLocation {
         private final AtomicInteger connectionAttempts = new AtomicInteger(0);
+        private final AtomicInteger staleNotifications = new AtomicInteger(0);
 
         private long time = 1_000_000L;
         private IOException connectionFailure;
@@ -412,6 +453,15 @@ public class HTTPURLConfigurationLocationTest {
 
         int connectionAttempts() {
             return connectionAttempts.get();
+        }
+
+        @Override
+        void notifyOfStaleContent() {
+            staleNotifications.incrementAndGet();
+        }
+
+        int staleNotifications() {
+            return staleNotifications.get();
         }
     }
 

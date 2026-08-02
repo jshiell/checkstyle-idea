@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.SSLException;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Streams.readContentOf;
 
 /**
@@ -34,6 +36,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private String etag;
     private String lastModified;
     private String validatedLocation;
+    private boolean staleNotified;
 
     HTTPURLConfigurationLocation(@NotNull final Project project,
                                  @NotNull final String id) {
@@ -54,7 +57,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
         if (failureExpiry > now()) {
             if (cachedContent != null && isConnectionFailure(lastFailure)) {
-                return new ByteArrayInputStream(cachedContent);
+                return staleContent();
             }
             throw new IOException("Skipping unavailable HTTP configuration (in cooldown): " + redactedLocation());
         }
@@ -86,7 +89,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             lastFailure = e;
 
             if (cachedContent != null && isConnectionFailure(e)) {
-                return new ByteArrayInputStream(cachedContent);
+                return staleContent();
             }
             throw e;
         }
@@ -137,12 +140,34 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         cacheExpiry = 0;
         failureExpiry = 0;
         lastFailure = null;
+        staleNotified = false;
+    }
+
+    /**
+     * Serves the last copy we successfully retrieved, telling the user the first time we do so for a
+     * given outage. Subsequent stale serves are left to the log, to avoid the notification storm that
+     * an unreachable server would otherwise produce.
+     */
+    private InputStream staleContent() {
+        if (!staleNotified) {
+            staleNotified = true;
+            notifyOfStaleContent();
+        }
+        return new ByteArrayInputStream(cachedContent);
+    }
+
+    /**
+     * Package-private (rather than private) to allow unit testing without the notification services.
+     */
+    void notifyOfStaleContent() {
+        Notifications.showWarning(getProject(), message("checkstyle.http-cache-stale", redactedLocation()));
     }
 
     private void markAsFresh() {
         cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
         failureExpiry = 0;
         lastFailure = null;
+        staleNotified = false;
     }
 
     /**
