@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HTTPURLConfigurationLocationTest {
 
+    private static final String ETAG = "\"v1\"";
+
     private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
 
     private HttpServer httpServer;
@@ -166,6 +168,21 @@ public class HTTPURLConfigurationLocationTest {
         assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A conditional response"));
     }
 
+    @Test
+    public void aRevalidationReturning304ReusesTheCachedContent() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/revalidated");
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+        assertThat(requestsTo("/revalidated"), is(2));
+
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat("a 304 should extend the cache lifetime", requestsTo("/revalidated"), is(2));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -218,8 +235,19 @@ public class HTTPURLConfigurationLocationTest {
                 response = "A test response";
                 status = 200;
                 break;
+            case "/revalidated":
+                if (ETAG.equals(exch.getRequestHeaders().getFirst("If-None-Match"))) {
+                    // a 304 must carry no body at all, or com.sun.net.httpserver will reject it
+                    exch.sendResponseHeaders(304, -1);
+                    exch.close();
+                    return;
+                }
+                exch.getResponseHeaders().add("ETag", ETAG);
+                response = "A revalidated response";
+                status = 200;
+                break;
             case "/conditional":
-                exch.getResponseHeaders().add("ETag", "\"v1\"");
+                exch.getResponseHeaders().add("ETag", ETAG);
                 response = exch.getRequestHeaders().containsKey("If-None-Match")
                         ? "A conditional response"
                         : "An unconditional response";
