@@ -106,6 +106,18 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     }
 
     @Override
+    public synchronized void reset() {
+        super.reset();
+
+        // a forced reload must genuinely contact the server, and must not be defeated by the failure
+        // cooldown. The cached content and its validators are kept, so if nothing has changed this
+        // costs us only a conditional request.
+        cacheExpiry = 0;
+        failureExpiry = 0;
+        lastFailure = null;
+    }
+
+    @Override
     public synchronized void setLocation(final String location) {
         final String previousLocation = getRawLocation();
         super.setLocation(location);

@@ -232,6 +232,35 @@ public class HTTPURLConfigurationLocationTest {
         assertThat(requestsTo("/valid"), is(1));
     }
 
+    @Test
+    public void resettingALocationForcesARevalidation() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/revalidated");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.reset();
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+        assertThat("a reset should contact the server rather than serving the cache",
+                requestsTo("/revalidated"), is(2));
+    }
+
+    @Test
+    public void resettingALocationBypassesTheFailureCooldown() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(new ConnectException("simulated network outage"));
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+        final int attemptsAfterFailure = location.connectionAttempts();
+
+        location.reset();
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat("a reset should retry despite the cooldown",
+                location.connectionAttempts(), is(attemptsAfterFailure + 1));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
