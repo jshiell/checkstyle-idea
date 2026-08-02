@@ -40,6 +40,8 @@ public class HTTPURLConfigurationLocationTest {
     private HttpServer httpServer;
     private int serverPort = -1;
     private volatile boolean configurationDeleted;
+    private volatile boolean validatorSeenOnRedirectingHop;
+    private volatile boolean validatorSeenOnFinalHop;
 
     @BeforeEach
     public void startHttpServer() throws IOException {
@@ -183,6 +185,21 @@ public class HTTPURLConfigurationLocationTest {
         assertThat("a 304 should extend the cache lifetime", requestsTo("/revalidated"), is(2));
     }
 
+    @Test
+    public void aRedirectedResourceIsRevalidatedAgainstItsFinalUrl() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/redirect-conditional");
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A revalidated response"));
+        assertThat("the redirecting hop never issued the validator, so must not be sent it",
+                validatorSeenOnRedirectingHop, is(false));
+        assertThat("the hop that issued the validator should be sent it",
+                validatorSeenOnFinalHop, is(true));
+        assertThat(requestsTo("/conditional2"), is(2));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -235,6 +252,15 @@ public class HTTPURLConfigurationLocationTest {
                 response = "A test response";
                 status = 200;
                 break;
+            case "/redirect-conditional":
+                validatorSeenOnRedirectingHop |= exch.getRequestHeaders().containsKey("If-None-Match");
+                response = "A redirect";
+                status = 301;
+                exch.getResponseHeaders().add("Location", urlOf("/conditional2"));
+                break;
+            case "/conditional2":
+                validatorSeenOnFinalHop |= exch.getRequestHeaders().containsKey("If-None-Match");
+                // falls through to the shared revalidation handling
             case "/revalidated":
                 if (ETAG.equals(exch.getRequestHeaders().getFirst("If-None-Match"))) {
                     // a 304 must carry no body at all, or com.sun.net.httpserver will reject it
