@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
+import javax.net.ssl.SSLException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,12 +59,28 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
-            LOG.info("Couldn't read URL: " + redactedLocation(), e);
-            cachedContent = null;
+            LOG.warn("Couldn't read URL: " + redactedLocation(), e);
             cacheExpiry = 0;
             failureExpiry = now() + (FAILURE_CACHE_SECONDS * ONE_SECOND);
+
+            if (cachedContent != null && isConnectionFailure(e)) {
+                return new ByteArrayInputStream(cachedContent);
+            }
             throw e;
         }
+    }
+
+    /**
+     * Is this failure one where the server could not be reached at all, as opposed to one where it
+     * answered? Only the former is a candidate for serving the last known good content, as a server
+     * that answers with an error may be telling us the configuration has been moved or removed.
+     */
+    private boolean isConnectionFailure(final IOException e) {
+        return e instanceof ConnectException
+                || e instanceof UnknownHostException
+                || e instanceof SocketTimeoutException
+                || e instanceof NoRouteToHostException
+                || e instanceof SSLException;
     }
 
     /**

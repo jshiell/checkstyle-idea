@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.URLConnection;
@@ -116,6 +117,17 @@ public class HTTPURLConfigurationLocationTest {
         assertThat("a call after the TTL should hit the server", requestsTo("/valid"), is(2));
     }
 
+    @Test
+    public void staleCachedContentIsServedWhenTheServerIsUnreachable() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(new ConnectException("simulated network outage"));
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A test response"));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }
@@ -202,7 +214,10 @@ public class HTTPURLConfigurationLocationTest {
      * at a nonzero value so that the initial zeroed expiry fields cannot compare as unexpired.
      */
     private static class FakeClockLocation extends HTTPURLConfigurationLocation {
+        private final AtomicInteger connectionAttempts = new AtomicInteger(0);
+
         private long time = 1_000_000L;
+        private IOException connectionFailure;
 
         FakeClockLocation() {
             super(TestHelper.mockProject(), UUID.randomUUID().toString());
@@ -215,6 +230,24 @@ public class HTTPURLConfigurationLocationTest {
 
         void advanceBy(final long millis) {
             time += millis;
+        }
+
+        @NotNull
+        @Override
+        URLConnection connectionTo(final String location) throws IOException {
+            connectionAttempts.incrementAndGet();
+            if (connectionFailure != null) {
+                throw connectionFailure;
+            }
+            return super.connectionTo(location);
+        }
+
+        void failConnectionsWith(final IOException failure) {
+            this.connectionFailure = failure;
+        }
+
+        int connectionAttempts() {
+            return connectionAttempts.get();
         }
     }
 
