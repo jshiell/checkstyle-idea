@@ -20,9 +20,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     private static final Logger LOG = Logger.getInstance(HTTPURLConfigurationLocation.class);
 
-    private static final int CONTENT_CACHE_SECONDS = 2;
-    private static final int FAILURE_CACHE_SECONDS = 60;
-    private static final int ONE_SECOND = 1000;
+    static final int CONTENT_CACHE_SECONDS = 2;
+    static final int FAILURE_CACHE_SECONDS = 60;
+    static final int ONE_SECOND = 1000;
     private static final int HTTP_TIMEOUT_IN_MS = 5000;
     private static final int MAX_REDIRECTS = 5;
 
@@ -43,17 +43,17 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
 
     @NotNull
     protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) throws IOException {
-        if (cachedContent != null && cacheExpiry > System.currentTimeMillis()) {
+        if (cachedContent != null && cacheExpiry > now()) {
             return new ByteArrayInputStream(cachedContent);
         }
 
-        if (failureExpiry > System.currentTimeMillis()) {
+        if (failureExpiry > now()) {
             throw new IOException("Skipping unavailable HTTP configuration (in cooldown): " + redactedLocation());
         }
 
         try {
             cachedContent = readContentOf(streamFrom(connectionTo(getLocation())));
-            cacheExpiry = System.currentTimeMillis() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
+            cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
             failureExpiry = 0;
             return new ByteArrayInputStream(cachedContent);
 
@@ -61,9 +61,18 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             LOG.info("Couldn't read URL: " + redactedLocation(), e);
             cachedContent = null;
             cacheExpiry = 0;
-            failureExpiry = System.currentTimeMillis() + (FAILURE_CACHE_SECONDS * ONE_SECOND);
+            failureExpiry = now() + (FAILURE_CACHE_SECONDS * ONE_SECOND);
             throw e;
         }
+    }
+
+    /**
+     * The current time in milliseconds.
+     * <p>
+     * Package-private (rather than private) to allow the cache timings to be driven by unit tests.
+     */
+    long now() {
+        return System.currentTimeMillis();
     }
 
     @NotNull

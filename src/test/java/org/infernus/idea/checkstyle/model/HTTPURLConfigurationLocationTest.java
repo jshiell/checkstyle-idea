@@ -16,17 +16,23 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.URLConnection;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.infernus.idea.checkstyle.model.HTTPURLConfigurationLocation.CONTENT_CACHE_SECONDS;
+import static org.infernus.idea.checkstyle.model.HTTPURLConfigurationLocation.ONE_SECOND;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HTTPURLConfigurationLocationTest {
+
+    private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
 
     private HttpServer httpServer;
     private int serverPort = -1;
@@ -90,6 +96,30 @@ public class HTTPURLConfigurationLocationTest {
         assertThat("second call within cooldown should not retry connection", connectionAttempts.get(), is(1));
     }
 
+    /**
+     * Note: this exercises the fake clock rather than wall-clock time. It could in theory pass
+     * spuriously on a machine slow enough that more than {@code CONTENT_CACHE_SECONDS} of real time
+     * elapsed between the first and second calls.
+     */
+    @Test
+    public void cachedContentExpiresOnceTheCacheTtlElapses() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+
+        location.resolveFile(getClass().getClassLoader());
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat("a call within the TTL should be served from cache", requestsTo("/valid"), is(1));
+
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+
+        assertThat("a call after the TTL should hit the server", requestsTo("/valid"), is(2));
+    }
+
+    private int requestsTo(final String path) {
+        return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
+    }
+
     private String toString(final InputStream is) {
         Scanner s = new Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
@@ -104,6 +134,19 @@ public class HTTPURLConfigurationLocationTest {
     }
 
     @NotNull
+    private FakeClockLocation aFakeClockLocationWithPath(final String path) {
+        final FakeClockLocation location = new FakeClockLocation();
+        location.setDescription("aTestLocation");
+        location.setLocation(urlOf(path));
+        return location;
+    }
+
+    @NotNull
+    private String urlOf(final String path) {
+        return format("http://localhost:%s%s", serverPort, path);
+    }
+
+    @NotNull
     private HTTPURLConfigurationLocation aTimingOutLocation() {
         final TimingOutHTTPURLConfigurationLocation location = new TimingOutHTTPURLConfigurationLocation();
         location.setDescription("aTimingOutTestLocation");
@@ -115,9 +158,12 @@ public class HTTPURLConfigurationLocationTest {
     private final class TestHandler implements HttpHandler {
         @Override
         public void handle(final HttpExchange exch) throws IOException {
+            final String path = exch.getRequestURI().getPath();
+            requestCounts.computeIfAbsent(path, ignored -> new AtomicInteger(0)).incrementAndGet();
+
             String response;
             int status;
-            switch (exch.getRequestURI().getPath()) {
+            switch (path) {
             case "/valid":
                 response = "A test response";
                 status = 200;
@@ -148,6 +194,27 @@ public class HTTPURLConfigurationLocationTest {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
             }
+        }
+    }
+
+    /**
+     * A location whose clock is driven by the test rather than by wall-clock time. The clock starts
+     * at a nonzero value so that the initial zeroed expiry fields cannot compare as unexpired.
+     */
+    private static class FakeClockLocation extends HTTPURLConfigurationLocation {
+        private long time = 1_000_000L;
+
+        FakeClockLocation() {
+            super(TestHelper.mockProject(), UUID.randomUUID().toString());
+        }
+
+        @Override
+        long now() {
+            return time;
+        }
+
+        void advanceBy(final long millis) {
+            time += millis;
         }
     }
 
