@@ -128,6 +128,21 @@ public class HTTPURLConfigurationLocationTest {
         assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A test response"));
     }
 
+    @Test
+    public void staleCachedContentIsServedWhileWithinTheFailureCooldownPeriod() throws IOException {
+        final FakeClockLocation location = aFakeClockLocationWithPath("/valid");
+        location.resolveFile(getClass().getClassLoader());
+
+        location.failConnectionsWith(new ConnectException("simulated network outage"));
+        location.advanceBy((CONTENT_CACHE_SECONDS * ONE_SECOND) + 1);
+        location.resolveFile(getClass().getClassLoader());
+        final int attemptsAfterFirstFailure = location.connectionAttempts();
+
+        assertThat(toString(location.resolveFile(getClass().getClassLoader())), is("A test response"));
+        assertThat("a call within the cooldown should not retry the connection",
+                location.connectionAttempts(), is(attemptsAfterFirstFailure));
+    }
+
     private int requestsTo(final String path) {
         return requestCounts.getOrDefault(path, new AtomicInteger(0)).get();
     }

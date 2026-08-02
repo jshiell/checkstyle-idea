@@ -30,6 +30,7 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
     private byte[] cachedContent;
     private long cacheExpiry;
     private long failureExpiry;
+    private IOException lastFailure;
 
     HTTPURLConfigurationLocation(@NotNull final Project project,
                                  @NotNull final String id) {
@@ -49,6 +50,9 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
         }
 
         if (failureExpiry > now()) {
+            if (cachedContent != null && isConnectionFailure(lastFailure)) {
+                return new ByteArrayInputStream(cachedContent);
+            }
             throw new IOException("Skipping unavailable HTTP configuration (in cooldown): " + redactedLocation());
         }
 
@@ -56,12 +60,14 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
             cachedContent = readContentOf(streamFrom(connectionTo(getLocation())));
             cacheExpiry = now() + (CONTENT_CACHE_SECONDS * ONE_SECOND);
             failureExpiry = 0;
+            lastFailure = null;
             return new ByteArrayInputStream(cachedContent);
 
         } catch (IOException e) {
             LOG.warn("Couldn't read URL: " + redactedLocation(), e);
             cacheExpiry = 0;
             failureExpiry = now() + (FAILURE_CACHE_SECONDS * ONE_SECOND);
+            lastFailure = e;
 
             if (cachedContent != null && isConnectionFailure(e)) {
                 return new ByteArrayInputStream(cachedContent);
