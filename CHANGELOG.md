@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.14.0** New: Added Checkstyle 13.9.0, 13.10.0.
 * **26.14.0** New: Added a Refresh Results action, which rescans the selected results - or all results, if none are selected - and merges the outcome into the existing results (#1).
 * **26.14.0** Fixed: HTTP rules files are now reused when the server is unreachable, and revalidated with conditional requests (#67).
 * **26.14.0** New: Added actions to check the selected or all search results (#2).
