@@ -56,6 +56,7 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private JTree resultsTree;
     private ResultTreeModel treeModel;
+    private Set<PsiFile> filesToReselect = Set.of();
 
     // Extracted collaborators
     private ResultTreeNavigator treeNavigator;
@@ -323,8 +324,39 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     public void mergeResults(final List<ScanResult> scanResults, final String warningMessage) {
         treeBuilder.mergeResults(scanResults, warningMessage);
+        restoreSelection();
         invalidate();
         repaint();
+    }
+
+    /**
+     * Note the files whose selection should survive the next merge.
+     * <p>
+     * Merging rebuilds the tree from scratch, which would otherwise lose the selection and leave a
+     * second refresh re-scanning everything.
+     *
+     * @param files the files to re-select.
+     */
+    public void reselectAfterRefresh(@NotNull final Set<PsiFile> files) {
+        this.filesToReselect = files;
+    }
+
+    private void restoreSelection() {
+        final Set<PsiFile> files = filesToReselect;
+        filesToReselect = Set.of();
+
+        if (files.isEmpty()) {
+            return;
+        }
+
+        // a file that is now clean has no node left to select, and is simply passed over
+        final TreePath[] paths = ResultTreeFiles.fileNodesShowing(treeModel.getVisibleRoot(), files).stream()
+                .map(node -> new TreePath(treeModel.getPathToRoot(node)))
+                .toArray(TreePath[]::new);
+        if (paths.length > 0) {
+            resultsTree.setSelectionPaths(paths);
+            resultsTree.scrollPathToVisible(paths[0]);
+        }
     }
 
     /**
