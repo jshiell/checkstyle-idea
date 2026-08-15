@@ -5,19 +5,27 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
-import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static org.infernus.idea.checkstyle.checker.ResultHandling.MERGE;
 
 public class UiFeedbackScannerListener implements ScannerListener {
     private final Project project;
+    private final ResultHandling resultHandling;
 
     public UiFeedbackScannerListener(final Project project) {
+        this(project, ResultHandling.REPLACE);
+    }
+
+    public UiFeedbackScannerListener(final Project project,
+                                     @NotNull final ResultHandling resultHandling) {
         this.project = project;
+        this.resultHandling = resultHandling;
     }
 
 
@@ -26,7 +34,11 @@ public class UiFeedbackScannerListener implements ScannerListener {
         ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
-                toolWindowPanel.displayInProgress(filesToScan.size());
+                if (resultHandling == MERGE) {
+                    toolWindowPanel.displayRefreshInProgress(filesToScan.size());
+                } else {
+                    toolWindowPanel.displayInProgress(filesToScan.size());
+                }
             }
         });
     }
@@ -46,29 +58,20 @@ public class UiFeedbackScannerListener implements ScannerListener {
         ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
-                var notPresent = new ArrayList<ConfigurationLocation>();
-                var blocked = new ArrayList<ConfigurationLocation>();
-                var validResults = new ArrayList<ScanResult>();
+                final ScanOutcome outcome = ScanOutcome.of(scanResults);
 
-                for (ScanResult scanResult : scanResults) {
-                    switch (scanResult.configurationLocationResult().status()) {
-                        case NOT_PRESENT -> notPresent.add(scanResult.configurationLocationResult().location());
-                        case BLOCKED -> blocked.add(scanResult.configurationLocationResult().location());
-                        default -> validResults.add(scanResult);
+                if (resultHandling == MERGE) {
+                    if (outcome.hasBlockedRulesFiles()) {
+                        // a blocked rules file is dropped before the files are scanned, so merging would
+                        // strip that rules file's findings with nothing to put in their place
+                        toolWindowPanel.clearProgress();
+                        toolWindowPanel.setProgressText(outcome.warningMessage());
+                    } else {
+                        toolWindowPanel.mergeResults(outcome.validResults(), outcome.warningMessage());
                     }
+                } else {
+                    toolWindowPanel.displayResults(outcome.validResults(), outcome.warningMessage());
                 }
-
-                var warningMessages = new ArrayList<String>();
-                if (!notPresent.isEmpty()) {
-                    warningMessages.add(CheckStyleBundle.message("plugin.results.no-rules-file"));
-                }
-                if (!blocked.isEmpty()) {
-                    var maxTimeBlocked = blocked.stream().map(ConfigurationLocation::blockedForSeconds).reduce(Long::max).get();
-                    var blockedLocations = String.join(", ", blocked.stream().map(ConfigurationLocation::getDescription).toList());
-                    warningMessages.add(CheckStyleBundle.message("plugin.results.rules-blocked", maxTimeBlocked, blockedLocations));
-                }
-
-                toolWindowPanel.displayResults(validResults, String.join("; ", warningMessages));
             }
         });
     }
@@ -78,7 +81,13 @@ public class UiFeedbackScannerListener implements ScannerListener {
         ApplicationManager.getApplication().invokeLater(() -> {
             final CheckStyleToolWindowPanel toolWindowPanel = toolWindowPanel();
             if (toolWindowPanel != null) {
-                toolWindowPanel.displayErrorResult(error);
+                if (resultHandling == MERGE) {
+                    // a failure while refreshing must not cost the user every other file's results
+                    toolWindowPanel.clearProgress();
+                    toolWindowPanel.setProgressText(CheckStyleBundle.message("plugin.results.error"));
+                } else {
+                    toolWindowPanel.displayErrorResult(error);
+                }
             }
         });
     }

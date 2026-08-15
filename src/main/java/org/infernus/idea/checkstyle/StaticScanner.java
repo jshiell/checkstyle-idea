@@ -81,6 +81,12 @@ public class StaticScanner {
     }
 
     public void asyncScanFiles(final List<VirtualFile> files, final ConfigurationLocation overrideConfigLocation) {
+        asyncScanFiles(files, overrideConfigLocation, ResultHandling.REPLACE);
+    }
+
+    public void asyncScanFiles(final List<VirtualFile> files,
+                               final ConfigurationLocation overrideConfigLocation,
+                               final ResultHandling resultHandling) {
         LOG.debug("Scanning current file(s).");
 
         if (files == null || files.isEmpty()) {
@@ -89,7 +95,7 @@ public class StaticScanner {
         }
 
         final ScanFiles checkFiles = new ScanFiles(project, files, overrideConfigLocation);
-        checkFiles.addListener(new UiFeedbackScannerListener(project));
+        checkFiles.addListener(new UiFeedbackScannerListener(project, resultHandling));
         runAsyncCheck(checkFiles);
     }
 
