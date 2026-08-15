@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.wm.ToolWindow;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.jetbrains.annotations.NotNull;
 
 import static org.infernus.idea.checkstyle.actions.ToolWindowAccess.toolWindow;
@@ -24,6 +25,8 @@ public class StopCheck extends BaseAction {
 
                     staticScanner(project).stopChecks();
 
+                    // cancelling the scan fires no listener, so nothing else will clear the progress bar
+                    ToolWindowAccess.actOnToolWindowPanel(toolWindow, CheckStyleToolWindowPanel::clearProgress);
                     setProgressText(toolWindow, "plugin.status.aborted");
                 });
 
