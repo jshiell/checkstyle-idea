@@ -5,6 +5,7 @@ import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ScanResult;
+import org.infernus.idea.checkstyle.model.ScanResultMerger;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -108,6 +109,32 @@ public class ResultTreeBuilder {
             progressManager.setProgressText(warningMessage);
         }
         navigator.expandTree(treeModel, 3);
+    }
+
+    /**
+     * Merge the passed results of a re-scan into the results already on display.
+     *
+     * @param scanResults    the results of the re-scan.
+     * @param warningMessage a warning message to display about the results, if appropriate.
+     */
+    public void mergeResults(final List<ScanResult> scanResults, final String warningMessage) {
+        lastScanResults = ScanResultMerger.merge(lastScanResults, resultsWorthDisplaying(scanResults));
+        treeModel.setModel(lastScanResults, getDisplayedSeverities());
+        progressManager.clearProgress();
+        if (warningMessage != null) {
+            progressManager.setProgressText(warningMessage);
+        }
+        navigator.expandTree(treeModel, 3);
+    }
+
+    /**
+     * Display a 'scan in progress' notice without disturbing the results already on display, so that
+     * they remain readable while the re-scan runs.
+     *
+     * @param size the number of files being re-scanned.
+     */
+    public void displayRefreshInProgress(final int size) {
+        progressManager.setProgressBarMax(size);
     }
 
     /**

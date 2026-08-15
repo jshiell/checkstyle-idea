@@ -312,6 +312,34 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         repaint();
     }
 
+    /**
+     * Merge the passed results of a re-scan into the results already on display.
+     *
+     * @param scanResults    the results of the re-scan.
+     * @param warningMessage a warning message to display about the results, if appropriate.
+     */
+    public void mergeResults(final List<ScanResult> scanResults, final String warningMessage) {
+        treeBuilder.mergeResults(scanResults, warningMessage);
+        invalidate();
+        repaint();
+    }
+
+    /**
+     * Display a 'scan in progress' notice without disturbing the results already on display.
+     *
+     * @param size the number of files being re-scanned.
+     */
+    public void displayRefreshInProgress(final int size) {
+        treeBuilder.displayRefreshInProgress(size);
+    }
+
+    /**
+     * Clear the progress bar and progress text.
+     */
+    public void clearProgress() {
+        progressManager.clearProgress();
+    }
+
     public boolean isDisplayingErrors() {
         return treeBuilder.isDisplayingErrors();
     }

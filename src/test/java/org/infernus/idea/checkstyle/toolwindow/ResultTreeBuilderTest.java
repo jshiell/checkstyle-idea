@@ -1,7 +1,11 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
 import org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus;
+import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -15,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,6 +42,16 @@ class ResultTreeBuilderTest {
     private ResultTreeNavigator navigator;
     @Mock
     private ConfigurationLocation configurationLocation;
+    @Mock
+    private PsiElement psiElement;
+    @Mock
+    private PsiFile fileA;
+    @Mock
+    private PsiFile fileB;
+    @Mock
+    private VirtualFile virtualFileA;
+    @Mock
+    private VirtualFile virtualFileB;
 
     private ResultTreeBuilder underTest;
 
@@ -45,8 +60,22 @@ class ResultTreeBuilderTest {
         underTest = new ResultTreeBuilder(treeModel, progressManager, navigator);
     }
 
+    private ConfigurationLocationResult presentLocation() {
+        return ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT);
+    }
+
+    private Problem problem() {
+        return new Problem(psiElement, "msg", SeverityLevel.Warning, 1, 0, "com.example.FooCheck", false, false);
+    }
+
     private ScanResult scanResultWith(final ConfigurationLocationResult locationResult) {
-        return new ScanResult(locationResult, null, Collections.emptyMap(), Set.of());
+        return scanResultWith(locationResult, Collections.emptyMap(), Set.of());
+    }
+
+    private ScanResult scanResultWith(final ConfigurationLocationResult locationResult,
+                                      final Map<PsiFile, List<Problem>> problems,
+                                      final Set<PsiFile> scannedFiles) {
+        return new ScanResult(locationResult, null, problems, scannedFiles);
     }
 
     // --- severity filter state ---
@@ -253,6 +282,93 @@ class ResultTreeBuilderTest {
         underTest.displayErrorResult(new RuntimeException("some error"));
 
         assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    // --- merging a re-scan into the displayed results ---
+
+    @Test
+    void mergeResultsCombinesTheLatestResultsWithThoseRetained() {
+        ScanResult previous = scanResultWith(presentLocation(), Map.of(fileB, List.of(problem())), Set.of());
+        ScanResult latest = scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA));
+        underTest.displayResults(List.of(previous), null);
+
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+        when(fileB.getVirtualFile()).thenReturn(virtualFileB);
+
+        underTest.mergeResults(List.of(latest), null);
+
+        verify(treeModel).setModel(eq(List.of(previous, latest)), any());
+    }
+
+    @Test
+    void mergeResultsRetainsTheMergedResults() {
+        ScanResult latest = scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA));
+
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+
+        underTest.mergeResults(List.of(latest), null);
+
+        assertThat(underTest.lastScanResults(), contains(latest));
+    }
+
+    @Test
+    void mergeResultsDiscardsTheStaleResultsForARescannedFile() {
+        ScanResult previous = scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of());
+        ScanResult latest = scanResultWith(presentLocation(), Collections.emptyMap(), Set.of(fileA));
+        underTest.displayResults(List.of(previous), null);
+
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+
+        underTest.mergeResults(List.of(latest), null);
+
+        verify(treeModel).setModel(eq(List.of(latest)), any());
+    }
+
+    @Test
+    void mergeResultsClearsProgressAndExpandsTheTree() {
+        underTest.mergeResults(Collections.emptyList(), null);
+
+        verify(progressManager).clearProgress();
+        verify(navigator).expandTree(treeModel, 3);
+    }
+
+    @Test
+    void mergeResultsWithWarningMessageSetsProgressText() {
+        underTest.mergeResults(Collections.emptyList(), "a warning");
+
+        verify(progressManager).setProgressText("a warning");
+    }
+
+    @Test
+    void mergeResultsNeverClearsTheTree() {
+        underTest.mergeResults(Collections.emptyList(), null);
+
+        verify(treeModel, never()).clear();
+    }
+
+    @Test
+    void displayRefreshInProgressSetsTheProgressBarMax() {
+        underTest.displayRefreshInProgress(42);
+
+        verify(progressManager).setProgressBarMax(42);
+    }
+
+    @Test
+    void displayRefreshInProgressLeavesTheTreeReadable() {
+        underTest.displayRefreshInProgress(42);
+
+        verify(treeModel, never()).clear();
+        verify(treeModel, never()).setRootMessage(any(), any());
+    }
+
+    @Test
+    void displayRefreshInProgressKeepsTheRetainedResults() {
+        ScanResult present = scanResultWith(presentLocation());
+        underTest.displayResults(List.of(present), null);
+
+        underTest.displayRefreshInProgress(1);
+
+        assertThat(underTest.lastScanResults(), contains(present));
     }
 
     @Test
