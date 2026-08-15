@@ -1,14 +1,18 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Resolves the nodes of the results tree back to the files they describe.
@@ -58,23 +62,37 @@ final class ResultTreeFiles {
     @NotNull
     static List<ToggleableTreeNode> fileNodesShowing(@Nullable final Object node,
                                                      @NotNull final Set<PsiFile> files) {
+        // by virtual file, as the tree has since been rebuilt from PsiFiles that PSI may well have
+        // handed back as fresh instances
+        final Set<VirtualFile> targets = virtualFilesOf(files);
+        if (targets.isEmpty()) {
+            return List.of();
+        }
+
         final List<ToggleableTreeNode> fileNodes = new ArrayList<>();
-        collectFileNodesShowing(node, files, fileNodes);
+        collectFileNodesShowing(node, targets, fileNodes);
         return fileNodes;
     }
 
     private static void collectFileNodesShowing(@Nullable final Object node,
-                                                final Set<PsiFile> files,
+                                                final Set<VirtualFile> targets,
                                                 final List<ToggleableTreeNode> fileNodes) {
         if (!(node instanceof ToggleableTreeNode toggleableNode)) {
             return;
         }
 
         if (toggleableNode.getUserObject() instanceof FileGroupTreeInfo
-                && !Collections.disjoint(filesUnder(toggleableNode), files)) {
+                && !Collections.disjoint(virtualFilesOf(filesUnder(toggleableNode)), targets)) {
             fileNodes.add(toggleableNode);
         }
 
-        toggleableNode.getAllChildren().forEach(child -> collectFileNodesShowing(child, files, fileNodes));
+        toggleableNode.getAllChildren().forEach(child -> collectFileNodesShowing(child, targets, fileNodes));
+    }
+
+    private static Set<VirtualFile> virtualFilesOf(final Collection<PsiFile> files) {
+        return files.stream()
+                .map(PsiFile::getVirtualFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }

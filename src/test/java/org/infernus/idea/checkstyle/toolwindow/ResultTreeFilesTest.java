@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,9 @@ class ResultTreeFilesTest {
 
     @Mock private PsiFile fileA;
     @Mock private PsiFile fileB;
+    @Mock private PsiFile reloadedFileA;
+    @Mock private VirtualFile virtualFileA;
+    @Mock private VirtualFile virtualFileB;
 
     private ToggleableTreeNode problemNodeFor(final PsiFile file) {
         // mocked to sidestep the icon lookups in the real constructor
@@ -102,6 +106,7 @@ class ResultTreeFilesTest {
     void theNodeForARequestedFileIsFound() {
         ToggleableTreeNode fileNode = fileNode(fileA);
         ToggleableTreeNode root = groupNode(fileNode);
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
 
         assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileA)), contains(fileNode));
     }
@@ -109,6 +114,8 @@ class ResultTreeFilesTest {
     @Test
     void theNodeForAnotherFileIsNotFound() {
         ToggleableTreeNode root = groupNode(fileNode(fileB));
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+        when(fileB.getVirtualFile()).thenReturn(virtualFileB);
 
         assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileA)), is(empty()));
     }
@@ -117,6 +124,7 @@ class ResultTreeFilesTest {
     void nodesAreFoundHoweverDeeplyTheTreeIsGrouped() {
         ToggleableTreeNode fileNode = fileNode(fileA);
         ToggleableTreeNode root = groupNode(groupNode(groupNode(fileNode)));
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
 
         assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileA)), contains(fileNode));
     }
@@ -124,13 +132,39 @@ class ResultTreeFilesTest {
     @Test
     void aFileAppearingUnderSeveralGroupsIsFoundInEachOfThem() {
         ToggleableTreeNode root = groupNode(groupNode(fileNode(fileA)), groupNode(fileNode(fileA)));
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
 
         assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileA)), hasSize(2));
     }
 
     @Test
+    void aReloadedPsiFileForTheSameVirtualFileStillFindsItsNode() {
+        ToggleableTreeNode fileNode = fileNode(fileA);
+        ToggleableTreeNode root = groupNode(fileNode);
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+        when(reloadedFileA.getVirtualFile()).thenReturn(virtualFileA);
+
+        assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(reloadedFileA)), contains(fileNode));
+    }
+
+    @Test
+    void aNodeWhoseFileHasNoVirtualFileIsNeverMatched() {
+        ToggleableTreeNode root = groupNode(fileNode(fileB));
+        when(fileA.getVirtualFile()).thenReturn(virtualFileA);
+
+        assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileA)), is(empty()));
+    }
+
+    @Test
+    void aRequestedFileWithNoVirtualFileMatchesNothing() {
+        ToggleableTreeNode root = groupNode(nodeWith(new FileGroupTreeInfo("a file", 1)));
+
+        assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of(fileB)), is(empty()));
+    }
+
+    @Test
     void noNodesAreFoundForNoFiles() {
-        ToggleableTreeNode root = groupNode(fileNode(fileA));
+        ToggleableTreeNode root = groupNode(nodeWith(new FileGroupTreeInfo("a file", 1)));
 
         assertThat(ResultTreeFiles.fileNodesShowing(root, Set.of()), is(empty()));
     }
