@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -49,16 +50,22 @@ class ScanResultTest {
     }
 
     @Test
+    void emptyConstantHasNoScannedFiles() {
+        assertThat(ScanResult.EMPTY.scannedFiles().isEmpty(), is(true));
+    }
+
+    @Test
     void constructorStoresAllFields() {
         ConfigurationLocationResult result = ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT);
         Problem p = problem();
         Map<PsiFile, List<Problem>> problems = Map.of(psiFile, List.of(p));
 
-        ScanResult scanResult = new ScanResult(result, module, problems);
+        ScanResult scanResult = new ScanResult(result, module, problems, Set.of(psiFile));
 
         assertThat(scanResult.configurationLocationResult(), is(result));
         assertThat(scanResult.module(), is(module));
         assertThat(scanResult.problems(), is(aMapWithSize(1)));
+        assertThat(scanResult.scannedFiles(), is(Set.of(psiFile)));
     }
 
     @Test
@@ -67,8 +74,18 @@ class ScanResultTest {
         Problem p = problem();
         Map<PsiFile, List<Problem>> problems = Collections.singletonMap(psiFile, List.of(p));
 
-        ScanResult scanResult = new ScanResult(result, module, problems);
+        ScanResult scanResult = new ScanResult(result, module, problems, Set.of(psiFile));
 
         assertThat(scanResult.problems().get(psiFile), is(List.of(p)));
+    }
+
+    @Test
+    void aFileMayBeScannedWithoutProducingProblems() {
+        ConfigurationLocationResult result = ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT);
+
+        ScanResult scanResult = new ScanResult(result, module, Collections.emptyMap(), Set.of(psiFile));
+
+        assertThat(scanResult.problems().isEmpty(), is(true));
+        assertThat(scanResult.scannedFiles(), is(Set.of(psiFile)));
     }
 }

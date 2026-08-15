@@ -152,7 +152,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
 
             final List<ConfigurationLocationResult> locationResults = configurationLocation(overrideConfigLocation, module);
             if (locationResults.isEmpty()) {
-                return List.of(new ScanResult(ConfigurationLocationResult.NOT_PRESENT, module, emptyMap()));
+                return List.of(new ScanResult(ConfigurationLocationResult.NOT_PRESENT, module, emptyMap(), Set.of()));
             }
 
             final Set<PsiFile> filesForModule = moduleToFiles.get(module);
@@ -192,14 +192,17 @@ public class ScanFiles implements Callable<List<ScanResult>> {
         final List<ScannableFile> scannableFiles = new ArrayList<>();
         try {
             PluginConfiguration pluginConfiguration = configurationManager().getCurrent();
-            scannableFiles.addAll(ScannableFile.createAndValidate(filesToScan, module, this.overrideConfigLocation, pluginConfiguration));
+            final Set<PsiFile> scannable = filesInScanScope(filesToScan, module, pluginConfiguration);
+            scannableFiles.addAll(ScannableFile.createAndValidate(scannable, module, this.overrideConfigLocation, pluginConfiguration));
+
+            final Set<PsiFile> scannedFiles = filesTheScanIsAuthoritativeFor(filesToScan, scannable, scannableFiles);
 
             final List<ScanResult> scanResults = new ArrayList<>();
             for (ConfigurationLocation configurationLocation : configurationLocations) {
                 var checker = checkerFactory().checker(module, configurationLocation);
                 if (checker.isPresent()) {
                     var problems = checker.get().scan(scannableFiles, pluginConfiguration.isSuppressErrors());
-                    scanResults.add(new ScanResult(ConfigurationLocationResult.of(configurationLocation, PRESENT), module, problems));
+                    scanResults.add(new ScanResult(ConfigurationLocationResult.of(configurationLocation, PRESENT), module, problems, scannedFiles));
                 } else {
                     throw new CheckStylePluginException("Could not create checker for location " + configurationLocation + ", see logs for details.");
                 }
@@ -209,6 +212,28 @@ public class ScanFiles implements Callable<List<ScanResult>> {
         } finally {
             scannableFiles.forEach(ScannableFile::deleteIfRequired);
         }
+    }
+
+    private Set<PsiFile> filesInScanScope(final Set<PsiFile> filesToScan,
+                                          final Module module,
+                                          final PluginConfiguration pluginConfiguration) {
+        return ReadAction.compute(() -> filesToScan.stream()
+                .filter(file -> PsiFileValidator.isScannable(file, module, pluginConfiguration, this.overrideConfigLocation))
+                .collect(Collectors.toSet()));
+    }
+
+    /**
+     * The files the scan can speak for, being those it actually scanned plus those it deliberately
+     * skipped as out of scope. Files that were in scope but that we failed to read are excluded, as
+     * their previous results remain the best we have.
+     */
+    private Set<PsiFile> filesTheScanIsAuthoritativeFor(final Set<PsiFile> filesToScan,
+                                                        final Set<PsiFile> filesInScope,
+                                                        final List<ScannableFile> readableFiles) {
+        final Set<PsiFile> authoritativeFor = new HashSet<>(filesToScan);
+        authoritativeFor.removeAll(filesInScope);
+        readableFiles.forEach(readableFile -> authoritativeFor.add(readableFile.getPsiFile()));
+        return authoritativeFor;
     }
 
     private CheckerFactory checkerFactory() {
