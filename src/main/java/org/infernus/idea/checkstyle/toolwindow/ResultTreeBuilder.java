@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
@@ -93,6 +94,44 @@ public class ResultTreeBuilder {
      */
     List<ScanResult> lastScanResults() {
         return lastScanResults;
+    }
+
+    /**
+     * Is there anything on display worth re-scanning?
+     *
+     * @return true if any problems are displayed.
+     */
+    public boolean hasResults() {
+        return lastScanResults.stream().anyMatch(scanResult -> !scanResult.problems().isEmpty());
+    }
+
+    /**
+     * Discard the results for the passed files.
+     * <p>
+     * A file that has been deleted since it was scanned is never sent to a re-scan, so it would
+     * otherwise linger in the tree forever.
+     *
+     * @param files the files to discard the results for.
+     */
+    public void discardResultsFor(final Set<PsiFile> files) {
+        if (files.isEmpty()) {
+            return;
+        }
+
+        lastScanResults = lastScanResults.stream()
+                .map(scanResult -> withoutProblemsFor(scanResult, files))
+                .filter(scanResult -> !scanResult.problems().isEmpty())
+                .toList();
+
+        treeModel.setModel(lastScanResults, getDisplayedSeverities());
+        navigator.expandTree(treeModel, 3);
+    }
+
+    private ScanResult withoutProblemsFor(final ScanResult scanResult, final Set<PsiFile> files) {
+        final var retained = new HashMap<>(scanResult.problems());
+        retained.keySet().removeAll(files);
+        return new ScanResult(scanResult.configurationLocationResult(), scanResult.module(),
+                retained, scanResult.scannedFiles());
     }
 
     /**

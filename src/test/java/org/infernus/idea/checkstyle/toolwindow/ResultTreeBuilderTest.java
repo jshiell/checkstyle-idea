@@ -284,6 +284,79 @@ class ResultTreeBuilderTest {
         assertThat(underTest.lastScanResults(), is(empty()));
     }
 
+    // --- results available to refresh ---
+
+    @Test
+    void thereAreNoResultsBeforeAnyScan() {
+        assertThat(underTest.hasResults(), is(false));
+    }
+
+    @Test
+    void thereAreResultsOnceAScanHasFoundProblems() {
+        underTest.displayResults(
+                List.of(scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA))), null);
+
+        assertThat(underTest.hasResults(), is(true));
+    }
+
+    @Test
+    void thereAreNoResultsWhenAScanFoundNothing() {
+        underTest.displayResults(
+                List.of(scanResultWith(presentLocation(), Collections.emptyMap(), Set.of(fileA))), null);
+
+        assertThat(underTest.hasResults(), is(false));
+    }
+
+    @Test
+    void discardingResultsForAFileRemovesItsProblems() {
+        underTest.displayResults(List.of(scanResultWith(presentLocation(),
+                Map.of(fileA, List.of(problem()), fileB, List.of(problem())), Set.of(fileA, fileB))), null);
+
+        underTest.discardResultsFor(Set.of(fileA));
+
+        assertThat(underTest.lastScanResults().getFirst().problems(), not(hasKey(fileA)));
+    }
+
+    @Test
+    void discardingResultsForAFileLeavesTheOtherFilesAlone() {
+        underTest.displayResults(List.of(scanResultWith(presentLocation(),
+                Map.of(fileA, List.of(problem()), fileB, List.of(problem())), Set.of(fileA, fileB))), null);
+
+        underTest.discardResultsFor(Set.of(fileA));
+
+        assertThat(underTest.lastScanResults().getFirst().problems(), hasKey(fileB));
+    }
+
+    @Test
+    void discardingTheLastResultsForAScanDropsThatScanEntirely() {
+        underTest.displayResults(
+                List.of(scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA))), null);
+
+        underTest.discardResultsFor(Set.of(fileA));
+
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    @Test
+    void discardingResultsRedisplaysTheTree() {
+        underTest.displayResults(
+                List.of(scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA))), null);
+
+        underTest.discardResultsFor(Set.of(fileA));
+
+        verify(treeModel).setModel(eq(List.of()), any());
+    }
+
+    @Test
+    void discardingResultsForNoFilesLeavesTheResultsAlone() {
+        ScanResult present = scanResultWith(presentLocation(), Map.of(fileA, List.of(problem())), Set.of(fileA));
+        underTest.displayResults(List.of(present), null);
+
+        underTest.discardResultsFor(Set.of());
+
+        assertThat(underTest.lastScanResults(), contains(present));
+    }
+
     // --- merging a re-scan into the displayed results ---
 
     @Test

@@ -11,6 +11,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
+import com.intellij.psi.PsiFile;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
@@ -29,7 +30,9 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.InputStream;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
@@ -338,6 +341,59 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
      */
     public void clearProgress() {
         progressManager.clearProgress();
+    }
+
+    /**
+     * Is there anything on display worth re-scanning?
+     *
+     * @return true if any problems are displayed.
+     */
+    public boolean hasResults() {
+        return treeBuilder.hasResults();
+    }
+
+    /**
+     * The files behind the current selection in the results tree.
+     * <p>
+     * This must be called on the event thread.
+     *
+     * @return the selected files, which is empty if nothing is selected.
+     */
+    @NotNull
+    public Set<PsiFile> selectedFiles() {
+        final TreePath[] selectionPaths = resultsTree.getSelectionPaths();
+        if (selectionPaths == null) {
+            return Set.of();
+        }
+
+        final Set<PsiFile> files = new LinkedHashSet<>();
+        for (final TreePath selectionPath : selectionPaths) {
+            files.addAll(ResultTreeFiles.filesUnder(selectionPath.getLastPathComponent()));
+        }
+        return files;
+    }
+
+    /**
+     * Every file with results in the tree, whether or not those results are currently filtered out.
+     * <p>
+     * This must be called on the event thread.
+     *
+     * @return the displayed files.
+     */
+    @NotNull
+    public Set<PsiFile> allDisplayedFiles() {
+        return ResultTreeFiles.filesUnder(treeModel.getVisibleRoot());
+    }
+
+    /**
+     * Discard the results for the passed files.
+     *
+     * @param files the files to discard the results for.
+     */
+    public void discardResultsFor(@NotNull final Set<PsiFile> files) {
+        treeBuilder.discardResultsFor(files);
+        invalidate();
+        repaint();
     }
 
     public boolean isDisplayingErrors() {
