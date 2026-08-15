@@ -42,6 +42,8 @@ public class ResultTreeBuilder {
     private boolean displayingWarnings = true;
     private boolean displayingInfo = true;
 
+    private List<ScanResult> lastScanResults = List.of();
+
     public ResultTreeBuilder(final ResultTreeModel treeModel,
                              final ScanProgressManager progressManager,
                              final ResultTreeNavigator navigator) {
@@ -71,14 +73,25 @@ public class ResultTreeBuilder {
      */
     public void displayInProgress(final int size) {
         progressManager.setProgressBarMax(size);
+        lastScanResults = List.of();
         treeModel.clear();
         treeModel.setRootMessage("plugin.results.in-progress");
     }
 
     public void displayWarningResult(final String messageKey, final Object... messageArgs) {
         progressManager.clearProgress();
+        lastScanResults = List.of();
         treeModel.clear();
         treeModel.setRootMessage(messageKey, messageArgs);
+    }
+
+    /**
+     * The results currently on display, as a basis for merging a re-scan into.
+     *
+     * @return the displayed results, which is empty whenever the tree has been cleared.
+     */
+    List<ScanResult> lastScanResults() {
+        return lastScanResults;
     }
 
     /**
@@ -88,7 +101,8 @@ public class ResultTreeBuilder {
      * @param warningMessage a warning message to display about the results, if appropriate.
      */
     public void displayResults(final List<ScanResult> scanResults, final String warningMessage) {
-        treeModel.setModel(resultsWorthDisplaying(scanResults), getDisplayedSeverities());
+        lastScanResults = resultsWorthDisplaying(scanResults);
+        treeModel.setModel(lastScanResults, getDisplayedSeverities());
         progressManager.clearProgress();
         if (warningMessage != null) {
             progressManager.setProgressText(warningMessage);
@@ -136,6 +150,7 @@ public class ResultTreeBuilder {
                 errorText = message("plugin.results.error");
             }
         }
+        lastScanResults = List.of();
         treeModel.clear();
         treeModel.setRootText(errorText);
         progressManager.clearProgress();

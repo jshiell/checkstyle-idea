@@ -201,6 +201,60 @@ class ResultTreeBuilderTest {
         verify(treeModel).setModel(eq(List.of(present)), any());
     }
 
+    // --- retained results ---
+
+    @Test
+    void noResultsAreRetainedBeforeAnyScan() {
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    @Test
+    void displayResultsRetainsTheDisplayedResults() {
+        ScanResult present = scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT));
+
+        underTest.displayResults(List.of(present), null);
+
+        assertThat(underTest.lastScanResults(), contains(present));
+    }
+
+    @Test
+    void displayResultsRetainsOnlyTheResultsWorthDisplaying() {
+        underTest.displayResults(List.of(ScanResult.EMPTY), null);
+
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    @Test
+    void displayInProgressDiscardsTheRetainedResults() {
+        underTest.displayResults(List.of(scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT))), null);
+
+        underTest.displayInProgress(1);
+
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    @Test
+    void displayWarningResultDiscardsTheRetainedResults() {
+        underTest.displayResults(List.of(scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT))), null);
+
+        underTest.displayWarningResult("some.key");
+
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
+    @Test
+    void displayErrorResultDiscardsTheRetainedResults() {
+        underTest.displayResults(List.of(scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT))), null);
+
+        underTest.displayErrorResult(new RuntimeException("some error"));
+
+        assertThat(underTest.lastScanResults(), is(empty()));
+    }
+
     @Test
     void displayResultsWithNullWarningMessageDoesNotSetProgressText() {
         List<ScanResult> results = Collections.emptyList();
