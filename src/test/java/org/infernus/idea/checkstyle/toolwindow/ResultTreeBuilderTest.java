@@ -300,6 +300,15 @@ class ResultTreeBuilderTest {
     }
 
     @Test
+    void thereAreNoResultsWhenEveryProblemFoundIsIgnored() {
+        Problem ignored = new Problem(psiElement, "msg", SeverityLevel.Ignore, 1, 0, "com.example.FooCheck", false, false);
+        underTest.displayResults(
+                List.of(scanResultWith(presentLocation(), Map.of(fileA, List.of(ignored)), Set.of(fileA))), null);
+
+        assertThat(underTest.hasResults(), is(false));
+    }
+
+    @Test
     void thereAreNoResultsWhenAScanFoundNothing() {
         underTest.displayResults(
                 List.of(scanResultWith(presentLocation(), Collections.emptyMap(), Set.of(fileA))), null);

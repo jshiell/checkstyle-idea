@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
@@ -83,8 +82,7 @@ public class UiFeedbackScannerListener implements ScannerListener {
             if (toolWindowPanel != null) {
                 if (resultHandling == MERGE) {
                     // a failure while refreshing must not cost the user every other file's results
-                    toolWindowPanel.clearProgress();
-                    toolWindowPanel.setProgressText(CheckStyleBundle.message("plugin.results.error"));
+                    toolWindowPanel.reportError(error);
                 } else {
                     toolWindowPanel.displayErrorResult(error);
                 }

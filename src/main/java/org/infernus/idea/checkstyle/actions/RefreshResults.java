@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.checker.ResultHandling;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.Async;
 import org.jetbrains.annotations.NotNull;
@@ -50,11 +51,9 @@ public class RefreshResults extends BaseAction {
                         setProgressText(toolWindow, "plugin.status.in-progress.refresh");
                         rememberSelection(toolWindow, targetFiles);
 
+                        final ConfigurationLocation overrideIfExists = getSelectedOverride(toolWindow);
                         Async.executeOnPooledThread(() -> {
-                            staticScanner(project).asyncScanFiles(
-                                    filesToScan,
-                                    getSelectedOverride(toolWindow),
-                                    ResultHandling.MERGE);
+                            staticScanner(project).asyncScanFiles(filesToScan, overrideIfExists, ResultHandling.MERGE);
                             return null;
                         });
 
@@ -128,11 +127,13 @@ public class RefreshResults extends BaseAction {
 
                 // a tree walk here would be O(problems), and the toolbar polls this often
                 final Boolean hasResults = getFromToolWindowPanel(toolWindow, CheckStyleToolWindowPanel::hasResults);
-                presentation.setEnabled(Boolean.TRUE.equals(hasResults)
+                presentation.setEnabled(presentation.isEnabled()
+                        && Boolean.TRUE.equals(hasResults)
                         && !staticScanner(project).isScanInProgress());
 
             } catch (Throwable e) {
                 LOG.warn("Refresh button update failed", e);
+                presentation.setEnabled(false);
             }
         }, () -> presentation.setEnabled(false));
     }

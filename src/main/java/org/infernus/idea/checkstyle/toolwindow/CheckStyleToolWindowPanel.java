@@ -376,6 +376,16 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
     }
 
     /**
+     * Report an error through the progress text alone, leaving the displayed results untouched.
+     *
+     * @param error the error that occurred.
+     */
+    public void reportError(final Throwable error) {
+        progressManager.clearProgress();
+        progressManager.setProgressText(ResultTreeBuilder.messageFor(error));
+    }
+
+    /**
      * Is there anything on display worth re-scanning?
      *
      * @return true if any problems are displayed.

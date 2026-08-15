@@ -102,7 +102,11 @@ public class ResultTreeBuilder {
      * @return true if any problems are displayed.
      */
     public boolean hasResults() {
-        return lastScanResults.stream().anyMatch(scanResult -> !scanResult.problems().isEmpty());
+        // ignored problems are never rendered, so a tree holding only those has nothing to refresh
+        return lastScanResults.stream()
+                .flatMap(scanResult -> scanResult.problems().values().stream())
+                .flatMap(List::stream)
+                .anyMatch(problem -> problem.severityLevel() != SeverityLevel.Ignore);
     }
 
     /**
@@ -196,6 +200,19 @@ public class ResultTreeBuilder {
      * @param error the error that occurred.
      */
     public void displayErrorResult(final Throwable error) {
+        lastScanResults = List.of();
+        treeModel.clear();
+        treeModel.setRootText(messageFor(error));
+        progressManager.clearProgress();
+    }
+
+    /**
+     * Describe an error to the user, in as much detail as we can extract from it.
+     *
+     * @param error the error that occurred.
+     * @return the message to display.
+     */
+    public static String messageFor(final Throwable error) {
         String errorText = null;
         if (error instanceof CheckstyleToolException && error.getCause() != null) {
             for (final Map.Entry<Pattern, String> errorPatternEntry : CHECKSTYLE_ERROR_PATTERNS.entrySet()) {
@@ -216,10 +233,7 @@ public class ResultTreeBuilder {
                 errorText = message("plugin.results.error");
             }
         }
-        lastScanResults = List.of();
-        treeModel.clear();
-        treeModel.setRootText(errorText);
-        progressManager.clearProgress();
+        return errorText;
     }
 
     /**
