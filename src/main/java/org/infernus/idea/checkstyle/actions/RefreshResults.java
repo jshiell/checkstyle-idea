@@ -100,8 +100,9 @@ public class RefreshResults extends BaseAction {
     private void discardResultsForDeletedFiles(final ToolWindow toolWindow,
                                                final Set<PsiFile> targetFiles,
                                                final List<VirtualFile> filesToScan) {
+        final Set<VirtualFile> scannedFiles = Set.copyOf(filesToScan);
         final Set<PsiFile> deletedFiles = targetFiles.stream()
-                .filter(psiFile -> !filesToScan.contains(psiFile.getVirtualFile()))
+                .filter(psiFile -> !scannedFiles.contains(psiFile.getVirtualFile()))
                 .collect(toCollection(LinkedHashSet::new));
         if (!deletedFiles.isEmpty()) {
             actOnToolWindowPanel(toolWindow, panel -> panel.discardResultsFor(deletedFiles));
