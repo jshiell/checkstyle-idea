@@ -1,8 +1,11 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
+import org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,12 +35,18 @@ class ResultTreeBuilderTest {
     private ScanProgressManager progressManager;
     @Mock
     private ResultTreeNavigator navigator;
+    @Mock
+    private ConfigurationLocation configurationLocation;
 
     private ResultTreeBuilder underTest;
 
     @BeforeEach
     void setUp() {
         underTest = new ResultTreeBuilder(treeModel, progressManager, navigator);
+    }
+
+    private ScanResult scanResultWith(final ConfigurationLocationResult locationResult) {
+        return new ScanResult(locationResult, null, Collections.emptyMap(), Set.of());
     }
 
     // --- severity filter state ---
@@ -154,6 +163,42 @@ class ResultTreeBuilderTest {
         underTest.displayResults(results, "a warning");
 
         verify(progressManager).setProgressText("a warning");
+    }
+
+    @Test
+    void displayResultsDiscardsResultsWithNoRulesFile() {
+        underTest.displayResults(List.of(ScanResult.EMPTY), null);
+
+        verify(treeModel).setModel(eq(List.of()), any());
+    }
+
+    @Test
+    void displayResultsDiscardsResultsForAbsentRulesFiles() {
+        ScanResult absent = scanResultWith(ConfigurationLocationResult.NOT_PRESENT);
+
+        underTest.displayResults(List.of(absent), null);
+
+        verify(treeModel).setModel(eq(List.of()), any());
+    }
+
+    @Test
+    void displayResultsDiscardsResultsForBlockedRulesFiles() {
+        ScanResult blocked = scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.BLOCKED));
+
+        underTest.displayResults(List.of(blocked), null);
+
+        verify(treeModel).setModel(eq(List.of()), any());
+    }
+
+    @Test
+    void displayResultsRetainsResultsForPresentRulesFiles() {
+        ScanResult present = scanResultWith(
+                ConfigurationLocationResult.of(configurationLocation, ConfigurationLocationStatus.PRESENT));
+
+        underTest.displayResults(List.of(present), null);
+
+        verify(treeModel).setModel(eq(List.of(present)), any());
     }
 
     @Test

@@ -88,12 +88,26 @@ public class ResultTreeBuilder {
      * @param warningMessage a warning message to display about the results, if appropriate.
      */
     public void displayResults(final List<ScanResult> scanResults, final String warningMessage) {
-        treeModel.setModel(scanResults, getDisplayedSeverities());
+        treeModel.setModel(resultsWorthDisplaying(scanResults), getDisplayedSeverities());
         progressManager.clearProgress();
         if (warningMessage != null) {
             progressManager.setProgressText(warningMessage);
         }
         navigator.expandTree(treeModel, 3);
+    }
+
+    /**
+     * Discard the results that say nothing about any file, so that whatever a caller hands us can
+     * safely be retained and merged against later.
+     */
+    private List<ScanResult> resultsWorthDisplaying(final List<ScanResult> scanResults) {
+        return scanResults.stream()
+                .filter(scanResult -> scanResult.configurationLocationResult() != null)
+                .filter(scanResult -> switch (scanResult.configurationLocationResult().status()) {
+                    case NOT_PRESENT, BLOCKED -> false;
+                    default -> true;
+                })
+                .toList();
     }
 
     /**
