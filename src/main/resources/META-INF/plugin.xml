@@ -243,6 +243,13 @@
                     icon="/actions/suspend.svg">
             </action>
 
+            <action id="CheckStyleRefreshResultsAction"
+                    class="org.infernus.idea.checkstyle.actions.RefreshResults"
+                    text="Refresh Results"
+                    description="Rescan the selected results, or all results if none are selected, and merge the outcome into the existing results"
+                    icon="/actions/rerun.svg">
+            </action>
+
             <separator/>
 
             <action id="CheckStyleCurrentFileAction"
