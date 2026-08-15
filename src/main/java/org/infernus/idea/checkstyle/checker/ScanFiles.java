@@ -165,6 +165,9 @@ public class ScanFiles implements Callable<List<ScanResult>> {
                     .map(ConfigurationLocationResult::location)
                     .collect(Collectors.toList());
 
+            // the files are still scanned against every other rules file, so a blocked rules file must
+            // be reported: otherwise nothing downstream can tell that its findings are simply missing
+            scanResults.addAll(blockedResultsIn(locationResults, module));
             scanResults.addAll(checkFiles(module, filesForModule, locationsToCheck));
 
             fireFilesScanned(filesForModule.size());
@@ -223,13 +226,30 @@ public class ScanFiles implements Callable<List<ScanResult>> {
     }
 
     /**
+     * Results recording the rules files that this scan could not be run against.
+     *
+     * @param locationResults the rules files considered for the scan.
+     * @param module          the module being scanned.
+     * @return a result for each blocked rules file, authoritative for nothing.
+     */
+    @NotNull
+    static List<ScanResult> blockedResultsIn(final List<ConfigurationLocationResult> locationResults,
+                                             final Module module) {
+        return locationResults.stream()
+                .filter(locationResult -> locationResult.status() == BLOCKED)
+                .map(locationResult -> new ScanResult(locationResult, module, emptyMap(), Set.of()))
+                .toList();
+    }
+
+    /**
      * The files the scan can speak for, being those it actually scanned plus those it deliberately
      * skipped as out of scope. Files that were in scope but that we failed to read are excluded, as
      * their previous results remain the best we have.
      */
-    private Set<PsiFile> filesTheScanIsAuthoritativeFor(final Set<PsiFile> filesToScan,
-                                                        final Set<PsiFile> filesInScope,
-                                                        final List<ScannableFile> readableFiles) {
+    @NotNull
+    static Set<PsiFile> filesTheScanIsAuthoritativeFor(final Set<PsiFile> filesToScan,
+                                                       final Set<PsiFile> filesInScope,
+                                                       final List<ScannableFile> readableFiles) {
         final Set<PsiFile> authoritativeFor = new HashSet<>(filesToScan);
         authoritativeFor.removeAll(filesInScope);
         readableFiles.forEach(readableFile -> authoritativeFor.add(readableFile.getPsiFile()));
