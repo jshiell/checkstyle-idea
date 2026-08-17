@@ -53,6 +53,13 @@ classloader, and missing `org.jetbrains.idea.maven.*` classes, which the IC dist
 
 **Tests:** JUnit 5 (Jupiter) + Hamcrest + Mockito. `jvmArgs("-Xshare:off")`. Sandbox must have artifacts copied before tests run.
 
+**Never mock the application in `src/test`:** `ApplicationManager.setApplication` is global and the whole source
+set shares one JVM, so a mock leaks into every test that runs afterwards and they fail with
+`ClassCastException: Application$MockitoMock cannot be cast to ApplicationEx`. Registering a `Disposable` that is
+never disposed does not undo it. Test through a seam that does not need an application — e.g. `CheckerFactory`
+throws rather than notifying when the module is null. `src/csaccessTest` gets away with it only because it runs
+in its own JVM.
+
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
