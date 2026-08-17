@@ -45,6 +45,11 @@ public class ConfigurationLocationTest {
             </module>
             </module>""";
 
+    private static final String TEST_FILE_WITH_UNDECLARED_ENTITY = """
+            <module name="Checker">
+            <module name="TestFilter">&someUndeclaredEntity;</module>
+            </module>""";
+
     private TestConfigurationLocation underTest;
 
     @BeforeEach
@@ -85,6 +90,19 @@ public class ConfigurationLocationTest {
         underTest.resolve(getClass().getClassLoader()).close();
 
         assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
+    }
+
+    @Test
+    public void propertiesAreRetainedWhenTheFileCannotBeScanned() throws IOException {
+        underTest.resolve(getClass().getClassLoader()).close();
+        updatePropertyOn(underTest, "property-two", "aValue");
+
+        underTest.setLocation(TEST_FILE_WITH_UNDECLARED_ENTITY);
+        underTest.resolve(getClass().getClassLoader()).close();
+
+        assertThat(underTest.getProperties(), hasEntry("property-one", ""));
+        assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
+        assertThat(underTest.getProperties(), hasEntry("property-three", ""));
     }
 
     @Test

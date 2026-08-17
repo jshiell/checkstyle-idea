@@ -174,8 +174,16 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         unblock();
     }
 
-    private Map<String, String> extractProperties(@Nullable final InputStream inputStream,
-                                           @NotNull final ClassLoader checkstyleClassLoader) {
+    /**
+     * Scans the given stream for {@code ${}} properties.
+     *
+     * @param inputStream           the configuration file, or null if it could not be resolved.
+     * @param checkstyleClassLoader the classloader for the configured Checkstyle.
+     * @return the properties and their defaults, or {@link Optional#empty()} if the scan could not be completed.
+     * An empty map means the scan completed and found no properties.
+     */
+    private Optional<Map<String, String>> extractProperties(@Nullable final InputStream inputStream,
+                                                            @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
                 final Map<String, String> propertiesAndDefaults = new HashMap<>();
@@ -199,14 +207,14 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                     eventReader.close();
                 }
 
-                return propertiesAndDefaults;
+                return Optional.of(propertiesAndDefaults);
 
             } catch (Exception e) {
                 LOG.warn("CheckStyle file could not be parsed for properties.", e);
             }
         }
 
-        return Collections.emptyMap();
+        return Optional.empty();
     }
 
     private static Pair<String, String> extractNameAndDefaultIfPropertyElement(final StartElement startElement) {
@@ -243,15 +251,9 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         InputStream is = resolveFile(checkstyleClassLoader);
 
         if (!propertiesCheckedThisSession) {
-            final Map<String, String> propertiesInFile = extractProperties(is, checkstyleClassLoader);
+            final Optional<Map<String, String>> propertiesInFile = extractProperties(is, checkstyleClassLoader);
 
-            for (final String propertyName : propertiesInFile.keySet()) {
-                if (!properties.containsKey(propertyName)) {
-                    properties.put(propertyName, propertiesInFile.getOrDefault(propertyName, ""));
-                }
-            }
-
-            properties.keySet().removeIf(propertyName -> !propertiesInFile.containsKey(propertyName));
+            propertiesInFile.ifPresent(this::reconcilePropertiesWith);
 
             try {
                 is.reset();
@@ -259,10 +261,21 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                 is = resolveFile(checkstyleClassLoader); // JAR IS doesn't support this, for instance
             }
 
-            propertiesCheckedThisSession = true;
+            // if the scan failed we leave this false, so that a later fix to the file is picked up
+            propertiesCheckedThisSession = propertiesInFile.isPresent();
         }
 
         return is;
+    }
+
+    private void reconcilePropertiesWith(final Map<String, String> propertiesInFile) {
+        for (final String propertyName : propertiesInFile.keySet()) {
+            if (!properties.containsKey(propertyName)) {
+                properties.put(propertyName, propertiesInFile.getOrDefault(propertyName, ""));
+            }
+        }
+
+        properties.keySet().removeIf(propertyName -> !propertiesInFile.containsKey(propertyName));
     }
 
     @Nullable
