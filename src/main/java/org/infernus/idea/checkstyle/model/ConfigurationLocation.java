@@ -18,9 +18,18 @@ import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+
 import javax.xml.namespace.QName;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
@@ -29,6 +38,7 @@ import java.io.InputStream;
 import java.util.*;
 import static com.intellij.openapi.util.Pair.pair;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Objects.requireNonNullElse;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 
 /**
@@ -43,6 +53,16 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private static final int ONE_SECOND = 1000;
     private static final long BLOCK_TIME_MS = ONE_SECOND * 60;
+
+    /**
+     * Checkstyle's {@code XmlLoader.LoadExternalDtdFeatureProvider.ENABLE_EXTERNAL_DTD_LOAD}. Checkstyle is not on
+     * this source set's classpath, so the name is repeated here. Honouring it gives us the same behaviour as the
+     * Checkstyle CLI and the Gradle plugin.
+     */
+    private static final String ENABLE_EXTERNAL_DTD_LOAD = "checkstyle.enableExternalDtdLoad";
+
+    private static final String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+    private static final String LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
 
     private final Map<String, String> properties = new HashMap<>();
     private final String id;
@@ -196,28 +216,10 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                                             @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
-                final Map<String, String> propertiesAndDefaults = new HashMap<>();
-
-                final XMLInputFactory factory = XMLInputFactory.newInstance();
-                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-                factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-                factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
-                final XMLEventReader eventReader = factory.createXMLEventReader(inputStream);
-                try {
-                    while (eventReader.hasNext()) {
-                        final XMLEvent event = eventReader.nextEvent();
-                        if (event.isStartElement()) {
-                            final var property = extractNameAndDefaultIfPropertyElement((StartElement) event);
-                            if (property != null) {
-                                propertiesAndDefaults.put(property.first, property.second);
-                            }
-                        }
-                    }
-                } finally {
-                    eventReader.close();
+                if (externalDtdLoadIsEnabled()) {
+                    return Optional.of(scanForPropertiesResolvingEntities(inputStream, checkstyleClassLoader));
                 }
-
-                return Optional.of(propertiesAndDefaults);
+                return Optional.of(scanForProperties(inputStream, checkstyleClassLoader));
 
             } catch (Exception e) {
                 LOG.warn("CheckStyle file could not be parsed for properties.", e);
@@ -227,22 +229,110 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return Optional.empty();
     }
 
-    private static Pair<String, String> extractNameAndDefaultIfPropertyElement(final StartElement startElement) {
-        if ("property".equals(startElement.getName().getLocalPart())) {
-            final var valueAttribute = startElement.getAttributeByName(new QName("value"));
-            if (valueAttribute != null) {
-                final String value = valueAttribute.getValue();
-                final int propertyStart = value.indexOf("${");
-                final int propertyEnd = value.indexOf('}');
-                if (propertyStart >= 0 && propertyEnd >= 0) {
-                    final String propertyName = value.substring(propertyStart + 2, propertyEnd);
+    static boolean externalDtdLoadIsEnabled() {
+        return Boolean.parseBoolean(System.getProperty(ENABLE_EXTERNAL_DTD_LOAD));
+    }
 
-                    final var defaultAttribute = startElement.getAttributeByName(new QName("default"));
-                    if (defaultAttribute != null) {
-                        return pair(propertyName, defaultAttribute.getValue());
+    private Map<String, String> scanForProperties(@NotNull final InputStream inputStream,
+                                                  @NotNull final ClassLoader checkstyleClassLoader)
+            throws XMLStreamException {
+        final Map<String, String> propertiesAndDefaults = new HashMap<>();
+
+        final XMLInputFactory factory = XMLInputFactory.newInstance();
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        factory.setXMLResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
+        final XMLEventReader eventReader = factory.createXMLEventReader(inputStream);
+        try {
+            while (eventReader.hasNext()) {
+                final XMLEvent event = eventReader.nextEvent();
+                if (event.isStartElement()) {
+                    final StartElement startElement = (StartElement) event;
+                    if ("property".equals(startElement.getName().getLocalPart())) {
+                        addPropertyIfPresent(propertiesAndDefaults,
+                                valueOf(startElement, "value"),
+                                valueOf(startElement, "default"));
                     }
-                    return pair(propertyName, "");
                 }
+            }
+        } finally {
+            eventReader.close();
+        }
+
+        return propertiesAndDefaults;
+    }
+
+    /**
+     * Scans for properties with entity resolution enabled, so that properties declared in an included file are
+     * found. This uses SAX rather than StAX as the IDE supplies a StAX implementation that cannot expand external
+     * general entities.
+     */
+    private Map<String, String> scanForPropertiesResolvingEntities(@NotNull final InputStream inputStream,
+                                                                   @NotNull final ClassLoader checkstyleClassLoader)
+            throws ParserConfigurationException, SAXException, IOException {
+        final Map<String, String> propertiesAndDefaults = new HashMap<>();
+
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+        factory.setFeature(EXTERNAL_GENERAL_ENTITIES, true);
+        factory.setFeature(LOAD_EXTERNAL_DTD, true);
+
+        final XMLReader reader = factory.newSAXParser().getXMLReader();
+        reader.setEntityResolver(new CheckStyleEntityResolver(this, checkstyleClassLoader));
+        reader.setContentHandler(new DefaultHandler() {
+            @Override
+            public void startElement(final String uri, final String localName,
+                                     final String qName, final Attributes attributes) {
+                if ("property".equals(localName)) {
+                    addPropertyIfPresent(propertiesAndDefaults,
+                            attributes.getValue("value"),
+                            attributes.getValue("default"));
+                }
+            }
+        });
+        reader.parse(inputSourceFor(inputStream));
+
+        return propertiesAndDefaults;
+    }
+
+    @NotNull
+    private InputSource inputSourceFor(@NotNull final InputStream inputStream) {
+        final InputSource inputSource = new InputSource(inputStream);
+
+        final String baseUri = baseUri();
+        if (baseUri != null) {
+            // without this the parser has no base URI, and resolves relative entities against the working directory
+            inputSource.setSystemId(baseUri);
+        }
+
+        return inputSource;
+    }
+
+    @Nullable
+    private String valueOf(final StartElement startElement, final String attributeName) {
+        final var attribute = startElement.getAttributeByName(new QName(attributeName));
+        return attribute != null ? attribute.getValue() : null;
+    }
+
+    private static void addPropertyIfPresent(final Map<String, String> propertiesAndDefaults,
+                                             @Nullable final String value,
+                                             @Nullable final String defaultValue) {
+        final var property = extractNameAndDefault(value, defaultValue);
+        if (property != null) {
+            propertiesAndDefaults.put(property.first, property.second);
+        }
+    }
+
+    @Nullable
+    private static Pair<String, String> extractNameAndDefault(@Nullable final String value,
+                                                              @Nullable final String defaultValue) {
+        if (value != null) {
+            final int propertyStart = value.indexOf("${");
+            final int propertyEnd = value.indexOf('}');
+            if (propertyStart >= 0 && propertyEnd >= 0) {
+                final String propertyName = value.substring(propertyStart + 2, propertyEnd);
+                return pair(propertyName, requireNonNullElse(defaultValue, ""));
             }
         }
         return null;
