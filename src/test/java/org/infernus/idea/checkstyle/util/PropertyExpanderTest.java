@@ -35,4 +35,13 @@ class PropertyExpanderTest {
 
         assertThat(expanded.get("paths"), is("/a/module:/a/rules:/a/module"));
     }
+
+    @Test
+    void aReferenceToAnUnknownNameIsLeftVerbatim() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${nosuchthing}/suppressions.xml"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("${nosuchthing}/suppressions.xml"));
+    }
 }
