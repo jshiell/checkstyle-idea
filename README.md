@@ -63,6 +63,33 @@ can take a different value in each module. For example, in a multi-module Gradle
 
 will resolve each subproject's own suppressions file. A reference to a variable that isn't set is left as-is.
 
+### Splitting a Configuration Across Files
+
+A rules file can pull in other files using XML entity includes, with paths resolved relative to the including file:
+
+```xml
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd" [
+        <!ENTITY additionalModules SYSTEM "./additional-modules.xml">
+        ]>
+<module name="Checker">
+    <module name="TreeWalker">&additionalModules;</module>
+</module>
+```
+
+Checkstyle does not resolve these unless you opt in, and neither does this plugin. To enable them, add
+
+```
+-Dcheckstyle.enableExternalDtdLoad=true
+```
+
+via *Help* → *Edit Custom VM Options*, and restart the IDE. This is the same opt-in the Checkstyle CLI and the
+Gradle plugin require. Note that it is an IDE-wide setting rather than a per-project one, and that it enables
+external entity resolution generally — including entities with absolute `http://` URLs, which are fetched without
+any plugin-side resolver in front of them. Enable it only if you trust the rules files you open.
+
+Properties declared in an included file appear under 'Edit Properties' once the option is set.
+
 ### Third Party Checks 
 
 This tab allows you to specify any third-party checks which your configuration file makes use of. All selected
