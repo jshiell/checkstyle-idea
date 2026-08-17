@@ -1,6 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.15.0** New: Properties may now reference the Eclipse-CS variables, so a single property can resolve to a different value in each module, e.g. a `baseDir` property set to `${basedir}` (#231).
+* **26.15.0** Fixed: `basedir` now resolves to the Gradle subproject or Maven module directory, rather than to a source set content root or the project directory (#231).
 * **26.14.0** New: Added Checkstyle 13.9.0, 13.10.0.
 * **26.14.0** New: Added a Refresh Results action, which rescans the selected results - or all results, if none are selected - and merges the outcome into the existing results (#1).
 * **26.14.0** Fixed: HTTP rules files are now reused when the server is unreachable, and revalidated with conditional requests (#67).

@@ -40,7 +40,7 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 
 **Plugin requires IDEA restart** (`require-restart="true"`).
 
-**Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`. Property substitution (`${prop}`) resolved before passing config to Checkstyle.
+**Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim.
 
 **Release:** Tag and push (e.g. `git tag 26.0.0 && git push origin 26.0.0`). CI builds, creates GitHub release, publishes to JetBrains marketplace.
 

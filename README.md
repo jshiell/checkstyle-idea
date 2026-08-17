@@ -44,10 +44,24 @@ Properties' button.
 
 The following variables will be available if you have not otherwise overridden their values:
 
-* **basedir** - mapped to the location of the current module file, or the project directory as a fallback. 
+* **basedir** - mapped to the external project directory of the current module (i.e. the Gradle subproject or Maven
+  module directory), falling back to the module content root, and then to the project directory.
 * **project_loc**, **workspace_loc** - mapped to the project directory.
 * **config_loc**, **samedir** - mapped to the directory the rules file is in, or the project directory for remote rules
   files (e.g. HTTP).
+
+These variables may also be referenced from the values you set under 'Edit Properties', which is how a single property
+can take a different value in each module. For example, in a multi-module Gradle build, setting a `baseDir` property to
+`${basedir}` and referencing it from your rules file:
+
+```xml
+<module name="SuppressionFilter">
+    <property name="file" value="${baseDir}/gradle/checkstyle-exclude.xml"/>
+    <property name="optional" value="true"/>
+</module>
+```
+
+will resolve each subproject's own suppressions file. A reference to a variable that isn't set is left as-is.
 
 ### Third Party Checks 
 
