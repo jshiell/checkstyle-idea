@@ -5,6 +5,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -159,7 +160,11 @@ public class CheckerFactory {
 
         final Object workerResult = executeWorker(location, module, propertyResolver);
 
-        if (workerResult instanceof CheckstyleToolException csToolException) {
+        if (workerResult instanceof ActionableCheckstyleException actionableException) {
+            // the message tells the user what to do about it, so it is worth showing rather than logging
+            return blockAndShowMessage(location, module, actionableException,
+                    "checkstyle.parse-failed", actionableException.getMessage());
+        } else if (workerResult instanceof CheckstyleToolException csToolException) {
             return blockAndShowMessageFromException(location, module, csToolException);
         } else if (workerResult instanceof IOException ioExceptionResult) {
             LOG.info("CheckStyle configuration could not be loaded: " + location.getLocation(), ioExceptionResult);
