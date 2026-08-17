@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -43,5 +44,16 @@ class PropertyExpanderTest {
                 Map.of("basedir", "/a/module"));
 
         assertThat(expanded.get("suppressions"), is("${nosuchthing}/suppressions.xml"));
+    }
+
+    @Test
+    void aReferenceToABuiltInWithANullValueIsLeftVerbatim() {
+        Map<String, String> builtIns = new HashMap<>();
+        builtIns.put("basedir", null);
+
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${basedir}/suppressions.xml"), builtIns);
+
+        assertThat(expanded.get("suppressions"), is("${basedir}/suppressions.xml"));
     }
 }
