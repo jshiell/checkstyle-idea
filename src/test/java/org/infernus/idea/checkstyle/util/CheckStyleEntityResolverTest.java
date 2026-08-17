@@ -71,6 +71,18 @@ public class CheckStyleEntityResolverTest {
 
     @Test
     public void aRemoteEntityIsNeverFetchedDuringAParse() throws Exception {
+        assertThat("The parser must not fetch remote entities",
+                requestsWhileParsingAnEntityFrom("/evil.xml"), is(0));
+    }
+
+    @Test
+    public void aRemoteEntityWhoseUrlCannotBeParsedIsNeverFetchedDuringAParse() throws Exception {
+        // a system ID that java.net.URI rejects must still be blocked, rather than handed back to the parser
+        assertThat("The parser must not fetch remote entities with unparseable URLs",
+                requestsWhileParsingAnEntityFrom("/evil file.xml"), is(0));
+    }
+
+    private int requestsWhileParsingAnEntityFrom(final String path) throws Exception {
         final AtomicInteger requestCount = new AtomicInteger();
         final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
@@ -85,13 +97,14 @@ public class CheckStyleEntityResolverTest {
         try {
             final String config = """
                     <!DOCTYPE module [
-                      <!ENTITY remoteInclude SYSTEM "http://127.0.0.1:%d/evil.xml">
+                      <!ENTITY remoteInclude SYSTEM "http://127.0.0.1:%d%s">
                     ]>
-                    <module name="Checker">&remoteInclude;</module>""".formatted(server.getAddress().getPort());
+                    <module name="Checker">&remoteInclude;</module>"""
+                    .formatted(server.getAddress().getPort(), path);
 
             parseWithExternalEntitiesEnabled(config);
 
-            assertThat("The parser must not fetch remote entities", requestCount.get(), is(0));
+            return requestCount.get();
         } finally {
             server.stop(0);
         }

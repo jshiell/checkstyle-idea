@@ -142,8 +142,9 @@ public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
                 return emptySource();
             }
         } catch (Exception e) {
+            // likewise, a system id we cannot even parse must not be handed back to the parser to fetch
             LOG.warn("Entity lookup failed for system id " + systemId, e);
-            return null;
+            return emptySource();
         }
     }
 
