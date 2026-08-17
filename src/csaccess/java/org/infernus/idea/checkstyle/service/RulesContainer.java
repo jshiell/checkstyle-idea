@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.service;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,16 @@ public interface RulesContainer {
      */
     InputStream inputStream(ClassLoader checkstyleClassLoader) throws IOException;
 
+    /**
+     * Getter.
+     *
+     * @return the URI that relative references within the rules file resolve against, or null if there is none.
+     */
+    @Nullable
+    default String baseUri() {
+        return null;
+    }
+
     @Nullable
     default String resolveAssociatedFile(@Nullable final String fileName,
                                          @Nullable final Module module,
@@ -59,6 +70,11 @@ public interface RulesContainer {
             return configurationLocation.resolve(checkstyleClassLoader);
         }
 
+        @Override
+        public String baseUri() {
+            return configurationLocation.baseUri();
+        }
+
         public String resolveAssociatedFile(final String fileName,
                                             final Module module,
                                             @NotNull final ClassLoader checkstyleClassLoader) throws IOException {
@@ -82,6 +98,15 @@ public interface RulesContainer {
         @Override
         public InputStream inputStream(final ClassLoader checkstyleClassLoader) throws IOException {
             return virtualFile.getInputStream();
+        }
+
+        @Override
+        public String baseUri() {
+            if (!virtualFile.isInLocalFileSystem()) {
+                // getPath() yields /x.jar!/y.xml for jar filesystems, which is not a valid file path
+                return null;
+            }
+            return VfsUtilCore.virtualToIoFile(virtualFile).toURI().toString();
         }
     }
 

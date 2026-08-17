@@ -162,7 +162,7 @@ public class OpLoadConfiguration
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Method method = ConfigurationLoader.class.getMethod("loadConfiguration",
                 InputSource.class, PropertyResolver.class, boolean.class);
-        return (Configuration) method.invoke(null, new InputSource(inputStream), resolver, false);
+        return (Configuration) method.invoke(null, inputSourceFor(inputStream), resolver, false);
     }
 
     private Configuration loadConfigurationForBrokenCheckstyles(final InputStream inputStream)
@@ -177,8 +177,22 @@ public class OpLoadConfiguration
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Method method = ConfigurationLoader.class.getMethod("loadConfiguration",
                 InputSource.class, PropertyResolver.class, ConfigurationLoader.IgnoredModulesOptions.class);
-        return (Configuration) method.invoke(null, new InputSource(inputStream), resolver,
+        return (Configuration) method.invoke(null, inputSourceFor(inputStream), resolver,
                 ConfigurationLoader.IgnoredModulesOptions.EXECUTE);
+    }
+
+    @NotNull
+    private InputSource inputSourceFor(final InputStream inputStream) {
+        final InputSource inputSource = new InputSource(inputStream);
+
+        final String baseUri = rulesContainer.baseUri();
+        if (baseUri != null) {
+            // without this the parser has no base URI, and resolves relative entity includes against the
+            // working directory rather than against the rules file
+            inputSource.setSystemId(baseUri);
+        }
+
+        return inputSource;
     }
 
 

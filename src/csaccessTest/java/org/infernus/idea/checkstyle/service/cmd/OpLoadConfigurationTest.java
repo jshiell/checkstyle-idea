@@ -20,6 +20,7 @@ import org.infernus.idea.checkstyle.service.CheckstyleActionsImpl;
 import org.infernus.idea.checkstyle.service.ConfigurationBuilder;
 import org.infernus.idea.checkstyle.service.FileUtil;
 import org.infernus.idea.checkstyle.service.TestHelper;
+import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,12 +32,19 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.infernus.idea.checkstyle.service.ConfigurationMatcher.configEqualTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.mockito.MockMakers;
 
@@ -44,6 +52,8 @@ import static org.mockito.Mockito.*;
 
 @Isolated
 public class OpLoadConfigurationTest {
+    private static final String ENABLE_EXTERNAL_DTD_LOAD = "checkstyle.enableExternalDtdLoad";
+
     private static final Project PROJECT = mock(Project.class);
     private static final NotificationGroup BALLOON_NOTIFICATION_GROUP = mock(NotificationGroup.class, withSettings().mockMaker(MockMakers.INLINE));
 
@@ -76,6 +86,11 @@ public class OpLoadConfigurationTest {
         if (previousApplication != null) {
             ApplicationManager.setApplication(previousApplication, mock(Disposable.class));
         }
+    }
+
+    @AfterEach
+    public void clearExternalDtdLoad() {
+        System.clearProperty(ENABLE_EXTERNAL_DTD_LOAD);
     }
 
     private void interceptApplicationNotifications() {
@@ -411,6 +426,43 @@ public class OpLoadConfigurationTest {
         assertNotNull(csConfig);
     }
 
+
+    @Test
+    public void aConfigurationWithAnEntityIncludeIsLoadedWhenExternalDtdLoadIsEnabled() throws Exception {
+        System.setProperty(ENABLE_EXTERNAL_DTD_LOAD, "true");
+
+        final Configuration config = loadConfigurationWithAnEntityInclude();
+
+        assertThat(namesOfChildrenOfTreeWalkerIn(config), hasItem("LeftCurly"));
+    }
+
+    @Test
+    public void aConfigurationWithAnEntityIncludeIsNotLoadedWhenExternalDtdLoadIsDisabled() {
+        assertThrows(Exception.class, this::loadConfigurationWithAnEntityInclude);
+    }
+
+    private Configuration loadConfigurationWithAnEntityInclude() throws Exception {
+        final Path configFile = Paths.get(
+                requireNonNull(getClass().getResource("config-with-entity-include.xml")).toURI());
+
+        final CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
+        when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+
+        final ConfigurationLocation location = mock(ConfigurationLocation.class);
+        when(location.baseUri()).thenReturn(configFile.toFile().toURI().toString());
+        when(location.resolve(ArgumentMatchers.any())).thenReturn(Files.newInputStream(configFile));
+
+        return ((CsConfigObject) new OpLoadConfiguration(location, null, null, projectService)
+                .execute(PROJECT)).getConfiguration();
+    }
+
+    private List<String> namesOfChildrenOfTreeWalkerIn(final Configuration config) {
+        return Arrays.stream(config.getChildren())
+                .filter(child -> "TreeWalker".equals(child.getName()))
+                .flatMap(treeWalker -> Arrays.stream(treeWalker.getChildren()))
+                .map(Configuration::getName)
+                .toList();
+    }
 
     @Test
     public void testLoadBundledSunChecks() {
