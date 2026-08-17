@@ -19,9 +19,11 @@ import org.infernus.idea.checkstyle.service.RulesContainer.VirtualFileRulesConta
 import org.infernus.idea.checkstyle.service.SimpleResolver;
 import org.infernus.idea.checkstyle.service.entities.CsConfigObject;
 import org.infernus.idea.checkstyle.service.entities.HasCsConfig;
+import org.infernus.idea.checkstyle.util.ExternalDtdLoad;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.InputSource;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -149,13 +151,55 @@ public class OpLoadConfiguration
 
             } catch (NoSuchMethodException ignored) {
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new CheckstyleServiceException("internal error - Failed to call "
-                        + ConfigurationLoader.class.getName() + ".loadConfiguration()", e);
+                throw loadFailureFor(e);
             }
         }
         throw new CheckstyleServiceException("internal error - Could not call "
                 + ConfigurationLoader.class.getName() + ".loadConfiguration() "
                 + "because the method was not found. New Checkstyle runtime?");
+    }
+
+    /**
+     * Turns a failed load into something a user can act on. An entity include that cannot be read fails deep
+     * inside the XML parser, which reports it as an internal error unless we recognise it here.
+     */
+    private CheckstyleServiceException loadFailureFor(final ReflectiveOperationException e) {
+        final Throwable rootCause = rootCauseOf(e);
+
+        if (rootCause instanceof FileNotFoundException) {
+            return new CheckstyleServiceException(
+                    message("checkstyle.entity-include-not-found", rootCause.getMessage()), e);
+        }
+
+        if (!ExternalDtdLoad.isEnabled() && isExternalEntityLoadingDisabledFailure(rootCause)) {
+            return new CheckstyleServiceException(
+                    message("checkstyle.entity-include-not-enabled", ExternalDtdLoad.ENABLE_EXTERNAL_DTD_LOAD), e);
+        }
+
+        return new CheckstyleServiceException("internal error - Failed to call "
+                + ConfigurationLoader.class.getName() + ".loadConfiguration()", e);
+    }
+
+    /**
+     * Checkstyle turns off external entity resolution unless it has been asked not to, and the parser then trips
+     * over the entity reference rather than reporting it. The NPE below is what that looks like on current JDKs;
+     * we only ever reinterpret it when the opt-in is absent, so a genuine internal error is still reported as one.
+     */
+    private boolean isExternalEntityLoadingDisabledFailure(final Throwable rootCause) {
+        final String message = rootCause.getMessage();
+        if (message == null) {
+            return false;
+        }
+        return rootCause instanceof NullPointerException && message.contains("fTableOfNOTATIONAttributeNames")
+                || message.contains("was referenced, but not declared");
+    }
+
+    private Throwable rootCauseOf(final Throwable t) {
+        Throwable rootCause = t;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
     }
 
     private Configuration loadConfigurationForCheckstylePre825(final InputStream inputStream)

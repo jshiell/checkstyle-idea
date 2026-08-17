@@ -441,9 +441,30 @@ public class OpLoadConfigurationTest {
         assertThrows(Exception.class, this::loadConfigurationWithAnEntityInclude);
     }
 
+    @Test
+    public void aConfigurationWithAnEntityIncludeSaysHowToEnableExternalDtdLoadWhenItIsDisabled() {
+        final Exception thrown = assertThrows(Exception.class, this::loadConfigurationWithAnEntityInclude);
+
+        assertThat(thrown.getMessage(), containsString(ENABLE_EXTERNAL_DTD_LOAD));
+    }
+
+    @Test
+    public void aMissingEntityIncludeIsReportedWhenExternalDtdLoadIsEnabled() {
+        System.setProperty(ENABLE_EXTERNAL_DTD_LOAD, "true");
+
+        final Exception thrown = assertThrows(Exception.class,
+                () -> loadConfiguration("config-with-missing-entity-include.xml"));
+
+        assertThat(thrown.getMessage(), containsString("no-such-file.xml"));
+        assertThat(thrown.getMessage(), not(containsString("internal error")));
+    }
+
     private Configuration loadConfigurationWithAnEntityInclude() throws Exception {
-        final Path configFile = Paths.get(
-                requireNonNull(getClass().getResource("config-with-entity-include.xml")).toURI());
+        return loadConfiguration("config-with-entity-include.xml");
+    }
+
+    private Configuration loadConfiguration(final String resourceName) throws Exception {
+        final Path configFile = Paths.get(requireNonNull(getClass().getResource(resourceName)).toURI());
 
         final CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());

@@ -13,6 +13,7 @@ import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.util.CheckStyleEntityResolver;
+import org.infernus.idea.checkstyle.util.ExternalDtdLoad;
 import org.infernus.idea.checkstyle.util.Objects;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
@@ -53,13 +54,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
 
     private static final int ONE_SECOND = 1000;
     private static final long BLOCK_TIME_MS = ONE_SECOND * 60;
-
-    /**
-     * Checkstyle's {@code XmlLoader.LoadExternalDtdFeatureProvider.ENABLE_EXTERNAL_DTD_LOAD}. Checkstyle is not on
-     * this source set's classpath, so the name is repeated here. Honouring it gives us the same behaviour as the
-     * Checkstyle CLI and the Gradle plugin.
-     */
-    private static final String ENABLE_EXTERNAL_DTD_LOAD = "checkstyle.enableExternalDtdLoad";
 
     private static final String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
     private static final String LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
@@ -216,7 +210,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                                             @NotNull final ClassLoader checkstyleClassLoader) {
         if (inputStream != null) {
             try {
-                if (externalDtdLoadIsEnabled()) {
+                if (ExternalDtdLoad.isEnabled()) {
                     return Optional.of(scanForPropertiesResolvingEntities(inputStream, checkstyleClassLoader));
                 }
                 return Optional.of(scanForProperties(inputStream, checkstyleClassLoader));
@@ -227,10 +221,6 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         }
 
         return Optional.empty();
-    }
-
-    static boolean externalDtdLoadIsEnabled() {
-        return Boolean.parseBoolean(System.getProperty(ENABLE_EXTERNAL_DTD_LOAD));
     }
 
     private Map<String, String> scanForProperties(@NotNull final InputStream inputStream,
