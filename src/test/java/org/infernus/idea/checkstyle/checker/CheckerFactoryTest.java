@@ -25,7 +25,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +102,22 @@ class CheckerFactoryTest {
         assertThat(propertiesPassedTo(checkstyleActions).get("basedir"), is(moduleDir.toFile().getAbsolutePath()));
     }
 
+    @Test
+    void aUserPropertyReferencingABuiltInIsExpandedBeforeReachingCheckstyle(@TempDir final Path moduleDir) {
+        CheckstyleActions checkstyleActions = stubCheckstyleInstance();
+        Module module = mockModule("a-module");
+        ConfigurationLocation locationUsingBaseDir = new StringConfigurationLocation(
+                "<module name=\"Checker\">"
+                        + "<module name=\"SuppressionFilter\">"
+                        + "<property name=\"file\" value=\"${baseDir}/suppressions.xml\"/>"
+                        + "</module></module>", project);
+        locationUsingBaseDir.setProperties(Map.of("baseDir", "${basedir}"));
+
+        checkerFactoryWith(projectPathsReturning(module, moduleDir)).checker(module, locationUsingBaseDir);
+
+        assertThat(propertiesPassedTo(checkstyleActions).get("baseDir"), is(moduleDir.toFile().getAbsolutePath()));
+    }
+
     private CheckerFactory checkerFactoryWith(final ProjectPaths projectPaths) {
         return CheckerFactory.create(project, checkstyleProjectService, cache, projectPaths);
     }
@@ -135,7 +150,7 @@ class CheckerFactoryTest {
     private Map<String, String> propertiesPassedTo(final CheckstyleActions checkstyleActions) {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, String>> properties = ArgumentCaptor.forClass(Map.class);
-        verify(checkstyleActions).createChecker(any(), eq(location), properties.capture());
+        verify(checkstyleActions).createChecker(any(), any(), properties.capture());
         return properties.getValue();
     }
 }

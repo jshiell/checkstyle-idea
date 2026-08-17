@@ -10,6 +10,7 @@ import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
+import org.infernus.idea.checkstyle.util.PropertyExpander;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,21 +102,21 @@ public class CheckerFactory {
         return null;
     }
 
-    private Map<String, String> addEclipseCsProperties(final ConfigurationLocation location,
-                                                       final Module module,
-                                                       final Map<String, String> properties) {
-        addIfAbsent("basedir", basePathFor(module), properties);
+    private Map<String, String> eclipseCsProperties(final ConfigurationLocation location,
+                                                    final Module module) {
+        final Map<String, String> builtIns = new HashMap<>();
+        builtIns.put("basedir", basePathFor(module));
 
-        addIfAbsent("project_loc", project.getBasePath(), properties);
-        addIfAbsent("workspace_loc", project.getBasePath(), properties);
+        builtIns.put("project_loc", project.getBasePath());
+        builtIns.put("workspace_loc", project.getBasePath());
 
         final String locationBaseDir = Optional.ofNullable(location.getBaseDir())
                 .map(File::toString)
                 .orElseGet(project::getBasePath);
-        addIfAbsent("config_loc", locationBaseDir, properties);
-        addIfAbsent("samedir", locationBaseDir, properties);
+        builtIns.put("config_loc", locationBaseDir);
+        builtIns.put("samedir", locationBaseDir);
 
-        return properties;
+        return builtIns;
     }
 
     private String basePathFor(final Module module) {
@@ -142,8 +143,15 @@ public class CheckerFactory {
         final ListPropertyResolver propertyResolver;
         try {
             location.ensurePropertiesAreUpToDate(checkstyleProjectService.underlyingClassLoader());
-            final Map<String, String> properties = removeEmptyProperties(location.getProperties());
-            propertyResolver = new ListPropertyResolver(addEclipseCsProperties(location, module, properties));
+
+            // expanded against the built-ins before they're merged in, so that a user property named
+            // after a built-in can't be asked to resolve against itself
+            final Map<String, String> builtIns = eclipseCsProperties(location, module);
+            final Map<String, String> properties = PropertyExpander.expand(
+                    removeEmptyProperties(location.getProperties()), builtIns);
+            builtIns.forEach((name, value) -> addIfAbsent(name, value, properties));
+
+            propertyResolver = new ListPropertyResolver(properties);
         } catch (IOException e) {
             LOG.info("CheckStyle properties could not be loaded: " + location.getLocation(), e);
             return blockAndShowMessage(location, module, e, "checkstyle.file-io-failed", location.getLocation());
