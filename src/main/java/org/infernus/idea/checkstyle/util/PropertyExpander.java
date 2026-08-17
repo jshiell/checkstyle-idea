@@ -28,23 +28,29 @@ public final class PropertyExpander {
     }
 
     private static String expandValue(final String value, final Map<String, String> builtIns) {
-        final int referenceStart = value.indexOf(REFERENCE_PREFIX);
-        if (referenceStart < 0) {
-            return value;
-        }
-        final int referenceEnd = value.indexOf(REFERENCE_SUFFIX, referenceStart);
-        if (referenceEnd < 0) {
-            return value;
+        final StringBuilder expanded = new StringBuilder();
+
+        int cursor = 0;
+        while (true) {
+            final int referenceStart = value.indexOf(REFERENCE_PREFIX, cursor);
+            if (referenceStart < 0) {
+                break;
+            }
+            final int referenceEnd = value.indexOf(REFERENCE_SUFFIX, referenceStart);
+            if (referenceEnd < 0) {
+                break;
+            }
+
+            final String reference = value.substring(referenceStart, referenceEnd + REFERENCE_SUFFIX.length());
+            final String builtIn = builtIns.get(
+                    value.substring(referenceStart + REFERENCE_PREFIX.length(), referenceEnd));
+
+            expanded.append(value, cursor, referenceStart)
+                    .append(builtIn != null ? builtIn : reference);
+            // resume after the replacement, so substituted text is never itself rescanned
+            cursor = referenceEnd + REFERENCE_SUFFIX.length();
         }
 
-        final String name = value.substring(referenceStart + REFERENCE_PREFIX.length(), referenceEnd);
-        final String builtIn = builtIns.get(name);
-        if (builtIn == null) {
-            return value;
-        }
-
-        return value.substring(0, referenceStart)
-                + builtIn
-                + value.substring(referenceEnd + REFERENCE_SUFFIX.length());
+        return expanded.append(value.substring(cursor)).toString();
     }
 }

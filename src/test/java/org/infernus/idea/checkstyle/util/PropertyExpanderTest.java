@@ -26,4 +26,13 @@ class PropertyExpanderTest {
 
         assertThat(expanded.get("suppressions"), is("/a/module/gradle/checkstyle-exclude.xml"));
     }
+
+    @Test
+    void everyReferenceInAValueIsExpanded() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("paths", "${basedir}:${config_loc}:${basedir}"),
+                Map.of("basedir", "/a/module", "config_loc", "/a/rules"));
+
+        assertThat(expanded.get("paths"), is("/a/module:/a/rules:/a/module"));
+    }
 }
