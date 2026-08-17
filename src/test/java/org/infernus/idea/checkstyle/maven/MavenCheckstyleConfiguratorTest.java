@@ -30,7 +30,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
         """.stripIndent();
 
     @Test
-    public void afterImport_importSettingsFromMavenIsEnabled_updatesConfigLocations()
+    public void afterImportImportSettingsFromMavenIsEnabledUpdatesConfigLocations()
         throws Exception {
         final var pluginConfigurationManager = getProject().getService(
             PluginConfigurationManager.class);
@@ -83,7 +83,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void afterImport_importSettingsFromMavenIsEnabledAndInheritingMavenPluginCheckstyleVersion_updatesVersionWithInheritedValue()
+    public void afterImportImportSettingsFromMavenIsEnabledAndInheritingMavenPluginCheckstyleVersionUpdatesVersionWithInheritedValue()
         throws Exception {
         final var pluginConfigurationManager = getProject().getService(
             PluginConfigurationManager.class);
@@ -113,7 +113,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void afterImport_configLocationContainsCustomMavenProperty_resolvesProperty() throws Exception {
+    public void afterImportConfigLocationContainsCustomMavenPropertyResolvesProperty() throws Exception {
         final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
 
         final var configPath = Files.writeString(
@@ -152,7 +152,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void afterImport_suppressionsLocationContainsCustomMavenProperty_resolvesProperty() throws Exception {
+    public void afterImportSuppressionsLocationContainsCustomMavenPropertyResolvesProperty() throws Exception {
         final var pluginConfigurationManager = getProject().getService(PluginConfigurationManager.class);
 
         Files.writeString(getProjectRoot().toNioPath().resolve("checkstyle.xml"), "<config></config>");

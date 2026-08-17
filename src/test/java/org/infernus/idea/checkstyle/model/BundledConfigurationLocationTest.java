@@ -89,7 +89,7 @@ class BundledConfigurationLocationTest {
     }
 
     @Test
-    void sunChecksSortsBefore_GoogleChecks() {
+    void sunChecksSortsBeforeGoogleChecks() {
         // SUN_CHECKS has sortOrder 0, GOOGLE_CHECKS has sortOrder 1
         // BundledConfigurationLocation uses priority sort order, so compareTo should be negative
         assertTrue(sunChecks.compareTo(googleChecks) < 0);

@@ -77,13 +77,13 @@ public class VersionListReaderTest {
     }
 
     @Test
-    public void isLatest_returnsTrueForLatestSentinel() {
+    public void isLatestReturnsTrueForLatestSentinel() {
         VersionListReader underTest = new VersionListReader();
         assertTrue(underTest.isLatest("latest"));
     }
 
     @Test
-    public void isLatest_returnsFalseForConcreteVersion() {
+    public void isLatestReturnsFalseForConcreteVersion() {
         VersionListReader underTest = new VersionListReader();
         assertFalse(underTest.isLatest("10.0"));
     }

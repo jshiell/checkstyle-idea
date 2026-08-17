@@ -67,7 +67,7 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void nonBundledVersion_usesDownloadedPaths(@TempDir Path tempDir) throws Exception {
+    public void nonBundledVersionUsesDownloadedPaths(@TempDir final Path tempDir) throws Exception {
         Path fakeJar = tempDir.resolve("checkstyle-10.4.jar");
         fakeJar.toFile().createNewFile();
 
@@ -83,7 +83,7 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void nonBundledVersion_addsThirdPartyClasspath(@TempDir Path tempDir) throws Exception {
+    public void nonBundledVersionAddsThirdPartyClasspath(@TempDir final Path tempDir) throws Exception {
         Path fakeCheckstyleJar = tempDir.resolve("checkstyle-10.4.jar");
         fakeCheckstyleJar.toFile().createNewFile();
         Path thirdPartyJar = tempDir.resolve("third-party.jar");
@@ -106,7 +106,7 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void nonBundledVersion_downloadFailure_throwsDescriptiveException() {
+    public void nonBundledVersionDownloadFailureThrowsDescriptiveException() {
         CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
         when(mockDownloader.download(NON_BUNDLED_VERSION))
                 .thenThrow(new CheckstyleDownloadException("connection refused"));
@@ -121,7 +121,7 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void forVersionWithDownloader_exposesDownloaderViaGetter() {
+    public void forVersionWithDownloaderExposesDownloaderViaGetter() {
         CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
 
         CheckstyleProjectService service =
@@ -131,14 +131,14 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void latestVersion_loadsDefaultBundledVersion() throws ClassNotFoundException {
+    public void latestVersionLoadsDefaultBundledVersion() throws ClassNotFoundException {
         underTest.activateCheckstyleVersion(VersionListReader.LATEST_VERSION, null);
         assertThat(underTest.underlyingClassLoader().loadClass("com.puppycrawl.tools.checkstyle.Checker"),
                 is(not(nullValue())));
     }
 
     @Test
-    public void bundledVersion_doesNotUseDownloader() {
+    public void bundledVersionDoesNotUseDownloader() {
         CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
 
         CheckstyleProjectService serviceWithDownloader =
@@ -150,8 +150,8 @@ public class CheckstyleProjectServiceTest {
     }
 
     @Test
-    public void copyLibsEnabled_stabilizesThirdPartyJarsFromProjectDir(@TempDir Path projectDir,
-                                                                        @TempDir Path copyDir) throws Exception {
+    public void copyLibsEnabledStabilizesThirdPartyJarsFromProjectDir(@TempDir final Path projectDir,
+                                                                      @TempDir final Path copyDir) throws Exception {
         Path thirdPartyJar = projectDir.resolve("ext.jar");
         thirdPartyJar.toFile().createNewFile();
 

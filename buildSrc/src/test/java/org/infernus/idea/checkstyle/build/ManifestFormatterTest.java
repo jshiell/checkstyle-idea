@@ -77,30 +77,75 @@ public class ManifestFormatterTest {
     }
 
     private static ResolvedArtifact stubArtifact(final String group,
-                                                  final String name,
-                                                  final String version,
-                                                  final String classifier,
-                                                  final File file) {
+                                                 final String name,
+                                                 final String version,
+                                                 final String classifier,
+                                                 final File file) {
         return new ResolvedArtifact() {
-            @Override public String getName() { return name; }
-            @Override public String getType() { return "jar"; }
-            @Override public String getExtension() { return "jar"; }
-            @Override public String getClassifier() { return classifier; }
-            @Override public File getFile() { return file; }
-            @Override public ResolvedModuleVersion getModuleVersion() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getType() {
+                return "jar";
+            }
+
+            @Override
+            public String getExtension() {
+                return "jar";
+            }
+
+            @Override
+            public String getClassifier() {
+                return classifier;
+            }
+
+            @Override
+            public File getFile() {
+                return file;
+            }
+
+            @Override
+            public ResolvedModuleVersion getModuleVersion() {
                 return () -> new org.gradle.api.artifacts.ModuleVersionIdentifier() {
-                    @Override public String getGroup() { return group; }
-                    @Override public String getName() { return name; }
-                    @Override public String getVersion() { return version; }
-                    @Override public org.gradle.api.artifacts.ModuleIdentifier getModule() {
+                    @Override
+                    public String getGroup() {
+                        return group;
+                    }
+
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public String getVersion() {
+                        return version;
+                    }
+
+                    @Override
+                    public org.gradle.api.artifacts.ModuleIdentifier getModule() {
                         return new org.gradle.api.artifacts.ModuleIdentifier() {
-                            @Override public String getGroup() { return group; }
-                            @Override public String getName() { return name; }
+                            @Override
+                            public String getGroup() {
+                                return group;
+                            }
+
+                            @Override
+                            public String getName() {
+                                return name;
+                            }
                         };
                     }
                 };
             }
-            @Override public ComponentArtifactIdentifier getId() { return null; }
+
+            @Override
+            public ComponentArtifactIdentifier getId() {
+                return null;
+            }
         };
     }
 }

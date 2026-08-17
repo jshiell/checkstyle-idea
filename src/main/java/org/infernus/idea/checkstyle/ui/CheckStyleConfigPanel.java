@@ -415,7 +415,8 @@ public class CheckStyleConfigPanel extends JPanel {
     private final class AddPathAction implements AnActionButtonRunnable {
         @Override
         public void run(final AnActionButton anActionButton) {
-            final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(), CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
+            final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(),
+                    CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());

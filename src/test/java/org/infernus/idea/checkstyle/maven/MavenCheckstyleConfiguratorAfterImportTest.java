@@ -54,7 +54,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         when(mavenProject.getFile()).thenReturn(mock(VirtualFile.class));
 
         @SuppressWarnings("unchecked")
-        MavenProjectWithModules<Module> projectWithModules = mock(MavenProjectWithModules.class);
+        final MavenProjectWithModules<Module> projectWithModules = mock(MavenProjectWithModules.class);
         when(projectWithModules.getMavenProject()).thenReturn(mavenProject);
 
         context = mock(MavenAfterImportConfigurator.Context.class);
@@ -63,7 +63,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
             .thenReturn(SequencesKt.asSequence(List.of(projectWithModules).iterator()));
     }
 
-    private MavenPlugin pluginWithConfig(Element configElement) {
+    private MavenPlugin pluginWithConfig(final Element configElement) {
         MavenPlugin plugin = mock(MavenPlugin.class);
         when(plugin.getConfigurationElement()).thenReturn(configElement);
         when(plugin.getDependencies()).thenReturn(List.of(dep("com.puppycrawl.tools", "checkstyle", "13.10.0")));
@@ -73,7 +73,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         return plugin;
     }
 
-    private MavenPlugin pluginWithDependencies(List<MavenId> deps) {
+    private MavenPlugin pluginWithDependencies(final List<MavenId> deps) {
         MavenPlugin plugin = mock(MavenPlugin.class);
         when(plugin.getConfigurationElement()).thenReturn(null);
         when(plugin.getDependencies()).thenReturn(deps);
@@ -83,7 +83,9 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         return plugin;
     }
 
-    private static MavenId dep(String groupId, String artifactId, String version) {
+    private static MavenId dep(final String groupId,
+                               final String artifactId,
+                               final String version) {
         return new MavenId(groupId, artifactId, version);
     }
 
@@ -96,7 +98,8 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     }
 
     /** Creates a physical file in a temp dir and stubs getDirectoryFile() to return the parent. */
-    private VirtualFile fixtureFile(String filename, String content) throws Exception {
+    private VirtualFile fixtureFile(final String filename,
+                                    final String content) throws Exception {
         Files.writeString(physicalTempDir.resolve(filename), content);
         VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(physicalTempDir.resolve(filename));
         when(mavenProject.getDirectoryFile()).thenReturn(vf.getParent());
@@ -105,7 +108,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
 
     // --- tests ---
 
-    public void testImportSettingsFromMavenIsDisabled_doesNothing() {
+    public void testImportSettingsFromMavenIsDisabledDoesNothing() {
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withImportSettingsFromMaven(false)
@@ -119,7 +122,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals("10.26.0", configManager.getCurrent().getCheckstyleVersion());
     }
 
-    public void testImportSettingsFromMavenIsEnabled_updatesVersion() {
+    public void testImportSettingsFromMavenIsEnabledUpdatesVersion() {
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withImportSettingsFromMaven(true)
@@ -133,7 +136,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals("10.26.1", configManager.getCurrent().getCheckstyleVersion());
     }
 
-    public void testImportSettingsFromMavenIsEnabled_updatesThirdPartyClasspath() {
+    public void testImportSettingsFromMavenIsEnabledUpdatesThirdPartyClasspath() {
         enableMavenImport();
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
@@ -152,7 +155,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals(List.of(expectedJar), configManager.getCurrent().getThirdPartyClasspath());
     }
 
-    public void testMavenCheckstylePluginNotConfigured_doesNotThrow() {
+    public void testMavenCheckstylePluginNotConfiguredDoesNotThrow() {
         enableMavenImport();
         // mavenProject.findPlugin returns null (set up in setUp)
 
@@ -160,7 +163,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         // no assertion needed — just mustn't throw
     }
 
-    public void testConfigLocationMissingAndMavenConfigExists_removesMavenConfigLocation() throws Exception {
+    public void testConfigLocationMissingAndMavenConfigExistsRemovesMavenConfigLocation() {
         enableMavenImport();
         var factory = getProject().getService(ConfigurationLocationFactory.class);
         var mavenLoc = factory.create(getProject(), "maven-config-location",
@@ -180,7 +183,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
             .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
     }
 
-    public void testConfigLocationExistsAndMavenConfigAlreadyExists_overwritesWithNewConfig() throws Exception {
+    public void testConfigLocationExistsAndMavenConfigAlreadyExistsOverwritesWithNewConfig() throws Exception {
         enableMavenImport();
         var checkstyleVf = fixtureFile("checkstyle.xml", "<config></config>");
         var factory = getProject().getService(ConfigurationLocationFactory.class);
@@ -209,7 +212,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals(expectedPath, storedPath);
     }
 
-    public void testMavenConfigDoesNotAlreadyExist_addsNewConfig() throws Exception {
+    public void testMavenConfigDoesNotAlreadyExistAddsNewConfig() throws Exception {
         enableMavenImport();
         fixtureFile("checkstyle.xml", "<config></config>");
         configManager.setCurrent(
@@ -234,7 +237,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals(expectedPath, storedPath);
     }
 
-    public void testConfigLocationNotOnDiskOrClasspath_doesNotAddLocation() throws Exception {
+    public void testConfigLocationNotOnDiskOrClasspathDoesNotAddLocation() throws Exception {
         enableMavenImport();
         fixtureFile(".placeholder", "");  // set up a valid directory VF
         configManager.setCurrent(
@@ -254,7 +257,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
             .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
     }
 
-    public void testOnlySuppressionLocationChanges_updatesProperties() throws Exception {
+    public void testOnlySuppressionLocationChangesUpdatesProperties() throws Exception {
         enableMavenImport();
         fixtureFile("checkstyle.xml", "<config></config>");
         var factory = getProject().getService(ConfigurationLocationFactory.class);

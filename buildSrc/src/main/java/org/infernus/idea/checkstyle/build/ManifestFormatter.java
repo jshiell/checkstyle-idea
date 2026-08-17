@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 
-public class ManifestFormatter {
+public final class ManifestFormatter {
 
     private ManifestFormatter() {
     }

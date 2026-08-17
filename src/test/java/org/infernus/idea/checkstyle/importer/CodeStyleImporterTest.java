@@ -705,10 +705,10 @@ public class CodeStyleImporterTest
 
     public void testDeclarationOrderIgnoreBoth() {
         importConfiguration(inTreeWalker(
-                "<module name=\"DeclarationOrder\">" +
-                "<property name=\"ignoreConstructors\" value=\"true\"/>" +
-                "<property name=\"ignoreModifiers\" value=\"true\"/>" +
-                "</module>"));
+                "<module name=\"DeclarationOrder\">"
+                        + "<property name=\"ignoreConstructors\" value=\"true\"/>"
+                        + "<property name=\"ignoreModifiers\" value=\"true\"/>"
+                        + "</module>"));
 
         StdArrangementSettings arrangementSettings = (StdArrangementSettings) javaSettings.getArrangementSettings();
         assertNotNull(arrangementSettings);

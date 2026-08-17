@@ -23,7 +23,7 @@ class ResultProblemTest {
     @Mock private PsiElement psiElement;
     @Mock private ConfigurationLocation configurationLocation;
 
-    private Problem problem(String sourceName, String message) {
+    private Problem problem(final String sourceName, final String message) {
         return new Problem(psiElement, message, SeverityLevel.Warning, 1, 0, sourceName, false, false);
     }
 

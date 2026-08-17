@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 public class CheckstyleClassLoaderContainerTest {
 
     @Test
-    void constructorWithDownloadedJars_acceptsEmptyList(@TempDir Path tempDir) {
+    void constructorWithDownloadedJarsAcceptsEmptyList() {
         var project = mock(com.intellij.openapi.project.Project.class);
         var service = mock(CheckstyleProjectService.class);
 
@@ -24,7 +24,7 @@ public class CheckstyleClassLoaderContainerTest {
     }
 
     @Test
-    void constructorWithDownloadedJars_acceptsRealJarPaths(@TempDir Path tempDir) throws Exception {
+    void constructorWithDownloadedJarsAcceptsRealJarPaths(@TempDir final Path tempDir) throws Exception {
         var jarPath = tempDir.resolve("fake.jar");
         jarPath.toFile().createNewFile();
 
@@ -37,7 +37,7 @@ public class CheckstyleClassLoaderContainerTest {
     }
 
     @Test
-    void constructorWithDownloadedJars_doesNotRequireClasspathsProperties(@TempDir Path tempDir) {
+    void constructorWithDownloadedJarsDoesNotRequireClasspathsProperties() {
         var project = mock(com.intellij.openapi.project.Project.class);
         var service = mock(CheckstyleProjectService.class);
 
@@ -45,7 +45,7 @@ public class CheckstyleClassLoaderContainerTest {
     }
 
     @Test
-    void constructorWithDownloadedJars_classLoaderCanFindCheckstyleActionsImpl() throws ClassNotFoundException {
+    void constructorWithDownloadedJarsClassLoaderCanFindCheckstyleActionsImpl() throws ClassNotFoundException {
         var project = mock(com.intellij.openapi.project.Project.class);
         var service = mock(CheckstyleProjectService.class);
 
@@ -55,7 +55,7 @@ public class CheckstyleClassLoaderContainerTest {
     }
 
     @Test
-    void originalConstructor_throwsForUnbundledVersion() {
+    void originalConstructorThrowsForUnbundledVersion() {
         var project = mock(com.intellij.openapi.project.Project.class);
         var service = mock(CheckstyleProjectService.class);
 

@@ -12,9 +12,9 @@ public class DownloadManifestTest {
     @Test
     void entriesForParsesTokensCorrectly() {
         String manifestContent =
-                "10.26.1 = com.puppycrawl.tools:checkstyle:10.26.1::abc123, " +
-                "org.antlr:antlr4-runtime:4.13.2::def456, " +
-                "org.xmlresolver:xmlresolver:5.3.3:data:789abc\n";
+                "10.26.1 = com.puppycrawl.tools:checkstyle:10.26.1::abc123, "
+                        + "org.antlr:antlr4-runtime:4.13.2::def456, "
+                        + "org.xmlresolver:xmlresolver:5.3.3:data:789abc\n";
 
         DownloadManifest manifest = DownloadManifest.fromString(manifestContent);
         List<ManifestEntry> entries = manifest.entriesFor("10.26.1");

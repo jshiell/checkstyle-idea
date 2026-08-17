@@ -62,7 +62,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void bundledVersion_noNotification() {
+    void bundledVersionNoNotification() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(true);
 
         activity.execute(project, mock(Continuation.class));
@@ -71,7 +71,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void locallyAvailable_noNotification() {
+    void locallyAvailableNoNotification() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(false);
         when(projectService.getDownloader()).thenReturn(downloader);
         when(downloader.isAvailableLocally("10.21.0")).thenReturn(true);
@@ -82,7 +82,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void nullDownloader_noNotification() {
+    void nullDownloaderNoNotification() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(false);
         when(projectService.getDownloader()).thenReturn(null);
 
@@ -92,7 +92,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void latestVersion_noNotification() {
+    void latestVersionNoNotification() {
         when(pluginConfig.getCheckstyleVersion()).thenReturn("latest");
         when(versionListReader.isLatest("latest")).thenReturn(true);
         when(versionListReader.getDefaultVersion()).thenReturn("13.10.0");
@@ -104,7 +104,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void nonBundledNotLocal_showsTwoActions() {
+    void nonBundledNotLocalShowsTwoActions() {
         when(versionListReader.isBundled("10.21.0")).thenReturn(false);
         when(projectService.getDownloader()).thenReturn(downloader);
         when(downloader.isAvailableLocally("10.21.0")).thenReturn(false);
@@ -116,7 +116,7 @@ class PromptForMissingCheckstyleVersionTest {
     }
 
     @Test
-    void useBundledAction_updatesCurrent() {
+    void useBundledActionUpdatesCurrent() {
         Consumer<String> onVersionChanged = activity.buildOnVersionChanged(configManager);
 
         onVersionChanged.accept("13.10.0");

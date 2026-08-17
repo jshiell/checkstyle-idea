@@ -17,7 +17,10 @@ class ProblemTest {
 
     @Mock private PsiElement psiElement;
 
-    private Problem problem(int line, int column, SeverityLevel severity, String message) {
+    private Problem problem(final int line,
+                            final int column,
+                            final SeverityLevel severity,
+                            final String message) {
         return new Problem(psiElement, message, severity, line, column, "com.example.FooCheck", false, false);
     }
 
