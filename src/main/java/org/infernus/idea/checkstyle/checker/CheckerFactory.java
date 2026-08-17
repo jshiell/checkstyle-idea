@@ -3,13 +3,13 @@ package org.infernus.idea.checkstyle.checker;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,12 +36,14 @@ public class CheckerFactory {
     private final Project project;
     private CheckstyleProjectService checkstyleProjectService;
     private  CheckerFactoryCache cache;
+    private ProjectPaths projectPaths;
 
     @SuppressWarnings("unused") // IDEA's DI
     public CheckerFactory(@NotNull final Project project) {
         this.project = project;
         this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
         this.cache = project.getService(CheckerFactoryCache.class);
+        this.projectPaths = project.getService(ProjectPaths.class);
     }
 
     public static CheckerFactory create(@NotNull final Project project,
@@ -50,6 +52,15 @@ public class CheckerFactory {
         CheckerFactory checkerFactory = new CheckerFactory(project);
         checkerFactory.checkstyleProjectService = checkstyleProjectService;
         checkerFactory.cache = cache;
+        return checkerFactory;
+    }
+
+    public static CheckerFactory create(@NotNull final Project project,
+                                        @NotNull final CheckstyleProjectService checkstyleProjectService,
+                                        @NotNull final CheckerFactoryCache cache,
+                                        @NotNull final ProjectPaths projectPaths) {
+        CheckerFactory checkerFactory = create(project, checkstyleProjectService, cache);
+        checkerFactory.projectPaths = projectPaths;
         return checkerFactory;
     }
 
@@ -109,7 +120,7 @@ public class CheckerFactory {
 
     private String basePathFor(final Module module) {
         if (module != null) {
-            VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
+            VirtualFile moduleDir = projectPaths.modulePath(module);
             if (moduleDir != null) {
                 final File moduleDirFile = new File(moduleDir.getPath());
                 if (moduleDirFile.exists()) {

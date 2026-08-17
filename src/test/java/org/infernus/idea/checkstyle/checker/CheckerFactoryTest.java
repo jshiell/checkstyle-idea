@@ -2,22 +2,32 @@ package org.infernus.idea.checkstyle.checker;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.StringConfigurationLocation;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,5 +91,51 @@ class CheckerFactoryTest {
 
         assertThat(factory1.checker(null, location).orElseThrow(), is(mockChecker));
         assertThat(factory2.checker(null, location).orElseThrow(), is(mockChecker));
+    }
+
+    @Test
+    void basedirIsTheModulePathReportedByTheProjectPathsService(@TempDir final Path moduleDir) {
+        CheckstyleActions checkstyleActions = stubCheckstyleInstance();
+        Module module = mockModule("a-module");
+
+        checkerFactoryWith(projectPathsReturning(module, moduleDir)).checker(module, location);
+
+        assertThat(propertiesPassedTo(checkstyleActions).get("basedir"), is(moduleDir.toFile().getAbsolutePath()));
+    }
+
+    private CheckerFactory checkerFactoryWith(final ProjectPaths projectPaths) {
+        return CheckerFactory.create(project, checkstyleProjectService, cache, projectPaths);
+    }
+
+    private ProjectPaths projectPathsReturning(final Module module, final Path path) {
+        VirtualFile moduleDir = mock(VirtualFile.class);
+        when(moduleDir.getPath()).thenReturn(path.toString());
+
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
+        when(projectPaths.modulePath(module)).thenReturn(moduleDir);
+        return projectPaths;
+    }
+
+    private Module mockModule(final String name) {
+        Module module = mock(Module.class);
+        when(module.getProject()).thenReturn(project);
+        when(module.getName()).thenReturn(name);
+        return module;
+    }
+
+    private CheckstyleActions stubCheckstyleInstance() {
+        when(checkstyleProjectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
+
+        CheckstyleActions checkstyleActions = mock(CheckstyleActions.class);
+        when(checkstyleActions.createChecker(any(), any(), any())).thenReturn(mock(CheckStyleChecker.class));
+        when(checkstyleProjectService.getCheckstyleInstance()).thenReturn(checkstyleActions);
+        return checkstyleActions;
+    }
+
+    private Map<String, String> propertiesPassedTo(final CheckstyleActions checkstyleActions) {
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, String>> properties = ArgumentCaptor.forClass(Map.class);
+        verify(checkstyleActions).createChecker(any(), eq(location), properties.capture());
+        return properties.getValue();
     }
 }
