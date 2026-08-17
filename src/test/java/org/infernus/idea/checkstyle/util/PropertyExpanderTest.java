@@ -65,4 +65,76 @@ class PropertyExpanderTest {
 
         assertThat(expanded.get("suppressions"), is("${basedir}/suppressions.xml"));
     }
+
+    @Test
+    void aKeyNamedAfterABuiltInResolvesToTheBuiltInValue() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("basedir", "${basedir}"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("basedir"), is("/a/module"));
+    }
+
+    @Test
+    void keysAreNeverExpanded() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("${basedir}", "a value"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded, is(Map.of("${basedir}", "a value")));
+    }
+
+    @Test
+    void substitutedTextIsNeverItselfExpanded() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${basedir}/suppressions.xml"),
+                Map.of("basedir", "${basedir}", "nested", "/should/not/appear"));
+
+        assertThat(expanded.get("suppressions"), is("${basedir}/suppressions.xml"));
+    }
+
+    @Test
+    void aValueWithNoReferencesIsUnchanged() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "/a/literal/path$/with-no-references"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("/a/literal/path$/with-no-references"));
+    }
+
+    @Test
+    void anUnclosedReferenceIsLeftVerbatim() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${basedir/suppressions.xml"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("${basedir/suppressions.xml"));
+    }
+
+    @Test
+    void anEmptyReferenceNameIsLeftVerbatim() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${}/suppressions.xml"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("${}/suppressions.xml"));
+    }
+
+    @Test
+    void aNestedReferenceIsResolvedAtItsFirstClosingBrace() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${a${basedir}}"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("${a${basedir}}"));
+    }
+
+    @Test
+    void oneUserPropertyIsNotExpandedIntoAnother() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("root", "/a/module", "suppressions", "${root}/suppressions.xml"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("${root}/suppressions.xml"));
+    }
 }
