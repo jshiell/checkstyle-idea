@@ -17,4 +17,13 @@ class PropertyExpanderTest {
 
         assertThat(expanded.get("baseDir"), is("/a/module"));
     }
+
+    @Test
+    void aReferenceIsExpandedWhereItSitsWithinALongerValue() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${basedir}/gradle/checkstyle-exclude.xml"),
+                Map.of("basedir", "/a/module"));
+
+        assertThat(expanded.get("suppressions"), is("/a/module/gradle/checkstyle-exclude.xml"));
+    }
 }

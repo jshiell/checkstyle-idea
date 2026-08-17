@@ -11,6 +11,9 @@ import java.util.Map;
  */
 public final class PropertyExpander {
 
+    private static final String REFERENCE_PREFIX = "${";
+    private static final String REFERENCE_SUFFIX = "}";
+
     private PropertyExpander() {
     }
 
@@ -25,10 +28,23 @@ public final class PropertyExpander {
     }
 
     private static String expandValue(final String value, final Map<String, String> builtIns) {
-        return builtIns.getOrDefault(nameReferencedBy(value), value);
-    }
+        final int referenceStart = value.indexOf(REFERENCE_PREFIX);
+        if (referenceStart < 0) {
+            return value;
+        }
+        final int referenceEnd = value.indexOf(REFERENCE_SUFFIX, referenceStart);
+        if (referenceEnd < 0) {
+            return value;
+        }
 
-    private static String nameReferencedBy(final String value) {
-        return value.substring("${".length(), value.length() - "}".length());
+        final String name = value.substring(referenceStart + REFERENCE_PREFIX.length(), referenceEnd);
+        final String builtIn = builtIns.get(name);
+        if (builtIn == null) {
+            return value;
+        }
+
+        return value.substring(0, referenceStart)
+                + builtIn
+                + value.substring(referenceEnd + REFERENCE_SUFFIX.length());
     }
 }
