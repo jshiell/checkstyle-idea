@@ -487,29 +487,49 @@ public class OpLoadConfigurationTest {
 
     @Test
     public void testLoadBundledSunChecks() {
+        assertNotNull(loadBundledSunChecks());
+    }
+
+    @Test
+    public void bundledSunChecksStillLoadWhenExternalDtdLoadIsEnabled() {
+        System.setProperty(ENABLE_EXTERNAL_DTD_LOAD, "true");
+
+        assertNotNull(loadBundledSunChecks());
+    }
+
+    @Test
+    public void bundledGoogleChecksStillLoadWhenExternalDtdLoadIsEnabled() {
+        System.setProperty(ENABLE_EXTERNAL_DTD_LOAD, "true");
+
+        assertNotNull(loadBundledGoogleChecks());
+    }
+
+    private CheckstyleInternalObject loadBundledSunChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
 
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
+        return new CheckstyleActionsImpl(PROJECT, projectService)
                 .loadConfiguration(clf.create(BundledConfig.SUN_CHECKS, TestHelper.mockProject()), Map.of(
                         "org.checkstyle.sun.suppressionfilter.config", "",
                         "org.checkstyle.sun.suppressionxpathfilter.config", ""
                 ));
-        assertNotNull(csConfig);
     }
 
 
     @Test
     public void testLoadBundledGoogleChecks() {
+        assertNotNull(loadBundledGoogleChecks());
+    }
+
+    private CheckstyleInternalObject loadBundledGoogleChecks() {
         final ConfigurationLocationFactory clf = new ConfigurationLocationFactory();
         CheckstyleProjectService projectService = mock(CheckstyleProjectService.class);
         when(projectService.underlyingClassLoader()).thenReturn(getClass().getClassLoader());
-        CheckstyleInternalObject csConfig = new CheckstyleActionsImpl(PROJECT, projectService)
+        return new CheckstyleActionsImpl(PROJECT, projectService)
                 .loadConfiguration(clf.create(BundledConfig.GOOGLE_CHECKS, TestHelper.mockProject()), Map.of(
                         "org.checkstyle.google.suppressionfilter.config", "",
                         "org.checkstyle.google.suppressionxpathfilter.config", ""
                 ));
-        assertNotNull(csConfig);
     }
 }
