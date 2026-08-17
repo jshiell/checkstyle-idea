@@ -1,12 +1,5 @@
 package org.infernus.idea.checkstyle.checker;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationGroup;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,16 +8,15 @@ import org.infernus.idea.checkstyle.StringConfigurationLocation;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockMakers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
@@ -34,15 +26,13 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 class CheckerFactoryTest {
@@ -54,21 +44,11 @@ class CheckerFactoryTest {
     @Mock
     private CheckstyleProjectService checkstyleProjectService;
 
-    private Application previousApplication;
-
     @BeforeEach
     void setUp() {
-        previousApplication = ApplicationManager.getApplication();
         project = TestHelper.mockProject();
         cache = new CheckerFactoryCache();
         location = new StringConfigurationLocation("<module name=\"Checker\"/>", project);
-    }
-
-    @AfterEach
-    void restoreApplication() {
-        if (previousApplication != null) {
-            ApplicationManager.setApplication(previousApplication, mock(Disposable.class));
-        }
     }
 
     @Test
@@ -144,14 +124,15 @@ class CheckerFactoryTest {
     }
 
     @Test
-    void aFailureTheUserCanActOnIsShownToThemRatherThanLeftInTheEventLog(@TempDir final Path moduleDir) {
-        NotificationGroup balloonGroup = interceptNotifications();
-        Module module = mockModule("a-module");
+    void aFailureTheUserCanActOnIsReportedRatherThanLoggedAsAnException() {
         checkstyleInstanceFailingWith(new ActionableCheckstyleException("set the VM option", new IOException()));
 
-        checkerFactoryWith(projectPathsReturning(module, moduleDir)).checker(module, location);
+        CheckStylePluginException thrown = assertThrows(CheckStylePluginException.class, () ->
+                checkerFactoryWith(mock(ProjectPaths.class)).checker(null, location));
 
-        verify(balloonGroup).createNotification(eq(""), contains("set the VM option"), eq(NotificationType.ERROR));
+        // the reported message, rather than a stack trace for the event log
+        assertThat(thrown.getCause().getMessage(), containsString("set the VM option"));
+        assertThat(thrown.getCause().getMessage(), containsString("could not be parsed"));
     }
 
     private CheckerFactory checkerFactoryWith(final ProjectPaths projectPaths) {
@@ -180,22 +161,6 @@ class CheckerFactoryTest {
         CheckstyleActions checkstyleActions = mock(CheckstyleActions.class);
         when(checkstyleActions.createChecker(any(), any(), any())).thenThrow(failure);
         when(checkstyleProjectService.getCheckstyleInstance()).thenReturn(checkstyleActions);
-    }
-
-    private NotificationGroup interceptNotifications() {
-        final NotificationGroup balloonGroup = mock(NotificationGroup.class,
-                withSettings().mockMaker(MockMakers.INLINE));
-        when(balloonGroup.createNotification(anyString(), anyString(), any(NotificationType.class)))
-                .thenReturn(mock(Notification.class));
-
-        final NotificationGroupManager notificationGroupManager = mock(NotificationGroupManager.class);
-        when(notificationGroupManager.getNotificationGroup("CheckStyleIDEABalloonGroup")).thenReturn(balloonGroup);
-
-        final Application application = mock(Application.class);
-        when(application.getService(NotificationGroupManager.class)).thenReturn(notificationGroupManager);
-        ApplicationManager.setApplication(application, mock(Disposable.class));
-
-        return balloonGroup;
     }
 
     private CheckstyleActions stubCheckstyleInstance() {
