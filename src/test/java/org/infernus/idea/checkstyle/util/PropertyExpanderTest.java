@@ -56,4 +56,13 @@ class PropertyExpanderTest {
 
         assertThat(expanded.get("suppressions"), is("${basedir}/suppressions.xml"));
     }
+
+    @Test
+    void aReferenceToABuiltInWithABlankValueIsLeftVerbatim() {
+        Map<String, String> expanded = PropertyExpander.expand(
+                Map.of("suppressions", "${basedir}/suppressions.xml"),
+                Map.of("basedir", "   "));
+
+        assertThat(expanded.get("suppressions"), is("${basedir}/suppressions.xml"));
+    }
 }

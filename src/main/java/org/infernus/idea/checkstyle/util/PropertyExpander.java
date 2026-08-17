@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.infernus.idea.checkstyle.util.Strings.isBlank;
+
 /**
  * Expands <code>${name}</code> references in user-defined property values against the plugin's
  * built-in properties.
@@ -46,7 +48,7 @@ public final class PropertyExpander {
                     value.substring(referenceStart + REFERENCE_PREFIX.length(), referenceEnd));
 
             expanded.append(value, cursor, referenceStart)
-                    .append(builtIn != null ? builtIn : reference);
+                    .append(isBlank(builtIn) ? reference : builtIn);
             // resume after the replacement, so substituted text is never itself rescanned
             cursor = referenceEnd + REFERENCE_SUFFIX.length();
         }
