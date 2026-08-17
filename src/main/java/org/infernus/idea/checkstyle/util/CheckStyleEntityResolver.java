@@ -137,14 +137,19 @@ public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
             if ("file".equals(systemIdUrl.getScheme())) {
                 return loadFromLocalFile(systemIdUrl);
             } else {
-                // Return null for non-file URIs (e.g. http/https) to prevent the XML parser from
-                // fetching arbitrary remote URLs, which would be an SSRF vector.
-                return null;
+                // Returning null would tell the parser to resolve the URI itself, so an unknown remote
+                // entity would still be fetched. An empty source blocks the fetch and lets the parse continue.
+                return emptySource();
             }
         } catch (Exception e) {
             LOG.warn("Entity lookup failed for system id " + systemId, e);
             return null;
         }
+    }
+
+    @NotNull
+    private InputSource emptySource() {
+        return new InputSource(new StringReader(""));
     }
 
     @Nullable

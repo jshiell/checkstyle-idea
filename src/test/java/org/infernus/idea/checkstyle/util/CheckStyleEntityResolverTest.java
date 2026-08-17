@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.util;
 
+import com.sun.net.httpserver.HttpServer;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.StringConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -7,15 +8,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.notNullValue;
 
 /**
- * Tests for CheckStyleEntityResolver — in particular the SSRF fix that returns
- * null for unknown non-file system IDs.
+ * Tests for CheckStyleEntityResolver — in particular that unknown remote entities
+ * are neutered rather than fetched.
  */
 public class CheckStyleEntityResolverTest {
 
@@ -29,15 +38,15 @@ public class CheckStyleEntityResolverTest {
     }
 
     @Test
-    public void unknownHttpSystemIdReturnsNull() throws Exception {
+    public void unknownHttpSystemIdResolvesToAnEmptySource() throws Exception {
         final InputSource result = underTest.resolveEntity(null, "http://evil.example.com/malicious.dtd");
-        assertThat("Expected null for unknown http system ID to prevent SSRF", result, nullValue());
+        assertThat("Expected an empty source for an unknown http system ID", contentOf(result), is(""));
     }
 
     @Test
-    public void unknownHttpsSystemIdReturnsNull() throws Exception {
+    public void unknownHttpsSystemIdResolvesToAnEmptySource() throws Exception {
         final InputSource result = underTest.resolveEntity(null, "https://evil.example.com/malicious.dtd");
-        assertThat("Expected null for unknown https system ID to prevent SSRF", result, nullValue());
+        assertThat("Expected an empty source for an unknown https system ID", contentOf(result), is(""));
     }
 
     @Test
@@ -55,9 +64,63 @@ public class CheckStyleEntityResolverTest {
     }
 
     @Test
-    public void xmlResolverDelegatesCorrectly() throws XMLStreamException {
-        // Unknown non-file URI should not cause an exception, and should return null
+    public void xmlResolverDelegatesCorrectly() throws Exception {
         final Object result = underTest.resolveEntity(null, "http://evil.example.com/dtd", null, null);
-        assertThat(result, nullValue());
+        assertThat(contentOf((InputSource) result), is(""));
+    }
+
+    @Test
+    public void aRemoteEntityIsNeverFetchedDuringAParse() throws Exception {
+        final AtomicInteger requestCount = new AtomicInteger();
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            requestCount.incrementAndGet();
+            final byte[] body = "<!-- pwned -->".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            final String config = """
+                    <!DOCTYPE module [
+                      <!ENTITY remoteInclude SYSTEM "http://127.0.0.1:%d/evil.xml">
+                    ]>
+                    <module name="Checker">&remoteInclude;</module>""".formatted(server.getAddress().getPort());
+
+            parseWithExternalEntitiesEnabled(config);
+
+            assertThat("The parser must not fetch remote entities", requestCount.get(), is(0));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private void parseWithExternalEntitiesEnabled(final String config) throws Exception {
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(false);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", true);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", true);
+
+        final SAXParser parser = factory.newSAXParser();
+        parser.getXMLReader().setEntityResolver(underTest);
+        parser.getXMLReader().parse(new InputSource(
+                new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8))));
+    }
+
+    private String contentOf(final InputSource inputSource) throws Exception {
+        assertThat("A source was expected", inputSource, notNullValue());
+
+        final Reader reader = inputSource.getCharacterStream();
+        assertThat("A character stream was expected", reader, notNullValue());
+
+        final StringBuilder content = new StringBuilder();
+        final char[] buffer = new char[64];
+        int read;
+        while ((read = reader.read(buffer)) != -1) {
+            content.append(buffer, 0, read);
+        }
+        return content.toString();
     }
 }
