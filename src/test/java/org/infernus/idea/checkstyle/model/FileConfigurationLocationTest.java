@@ -11,17 +11,22 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +85,29 @@ public class FileConfigurationLocationTest {
         underTest.setLocation(PROJECT_BASE_PATH + "-sibling/a-path/to/checkstyle.xml");
 
         assertThat(underTest.getLocation(), is(equalTo(PROJECT_BASE_PATH + "-sibling/a-path/to/checkstyle.xml")));
+    }
+
+    @Test
+    public void theBaseUriIsTheConfigurationFilesOwnUri(@TempDir final Path tempDir) throws IOException {
+        final Path configFile = Files.createFile(tempDir.resolve("checkstyle.xml"));
+        underTest.setLocation(configFile.toString());
+
+        assertThat(underTest.baseUri(), is(equalTo(configFile.toFile().toURI().toString())));
+    }
+
+    @Test
+    public void theBaseUriIsNullWhenTheConfigurationFileDoesNotExist() {
+        underTest.setLocation("/a-volume/a-path/to/no-such-checkstyle.xml");
+
+        assertThat(underTest.baseUri(), is(nullValue()));
+    }
+
+    @Test
+    public void theBaseUriIsNullForAConfigurationFileInsideAJar(@TempDir final Path tempDir) throws IOException {
+        final Path jarFile = Files.createFile(tempDir.resolve("rules.jar"));
+        underTest.setLocation(jarFile + "!/checkstyle.xml");
+
+        assertThat(underTest.baseUri(), is(nullValue()));
     }
 
     private FileConfigurationLocation useUnixPaths() {

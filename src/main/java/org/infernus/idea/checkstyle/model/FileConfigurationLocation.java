@@ -53,6 +53,26 @@ public class FileConfigurationLocation extends ConfigurationLocation {
         return null;
     }
 
+    /**
+     * The configuration file's own URI, so that relative references resolve as siblings of the file.
+     * A directory URI would resolve them one level too high, as it has no trailing slash.
+     */
+    @Nullable
+    @Override
+    public String baseUri() {
+        final String detokenisedLocation = getLocation();
+        if (detokenisedLocation == null || isInJarFile(detokenisedLocation)) {
+            return null;
+        }
+
+        final File locationFile = new File(detokenisedLocation);
+        if (locationFile.exists()) {
+            return locationFile.toURI().toString();
+        }
+
+        return null;
+    }
+
     @Override
     public String getLocation() {
         return projectFilePaths().detokenise(super.getLocation());

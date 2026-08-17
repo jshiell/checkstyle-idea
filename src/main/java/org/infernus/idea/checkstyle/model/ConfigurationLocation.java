@@ -99,6 +99,16 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
         return null;
     }
 
+    /**
+     * Get the URI that relative references within this configuration file should be resolved against.
+     *
+     * @return the base URI, or null if this location type has no meaningful base URI.
+     */
+    @Nullable
+    public String baseUri() {
+        return null;
+    }
+
     @NotNull
     public String getId() {
         return id;

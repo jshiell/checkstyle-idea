@@ -19,6 +19,7 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,6 +104,11 @@ public class ConfigurationLocationTest {
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", "aValue"));
         assertThat(underTest.getProperties(), hasEntry("property-three", ""));
+    }
+
+    @Test
+    public void thereIsNoBaseUriByDefault() {
+        assertThat(underTest.baseUri(), is(nullValue()));
     }
 
     @Test
