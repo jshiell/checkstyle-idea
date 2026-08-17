@@ -183,16 +183,14 @@ public class OpLoadConfiguration
 
     /**
      * Checkstyle turns off external entity resolution unless it has been asked not to, and the parser then trips
-     * over the entity reference rather than reporting it. The NPE below is what that looks like on current JDKs;
-     * we only ever reinterpret it when the opt-in is absent, so a genuine internal error is still reported as one.
+     * over the entity reference rather than reporting it. The NPE below is what that looks like on current JDKs.
+     * A parser complaint that the entity was never declared is a different matter - the file has a typo, and the
+     * opt-in would not help - so it is left to be reported in the parser's own words.
      */
     private boolean isExternalEntityLoadingDisabledFailure(final Throwable rootCause) {
-        final String message = rootCause.getMessage();
-        if (message == null) {
-            return false;
-        }
-        return rootCause instanceof NullPointerException && message.contains("fTableOfNOTATIONAttributeNames")
-                || message.contains("was referenced, but not declared");
+        return rootCause instanceof NullPointerException
+                && rootCause.getMessage() != null
+                && rootCause.getMessage().contains("fTableOfNOTATIONAttributeNames");
     }
 
     private Throwable rootCauseOf(final Throwable t) {

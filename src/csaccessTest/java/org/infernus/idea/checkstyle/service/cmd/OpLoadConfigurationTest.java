@@ -459,6 +459,15 @@ public class OpLoadConfigurationTest {
         assertThat(thrown.getMessage(), not(containsString("internal error")));
     }
 
+    @Test
+    public void anEntityThatWasNeverDeclaredIsNotBlamedOnTheExternalDtdLoadOption() {
+        final Exception thrown = assertThrows(Exception.class,
+                () -> loadConfiguration("config-with-undeclared-entity.xml"));
+
+        assertThat(thrown.getMessage(), containsString("was referenced, but not declared"));
+        assertThat(thrown.getMessage(), not(containsString(ENABLE_EXTERNAL_DTD_LOAD)));
+    }
+
     private Configuration loadConfigurationWithAnEntityInclude() throws Exception {
         return loadConfiguration("config-with-entity-include.xml");
     }
