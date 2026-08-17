@@ -14,6 +14,27 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 ./gradlew csaccessTest_cs_13.0.0  # Test specific Checkstyle version
 ```
 
+### Gradle needs to mount a DMG (sandboxes cannot)
+
+On macOS the IntelliJ Platform plugin extracts `ideaIC-*.dmg` by running `hdiutil attach`. Sandboxed shells
+deny the mount, whatever paths are granted, and the build fails during dependency resolution with
+`Process 'command 'hdiutil'' finished with non-zero exit value 1` (`hdiutil: attach failed - Operation not
+permitted`).
+
+This only bites when the extraction has to run again — the result lives in
+`~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a configuration cache hit skips it.
+Adding a task option such as `--tests` misses that cache and triggers it. **A failed attempt empties the
+transform directory, so every later build fails until an unsandboxed `./gradlew build` re-extracts it.**
+
+To run tests without Gradle, compile the sources with `javac` and drive JUnit directly against the extracted
+IDEA jars (`lib/*.jar`, `plugins/java/lib/*.jar`) plus the base Checkstyle 10.0 jars from
+`~/.gradle/caches/modules-2`. That is equivalent to `test` and `runCsaccessTests` for the base version, and it
+picks up the same Aalto StAX provider (in `lib/util-8.jar`) that the plugin sees at runtime. It needs
+`--add-opens` for `java.base/{java.lang,java.util,java.lang.reflect}` and
+`java.desktop/{javax.swing,java.awt,java.awt.event}`, or IDEA's JUnit 5 extensions abort every test. Expect
+two classes of unrelated failure in that mode: `IllegalAccessError` from tests needing the platform's own
+classloader, and missing `org.jetbrains.idea.maven.*` classes, which the IC distribution does not ship.
+
 ## Structure
 
 - `src/main/java/org/infernus/idea/checkstyle/` — plugin code (actions, checker, config, model, ui, etc.)
