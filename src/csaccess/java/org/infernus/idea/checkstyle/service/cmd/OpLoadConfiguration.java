@@ -36,6 +36,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNullElseGet;
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
+import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
 import static org.infernus.idea.checkstyle.util.Notifications.showError;
 import static org.infernus.idea.checkstyle.util.Notifications.showWarning;
 import static org.infernus.idea.checkstyle.util.Strings.isBlank;
@@ -191,14 +192,6 @@ public class OpLoadConfiguration
         return rootCause instanceof NullPointerException
                 && rootCause.getMessage() != null
                 && rootCause.getMessage().contains("fTableOfNOTATIONAttributeNames");
-    }
-
-    private Throwable rootCauseOf(final Throwable t) {
-        Throwable rootCause = t;
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
-        }
-        return rootCause;
     }
 
     private Configuration loadConfigurationForCheckstylePre825(final InputStream inputStream)
