@@ -88,7 +88,12 @@ Gradle plugin require. Note that it is an IDE-wide setting rather than a per-pro
 external entity resolution generally — including entities with absolute `http://` URLs, which are fetched without
 any plugin-side resolver in front of them. Enable it only if you trust the rules files you open.
 
-Properties declared in an included file appear under 'Edit Properties' once the option is set.
+Includes are resolved relative to rules files held on the local filesystem. A rules file loaded over HTTP or from
+the third-party checks classpath has nothing to resolve a relative include against, so its includes will not be
+found.
+
+Properties declared in an included file appear under 'Edit Properties' once the option is set, again for local
+rules files.
 
 ### Third Party Checks 
 
