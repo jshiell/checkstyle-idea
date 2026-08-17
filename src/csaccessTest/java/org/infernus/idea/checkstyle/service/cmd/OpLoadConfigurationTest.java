@@ -473,8 +473,9 @@ public class OpLoadConfigurationTest {
         when(location.baseUri()).thenReturn(configFile.toFile().toURI().toString());
         when(location.resolve(ArgumentMatchers.any())).thenReturn(Files.newInputStream(configFile));
 
-        return ((CsConfigObject) new OpLoadConfiguration(location, null, null, projectService)
-                .execute(PROJECT)).getConfiguration();
+        // loaded via the service layer, as the plugin does, so that its exception handling is exercised too
+        return ((CsConfigObject) new CheckstyleActionsImpl(PROJECT, projectService)
+                .loadConfiguration(location, null)).getConfiguration();
     }
 
     private List<String> namesOfChildrenOfTreeWalkerIn(final Configuration config) {

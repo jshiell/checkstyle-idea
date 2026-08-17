@@ -10,6 +10,7 @@ import com.puppycrawl.tools.checkstyle.PropertyResolver;
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.service.RulesContainer;
@@ -167,12 +168,12 @@ public class OpLoadConfiguration
         final Throwable rootCause = rootCauseOf(e);
 
         if (rootCause instanceof FileNotFoundException) {
-            return new CheckstyleServiceException(
+            return new ActionableCheckstyleException(
                     message("checkstyle.entity-include-not-found", rootCause.getMessage()), e);
         }
 
         if (!ExternalDtdLoad.isEnabled() && isExternalEntityLoadingDisabledFailure(rootCause)) {
-            return new CheckstyleServiceException(
+            return new ActionableCheckstyleException(
                     message("checkstyle.entity-include-not-enabled", ExternalDtdLoad.ENABLE_EXTERNAL_DTD_LOAD), e);
         }
 

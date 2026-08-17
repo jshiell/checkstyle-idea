@@ -17,6 +17,7 @@ import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
 import org.infernus.idea.checkstyle.csapi.ConfigVisitor;
 import org.infernus.idea.checkstyle.csapi.TabWidthAndBaseDirProvider;
+import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleServiceException;
@@ -118,6 +119,9 @@ public class CheckstyleActionsImpl implements CheckstyleActions {
                 throw parseException;
             }
             throw new CheckstyleToolException(e);
+        } catch (ActionableCheckstyleException e) {
+            // its message already says what the user needs to know, so we must not swap in the Checkstyle one
+            throw e;
         } catch (RuntimeException | ExceptionInInitializerError e) {
             CheckStylePluginException wrapped = new ExceptionWrapper().wrap(null, e);
             if (wrapped instanceof CheckStylePluginParseException parseException) {
