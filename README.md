@@ -34,8 +34,13 @@ Google configuration that are bundled with the selected version of Checkstyle.
 
 If you need to pass authentication information for rules file accessed via HTTP then you can use the `https://user:pass@host/` form to do so.
 
-The *Scan Test Classes* checkbox will enable scanning of Java files under test source roots. If disabled, these files
-will be ignored.
+The *Scan scope* dropdown controls which files are scanned. It offers:
+
+* *Only Java sources (but not tests)* - Java files under source roots, excluding test source roots. This is the default.
+* *Only Java sources (including tests)* - as above, but test source roots are scanned too.
+* *All sources (but not tests)* - every file under source roots, whatever its type, excluding test source roots.
+* *All sources (including tests)* - as above, but test source roots are scanned too.
+* *All files in project* - every file in the project, regardless of whether it sits under a source root.
 
 The *Scan modified files before commit* checkbox will run Checkstyle over the files in the changelist when you commit,
 and offer to abort the commit if any problems are found. The same option appears in the commit dialogue, and under
