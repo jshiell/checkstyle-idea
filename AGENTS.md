@@ -14,26 +14,38 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 ./gradlew csaccessTest_cs_13.0.0  # Test specific Checkstyle version
 ```
 
-### Gradle needs to mount a DMG (sandboxes cannot)
+### Gradle needs to mount a DMG (the nono sandbox blocks it)
 
-On macOS the IntelliJ Platform plugin extracts `ideaIC-*.dmg` by running `hdiutil attach`. Sandboxed shells
-deny the mount, whatever paths are granted, and the build fails during dependency resolution with
-`Process 'command 'hdiutil'' finished with non-zero exit value 1` (`hdiutil: attach failed - Operation not
-permitted`).
+On macOS the IntelliJ Platform plugin extracts `ideaIC-*.dmg` by running `hdiutil attach`. Under the `nono`
+sandbox this fails during dependency resolution with `Process 'command 'hdiutil'' finished with non-zero exit
+value 1` (`hdiutil: attach failed - Operation not permitted`).
+
+The cause is specifically that **`hdiutil` must create a mount point under `/Volumes`, and `/Volumes` is
+granted read-only**. Diagnose it with `nono why --path /Volumes --op write`. Beware: a profile granting
+`filesystem.allow: ["/Volumes"]` is *not* sufficient — the inherited `system_read_macos` group also covers
+`/Volumes` with read access and wins, so the capability list advertises `readwrite` while enforcement is
+read-only. `hdiutil attach -nomount` succeeds (it needs no mount point), which is a quick way to confirm the
+DMG itself is fine; `hdiutil imageinfo` also works and rules out corruption.
+
+Two things that do **not** get around this: the `dangerouslyDisableSandbox` tool flag (nono wraps the whole
+`claude` process, so the flag is irrelevant to it), and running `! ./gradlew …` from the prompt (that executes
+in the same session, inside the same sandbox). Re-extraction has to happen in a **real terminal outside
+Claude Code**; one `./gradlew build` there repopulates the cache and every later sandboxed build hits it.
 
 This only bites when the extraction has to run again — the result lives in
 `~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a configuration cache hit skips it.
-Adding a task option such as `--tests` misses that cache and triggers it. **A failed attempt empties the
-transform directory, so every later build fails until an unsandboxed `./gradlew build` re-extracts it.**
+Adding a task option such as `--tests` misses that cache and triggers it, and so does a task set that has no
+cache entry yet. **A failed attempt wipes and recreates the transform's `transformed/` directory, so every
+later build fails until an unsandboxed `./gradlew build` re-extracts it.**
 
-To run tests without Gradle, compile the sources with `javac` and drive JUnit directly against the extracted
-IDEA jars (`lib/*.jar`, `plugins/java/lib/*.jar`) plus the base Checkstyle 10.0 jars from
-`~/.gradle/caches/modules-2`. That is equivalent to `test` and `runCsaccessTests` for the base version, and it
-picks up the same Aalto StAX provider (in `lib/util-8.jar`) that the plugin sees at runtime. It needs
-`--add-opens` for `java.base/{java.lang,java.util,java.lang.reflect}` and
-`java.desktop/{javax.swing,java.awt,java.awt.event}`, or IDEA's JUnit 5 extensions abort every test. Expect
-two classes of unrelated failure in that mode: `IllegalAccessError` from tests needing the platform's own
-classloader, and missing `org.jetbrains.idea.maven.*` classes, which the IC distribution does not ship.
+Driving JUnit directly with `javac`, as a way to test without Gradle, **does not work for anything that
+extends `LightPlatformTestCase`** in 2024.3. The platform is split across `lib/modules/*.jar` v2 content
+modules, and a flat classpath collides duplicates: startup dies with `NoSuchFieldError: … JavaStubIndexKeys …
+IMPLICIT_CLASSES` and `Index data initialization failed`. Plain unit tests that need no platform fixture do
+still compile and run this way. Note that the IC distribution *does* ship `plugins/maven/`, and the Maven test
+framework is available as `com.jetbrains.intellij.maven:maven-test-framework` — a compile failure on
+`com.intellij.maven.testFramework` means that artifact is missing from your hand-built classpath, not from the
+distribution.
 
 ## Structure
 
@@ -62,9 +74,32 @@ in its own JVM.
 
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
+**Using a class from a v2 content module:** classes that live only in `lib/modules/*.jar` (e.g.
+`BooleanCommitOption`, in `intellij.platform.vcs.impl`) need *two* declarations — `bundledModule("<name>")` in
+`build.gradle.kts` for the compile classpath, and a `<dependencies><module name="<name>"/></dependencies>`
+block in `plugin.xml` for the runtime classloader. A v1 `<depends>` tag does not grant access to a v2 content
+module, and omitting the `plugin.xml` half compiles cleanly but fails at runtime with `NoClassDefFoundError`.
+`./gradlew test` will not catch it either: tests run on a flat classpath. Use the plugin verifier (below).
+
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
 **Sandbox:** `build/idea-sandbox/` — not auto-cleaned; delete manually if stale.
+
+**`./gradlew verifyPlugin` always fails, before it verifies anything:** the descriptor check rejects the
+plugin's own name (`Invalid plugin descriptor 'plugin.xml'. The plugin name 'CheckStyle-IDEA' should not
+include the word 'IDEA'`), and it aborts there without reaching class resolution. To actually verify class
+references — the only automated check for a missing v2 module dependency — run the verifier CLI directly:
+
+```bash
+java -Dplugin.verifier.home.dir="$TMPDIR/pv-home" \
+  -jar ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.plugins/verifier-cli/*/*/verifier-cli-*-all.jar \
+  check-plugin -mute TemplateWordInPluginName -verification-reports-dir "$TMPDIR/pv-report" \
+  build/distributions/checkstyle-idea-<version>.zip <path-to-extracted-ideaIC>
+```
+
+The `-Dplugin.verifier.home.dir` override is needed under the sandbox — the default `~/.pluginVerifier` is not
+writable. A clean run reports `Compatible. N usages of experimental API`; the experimental-API usages are
+pre-existing Maven ones. Read `<reports>/…/verification-verdict.txt` for the verdict.
 
 **Plugin requires IDEA restart** (`require-restart="true"`).
 
@@ -89,5 +124,5 @@ Do not re-raise these as bugs:
 - **`CheckStyleInspection.checkFile()` — nested thread**: Intentional polling loop for cancellation support; Checkstyle scanning is non-cooperative.
 - **`FindChildFiles.visitFile()` — no `super` call**: Base `visitFile()` is a no-op returning `true`.
 - **`setForkEvery(1)`**: Not actually set in the build; only `jvmArgs("-Xshare:off")` and `useJUnitPlatform()`.
-- **`CheckerFactoryCacheTest` — 8 failures**: Pre-existing; `DependencyValidationManager.getInstance` returns null without full platform services. Needs `BasePlatformTestCase` or mock refactor.
+- **`CheckerFactoryCacheTest`**: Was documented here as 8 pre-existing failures. No longer true — as of 2026-08-18 it runs 8 tests, 0 failures under `./gradlew build`. Do not reinstate it as a known-failure baseline; a failure there now is a real regression.
 - **`PsiFileValidator.isInNamedScopeIfPresent()`**: Was a real bug (empty stream from null scopes returned `false`), now fixed.
