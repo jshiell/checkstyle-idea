@@ -45,6 +45,11 @@ public class ScanFilesBeforeCheckinHandlerTest extends LightPlatformTestCase {
                 configurationManager.getCurrent().isScanBeforeCheckin());
     }
 
+    public void testTheOptionIsOfferedToTheCommitSettingsPage() {
+        assertNotNull("Settings > Version Control > Commit only lists options that are configurables",
+                handler.getBeforeCheckinSettings());
+    }
+
     private JCheckBox firstCheckBoxIn(final Component component) {
         if (component instanceof JCheckBox checkBox) {
             return checkBox;

@@ -23,6 +23,10 @@
     <depends>com.intellij.modules.java</depends>
     <depends optional="true" config-file="checkstyle-idea-maven.xml">org.jetbrains.idea.maven</depends>
 
+    <dependencies>
+        <module name="intellij.platform.vcs.impl"/>
+    </dependencies>
+
     <change-notes>
         <![CDATA[
 <ul>

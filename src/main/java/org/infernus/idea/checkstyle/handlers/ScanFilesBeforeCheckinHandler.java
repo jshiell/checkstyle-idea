@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitExecutor;
+import com.intellij.openapi.vcs.changes.ui.BooleanCommitOption;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -28,8 +29,6 @@ import org.infernus.idea.checkstyle.util.FileTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,27 +50,23 @@ public class ScanFilesBeforeCheckinHandler extends CheckinHandler {
 
     @Nullable
     public RefreshableOnComponent getBeforeCheckinConfigurationPanel() {
-        final JCheckBox checkBox = new JCheckBox(message("handler.before.checkin.checkbox"));
+        // a BooleanCommitOption is also an UnnamedConfigurable, which is what puts the option on the
+        // Settings > Version Control > Commit page as well as in the commit tool window
+        return BooleanCommitOption.create(
+                checkinPanel.getProject(),
+                this,
+                true,
+                message("handler.before.checkin.checkbox"),
+                () -> settings().map(c -> c.getCurrent().isScanBeforeCheckin()).orElse(Boolean.FALSE),
+                this::setScanBeforeCheckin);
+    }
 
-        return new RefreshableOnComponent() {
-            public JComponent getComponent() {
-                final JPanel panel = new JPanel(new BorderLayout());
-                panel.add(checkBox);
-                return panel;
-            }
-
-            public void saveState() {
-                settings().ifPresent(settings -> settings.setCurrent(
-                        PluginConfigurationBuilder.from(settings.getCurrent()).withScanBeforeCheckin(checkBox.isSelected()).build(),
-                        false));
-            }
-
-            public void restoreState() {
-                checkBox.setSelected(
-                        settings().map(c -> c.getCurrent().isScanBeforeCheckin())
-                                .orElse(Boolean.FALSE));
-            }
-        };
+    private void setScanBeforeCheckin(final boolean scanBeforeCheckin) {
+        settings().ifPresent(settings -> settings.setCurrent(
+                PluginConfigurationBuilder.from(settings.getCurrent())
+                        .withScanBeforeCheckin(scanBeforeCheckin)
+                        .build(),
+                false));
     }
 
     @Override

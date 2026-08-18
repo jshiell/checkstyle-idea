@@ -85,6 +85,7 @@ dependencies {
 
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
+        bundledModule("intellij.platform.vcs.impl")
 
         testFramework(TestFrameworkType.Platform)
         testFramework(TestFrameworkType.Plugin.Maven)
