@@ -334,7 +334,7 @@ public class CheckStyleConfigPanel extends JPanel {
         return scanBeforeCheckinCheckbox.isSelected() != shownScanBeforeCheckin;
     }
 
-    JCheckBox getScanBeforeCheckinCheckbox() {
+    public JCheckBox getScanBeforeCheckinCheckbox() {
         return scanBeforeCheckinCheckbox;
     }
 

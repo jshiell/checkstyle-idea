@@ -46,12 +46,8 @@ public class CheckStyleConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         final PluginConfiguration oldConfig = pluginConfigurationManager.getCurrent();
-        final PluginConfiguration newConfig = PluginConfigurationBuilder
-                .from(configPanel.getPluginConfiguration())
-                .withScanBeforeCheckin(oldConfig.isScanBeforeCheckin())
-                .build();
 
-        boolean modified = oldConfig.hasChangedFrom(newConfig);
+        boolean modified = oldConfig.hasChangedFrom(configurationFromPanel());
         if (LOG.isDebugEnabled()) {
             LOG.debug("Has config changed? " + modified);
         }
@@ -59,13 +55,23 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void apply() {
-        final PluginConfiguration newConfig = PluginConfigurationBuilder
-                .from(configPanel.getPluginConfiguration())
-                .withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin())
-                .build();
-        pluginConfigurationManager.setCurrent(newConfig, true);
+        pluginConfigurationManager.setCurrent(configurationFromPanel(), true);
 
         configurationInvalidator.invalidateCachedResources();
+    }
+
+    /**
+     * The pre-commit scan flag is also editable on the Version Control &gt; Commit page, which the settings
+     * tree applies before us. Carrying the live value through when our own checkbox was left alone stops
+     * us discarding an edit made there in the same session.
+     */
+    private PluginConfiguration configurationFromPanel() {
+        final PluginConfigurationBuilder builder = PluginConfigurationBuilder
+                .from(configPanel.getPluginConfiguration());
+        if (!configPanel.isScanBeforeCheckinModified()) {
+            builder.withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin());
+        }
+        return builder.build();
     }
 
     public void reset() {
