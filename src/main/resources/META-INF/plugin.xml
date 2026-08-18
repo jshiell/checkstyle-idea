@@ -30,6 +30,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.15.0: New: The option to scan modified files before a commit is now available in the Checkstyle settings, and in Settings &gt; Version Control &gt; Commit (#541).</li>
     <li>26.15.0: New: Properties may now reference the Eclipse-CS variables, so a single property can resolve to a different value in each module, e.g. a baseDir property set to ${basedir} (#231).</li>
     <li>26.15.0: Fixed: basedir now resolves to the Gradle subproject or Maven module directory, rather than to a source set content root or the project directory (#231).</li>
     <li>26.14.0: New: Added Checkstyle 13.9.0, 13.10.0</li>

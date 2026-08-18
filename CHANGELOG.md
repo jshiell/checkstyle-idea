@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.15.0** New: The option to scan modified files before a commit is now available in the Checkstyle settings, and in *Settings* -> *Version Control* -> *Commit* (#541).
 * **26.15.0** New: Rules files split across multiple files with XML entity includes are now resolved relative to the including file, when Checkstyle's `-Dcheckstyle.enableExternalDtdLoad=true` VM option is set (#350).
 * **26.15.0** Fixed: A rules file that cannot be scanned for properties no longer discards the property values already set for it.
 * **26.15.0** New: Properties may now reference the Eclipse-CS variables, so a single property can resolve to a different value in each module, e.g. a `baseDir` property set to `${basedir}` (#231).

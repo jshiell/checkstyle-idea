@@ -37,6 +37,10 @@ If you need to pass authentication information for rules file accessed via HTTP 
 The *Scan Test Classes* checkbox will enable scanning of Java files under test source roots. If disabled, these files
 will be ignored.
 
+The *Scan modified files before commit* checkbox will run Checkstyle over the files in the changelist when you commit,
+and offer to abort the commit if any problems are found. The same option appears in the commit dialogue, and under
+*Settings* -> *Version Control* -> *Commit*; all three edit the same setting.
+
 If a custom file is being used and properties are available for definition then these will accessible using the 'Edit
 Properties' button.
 
