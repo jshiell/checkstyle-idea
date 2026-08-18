@@ -60,6 +60,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final JCheckBox suppressErrorsCheckbox = new JCheckBox();
     private final JCheckBox copyLibsCheckbox = new JCheckBox();
     private final JCheckBox importSettingsFromMavenCheckbox = new JCheckBox();
+    private final JCheckBox scanBeforeCheckinCheckbox = new JCheckBox();
 
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
@@ -177,6 +178,9 @@ public class CheckStyleConfigPanel extends JPanel {
         importSettingsFromMavenCheckbox.setText(CheckStyleBundle.message("config.import-maven-settings.text"));
         importSettingsFromMavenCheckbox.setToolTipText(CheckStyleBundle.message("config.import-maven-settings.tooltip"));
 
+        scanBeforeCheckinCheckbox.setText(CheckStyleBundle.message("config.scan-before-checkin.text"));
+        scanBeforeCheckinCheckbox.setToolTipText(CheckStyleBundle.message("config.scan-before-checkin.tooltip"));
+
         final JPanel configFilePanel = new JPanel(new GridBagLayout());
         configFilePanel.setOpaque(false);
 
@@ -201,11 +205,14 @@ public class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
                 0, 3, 4, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+        configFilePanel.add(scanBeforeCheckinCheckbox, new GridBagConstraints(
+                0, 4, 4, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 4, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 5, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 5, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 6, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
@@ -309,6 +316,7 @@ public class CheckStyleConfigPanel extends JPanel {
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         importSettingsFromMavenCheckbox.setSelected(pluginConfig.isImportSettingsFromMaven());
+        scanBeforeCheckinCheckbox.setSelected(pluginConfig.isScanBeforeCheckin());
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
         locationModel.setActiveLocations(pluginConfig.getActiveLocations());
@@ -323,13 +331,14 @@ public class CheckStyleConfigPanel extends JPanel {
             scanScope = ScanScope.getDefaultValue();
         }
 
-        // we don't know the scanBeforeCheckin flag at this point
+        // we don't know the scrollToSource flag at this point
         return PluginConfigurationBuilder.defaultConfiguration(project)
                 .withCheckstyleVersion(checkstyleVersion)
                 .withScanScope(scanScope)
                 .withSuppressErrors(suppressErrorsCheckbox.isSelected())
                 .withCopyLibraries(copyLibsCheckbox.isSelected())
                 .withImportSettingsFromMaven(importSettingsFromMavenCheckbox.isSelected())
+                .withScanBeforeCheckin(scanBeforeCheckinCheckbox.isSelected())
                 .withLocations(new TreeSet<>(locationModel.getLocations()))
                 .withThirdPartyClassPath(getThirdPartyClasspath())
                 .withActiveLocationIds(locationModel.getActiveLocations().stream()
