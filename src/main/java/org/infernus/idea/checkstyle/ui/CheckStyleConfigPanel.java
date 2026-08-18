@@ -65,6 +65,8 @@ public class CheckStyleConfigPanel extends JPanel {
     private final LocationTableModel locationModel = new LocationTableModel();
     private final JBTable locationTable = new JBTable(locationModel);
 
+    private boolean shownScanBeforeCheckin;
+
     private final Project project;
     private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache checkerFactoryCache;
@@ -316,10 +318,24 @@ public class CheckStyleConfigPanel extends JPanel {
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         importSettingsFromMavenCheckbox.setSelected(pluginConfig.isImportSettingsFromMaven());
-        scanBeforeCheckinCheckbox.setSelected(pluginConfig.isScanBeforeCheckin());
+        shownScanBeforeCheckin = pluginConfig.isScanBeforeCheckin();
+        scanBeforeCheckinCheckbox.setSelected(shownScanBeforeCheckin);
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
         locationModel.setActiveLocations(pluginConfig.getActiveLocations());
+    }
+
+    /**
+     * Has the user touched the pre-commit scan checkbox since it was last shown? The same setting is
+     * editable on the Version Control &gt; Commit page, which is applied first, so we only write ours
+     * back when it was actually changed here.
+     */
+    public boolean isScanBeforeCheckinModified() {
+        return scanBeforeCheckinCheckbox.isSelected() != shownScanBeforeCheckin;
+    }
+
+    JCheckBox getScanBeforeCheckinCheckbox() {
+        return scanBeforeCheckinCheckbox;
     }
 
     public PluginConfiguration getPluginConfiguration() {

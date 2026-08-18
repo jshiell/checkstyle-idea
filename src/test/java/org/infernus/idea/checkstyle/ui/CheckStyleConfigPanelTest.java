@@ -21,6 +21,22 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
+    public void testScanBeforeCheckinIsUnmodifiedUntilTheCheckboxIsTouched() {
+        panel.showPluginConfiguration(configurationWithScanBeforeCheckin(true));
+
+        assertFalse("showing a configuration is not a modification",
+                panel.isScanBeforeCheckinModified());
+    }
+
+    public void testScanBeforeCheckinIsModifiedOnceTheCheckboxIsToggled() {
+        panel.showPluginConfiguration(configurationWithScanBeforeCheckin(true));
+
+        panel.getScanBeforeCheckinCheckbox().setSelected(false);
+
+        assertTrue("toggling the checkbox is a modification",
+                panel.isScanBeforeCheckinModified());
+    }
+
     private PluginConfiguration configurationWithScanBeforeCheckin(final boolean scanBeforeCheckin) {
         return PluginConfigurationBuilder.defaultConfiguration(getProject())
                 .withScanBeforeCheckin(scanBeforeCheckin)
