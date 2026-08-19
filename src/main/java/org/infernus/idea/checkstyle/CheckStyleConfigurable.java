@@ -4,7 +4,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
-import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.ui.CheckStyleConfigPanel;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +46,7 @@ public class CheckStyleConfigurable implements Configurable {
     public boolean isModified() {
         final PluginConfiguration oldConfig = pluginConfigurationManager.getCurrent();
 
-        boolean modified = oldConfig.hasChangedFrom(configurationFromPanel());
+        boolean modified = oldConfig.hasChangedFrom(configPanel.getPluginConfiguration());
         if (LOG.isDebugEnabled()) {
             LOG.debug("Has config changed? " + modified);
         }
@@ -55,23 +54,9 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void apply() {
-        pluginConfigurationManager.setCurrent(configurationFromPanel(), true);
+        pluginConfigurationManager.setCurrent(configPanel.getPluginConfiguration(), true);
 
         configurationInvalidator.invalidateCachedResources();
-    }
-
-    /**
-     * The pre-commit scan flag is also editable on the Version Control &gt; Commit page, which the settings
-     * tree applies before us. Carrying the live value through when our own checkbox was left alone stops
-     * us discarding an edit made there in the same session.
-     */
-    private PluginConfiguration configurationFromPanel() {
-        final PluginConfigurationBuilder builder = PluginConfigurationBuilder
-                .from(configPanel.getPluginConfiguration());
-        if (!configPanel.isScanBeforeCheckinModified()) {
-            builder.withScanBeforeCheckin(pluginConfigurationManager.getCurrent().isScanBeforeCheckin());
-        }
-        return builder.build();
     }
 
     public void reset() {

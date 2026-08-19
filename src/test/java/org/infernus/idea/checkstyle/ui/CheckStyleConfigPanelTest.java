@@ -3,43 +3,53 @@ package org.infernus.idea.checkstyle.ui;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 
 public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
 
+    private PluginConfigurationManager configurationManager;
     private CheckStyleConfigPanel panel;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        configurationManager = getProject().getService(PluginConfigurationManager.class);
+        configurationManager.setCurrent(PluginConfigurationBuilder.defaultConfiguration(getProject()).build(), false);
         panel = new CheckStyleConfigPanel(getProject());
     }
 
-    public void testScanBeforeCheckinSurvivesARoundTrip() {
-        panel.showPluginConfiguration(configurationWithScanBeforeCheckin(true));
+    public void testAnUntouchedCheckboxReturnsTheLiveScanBeforeCheckin() {
+        panel.showPluginConfiguration(setScanBeforeCheckin(true));
 
-        assertTrue("the panel should return the flag it was shown",
+        assertTrue("an untouched checkbox should return the live flag",
                 panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
-    public void testScanBeforeCheckinIsUnmodifiedUntilTheCheckboxIsTouched() {
-        panel.showPluginConfiguration(configurationWithScanBeforeCheckin(true));
+    public void testAnUntouchedCheckboxPicksUpAnEditMadeAfterThePanelWasShown() {
+        panel.showPluginConfiguration(setScanBeforeCheckin(false));
 
-        assertFalse("showing a configuration is not a modification",
-                panel.isScanBeforeCheckinModified());
+        // the Commit settings page writes while our panel is open
+        setScanBeforeCheckin(true);
+
+        assertTrue("an untouched checkbox should not overwrite a later edit",
+                panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
-    public void testScanBeforeCheckinIsModifiedOnceTheCheckboxIsToggled() {
-        panel.showPluginConfiguration(configurationWithScanBeforeCheckin(true));
+    public void testATickedCheckboxIsWrittenBack() {
+        panel.showPluginConfiguration(setScanBeforeCheckin(false));
 
-        panel.getScanBeforeCheckinCheckbox().setSelected(false);
+        panel.getScanBeforeCheckinCheckbox().setSelected(true);
 
-        assertTrue("toggling the checkbox is a modification",
-                panel.isScanBeforeCheckinModified());
+        assertTrue("a checkbox the user ticked should be written back",
+                panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
-    private PluginConfiguration configurationWithScanBeforeCheckin(final boolean scanBeforeCheckin) {
-        return PluginConfigurationBuilder.defaultConfiguration(getProject())
+    private PluginConfiguration setScanBeforeCheckin(final boolean scanBeforeCheckin) {
+        final PluginConfiguration configuration = PluginConfigurationBuilder
+                .from(configurationManager.getCurrent())
                 .withScanBeforeCheckin(scanBeforeCheckin)
                 .build();
+        configurationManager.setCurrent(configuration, false);
+        return configuration;
     }
 }

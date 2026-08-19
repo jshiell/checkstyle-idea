@@ -329,12 +329,15 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
-     * Has the user touched the pre-commit scan checkbox since it was last shown? The same setting is
-     * editable on the Version Control &gt; Commit page, which is applied first, so we only write ours
-     * back when it was actually changed here.
+     * The pre-commit scan setting is also editable on the Version Control &gt; Commit page, which the
+     * settings tree applies before us. Carrying the live value through when our own checkbox was left
+     * alone stops us discarding an edit made there in the same session.
      */
-    public boolean isScanBeforeCheckinModified() {
-        return scanBeforeCheckinCheckbox.isSelected() != shownScanBeforeCheckin;
+    private boolean scanBeforeCheckinToWriteBack(@NotNull final PluginConfiguration current) {
+        if (scanBeforeCheckinCheckbox.isSelected() != shownScanBeforeCheckin) {
+            return scanBeforeCheckinCheckbox.isSelected();
+        }
+        return current.isScanBeforeCheckin();
     }
 
     public JCheckBox getScanBeforeCheckinCheckbox() {
@@ -358,7 +361,7 @@ public class CheckStyleConfigPanel extends JPanel {
                 .withSuppressErrors(suppressErrorsCheckbox.isSelected())
                 .withCopyLibraries(copyLibsCheckbox.isSelected())
                 .withImportSettingsFromMaven(importSettingsFromMavenCheckbox.isSelected())
-                .withScanBeforeCheckin(scanBeforeCheckinCheckbox.isSelected())
+                .withScanBeforeCheckin(scanBeforeCheckinToWriteBack(current))
                 .withLocations(new TreeSet<>(locationModel.getLocations()))
                 .withThirdPartyClassPath(getThirdPartyClasspath())
                 .withActiveLocationIds(locationModel.getActiveLocations().stream()
