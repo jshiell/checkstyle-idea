@@ -60,6 +60,15 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
                 configurationManager.getCurrent().isScrollToSource());
     }
 
+    public void testScrollToSourceAloneIsNotAModification() {
+        configurable.reset();
+
+        setScrollToSource(true);
+
+        assertFalse("a flag the panel does not show should not mark the page as modified",
+                configurable.isModified());
+    }
+
     private void setScrollToSource(final boolean scrollToSource) {
         configurationManager.setCurrent(PluginConfigurationBuilder
                 .from(configurationManager.getCurrent())
