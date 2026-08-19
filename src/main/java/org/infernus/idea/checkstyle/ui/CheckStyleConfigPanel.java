@@ -208,16 +208,16 @@ public class CheckStyleConfigPanel extends JPanel {
                 2, 2, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
-                0, 3, 4, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                0, 3, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(scanBeforeCheckinCheckbox, new GridBagConstraints(
-                0, 4, 4, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                2, 3, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
-                0, 5, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 4, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildClassPathPanel(), new GridBagConstraints(
-                0, 6, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
+                0, 5, 4, 1, 1.0, 1.0, GridBagConstraints.WEST,
                 GridBagConstraints.BOTH, COMPONENT_INSETS, 0, 0));
 
         return configFilePanel;
