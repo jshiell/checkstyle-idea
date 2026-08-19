@@ -51,6 +51,18 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
                 configurationManager.getCurrent().isScanBeforeCheckin());
     }
 
+    public void testAnAppliedCheckboxDoesNotOverwriteALaterEditOnTheCommitPage() {
+        panel.getScanBeforeCheckinCheckbox().setSelected(true);
+        configurable.apply();
+
+        // IDEA does not reset() after apply(), so the Commit page's later edit must still win
+        setScanBeforeCheckin(false);
+        configurable.apply();
+
+        assertFalse("an already applied checkbox should no longer count as touched",
+                configurationManager.getCurrent().isScanBeforeCheckin());
+    }
+
     public void testApplyDoesNotDisableScrollToSource() {
         setScrollToSource(true);
 

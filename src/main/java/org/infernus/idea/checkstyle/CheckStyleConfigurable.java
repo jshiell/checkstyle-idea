@@ -54,7 +54,9 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public void apply() {
-        pluginConfigurationManager.setCurrent(configPanel.getPluginConfiguration(), true);
+        final PluginConfiguration newConfig = configPanel.getPluginConfiguration();
+        pluginConfigurationManager.setCurrent(newConfig, true);
+        configPanel.markAsApplied(newConfig);
 
         configurationInvalidator.invalidateCachedResources();
     }

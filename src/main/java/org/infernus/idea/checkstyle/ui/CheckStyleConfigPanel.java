@@ -321,11 +321,23 @@ public class CheckStyleConfigPanel extends JPanel {
         suppressErrorsCheckbox.setSelected(pluginConfig.isSuppressErrors());
         copyLibsCheckbox.setSelected(pluginConfig.isCopyLibs());
         importSettingsFromMavenCheckbox.setSelected(pluginConfig.isImportSettingsFromMaven());
-        shownScanBeforeCheckin = pluginConfig.isScanBeforeCheckin();
+        setShownScanBeforeCheckin(pluginConfig);
         scanBeforeCheckinCheckbox.setSelected(shownScanBeforeCheckin);
         locationModel.setLocations(new ArrayList<>(pluginConfig.getLocations()));
         setThirdPartyClasspath(pluginConfig.getThirdPartyClasspath());
         locationModel.setActiveLocations(pluginConfig.getActiveLocations());
+    }
+
+    /**
+     * IDEA does not reset us after an apply, so re-baseline what the checkbox was last shown as -
+     * otherwise it counts as touched for the rest of the dialog session.
+     */
+    public void markAsApplied(@NotNull final PluginConfiguration appliedConfig) {
+        setShownScanBeforeCheckin(appliedConfig);
+    }
+
+    private void setShownScanBeforeCheckin(@NotNull final PluginConfiguration pluginConfig) {
+        shownScanBeforeCheckin = pluginConfig.isScanBeforeCheckin();
     }
 
     /**
