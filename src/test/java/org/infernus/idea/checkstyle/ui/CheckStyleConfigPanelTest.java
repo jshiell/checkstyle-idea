@@ -44,6 +44,18 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
+    public void testScrollToSourceIsCarriedThrough() {
+        final PluginConfiguration configuration = PluginConfigurationBuilder
+                .from(configurationManager.getCurrent())
+                .withScrollToSource(true)
+                .build();
+        configurationManager.setCurrent(configuration, false);
+        panel.showPluginConfiguration(configuration);
+
+        assertTrue("a flag the panel has no widget for should not be reset",
+                panel.getPluginConfiguration().isScrollToSource());
+    }
+
     private PluginConfiguration setScanBeforeCheckin(final boolean scanBeforeCheckin) {
         final PluginConfiguration configuration = PluginConfigurationBuilder
                 .from(configurationManager.getCurrent())
