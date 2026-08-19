@@ -15,7 +15,7 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         configurationManager = getProject().getService(PluginConfigurationManager.class);
-        setScanBeforeCheckin(false);
+        configurationManager.setCurrent(PluginConfigurationBuilder.defaultConfiguration(getProject()).build(), false);
         configurable = new CheckStyleConfigurable(getProject());
         panel = (CheckStyleConfigPanel) configurable.createComponent();
     }
@@ -26,6 +26,18 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
         configurable.apply();
 
         assertTrue("a checkbox the user toggled should be written back",
+                configurationManager.getCurrent().isScanBeforeCheckin());
+    }
+
+    public void testApplyPersistsAnUntickOfTheCheckbox() {
+        setScanBeforeCheckin(true);
+        configurable.reset();
+
+        panel.getScanBeforeCheckinCheckbox().setSelected(false);
+
+        configurable.apply();
+
+        assertFalse("a checkbox the user unticked should be written back",
                 configurationManager.getCurrent().isScanBeforeCheckin());
     }
 
