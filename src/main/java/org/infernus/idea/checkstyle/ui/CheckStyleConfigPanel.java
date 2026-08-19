@@ -22,6 +22,7 @@ import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
@@ -70,6 +71,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final Project project;
     private final CheckstyleProjectService checkstyleProjectService;
     private final CheckerFactoryCache checkerFactoryCache;
+    private final PluginConfigurationManager pluginConfigurationManager;
     private final VersionListReader versionListReader;
     private final Path m2Root;
     private final Map<String, String> versionSuffixCache = new HashMap<>();
@@ -81,6 +83,7 @@ public class CheckStyleConfigPanel extends JPanel {
 
         this.checkstyleProjectService = project.getService(CheckstyleProjectService.class);
         this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
+        this.pluginConfigurationManager = project.getService(PluginConfigurationManager.class);
         this.versionListReader = new VersionListReader();
         this.m2Root = CheckstyleArtifactDownloader.defaultM2Root();
 
@@ -347,8 +350,9 @@ public class CheckStyleConfigPanel extends JPanel {
             scanScope = ScanScope.getDefaultValue();
         }
 
-        // we don't know the scrollToSource flag at this point
-        return PluginConfigurationBuilder.defaultConfiguration(project)
+        final PluginConfiguration current = pluginConfigurationManager.getCurrent();
+
+        return PluginConfigurationBuilder.from(current)
                 .withCheckstyleVersion(checkstyleVersion)
                 .withScanScope(scanScope)
                 .withSuppressErrors(suppressErrorsCheckbox.isSelected())

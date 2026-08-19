@@ -51,6 +51,22 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
                 configurationManager.getCurrent().isScanBeforeCheckin());
     }
 
+    public void testApplyDoesNotDisableScrollToSource() {
+        setScrollToSource(true);
+
+        configurable.apply();
+
+        assertTrue("applying the settings should not reset a flag the panel does not own",
+                configurationManager.getCurrent().isScrollToSource());
+    }
+
+    private void setScrollToSource(final boolean scrollToSource) {
+        configurationManager.setCurrent(PluginConfigurationBuilder
+                .from(configurationManager.getCurrent())
+                .withScrollToSource(scrollToSource)
+                .build(), false);
+    }
+
     private void setScanBeforeCheckin(final boolean scanBeforeCheckin) {
         configurationManager.setCurrent(PluginConfigurationBuilder
                 .from(configurationManager.getCurrent())
