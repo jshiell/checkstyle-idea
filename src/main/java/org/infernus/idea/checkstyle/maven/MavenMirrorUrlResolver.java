@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.maven;
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import org.jetbrains.annotations.NotNull;
@@ -49,10 +48,6 @@ public final class MavenMirrorUrlResolver {
 
     private static boolean isMavenPluginAvailable() {
         PluginId pluginId = PluginId.getId(MAVEN_PLUGIN_ID);
-        if (!PluginManagerCore.isPluginInstalled(pluginId)) {
-            return false;
-        }
-        IdeaPluginDescriptor descriptor = PluginManagerCore.getPlugin(pluginId);
-        return descriptor != null && descriptor.isEnabled();
+        return PluginManagerCore.isPluginInstalled(pluginId) && !PluginManagerCore.isDisabled(pluginId);
     }
 }
