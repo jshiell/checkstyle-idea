@@ -24,8 +24,10 @@ The cause is specifically that **`hdiutil` must create a mount point under `/Vol
 granted read-only**. Diagnose it with `nono why --path /Volumes --op write`. Beware: a profile granting
 `filesystem.allow: ["/Volumes"]` is *not* sufficient — the inherited `system_read_macos` group also covers
 `/Volumes` with read access and wins, so the capability list advertises `readwrite` while enforcement is
-read-only. `hdiutil attach -nomount` succeeds (it needs no mount point), which is a quick way to confirm the
-DMG itself is fine; `hdiutil imageinfo` also works and rules out corruption.
+read-only. Use `hdiutil imageinfo` to confirm the DMG itself is fine — it works under the sandbox and rules
+out corruption. `hdiutil attach -nomount` does **not** work despite needing no mount point: it checksums the
+image, then still fails with `attach failed - Operation not permitted`. Passing an explicit `-mountpoint`
+outside `/Volumes` fails the same way, so the block is on attaching at all, not on writing to `/Volumes`.
 
 Two things that do **not** get around this: the `dangerouslyDisableSandbox` tool flag (nono wraps the whole
 `claude` process, so the flag is irrelevant to it), and running `! ./gradlew …` from the prompt (that executes
@@ -72,6 +74,17 @@ never disposed does not undo it. Test through a seam that does not need an appli
 throws rather than notifying when the module is null. `src/csaccessTest` gets away with it only because it runs
 in its own JVM.
 
+**Reset global platform state in `tearDown`:** the application-mock leak above is one instance of a general
+rule. Anything installed into a static platform holder — `ApplicationManager.setApplication`, a registered
+service or extension point, a `ServiceContainerUtil` replacement, a swapped `Disposable` parent — outlives the
+test method and the test class, because the source set shares one JVM. Whatever a test installs, the same test
+must undo in `tearDown`, unconditionally, so it also runs when the test fails partway through. The damage does
+not surface where it is caused: the guilty test passes and some unrelated class fails later, in an order that
+depends on how the tests were selected. That is why **a green run of the class you touched proves nothing about
+this bug**. Before committing, run the full suite (`./gradlew build`, plus `./gradlew xTest` if you touched
+csaccess) — never just the test class you edited. If a test only passes in isolation, treat that as the leak,
+not as flakiness.
+
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
 **Using a class from a v2 content module:** classes that live only in `lib/modules/*.jar` (e.g.
@@ -113,7 +126,9 @@ sandbox — the default `~/.pluginVerifier` is not writable.
 ## Contributing
 
 1. Follow existing code style; no wildcard imports; standard IntelliJ annotations
-2. Add tests; run `./gradlew build`; run `./gradlew xTest` if touching csaccess
+2. Add tests; run the **full** suite with `./gradlew build` before committing — not just the test
+   class you touched, which cannot catch leaked global platform state; run `./gradlew xTest` if
+   touching csaccess
 3. Test with `./gradlew runIde`
 4. Update CHANGELOG.md
 
