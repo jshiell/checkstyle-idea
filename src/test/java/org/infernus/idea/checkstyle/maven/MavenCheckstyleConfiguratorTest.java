@@ -13,14 +13,8 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 
 public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingTestCase {
-
-    @Parameterized.Parameters(name = "with Maven-{0}")
-    public static List<String[]> getMavenVersions() {
-        return List.<String[]>of(new String[]{"bundled"});
-    }
 
     private static final String PROJECT_INFO = """
         <groupId>test</groupId>

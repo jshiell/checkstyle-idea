@@ -57,6 +57,13 @@ abstract class MockitoAgentProvider : CommandLineArgumentProvider {
 }
 
 tasks {
+    named<Test>("test") {
+        // MavenMultiVersionImportingTestCase.getMavenVersions() is final as of IDEA 2025.1, so
+        // MavenCheckstyleConfiguratorTest can no longer pin this by overriding it. Without the pin
+        // that class runs against every bundled Maven version rather than just the default one.
+        systemProperty("maven.versions.to.run", "bundled")
+    }
+
     withType<Test> {
         jvmArgs("-Xshare:off")
         val agentProvider = objects.newInstance(MockitoAgentProvider::class)

@@ -6,7 +6,7 @@ junit-platform = "1.12.0"
 hamcrest = "3.0"
 mockito = "5.21.0"
 intellij-platform-plugin = "2.18.1"
-intellij-idea-community = "2024.3.7"
+intellij-idea-community = "2025.1.7.2"
 
 [libraries]
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }

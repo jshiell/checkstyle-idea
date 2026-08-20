@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.maven;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -40,12 +41,12 @@ import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.model.MavenPlugin;
 import org.jetbrains.idea.maven.project.MavenEmbeddersManager;
 import org.jetbrains.idea.maven.project.MavenProject;
+import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jetbrains.idea.maven.server.MavenArtifactEvent;
 import org.jetbrains.idea.maven.server.MavenArtifactResolutionRequest;
 import org.jetbrains.idea.maven.server.MavenServerConsoleEvent;
 import org.jetbrains.idea.maven.server.MavenServerConsoleIndicator;
 import org.jetbrains.idea.maven.utils.MavenLog;
-import org.jetbrains.idea.maven.utils.MavenProcessCanceledException;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
 /**
@@ -275,28 +276,42 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return pomVirtualFile;
         }
 
+        final var mavenProjectsManager = MavenProjectsManager.getInstance(project);
+        // As of IDEA 2025.1 MavenEmbeddersManager can no longer produce an always-online embedder,
+        // so an offline Maven cannot download the pom. Respect the setting, but say so.
+        if (mavenProjectsManager.getGeneralSettings().isWorkOffline()) {
+            LOG.info("Not downloading the Checkstyle Maven Plugin pom file as Maven is working offline; "
+                + "the Checkstyle version cannot be determined from " + pomPath);
+            return null;
+        }
+
+        final var embeddersManager = mavenProjectsManager.getEmbeddersManager();
         try {
-            BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE, (scope, continuation) -> {
-                try {
-                    // Download the Checkstyle Maven Plugin pom file.
-                    new MavenEmbeddersManager(project).execute(mavenProject,
-                        MavenEmbeddersManager.FOR_DOWNLOAD, mavenEmbedderWrapper -> {
-                            final var requests = List.of(new MavenArtifactResolutionRequest(
-                                new MavenArtifactInfo(checkstyleMavenPlugin.getMavenId(), "pom",
-                                    ""), mavenProject.getRemoteRepositories()));
-                            mavenEmbedderWrapper.resolveArtifacts(requests, null,
-                                new MavenLogEventHandler(), continuation);
-                        });
-                } catch (MavenProcessCanceledException e) {
-                    LOG.warn("Downloading Checkstyle Maven Plugin pom file cancelled", e);
-                    return null;
-                }
-                return null;
-            });
+            final var embedder = embeddersManager.getEmbedder(mavenProject,
+                MavenEmbeddersManager.FOR_DEPENDENCIES_RESOLVE);
+            try {
+                final var requests = List.of(new MavenArtifactResolutionRequest(
+                    new MavenArtifactInfo(checkstyleMavenPlugin.getMavenId(), "pom", ""),
+                    mavenProject.getRemoteRepositories()));
+                // Download the Checkstyle Maven Plugin pom file. The lambda must return the result of
+                // the suspending call so that runBlocking waits for it; returning a value of its own
+                // would let runBlocking complete while resolution is still in flight, and the embedder
+                // would then be released back into the shared pool while still in use.
+                BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> embedder.resolveArtifacts(
+                        requests, null, new MavenLogEventHandler(), continuation));
+            } finally {
+                embeddersManager.release(embedder);
+            }
             LocalFileSystem.getInstance()
                 .refreshIoFiles(List.of(pomPath.toFile()), true, false, null);
+        } catch (ProcessCanceledException e) {
+            throw e;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOG.warn("Downloading Checkstyle Maven Plugin pom file interrupted", e);
+        } catch (Exception e) {
+            LOG.warn("Downloading Checkstyle Maven Plugin pom file failed", e);
         }
         return VirtualFileManager.getInstance().findFileByNioPath(pomPath);
     }

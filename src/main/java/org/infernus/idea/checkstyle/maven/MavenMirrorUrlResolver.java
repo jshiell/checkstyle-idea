@@ -38,7 +38,8 @@ public final class MavenMirrorUrlResolver {
         if (settingsFile == null || !settingsFile.exists()) {
             return Optional.empty();
         }
-        String mirroredUrl = MavenUtil.getMirroredUrl(settingsFile, CENTRAL_REPOSITORY_URL, CENTRAL_REPOSITORY_ID);
+        String mirroredUrl = MavenUtil.INSTANCE.getMirroredUrl(
+                settingsFile.toPath(), CENTRAL_REPOSITORY_URL, CENTRAL_REPOSITORY_ID);
         if (mirroredUrl != null && !mirroredUrl.equals(CENTRAL_REPOSITORY_URL)) {
             return Optional.of(mirroredUrl);
         }

@@ -50,7 +50,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         when(mavenProject.getMavenId()).thenReturn(new MavenId("test", "test", "1"));
         when(mavenProject.findPlugin("org.apache.maven.plugins", "maven-checkstyle-plugin"))
             .thenReturn(null);
-        when(mavenProject.getLocalRepository()).thenReturn(new File(MavenUtil.resolveDefaultLocalRepository().toString()));
+        when(mavenProject.getLocalRepository()).thenReturn(new File(MavenUtil.resolveDefaultLocalRepository(null).toString()));
         when(mavenProject.getFile()).thenReturn(mock(VirtualFile.class));
 
         @SuppressWarnings("unchecked")
@@ -149,7 +149,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
 
         configurator.afterImport(context);
 
-        String expectedJar = MavenUtil.resolveDefaultLocalRepository()
+        String expectedJar = MavenUtil.resolveDefaultLocalRepository(null)
             + "/com/checkstyle/third/party/rules/cool-stuff/3.2.1/cool-stuff-3.2.1.jar"
                 .replace("/", File.separator);
         assertEquals(List.of(expectedJar), configManager.getCurrent().getThirdPartyClasspath());
