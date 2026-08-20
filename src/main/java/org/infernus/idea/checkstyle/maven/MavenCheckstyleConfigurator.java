@@ -1,6 +1,5 @@
 package org.infernus.idea.checkstyle.maven;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -8,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.util.concurrency.ThreadingAssertions;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -255,7 +255,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return !CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId(), dependency.getArtifactId());
 
         }).map(dependency -> MavenUtil.getArtifactPath(
-                mavenProject.getLocalRepository().toPath(),
+                mavenProject.getLocalRepositoryPath(),
                 new MavenId(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()),
                 "jar", null))
             .filter(Objects::nonNull)
@@ -269,7 +269,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             @NotNull final MavenProject mavenProject,
             @NotNull final Path pomPath,
             @NotNull final Project project) {
-        ApplicationManager.getApplication().assertIsNonDispatchThread();
+        ThreadingAssertions.assertBackgroundThread();
         final var pomVirtualFile = VirtualFileManager.getInstance().findFileByNioPath(pomPath);
         // Pom file may already exist from something such as a previous resolution.
         if (pomVirtualFile != null) {
@@ -331,7 +331,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             @NotNull final MavenProject mavenProject,
             @NotNull final MavenPlugin checkstyleMavenPlugin) {
         final var checkstylePluginPomPath = MavenUtil.getArtifactPath(
-            mavenProject.getLocalRepository().toPath(), checkstyleMavenPlugin.getMavenId(), "pom", null);
+            mavenProject.getLocalRepositoryPath(), checkstyleMavenPlugin.getMavenId(), "pom", null);
         if (checkstylePluginPomPath == null) {
             return null;
         }

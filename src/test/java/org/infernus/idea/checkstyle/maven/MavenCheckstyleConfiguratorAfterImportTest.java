@@ -50,7 +50,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         when(mavenProject.getMavenId()).thenReturn(new MavenId("test", "test", "1"));
         when(mavenProject.findPlugin("org.apache.maven.plugins", "maven-checkstyle-plugin"))
             .thenReturn(null);
-        when(mavenProject.getLocalRepository()).thenReturn(new File(MavenUtil.resolveDefaultLocalRepository(null).toString()));
+        when(mavenProject.getLocalRepositoryPath()).thenReturn(MavenUtil.resolveDefaultLocalRepository(null));
         when(mavenProject.getFile()).thenReturn(mock(VirtualFile.class));
 
         @SuppressWarnings("unchecked")
