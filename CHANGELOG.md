@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.16.0** New: Now built against IDEA 2025.1.7.2 (was 2024.3.7). IDEA 2024.3 and earlier are no longer supported.
 * **26.15.0** New: Added Checkstyle 13.11.0, 14.0.0.
 * **26.15.0** Fixed: Applying the Checkstyle settings no longer turns off the tool window's Autoscroll to Source toggle (#699).
 * **26.15.0** New: The option to scan modified files before a commit is now available in the Checkstyle settings, and in *Settings* -> *Version Control* -> *Commit* (#541).
