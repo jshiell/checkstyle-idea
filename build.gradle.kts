@@ -31,6 +31,10 @@ intellijPlatform {
         }
     }
 
+    pluginVerification {
+        freeArgs = listOf("-mute", "TemplateWordInPluginName")
+    }
+
     publishing {
         token.set(System.getenv("JETBRAINS_PLUGIN_REPO_TOKEN"))
     }
