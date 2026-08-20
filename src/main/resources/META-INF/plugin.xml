@@ -30,6 +30,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.15.0: New: Added Checkstyle 13.11.0, 14.0.0.</li>
     <li>26.15.0: New: The option to scan modified files before a commit is now available in the Checkstyle settings, and in Settings &gt; Version Control &gt; Commit (#541).</li>
     <li>26.15.0: New: Properties may now reference the Eclipse-CS variables, so a single property can resolve to a different value in each module, e.g. a baseDir property set to ${basedir} (#231).</li>
     <li>26.15.0: Fixed: basedir now resolves to the Gradle subproject or Maven module directory, rather than to a source set content root or the project directory (#231).</li>
@@ -44,26 +45,6 @@
     <li>26.11.1: Fixed: Improved flow for projects with a stored version that isn't bundled (#697).</li>
     <li>26.11.0: New: Added Checkstyle 13.6.0.</li>
     <li>26.11.0: New: Added option to always use latest supported version of Checkstyle (#680).</li>
-    <li>26.10.1: Fixed: Downloaded runtimes work correctly when using location dialogue (#695).</li>
-    <li>26.10.1: Fixed: Third-party classpath is correctly added to download Checkstyle versions (#694, #696).</li>
-    <li>26.10.0: New: Checkstyle versions are now downloaded on demand (except base and most recent, which remain pre-packaged) (#496).</li>
-    <li>26.9.0: Fixed: Another attempt at improving tokenised paths on Windows (#691).</li>
-    <li>26.9.0: New: Import Checkstyle rule configuration from Maven POMs (#671, #692) - thanks to @nrayburn-tech and @leonschenk.</li>
-    <li>26.8.0: New: Added Checkstyle 13.5.0.</li>
-    <li>26.8.0: New: description and file path of a rules file can now be edited (#337).
-    <li>26.7.2: Fixed: OperatorWrap is now included in code formatter imports (#540).</li>
-    <li>26.7.2: Fixed: Long lines are now wrapped when line length is imported to code setting (#354).</li>
-    <li>26.7.2: Fixed: SeparatorWrap is now included in code formatter imports (#335).</li>
-    <li>26.7.1: Fixed: Remove commons-text as a transitive dep, as it appears (probably) that Checkstyle doesn't need it, and it triggers enterprise CVE rules (#688).</li>
-    <li>26.7.1: Fixed: Redirects are now supported during protocol upgrades (#682).</li>
-    <li>26.7.1: Fixed: An attempted fix for the Windows issue with tokenised paths, thanks to Opus (#691).</li>
-    <li>26.7.0: New: Added Checkstyle 13.4.2.</li>
-    <li>26.6.0: New: Added Checkstyle 13.4.1.</li>
-    <li>26.5.0: New: Added Checkstyle 13.4.0.</li>
-    <li>26.4.0: New: Added Checkstyle 13.3.0.</li>
-    <li>26.3.0: New: Added Checkstyle 13.2.0.</li>
-    <li>26.2.0: New: Added Checkstyle 13.1.0.</li>
-    <li>26.1.0: New: Add extension point for custom Checkstyle fixes (#686). Thanks to @dong4j.</li>
     <li><em>For older changes please see the changelog.</em></li>
 </ul>
         ]]>
