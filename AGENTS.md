@@ -55,7 +55,7 @@ distribution.
 - `src/csaccess/java/` — code isolated behind per-version classloaders (compiled against base Checkstyle 10.0)
 - `src/csaccessTest/java/` — tests for csaccess; `xTest` runs against all supported versions
 - `buildSrc/` — custom Gradle plugin: source sets, artifact gathering, cross-version test tasks, JaCoCo (60% min for csaccess)
-- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.16.0; IDEA Community 2024.3.7
+- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.18.1; IDEA Community 2025.1.7.2
 
 ## Key Concepts
 
@@ -85,21 +85,24 @@ module, and omitting the `plugin.xml` half compiles cleanly but fails at runtime
 
 **Sandbox:** `build/idea-sandbox/` — not auto-cleaned; delete manually if stale.
 
-**`./gradlew verifyPlugin` always fails, before it verifies anything:** the descriptor check rejects the
-plugin's own name (`Invalid plugin descriptor 'plugin.xml'. The plugin name 'CheckStyle-IDEA' should not
-include the word 'IDEA'`), and it aborts there without reaching class resolution. To actually verify class
-references — the only automated check for a missing v2 module dependency — run the verifier CLI directly:
+**`./gradlew verifyPlugin` works** — as of the 2025.1 base version with IntelliJ Platform Gradle Plugin
+2.18.1. It previously aborted on the descriptor check (`The plugin name 'CheckStyle-IDEA' should not include
+the word 'IDEA'`) before reaching class resolution; `pluginVerification { freeArgs = listOf("-mute",
+"TemplateWordInPluginName") }` in `build.gradle.kts` settles that. It resolves its own IDEs, so no `ides { }`
+block is needed, and it verifies against both the base version and the next major — useful because
+`untilBuild` is null.
 
-```bash
-java -Dplugin.verifier.home.dir="$TMPDIR/pv-home" \
-  -jar ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.plugins/verifier-cli/*/*/verifier-cli-*-all.jar \
-  check-plugin -mute TemplateWordInPluginName -verification-reports-dir "$TMPDIR/pv-report" \
-  build/distributions/checkstyle-idea-<version>.zip <path-to-extracted-ideaIC>
-```
+This is the only automated check for a missing v2 module dependency; `./gradlew test` cannot catch one
+because tests run on a flat classpath.
 
-The `-Dplugin.verifier.home.dir` override is needed under the sandbox — the default `~/.pluginVerifier` is not
-writable. A clean run reports `Compatible. N usages of experimental API`; the experimental-API usages are
-pre-existing Maven ones. Read `<reports>/…/verification-verdict.txt` for the verdict.
+Read `build/reports/pluginVerifier/<IDE>/plugins/CheckStyle-IDEA/<version>/verification-verdict.txt`.
+**Blocking:** any unresolved class or method reference, or any internal-API usage. **Not blocking:** a
+changed count of deprecated or experimental usages — those move with every platform bump. As of 26.16.0 both
+IC-251 and IC-252 report `Compatible`, with the deprecations being `MavenProject.getLocalRepository()` and
+`MavenUtil.resolveUserSettingsFile(String)`.
+
+If you ever do need the CLI directly, `-Dplugin.verifier.home.dir="$TMPDIR/pv-home"` is required under the
+sandbox — the default `~/.pluginVerifier` is not writable.
 
 **Plugin requires IDEA restart** (`require-restart="true"`).
 
