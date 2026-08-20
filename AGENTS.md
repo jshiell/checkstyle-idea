@@ -98,8 +98,8 @@ because tests run on a flat classpath.
 Read `build/reports/pluginVerifier/<IDE>/plugins/CheckStyle-IDEA/<version>/verification-verdict.txt`.
 **Blocking:** any unresolved class or method reference, or any internal-API usage. **Not blocking:** a
 changed count of deprecated or experimental usages — those move with every platform bump. As of 26.16.0 both
-IC-251 and IC-252 report `Compatible`, with the deprecations being `MavenProject.getLocalRepository()` and
-`MavenUtil.resolveUserSettingsFile(String)`.
+IC-251 and IC-252 report `Compatible`, with no deprecated usages and 12 experimental ones (see Known
+Non-Issues).
 
 If you ever do need the CLI directly, `-Dplugin.verifier.home.dir="$TMPDIR/pv-home"` is required under the
 sandbox — the default `~/.pluginVerifier` is not writable.
@@ -129,3 +129,7 @@ Do not re-raise these as bugs:
 - **`setForkEvery(1)`**: Not actually set in the build; only `jvmArgs("-Xshare:off")` and `useJUnitPlatform()`.
 - **`CheckerFactoryCacheTest`**: Was documented here as 8 pre-existing failures. No longer true — as of 2026-08-18 it runs 8 tests, 0 failures under `./gradlew build`. Do not reinstate it as a known-failure baseline; a failure there now is a real regression.
 - **`PsiFileValidator.isInNamedScopeIfPresent()`**: Was a real bug (empty stream from null scopes returned `false`), now fixed.
+- **Experimental API usages reported by `verifyPlugin`**: The 12 remaining ones are all
+  `MavenAfterImportConfigurator` and `MavenWorkspaceConfigurator.MavenProjectWithModules`. JetBrains marks
+  the whole Maven importing API `@ApiStatus.Experimental` and offers no alternative extension point for
+  post-import configuration, so these cannot be removed without dropping the Maven settings import.
