@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -30,16 +31,16 @@ public final class MavenMirrorUrlResolver {
         if (!isMavenPluginAvailable()) {
             return Optional.empty();
         }
-        return resolveCentralMirrorFromSettings(MavenUtil.resolveUserSettingsFile(null));
+        return resolveCentralMirrorFromSettings(MavenUtil.resolveUserSettingsPath(null, null));
     }
 
     @NotNull
-    static Optional<String> resolveCentralMirrorFromSettings(@Nullable final File settingsFile) {
-        if (settingsFile == null || !settingsFile.exists()) {
+    static Optional<String> resolveCentralMirrorFromSettings(@Nullable final Path settingsFile) {
+        if (settingsFile == null || !Files.exists(settingsFile)) {
             return Optional.empty();
         }
         String mirroredUrl = MavenUtil.INSTANCE.getMirroredUrl(
-                settingsFile.toPath(), CENTRAL_REPOSITORY_URL, CENTRAL_REPOSITORY_ID);
+                settingsFile, CENTRAL_REPOSITORY_URL, CENTRAL_REPOSITORY_ID);
         if (mirroredUrl != null && !mirroredUrl.equals(CENTRAL_REPOSITORY_URL)) {
             return Optional.of(mirroredUrl);
         }

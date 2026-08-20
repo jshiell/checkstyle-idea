@@ -3,7 +3,6 @@ package org.infernus.idea.checkstyle.maven;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +18,7 @@ class MavenMirrorUrlResolverTest {
 
     @Test
     void returnsMirrorUrlWhenWildcardMirrorConfigured() throws IOException {
-        File settingsFile = writeSettings("""
+        Path settingsFile = writeSettings("""
                 <settings>
                   <mirrors>
                     <mirror>
@@ -38,7 +37,7 @@ class MavenMirrorUrlResolverTest {
 
     @Test
     void returnsEmptyWhenSettingsFileDoesNotExist() {
-        File missing = tempDir.resolve("does-not-exist.xml").toFile();
+        Path missing = tempDir.resolve("does-not-exist.xml");
 
         Optional<String> result = MavenMirrorUrlResolver.resolveCentralMirrorFromSettings(missing);
 
@@ -47,7 +46,7 @@ class MavenMirrorUrlResolverTest {
 
     @Test
     void returnsEmptyWhenNoMirrorsConfigured() throws IOException {
-        File settingsFile = writeSettings("""
+        Path settingsFile = writeSettings("""
                 <settings>
                 </settings>
                 """);
@@ -59,7 +58,7 @@ class MavenMirrorUrlResolverTest {
 
     @Test
     void returnsEmptyWhenMirrorDoesNotApplyToCentral() throws IOException {
-        File settingsFile = writeSettings("""
+        Path settingsFile = writeSettings("""
                 <settings>
                   <mirrors>
                     <mirror>
@@ -78,7 +77,7 @@ class MavenMirrorUrlResolverTest {
 
     @Test
     void returnsEmptyWhenMirrorUrlMatchesCentral() throws IOException {
-        File settingsFile = writeSettings("""
+        Path settingsFile = writeSettings("""
                 <settings>
                   <mirrors>
                     <mirror>
@@ -95,9 +94,9 @@ class MavenMirrorUrlResolverTest {
         assertTrue(result.isEmpty());
     }
 
-    private File writeSettings(final String xml) throws IOException {
+    private Path writeSettings(final String xml) throws IOException {
         Path settingsFile = tempDir.resolve("settings.xml");
         Files.writeString(settingsFile, xml);
-        return settingsFile.toFile();
+        return settingsFile;
     }
 }
