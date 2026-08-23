@@ -182,23 +182,22 @@ public class LocationDialogue extends DialogWrapper {
     private Step attemptLoadOfFile(final ConfigurationLocation location) {
         configurationLocation = location;
 
+        final CheckstyleProjectService editedConfigProjectService = CheckstyleProjectService.forVersion(
+                project, checkstyleVersion, thirdPartyClasspath,
+                checkstyleProjectService.getDownloader());
+        final CheckerFactoryCache verificationCache = new CheckerFactoryCache();
         try {
             location.reset();
-            checkerFactory().verify(location);
+            CheckerFactory.create(project, editedConfigProjectService, verificationCache).verify(location);
             return Step.COMPLETE;
 
         } catch (Exception e) {
             errorPanel.setError(e);
             return Step.ERROR;
+        } finally {
+            verificationCache.dispose();
+            editedConfigProjectService.dispose();
         }
-    }
-
-    @NotNull
-    private CheckerFactory checkerFactory() {
-        final CheckstyleProjectService editedConfigProjectService = CheckstyleProjectService.forVersion(
-                project, checkstyleVersion, thirdPartyClasspath,
-                checkstyleProjectService.getDownloader());
-        return CheckerFactory.create(project, editedConfigProjectService, new CheckerFactoryCache());
     }
 
     private Step continueWithoutLoadOfFile(final ConfigurationLocation location) {

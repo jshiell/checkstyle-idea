@@ -491,8 +491,13 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         final var tempConfiguration = pluginConfigurationBuilder.build();
         final var checkstyleProjectService = CheckstyleProjectService.forVersion(project,
             tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
-        final var configurationLocation = createConfigurationLocation(project, mavenProject,
-            checkstyleProjectService, mavenPluginConfigLocation);
+        final ConfigurationLocation configurationLocation;
+        try {
+            configurationLocation = createConfigurationLocation(project, mavenProject,
+                checkstyleProjectService, mavenPluginConfigLocation);
+        } finally {
+            checkstyleProjectService.dispose();
+        }
         if (configurationLocation == null) {
             LOG.warn("Could not resolve <configLocation>" + mavenPluginConfigLocation
                 + "</configLocation> — no matching local file, URL, or classpath resource");
