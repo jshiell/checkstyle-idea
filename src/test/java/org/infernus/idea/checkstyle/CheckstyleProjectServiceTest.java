@@ -42,7 +42,7 @@ public class CheckstyleProjectServiceTest {
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder.testInstance(BUNDLED_VERSION).build());
         when(project.getService(PluginConfigurationManager.class)).thenReturn(pluginConfigManager);
-        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class))
+        when(project.getServiceIfCreated(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class))
                 .thenReturn(new org.infernus.idea.checkstyle.checker.CheckerFactoryCache());
 
         underTest = new CheckstyleProjectService(project);
@@ -196,7 +196,7 @@ public class CheckstyleProjectServiceTest {
     public void disposeInvalidatesTheProjectSharedCheckerCacheForTheRegisteredProjectService() {
         org.infernus.idea.checkstyle.checker.CheckerFactoryCache cache =
                 mock(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class);
-        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
+        when(project.getServiceIfCreated(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
 
         underTest.activateCheckstyleVersion(BUNDLED_VERSION, null);
         underTest.underlyingClassLoader();
@@ -210,7 +210,7 @@ public class CheckstyleProjectServiceTest {
     public void disposeDoesNotTouchTheProjectSharedCacheForAThrowawayInstance() {
         org.infernus.idea.checkstyle.checker.CheckerFactoryCache cache =
                 mock(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class);
-        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
+        when(project.getServiceIfCreated(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
 
         CheckstyleProjectService throwaway = CheckstyleProjectService.forVersion(project, BUNDLED_VERSION, null);
         throwaway.underlyingClassLoader();
@@ -223,5 +223,18 @@ public class CheckstyleProjectServiceTest {
     @Test
     public void disposeWithNoContainerEverBuiltDoesNotThrow() {
         assertDoesNotThrow(() -> underTest.dispose());
+    }
+
+    @Test
+    public void disposeDoesNotForceCreateTheCheckerCacheWhenItWasNeverCreated() {
+        when(project.getServiceIfCreated(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class))
+                .thenReturn(null);
+
+        underTest.activateCheckstyleVersion(BUNDLED_VERSION, null);
+        underTest.underlyingClassLoader();
+
+        assertDoesNotThrow(() -> underTest.dispose());
+
+        verify(project, never()).getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class);
     }
 }

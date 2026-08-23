@@ -238,6 +238,12 @@ public class CheckstyleProjectService implements Disposable {
      * {@code CachedChecker} may lazily load further classes from the container's loader during
      * destruction. Throwaway instances from {@link #forVersion} do not touch that shared cache -
      * it is not theirs.
+     * <p>
+     * Uses {@link Project#getServiceIfCreated} rather than {@code getService} so that dispose
+     * (which may itself run during project teardown) never forces the platform to instantiate a
+     * fresh {@link CheckerFactoryCache} - if the cache was never created there can be no live
+     * {@code CachedChecker} instances in it to drain, and force-creating a service mid-dispose
+     * makes the platform log a warning.
      */
     @Override
     public void dispose() {
@@ -246,7 +252,10 @@ public class CheckstyleProjectService implements Disposable {
                 return;
             }
             if (isProjectSharedInstance) {
-                project.getService(CheckerFactoryCache.class).invalidate();
+                CheckerFactoryCache cache = project.getServiceIfCreated(CheckerFactoryCache.class);
+                if (cache != null) {
+                    cache.invalidate();
+                }
             }
             checkstyleClassLoaderContainer.close();
             checkstyleClassLoaderContainer = null;
