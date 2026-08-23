@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 import static org.infernus.idea.checkstyle.util.Exceptions.rootCauseOf;
@@ -34,6 +36,12 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  */
 public class CheckerFactory {
     private static final Logger LOG = Logger.getInstance(CheckerFactory.class);
+
+    private static final ThreadFactory WORKER_THREAD_FACTORY = runnable -> {
+        final Thread thread = new Thread(runnable, "CheckStyle-IDEA CheckerFactoryWorker");
+        thread.setDaemon(true);
+        return thread;
+    };
 
     private final Project project;
     private CheckstyleProjectService checkstyleProjectService;
@@ -192,10 +200,12 @@ public class CheckerFactory {
                                  final ListPropertyResolver resolver) {
         final CheckerFactoryWorker worker = new CheckerFactoryWorker(location,
                 resolver.getPropertyNamesToValues(), module, checkstyleProjectService);
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ExecutorService executor = Executors.newSingleThreadExecutor(WORKER_THREAD_FACTORY);
+        final Future<CachedChecker> future = executor.submit(worker);
         try {
-            return executor.submit(worker).get();
+            return future.get();
         } catch (InterruptedException e) {
+            future.cancel(true);
             Thread.currentThread().interrupt();
             return e;
         } catch (ExecutionException e) {
