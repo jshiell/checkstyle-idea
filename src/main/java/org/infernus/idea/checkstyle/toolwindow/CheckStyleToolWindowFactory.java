@@ -13,10 +13,12 @@ public class CheckStyleToolWindowFactory implements ToolWindowFactory, DumbAware
 
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
+        final CheckStyleToolWindowPanel toolWindowPanel = new CheckStyleToolWindowPanel(toolWindow, project);
         final Content toolContent = toolWindow.getContentManager().getFactory().createContent(
-                new CheckStyleToolWindowPanel(toolWindow, project),
+                toolWindowPanel,
                 CheckStyleBundle.message("plugin.toolwindow.action"),
                 false);
+        toolContent.setDisposer(toolWindowPanel);
         toolWindow.getContentManager().addContent(toolContent);
 
         toolWindow.setTitle(CheckStyleBundle.message("plugin.toolwindow.name"));

@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.toolwindow;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -39,7 +40,7 @@ import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 /**
  * The tool window for CheckStyle scans.
  */
-public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener, DumbAware {
+public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationListener, DumbAware, Disposable {
 
     public static final String ID_TOOLWINDOW = "CheckStyle";
 
@@ -472,6 +473,12 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
 
     private PluginConfigurationManager configurationManager() {
         return project.getService(PluginConfigurationManager.class);
+    }
+
+    @Override
+    public void dispose() {
+        configurationManager().removeConfigurationListener(this);
+        ToolTipManager.sharedInstance().unregisterComponent(resultsTree);
     }
 
     /**
