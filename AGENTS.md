@@ -117,17 +117,22 @@ Non-Issues).
 If you ever do need the CLI directly, `-Dplugin.verifier.home.dir="$TMPDIR/pv-home"` is required under the
 sandbox — the default `~/.pluginVerifier` is not writable.
 
-**Plugin requires IDEA restart** (`require-restart="true"`). Hot-reload work (`DynamicUnloadEligibilityTest`,
-`PluginDescriptorDynamicUnloadTripwireTest`, `CheckstyleClassLoaderContainer.close()`,
-`CheckstyleProjectService`/`CheckStyleToolWindowPanel`/`StaticScanner` now `Disposable`) shipped across several
-2026-08-23 commits to fix classloader/listener leaks first; removing the attribute itself is deferred to a
-later release so those fixes bake in the field. `DynamicUnloadEligibilityTest` calls the platform's own
-`DynamicPlugins.checkCanUnloadWithoutRestart` against the real loaded descriptor and confirmed — by temporarily
-flipping `require-restart` to `false` in a throwaway spike, then reverting — that this is the *only* remaining
-blocker; the test currently pins that fact, and should be flipped to expect `null` when the attribute is
-removed.
+**Plugin supports dynamic load/unload** (no `require-restart` attribute) as of the 2026-08-23 hot-reload work.
+`require-restart="true"` was removed from `plugin.xml` after: (1) leak fixes shipped first
+(`CheckstyleClassLoaderContainer.close()`; `CheckstyleProjectService`/`CheckStyleToolWindowPanel`/`StaticScanner`
+now `Disposable`; listener deregistration in `PluginConfigurationManager`; cancellation propagation in
+`CheckerFactory`), so a plugin update or disable/enable doesn't tear down dirty runtime state; (2)
+`DynamicUnloadEligibilityTest` — which calls the platform's own `DynamicPlugins.checkCanUnloadWithoutRestart`
+against the real loaded descriptor — confirmed via a throwaway spike (`require-restart` temporarily flipped to
+`false`, then reverted) that the attribute was the *only* remaining blocker; (3) the manual `./gradlew runIde`
+sandbox pass below was run and passed. `PluginDescriptorDynamicUnloadTripwireTest` now asserts the attribute
+is absent, and `DynamicUnloadEligibilityTest` asserts the platform reports no blocker at all.
 
-Before removing the attribute for real, exercise this manually in `./gradlew runIde` (registry
+If field reports of load/unload trouble arrive after release, re-adding `require-restart="true"` is a
+one-attribute patch release — treat that as an expected, cheap rollback, not a sign the leak fixes need
+unwinding too.
+
+The manual verification procedure, for reference (`./gradlew runIde`; registry
 `ide.plugins.allow.unload.from.sources=true`, `ide.plugins.snapshot.on.unload.fail=true`; debug log
 `#com.intellij.ide.plugins` and `#org.infernus.idea.checkstyle`): open a project, run a scan and record the
 violation count, open the tool window, change the Checkstyle version (forces a second loader), run Reload
@@ -136,11 +141,10 @@ three times each: (1) disable/re-enable the plugin; (2) toggle the Maven plugin 
 loaded, then unload CheckStyle-IDEA with Maven disabled; (3) **the actual #539 regression** —
 `buildPlugin` at version N, install into a clean sandbox from disk, exercise as above, `buildPlugin` at N+1,
 install over the top *without restarting*, confirm the old plugin directory was actually replaced. Scenario
-(1) never replaces the plugin directory, so only (3) can reproduce the original open-handle failure; do it on
-Windows if reachable; that's where handle locking bites. Pass criteria: no "is not unload-safe" / "was not
-unloaded" in `idea.log`, no memory snapshot captured, no `Throwable` from `org.infernus.idea.checkstyle`
-anywhere in the log, and a post-reload re-scan matches the recorded violation count. This has not yet been
-run — it needs a human driving the sandbox IDE UI.
+(1) never replaces the plugin directory, so only (3) can reproduce the original open-handle failure. Pass
+criteria: no "is not unload-safe" / "was not unloaded" in `idea.log`, no memory snapshot captured, no
+`Throwable` from `org.infernus.idea.checkstyle` anywhere in the log, and a post-reload re-scan matches the
+recorded violation count.
 
 **Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim.
 

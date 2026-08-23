@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,6 +26,10 @@ class PluginDescriptorDynamicUnloadTripwireTest {
     @Test
     void pluginXmlHasNoKnownDynamicUnloadBlockers() throws Exception {
         assertDescriptorHasNoKnownDynamicUnloadBlockers("/META-INF/plugin.xml");
+
+        final Element root = parse("/META-INF/plugin.xml").getDocumentElement();
+        assertFalse(root.hasAttribute("require-restart"),
+                "require-restart declares the plugin restart-only - see plan.md Step 8");
     }
 
     @Test
