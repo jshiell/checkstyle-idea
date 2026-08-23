@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -18,6 +20,7 @@ import java.net.*;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -266,18 +269,44 @@ public class CheckstyleClassLoaderContainer {
      * Determine the base path of the plugin. When running in IntelliJ, this is something like
      * {@code C:/Users/jdoe/.IdeaIC2016.3/config/plugins/CheckStyle-IDEA} (on Windows); when running in Gradle,
      * it's probably the sandbox directory.
+     * <p>
+     * Candidates are tried in order and validated by on-disk layout, not merely non-null: a
+     * non-null candidate pointing at the wrong layout (a stale guess, a from-sources descriptor
+     * pointing at a module output root) is skipped rather than accepted, so it cannot shadow a
+     * later, valid candidate.
      *
      * @return the base path, as absolute path
      */
     @Nullable
     private String getBasePluginPath() {
-        String result = getPluginPath();
+        final List<Supplier<String>> candidates = List.of(
+                this::getDescriptorPluginPath,
+                this::getPluginPath,
+                this::getPreinstalledPluginPath);
 
-        if (result == null) {
-            result = getPreinstalledPluginPath();
+        return PluginBasePathCandidates.selectFirstValid(candidates, this::hasExpectedLayout);
+    }
+
+    /**
+     * The plugin path as reported by the platform for this plugin's own descriptor. Preferred over the
+     * guessed paths below because it is authoritative, but returns {@code null} under a flat test classpath
+     * where there is no {@code PluginAwareClassLoader}.
+     */
+    @Nullable
+    private String getDescriptorPluginPath() {
+        try {
+            final PluginDescriptor descriptor = PluginManager.getPluginByClass(getClass());
+            if (descriptor != null) {
+                return descriptor.getPluginPath().toString();
+            }
+        } catch (RuntimeException ignored) {
+            // ok, if this fails, we are in a unit test situation where the plugin system is not initialized
         }
+        return null;
+    }
 
-        return result;
+    private boolean hasExpectedLayout(@NotNull final String basePath) {
+        return new File(new File(basePath), "checkstyle/classes").exists();
     }
 
     @Nullable
