@@ -42,6 +42,8 @@ public class CheckstyleProjectServiceTest {
         when(pluginConfigManager.getCurrent())
                 .thenReturn(PluginConfigurationBuilder.testInstance(BUNDLED_VERSION).build());
         when(project.getService(PluginConfigurationManager.class)).thenReturn(pluginConfigManager);
+        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class))
+                .thenReturn(new org.infernus.idea.checkstyle.checker.CheckerFactoryCache());
 
         underTest = new CheckstyleProjectService(project);
     }
@@ -177,5 +179,49 @@ public class CheckstyleProjectServiceTest {
         URL originalUrl = thirdPartyJar.toUri().toURL();
         URL copiedUrl = copyDir.resolve("ext.jar").toUri().toURL();
         assertThat(Arrays.asList(classLoader.getURLs()), allOf(not(hasItem(originalUrl)), hasItem(copiedUrl)));
+    }
+
+    @Test
+    public void disposeClosesTheContainerSoANewOneIsBuiltOnNextAccess() {
+        underTest.activateCheckstyleVersion(BUNDLED_VERSION, null);
+        ClassLoader before = underTest.underlyingClassLoader();
+
+        underTest.dispose();
+
+        ClassLoader after = underTest.underlyingClassLoader();
+        assertNotSame(before, after);
+    }
+
+    @Test
+    public void disposeInvalidatesTheProjectSharedCheckerCacheForTheRegisteredProjectService() {
+        org.infernus.idea.checkstyle.checker.CheckerFactoryCache cache =
+                mock(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class);
+        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
+
+        underTest.activateCheckstyleVersion(BUNDLED_VERSION, null);
+        underTest.underlyingClassLoader();
+
+        underTest.dispose();
+
+        verify(cache).invalidate();
+    }
+
+    @Test
+    public void disposeDoesNotTouchTheProjectSharedCacheForAThrowawayInstance() {
+        org.infernus.idea.checkstyle.checker.CheckerFactoryCache cache =
+                mock(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class);
+        when(project.getService(org.infernus.idea.checkstyle.checker.CheckerFactoryCache.class)).thenReturn(cache);
+
+        CheckstyleProjectService throwaway = CheckstyleProjectService.forVersion(project, BUNDLED_VERSION, null);
+        throwaway.underlyingClassLoader();
+
+        throwaway.dispose();
+
+        verifyNoInteractions(cache);
+    }
+
+    @Test
+    public void disposeWithNoContainerEverBuiltDoesNotThrow() {
+        assertDoesNotThrow(() -> underTest.dispose());
     }
 }

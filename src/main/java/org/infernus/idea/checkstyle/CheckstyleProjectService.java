@@ -1,7 +1,9 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.checker.ClasspathStabilizer;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -26,7 +28,7 @@ import java.util.concurrent.Callable;
  * Makes the Checkstyle tool available to the plugin in the correct version. Registered in {@code plugin.xml}.
  * This must be a project-level service because the Checkstyle version is chosen per project.
  */
-public class CheckstyleProjectService {
+public class CheckstyleProjectService implements Disposable {
 
     private static final Logger LOG = Logger.getInstance(CheckstyleProjectService.class);
 
@@ -41,35 +43,45 @@ public class CheckstyleProjectService {
     private final CheckstyleArtifactDownloader downloader;
     private final TempDirProvider tempDirProvider;
 
+    /**
+     * True only for the instance registered as the project's {@code CheckstyleProjectService},
+     * which shares the project's {@link CheckerFactoryCache}. Throwaway instances created via
+     * {@link #forVersion} must not drain that shared cache on dispose - it belongs to the
+     * registered instance, not to them.
+     */
+    private final boolean isProjectSharedInstance;
+
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
                 CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
                         () -> new ArtifactDownloadBaseUrlResolver().resolve()),
-                new TempDirProvider());
+                new TempDirProvider(), true);
     }
 
     CheckstyleProjectService(@NotNull final Project project,
                              @NotNull final CheckstyleArtifactDownloader downloader) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                downloader, new TempDirProvider());
+                downloader, new TempDirProvider(), false);
     }
 
     CheckstyleProjectService(@NotNull final Project project,
                              @NotNull final TempDirProvider tempDirProvider) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                null, tempDirProvider);
+                null, tempDirProvider, false);
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
                                      @Nullable final String requestedVersion,
                                      @Nullable final List<String> thirdPartyJars,
                                      @Nullable final CheckstyleArtifactDownloader downloaderOverride,
-                                     @NotNull final TempDirProvider tempDirProvider) {
+                                     @NotNull final TempDirProvider tempDirProvider,
+                                     final boolean isProjectSharedInstance) {
         this.project = project;
         this.tempDirProvider = tempDirProvider;
+        this.isProjectSharedInstance = isProjectSharedInstance;
         versionListReader = new VersionListReader();
         supportedVersions = versionListReader.getSupportedVersions();
         this.downloader = downloaderOverride;
@@ -94,7 +106,7 @@ public class CheckstyleProjectService {
     public static CheckstyleProjectService forVersion(@NotNull final Project project,
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null, new TempDirProvider());
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null, new TempDirProvider(), false);
     }
 
     @NotNull
@@ -102,7 +114,7 @@ public class CheckstyleProjectService {
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars,
                                                       @Nullable final CheckstyleArtifactDownloader downloader) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader, new TempDirProvider());
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader, new TempDirProvider(), false);
     }
 
     @Nullable
@@ -218,6 +230,27 @@ public class CheckstyleProjectService {
         }
         // Don't worry about caching, class loaders do lots of caching.
         return this.checkstyleClassLoaderContainer;
+    }
+
+    /**
+     * Closes the currently held classloader, if any was ever built. For the registered project
+     * service this first drains the project's shared {@link CheckerFactoryCache}, since a
+     * {@code CachedChecker} may lazily load further classes from the container's loader during
+     * destruction. Throwaway instances from {@link #forVersion} do not touch that shared cache -
+     * it is not theirs.
+     */
+    @Override
+    public void dispose() {
+        synchronized (lock) {
+            if (checkstyleClassLoaderContainer == null) {
+                return;
+            }
+            if (isProjectSharedInstance) {
+                project.getService(CheckerFactoryCache.class).invalidate();
+            }
+            checkstyleClassLoaderContainer.close();
+            checkstyleClassLoaderContainer = null;
+        }
     }
 
     private static PluginConfigurationManager pluginConfigurationManager(final Project project) {
