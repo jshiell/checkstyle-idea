@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -17,7 +18,7 @@ import static org.infernus.idea.checkstyle.util.Async.NO_TIMEOUT;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
 import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 
-public class StaticScanner {
+public class StaticScanner implements Disposable {
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(StaticScanner.class);
 
     private final Set<Future<?>> checksInProgress = new HashSet<>();
@@ -68,6 +69,11 @@ public class StaticScanner {
             checksInProgress.forEach(task -> task.cancel(true));
             checksInProgress.clear();
         }
+    }
+
+    @Override
+    public void dispose() {
+        stopChecks();
     }
 
     private <T> void checkComplete(final Future<T> task) {
