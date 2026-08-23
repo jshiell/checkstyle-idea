@@ -85,6 +85,13 @@ this bug**. Before committing, run the full suite (`./gradlew build`, plus `./gr
 csaccess) — never just the test class you edited. If a test only passes in isolation, treat that as the leak,
 not as flakiness.
 
+**A platform test fails on any thread's uncaught exception, not just the test thread's:** JUnit5 platform tests
+run under `UncaughtExceptionExtension`/`TestUncaughtExceptionHandler`, which fails the test if *any* thread
+throws uncaught during it — including a helper thread the test itself spawns to exercise cross-thread
+behaviour (e.g. interrupting a caller thread from another thread). A pre-existing, expected exception path on
+that helper thread will fail the test with `AssertionFailedError: N uncaught exceptions` instead of the
+assertion you meant to check — catch it explicitly inside the thread's `Runnable`.
+
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
 **Using a class from a v2 content module:** classes that live only in `lib/modules/*.jar` (e.g.
@@ -93,6 +100,14 @@ not as flakiness.
 block in `plugin.xml` for the runtime classloader. A v1 `<depends>` tag does not grant access to a v2 content
 module, and omitting the `plugin.xml` half compiles cleanly but fails at runtime with `NoClassDefFoundError`.
 `./gradlew test` will not catch it either: tests run on a flat classpath. Use the plugin verifier (below).
+
+**Verifying platform API behaviour:** the resolved IDE distribution lives at
+`~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*/lib/*.jar` (plus `lib/modules/*.jar` for
+v2 content modules). To confirm real behaviour rather than assume it: `unzip -o -j <jar> '<path/To/Class.class>'
+-d <tmpdir>` then `javap -p -v <Class>.class` — annotations like `@ApiStatus.Internal` show as
+`RuntimeInvisibleAnnotations` in `-v` output. Most core platform classes are in `lib/app-client.jar`,
+`lib/util.jar`, or `lib/util-8.jar`; check those directly before looping `find` across the ~500+ jars in the
+distribution, which can silently return zero matches even when the class exists.
 
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
@@ -157,7 +172,10 @@ recorded violation count.
    class you touched, which cannot catch leaked global platform state; run `./gradlew xTest` if
    touching csaccess
 3. Test with `./gradlew runIde`
-4. Update CHANGELOG.md
+4. Update CHANGELOG.md and, for a user-visible change, the `<change-notes>` block in `plugin.xml` — both are
+   added under the **current** `version` from `build.gradle.kts`. This repo does not use an `Unreleased`
+   heading; pending changes accumulate under that not-yet-tagged version until it is actually released
+   (`git tag` + push, per Release below).
 
 ## Known Non-Issues
 
