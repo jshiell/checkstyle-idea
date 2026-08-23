@@ -3,14 +3,13 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PluginConfigurationManager {
 
-    private final List<ConfigurationListener> configurationListeners = Collections.synchronizedList(new ArrayList<>());
+    private final List<ConfigurationListener> configurationListeners = new CopyOnWriteArrayList<>();
 
     private final Project project;
 
@@ -26,11 +25,13 @@ public class PluginConfigurationManager {
         }
     }
 
+    public void removeConfigurationListener(final ConfigurationListener configurationListener) {
+        configurationListeners.remove(configurationListener);
+    }
+
     private void fireConfigurationChanged() {
-        synchronized (configurationListeners) {
-            for (ConfigurationListener configurationListener : configurationListeners) {
-                configurationListener.configurationChanged();
-            }
+        for (ConfigurationListener configurationListener : configurationListeners) {
+            configurationListener.configurationChanged();
         }
     }
 
