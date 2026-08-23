@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle;
 
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
@@ -32,6 +33,8 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
  * Loads Checkstyle classes from a given Checkstyle version.
  */
 public class CheckstyleClassLoaderContainer {
+    private static final Logger LOG = Logger.getInstance(CheckstyleClassLoaderContainer.class);
+
     private static final String PROP_FILE = "checkstyle-classpaths.properties";
     private static final String CSACTIONS_CLASS = "org.infernus.idea.checkstyle.service.CheckstyleActionsImpl";
 
@@ -390,5 +393,19 @@ public class CheckstyleClassLoaderContainer {
 
     ClassLoader getClassLoader() {
         return classLoader;
+    }
+
+    /**
+     * Closes the underlying classloader, best-effort. Both construction paths produce a
+     * {@link URLClassLoader}, so this releases the open jar file handles unconditionally.
+     */
+    void close() {
+        if (classLoader instanceof URLClassLoader urlClassLoader) {
+            try {
+                urlClassLoader.close();
+            } catch (IOException e) {
+                LOG.warn("Failed to close Checkstyle classloader", e);
+            }
+        }
     }
 }
