@@ -1,6 +1,10 @@
 
 # CheckStyle-IDEA Changelog
 
+* **Unreleased** Fixed: The Checkstyle classloader and its open jar file handles are now closed when no longer needed, instead of leaking on every rules-file check, Maven import, or version switch.
+* **Unreleased** Fixed: The tool window no longer leaks its configuration listener and Swing components each time its content is recreated.
+* **Unreleased** Fixed: Background scans and checker threads are now cancelled instead of left running when interrupted or when the project or plugin closes.
+* **Unreleased** Fixed: The plugin's own install directory is now resolved via the IDE's authoritative path first, with a validated fallback chain, improving reliability on case-sensitive filesystems.
 * **26.16.0** New: Now built against IDEA 2025.1.7.2 (was 2024.3.7). IDEA 2024.3 and earlier are no longer supported.
 * **26.15.0** New: Added Checkstyle 13.11.0, 14.0.0.
 * **26.15.0** Fixed: Applying the Checkstyle settings no longer turns off the tool window's Autoscroll to Source toggle (#699).
