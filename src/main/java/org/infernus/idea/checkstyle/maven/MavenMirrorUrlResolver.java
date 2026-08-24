@@ -14,9 +14,10 @@ import java.util.Optional;
 
 /**
  * Resolves a Maven Central mirror URL from the user's Maven {@code settings.xml}, if the bundled Maven
- * plugin is available and a mirror applies. This is the only class in the plugin that references
- * {@code org.jetbrains.idea.maven.*} classes, so callers can safely guard against the optional dependency
- * being absent by catching any {@link Throwable} around calls into this class.
+ * plugin is available and a mirror applies. This is the only class the artifact download path references
+ * that touches {@code org.jetbrains.idea.maven.*} classes, so {@link org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver}
+ * can safely guard against the optional dependency being absent by catching any {@link Throwable} around
+ * calls into this class - no such symbol crosses into its own bytecode.
  */
 public final class MavenMirrorUrlResolver {
 
