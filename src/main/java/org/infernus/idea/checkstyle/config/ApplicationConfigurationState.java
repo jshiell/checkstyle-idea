@@ -29,6 +29,15 @@ public final class ApplicationConfigurationState
         applicationSettings.artifactRepositoryBaseUrlOverride = artifactRepositoryBaseUrlOverride;
     }
 
+    @Nullable
+    public String getArtifactRepositoryOverrideUsername() {
+        return applicationSettings.artifactRepositoryOverrideUsername;
+    }
+
+    public void setArtifactRepositoryOverrideUsername(@Nullable final String artifactRepositoryOverrideUsername) {
+        applicationSettings.artifactRepositoryOverrideUsername = artifactRepositoryOverrideUsername;
+    }
+
     @Override
     @NotNull
     public ApplicationSettings getState() {
@@ -44,5 +53,8 @@ public final class ApplicationConfigurationState
 
         @Tag
         public String artifactRepositoryBaseUrlOverride;
+
+        @Tag
+        public String artifactRepositoryOverrideUsername;
     }
 }

@@ -35,4 +35,33 @@ class ApplicationConfigurationStateTest {
 
         assertEquals("https://mirror.example.com/repo/", reloaded.getArtifactRepositoryBaseUrlOverride());
     }
+
+    @Test
+    void defaultOverrideUsernameIsNull() {
+        ApplicationConfigurationState state = new ApplicationConfigurationState();
+
+        assertNull(state.getArtifactRepositoryOverrideUsername());
+    }
+
+    @Test
+    void overrideUsernameSetterUpdatesGetter() {
+        ApplicationConfigurationState state = new ApplicationConfigurationState();
+
+        state.setArtifactRepositoryOverrideUsername("jane");
+
+        assertEquals("jane", state.getArtifactRepositoryOverrideUsername());
+    }
+
+    @Test
+    void overrideUsernameRoundTripsThroughGetStateAndLoadState() {
+        ApplicationConfigurationState original = new ApplicationConfigurationState();
+        original.setArtifactRepositoryOverrideUsername("jane");
+
+        ApplicationConfigurationState.ApplicationSettings persisted = original.getState();
+
+        ApplicationConfigurationState reloaded = new ApplicationConfigurationState();
+        reloaded.loadState(persisted);
+
+        assertEquals("jane", reloaded.getArtifactRepositoryOverrideUsername());
+    }
 }
