@@ -5,7 +5,6 @@ import org.infernus.idea.checkstyle.config.ArtifactRepositoryCredentialsStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import java.util.HashMap;
 import java.util.Map;
