@@ -31,11 +31,8 @@ public final class MavenMirrorUrlResolver {
     @NotNull
     public static Optional<ArtifactRepositoryLocation> resolveCentralMirrorWithCredentials() {
         Optional<Path> settingsFile = currentUserSettingsPath();
-        if (settingsFile.isEmpty()) {
-            return Optional.empty();
-        }
-        return resolveCentralMirrorWithCredentialsFromSettings(
-                settingsFile.get(), MavenServerCredentialsResolver.defaultSettingsSecurityPath());
+        return settingsFile.flatMap(path -> resolveCentralMirrorWithCredentialsFromSettings(
+                path, MavenServerCredentialsResolver.defaultSettingsSecurityPath()));
     }
 
     @NotNull
@@ -55,7 +52,7 @@ public final class MavenMirrorUrlResolver {
         if (!isMavenPluginAvailable()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(MavenUtil.resolveUserSettingsPath(null, null));
+        return Optional.of(MavenUtil.resolveUserSettingsPath(null, null));
     }
 
     @NotNull
