@@ -7,10 +7,16 @@ hamcrest = "3.0"
 mockito = "5.21.0"
 intellij-platform-plugin = "2.18.1"
 intellij-idea-community = "2025.1.7.2"
+maven-settings = "3.9.9"
+plexus-cipher = "2.0"
+plexus-sec-dispatcher = "2.0"
 
 [libraries]
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+maven-settings = { module = "org.apache.maven:maven-settings", version.ref = "maven-settings" }
+plexus-cipher = { module = "org.codehaus.plexus:plexus-cipher", version.ref = "plexus-cipher" }
+plexus-sec-dispatcher = { module = "org.codehaus.plexus:plexus-sec-dispatcher", version.ref = "plexus-sec-dispatcher" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit-jupiter" }

@@ -104,6 +104,9 @@ dependencies {
 
     implementation(libs.commons.io)
     implementation(libs.commons.codec)
+    implementation(libs.maven.settings)
+    implementation(libs.plexus.cipher)
+    implementation(libs.plexus.sec.dispatcher)
 
     val checkStyleBaseVersion = (project.extra["supportedCsVersions"] as CheckstyleVersions).baseVersion
     csaccessCompileOnly("com.puppycrawl.tools:checkstyle:${checkStyleBaseVersion}") {
