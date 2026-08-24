@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,13 +56,13 @@ public class ManifestBasedArtifactResolverTest {
             Files.createDirectories(jarPath.getParent());
             Files.write(jarPath, new byte[]{1, 2, 3});
             return null;
-        }).when(mockDownloader).download(anyString(), eq(jarPath));
+        }).when(mockDownloader).download(anyString(), eq(jarPath), any());
 
         List<Path> result = resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION);
 
         verify(mockDownloader).download(
                 "https://repo1.maven.org/maven2/com/puppycrawl/tools/checkstyle/" + VERSION + "/checkstyle-" + VERSION + ".jar",
-                jarPath);
+                jarPath, Optional.empty());
         assertEquals(List.of(jarPath), result);
     }
 
@@ -74,11 +75,11 @@ public class ManifestBasedArtifactResolverTest {
         doAnswer(inv -> {
             Files.write(jarPath, new byte[]{1, 2, 3});
             return null;
-        }).when(mockDownloader).download(anyString(), eq(jarPath));
+        }).when(mockDownloader).download(anyString(), eq(jarPath), any());
 
         resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION);
 
-        verify(mockDownloader).download(anyString(), eq(jarPath));
+        verify(mockDownloader).download(anyString(), eq(jarPath), any());
     }
 
     @Test
@@ -89,7 +90,7 @@ public class ManifestBasedArtifactResolverTest {
             Files.createDirectories(jarPath.getParent());
             Files.write(jarPath, new byte[]{9, 9, 9});
             return null;
-        }).when(mockDownloader).download(anyString(), eq(jarPath));
+        }).when(mockDownloader).download(anyString(), eq(jarPath), any());
 
         assertThrows(CheckstyleDownloadException.class,
                 () -> resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION));
@@ -106,13 +107,13 @@ public class ManifestBasedArtifactResolverTest {
             Files.createDirectories(jarPath.getParent());
             Files.write(jarPath, new byte[]{1, 2, 3});
             return null;
-        }).when(mockDownloader).download(anyString(), eq(jarPath));
+        }).when(mockDownloader).download(anyString(), eq(jarPath), any());
 
         resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION);
 
         verify(mockDownloader).download(
                 "https://mirror.example.com/repo/com/puppycrawl/tools/checkstyle/" + VERSION + "/checkstyle-" + VERSION + ".jar",
-                jarPath);
+                jarPath, Optional.empty());
     }
 
     @Test

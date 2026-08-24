@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
+import java.util.Base64;
+import java.util.Optional;
 
 
 public class HttpJarDownloader implements ManifestBasedArtifactResolver.JarDownloader {
@@ -27,12 +29,14 @@ public class HttpJarDownloader implements ManifestBasedArtifactResolver.JarDownl
     }
 
     @Override
-    public void download(@NotNull final String url, @NotNull final Path target) throws IOException {
-        HttpRequest request = HttpRequest.newBuilder()
+    public void download(@NotNull final String url, @NotNull final Path target,
+                          @NotNull final Optional<ArtifactRepositoryCredentials> credentials) throws IOException {
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(TIMEOUT)
-                .GET()
-                .build();
+                .GET();
+        credentials.ifPresent(c -> requestBuilder.header("Authorization", basicAuthHeader(c)));
+        HttpRequest request = requestBuilder.build();
         Path tmp = Files.createTempFile(target.getParent(), ".download-", ".part");
         try {
             HttpResponse<Path> response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(tmp));
@@ -46,5 +50,11 @@ public class HttpJarDownloader implements ManifestBasedArtifactResolver.JarDownl
         } finally {
             Files.deleteIfExists(tmp);
         }
+    }
+
+    @NotNull
+    private static String basicAuthHeader(@NotNull final ArtifactRepositoryCredentials credentials) {
+        String userPass = credentials.username() + ":" + credentials.password();
+        return "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
     }
 }

@@ -11,13 +11,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 
 public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownloader.ArtifactResolver {
 
     public interface JarDownloader {
-        void download(String url, Path target) throws IOException;
+        void download(String url, Path target, Optional<ArtifactRepositoryCredentials> credentials) throws IOException;
     }
 
     private final DownloadManifest manifest;
@@ -59,7 +60,7 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
         }
         Files.createDirectories(target.getParent());
         String artifactUrl = entry.artifactUrl(baseUrlSupplier.get());
-        jarDownloader.download(artifactUrl, target);
+        jarDownloader.download(artifactUrl, target, Optional.empty());
         String actualHex = sha256Hex(target);
         if (!entry.sha256hex().equalsIgnoreCase(actualHex)) {
             Files.deleteIfExists(target);
