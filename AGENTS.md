@@ -34,6 +34,11 @@ Two things that do **not** get around this: the `dangerouslyDisableSandbox` tool
 in the same session, inside the same sandbox). Re-extraction has to happen in a **real terminal outside
 Claude Code**; one `./gradlew build` there repopulates the cache and every later sandboxed build hits it.
 
+**A Gradle daemon started while sandboxed keeps failing the same way even after you exit the sandbox** — the
+daemon process outlives the sandbox lift and goes on serving the broken state. If the same `hdiutil` error
+recurs immediately after running the fix build in a real terminal, run `./gradlew --stop` before concluding
+the fix didn't work; that's the actual missing step, not a second permission problem.
+
 This only bites when the extraction has to run again — the result lives in
 `~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a configuration cache hit skips it.
 Adding a task option such as `--tests` misses that cache and triggers it, and so does a task set that has no
