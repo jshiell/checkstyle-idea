@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -55,6 +56,6 @@ public class HttpJarDownloader implements ManifestBasedArtifactResolver.JarDownl
     @NotNull
     private static String basicAuthHeader(@NotNull final ArtifactRepositoryCredentials credentials) {
         String userPass = credentials.username() + ":" + credentials.password();
-        return "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
+        return "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
     }
 }
