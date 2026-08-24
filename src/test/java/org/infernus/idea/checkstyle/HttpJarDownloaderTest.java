@@ -103,8 +103,7 @@ public class HttpJarDownloaderTest {
         downloader.download(baseUrl + "/jar", tempDir.resolve("checkstyle.jar"),
                 Optional.of(new ArtifactRepositoryCredentials("user", "pass")));
 
-        String expected = "Basic " + Base64.getEncoder().encodeToString("user:pass".getBytes());
-        assertEquals(expected, seenHeader.get());
+        assertEquals("Basic dXNlcjpwYXNz", seenHeader.get());
     }
 
     @Test
