@@ -2,6 +2,8 @@ package org.infernus.idea.checkstyle.maven;
 
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
+import org.infernus.idea.checkstyle.ArtifactRepositoryCredentials;
+import org.infernus.idea.checkstyle.ArtifactRepositoryLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.utils.MavenUtil;
@@ -26,11 +28,33 @@ public final class MavenMirrorUrlResolver {
     }
 
     @NotNull
-    public static Optional<String> resolveCentralMirror() {
+    public static Optional<ArtifactRepositoryLocation> resolveCentralMirrorWithCredentials() {
+        Optional<Path> settingsFile = currentUserSettingsPath();
+        if (settingsFile.isEmpty()) {
+            return Optional.empty();
+        }
+        return resolveCentralMirrorWithCredentialsFromSettings(
+                settingsFile.get(), MavenServerCredentialsResolver.defaultSettingsSecurityPath());
+    }
+
+    @NotNull
+    static Optional<ArtifactRepositoryLocation> resolveCentralMirrorWithCredentialsFromSettings(
+            @NotNull final Path settingsFile, @NotNull final Path settingsSecurityFile) {
+        Optional<String> mirrorUrl = resolveCentralMirrorFromSettings(settingsFile);
+        if (mirrorUrl.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<ArtifactRepositoryCredentials> credentials = MavenServerCredentialsResolver
+                .resolveCredentialsForMirror(settingsFile, settingsSecurityFile, mirrorUrl.get());
+        return Optional.of(new ArtifactRepositoryLocation(mirrorUrl.get(), credentials));
+    }
+
+    @NotNull
+    private static Optional<Path> currentUserSettingsPath() {
         if (!isMavenPluginAvailable()) {
             return Optional.empty();
         }
-        return resolveCentralMirrorFromSettings(MavenUtil.resolveUserSettingsPath(null, null));
+        return Optional.ofNullable(MavenUtil.resolveUserSettingsPath(null, null));
     }
 
     @NotNull

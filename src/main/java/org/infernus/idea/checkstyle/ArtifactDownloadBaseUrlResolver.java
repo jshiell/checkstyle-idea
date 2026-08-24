@@ -47,8 +47,7 @@ public class ArtifactDownloadBaseUrlResolver {
                                             .getPassword(username).orElse(null));
                     return Optional.of(new ArtifactRepositoryLocation(override, credentials));
                 },
-                () -> MavenMirrorUrlResolver.resolveCentralMirror()
-                        .map(url -> new ArtifactRepositoryLocation(url, Optional.empty())));
+                MavenMirrorUrlResolver::resolveCentralMirrorWithCredentials);
     }
 
     ArtifactDownloadBaseUrlResolver(@NotNull final Supplier<Optional<ArtifactRepositoryLocation>> overrideSupplier,
