@@ -4,6 +4,7 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
+import org.infernus.idea.checkstyle.config.PasswordSafeArtifactRepositoryCredentialsStore;
 import org.infernus.idea.checkstyle.maven.MavenMirrorUrlResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,12 +33,19 @@ public class ArtifactDownloadBaseUrlResolver {
                     if (application == null) {
                         return Optional.empty();
                     }
-                    String override = application.getService(ApplicationConfigurationState.class)
-                            .getArtifactRepositoryBaseUrlOverride();
+                    ApplicationConfigurationState state =
+                            application.getService(ApplicationConfigurationState.class);
+                    String override = state.getArtifactRepositoryBaseUrlOverride();
                     if (override == null || override.isBlank()) {
                         return Optional.empty();
                     }
-                    return Optional.of(new ArtifactRepositoryLocation(override, Optional.empty()));
+                    String username = state.getArtifactRepositoryOverrideUsername();
+                    Optional<ArtifactRepositoryCredentials> credentials = (username == null || username.isBlank())
+                            ? Optional.empty()
+                            : ArtifactRepositoryCredentials.of(username,
+                                    new PasswordSafeArtifactRepositoryCredentialsStore()
+                                            .getPassword(username).orElse(null));
+                    return Optional.of(new ArtifactRepositoryLocation(override, credentials));
                 },
                 () -> MavenMirrorUrlResolver.resolveCentralMirror()
                         .map(url -> new ArtifactRepositoryLocation(url, Optional.empty())));
