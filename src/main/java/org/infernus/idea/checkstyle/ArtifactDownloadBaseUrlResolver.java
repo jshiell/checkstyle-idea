@@ -23,39 +23,44 @@ public class ArtifactDownloadBaseUrlResolver {
     private static final Logger LOG = Logger.getInstance(ArtifactDownloadBaseUrlResolver.class);
     static final String DEFAULT_BASE_URL = "https://repo1.maven.org/maven2/";
 
-    private final Supplier<String> overrideSupplier;
-    private final Supplier<Optional<String>> mavenMirrorSupplier;
+    private final Supplier<Optional<ArtifactRepositoryLocation>> overrideSupplier;
+    private final Supplier<Optional<ArtifactRepositoryLocation>> mavenMirrorSupplier;
 
     public ArtifactDownloadBaseUrlResolver() {
         this(() -> {
                     Application application = ApplicationManager.getApplication();
                     if (application == null) {
-                        return null;
+                        return Optional.empty();
                     }
-                    return application.getService(ApplicationConfigurationState.class)
+                    String override = application.getService(ApplicationConfigurationState.class)
                             .getArtifactRepositoryBaseUrlOverride();
+                    if (override == null || override.isBlank()) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(new ArtifactRepositoryLocation(override, Optional.empty()));
                 },
-                MavenMirrorUrlResolver::resolveCentralMirror);
+                () -> MavenMirrorUrlResolver.resolveCentralMirror()
+                        .map(url -> new ArtifactRepositoryLocation(url, Optional.empty())));
     }
 
-    ArtifactDownloadBaseUrlResolver(@NotNull final Supplier<String> overrideSupplier,
-                                    @NotNull final Supplier<Optional<String>> mavenMirrorSupplier) {
+    ArtifactDownloadBaseUrlResolver(@NotNull final Supplier<Optional<ArtifactRepositoryLocation>> overrideSupplier,
+                                    @NotNull final Supplier<Optional<ArtifactRepositoryLocation>> mavenMirrorSupplier) {
         this.overrideSupplier = overrideSupplier;
         this.mavenMirrorSupplier = mavenMirrorSupplier;
     }
 
     @NotNull
-    public String resolve() {
-        String override = overrideSupplier.get();
-        if (override != null && !override.isBlank()) {
-            if (isValidHttpUrl(override)) {
-                return override;
+    public ArtifactRepositoryLocation resolve() {
+        Optional<ArtifactRepositoryLocation> override = overrideSupplier.get();
+        if (override.isPresent()) {
+            if (isValidHttpUrl(override.get().baseUrl())) {
+                return override.get();
             }
-            LOG.warn("Ignoring invalid artifact download mirror override: " + override);
+            LOG.warn("Ignoring invalid artifact download mirror override: " + override.get().baseUrl());
         }
 
         try {
-            Optional<String> mirrored = mavenMirrorSupplier.get();
+            Optional<ArtifactRepositoryLocation> mirrored = mavenMirrorSupplier.get();
             if (mirrored.isPresent()) {
                 return mirrored.get();
             }
@@ -63,7 +68,7 @@ public class ArtifactDownloadBaseUrlResolver {
             LOG.warn("Failed to resolve a Maven settings.xml mirror for artifact downloads", t);
         }
 
-        return DEFAULT_BASE_URL;
+        return new ArtifactRepositoryLocation(DEFAULT_BASE_URL, Optional.empty());
     }
 
     private static boolean isValidHttpUrl(@Nullable final String candidate) {

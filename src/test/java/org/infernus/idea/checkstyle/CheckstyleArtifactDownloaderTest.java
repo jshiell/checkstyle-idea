@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -77,7 +78,7 @@ public class CheckstyleArtifactDownloaderTest {
     @Test
     void createFactoryReturnsNonNullDownloader() {
         CheckstyleArtifactDownloader created = CheckstyleArtifactDownloader.create(
-                m2Root, () -> "https://repo1.maven.org/maven2/");
+                m2Root, () -> new ArtifactRepositoryLocation("https://repo1.maven.org/maven2/", Optional.empty()));
         assertNotNull(created);
     }
 }

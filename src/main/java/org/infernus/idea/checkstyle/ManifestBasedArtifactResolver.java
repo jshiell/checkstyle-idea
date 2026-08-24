@@ -24,16 +24,16 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
     private final DownloadManifest manifest;
     private final Path m2Root;
     private final JarDownloader jarDownloader;
-    private final Supplier<String> baseUrlSupplier;
+    private final Supplier<ArtifactRepositoryLocation> locationSupplier;
 
     public ManifestBasedArtifactResolver(@NotNull final DownloadManifest manifest,
                                          @NotNull final Path m2Root,
                                          @NotNull final JarDownloader jarDownloader,
-                                         @NotNull final Supplier<String> baseUrlSupplier) {
+                                         @NotNull final Supplier<ArtifactRepositoryLocation> locationSupplier) {
         this.manifest = manifest;
         this.m2Root = m2Root;
         this.jarDownloader = jarDownloader;
-        this.baseUrlSupplier = baseUrlSupplier;
+        this.locationSupplier = locationSupplier;
     }
 
     @Override
@@ -46,21 +46,23 @@ public class ManifestBasedArtifactResolver implements CheckstyleArtifactDownload
             throw new CheckstyleDownloadException("No manifest entry found for Checkstyle " + version);
         }
 
+        ArtifactRepositoryLocation location = locationSupplier.get();
         List<Path> paths = new ArrayList<>();
         for (ManifestEntry entry : entries) {
-            paths.add(ensureJar(entry));
+            paths.add(ensureJar(entry, location));
         }
         return paths;
     }
 
-    private Path ensureJar(@NotNull final ManifestEntry entry) throws IOException {
+    private Path ensureJar(@NotNull final ManifestEntry entry,
+                           @NotNull final ArtifactRepositoryLocation location) throws IOException {
         Path target = entry.m2Path(m2Root);
         if (Files.exists(target) && sha256Matches(target, entry.sha256hex())) {
             return target;
         }
         Files.createDirectories(target.getParent());
-        String artifactUrl = entry.artifactUrl(baseUrlSupplier.get());
-        jarDownloader.download(artifactUrl, target, Optional.empty());
+        String artifactUrl = entry.artifactUrl(location.baseUrl());
+        jarDownloader.download(artifactUrl, target, location.credentials());
         String actualHex = sha256Hex(target);
         if (!entry.sha256hex().equalsIgnoreCase(actualHex)) {
             Files.deleteIfExists(target);

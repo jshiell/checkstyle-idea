@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,7 +34,7 @@ public class ManifestBasedArtifactResolverTest {
         mockDownloader = mock(ManifestBasedArtifactResolver.JarDownloader.class);
         manifest = DownloadManifest.fromString(VERSION + " = com.puppycrawl.tools:checkstyle:" + VERSION + "::" + SHA256 + "\n");
         resolver = new ManifestBasedArtifactResolver(manifest, m2Root, mockDownloader,
-                () -> "https://repo1.maven.org/maven2/");
+                () -> new ArtifactRepositoryLocation("https://repo1.maven.org/maven2/", Optional.empty()));
     }
 
     @Test
@@ -101,7 +102,7 @@ public class ManifestBasedArtifactResolverTest {
     void downloadsJarUsingSuppliedBaseUrl() throws Exception {
         Path jarPath = expectedJarPath(VERSION);
         resolver = new ManifestBasedArtifactResolver(manifest, m2Root, mockDownloader,
-                () -> "https://mirror.example.com/repo/");
+                () -> new ArtifactRepositoryLocation("https://mirror.example.com/repo/", Optional.empty()));
 
         doAnswer(inv -> {
             Files.createDirectories(jarPath.getParent());
@@ -120,6 +121,37 @@ public class ManifestBasedArtifactResolverTest {
     void throwsForVersionNotInManifest() {
         assertThrows(CheckstyleDownloadException.class,
                 () -> resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", "9.0"));
+    }
+
+    @Test
+    void invokesLocationSupplierExactlyOnceForMultiEntryManifest() throws Exception {
+        String otherSha = sha256Of(new byte[]{4, 5, 6});
+        DownloadManifest multiEntryManifest = DownloadManifest.fromString(
+                VERSION + " = com.puppycrawl.tools:checkstyle:" + VERSION + "::" + SHA256
+                        + ", org.antlr:antlr4-runtime:" + VERSION + "::" + otherSha + "\n");
+
+        @SuppressWarnings("unchecked")
+        Supplier<ArtifactRepositoryLocation> locationSupplier = mock(Supplier.class);
+        when(locationSupplier.get())
+                .thenReturn(new ArtifactRepositoryLocation("https://repo1.maven.org/maven2/", Optional.empty()));
+
+        doAnswer(inv -> {
+            Path target = inv.getArgument(1);
+            Files.createDirectories(target.getParent());
+            Files.write(target, new byte[]{1, 2, 3});
+            return null;
+        }).when(mockDownloader).download(contains("checkstyle-" + VERSION + ".jar"), any(), any());
+        doAnswer(inv -> {
+            Path target = inv.getArgument(1);
+            Files.createDirectories(target.getParent());
+            Files.write(target, new byte[]{4, 5, 6});
+            return null;
+        }).when(mockDownloader).download(contains("antlr4-runtime-" + VERSION + ".jar"), any(), any());
+
+        resolver = new ManifestBasedArtifactResolver(multiEntryManifest, m2Root, mockDownloader, locationSupplier);
+        resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", VERSION);
+
+        verify(locationSupplier, times(1)).get();
     }
 
     private Path expectedJarPath(final String version) {
