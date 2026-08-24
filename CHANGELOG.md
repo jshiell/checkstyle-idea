@@ -1,6 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.16.0** New: The artefact download mirror override now supports a username and password, sent as HTTP Basic authentication, for authenticated repositories such as a corporate Artifactory or Nexus (#698).
+* **26.16.0** Fixed: Non-bundled Checkstyle version downloads no longer fail with `NoSuchMethodError` when resolving a Maven settings.xml mirror (#698).
 * **26.16.0** Fixed: Hot-reloading enabled again.
 * **26.16.0** New: Now built against IDEA 2025.1.7.2 (was 2024.3.7). IDEA 2024.3 and earlier are no longer supported.
 * **26.15.0** New: Added Checkstyle 13.11.0, 14.0.0.
