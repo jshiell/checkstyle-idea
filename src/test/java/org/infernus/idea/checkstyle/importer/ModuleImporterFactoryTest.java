@@ -132,6 +132,15 @@ class ModuleImporterFactoryTest {
         assertThat(importer.getWarnings(), org.hamcrest.Matchers.empty());
     }
 
+    @Test
+    void avoidStarImportWithUnknownPropertyEmitsWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("AvoidStarImport");
+        when(module.getProperties()).thenReturn(Map.of("totallyBogusProperty", "x"));
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(),
+                hasItem(CheckStyleBundle.message("import.avoid-star-import.unsupported-property", "totallyBogusProperty")));
+    }
+
     private ConfigurationModule moduleNamed(final String name) {
         ConfigurationModule module = mock(ConfigurationModule.class);
         when(module.getName()).thenReturn(name);

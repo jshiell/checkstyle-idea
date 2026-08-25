@@ -1,16 +1,15 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class AvoidStarImportImporter extends ModuleImporter {
-    private static final Logger LOG = Logger.getInstance(AvoidStarImportImporter.class);
 
     private static final String EXCLUDES = "excludes";
     private static final String ALLOW_CLASS_STAR_IMPORT = "allowClassImports";
@@ -34,7 +33,7 @@ public class AvoidStarImportImporter extends ModuleImporter {
                 allowStaticStarImports = Boolean.parseBoolean(attrValue);
                 break;
             default:
-                LOG.warn("Unexpected avoid star import policy: " + attrValue);
+                warn(CheckStyleBundle.message("import.avoid-star-import.unsupported-property", attrName));
                 break;
         }
 
