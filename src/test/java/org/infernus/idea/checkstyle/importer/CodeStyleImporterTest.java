@@ -535,6 +535,19 @@ public class CodeStyleImporterTest
         assertEquals(CommonCodeStyleSettings.DO_NOT_WRAP, javaSettings.METHOD_CALL_CHAIN_WRAP);
     }
 
+    public void testSeparatorWrapImporterWarnsOnUnsupportedSemiToken() {
+        importConfiguration(
+                inTreeWalker(
+                        """
+                                <module name="SeparatorWrap">
+                                    <property name="tokens" value="SEMI"/>
+                                </module>"""
+                )
+        );
+        assertEquals(CheckStyleBundle.message("import.separator-wrap.token-unsupported", "SEMI"),
+                importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+    }
+
     public void testOperatorWrapImporter() {
         importConfiguration(
                 inTreeWalker(
