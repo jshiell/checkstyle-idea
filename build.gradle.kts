@@ -70,6 +70,12 @@ tasks {
         agentProvider.agentFiles.from(mockitoAgent)
         jvmArgumentProviders.add(agentProvider)
         useJUnitPlatform()
+
+        // tests bind local HttpServer instances to OS-assigned ephemeral ports; without this, the
+        // JDK's HttpURLConnection keep-alive cache (keyed on host:port only) can hand a request to a
+        // pooled connection left over from an unrelated test whose server happened to reuse the same
+        // port number, delivering that test's response instead of the current server's.
+        systemProperty("http.keepAlive", "false")
     }
 
     withType<JavaCompile> {
