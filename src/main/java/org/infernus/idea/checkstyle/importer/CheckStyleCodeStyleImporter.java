@@ -19,7 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,7 @@ public class CheckStyleCodeStyleImporter
     private static final Logger LOG = Logger.getInstance(CheckStyleCodeStyleImporter.class);
 
     private CheckstyleProjectService overrideCheckstyleProjectService;
+    private Set<String> importWarnings = Set.of();
 
     public CheckStyleCodeStyleImporter() {
     }
@@ -54,6 +57,7 @@ public class CheckStyleCodeStyleImporter
                                                   @NotNull final VirtualFile selectedFile,
                                                   @NotNull final CodeStyleScheme currentScheme,
                                                   @NotNull final SchemeFactory<? extends CodeStyleScheme> schemeFactory) throws SchemeImportException {
+        importWarnings = Set.of();
         try {
             CodeStyleScheme targetScheme = currentScheme;
             if (currentScheme.isDefault()) {
@@ -85,7 +89,10 @@ public class CheckStyleCodeStyleImporter
     @Nullable
     @Override
     public String getAdditionalImportInfo(@NotNull final CodeStyleScheme scheme) {
-        return null;
+        if (importWarnings.isEmpty()) {
+            return null;
+        }
+        return String.join("\n", importWarnings);
     }
 
 
@@ -123,6 +130,7 @@ public class CheckStyleCodeStyleImporter
                              @NotNull final CheckstyleInternalObject configuration,
                              @NotNull final CodeStyleSettings settings) {
 
+        Set<String> warnings = new LinkedHashSet<>();
         checkstyleProjectService.getCheckstyleInstance().peruseConfiguration(configuration, module -> {
             ModuleImporter moduleImporter;
             try {
@@ -132,7 +140,9 @@ public class CheckStyleCodeStyleImporter
             }
             if (moduleImporter != null) {
                 moduleImporter.importTo(settings);
+                warnings.addAll(moduleImporter.getWarnings());
             }
         });
+        importWarnings = Set.copyOf(warnings);
     }
 }

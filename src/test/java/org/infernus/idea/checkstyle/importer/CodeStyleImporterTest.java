@@ -2,8 +2,12 @@ package org.infernus.idea.checkstyle.importer;
 
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
+import com.intellij.openapi.options.SchemeFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.packageDependencies.DependencyValidationManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.codeStyle.*;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.psi.codeStyle.arrangement.match.StdArrangementMatchRule;
 import com.intellij.psi.codeStyle.arrangement.model.ArrangementAtomMatchCondition;
 import com.intellij.psi.codeStyle.arrangement.model.ArrangementCompositeMatchCondition;
@@ -11,11 +15,14 @@ import com.intellij.psi.codeStyle.arrangement.model.ArrangementMatchCondition;
 import com.intellij.psi.codeStyle.arrangement.std.ArrangementSettingsToken;
 import com.intellij.psi.codeStyle.arrangement.std.StdArrangementSettings;
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleInternalObject;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -24,6 +31,7 @@ import java.util.Set;
 
 import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.EntryType.*;
 import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.Modifier.*;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,11 +70,13 @@ public class CodeStyleImporterTest
     private static final String FILE_SUFFIX =
             "</module>";
 
+    private CheckStyleCodeStyleImporter importer;
+
     private void importConfiguration(@NotNull final String configuration) {
         String fullConfiguration = FILE_PREFIX + configuration + FILE_SUFFIX;
 
-        new CheckStyleCodeStyleImporter(csService).importConfiguration(
-                csService, loadConfiguration(fullConfiguration), codeStyleSettings);
+        importer = new CheckStyleCodeStyleImporter(csService);
+        importer.importConfiguration(csService, loadConfiguration(fullConfiguration), codeStyleSettings);
     }
 
     private String inTreeWalker(@NotNull final String configuration) {
@@ -88,6 +98,7 @@ public class CodeStyleImporterTest
         );
         assertEquals(100, javaSettings.RIGHT_MARGIN);
         assertTrue(javaSettings.WRAP_LONG_LINES);
+        assertNull(importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
     }
 
     public void testEmptyLineSeparator() {
@@ -552,6 +563,46 @@ public class CodeStyleImporterTest
                 PackageEntry.ALL_OTHER_IMPORTS_ENTRY
         };
         comparePackageEntries(expected, codeStyleSettings.getCustomSettings(JavaCodeStyleSettings.class).IMPORT_LAYOUT_TABLE);
+
+        assertEquals(CheckStyleBundle.message("import.custom-order.same-package-unsupported"),
+                importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testAdditionalImportInfoDoesNotLeakToASubsequentCleanImport() throws Exception {
+        CodeStyleScheme currentScheme = mock(CodeStyleScheme.class);
+        when(currentScheme.isDefault()).thenReturn(false);
+        when(currentScheme.getCodeStyleSettings()).thenReturn(codeStyleSettings);
+        SchemeFactory<CodeStyleScheme> schemeFactory = mock(SchemeFactory.class);
+
+        ConfigurationLocationFactory configurationLocationFactory = mock(ConfigurationLocationFactory.class);
+        ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
+        when(configurationLocationFactory.create(any(), any(), any(), any(), any(), any()))
+                .thenReturn(configurationLocation);
+        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(configurationLocationFactory);
+        when(project.getService(DependencyValidationManager.class))
+                .thenReturn(mock(DependencyValidationManager.class));
+
+        CheckStyleCodeStyleImporter schemeImporter = new CheckStyleCodeStyleImporter(csService);
+
+        VirtualFile warningFile = new LightVirtualFile("checkstyle-warning.xml", FILE_PREFIX + inTreeWalker(
+                """
+                        <module name="CustomImportOrder">
+                            <property name="customImportOrderRules" value="SAME_PACKAGE(2)###STATIC"/>
+                        </module>"""
+        ) + FILE_SUFFIX);
+        schemeImporter.importScheme(project, warningFile, currentScheme, schemeFactory);
+        assertEquals(CheckStyleBundle.message("import.custom-order.same-package-unsupported"),
+                schemeImporter.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+
+        VirtualFile cleanFile = new LightVirtualFile("checkstyle-clean.xml", FILE_PREFIX + inTreeWalker(
+                """
+                        <module name="LineLength">
+                            <property name="max" value="100"/>
+                        </module>"""
+        ) + FILE_SUFFIX);
+        schemeImporter.importScheme(project, cleanFile, currentScheme, schemeFactory);
+        assertNull(schemeImporter.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
     }
 
     public void testCustomImportOrderImporterSortAlphabetically() {
