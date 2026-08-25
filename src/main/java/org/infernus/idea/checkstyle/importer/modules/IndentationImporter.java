@@ -12,6 +12,8 @@ public class IndentationImporter extends ModuleImporter {
     private static final String BASIC_OFFSET_PROP = "basicOffset";
     private static final String CASE_INDENT_PROP = "caseIndent";
     private static final String LINE_WRAP_INDENT_PROP = "lineWrappingIndentation";
+    private static final String SEVERITY = "severity";
+    private static final String ID = "id";
 
     private static final int DEFAULT_BASIC_OFFSET = 4;
     private static final int DEFAULT_LINE_WRAP_INDENT = 4;
@@ -33,6 +35,10 @@ public class IndentationImporter extends ModuleImporter {
                 break;
             case LINE_WRAP_INDENT_PROP:
                 continuationIndent = getIntOrDefault(attrValue, DEFAULT_LINE_WRAP_INDENT);
+                break;
+            case SEVERITY:
+            case ID:
+                // ignored, but valid
                 break;
 
             default:
