@@ -107,6 +107,14 @@ class ModuleImporterFactoryTest {
                 hasItem(CheckStyleBundle.message("import.import-order.unsupported-property", "totallyBogusProperty")));
     }
 
+    @Test
+    void importOrderWithSeverityAndIdEmitsNoWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("ImportOrder");
+        when(module.getProperties()).thenReturn(Map.of("severity", "warning", "id", "myId"));
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(), org.hamcrest.Matchers.empty());
+    }
+
     private ConfigurationModule moduleNamed(final String name) {
         ConfigurationModule module = mock(ConfigurationModule.class);
         when(module.getName()).thenReturn(name);

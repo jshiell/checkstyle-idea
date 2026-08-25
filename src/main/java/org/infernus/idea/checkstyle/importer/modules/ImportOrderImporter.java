@@ -18,6 +18,8 @@ public class ImportOrderImporter extends ModuleImporter {
     private static final String GROUPS = "groups";
     private static final String SEPARATED = "separated";
     private static final String OPTION = "option";
+    private static final String SEVERITY = "severity";
+    private static final String ID = "id";
 
     private String[] groups;
     private boolean separated = false;
@@ -34,6 +36,10 @@ public class ImportOrderImporter extends ModuleImporter {
                 break;
             case OPTION:
                 staticPosition = StaticImportPosition.valueOf(attrValue.toUpperCase());
+                break;
+            case SEVERITY:
+            case ID:
+                // ignored, but valid
                 break;
             default:
                 warn(CheckStyleBundle.message("import.import-order.unsupported-property", attrName));
