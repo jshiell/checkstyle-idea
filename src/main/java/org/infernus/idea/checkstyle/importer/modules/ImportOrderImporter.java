@@ -6,6 +6,7 @@ import com.intellij.psi.codeStyle.JavaCodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
 import java.util.HashSet;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +36,7 @@ public class ImportOrderImporter extends ModuleImporter {
                 staticPosition = StaticImportPosition.valueOf(attrValue.toUpperCase());
                 break;
             default:
-                LOG.warn("Unexpected import order policy: " + attrValue);
+                warn(CheckStyleBundle.message("import.import-order.unsupported-property", attrName));
                 break;
         }
     }
