@@ -104,7 +104,7 @@ class ModuleImporterFactoryTest {
         when(module.getProperties()).thenReturn(Map.of("totallyBogusProperty", "x"));
         ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
         assertThat(importer.getWarnings(),
-                hasItem(CheckStyleBundle.message("import.import-order.unsupported-property", "totallyBogusProperty")));
+                hasItem("The ImportOrder rule's \"totallyBogusProperty\" property is not supported by this importer and was ignored."));
     }
 
     @Test
