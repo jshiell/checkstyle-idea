@@ -14,6 +14,8 @@ public class AvoidStarImportImporter extends ModuleImporter {
     private static final String EXCLUDES = "excludes";
     private static final String ALLOW_CLASS_STAR_IMPORT = "allowClassImports";
     private static final String ALLOW_STATIC_STAR_IMPORT = "allowStaticMemberImports";
+    private static final String SEVERITY = "severity";
+    private static final String ID = "id";
     private static final int MAXIMUM_INPUTS = 999;
 
     private boolean allowClassStarImports;
@@ -31,6 +33,10 @@ public class AvoidStarImportImporter extends ModuleImporter {
                 break;
             case ALLOW_STATIC_STAR_IMPORT:
                 allowStaticStarImports = Boolean.parseBoolean(attrValue);
+                break;
+            case SEVERITY:
+            case ID:
+                // ignored, but valid
                 break;
             default:
                 warn(CheckStyleBundle.message("import.avoid-star-import.unsupported-property", attrName));
