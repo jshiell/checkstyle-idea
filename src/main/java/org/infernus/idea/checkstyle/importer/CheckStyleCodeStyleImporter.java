@@ -143,6 +143,6 @@ public class CheckStyleCodeStyleImporter
                 warnings.addAll(moduleImporter.getWarnings());
             }
         });
-        importWarnings = Set.copyOf(warnings);
+        importWarnings = Collections.unmodifiableSet(warnings);
     }
 }

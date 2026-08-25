@@ -568,6 +568,16 @@ public class CodeStyleImporterTest
                 importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
     }
 
+    public void testAdditionalImportInfoPreservesConfigOrderAcrossMultipleWarnings() {
+        importConfiguration(
+                inTreeWalker(
+                        "<module name=\"WarningOrderingFixture\"/>"
+                )
+        );
+        assertEquals("first-warning\nsecond-warning",
+                importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+    }
+
     @SuppressWarnings("unchecked")
     public void testAdditionalImportInfoDoesNotLeakToASubsequentCleanImport() throws Exception {
         CodeStyleScheme currentScheme = mock(CodeStyleScheme.class);
