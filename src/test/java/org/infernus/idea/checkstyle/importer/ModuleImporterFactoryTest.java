@@ -82,6 +82,22 @@ class ModuleImporterFactoryTest {
                 hasItem(CheckStyleBundle.message("import.left-curly.unrecognized-option", "banana")));
     }
 
+    @Test
+    void separatorWrapWithSemiTokenEmitsWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("SeparatorWrap");
+        when(module.getKnownTokenTypes()).thenReturn(java.util.Set.of(org.infernus.idea.checkstyle.csapi.KnownTokenTypes.SEMI));
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(),
+                hasItem(CheckStyleBundle.message("import.separator-wrap.token-unsupported", "SEMI")));
+    }
+
+    @Test
+    void separatorWrapWithNoTokensEmitsNoWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("SeparatorWrap");
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(), org.hamcrest.Matchers.empty());
+    }
+
     private ConfigurationModule moduleNamed(final String name) {
         ConfigurationModule module = mock(ConfigurationModule.class);
         when(module.getName()).thenReturn(name);

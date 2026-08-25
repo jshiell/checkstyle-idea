@@ -4,6 +4,8 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 
 import static com.intellij.psi.codeStyle.CommonCodeStyleSettings.WRAP_ALWAYS;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.csapi.ConfigurationModule;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +26,21 @@ public class SeparatorWrapImporter extends ModuleImporter {
     }
 
     @Override
+    public void setFrom(@NotNull final ConfigurationModule moduleConfig) {
+        super.setFrom(moduleConfig);
+        warnIfUnsupported(moduleConfig, KnownTokenTypes.ELLIPSIS);
+        warnIfUnsupported(moduleConfig, KnownTokenTypes.METHOD_REF);
+        warnIfUnsupported(moduleConfig, KnownTokenTypes.SEMI);
+        warnIfUnsupported(moduleConfig, KnownTokenTypes.ARRAY_DECLARATOR);
+    }
+
+    private void warnIfUnsupported(@NotNull final ConfigurationModule moduleConfig, @NotNull final KnownTokenTypes token) {
+        if (moduleConfig.getKnownTokenTypes().contains(token)) {
+            warn(CheckStyleBundle.message("import.separator-wrap.token-unsupported", token.name()));
+        }
+    }
+
+    @Override
     public void importTo(@NotNull final CodeStyleSettings settings) {
         CommonCodeStyleSettings javaSettings = getCommonSettings(settings);
         if (appliesTo(KnownTokenTypes.DOT)) {
@@ -39,6 +56,5 @@ public class SeparatorWrapImporter extends ModuleImporter {
             }
         }
         // COMMA is a no-op: IDEA has no generic "comma on next line" setting.
-        // Other tokens (ELLIPSIS, METHOD_REF, SEMI, ARRAY_DECLARATOR) have no IDEA equivalent.
     }
 }
