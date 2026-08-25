@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.16.0** Fixed: Importing a rules file whose `CustomImportOrder` uses `SAME_PACKAGE` now shows a warning that the group has no IntelliJ equivalent and was skipped, instead of silently dropping it (#377).
 * **26.16.0** New: When a Maven mirror is auto-detected from settings.xml, its matching `<server>` username and password (decrypted, if encrypted) are now used automatically for the download (#698).
 * **26.16.0** New: The artefact download mirror override now supports a username and password, sent as HTTP Basic authentication, for authenticated repositories such as a corporate Artifactory or Nexus (#698).
 * **26.16.0** Fixed: Non-bundled Checkstyle version downloads no longer fail with `NoSuchMethodError` when resolving a Maven settings.xml mirror (#698).
