@@ -138,7 +138,7 @@ class ModuleImporterFactoryTest {
         when(module.getProperties()).thenReturn(Map.of("totallyBogusProperty", "x"));
         ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
         assertThat(importer.getWarnings(),
-                hasItem(CheckStyleBundle.message("import.avoid-star-import.unsupported-property", "totallyBogusProperty")));
+                hasItem("The AvoidStarImport rule's \"totallyBogusProperty\" property is not supported by this importer and was ignored."));
     }
 
     @Test
