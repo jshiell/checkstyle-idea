@@ -115,6 +115,15 @@ class ModuleImporterFactoryTest {
         assertThat(importer.getWarnings(), org.hamcrest.Matchers.empty());
     }
 
+    @Test
+    void indentationWithUnknownPropertyEmitsWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("Indentation");
+        when(module.getProperties()).thenReturn(Map.of("totallyBogusProperty", "x"));
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(),
+                hasItem(CheckStyleBundle.message("import.indentation.unsupported-property", "totallyBogusProperty")));
+    }
+
     private ConfigurationModule moduleNamed(final String name) {
         ConfigurationModule module = mock(ConfigurationModule.class);
         when(module.getName()).thenReturn(name);

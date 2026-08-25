@@ -1,15 +1,13 @@
 package org.infernus.idea.checkstyle.importer.modules;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class IndentationImporter extends ModuleImporter {
-
-    private static final Logger LOG = Logger.getInstance(IndentationImporter.class);
 
     private static final String BASIC_OFFSET_PROP = "basicOffset";
     private static final String CASE_INDENT_PROP = "caseIndent";
@@ -38,8 +36,7 @@ public class IndentationImporter extends ModuleImporter {
                 break;
 
             default:
-                // uncharted territory - https://checkstyle.org/property_types.html#LeftCurlyOption
-                LOG.warn("Unexpected indentation policy: " + attrValue);
+                warn(CheckStyleBundle.message("import.indentation.unsupported-property", attrName));
                 break;
         }
     }
