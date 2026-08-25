@@ -114,6 +114,15 @@ v2 content modules). To confirm real behaviour rather than assume it: `unzip -o 
 `lib/util.jar`, or `lib/util-8.jar`; check those directly before looping `find` across the ~500+ jars in the
 distribution, which can silently return zero matches even when the class exists.
 
+**`CheckStyleBundle.message(key, params)` and apostrophes:** any call with a non-empty `params` routes
+through `java.text.MessageFormat` (confirmed by disassembling `BundleBase.format` in `lib/util-8.jar`),
+which treats a lone `'` as an unterminated quote — it swallows everything after it, including `{0}`,
+until the next `''` or end of string. Every parameterized entry in `CheckStyleBundle.properties` needs
+literal apostrophes doubled (`rule''s`), matching the convention already at lines 11 and 16. A zero-arg
+key is unaffected — empty `params` skips `MessageFormat` entirely. Verify a new entry by actually
+rendering it (`MessageFormat.format(pattern, args)`), not by inspection; a test that compares
+`CheckStyleBundle.message(key, arg)` against itself proves nothing about the properties file.
+
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
 **Sandbox:** `build/idea-sandbox/` — not auto-cleaned; delete manually if stale.
