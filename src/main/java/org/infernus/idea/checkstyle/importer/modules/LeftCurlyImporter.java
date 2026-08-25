@@ -3,17 +3,15 @@ package org.infernus.idea.checkstyle.importer.modules;
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.csapi.KnownTokenTypes;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class LeftCurlyImporter extends ModuleImporter {
-
-    private static final Logger LOG = Logger.getInstance(LeftCurlyImporter.class);
 
     private static final String OPTION_PROP = "option";
 
@@ -49,8 +47,7 @@ public class LeftCurlyImporter extends ModuleImporter {
                     leftCurlyPolicy = CommonCodeStyleSettings.NEXT_LINE_IF_WRAPPED;
                     break;
                 default:
-                    // uncharted territory - https://checkstyle.org/property_types.html#LeftCurlyOption
-                    LOG.warn("Unexpected left curly policy: " + attrValue);
+                    warn(CheckStyleBundle.message("import.left-curly.unrecognized-option", attrValue));
                     break;
             }
         }

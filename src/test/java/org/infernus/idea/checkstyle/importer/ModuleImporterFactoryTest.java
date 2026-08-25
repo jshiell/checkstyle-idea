@@ -73,6 +73,15 @@ class ModuleImporterFactoryTest {
                 hasItem(CheckStyleBundle.message("import.custom-order.same-package-unsupported")));
     }
 
+    @Test
+    void leftCurlyWithUnrecognizedOptionEmitsWarning() throws Exception {
+        ConfigurationModule module = moduleNamed("LeftCurly");
+        when(module.getProperties()).thenReturn(Map.of("option", "banana"));
+        ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
+        assertThat(importer.getWarnings(),
+                hasItem(CheckStyleBundle.message("import.left-curly.unrecognized-option", "banana")));
+    }
+
     private ConfigurationModule moduleNamed(final String name) {
         ConfigurationModule module = mock(ConfigurationModule.class);
         when(module.getName()).thenReturn(name);
