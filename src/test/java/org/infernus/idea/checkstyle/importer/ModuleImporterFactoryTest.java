@@ -88,7 +88,7 @@ class ModuleImporterFactoryTest {
         when(module.getKnownTokenTypes()).thenReturn(java.util.Set.of(org.infernus.idea.checkstyle.csapi.KnownTokenTypes.SEMI));
         ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
         assertThat(importer.getWarnings(),
-                hasItem(CheckStyleBundle.message("import.separator-wrap.token-unsupported", "SEMI")));
+                hasItem("The SeparatorWrap rule's \"SEMI\" token has no IntelliJ equivalent and was not imported."));
     }
 
     @Test

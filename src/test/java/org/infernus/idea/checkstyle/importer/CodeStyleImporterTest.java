@@ -544,7 +544,7 @@ public class CodeStyleImporterTest
                                 </module>"""
                 )
         );
-        assertEquals(CheckStyleBundle.message("import.separator-wrap.token-unsupported", "SEMI"),
+        assertEquals("The SeparatorWrap rule's \"SEMI\" token has no IntelliJ equivalent and was not imported.",
                 importer.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
     }
 
