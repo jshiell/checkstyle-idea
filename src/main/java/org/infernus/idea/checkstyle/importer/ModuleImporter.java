@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.importer;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class ModuleImporter {
 
     private Set<KnownTokenTypes> tokens;
+    private final List<String> warnings = new ArrayList<>();
 
     @NotNull
     protected CommonCodeStyleSettings getCommonSettings(@NotNull final CodeStyleSettings settings) {
@@ -33,6 +36,14 @@ public abstract class ModuleImporter {
     }
 
     protected abstract void handleAttribute(@NotNull String attrName, @NotNull String attrValue);
+
+    protected void warn(@NotNull final String message) {
+        warnings.add(message);
+    }
+
+    List<String> getWarnings() {
+        return List.copyOf(warnings);
+    }
 
 
     protected boolean appliesTo(final KnownTokenTypes token) {

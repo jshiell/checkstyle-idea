@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.importer.modules;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.PackageEntry;
 import com.intellij.psi.codeStyle.PackageEntryTable;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.importer.ModuleImporter;
 import org.jetbrains.annotations.NotNull;
 
@@ -149,6 +150,10 @@ public class CustomImportOrderImporter extends ModuleImporter {
                 .map(String::strip)
                 .map(ImportGroup::valueOf)
                 .collect(Collectors.toList());
+
+        if (customImportOrder.contains(ImportGroup.SAME_PACKAGE)) {
+            warn(CheckStyleBundle.message("import.custom-order.same-package-unsupported"));
+        }
     }
 
     public enum ImportGroup {
