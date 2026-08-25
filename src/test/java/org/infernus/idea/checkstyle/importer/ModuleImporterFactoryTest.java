@@ -79,7 +79,7 @@ class ModuleImporterFactoryTest {
         when(module.getProperties()).thenReturn(Map.of("option", "banana"));
         ModuleImporter importer = ModuleImporterFactory.getModuleImporter(module);
         assertThat(importer.getWarnings(),
-                hasItem(CheckStyleBundle.message("import.left-curly.unrecognized-option", "banana")));
+                hasItem("The LeftCurly rule's option value \"banana\" is not recognized and was not imported."));
     }
 
     @Test
