@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.importer;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.options.SchemeFactory;
+import com.intellij.openapi.options.SchemeImportException;
 import com.intellij.openapi.project.Project;
 import com.intellij.packageDependencies.DependencyValidationManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -31,6 +32,7 @@ import java.util.Set;
 
 import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.EntryType.*;
 import static com.intellij.psi.codeStyle.arrangement.std.StdArrangementTokens.Modifier.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -612,6 +614,40 @@ public class CodeStyleImporterTest
                         </module>"""
         ) + FILE_SUFFIX);
         schemeImporter.importScheme(project, cleanFile, currentScheme, schemeFactory);
+        assertNull(schemeImporter.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testAdditionalImportInfoDoesNotLeakAfterASubsequentFailedImport() throws Exception {
+        CodeStyleScheme currentScheme = mock(CodeStyleScheme.class);
+        when(currentScheme.isDefault()).thenReturn(false);
+        when(currentScheme.getCodeStyleSettings()).thenReturn(codeStyleSettings);
+        SchemeFactory<CodeStyleScheme> schemeFactory = mock(SchemeFactory.class);
+
+        ConfigurationLocationFactory configurationLocationFactory = mock(ConfigurationLocationFactory.class);
+        ConfigurationLocation configurationLocation = mock(ConfigurationLocation.class);
+        when(configurationLocationFactory.create(any(), any(), any(), any(), any(), any()))
+                .thenReturn(configurationLocation);
+        when(project.getService(ConfigurationLocationFactory.class)).thenReturn(configurationLocationFactory);
+        when(project.getService(DependencyValidationManager.class))
+                .thenReturn(mock(DependencyValidationManager.class));
+
+        CheckStyleCodeStyleImporter schemeImporter = new CheckStyleCodeStyleImporter(csService);
+
+        VirtualFile warningFile = new LightVirtualFile("checkstyle-warning.xml", FILE_PREFIX + inTreeWalker(
+                """
+                        <module name="CustomImportOrder">
+                            <property name="customImportOrderRules" value="SAME_PACKAGE(2)###STATIC"/>
+                        </module>"""
+        ) + FILE_SUFFIX);
+        schemeImporter.importScheme(project, warningFile, currentScheme, schemeFactory);
+        assertEquals(CheckStyleBundle.message("import.custom-order.same-package-unsupported"),
+                schemeImporter.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
+
+        VirtualFile malformedFile = new LightVirtualFile("checkstyle-malformed.xml", "not xml at all");
+        assertThrows(SchemeImportException.class,
+                () -> schemeImporter.importScheme(project, malformedFile, currentScheme, schemeFactory));
+
         assertNull(schemeImporter.getAdditionalImportInfo(mock(CodeStyleScheme.class)));
     }
 
