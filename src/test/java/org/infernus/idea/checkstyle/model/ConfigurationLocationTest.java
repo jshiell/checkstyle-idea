@@ -319,6 +319,59 @@ public class ConfigurationLocationTest {
         }
     }
 
+    /**
+     * A ConfigurationLocation whose base dir (the rules file's own directory) is fixed for the test,
+     * to exercise {@code checkRelativeToRulesFile} independently of a real rules file on disk.
+     */
+    private static class BaseDirTestConfigurationLocation extends ConfigurationLocation {
+
+        private final File baseDir;
+
+        BaseDirTestConfigurationLocation(final Project project, final File baseDir) {
+            super("anId", ConfigurationType.LOCAL_FILE, project);
+            this.baseDir = baseDir;
+
+            setLocation("unused");
+            setNamedScope(TestHelper.NAMED_SCOPE);
+        }
+
+        @Override
+        public File getBaseDir() {
+            return baseDir;
+        }
+
+        @NotNull
+        @Override
+        protected InputStream resolveFile(@NotNull final ClassLoader checkstyleClassLoader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Object clone() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @Test
+    public void checkRelativeToRulesFileTakesPrecedenceOverTheModulesOwnDirectory(
+            @TempDir final Path rulesFileDir, @TempDir final Path moduleDir) throws IOException {
+        final String fileName = "csidea-test-fixture-537-precedence.xml";
+        Files.writeString(rulesFileDir.resolve(fileName), "rules-file-relative copy");
+        Files.writeString(moduleDir.resolve(fileName), "module's own copy");
+
+        final Project project = TestHelper.mockProject();
+        final ProjectPaths projectPaths = mock(ProjectPaths.class);
+        when(project.getService(ProjectPaths.class)).thenReturn(projectPaths);
+
+        final Module module = mockModuleIn(moduleDir, projectPaths);
+
+        final ConfigurationLocation location = new BaseDirTestConfigurationLocation(project, rulesFileDir.toFile());
+
+        final String resolved = location.resolveAssociatedFile(fileName, module, getClass().getClassLoader());
+
+        assertThat(resolved, is(equalTo(rulesFileDir.resolve(fileName).toString())));
+        assertThat(resolved, is(not(equalTo(moduleDir.resolve(fileName).toString()))));
+    }
 
     @Test
     public void testSorting() {
