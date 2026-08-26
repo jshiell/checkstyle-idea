@@ -1,8 +1,13 @@
 package org.infernus.idea.checkstyle.config;
 
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.util.Streams;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Locale;
 
 public final class ConfigurationExporter {
@@ -31,5 +36,16 @@ public final class ConfigurationExporter {
 
     public static boolean hasConfiguredProperties(@NotNull final ConfigurationLocation location) {
         return !location.getProperties().isEmpty();
+    }
+
+    public static void export(@NotNull final ConfigurationLocation location,
+                              @NotNull final ClassLoader checkstyleClassLoader,
+                              @NotNull final File destination) throws IOException {
+        final ConfigurationLocation clone = (ConfigurationLocation) location.clone();
+        final byte[] content;
+        try (InputStream resolved = clone.resolve(checkstyleClassLoader)) {
+            content = Streams.readContentOf(resolved);
+        }
+        Files.write(destination.toPath(), content);
     }
 }
