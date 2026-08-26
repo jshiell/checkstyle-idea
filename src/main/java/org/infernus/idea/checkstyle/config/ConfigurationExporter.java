@@ -28,4 +28,8 @@ public final class ConfigurationExporter {
 
         return name + XML_SUFFIX;
     }
+
+    public static boolean hasConfiguredProperties(@NotNull final ConfigurationLocation location) {
+        return !location.getProperties().isEmpty();
+    }
 }
