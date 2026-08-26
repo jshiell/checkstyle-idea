@@ -244,7 +244,11 @@ public class ConfigurationLocationTest {
     private static class TestConfigurationLocation extends ConfigurationLocation {
 
         TestConfigurationLocation(final String content) {
-            super("anId", ConfigurationType.LOCAL_FILE, TestHelper.mockProject());
+            this(content, TestHelper.mockProject());
+        }
+
+        TestConfigurationLocation(final String content, final Project project) {
+            super("anId", ConfigurationType.LOCAL_FILE, project);
 
             setLocation(content);
             setNamedScope(TestHelper.NAMED_SCOPE);
