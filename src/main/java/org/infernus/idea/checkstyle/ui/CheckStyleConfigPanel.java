@@ -1,9 +1,16 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.fileChooser.FileChooserFactory;
+import com.intellij.openapi.fileChooser.FileSaverDescriptor;
+import com.intellij.openapi.fileChooser.FileSaverDialog;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.ComboBox;
@@ -11,6 +18,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.table.JBTable;
@@ -20,6 +28,7 @@ import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
+import org.infernus.idea.checkstyle.config.ConfigurationExporter;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -33,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -236,6 +246,7 @@ public class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setRemoveAction(new RemoveLocationAction());
         tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndNotBundled());
         tableDecorator.setRemoveActionUpdater(new EnableWhenSelectedAndRemovable());
+        tableDecorator.addExtraAction((AnAction) new ExportLocationAction());
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         final JPanel container = new JPanel(new BorderLayout());
@@ -450,6 +461,68 @@ public class CheckStyleConfigPanel extends JPanel {
                 final ConfigurationLocation editedLocation = propertiesDialogue.getConfigurationLocation();
                 locationModel.updateLocation(location, editedLocation);
             }
+        }
+    }
+
+    /**
+     * Export the resolved XML of a configuration location to a file.
+     */
+    private final class ExportLocationAction extends AnActionButton {
+        ExportLocationAction() {
+            super(CheckStyleBundle.message("config.file.export.text"), AllIcons.ToolbarDecorator.Export);
+            addCustomUpdater(e -> locationTable.getSelectedRow() >= 0);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull final AnActionEvent e) {
+            final int selectedIndex = locationTable.getSelectedRow();
+            if (selectedIndex == -1) {
+                return;
+            }
+
+            final ConfigurationLocation location = locationModel.getLocationAt(selectedIndex);
+
+            final FileSaverDescriptor descriptor = new FileSaverDescriptor(
+                    CheckStyleBundle.message("config.file.export.text"),
+                    CheckStyleBundle.message("config.file.export.tooltip"),
+                    "xml");
+            final FileSaverDialog dialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project);
+            final VirtualFileWrapper wrapper = dialog.save(
+                    ProjectUtil.guessProjectDir(project), ConfigurationExporter.suggestedFileName(location));
+            if (wrapper == null) {
+                return;
+            }
+
+            final File destination = wrapper.getFile();
+            final Exception[] failure = {null};
+            ProgressManager.getInstance().run(new Task.Modal(
+                    project, CheckStyleBundle.message("config.export.title", location.getDescription()), false) {
+                @Override
+                public void run(@NotNull final ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    try {
+                        ConfigurationExporter.export(location, checkstyleProjectService.underlyingClassLoader(), destination);
+                    } catch (Exception exception) {
+                        failure[0] = exception;
+                    }
+                }
+            });
+
+            if (failure[0] != null) {
+                Messages.showErrorDialog(project,
+                        CheckStyleBundle.message("config.export.failed", Objects.toString(
+                                failure[0].getMessage(), failure[0].getClass().getSimpleName())),
+                        CheckStyleBundle.message("config.export.failed.title"));
+                return;
+            }
+
+            LocalFileSystem.getInstance().refreshAndFindFileByIoFile(destination);
+
+            String message = CheckStyleBundle.message("config.export.success", destination.getAbsolutePath());
+            if (ConfigurationExporter.hasConfiguredProperties(location)) {
+                message += " " + CheckStyleBundle.message("config.export.success.properties-warning");
+            }
+            Messages.showInfoMessage(project, message, CheckStyleBundle.message("config.export.success.title"));
         }
     }
 
