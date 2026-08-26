@@ -1,6 +1,10 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ContentEntry;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
@@ -9,10 +13,14 @@ import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -23,6 +31,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -207,6 +216,50 @@ public class ConfigurationLocationTest {
     @Test
     public void toStringReturnsTheDescription() {
         assertThat(underTest.toString(), is(equalTo("aDescription")));
+    }
+
+    @Test
+    public void checkModuleFileResolvesEachModuleAgainstItsOwnDirectory(@TempDir final Path moduleOneDir,
+                                                                        @TempDir final Path moduleTwoDir) throws IOException {
+        final String fileName = "csidea-test-fixture-537.xml";
+        Files.writeString(moduleOneDir.resolve(fileName), "module one's copy");
+        Files.writeString(moduleTwoDir.resolve(fileName), "module two's copy");
+
+        final Project project = TestHelper.mockProject();
+        final ProjectPaths projectPaths = mock(ProjectPaths.class);
+        when(project.getService(ProjectPaths.class)).thenReturn(projectPaths);
+
+        final Module moduleOne = mockModuleIn(moduleOneDir, projectPaths);
+        final Module moduleTwo = mockModuleIn(moduleTwoDir, projectPaths);
+
+        final TestConfigurationLocation location = new TestConfigurationLocation(TEST_FILE, project);
+
+        final String resolvedForModuleOne =
+                location.resolveAssociatedFile(fileName, moduleOne, getClass().getClassLoader());
+        final String resolvedForModuleTwo =
+                location.resolveAssociatedFile(fileName, moduleTwo, getClass().getClassLoader());
+
+        assertThat(resolvedForModuleOne, is(not(equalTo(resolvedForModuleTwo))));
+        assertThat(resolvedForModuleOne, is(equalTo(moduleOneDir.resolve(fileName).toString())));
+        assertThat(resolvedForModuleTwo, is(equalTo(moduleTwoDir.resolve(fileName).toString())));
+    }
+
+    /**
+     * Module.getComponent(ModuleRootManager.class) is what {@code ModuleRootManager.getInstance(module)}
+     * resolves to under the hood - confirmed by decompiling the platform's ModuleRootManager class.
+     */
+    private Module mockModuleIn(final Path moduleDir, final ProjectPaths projectPaths) {
+        final Module module = mock(Module.class);
+
+        final ModuleRootManager rootManager = mock(ModuleRootManager.class);
+        when(rootManager.getContentEntries()).thenReturn(new ContentEntry[0]);
+        when(module.getComponent(ModuleRootManager.class)).thenReturn(rootManager);
+
+        final VirtualFile moduleVirtualDir = mock(VirtualFile.class);
+        when(moduleVirtualDir.getPath()).thenReturn(moduleDir.toString());
+        when(projectPaths.modulePath(module)).thenReturn(moduleVirtualDir);
+
+        return module;
     }
 
     private void updatePropertyOn(final ConfigurationLocation configurationLocation,
