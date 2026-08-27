@@ -66,7 +66,7 @@ public class ConfigurationLocationFactory {
                 break;
 
             case BUNDLED:
-                configurationLocation = new BundledConfigurationLocation(BundledConfig.fromDescription(description), project);
+                configurationLocation = resolveBundledConfigurationLocation(project, id, location, description);
                 break;
 
             case LEGACY_CLASSPATH:
@@ -95,6 +95,34 @@ public class ConfigurationLocationFactory {
     public @NotNull BundledConfigurationLocation create(@NotNull final BundledConfig bundledConfig,
                                                         @NotNull final Project project) {
         return new BundledConfigurationLocation(bundledConfig, project);
+    }
+
+    /**
+     * Resolve a {@link BundledConfigurationLocation} for a {@code BUNDLED}-type descriptor.
+     * <p>Tries, in order: (1) match {@code location} against a {@link BundledConfig} id, keeping the
+     * caller-supplied {@code id} - this is the path for both freshly-seeded and user-created copies, which
+     * need a stable id of their own; (2) match {@code description} against a {@link BundledConfig}'s canonical
+     * description, using the {@link BundledConfig}'s own id - this is the legacy-migration path, where the
+     * caller only ever supplies a fresh random id that must be discarded in favour of the stable canonical one;
+     * (3) fall back to the {@link BundledConfig#fromDescription(String)} heuristic, also using the
+     * {@link BundledConfig}'s own id.</p>
+     */
+    @NotNull
+    private BundledConfigurationLocation resolveBundledConfigurationLocation(@NotNull final Project project,
+                                                                             @NotNull final String id,
+                                                                             final String location,
+                                                                             final String description) {
+        for (final BundledConfig bundledConfig : BundledConfig.getAllBundledConfigs()) {
+            if (bundledConfig.getId().equals(location)) {
+                return new BundledConfigurationLocation(id, bundledConfig, project);
+            }
+        }
+        for (final BundledConfig bundledConfig : BundledConfig.getAllBundledConfigs()) {
+            if (bundledConfig.getDescription().equals(description)) {
+                return new BundledConfigurationLocation(bundledConfig, project);
+            }
+        }
+        return new BundledConfigurationLocation(BundledConfig.fromDescription(description), project);
     }
 
 }

@@ -60,7 +60,7 @@ public class ConfigurationLocationFactoryTest {
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;
         assertEquals(BundledConfig.SUN_CHECKS, bcl.getBundledConfig());
         assertEquals(BundledConfig.SUN_CHECKS.getDescription(), bcl.getDescription());
-        assertEquals(BundledConfig.SUN_CHECKS.getLocation(), bcl.getLocation());
+        assertEquals(BundledConfig.SUN_CHECKS.getId(), bcl.getLocation());
         assertEquals(BundledConfig.SUN_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         assertTrue(bcl.getProperties().isEmpty());
     }
@@ -73,8 +73,30 @@ public class ConfigurationLocationFactoryTest {
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) clg;
         assertEquals(BundledConfig.GOOGLE_CHECKS, bcl.getBundledConfig());
         assertEquals(BundledConfig.GOOGLE_CHECKS.getDescription(), bcl.getDescription());
-        assertEquals(BundledConfig.GOOGLE_CHECKS.getLocation(), bcl.getLocation());
+        assertEquals(BundledConfig.GOOGLE_CHECKS.getId(), bcl.getLocation());
         assertEquals(BundledConfig.GOOGLE_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         assertTrue(bcl.getProperties().isEmpty());
+    }
+
+    @Test
+    public void aBundledLocationMatchedByIdKeepsTheCallerSuppliedId() {
+        ConfigurationLocation cl = underTest.create(project, "a-user-created-copy-id", ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), "My Custom Google Checks", allScope);
+        assertNotNull(cl);
+        assertEquals(BundledConfigurationLocation.class, cl.getClass());
+        final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cl;
+        assertEquals(BundledConfig.GOOGLE_CHECKS, bcl.getBundledConfig());
+        assertEquals("a-user-created-copy-id", bcl.getId());
+    }
+
+    @Test
+    public void aLegacyBundledLocationMatchedByDescriptionKeepsTheStableCanonicalId() {
+        ConfigurationLocation cl = underTest.create(project, "some-random-legacy-id", ConfigurationType.BUNDLED,
+                "(bundled)", "Sun Checks", allScope);
+        assertNotNull(cl);
+        assertEquals(BundledConfigurationLocation.class, cl.getClass());
+        final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cl;
+        assertEquals(BundledConfig.SUN_CHECKS, bcl.getBundledConfig());
+        assertEquals(BundledConfig.SUN_CHECKS.getId(), bcl.getId());
     }
 }

@@ -15,8 +15,6 @@ public final class BundledConfig {
 
     private static final Logger LOG = Logger.getInstance(BundledConfig.class);
 
-    private static final String BUNDLED_LOCATION = "(bundled)";
-
     /** the Sun checks */
     public static final BundledConfig SUN_CHECKS = new BundledConfig(0, "bundled-sun-checks", "Sun Checks", "/sun_checks.xml");
 
@@ -25,8 +23,6 @@ public final class BundledConfig {
 
     private final int sortOrder;
     private final String id;
-
-    private final String location;
 
     private final String description;
 
@@ -38,7 +34,6 @@ public final class BundledConfig {
                   @NotNull final String path) {
         this.sortOrder = sortOrder;
         this.id = id;
-        this.location = BUNDLED_LOCATION;
         this.description = description;
         this.path = path;
     }
@@ -47,7 +42,6 @@ public final class BundledConfig {
         this.sortOrder = sortOrder;
         this.id = id;
         this.description = baseConfig.getDescription();
-        this.location = BUNDLED_LOCATION;
         this.path = baseConfig.getPath();
     }
 
@@ -57,11 +51,6 @@ public final class BundledConfig {
 
     public String getId() {
         return id;
-    }
-
-    @NotNull
-    public String getLocation() {
-        return location;
     }
 
     @NotNull
@@ -76,7 +65,7 @@ public final class BundledConfig {
 
     public boolean matches(@NotNull final ConfigurationLocation configurationLocation) {
         return configurationLocation.getType() == ConfigurationType.BUNDLED
-                && Objects.equals(configurationLocation.getLocation(), location)
+                && Objects.equals(configurationLocation.getLocation(), id)
                 && Objects.equals(configurationLocation.getDescription(), description);
     }
 

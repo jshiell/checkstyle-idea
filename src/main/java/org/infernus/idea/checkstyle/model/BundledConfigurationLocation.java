@@ -24,7 +24,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
                                  @NotNull final BundledConfig bundledConfig,
                                  @NotNull final Project project) {
         super(id, ConfigurationType.BUNDLED, project);
-        super.setLocation(bundledConfig.getLocation());
+        super.setLocation(bundledConfig.getId());
         super.setDescription(bundledConfig.getDescription());
 
         this.bundledConfig = bundledConfig;

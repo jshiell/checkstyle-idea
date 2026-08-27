@@ -86,7 +86,7 @@ public class CheckstylePluginApiTest {
                         .build());
         CheckstylePluginApi.ConfigurationVisitor visitor = mock(CheckstylePluginApi.ConfigurationVisitor.class);
         NamedScope allScope = NamedScopeHelper.getScopeByIdWithDefaultFallback(project, "All");
-        when(configurationLocationFactory.create(eq(project), anyString(), eq(ConfigurationType.BUNDLED), eq("(bundled)"), eq("Google Checks"), eq(allScope)))
+        when(configurationLocationFactory.create(eq(project), anyString(), eq(ConfigurationType.BUNDLED), eq(GOOGLE_CHECKS.getId()), eq("Google Checks"), eq(allScope)))
                 .thenReturn(googleChecks);
 
         underTest.visitCurrentConfiguration(visitor);

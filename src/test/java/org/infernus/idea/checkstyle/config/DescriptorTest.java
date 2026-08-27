@@ -69,7 +69,7 @@ public class DescriptorTest {
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cls;
         assertEquals(BundledConfig.SUN_CHECKS, bcl.getBundledConfig());
         assertEquals(BundledConfig.SUN_CHECKS.getDescription(), bcl.getDescription());
-        assertEquals(BundledConfig.SUN_CHECKS.getLocation(), bcl.getLocation());
+        assertEquals(BundledConfig.SUN_CHECKS.getId(), bcl.getLocation());
         assertEquals(BundledConfig.SUN_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         assertTrue(bcl.getProperties().isEmpty());
     }
@@ -82,7 +82,7 @@ public class DescriptorTest {
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) clg;
         assertEquals(BundledConfig.GOOGLE_CHECKS, bcl.getBundledConfig());
         assertEquals(BundledConfig.GOOGLE_CHECKS.getDescription(), bcl.getDescription());
-        assertEquals(BundledConfig.GOOGLE_CHECKS.getLocation(), bcl.getLocation());
+        assertEquals(BundledConfig.GOOGLE_CHECKS.getId(), bcl.getLocation());
         assertEquals(BundledConfig.GOOGLE_CHECKS.getPath(), bcl.getBundledConfig().getPath());
         assertTrue(bcl.getProperties().isEmpty());
     }

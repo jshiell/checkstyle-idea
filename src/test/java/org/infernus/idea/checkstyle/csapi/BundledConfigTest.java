@@ -48,7 +48,7 @@ class BundledConfigTest {
     @Test
     void matchesReturnsTrueForMatchingBundledLocation() {
         when(configurationLocation.getType()).thenReturn(ConfigurationType.BUNDLED);
-        when(configurationLocation.getLocation()).thenReturn("(bundled)");
+        when(configurationLocation.getLocation()).thenReturn(BundledConfig.SUN_CHECKS.getId());
         when(configurationLocation.getDescription()).thenReturn("Sun Checks");
 
         assertThat(BundledConfig.SUN_CHECKS.matches(configurationLocation), is(true));
