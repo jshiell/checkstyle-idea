@@ -11,6 +11,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -34,7 +36,7 @@ import static org.infernus.idea.checkstyle.util.Strings.isBlank;
 public class LocationPanel extends JPanel {
 
     enum LocationType {
-        FILE, HTTP, CLASSPATH
+        FILE, HTTP, CLASSPATH, BUILT_IN
     }
 
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
@@ -49,6 +51,9 @@ public class LocationPanel extends JPanel {
     private final JRadioButton fileLocationRadio = new JRadioButton();
     private final JRadioButton urlLocationRadio = new JRadioButton();
     private final JRadioButton classpathLocationRadio = new JRadioButton();
+    private final JRadioButton builtInLocationRadio = new JRadioButton();
+    private final JLabel builtInLocationLabel = new JLabel(CheckStyleBundle.message("config.file.built-in.label"));
+    private final ComboBox<BundledConfig> builtInComboBox = new ComboBox<>();
     private final JTextField descriptionField = new JTextField();
     private final ComboBox<NamedScope> scopeComboBox = new ComboBox<>();
     private final JCheckBox relativeFileCheckbox = new JCheckBox();
@@ -82,10 +87,28 @@ public class LocationPanel extends JPanel {
         classpathLocationRadio.addActionListener(new RadioButtonActionListener());
         classpathLocationReminderLabel.setText(CheckStyleBundle.message("config.file.classpath.reminder"));
 
+        builtInLocationRadio.setText(CheckStyleBundle.message("config.file.built-in.text"));
+        builtInLocationRadio.addActionListener(new RadioButtonActionListener());
+        BundledConfig.getAllBundledConfigs().forEach(builtInComboBox::addItem);
+        builtInComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(final JList<?> list,
+                                                          final Object value,
+                                                          final int index,
+                                                          final boolean isSelected,
+                                                          final boolean cellHasFocus) {
+                var presentableName = ((BundledConfig) value).getDescription();
+                super.getListCellRendererComponent(list, presentableName, index, isSelected, cellHasFocus);
+                return this;
+            }
+        });
+        builtInComboBox.addActionListener(e -> prefillDescriptionFromSelectedBuiltIn());
+
         final ButtonGroup locationGroup = new ButtonGroup();
         locationGroup.add(fileLocationRadio);
         locationGroup.add(urlLocationRadio);
         locationGroup.add(classpathLocationRadio);
+        locationGroup.add(builtInLocationRadio);
 
         fileLocationRadio.setSelected(true);
         enabledLocation(FILE);
@@ -150,15 +173,32 @@ public class LocationPanel extends JPanel {
         add(classpathLocationReminderLabel, new GridBagConstraints(1, 9, 2, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
 
-        add(Box.createVerticalGlue(), new GridBagConstraints(0, 10, 3, 1, 0.0, 1.0,
+        add(builtInLocationRadio, new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE, JBUI.insets(8, 4, 4, 4), 0, 0));
+
+        add(builtInLocationLabel, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
+        add(builtInComboBox, new GridBagConstraints(1, 11, 2, 1, 1.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+
+        add(Box.createVerticalGlue(), new GridBagConstraints(0, 13, 3, 1, 0.0, 1.0,
                 GridBagConstraints.WEST, GridBagConstraints.VERTICAL, COMPONENT_INSETS, 0, 0));
 
 
-        add(scopeLabel, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0,
+        add(scopeLabel, new GridBagConstraints(0, 15, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE, COMPONENT_INSETS, 0, 0));
 
-        add(scopeComboBox, new GridBagConstraints(1, 12, 2, 1, 0.0, 0.0,
+        add(scopeComboBox, new GridBagConstraints(1, 15, 2, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
+    }
+
+    private void prefillDescriptionFromSelectedBuiltIn() {
+        if (!isNotBlank(descriptionField.getText())) {
+            final BundledConfig selected = (BundledConfig) builtInComboBox.getSelectedItem();
+            if (selected != null) {
+                descriptionField.setText(selected.getDescription());
+            }
+        }
     }
 
     private void enabledLocation(final LocationType locationType) {
@@ -174,6 +214,9 @@ public class LocationPanel extends JPanel {
         classpathLocationLabel.setEnabled(locationType == CLASSPATH);
         classpathLocationField.setEnabled(locationType == CLASSPATH);
         classpathLocationReminderLabel.setEnabled(locationType == CLASSPATH);
+
+        builtInLocationLabel.setEnabled(locationType == BUILT_IN);
+        builtInComboBox.setEnabled(locationType == BUILT_IN);
     }
 
     private ConfigurationType typeOfFile() {
@@ -228,6 +271,18 @@ public class LocationPanel extends JPanel {
                         newId,
                         PLUGIN_CLASSPATH,
                         classpathLocation(),
+                        descriptionField.getText(),
+                        namedScope);
+            }
+
+        } else if (builtInComboBox.isEnabled()) {
+            final BundledConfig selectedBundledConfig = (BundledConfig) builtInComboBox.getSelectedItem();
+            if (selectedBundledConfig != null) {
+                return configurationLocationFactory().create(
+                        project,
+                        newId,
+                        BUNDLED,
+                        selectedBundledConfig.getId(),
                         descriptionField.getText(),
                         namedScope);
             }
@@ -333,6 +388,12 @@ public class LocationPanel extends JPanel {
             enabledLocation(CLASSPATH);
             descriptionField.setText(configurationLocation.getDescription());
 
+        } else if (configurationLocation.getType() == BUNDLED) {
+            builtInLocationRadio.setSelected(true);
+            builtInComboBox.setSelectedItem(((BundledConfigurationLocation) configurationLocation).getBundledConfig());
+            enabledLocation(BUILT_IN);
+            descriptionField.setText(configurationLocation.getDescription());
+
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());
         }
@@ -345,6 +406,7 @@ public class LocationPanel extends JPanel {
         fileLocationRadio.setEnabled(false);
         urlLocationRadio.setEnabled(false);
         classpathLocationRadio.setEnabled(false);
+        builtInLocationRadio.setEnabled(false);
     }
 
     /**
@@ -361,6 +423,18 @@ public class LocationPanel extends JPanel {
         } else if (classpathLocationField.isEnabled() && isNotBlank(classpathLocation())) {
             location.setLocation(classpathLocation());
         }
+    }
+
+    JRadioButton builtInLocationRadio() {
+        return builtInLocationRadio;
+    }
+
+    ComboBox<BundledConfig> builtInComboBox() {
+        return builtInComboBox;
+    }
+
+    JTextField descriptionField() {
+        return descriptionField;
     }
 
     private final class BrowseAction extends AbstractAction {
@@ -416,6 +490,9 @@ public class LocationPanel extends JPanel {
 
             } else if (classpathLocationRadio.isSelected()) {
                 enabledLocation(CLASSPATH);
+
+            } else if (builtInLocationRadio.isSelected()) {
+                enabledLocation(BUILT_IN);
 
             } else {
                 throw new IllegalStateException("Unknown radio button state");
