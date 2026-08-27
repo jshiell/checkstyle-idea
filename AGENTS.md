@@ -45,6 +45,15 @@ Adding a task option such as `--tests` misses that cache and triggers it, and so
 cache entry yet. **A failed attempt wipes and recreates the transform's `transformed/` directory, so every
 later build fails until an unsandboxed `./gradlew build` re-extracts it.**
 
+**`buildSearchableOptions` can fail under a spawned subagent even when the top-level session succeeds
+on the identical task.** Observed once: a background `implementation` agent's `./gradlew build` failed
+at `buildSearchableOptions` with `FileAlreadyExistsException` writing to `~/Library/Application
+Support/JetBrains`, confirmed `DENIED` via `nono why --path ... --op write`; the exact same
+`./gradlew build` run from the top-level session moments later succeeded cleanly. Mechanism unconfirmed
+(possibly a narrower grant for spawned agents, possibly transient) — if only a subagent reports this
+specific failure, don't treat it as a real regression; re-run `./gradlew build` from the top-level
+session before concluding anything broke.
+
 Driving JUnit directly with `javac`, as a way to test without Gradle, **does not work for anything that
 extends `LightPlatformTestCase`** in 2024.3. The platform is split across `lib/modules/*.jar` v2 content
 modules, and a flat classpath collides duplicates: startup dies with `NoSuchFieldError: … JavaStubIndexKeys …
