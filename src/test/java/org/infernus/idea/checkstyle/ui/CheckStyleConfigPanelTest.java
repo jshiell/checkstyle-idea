@@ -108,6 +108,23 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
         assertTrue(applied.contains(userCopy));
     }
 
+    public void testAddingASecondBundledCopyWithAnUneditedDuplicateDescriptionIsRejected() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());
+
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(canonical))
+                .build());
+
+        final ConfigurationLocation secondCopyWithUneditedDescription = factory.create(getProject(), "another-copy-id",
+                ConfigurationType.BUNDLED, BundledConfig.GOOGLE_CHECKS.getId(), BundledConfig.GOOGLE_CHECKS.getDescription(),
+                NamedScopeHelper.getDefaultScope(getProject()));
+
+        assertTrue("a second bundled copy with an unedited (prefilled) description matching an existing "
+                        + "bundled entry should be flagged as a duplicate",
+                panel.hasDuplicateBundledDescription(secondCopyWithUneditedDescription, null));
+    }
+
     public void testRenamingACopyToCollideWithAnotherEntryIsRejectedAsADuplicate() {
         final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
         final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());

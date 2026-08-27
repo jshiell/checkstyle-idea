@@ -33,10 +33,12 @@ import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.CheckstyleDownloadHelper;
 import org.infernus.idea.checkstyle.util.Strings;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -408,7 +410,8 @@ public class CheckStyleConfigPanel extends JPanel {
 
             if (dialogue.showAndGet()) {
                 final ConfigurationLocation newLocation = dialogue.getConfigurationLocation();
-                if (locationModel.getLocations().contains(newLocation)) {
+                if (locationModel.getLocations().contains(newLocation)
+                        || hasDuplicateBundledDescription(newLocation, null)) {
                     Messages.showWarningDialog(project,
                             CheckStyleBundle.message("config.file.error.duplicate.text"),
                             CheckStyleBundle.message("config.file.error.duplicate.title"));
@@ -654,6 +657,28 @@ public class CheckStyleConfigPanel extends JPanel {
         return locationModel.getLocations().stream()
                 .anyMatch(existing -> existing != original
                         && java.util.Objects.equals(existing.getDescription(), edited.getDescription()));
+    }
+
+    /**
+     * Would {@code candidate} share its description with a different bundled location already in the
+     * table? Only {@link ConfigurationType#BUNDLED} locations are compared: two bundled copies of the
+     * same style are otherwise indistinguishable to the user except by description, whereas non-bundled
+     * locations (file/HTTP/classpath) have always been allowed to share a description while pointing at
+     * different underlying locations.
+     *
+     * @param candidate the location to check.
+     * @param excluding a location to exclude from the comparison (e.g. the original being edited), or
+     *                  {@code null} if there is none.
+     */
+    boolean hasDuplicateBundledDescription(final ConfigurationLocation candidate, @Nullable final ConfigurationLocation excluding) {
+        if (candidate.getType() != ConfigurationType.BUNDLED) {
+            return false;
+        }
+        return locationModel.getLocations().stream()
+                .anyMatch(existing -> existing != candidate
+                        && existing != excluding
+                        && existing.getType() == ConfigurationType.BUNDLED
+                        && java.util.Objects.equals(existing.getDescription(), candidate.getDescription()));
     }
 
     LocationTableModel locationModel() {
