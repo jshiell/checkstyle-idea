@@ -104,6 +104,17 @@ class BundledConfigurationLocationTest {
     }
 
     @Test
+    void clonePreservesACustomDescription() {
+        BundledConfigurationLocation copy = new BundledConfigurationLocation("a-user-created-copy-id", BundledConfig.GOOGLE_CHECKS, project);
+        copy.setDescription("My Custom Google Checks");
+
+        BundledConfigurationLocation cloned = copy.clone();
+
+        assertThat(cloned.getDescription(), is("My Custom Google Checks"));
+        assertThat(cloned.getDescription(), is(not(equalTo(BundledConfig.GOOGLE_CHECKS.getDescription()))));
+    }
+
+    @Test
     void idMatchesBundledConfigId() {
         assertThat(sunChecks.getId(), is(BundledConfig.SUN_CHECKS.getId()));
         assertThat(googleChecks.getId(), is(BundledConfig.GOOGLE_CHECKS.getId()));
