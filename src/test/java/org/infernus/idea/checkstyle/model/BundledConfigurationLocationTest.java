@@ -6,7 +6,6 @@ import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.util.TreeSet;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -44,11 +43,9 @@ class BundledConfigurationLocationTest {
     }
 
     @Test
-    void descriptionIsFixedToBundledDescription() {
-        // setDescription() is a no-op for bundled configs
-        String originalDescription = sunChecks.getDescription();
+    void descriptionCanBeChanged() {
         sunChecks.setDescription("Custom Description");
-        assertThat(sunChecks.getDescription(), is(originalDescription));
+        assertThat(sunChecks.getDescription(), is("Custom Description"));
     }
 
     @Test
@@ -65,6 +62,19 @@ class BundledConfigurationLocationTest {
     void isRemovableReturnsFalse() {
         assertFalse(sunChecks.isRemovable());
         assertFalse(googleChecks.isRemovable());
+    }
+
+    @Test
+    void isRemovableReturnsTrueForUserCreatedCopy() {
+        BundledConfigurationLocation copy = new BundledConfigurationLocation("a-user-created-copy-id", BundledConfig.GOOGLE_CHECKS, project);
+        assertTrue(copy.isRemovable());
+    }
+
+    @Test
+    void isRemovableStaysTrueAfterRenamingCopyBackToCanonicalDescription() {
+        BundledConfigurationLocation copy = new BundledConfigurationLocation("a-user-created-copy-id", BundledConfig.GOOGLE_CHECKS, project);
+        copy.setDescription(BundledConfig.GOOGLE_CHECKS.getDescription());
+        assertTrue(copy.isRemovable());
     }
 
     @Test
@@ -113,12 +123,11 @@ class BundledConfigurationLocationTest {
     }
 
     @Test
-    void differentlyDescribedCopiesOfTheSameBundledConfigAreNotEqual() throws Exception {
+    void differentlyDescribedCopiesOfTheSameBundledConfigAreNotEqual() {
         // Two copies of the same BundledConfig have the same sort order, so compareForPrioritySortOrder
-        // must fall back to description (then id) to tell them apart. setDescription() only becomes a
-        // real setter in a later increment, so the description difference is forced directly here.
+        // must fall back to description (then id) to tell them apart.
         BundledConfigurationLocation copyOfGoogleChecks = new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project);
-        forceDescription(copyOfGoogleChecks, "My Custom Google Checks");
+        copyOfGoogleChecks.setDescription("My Custom Google Checks");
 
         assertThat(googleChecks, is(not(equalTo(copyOfGoogleChecks))));
 
@@ -126,11 +135,5 @@ class BundledConfigurationLocationTest {
         locations.add(googleChecks);
         locations.add(copyOfGoogleChecks);
         assertThat(locations.size(), is(2));
-    }
-
-    private void forceDescription(final BundledConfigurationLocation location, final String description) throws Exception {
-        Field descriptionField = ConfigurationLocation.class.getDeclaredField("description");
-        descriptionField.setAccessible(true);
-        descriptionField.set(location, description);
     }
 }

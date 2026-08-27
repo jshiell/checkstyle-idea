@@ -42,7 +42,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
 
     @Override
     public void setDescription(@Nullable final String description) {
-        // do nothing, we always use the hard-coded description
+        super.setDescription(description);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
     }
 
     public boolean isRemovable() {
-        return false;
+        return !getId().equals(bundledConfig.getId());
     }
 
     @Override
