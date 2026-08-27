@@ -81,6 +81,19 @@ class BundledConfigurationLocationTest {
     }
 
     @Test
+    void clonePreservesIdPropertiesAndNamedScope() {
+        BundledConfigurationLocation copy = new BundledConfigurationLocation("a-user-created-copy-id", BundledConfig.GOOGLE_CHECKS, project);
+        copy.setProperties(java.util.Map.of("someProperty", "someValue"));
+        copy.setNamedScope(TestHelper.NAMED_SCOPE);
+
+        BundledConfigurationLocation cloned = copy.clone();
+
+        assertThat(cloned.getId(), is("a-user-created-copy-id"));
+        assertThat(cloned.getProperties(), is(copy.getProperties()));
+        assertThat(cloned.getNamedScope(), is(copy.getNamedScope()));
+    }
+
+    @Test
     void idMatchesBundledConfigId() {
         assertThat(sunChecks.getId(), is(BundledConfig.SUN_CHECKS.getId()));
         assertThat(googleChecks.getId(), is(BundledConfig.GOOGLE_CHECKS.getId()));
