@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.17.0** New: Built-in Checkstyle configurations (Sun Checks, Google Checks) can now be added more than once, each with its own description, scan scope, and properties (#529).
 * **26.16.0** New: Added an Export button to the configuration locations table, to write a location's resolved rules XML to a file (#410).
 * **26.16.0** Fixed: Importing a rules file whose `CustomImportOrder` uses `SAME_PACKAGE` now shows a warning that the group has no IntelliJ equivalent and was skipped, instead of silently dropping it (#377).
 * **26.16.0** New: When a Maven mirror is auto-detected from settings.xml, its matching `<server>` username and password (decrypted, if encrypted) are now used automatically for the download (#698).
