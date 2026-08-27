@@ -4,6 +4,16 @@ import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.csapi.BundledConfig;
+import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
+
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
 
@@ -54,6 +64,75 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
 
         assertTrue("a flag the panel has no widget for should not be reset",
                 panel.getPluginConfiguration().isScrollToSource());
+    }
+
+    public void testEditAndRemoveAreEnabledForAUserCreatedBundledCopyButNotForTheCanonicalSeededRow() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());
+        final ConfigurationLocation userCopy = factory.create(getProject(), "a-user-created-copy-id", ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), "My Custom Google Checks", NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(canonical, userCopy))
+                .build());
+
+        final int canonicalIndex = panel.locationModel().getLocations().indexOf(canonical);
+        final int userCopyIndex = panel.locationModel().getLocations().indexOf(userCopy);
+
+        assertFalse("the canonical seeded row should not be editable/removable",
+                panel.isEditOrRemoveEnabledFor(canonicalIndex));
+        assertTrue("a user-created copy should be editable/removable",
+                panel.isEditOrRemoveEnabledFor(userCopyIndex));
+    }
+
+    public void testTwoDifferentlyDescribedBundledCopiesSurviveTheAddDuplicateCheckAndTheApplyDedup() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());
+        final ConfigurationLocation userCopy = factory.create(getProject(), "a-user-created-copy-id", ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), "My Custom Google Checks", NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(canonical))
+                .build());
+
+        // mirrors AddLocationAction's duplicate check
+        assertFalse("a differently-described copy should not be flagged as a duplicate of the canonical entry",
+                panel.locationModel().getLocations().contains(userCopy));
+
+        panel.locationModel().addLocation(userCopy);
+
+        // mirrors the Apply path's dedup via new TreeSet<>(locationModel.getLocations())
+        final Set<ConfigurationLocation> applied = panel.getPluginConfiguration().getLocations();
+        assertEquals(2, applied.size());
+        assertTrue(applied.contains(canonical));
+        assertTrue(applied.contains(userCopy));
+    }
+
+    public void testRenamingACopyToCollideWithAnotherEntryIsRejectedAsADuplicate() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());
+        final ConfigurationLocation userCopy = factory.create(getProject(), "a-user-created-copy-id", ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), "My Custom Google Checks", NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(canonical, userCopy))
+                .build());
+
+        final ConfigurationLocation renamedBackToCanonical = factory.create(getProject(), userCopy.getId(), ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), BundledConfig.GOOGLE_CHECKS.getDescription(), NamedScopeHelper.getDefaultScope(getProject()));
+        final ConfigurationLocation renamedToSomethingStillUnique = factory.create(getProject(), userCopy.getId(), ConfigurationType.BUNDLED,
+                BundledConfig.GOOGLE_CHECKS.getId(), "Another Unique Description", NamedScopeHelper.getDefaultScope(getProject()));
+
+        assertTrue("renaming a copy back to the canonical description should collide",
+                panel.wouldCollideOnEdit(userCopy, renamedBackToCanonical));
+        assertFalse("renaming a copy to a still-unique description should not collide",
+                panel.wouldCollideOnEdit(userCopy, renamedToSomethingStillUnique));
+    }
+
+    private SortedSet<ConfigurationLocation> locationsOf(final ConfigurationLocation... locations) {
+        final SortedSet<ConfigurationLocation> result = new TreeSet<>();
+        result.addAll(java.util.Arrays.asList(locations));
+        return result;
     }
 
     private PluginConfiguration setScanBeforeCheckin(final boolean scanBeforeCheckin) {

@@ -33,7 +33,6 @@ import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.CheckstyleDownloadHelper;
 import org.infernus.idea.checkstyle.util.Strings;
@@ -244,7 +243,7 @@ public class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setAddAction(new AddLocationAction());
         tableDecorator.setEditAction(new EditPropertiesAction());
         tableDecorator.setRemoveAction(new RemoveLocationAction());
-        tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndNotBundled());
+        tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndRemovable());
         tableDecorator.setRemoveActionUpdater(new EnableWhenSelectedAndRemovable());
         tableDecorator.addExtraAction((AnAction) new ExportLocationAction());
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
@@ -459,7 +458,14 @@ public class CheckStyleConfigPanel extends JPanel {
 
             if (propertiesDialogue.showAndGet()) {
                 final ConfigurationLocation editedLocation = propertiesDialogue.getConfigurationLocation();
-                locationModel.updateLocation(location, editedLocation);
+                if (wouldCollideOnEdit(location, editedLocation)) {
+                    Messages.showWarningDialog(project,
+                            CheckStyleBundle.message("config.file.error.duplicate.text"),
+                            CheckStyleBundle.message("config.file.error.duplicate.title"));
+
+                } else {
+                    locationModel.updateLocation(location, editedLocation);
+                }
             }
         }
     }
@@ -631,19 +637,33 @@ public class CheckStyleConfigPanel extends JPanel {
         }
     }
 
+    boolean isEditOrRemoveEnabledFor(final int row) {
+        return row >= 0 && locationModel.getLocationAt(row).isRemovable();
+    }
+
+    /**
+     * Would saving {@code edited} in place of {@code original} give it the same description as a
+     * different, already-present location? {@code original} itself is excluded, so an edit that leaves
+     * the description unchanged is never flagged.
+     * <p>Descriptions, not {@link ConfigurationLocation#equals}, are the right comparison here: two
+     * bundled copies of the same style are deliberately distinguished by id (so a rename never silently
+     * clobbers a distinct entry), but that same id-based distinction means a plain equals() check would
+     * miss the user visibly renaming one copy to match another row's description.</p>
+     */
+    boolean wouldCollideOnEdit(final ConfigurationLocation original, final ConfigurationLocation edited) {
+        return locationModel.getLocations().stream()
+                .anyMatch(existing -> existing != original
+                        && java.util.Objects.equals(existing.getDescription(), edited.getDescription()));
+    }
+
+    LocationTableModel locationModel() {
+        return locationModel;
+    }
+
     private final class EnableWhenSelectedAndRemovable implements AnActionButtonUpdater {
         @Override
         public boolean isEnabled(@NotNull final AnActionEvent e) {
-            final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem >= 0 && locationModel.getLocationAt(selectedItem).isRemovable();
-        }
-    }
-
-    private final class EnableWhenSelectedAndNotBundled implements AnActionButtonUpdater {
-        @Override
-        public boolean isEnabled(@NotNull final AnActionEvent e) {
-            final int selectedItem = locationTable.getSelectedRow();
-            return selectedItem >= 0 && locationModel.getLocationAt(selectedItem).getType() != ConfigurationType.BUNDLED;
+            return isEditOrRemoveEnabledFor(locationTable.getSelectedRow());
         }
     }
 }
