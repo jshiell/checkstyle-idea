@@ -493,6 +493,7 @@ public class LocationPanel extends JPanel {
 
             } else if (builtInLocationRadio.isSelected()) {
                 enabledLocation(BUILT_IN);
+                prefillDescriptionFromSelectedBuiltIn();
 
             } else {
                 throw new IllegalStateException("Unknown radio button state");

@@ -29,6 +29,13 @@ public class LocationPanelTest extends LightPlatformTestCase {
         assertEquals("My Custom Google Checks", bundled.getDescription());
     }
 
+    public void testSelectingBuiltInRadioWithoutTouchingComboPrefillsDescription() {
+        panel.builtInLocationRadio().doClick();
+
+        assertEquals(((BundledConfig) panel.builtInComboBox().getSelectedItem()).getDescription(),
+                panel.descriptionField().getText());
+    }
+
     public void testSetConfigurationLocationRoundTripsABundledLocationIntoComboAndDescription() {
         final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
         final BundledConfigurationLocation location = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());
