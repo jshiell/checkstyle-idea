@@ -69,9 +69,26 @@ public class BundledConfigurationLocation extends ConfigurationLocation {
 
     @Override
     protected int compareForPrioritySortOrder(@NotNull final ConfigurationLocation other) {
-        return Integer.compare(
-                bundledConfig.getSortOrder(),
-                ((BundledConfigurationLocation) other).bundledConfig.getSortOrder());
+        final BundledConfigurationLocation that = (BundledConfigurationLocation) other;
+
+        int result = Integer.compare(bundledConfig.getSortOrder(), that.bundledConfig.getSortOrder());
+        if (result == 0) {
+            result = compareNullable(getDescription(), that.getDescription());
+        }
+        if (result == 0) {
+            result = compareNullable(getId(), that.getId());
+        }
+        return result;
+    }
+
+    private static int compareNullable(@Nullable final String left, @Nullable final String right) {
+        if (left == null) {
+            return right == null ? 0 : -1;
+        }
+        if (right == null) {
+            return 1;
+        }
+        return left.compareTo(right);
     }
 
 

@@ -6,6 +6,10 @@ import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.TreeSet;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -93,5 +97,27 @@ class BundledConfigurationLocationTest {
         // SUN_CHECKS has sortOrder 0, GOOGLE_CHECKS has sortOrder 1
         // BundledConfigurationLocation uses priority sort order, so compareTo should be negative
         assertTrue(sunChecks.compareTo(googleChecks) < 0);
+    }
+
+    @Test
+    void differentlyDescribedCopiesOfTheSameBundledConfigAreNotEqual() throws Exception {
+        // Two copies of the same BundledConfig have the same sort order, so compareForPrioritySortOrder
+        // must fall back to description (then id) to tell them apart. setDescription() only becomes a
+        // real setter in a later increment, so the description difference is forced directly here.
+        BundledConfigurationLocation copyOfGoogleChecks = new BundledConfigurationLocation(BundledConfig.GOOGLE_CHECKS, project);
+        forceDescription(copyOfGoogleChecks, "My Custom Google Checks");
+
+        assertThat(googleChecks, is(not(equalTo(copyOfGoogleChecks))));
+
+        TreeSet<ConfigurationLocation> locations = new TreeSet<>();
+        locations.add(googleChecks);
+        locations.add(copyOfGoogleChecks);
+        assertThat(locations.size(), is(2));
+    }
+
+    private void forceDescription(final BundledConfigurationLocation location, final String description) throws Exception {
+        Field descriptionField = ConfigurationLocation.class.getDeclaredField("description");
+        descriptionField.setAccessible(true);
+        descriptionField.set(location, description);
     }
 }
