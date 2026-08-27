@@ -125,6 +125,24 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 panel.hasDuplicateBundledDescription(secondCopyWithUneditedDescription, null));
     }
 
+    public void testEditingANonBundledLocationToShareAnotherNonBundledLocationsDescriptionIsNotRejected() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation fileA = factory.create(getProject(), "file-a-id", ConfigurationType.LOCAL_FILE,
+                "/path/to/a.xml", "My Rules", NamedScopeHelper.getDefaultScope(getProject()));
+        final ConfigurationLocation fileB = factory.create(getProject(), "file-b-id", ConfigurationType.LOCAL_FILE,
+                "/path/to/b.xml", "Some Other Rules", NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(fileA, fileB))
+                .build());
+
+        final ConfigurationLocation editedFileB = factory.create(getProject(), "file-b-id", ConfigurationType.LOCAL_FILE,
+                "/path/to/b.xml", "My Rules", NamedScopeHelper.getDefaultScope(getProject()));
+
+        assertFalse("two non-bundled locations have always been allowed to share a description",
+                panel.wouldCollideOnEdit(fileB, editedFileB));
+    }
+
     public void testRenamingACopyToCollideWithAnotherEntryIsRejectedAsADuplicate() {
         final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
         final BundledConfigurationLocation canonical = factory.create(BundledConfig.GOOGLE_CHECKS, getProject());

@@ -646,17 +646,16 @@ public class CheckStyleConfigPanel extends JPanel {
 
     /**
      * Would saving {@code edited} in place of {@code original} give it the same description as a
-     * different, already-present location? {@code original} itself is excluded, so an edit that leaves
-     * the description unchanged is never flagged.
+     * different, already-present bundled location? {@code original} itself is excluded, so an edit that
+     * leaves the description unchanged is never flagged.
      * <p>Descriptions, not {@link ConfigurationLocation#equals}, are the right comparison here: two
      * bundled copies of the same style are deliberately distinguished by id (so a rename never silently
      * clobbers a distinct entry), but that same id-based distinction means a plain equals() check would
-     * miss the user visibly renaming one copy to match another row's description.</p>
+     * miss the user visibly renaming one copy to match another row's description. Non-bundled locations
+     * are unaffected: {@link #hasDuplicateBundledDescription} only compares {@code BUNDLED} entries.</p>
      */
     boolean wouldCollideOnEdit(final ConfigurationLocation original, final ConfigurationLocation edited) {
-        return locationModel.getLocations().stream()
-                .anyMatch(existing -> existing != original
-                        && java.util.Objects.equals(existing.getDescription(), edited.getDescription()));
+        return hasDuplicateBundledDescription(edited, original);
     }
 
     /**
