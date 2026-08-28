@@ -123,9 +123,11 @@ automatically:
 To check it worked, open `.idea/checkstyle-idea.xml` after saving settings and look for the macro token in the
 `thirdPartyClasspath` entries.
 
-If none of the above applies, or a teammate's copy of the referenced file is missing or at a different path, there
-is no error: an entry that doesn't resolve to an existing file is silently skipped when the classpath is built, and
-the affected checks simply don't run.
+If none of the above applies, or a teammate's copy of the referenced file is missing or at a different path, the
+entry is *not* skipped — it's added to the classpath as-is regardless of whether the file exists. If your rules
+file doesn't actually reference a check from that entry, nothing happens. If it does, Checkstyle fails to load
+that check, and the plugin shows an error notification and blocks the affected configuration location entirely
+(not just the one check) until the path resolves.
 
 For Maven projects, prefer "Import settings from Maven" for third-party Checkstyle rule jars declared as
 `maven-checkstyle-plugin` dependencies — it resolves the correct path on every machine regardless of where the
