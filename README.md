@@ -109,6 +109,28 @@ rules files.
 This tab allows you to specify any third-party checks which your configuration file makes use of. All selected
 directories/JAR files will be added to CheckStyle's classpath.
 
+Third-party classpath entries can be shared across a team via version control, without hard-coding any one
+developer's machine layout, because the IDE platform substitutes portable path macros into `checkstyle-idea.xml`
+automatically:
+
+- A jar under the project directory is saved as a `$PROJECT_DIR$`-relative path.
+- A jar under a developer's home directory is saved as a `$USER_HOME$`-relative path — this only works if every
+  teammate has the jar at the same path relative to their own home directory.
+- A jar anywhere else (a shared network path, `/opt/...`, a corporate mirror) can be made portable by defining a
+  Path Variable for it (*Settings* → *Appearance & Behavior* → *Path Variables*); each developer sets the
+  variable's value to match their own machine.
+
+To check it worked, open `.idea/checkstyle-idea.xml` after saving settings and look for the macro token in the
+`thirdPartyClasspath` entries.
+
+If none of the above applies, or a teammate's copy of the referenced file is missing or at a different path, there
+is no error: an entry that doesn't resolve to an existing file is silently skipped when the classpath is built, and
+the affected checks simply don't run.
+
+For Maven projects, prefer "Import settings from Maven" for third-party Checkstyle rule jars declared as
+`maven-checkstyle-plugin` dependencies — it resolves the correct path on every machine regardless of where the
+local repository lives, so no committed/shared path is needed at all.
+
 ### Copy libraries from project directory
 
 The option "Copy libraries from project directory" will tell Checkstyle-IDEA to do the following when creating custom
