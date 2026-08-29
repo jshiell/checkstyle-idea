@@ -1,11 +1,13 @@
 package org.infernus.idea.checkstyle.config;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public class PluginConfigurationManager {
 
@@ -13,10 +15,17 @@ public class PluginConfigurationManager {
 
     private final Project project;
 
+    private final Consumer<Runnable> edtDispatcher;
+
     private volatile PluginConfiguration cachedConfiguration;
 
     public PluginConfigurationManager(@NotNull final Project project) {
+        this(project, runnable -> ApplicationManager.getApplication().invokeLater(runnable));
+    }
+
+    PluginConfigurationManager(@NotNull final Project project, @NotNull final Consumer<Runnable> edtDispatcher) {
         this.project = project;
+        this.edtDispatcher = edtDispatcher;
     }
 
     public void addConfigurationListener(final ConfigurationListener configurationListener) {
@@ -30,9 +39,11 @@ public class PluginConfigurationManager {
     }
 
     private void fireConfigurationChanged() {
-        for (ConfigurationListener configurationListener : configurationListeners) {
-            configurationListener.configurationChanged();
-        }
+        edtDispatcher.accept(() -> {
+            for (ConfigurationListener configurationListener : configurationListeners) {
+                configurationListener.configurationChanged();
+            }
+        });
     }
 
     public synchronized void disableActiveConfiguration() {

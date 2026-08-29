@@ -4,6 +4,8 @@ import com.intellij.openapi.project.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -15,7 +17,7 @@ class PluginConfigurationManagerListenerTest {
 
     private final Project project = mock(Project.class);
     private final ProjectConfigurationState projectConfigurationState = mock(ProjectConfigurationState.class);
-    private final PluginConfigurationManager manager = new PluginConfigurationManager(project);
+    private final PluginConfigurationManager manager = new PluginConfigurationManager(project, Runnable::run);
 
     @BeforeEach
     void setUp() {
@@ -58,5 +60,20 @@ class PluginConfigurationManagerListenerTest {
         manager.addConfigurationListener(selfRemoving[0]);
 
         assertDoesNotThrow(() -> manager.setCurrent(mock(PluginConfiguration.class), true));
+    }
+
+    @Test
+    void configurationChangedIsDispatchedRatherThanRunSynchronously() {
+        final List<Runnable> dispatched = new ArrayList<>();
+        final PluginConfigurationManager dispatchingManager =
+                new PluginConfigurationManager(project, dispatched::add);
+        final AtomicInteger callCount = new AtomicInteger();
+        dispatchingManager.addConfigurationListener(callCount::incrementAndGet);
+
+        dispatchingManager.setCurrent(mock(PluginConfiguration.class), true);
+        assertEquals(0, callCount.get(), "listener must not run synchronously on the calling thread");
+
+        dispatched.forEach(Runnable::run);
+        assertEquals(1, callCount.get(), "listener must run once the dispatched callback executes");
     }
 }
