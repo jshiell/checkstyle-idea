@@ -66,4 +66,16 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         assertTrue(found.isPresent());
         assertEquals(expected.getPath(), new ProjectFilePaths(getProject()).detokenise(found.get().getLocation()));
     }
+
+    public void testSkipsAPathThatIsADirectoryRatherThanAFile() {
+        myFixture.addFileToProject("checkstyle.xml/placeholder.txt", "");
+        myFixture.addFileToProject("etc/checkstyle.xml", "<module/>");
+        var expected = baseDir().findFileByRelativePath("etc/checkstyle.xml");
+
+        var found = ConventionalConfigurationLocationScanner.findConventionalConfigurationLocation(
+                getProject(), baseDir());
+
+        assertTrue(found.isPresent());
+        assertEquals(expected.getPath(), new ProjectFilePaths(getProject()).detokenise(found.get().getLocation()));
+    }
 }
