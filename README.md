@@ -61,8 +61,10 @@ root for a Checkstyle configuration file at one of three conventional locations,
 The first match wins; there is no merging of multiple matches. This is a manual action only - it does not watch the
 filesystem - so invoke it again after a location appears or disappears, for example after a `git pull`. Each
 invocation is idempotent: it adds a location for the first match found, removes it again if nothing matches any
-more, and otherwise leaves things as they are. It only ever manages the single location it created itself, so it
-never overrides or removes a location you added by hand.
+more, and otherwise leaves things as they are. It only ever manages the single location it created itself, so it never overrides or removes a location you added by
+hand under a different description or path. (If a location you added by hand happens to have the exact same
+description, path and type as the detected one, it may be adopted as the managed location - a rare, pre-existing
+edge case of how locations are identified internally.)
 
 ### Eclipse-CS Variable Support
 
