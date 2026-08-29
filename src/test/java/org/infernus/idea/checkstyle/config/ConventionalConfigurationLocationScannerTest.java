@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
@@ -12,6 +13,14 @@ import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 
 public class ConventionalConfigurationLocationScannerTest extends BasePlatformTestCase {
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        // The light project fixture is reused across test methods, so PluginConfigurationManager's
+        // state (including anything a previous test's rescan() added) otherwise leaks between tests.
+        configManager().setCurrent(PluginConfigurationBuilder.defaultConfiguration(getProject()).build(), false);
+    }
 
     private PluginConfigurationManager configManager() {
         return getProject().getService(PluginConfigurationManager.class);
@@ -166,5 +175,16 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         assertTrue(current.getLocations().stream()
                 .anyMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
         assertEquals(locationCountBeforeRescan + 1, current.getLocations().size());
+    }
+
+    public void testMakesNoChangeAndFiresNoListenerWhenNothingIsDetectedAndNothingExistedBefore() {
+        var callCount = new AtomicInteger();
+        ConfigurationListener listener = callCount::incrementAndGet;
+        configManager().addConfigurationListener(listener);
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.UNCHANGED_ABSENT, outcome);
+        assertEquals(0, callCount.get());
     }
 }
