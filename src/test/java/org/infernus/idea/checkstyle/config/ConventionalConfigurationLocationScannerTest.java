@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.PlatformTestUtil;
+import com.intellij.testFramework.ServiceContainerUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import java.util.List;
 import java.util.TreeSet;
@@ -248,13 +249,30 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
     }
 
     public void testScanDoesNotDuplicateAnAlreadyPresentEquivalentLocation() {
+        // Reproduces the ConfigurationLocationFactory cache-collision documented at
+        // ConventionalConfigurationLocationScanner.java:32-36: seed the snapshot with a location that is
+        // NOT carrying RESERVED_ID but is otherwise equal (same description/location/type) to what scan()
+        // will find. The factory's instance cache is keyed by equals() (which ignores id), so
+        // findConventionalConfigurationLocation's create(..., RESERVED_ID, ...) call returns this exact
+        // cached instance - carrying "some-other-id", not RESERVED_ID - forcing scan()'s dedup guard
+        // (`.filter(not(updated::contains))`) to actually run and suppress the add.
+        // Give this test its own factory instance: ConfigurationLocationFactory's instance cache is a
+        // project-service field, and the light project fixture is reused across test methods in this
+        // class, so a shared cache would make the collision below order-dependent on whichever earlier
+        // test last cached an entry for this exact description/location/type.
+        var factory = new ConfigurationLocationFactory();
+        ServiceContainerUtil.replaceService(getProject(), ConfigurationLocationFactory.class, factory,
+                getTestRootDisposable());
         myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
-        var reservedRow = ConventionalConfigurationLocationScanner.findConventionalConfigurationLocation(
-                getProject(), baseDir()).orElseThrow();
+        var alreadyPresentRow = factory.create(getProject(), "some-other-id", ConfigurationType.PROJECT_RELATIVE,
+                "config/checkstyle/checkstyle.xml", ConventionalConfigurationLocationScanner.RESERVED_DESCRIPTION,
+                NamedScopeHelper.getDefaultScope(getProject()));
 
-        var result = ConventionalConfigurationLocationScanner.scan(getProject(), List.of(reservedRow));
+        var result = ConventionalConfigurationLocationScanner.scan(getProject(), List.of(alreadyPresentRow));
 
-        var matches = result.locations().stream().filter(reservedRow::equals).toList();
+        assertTrue(result.found().isPresent());
+        assertEquals("some-other-id", result.found().get().getId());
+        var matches = result.locations().stream().filter(alreadyPresentRow::equals).toList();
         assertEquals(1, matches.size());
     }
 
