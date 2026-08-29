@@ -35,7 +35,7 @@ public class DetectConventionalConfigurationLocation extends BaseAction {
     }
 
     @NotNull
-    static Optional<String> messageFor(@NotNull final ScanOutcome outcome) {
+    public static Optional<String> messageFor(@NotNull final ScanOutcome outcome) {
         return switch (outcome) {
             case ADDED -> Optional.of(message("notification.detect-conventional-config.added"));
             case REPLACED -> Optional.of(message("notification.detect-conventional-config.replaced"));

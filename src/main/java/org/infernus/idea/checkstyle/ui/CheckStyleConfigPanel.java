@@ -27,8 +27,12 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.VersionListReader;
+import org.infernus.idea.checkstyle.actions.DetectConventionalConfigurationLocation;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.ConfigurationExporter;
+import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner;
+import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanOutcome;
+import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanResult;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -248,6 +252,7 @@ public class CheckStyleConfigPanel extends JPanel {
         tableDecorator.setEditActionUpdater(new EnableWhenSelectedAndRemovable());
         tableDecorator.setRemoveActionUpdater(new EnableWhenSelectedAndRemovable());
         tableDecorator.addExtraAction((AnAction) new ExportLocationAction());
+        tableDecorator.addExtraAction((AnAction) new DetectConventionalConfigurationAction());
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
 
         final JPanel container = new JPanel(new BorderLayout());
@@ -533,6 +538,57 @@ public class CheckStyleConfigPanel extends JPanel {
             }
             Messages.showInfoMessage(project, message, CheckStyleBundle.message("config.export.success.title"));
         }
+    }
+
+    /**
+     * Scan for a Checkstyle configuration file at one of a fixed set of conventional, project-relative
+     * locations and merge the result into this panel's in-memory location table. Mirrors
+     * {@link DetectConventionalConfigurationLocation}, but operates on {@link #locationModel} instead of
+     * writing straight to {@link PluginConfigurationManager}, so that Cancel still discards it.
+     */
+    private final class DetectConventionalConfigurationAction extends AnActionButton {
+        DetectConventionalConfigurationAction() {
+            super(CheckStyleBundle.message("config.file.detect.text"), AllIcons.Actions.Find);
+            getTemplatePresentation().setDescription(CheckStyleBundle.message("config.file.detect.tooltip"));
+        }
+
+        @Override
+        public void actionPerformed(@NotNull final AnActionEvent e) {
+            final List<ConfigurationLocation> snapshot = List.copyOf(locationModel.getLocations());
+            final ScanResult[] result = new ScanResult[1];
+            ProgressManager.getInstance().run(new Task.Modal(
+                    project, CheckStyleBundle.message("detect.title"), false) {
+                @Override
+                public void run(@NotNull final ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    result[0] = ConventionalConfigurationLocationScanner.scan(project, snapshot);
+                }
+            });
+
+            applyDetectionResult(result[0]);
+            DetectConventionalConfigurationLocation.messageFor(result[0].outcome())
+                    .ifPresent(msg -> Messages.showInfoMessage(
+                            project, msg, CheckStyleBundle.message("config.file.detect.text")));
+        }
+    }
+
+    /**
+     * Applies a {@link ScanResult} to {@link #locationModel}: replaces the location list and, if a
+     * location was detected, (re-)activates it. Package-private as a test seam, so tests can drive it
+     * directly on the EDT without going through {@link Task.Modal}.
+     */
+    void applyDetectionResult(@NotNull final ScanResult result) {
+        if (result.outcome() == ScanOutcome.NO_PROJECT_DIRECTORY) {
+            return;
+        }
+
+        locationModel.setLocations(result.locations());
+
+        result.found().ifPresent(location -> {
+            final SortedSet<ConfigurationLocation> active = new TreeSet<>(locationModel.getActiveLocations());
+            active.add(location);
+            locationModel.setActiveLocations(active);
+        });
     }
 
     /**

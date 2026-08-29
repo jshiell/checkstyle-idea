@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanOutcome;
+import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanResult;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -11,6 +13,8 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -162,6 +166,119 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 panel.wouldCollideOnEdit(userCopy, renamedBackToCanonical));
         assertFalse("renaming a copy to a still-unique description should not collide",
                 panel.wouldCollideOnEdit(userCopy, renamedToSomethingStillUnique));
+    }
+
+    public void testApplyDetectionResultForAddedAppendsAndActivatesTheRow() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation newLocation = factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "config/checkstyle/checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.ADDED, List.of(newLocation), Optional.of(newLocation)));
+
+        assertTrue(panel.locationModel().getLocations().contains(newLocation));
+        assertTrue(panel.locationModel().getActiveLocations().contains(newLocation));
+    }
+
+    public void testApplyDetectionResultForRemovedDropsTheRowAndDeactivatesIt() {
+        final ConfigurationLocation reservedRow = reservedRow();
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(reservedRow))
+                .withActiveLocationIds(new TreeSet<>(List.of(reservedRow.getId())))
+                .build());
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.REMOVED, List.of(), Optional.empty()));
+
+        assertFalse(panel.locationModel().getLocations().contains(reservedRow));
+        assertFalse(panel.locationModel().getActiveLocations().contains(reservedRow));
+    }
+
+    public void testApplyDetectionResultForReplacedLeavesExactlyOneReservedRowActiveAtTheNewLocation() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation oldReservedRow = factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(oldReservedRow))
+                .withActiveLocationIds(new TreeSet<>(List.of(oldReservedRow.getId())))
+                .build());
+        final ConfigurationLocation newReservedRow = factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "config/checkstyle/checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.REPLACED, List.of(newReservedRow), Optional.of(newReservedRow)));
+
+        assertFalse(panel.locationModel().getLocations().contains(oldReservedRow));
+        assertFalse(panel.locationModel().getActiveLocations().contains(oldReservedRow));
+        assertEquals(List.of(newReservedRow), panel.locationModel().getLocations());
+        assertTrue(panel.locationModel().getActiveLocations().contains(newReservedRow));
+    }
+
+    public void testApplyDetectionResultForNoProjectDirectoryIsANoOp() {
+        final ConfigurationLocation existing = reservedRow();
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(existing))
+                .withActiveLocationIds(new TreeSet<>(List.of(existing.getId())))
+                .build());
+        final List<ConfigurationLocation> locationsBefore = panel.locationModel().getLocations();
+        final SortedSet<ConfigurationLocation> activeBefore = new TreeSet<>(panel.locationModel().getActiveLocations());
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.NO_PROJECT_DIRECTORY, locationsBefore, Optional.empty()));
+
+        assertEquals(locationsBefore, panel.locationModel().getLocations());
+        assertEquals(activeBefore, panel.locationModel().getActiveLocations());
+    }
+
+    public void testApplyDetectionResultForAddedDoesNotTouchThePersistedConfiguration() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation newLocation = factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "config/checkstyle/checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
+        final PluginConfiguration before = configurationManager.getCurrent();
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.ADDED, List.of(newLocation), Optional.of(newLocation)));
+
+        assertTrue(panel.getPluginConfiguration().getLocations().contains(newLocation));
+        assertTrue(panel.getPluginConfiguration().getActiveLocationIds().contains(newLocation.getId()));
+        assertEquals(before, configurationManager.getCurrent());
+    }
+
+    public void testApplyingTheSameDetectionResultTwiceDoesNotDuplicateTheRow() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation newLocation = factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "config/checkstyle/checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.ADDED, List.of(newLocation), Optional.of(newLocation)));
+
+        // Mirrors what scan() would actually return on a second call: the row is already in the
+        // snapshot, so the outcome is UNCHANGED_PRESENT and the location list is unchanged. getLocations()
+        // returns a live view over the model's backing list, so it must be snapshotted (as scan() itself
+        // always does) before being fed back into setLocations(), or the model's own clear() wipes it.
+        final List<ConfigurationLocation> secondCallLocations = List.copyOf(panel.locationModel().getLocations());
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.UNCHANGED_PRESENT, secondCallLocations, Optional.of(newLocation)));
+
+        assertEquals(1, panel.locationModel().getLocations().stream().filter(newLocation::equals).count());
+    }
+
+    public void testApplyDetectionResultForUnchangedPresentReactivatesAManuallyDeactivatedRow() {
+        final ConfigurationLocation reservedRow = reservedRow();
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withLocations(locationsOf(reservedRow))
+                .withActiveLocationIds(new TreeSet<>(List.of(reservedRow.getId())))
+                .build());
+        panel.locationModel().setActiveLocations(new TreeSet<>());
+        assertFalse(panel.locationModel().getActiveLocations().contains(reservedRow));
+
+        panel.applyDetectionResult(new ScanResult(ScanOutcome.UNCHANGED_PRESENT, List.of(reservedRow), Optional.of(reservedRow)));
+
+        assertTrue(panel.locationModel().getActiveLocations().contains(reservedRow));
+    }
+
+    private ConfigurationLocation reservedRow() {
+        final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
+        return factory.create(getProject(), "conventional-config-location",
+                ConfigurationType.PROJECT_RELATIVE, "config/checkstyle/checkstyle.xml", "Detected Checkstyle Configuration",
+                NamedScopeHelper.getDefaultScope(getProject()));
     }
 
     private SortedSet<ConfigurationLocation> locationsOf(final ConfigurationLocation... locations) {
