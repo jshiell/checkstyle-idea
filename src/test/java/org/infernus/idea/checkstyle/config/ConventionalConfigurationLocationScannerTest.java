@@ -94,4 +94,17 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
                 .anyMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
         assertTrue(current.getActiveLocationIds().contains(ConventionalConfigurationLocationScanner.RESERVED_ID));
     }
+
+    public void testRescanningWithTheSameFilePresentDoesNotDuplicateTheLocation() {
+        myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
+        ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.UNCHANGED_PRESENT, outcome);
+        var reservedLocations = configManager().getCurrent().getLocations().stream()
+                .filter(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId()))
+                .toList();
+        assertEquals(1, reservedLocations.size());
+    }
 }
