@@ -123,4 +123,21 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
                 .noneMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
         assertFalse(current.getActiveLocationIds().contains(ConventionalConfigurationLocationScanner.RESERVED_ID));
     }
+
+    public void testSwitchesToAHigherPriorityLocationWhenItAppears() {
+        myFixture.addFileToProject("checkstyle.xml", "<module/>");
+        ConventionalConfigurationLocationScanner.rescan(getProject());
+        myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
+        var expected = baseDir().findFileByRelativePath("config/checkstyle/checkstyle.xml");
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.REPLACED, outcome);
+        var reservedLocations = configManager().getCurrent().getLocations().stream()
+                .filter(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId()))
+                .toList();
+        assertEquals(1, reservedLocations.size());
+        assertEquals(expected.getPath(),
+                new ProjectFilePaths(getProject()).detokenise(reservedLocations.get(0).getLocation()));
+    }
 }
