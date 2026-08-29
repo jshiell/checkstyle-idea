@@ -24,4 +24,11 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         assertEquals(ConventionalConfigurationLocationScanner.RESERVED_DESCRIPTION, found.get().getDescription());
         assertEquals(NamedScopeHelper.getDefaultScope(getProject()), found.get().getNamedScope().orElse(null));
     }
+
+    public void testReturnsEmptyWhenNoConventionalFileExists() {
+        var found = ConventionalConfigurationLocationScanner.findConventionalConfigurationLocation(
+                getProject(), baseDir());
+
+        assertFalse(found.isPresent());
+    }
 }
