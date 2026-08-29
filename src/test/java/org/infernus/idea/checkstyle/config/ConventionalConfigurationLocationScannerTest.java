@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.config;
 
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -106,5 +107,20 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
                 .filter(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId()))
                 .toList();
         assertEquals(1, reservedLocations.size());
+    }
+
+    public void testRemovesPreviouslyDetectedLocationWhenTheFileIsDeleted() throws Exception {
+        var file = myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>").getVirtualFile();
+        ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        WriteAction.runAndWait(() -> file.delete(this));
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.REMOVED, outcome);
+        var current = configManager().getCurrent();
+        assertTrue(current.getLocations().stream()
+                .noneMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
+        assertFalse(current.getActiveLocationIds().contains(ConventionalConfigurationLocationScanner.RESERVED_ID));
     }
 }
