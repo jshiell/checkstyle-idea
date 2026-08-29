@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import java.util.List;
 import java.util.TreeSet;
@@ -183,6 +184,9 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         configManager().addConfigurationListener(listener);
 
         var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+        // configManager.setCurrent() (if reached) fires listeners via invokeLater, so the queued
+        // event must be pumped before the assertion can see whether it ran.
+        PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue();
 
         assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.UNCHANGED_ABSENT, outcome);
         assertEquals(0, callCount.get());
