@@ -4,6 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
+import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 
 public class ConventionalConfigurationLocationScannerTest extends BasePlatformTestCase {
@@ -30,5 +31,17 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
                 getProject(), baseDir());
 
         assertFalse(found.isPresent());
+    }
+
+    public void testPrefersConfigCheckstyleCheckstyleXmlOverRootCheckstyleXmlWhenBothExist() {
+        myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
+        myFixture.addFileToProject("checkstyle.xml", "<module/>");
+        var expected = baseDir().findFileByRelativePath("config/checkstyle/checkstyle.xml");
+
+        var found = ConventionalConfigurationLocationScanner.findConventionalConfigurationLocation(
+                getProject(), baseDir());
+
+        assertTrue(found.isPresent());
+        assertEquals(expected.getPath(), new ProjectFilePaths(getProject()).detokenise(found.get().getLocation()));
     }
 }
