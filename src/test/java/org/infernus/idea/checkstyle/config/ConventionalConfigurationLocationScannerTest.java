@@ -9,6 +9,10 @@ import org.infernus.idea.checkstyle.util.ProjectPaths;
 
 public class ConventionalConfigurationLocationScannerTest extends BasePlatformTestCase {
 
+    private PluginConfigurationManager configManager() {
+        return getProject().getService(PluginConfigurationManager.class);
+    }
+
     private VirtualFile baseDir() {
         return getProject().getService(ProjectPaths.class).projectPath(getProject());
     }
@@ -77,5 +81,17 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
 
         assertTrue(found.isPresent());
         assertEquals(expected.getPath(), new ProjectFilePaths(getProject()).detokenise(found.get().getLocation()));
+    }
+
+    public void testAddsDetectedLocationWhenNoneExistedPreviously() {
+        myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.ADDED, outcome);
+        var current = configManager().getCurrent();
+        assertTrue(current.getLocations().stream()
+                .anyMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
+        assertTrue(current.getActiveLocationIds().contains(ConventionalConfigurationLocationScanner.RESERVED_ID));
     }
 }
