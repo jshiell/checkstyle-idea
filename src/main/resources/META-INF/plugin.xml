@@ -295,6 +295,13 @@
                     description="Clear the rules file cache and blocked configurations, forcing a reload of changed rules"
                     icon="/actions/refresh.svg">
             </action>
+
+            <action id="CheckStyleDetectConventionalConfigAction"
+                    class="org.infernus.idea.checkstyle.actions.DetectConventionalConfigurationLocation"
+                    text="Detect Checkstyle Configuration File"
+                    description="Scan config/checkstyle/checkstyle.xml, checkstyle.xml and etc/checkstyle.xml in the project root for a Checkstyle configuration file, and add or remove it accordingly"
+                    icon="/actions/find.svg">
+            </action>
         </group>
 
         <action id="JumpToErrorSource"
