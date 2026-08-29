@@ -49,6 +49,21 @@ and offer to abort the commit if any problems are found. The same option appears
 If a custom file is being used and properties are available for definition then these will accessible using the 'Edit
 Properties' button.
 
+### Detecting a Conventional Configuration File
+
+The *Detect Checkstyle Configuration File* action (in the CheckStyle tool window's action group) scans the project
+root for a Checkstyle configuration file at one of three conventional locations, in priority order:
+
+1. `config/checkstyle/checkstyle.xml` - the Gradle/Maven Checkstyle plugin default.
+2. `checkstyle.xml`
+3. `etc/checkstyle.xml`
+
+The first match wins; there is no merging of multiple matches. This is a manual action only - it does not watch the
+filesystem - so invoke it again after a location appears or disappears, for example after a `git pull`. Each
+invocation is idempotent: it adds a location for the first match found, removes it again if nothing matches any
+more, and otherwise leaves things as they are. It only ever manages the single location it created itself, so it
+never overrides or removes a location you added by hand.
+
 ### Eclipse-CS Variable Support
 
 The following variables will be available if you have not otherwise overridden their values:
