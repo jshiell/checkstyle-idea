@@ -3,6 +3,9 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import java.util.List;
+import java.util.TreeSet;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -139,5 +142,29 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         assertEquals(1, reservedLocations.size());
         assertEquals(expected.getPath(),
                 new ProjectFilePaths(getProject()).detokenise(reservedLocations.get(0).getLocation()));
+    }
+
+    public void testDoesNotTouchManuallyAddedLocationsOrActiveIds() {
+        myFixture.addFileToProject("config/checkstyle/checkstyle.xml", "<module/>");
+        var factory = getProject().getService(ConfigurationLocationFactory.class);
+        var manualLocation = factory.create(getProject(), "manual-location", ConfigurationType.PROJECT_RELATIVE,
+                "some-other.xml", "Manually Added", NamedScopeHelper.getDefaultScope(getProject()));
+        configManager().setCurrent(
+                PluginConfigurationBuilder.from(configManager().getCurrent())
+                        .withLocations(new TreeSet<>(List.of(manualLocation)))
+                        .withActiveLocationIds(new TreeSet<>(List.of(manualLocation.getId())))
+                        .build(),
+                true);
+        var locationCountBeforeRescan = configManager().getCurrent().getLocations().size();
+
+        var outcome = ConventionalConfigurationLocationScanner.rescan(getProject());
+
+        assertEquals(ConventionalConfigurationLocationScanner.ScanOutcome.ADDED, outcome);
+        var current = configManager().getCurrent();
+        assertTrue(current.getLocations().contains(manualLocation));
+        assertTrue(current.getActiveLocationIds().contains("manual-location"));
+        assertTrue(current.getLocations().stream()
+                .anyMatch(loc -> ConventionalConfigurationLocationScanner.RESERVED_ID.equals(loc.getId())));
+        assertEquals(locationCountBeforeRescan + 1, current.getLocations().size());
     }
 }
