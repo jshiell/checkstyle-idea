@@ -3,15 +3,19 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.jetbrains.annotations.NotNull;
+
+import static java.util.function.Predicate.not;
 
 /**
  * Detects a Checkstyle configuration file at one of a fixed set of conventional, project-relative
@@ -91,6 +95,45 @@ public final class ConventionalConfigurationLocationScanner {
         }
 
         return outcomeFor(previousLocation, foundLocation);
+    }
+
+    /**
+     * The result of a {@link #scan(Project, List)}: the outcome, the updated location list (with the
+     * reserved-id entry added, replaced, or removed as appropriate), and the detected location (if any).
+     */
+    public record ScanResult(@NotNull ScanOutcome outcome,
+                             @NotNull List<ConfigurationLocation> locations,
+                             @NotNull Optional<ConfigurationLocation> found) {
+    }
+
+    /**
+     * Pure variant of {@link #rescan(Project)}: scans the project for a conventional configuration file
+     * and merges the result into a caller-supplied snapshot of locations, without touching
+     * {@link PluginConfigurationManager}. Callers that need to defer persistence (e.g. an in-memory table
+     * model with its own Apply/Cancel) should use this instead of {@link #rescan(Project)}.
+     */
+    @NotNull
+    public static ScanResult scan(@NotNull final Project project,
+                                  @NotNull final List<ConfigurationLocation> currentLocations) {
+        final VirtualFile baseDir = project.getService(ProjectPaths.class).projectPath(project);
+        if (baseDir == null) {
+            return new ScanResult(ScanOutcome.NO_PROJECT_DIRECTORY, currentLocations, Optional.empty());
+        }
+
+        VfsUtil.markDirtyAndRefresh(false, true, true, baseDir);
+
+        final Optional<ConfigurationLocation> previousLocation = currentLocations.stream()
+                .filter(location -> RESERVED_ID.equals(location.getId()))
+                .findFirst();
+        final Optional<ConfigurationLocation> foundLocation =
+                findConventionalConfigurationLocation(project, baseDir);
+
+        final List<ConfigurationLocation> updated = currentLocations.stream()
+                .filter(location -> !RESERVED_ID.equals(location.getId()))
+                .collect(Collectors.toCollection(ArrayList::new));
+        foundLocation.filter(not(updated::contains)).ifPresent(updated::add);
+
+        return new ScanResult(outcomeFor(previousLocation, foundLocation), updated, foundLocation);
     }
 
     @NotNull
