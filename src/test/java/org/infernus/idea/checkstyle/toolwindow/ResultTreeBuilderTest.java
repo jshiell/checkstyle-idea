@@ -7,6 +7,7 @@ import org.infernus.idea.checkstyle.checker.ConfigurationLocationResult;
 import org.infernus.idea.checkstyle.checker.ConfigurationLocationStatus;
 import org.infernus.idea.checkstyle.checker.Problem;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -544,5 +545,28 @@ class ResultTreeBuilderTest {
         ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
         verify(treeModel).setRootText(rootText.capture());
         assertThat(rootText.getValue(), containsString("com.example.MyCheck"));
+    }
+
+    @Test
+    void displayErrorResultForCheckStylePluginExceptionUsesItsOwnMessage() {
+        underTest.displayErrorResult(
+                new CheckStylePluginException("Failed to download third-party check JAR from https://example.invalid/x.jar"));
+
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(),
+                containsString("Failed to download third-party check JAR from https://example.invalid/x.jar"));
+    }
+
+    @Test
+    void displayErrorResultForCheckstyleToolExceptionWithUnmatchedCauseFallsBackToGenericMessage() {
+        RuntimeException cause = new RuntimeException("some other internal failure");
+        CheckstyleToolException toolException = new CheckstyleToolException(cause);
+
+        underTest.displayErrorResult(toolException);
+
+        ArgumentCaptor<String> rootText = ArgumentCaptor.forClass(String.class);
+        verify(treeModel).setRootText(rootText.capture());
+        assertThat(rootText.getValue(), containsString("scan failed"));
     }
 }

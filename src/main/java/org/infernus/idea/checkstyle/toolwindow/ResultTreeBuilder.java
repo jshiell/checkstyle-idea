@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.toolwindow;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiFile;
 import org.infernus.idea.checkstyle.csapi.SeverityLevel;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginParseException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
 import org.infernus.idea.checkstyle.model.ScanResult;
@@ -229,6 +230,11 @@ public class ResultTreeBuilder {
         if (errorText == null) {
             if (error instanceof CheckStylePluginParseException) {
                 errorText = message("plugin.results.unparseable");
+            } else if (error instanceof CheckStylePluginException pluginException
+                    && !(error instanceof CheckstyleToolException)
+                    && pluginException.getMessage() != null
+                    && !pluginException.getMessage().isBlank()) {
+                errorText = message("plugin.results.error.detail", pluginException.getMessage());
             } else {
                 errorText = message("plugin.results.error");
             }
