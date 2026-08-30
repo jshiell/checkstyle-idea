@@ -78,6 +78,47 @@ parse_map_keys() {
     done <<< "${mappings}"
 }
 
+# Splits version <v> on '.' and echoes exactly three numeric components,
+# padding any missing trailing components with 0 (so "14.0" and "14.0.0"
+# compare equal). Do not use `sort -V` for version comparison: it treats
+# "14.0" and "14.0.0" as different versions, and macOS's BSD `sort` does not
+# even support -V. This mirrors the padding semantics of
+# src/main/java/org/infernus/idea/checkstyle/VersionComparator.java, which
+# treats a missing micro component as 0.
+version_components() {
+    local v="$1"
+    local IFS='.'
+    read -ra parts <<< "${v}"
+    printf '%d %d %d\n' "${parts[0]:-0}" "${parts[1]:-0}" "${parts[2]:-0}"
+}
+
+# True if version <a> is strictly greater than version <b>.
+version_gt() {
+    local a_major a_minor a_micro b_major b_minor b_micro
+    read -r a_major a_minor a_micro <<< "$(version_components "$1")"
+    read -r b_major b_minor b_micro <<< "$(version_components "$2")"
+
+    if (( a_major != b_major )); then
+        (( a_major > b_major ))
+    elif (( a_minor != b_minor )); then
+        (( a_minor > b_minor ))
+    else
+        (( a_micro > b_micro ))
+    fi
+}
+
+# Echoes the greatest of the given versions.
+version_max() {
+    local max="$1"
+    shift
+    for v in "$@"; do
+        if version_gt "${v}" "${max}"; then
+            max="${v}"
+        fi
+    done
+    printf '%s\n' "${max}"
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "check-checkstyle-version.sh: main entry point not yet implemented" >&2
     exit 1

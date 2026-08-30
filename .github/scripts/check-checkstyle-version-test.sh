@@ -91,8 +91,39 @@ test_parse_versions_reads_supported_list
 test_parse_versions_real_properties_file
 test_parse_versions_rejects_invalid_token
 test_parse_versions_rejects_empty_result
+assert_version_gt() {
+    local a="$1" b="$2"
+    if ! version_gt "${a}" "${b}"; then
+        fail "version_gt(${a}, ${b}): expected true"
+    fi
+}
+
+assert_not_version_gt() {
+    local a="$1" b="$2"
+    if version_gt "${a}" "${b}"; then
+        fail "version_gt(${a}, ${b}): expected false"
+    fi
+}
+
+test_version_gt() {
+    assert_not_version_gt "14.0.0" "14.0.0"
+    assert_not_version_gt "14.0" "14.0.0"
+    assert_not_version_gt "14.0.0" "14.0"
+    assert_version_gt "10.0" "9.0"
+    assert_version_gt "100.0.0" "14.0.0"
+    assert_version_gt "14.0.1" "14.0.0"
+}
+
+test_version_max() {
+    local actual
+    actual="$(version_max "10.0" "14.0.0" "9.5.2" "14.0")"
+    assert_eq "14.0.0" "${actual}" "version_max picks the highest version"
+}
+
 test_parse_map_keys_reads_left_hand_sides
 test_parse_map_keys_real_properties_file
+test_version_gt
+test_version_max
 
 if [[ "${FAILURES}" -gt 0 ]]; then
     echo "${FAILURES} test(s) failed." >&2
