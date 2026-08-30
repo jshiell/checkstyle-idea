@@ -5,6 +5,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTDATA_DIR="${SCRIPT_DIR}/testdata"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REAL_PROPERTIES="${REPO_ROOT}/src/main/resources/checkstyle-idea.properties"
 
 # shellcheck source=./check-checkstyle-version.sh
 source "${SCRIPT_DIR}/check-checkstyle-version.sh"
@@ -23,14 +25,44 @@ assert_eq() {
     fi
 }
 
+assert_fails() {
+    local description="$1"
+    shift
+    if "$@" >/dev/null 2>&1; then
+        fail "${description}: expected non-zero exit, got success"
+    fi
+}
+
+assert_version_gt() {
+    local a="$1" b="$2"
+    if ! version_gt "${a}" "${b}"; then
+        fail "version_gt(${a}, ${b}): expected true"
+    fi
+}
+
+assert_not_version_gt() {
+    local a="$1" b="$2"
+    if version_gt "${a}" "${b}"; then
+        fail "version_gt(${a}, ${b}): expected false"
+    fi
+}
+
+# run_check (parse_args + decide_action) is exercised in-process via a fresh
+# `bash -c` that sources the script, rather than executing the script file
+# directly. This keeps these tests hermetic: the script's actual entry point
+# (run when executed directly, see the BASH_SOURCE guard at the bottom of
+# check-checkstyle-version.sh) also drives the issue-lifecycle logic, which
+# makes real `gh` calls and is intentionally NOT covered by this offline
+# suite — see the "Issue lifecycle" section of check-checkstyle-version.sh.
+run_check_in_subshell() {
+    bash -c 'source "'"${SCRIPT_DIR}"'/check-checkstyle-version.sh"; run_check "$@"' -- "$@"
+}
+
 test_parse_versions_reads_supported_list() {
     local actual
     actual="$(parse_versions "${TESTDATA_DIR}/sample.properties" | tr '\n' ',')"
     assert_eq "10.0,10.1,10.2,10.3.4,11.0.1,11.2.0," "${actual}" "parse_versions on sample fixture"
 }
-
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-REAL_PROPERTIES="${REPO_ROOT}/src/main/resources/checkstyle-idea.properties"
 
 test_parse_versions_real_properties_file() {
     local versions count
@@ -51,14 +83,6 @@ test_parse_versions_real_properties_file() {
     fi
     if printf '%s\n' "${versions}" | grep -q -- '-'; then
         fail "parse_versions on real properties file: contains '-' (likely read checkstyle.versions.map raw)"
-    fi
-}
-
-assert_fails() {
-    local description="$1"
-    shift
-    if "$@" >/dev/null 2>&1; then
-        fail "${description}: expected non-zero exit, got success"
     fi
 }
 
@@ -87,24 +111,6 @@ test_parse_map_keys_real_properties_file() {
     fi
 }
 
-test_parse_versions_reads_supported_list
-test_parse_versions_real_properties_file
-test_parse_versions_rejects_invalid_token
-test_parse_versions_rejects_empty_result
-assert_version_gt() {
-    local a="$1" b="$2"
-    if ! version_gt "${a}" "${b}"; then
-        fail "version_gt(${a}, ${b}): expected true"
-    fi
-}
-
-assert_not_version_gt() {
-    local a="$1" b="$2"
-    if version_gt "${a}" "${b}"; then
-        fail "version_gt(${a}, ${b}): expected false"
-    fi
-}
-
 test_version_gt() {
     assert_not_version_gt "14.0.0" "14.0.0"
     assert_not_version_gt "14.0" "14.0.0"
@@ -120,8 +126,6 @@ test_version_max() {
     assert_eq "14.0.0" "${actual}" "version_max picks the highest version"
 }
 
-test_parse_map_keys_reads_left_hand_sides
-test_parse_map_keys_real_properties_file
 test_current_max_version_sample_fixture() {
     local actual
     actual="$(current_max_version "${TESTDATA_DIR}/sample.properties")"
@@ -134,8 +138,6 @@ test_current_max_version_real_properties_file() {
     assert_eq "14.0.0" "${actual}" "current_max_version on real properties file"
 }
 
-test_version_gt
-test_version_max
 test_select_latest_release_tag_picks_max_matching_tag() {
     local actual
     actual="$(printf 'checkstyle-13.9.0\ncheckstyle-14.0.0\nsome-other-tag\ncheckstyle-9.3\n' | select_latest_release_tag)"
@@ -147,13 +149,9 @@ test_select_latest_release_tag_fails_on_no_match() {
         'source "'"${SCRIPT_DIR}"'/check-checkstyle-version.sh"; printf "not-a-checkstyle-tag\n" | select_latest_release_tag'
 }
 
-test_current_max_version_sample_fixture
-test_current_max_version_real_properties_file
-SCRIPT_UNDER_TEST="${SCRIPT_DIR}/check-checkstyle-version.sh"
-
 test_run_check_reports_update_available() {
     local actual
-    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest 99.0.0 --dry-run)"
+    actual="$(run_check_in_subshell --properties "${REAL_PROPERTIES}" --latest 99.0.0 --dry-run)"
     if [[ "${actual}" != *"Update available"* ]]; then
         fail "run_check with --latest 99.0.0: expected 'Update available' in [${actual}]"
     fi
@@ -161,15 +159,15 @@ test_run_check_reports_update_available() {
 
 test_run_check_reports_up_to_date() {
     local actual
-    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest 14.0.0 --dry-run)"
+    actual="$(run_check_in_subshell --properties "${REAL_PROPERTIES}" --latest 14.0.0 --dry-run)"
     if [[ "${actual}" != *"Up to date"* ]]; then
         fail "run_check with --latest 14.0.0: expected 'Up to date' in [${actual}]"
     fi
 }
 
 test_run_check_rejects_invalid_latest() {
-    assert_fails "run_check --latest ''" bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest '' --dry-run
-    assert_fails "run_check --latest null" bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest null --dry-run
+    assert_fails "run_check --latest ''" run_check_in_subshell --properties "${REAL_PROPERTIES}" --latest '' --dry-run
+    assert_fails "run_check --latest null" run_check_in_subshell --properties "${REAL_PROPERTIES}" --latest null --dry-run
 }
 
 test_run_check_treats_map_key_as_handled() {
@@ -179,7 +177,7 @@ test_run_check_treats_map_key_as_handled() {
     sed -i.bak 's/13\.4\.1 -> 13\.4\.2/13.4.1 -> 13.4.2, 15.0.0 -> 14.0.0/' "${scratch}"
 
     local actual
-    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${scratch}" --latest 15.0.0 --dry-run)"
+    actual="$(run_check_in_subshell --properties "${scratch}" --latest 15.0.0 --dry-run)"
     if [[ "${actual}" != *"Up to date"* ]]; then
         fail "run_check with map key 15.0.0 present and --latest 15.0.0: expected 'Up to date' in [${actual}]"
     fi
@@ -187,6 +185,16 @@ test_run_check_treats_map_key_as_handled() {
     rm -f "${scratch}" "${scratch}.bak"
 }
 
+test_parse_versions_reads_supported_list
+test_parse_versions_real_properties_file
+test_parse_versions_rejects_invalid_token
+test_parse_versions_rejects_empty_result
+test_parse_map_keys_reads_left_hand_sides
+test_parse_map_keys_real_properties_file
+test_version_gt
+test_version_max
+test_current_max_version_sample_fixture
+test_current_max_version_real_properties_file
 test_select_latest_release_tag_picks_max_matching_tag
 test_select_latest_release_tag_fails_on_no_match
 test_run_check_reports_update_available
