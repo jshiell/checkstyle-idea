@@ -13,6 +13,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -156,7 +157,7 @@ public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
     @Nullable
     private InputSource loadFromLocalFile(final URI systemIdUrl) throws IOException {
         File file = new File(systemIdUrl.getPath());
-        if (file.exists()) {
+        if (file.exists() && isWithinConfigurationBaseDir(file)) {
             return sourceFromFile(file.getAbsolutePath());
         }
 
@@ -170,6 +171,21 @@ public class CheckStyleEntityResolver implements EntityResolver, XMLResolver {
             }
         }
         return null;
+    }
+
+    /**
+     * Confines direct (i.e. not relative-to-base-URI) local file entity references to the configuration's own
+     * base directory, so an untrusted configuration cannot use an absolute {@code file:} system ID to read
+     * arbitrary files on disk.
+     */
+    private boolean isWithinConfigurationBaseDir(final File file) {
+        final File baseDir = configurationLocation.getBaseDir();
+        if (baseDir == null) {
+            return false;
+        }
+        final Path normalisedFile = file.toPath().normalize().toAbsolutePath();
+        final Path normalisedBaseDir = baseDir.toPath().normalize().toAbsolutePath();
+        return normalisedFile.startsWith(normalisedBaseDir);
     }
 
     @NotNull

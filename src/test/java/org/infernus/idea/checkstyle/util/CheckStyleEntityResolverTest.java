@@ -14,6 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -66,6 +68,22 @@ public class CheckStyleEntityResolverTest {
     public void xmlResolverDelegatesCorrectly() throws Exception {
         final Object result = underTest.resolveEntity(null, "http://evil.example.com/dtd", null, null);
         assertThat(contentOf((InputSource) result), is(""));
+    }
+
+    @Test
+    public void aLocalFileOutsideTheConfigurationsBaseDirIsNotResolved() throws Exception {
+        // the configuration has no base dir (it is not backed by a file on disk), so no local file
+        // reference should be honoured, however plausible its content
+        final Path secretFile = Files.createTempFile("checkstyle-entity-resolver-test", ".txt");
+        Files.writeString(secretFile, "SECRET_CONTENT");
+
+        try {
+            final InputSource result = underTest.resolveEntity(null, secretFile.toUri().toString());
+            assertThat("A local file outside the configuration's base directory must not be resolved",
+                    result, nullValue());
+        } finally {
+            Files.deleteIfExists(secretFile);
+        }
     }
 
     @Test
