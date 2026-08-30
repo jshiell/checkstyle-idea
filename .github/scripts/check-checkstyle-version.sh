@@ -119,7 +119,126 @@ version_max() {
     printf '%s\n' "${max}"
 }
 
+# The highest version <file> already "handles": the max of everything in
+# checkstyle.versions.supported plus every checkstyle.versions.map key (a
+# map key is a deliberately handled, unsupported version mapped onto a
+# supported alternative, so it counts as handled for alerting purposes).
+current_max_version() {
+    local file="$1"
+    local versions
+    versions="$(parse_versions "${file}")" || return 1
+    local map_keys
+    map_keys="$(parse_map_keys "${file}")" || return 1
+
+    local all=()
+    while IFS= read -r v; do all+=("${v}"); done <<< "${versions}"
+    while IFS= read -r v; do [[ -n "${v}" ]] && all+=("${v}"); done <<< "${map_keys}"
+
+    version_max "${all[@]}"
+}
+
+# Reads release tag names (one per line) from stdin, filters to those
+# matching checkstyle-X.Y(.Z), and echoes the highest version among them
+# (prefix stripped). Hard-fails if none match.
+select_latest_release_tag() {
+    local tag version
+    local versions=()
+    while IFS= read -r tag; do
+        if [[ "${tag}" =~ ^checkstyle-([0-9]+\.[0-9]+(\.[0-9]+)?)$ ]]; then
+            versions+=("${BASH_REMATCH[1]}")
+        fi
+    done
+
+    if [[ "${#versions[@]}" -eq 0 ]]; then
+        echo "check-checkstyle-version.sh: no release tags matched 'checkstyle-X.Y(.Z)'" >&2
+        return 1
+    fi
+
+    version_max "${versions[@]}"
+}
+
+# Fetches the latest non-draft, non-prerelease Checkstyle release version
+# from GitHub. Uses the releases list (not /latest), since /latest can be
+# masked by an old-line backport release published more recently.
+fetch_latest_version() {
+    gh api 'repos/checkstyle/checkstyle/releases?per_page=50' \
+        --jq '.[] | select(.draft==false and .prerelease==false) | .tag_name' \
+        | select_latest_release_tag
+}
+
+DEFAULT_PROPERTIES_FILE="$(cd "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/../.." && pwd)/src/main/resources/checkstyle-idea.properties"
+
+# Parses CLI flags into the globals PROPERTIES_FILE, LATEST_OVERRIDE and
+# DRY_RUN. --latest is validated against VERSION_RE immediately (so e.g.
+# `--latest ''` or `--latest null` are rejected here, not later).
+parse_args() {
+    PROPERTIES_FILE="${DEFAULT_PROPERTIES_FILE}"
+    LATEST_OVERRIDE=""
+    DRY_RUN=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --properties)
+                PROPERTIES_FILE="$2"
+                shift 2
+                ;;
+            --latest)
+                LATEST_OVERRIDE="$2"
+                shift 2
+                if [[ ! "${LATEST_OVERRIDE}" =~ ${VERSION_RE} ]]; then
+                    echo "check-checkstyle-version.sh: --latest value '${LATEST_OVERRIDE}' is not a valid version" >&2
+                    return 1
+                fi
+                ;;
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            *)
+                echo "check-checkstyle-version.sh: unknown argument '$1'" >&2
+                return 1
+                ;;
+        esac
+    done
+}
+
+# Echoes the version to compare against: the --latest override if given,
+# otherwise the actual latest release fetched from GitHub.
+resolve_latest_version() {
+    if [[ -n "${LATEST_OVERRIDE}" ]]; then
+        printf '%s\n' "${LATEST_OVERRIDE}"
+    else
+        fetch_latest_version
+    fi
+}
+
+# Prints a human-readable verdict and returns 1 if <latest> is newer than
+# <current>, 0 if <current> is already up to date.
+decide_action() {
+    local current="$1" latest="$2"
+    if version_gt "${latest}" "${current}"; then
+        echo "Update available: Checkstyle ${latest} has been released (current max known: ${current})"
+        return 1
+    else
+        echo "Up to date: ${current} is already the latest known Checkstyle version"
+        return 0
+    fi
+}
+
+# Parses args, computes the current max and latest versions, and prints the
+# verdict. Always returns 0 (an "update available" outcome is not a script
+# error).
+run_check() {
+    parse_args "$@" || return 1
+
+    local current latest
+    current="$(current_max_version "${PROPERTIES_FILE}")" || return 1
+    latest="$(resolve_latest_version)" || return 1
+
+    decide_action "${current}" "${latest}" || true
+    return 0
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "check-checkstyle-version.sh: main entry point not yet implemented" >&2
-    exit 1
+    run_check "$@"
 fi

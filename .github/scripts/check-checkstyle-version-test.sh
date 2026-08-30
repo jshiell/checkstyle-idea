@@ -122,8 +122,77 @@ test_version_max() {
 
 test_parse_map_keys_reads_left_hand_sides
 test_parse_map_keys_real_properties_file
+test_current_max_version_sample_fixture() {
+    local actual
+    actual="$(current_max_version "${TESTDATA_DIR}/sample.properties")"
+    assert_eq "20.0.0" "${actual}" "current_max_version on sample fixture (map key exceeds supported max)"
+}
+
+test_current_max_version_real_properties_file() {
+    local actual
+    actual="$(current_max_version "${REAL_PROPERTIES}")"
+    assert_eq "14.0.0" "${actual}" "current_max_version on real properties file"
+}
+
 test_version_gt
 test_version_max
+test_select_latest_release_tag_picks_max_matching_tag() {
+    local actual
+    actual="$(printf 'checkstyle-13.9.0\ncheckstyle-14.0.0\nsome-other-tag\ncheckstyle-9.3\n' | select_latest_release_tag)"
+    assert_eq "14.0.0" "${actual}" "select_latest_release_tag picks the max checkstyle-X.Y(.Z) tag"
+}
+
+test_select_latest_release_tag_fails_on_no_match() {
+    assert_fails "select_latest_release_tag with no matching tags" bash -c \
+        'source "'"${SCRIPT_DIR}"'/check-checkstyle-version.sh"; printf "not-a-checkstyle-tag\n" | select_latest_release_tag'
+}
+
+test_current_max_version_sample_fixture
+test_current_max_version_real_properties_file
+SCRIPT_UNDER_TEST="${SCRIPT_DIR}/check-checkstyle-version.sh"
+
+test_run_check_reports_update_available() {
+    local actual
+    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest 99.0.0 --dry-run)"
+    if [[ "${actual}" != *"Update available"* ]]; then
+        fail "run_check with --latest 99.0.0: expected 'Update available' in [${actual}]"
+    fi
+}
+
+test_run_check_reports_up_to_date() {
+    local actual
+    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest 14.0.0 --dry-run)"
+    if [[ "${actual}" != *"Up to date"* ]]; then
+        fail "run_check with --latest 14.0.0: expected 'Up to date' in [${actual}]"
+    fi
+}
+
+test_run_check_rejects_invalid_latest() {
+    assert_fails "run_check --latest ''" bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest '' --dry-run
+    assert_fails "run_check --latest null" bash "${SCRIPT_UNDER_TEST}" --properties "${REAL_PROPERTIES}" --latest null --dry-run
+}
+
+test_run_check_treats_map_key_as_handled() {
+    local scratch
+    scratch="$(mktemp)"
+    cp "${REAL_PROPERTIES}" "${scratch}"
+    sed -i.bak 's/13\.4\.1 -> 13\.4\.2/13.4.1 -> 13.4.2, 15.0.0 -> 14.0.0/' "${scratch}"
+
+    local actual
+    actual="$(bash "${SCRIPT_UNDER_TEST}" --properties "${scratch}" --latest 15.0.0 --dry-run)"
+    if [[ "${actual}" != *"Up to date"* ]]; then
+        fail "run_check with map key 15.0.0 present and --latest 15.0.0: expected 'Up to date' in [${actual}]"
+    fi
+
+    rm -f "${scratch}" "${scratch}.bak"
+}
+
+test_select_latest_release_tag_picks_max_matching_tag
+test_select_latest_release_tag_fails_on_no_match
+test_run_check_reports_update_available
+test_run_check_reports_up_to_date
+test_run_check_rejects_invalid_latest
+test_run_check_treats_map_key_as_handled
 
 if [[ "${FAILURES}" -gt 0 ]]; then
     echo "${FAILURES} test(s) failed." >&2
