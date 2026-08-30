@@ -12,14 +12,19 @@ import org.junit.jupiter.api.io.TempDir;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -100,6 +105,66 @@ public class CheckstyleProjectServiceTest {
 
         URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
         assertThat(Arrays.asList(classLoader.getURLs()), hasItem(thirdPartyJar.toUri().toURL()));
+    }
+
+    @Test
+    public void urlThirdPartyClasspathEntryResolvesThroughTheCache(@TempDir final Path tempDir) throws Exception {
+        final Path fakeCheckstyleJar = tempDir.resolve("checkstyle-10.4.jar");
+        fakeCheckstyleJar.toFile().createNewFile();
+
+        final CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
+        when(mockDownloader.download(NON_BUNDLED_VERSION)).thenReturn(List.of(fakeCheckstyleJar));
+
+        final Path cacheRoot = tempDir.resolve("third-party-jars");
+        final byte[] jarBytes = validZipBytes();
+        final ThirdPartyJarCache thirdPartyJarCache = new ThirdPartyJarCache(cacheRoot,
+                (url, target) -> Files.write(target, jarBytes));
+
+        final CheckstyleProjectService serviceWithDownloader =
+                new CheckstyleProjectService(project, mockDownloader, thirdPartyJarCache);
+        serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION,
+                List.of("https://example.invalid/custom-check.jar"));
+
+        final URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
+        final Path resolvedCacheFile = thirdPartyJarCache.resolve("https://example.invalid/custom-check.jar");
+        assertThat(Arrays.asList(classLoader.getURLs()), hasItem(resolvedCacheFile.toUri().toURL()));
+    }
+
+    @Test
+    public void urlThirdPartyClasspathEntryDownloadFailureBlocksActivationWithADescriptiveErrorEvenWhenOtherEntriesWouldResolve(
+            @TempDir final Path tempDir) throws Exception {
+        final Path fakeCheckstyleJar = tempDir.resolve("checkstyle-10.4.jar");
+        fakeCheckstyleJar.toFile().createNewFile();
+        final Path otherThirdPartyJar = tempDir.resolve("other-third-party.jar");
+        otherThirdPartyJar.toFile().createNewFile();
+
+        final CheckstyleArtifactDownloader mockDownloader = mock(CheckstyleArtifactDownloader.class);
+        when(mockDownloader.download(NON_BUNDLED_VERSION)).thenReturn(List.of(fakeCheckstyleJar));
+
+        final Path cacheRoot = tempDir.resolve("third-party-jars");
+        final ThirdPartyJarCache thirdPartyJarCache = new ThirdPartyJarCache(cacheRoot, (url, target) -> {
+            throw new IOException("connection refused");
+        });
+
+        final String failingUrl = "https://example.invalid/custom-check.jar";
+        final CheckstyleProjectService serviceWithDownloader =
+                new CheckstyleProjectService(project, mockDownloader, thirdPartyJarCache);
+        serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION,
+                List.of(otherThirdPartyJar.toString(), failingUrl));
+
+        final CheckStylePluginException ex = assertThrows(CheckStylePluginException.class,
+                serviceWithDownloader::underlyingClassLoader);
+        assertThat(ex.getMessage(), containsString(failingUrl));
+    }
+
+    private static byte[] validZipBytes() throws IOException {
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(bytes)) {
+            zip.putNextEntry(new ZipEntry("entry.txt"));
+            zip.write("content".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+        return bytes.toByteArray();
     }
 
     @Test

@@ -9,6 +9,8 @@ import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
+import org.infernus.idea.checkstyle.exception.ThirdPartyJarDownloadException;
+import org.infernus.idea.checkstyle.util.Strings;
 import org.infernus.idea.checkstyle.util.TempDirProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +44,7 @@ public class CheckstyleProjectService implements Disposable {
     private final SortedSet<String> supportedVersions;
     private final CheckstyleArtifactDownloader downloader;
     private final TempDirProvider tempDirProvider;
+    private final ThirdPartyJarCache thirdPartyJarCache;
 
     /**
      * True only for the instance registered as the project's {@code CheckstyleProjectService},
@@ -56,21 +59,29 @@ public class CheckstyleProjectService implements Disposable {
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
                 CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
                         () -> new ArtifactDownloadBaseUrlResolver().resolve()),
-                new TempDirProvider(), true);
+                new TempDirProvider(), ThirdPartyJarCache.create(), true);
     }
 
     CheckstyleProjectService(@NotNull final Project project,
                              @NotNull final CheckstyleArtifactDownloader downloader) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                downloader, new TempDirProvider(), false);
+                downloader, new TempDirProvider(), ThirdPartyJarCache.create(), false);
+    }
+
+    CheckstyleProjectService(@NotNull final Project project,
+                             @NotNull final CheckstyleArtifactDownloader downloader,
+                             @NotNull final ThirdPartyJarCache thirdPartyJarCache) {
+        this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
+                pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
+                downloader, new TempDirProvider(), thirdPartyJarCache, false);
     }
 
     CheckstyleProjectService(@NotNull final Project project,
                              @NotNull final TempDirProvider tempDirProvider) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                null, tempDirProvider, false);
+                null, tempDirProvider, ThirdPartyJarCache.create(), false);
     }
 
     private CheckstyleProjectService(@NotNull final Project project,
@@ -78,9 +89,11 @@ public class CheckstyleProjectService implements Disposable {
                                      @Nullable final List<String> thirdPartyJars,
                                      @Nullable final CheckstyleArtifactDownloader downloaderOverride,
                                      @NotNull final TempDirProvider tempDirProvider,
+                                     @NotNull final ThirdPartyJarCache thirdPartyJarCache,
                                      final boolean isProjectSharedInstance) {
         this.project = project;
         this.tempDirProvider = tempDirProvider;
+        this.thirdPartyJarCache = thirdPartyJarCache;
         this.isProjectSharedInstance = isProjectSharedInstance;
         versionListReader = new VersionListReader();
         supportedVersions = versionListReader.getSupportedVersions();
@@ -106,7 +119,8 @@ public class CheckstyleProjectService implements Disposable {
     public static CheckstyleProjectService forVersion(@NotNull final Project project,
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null, new TempDirProvider(), false);
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, null, new TempDirProvider(),
+                ThirdPartyJarCache.create(), false);
     }
 
     @NotNull
@@ -114,12 +128,18 @@ public class CheckstyleProjectService implements Disposable {
                                                       @Nullable final String requestedVersion,
                                                       @Nullable final List<String> thirdPartyJars,
                                                       @Nullable final CheckstyleArtifactDownloader downloader) {
-        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader, new TempDirProvider(), false);
+        return new CheckstyleProjectService(project, requestedVersion, thirdPartyJars, downloader, new TempDirProvider(),
+                ThirdPartyJarCache.create(), false);
     }
 
     @Nullable
     public CheckstyleArtifactDownloader getDownloader() {
         return downloader;
+    }
+
+    @NotNull
+    public ThirdPartyJarCache getThirdPartyJarCache() {
+        return thirdPartyJarCache;
     }
 
     @NotNull
@@ -177,15 +197,30 @@ public class CheckstyleProjectService implements Disposable {
     private List<URL> toListOfUrls(@Nullable final List<String> jarFilePaths) {
         List<URL> result = new ArrayList<>();
         if (jarFilePaths != null) {
-            for (final String absolutePath : jarFilePaths) {
-                try {
-                    result.add(new File(absolutePath).toURI().toURL());
-                } catch (MalformedURLException e) {
-                    LOG.warn("Skipping malformed third party classpath entry: " + absolutePath, e);
+            for (final String entry : jarFilePaths) {
+                if (Strings.isHttpUrl(entry)) {
+                    result.add(resolveCachedUrl(entry));
+                } else {
+                    try {
+                        result.add(new File(entry).toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        LOG.warn("Skipping malformed third party classpath entry: " + entry, e);
+                    }
                 }
             }
         }
         return result;
+    }
+
+    @NotNull
+    private URL resolveCachedUrl(@NotNull final String url) {
+        try {
+            return thirdPartyJarCache.resolve(url).toUri().toURL();
+        } catch (ThirdPartyJarDownloadException e) {
+            throw new CheckStylePluginException(e.getMessage(), e);
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("Unexpected malformed cache path URL for " + url, e);
+        }
     }
 
     @NotNull
