@@ -1,0 +1,46 @@
+name: Check Checkstyle version
+
+permissions:
+  issues: write
+  contents: read
+
+on:
+  schedule:
+    # Weekly, Monday 07:37 UTC. Offset off the top of the hour deliberately:
+    # scheduled runs are documented to be delayed when queued at :00. Note
+    # that scheduled workflows on public repos are auto-disabled after 60
+    # days of repo inactivity, so this may need re-enabling by hand.
+    - cron: '37 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run (no issue create/edit/comment/close)
+        type: boolean
+        default: false
+
+concurrency:
+  group: check-checkstyle-version
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    - name: Run version-check script tests
+      run: bash .github/scripts/check-checkstyle-version-test.sh
+
+    - name: Check for a newer Checkstyle release
+      run: |
+        if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+          bash .github/scripts/check-checkstyle-version.sh --dry-run
+        else
+          bash .github/scripts/check-checkstyle-version.sh
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
