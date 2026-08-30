@@ -701,11 +701,47 @@ public class CheckStyleConfigPanel extends JPanel {
             final DefaultListModel<String> listModel = pathListModel();
             final String selectedFile = listModel.get(selected);
 
+            if (Strings.isHttpUrl(selectedFile)) {
+                runEditUrl(selected, selectedFile);
+            } else {
+                runEditFile(selected, selectedFile);
+            }
+        }
+
+        private void runEditFile(final int selected, final String selectedFile) {
+            final DefaultListModel<String> listModel = pathListModel();
             final VirtualFile toSelect = LocalFileSystem.getInstance().findFileByPath(selectedFile);
             final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(), project, toSelect);
             if (chosen != null) {
                 listModel.remove(selected);
                 listModel.add(selected, VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
+                pathList.setSelectedIndex(selected);
+                activateCurrentClasspath();
+            }
+        }
+
+        private void runEditUrl(final int selected, final String currentUrl) {
+            String newUrl = currentUrl;
+            while (true) {
+                newUrl = Messages.showInputDialog(project,
+                        CheckStyleBundle.message("config.path.add.url.prompt"),
+                        CheckStyleBundle.message("config.path.edit.url.title"),
+                        Messages.getQuestionIcon(), newUrl, null);
+                if (newUrl == null) {
+                    return;
+                }
+                if (Strings.isHttpUrl(newUrl)) {
+                    break;
+                }
+                Messages.showErrorDialog(project,
+                        CheckStyleBundle.message("config.path.add.url.invalid"),
+                        CheckStyleBundle.message("config.path.edit.url.title"));
+            }
+
+            if (ThirdPartyJarDownloadHelper.forceRefreshWithProgress(project, newUrl, thirdPartyJarCache)) {
+                final DefaultListModel<String> listModel = pathListModel();
+                listModel.remove(selected);
+                listModel.add(selected, newUrl);
                 pathList.setSelectedIndex(selected);
                 activateCurrentClasspath();
             }
