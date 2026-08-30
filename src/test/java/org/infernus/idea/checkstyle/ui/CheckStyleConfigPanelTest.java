@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.ThirdPartyJarCache;
 import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanOutcome;
 import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanResult;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
@@ -272,6 +273,28 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
         panel.applyDetectionResult(new ScanResult(ScanOutcome.UNCHANGED_PRESENT, List.of(reservedRow), Optional.of(reservedRow)));
 
         assertTrue(panel.locationModel().getActiveLocations().contains(reservedRow));
+    }
+
+    public void testApplyUrlClasspathEntryAddsTheRawUrlToTheThirdPartyClasspath() {
+        panel.setThirdPartyJarCacheForTesting(new ThirdPartyJarCache(java.nio.file.Path.of("unused"),
+                (url, target) -> { throw new AssertionError("no network access expected"); }));
+
+        panel.applyUrlClasspathEntry("https://example.invalid/custom-check.jar");
+
+        assertTrue(panel.getPluginConfiguration().getThirdPartyClasspath()
+                .contains("https://example.invalid/custom-check.jar"));
+    }
+
+    public void testApplyUrlClasspathEntryCalledTwiceWithTheSameUrlDoesNotAddADuplicate() {
+        panel.setThirdPartyJarCacheForTesting(new ThirdPartyJarCache(java.nio.file.Path.of("unused"),
+                (url, target) -> { throw new AssertionError("no network access expected"); }));
+
+        panel.applyUrlClasspathEntry("https://example.invalid/custom-check.jar");
+        panel.applyUrlClasspathEntry("https://example.invalid/custom-check.jar");
+
+        assertEquals(1, panel.getPluginConfiguration().getThirdPartyClasspath().stream()
+                .filter("https://example.invalid/custom-check.jar"::equals)
+                .count());
     }
 
     private ConfigurationLocation reservedRow() {

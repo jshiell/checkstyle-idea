@@ -26,6 +26,7 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.ThirdPartyJarCache;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.actions.DetectConventionalConfigurationLocation;
 import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
@@ -90,6 +91,7 @@ public class CheckStyleConfigPanel extends JPanel {
     private final VersionListReader versionListReader;
     private final Path m2Root;
     private final Map<String, String> versionSuffixCache = new HashMap<>();
+    private ThirdPartyJarCache thirdPartyJarCache = ThirdPartyJarCache.create();
 
     public CheckStyleConfigPanel(@NotNull final Project project) {
         super(new BorderLayout());
@@ -589,6 +591,29 @@ public class CheckStyleConfigPanel extends JPanel {
             active.add(location);
             locationModel.setActiveLocations(active);
         });
+    }
+
+    /**
+     * Replaces this panel's {@link ThirdPartyJarCache} with one supplied by a test, independent of
+     * {@link #checkstyleProjectService}'s own instance (see the "two independent instances" design
+     * note in plan-586.md).
+     */
+    void setThirdPartyJarCacheForTesting(@NotNull final ThirdPartyJarCache thirdPartyJarCache) {
+        this.thirdPartyJarCache = thirdPartyJarCache;
+    }
+
+    /**
+     * Adds {@code url} to the classpath list and activates it. Assumes {@code url} has already been
+     * successfully fetched by something else (in production, {@link org.infernus.idea.checkstyle.util.ThirdPartyJarDownloadHelper});
+     * this method itself does no network I/O and only touches the Swing list model, so it is safe to
+     * call directly from the EDT. Package-private as a test seam.
+     */
+    void applyUrlClasspathEntry(@NotNull final String url) {
+        final DefaultListModel<String> listModel = pathListModel();
+        if (!listModel.contains(url)) {
+            listModel.addElement(url);
+        }
+        activateCurrentClasspath();
     }
 
     /**
