@@ -9,4 +9,12 @@ public final class Strings {
         return value == null || value.trim().isEmpty();
     }
 
+    public static boolean isHttpUrl(final String value) {
+        if (isBlank(value)) {
+            return false;
+        }
+        final String trimmed = value.trim().toLowerCase();
+        return trimmed.startsWith("http://") || trimmed.startsWith("https://");
+    }
+
 }

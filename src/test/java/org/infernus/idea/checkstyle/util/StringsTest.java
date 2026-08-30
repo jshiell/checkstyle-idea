@@ -31,4 +31,39 @@ class StringsTest {
     void stringWithLeadingAndTrailingWhitespaceIsNotBlank() {
         assertThat(Strings.isBlank("  hello  "), is(false));
     }
+
+    @Test
+    void nullIsNotHttpUrl() {
+        assertThat(Strings.isHttpUrl(null), is(false));
+    }
+
+    @Test
+    void blankIsNotHttpUrl() {
+        assertThat(Strings.isHttpUrl("   "), is(false));
+    }
+
+    @Test
+    void bareFilenameIsNotHttpUrl() {
+        assertThat(Strings.isHttpUrl("foo.jar"), is(false));
+    }
+
+    @Test
+    void absolutePathIsNotHttpUrl() {
+        assertThat(Strings.isHttpUrl("/abs/path.jar"), is(false));
+    }
+
+    @Test
+    void httpUrlIsHttpUrl() {
+        assertThat(Strings.isHttpUrl("http://x/y.jar"), is(true));
+    }
+
+    @Test
+    void httpsUrlIsCaseInsensitivelyHttpUrl() {
+        assertThat(Strings.isHttpUrl("HTTPS://X/Y.JAR"), is(true));
+    }
+
+    @Test
+    void httpUrlWithSurroundingWhitespaceIsHttpUrl() {
+        assertThat(Strings.isHttpUrl("  https://x/y.jar  "), is(true));
+    }
 }
