@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.17.0** New: Third-party check JARs can now be added by URL as well as by local file; the plugin downloads and caches the JAR, and re-downloads only when the entry is explicitly edited (#586).
 * **26.17.0** Fixed: `ConfigurationListener` callbacks (e.g. the tool window's configuration override dropdown) are now always dispatched on the EDT, fixing a potential threading violation when the configuration changes from a background thread — Maven project sync or the Detect Checkstyle Configuration File action (#700).
 * **26.17.0** New: Added a Detect Checkstyle Configuration File action, which scans config/checkstyle/checkstyle.xml, checkstyle.xml, and etc/checkstyle.xml for a conventional configuration file and adds or removes it accordingly (#618).
 * **26.17.0** New: Built-in Checkstyle configurations (Sun Checks, Google Checks) can now be added more than once, each with its own description, scan scope, and properties (#529).
