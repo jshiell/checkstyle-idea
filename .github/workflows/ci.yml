@@ -17,6 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
+    - name: Run Checkstyle version-check script tests
+      run: bash .github/scripts/check-checkstyle-version-test.sh
+
     - name: Set up Java 21
       uses: actions/setup-java@v6
       with:
