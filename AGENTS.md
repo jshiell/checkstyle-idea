@@ -77,7 +77,7 @@ distribution.
 
 **Classloader isolation:** `csaccess` code is loaded in separate classloaders per Checkstyle version at runtime via `CheckstyleClassLoaderContainer`. Static state is duplicated per loader; class identity differs across loaders.
 
-**Adding a Checkstyle version:** Add to `checkstyle.versions.supported` in `checkstyle-idea.properties`, run `./gradlew gatherCheckstyleArtifacts`, run `./gradlew xTest`, update CHANGELOG.md.
+**Adding a Checkstyle version:** Add to `checkstyle.versions.supported` in `checkstyle-idea.properties`, run `./gradlew gatherCheckstyleArtifacts`, run `./gradlew xTest`, update CHANGELOG.md. A weekly workflow (`.github/workflows/check-checkstyle-version.yml`) files/updates a `checkstyle-update` tracking issue when upstream is ahead, and closes it automatically once `checkstyle.versions.supported` or `checkstyle.versions.map` catches up.
 
 **Tests:** JUnit 5 (Jupiter) + Hamcrest + Mockito. `jvmArgs("-Xshare:off")`. Sandbox must have artifacts copied before tests run.
 
