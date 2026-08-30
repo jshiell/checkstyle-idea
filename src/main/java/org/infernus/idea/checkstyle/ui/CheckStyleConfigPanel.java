@@ -619,6 +619,18 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     /**
+     * Normalizes URL text captured from the Add/Edit dialogs, once validated by {@link Strings#isHttpUrl}
+     * but before it is used for duplicate detection, download, or storage. Trims surrounding whitespace so
+     * {@code " https://x/y.jar "} is treated as the same entry as {@code "https://x/y.jar"} — left untrimmed,
+     * the two would hash to different {@link ThirdPartyJarCache} cache filenames and each download
+     * independently. {@link Strings#isHttpUrl} itself must keep accepting whitespace-padded input, so this
+     * normalization runs after validation, not instead of it. Package-private as a test seam.
+     */
+    static String normalizeCapturedUrl(@NotNull final String url) {
+        return url.trim();
+    }
+
+    /**
      * Process the addition of a path element.
      */
     private final class AddPathAction implements AnActionButtonRunnable {
@@ -659,6 +671,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     return;
                 }
                 if (Strings.isHttpUrl(url)) {
+                    url = normalizeCapturedUrl(url);
                     break;
                 }
                 Messages.showErrorDialog(project,
@@ -731,6 +744,7 @@ public class CheckStyleConfigPanel extends JPanel {
                     return;
                 }
                 if (Strings.isHttpUrl(newUrl)) {
+                    newUrl = normalizeCapturedUrl(newUrl);
                     break;
                 }
                 Messages.showErrorDialog(project,

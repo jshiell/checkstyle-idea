@@ -297,6 +297,15 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 .count());
     }
 
+    public void testNormalizeCapturedUrlTrimsSurroundingWhitespace() {
+        // runAddUrl()/runEditUrl() apply this to text captured from the Add/Edit dialogs before
+        // it reaches the duplicate check, the download helper, or the classpath list, so that
+        // "https://example.invalid/custom-check.jar" and the same URL with surrounding whitespace
+        // are treated as one entry rather than downloading and caching separately.
+        assertEquals("https://example.invalid/custom-check.jar",
+                CheckStyleConfigPanel.normalizeCapturedUrl("  https://example.invalid/custom-check.jar  "));
+    }
+
     private ConfigurationLocation reservedRow() {
         final ConfigurationLocationFactory factory = getProject().getService(ConfigurationLocationFactory.class);
         return factory.create(getProject(), "conventional-config-location",
