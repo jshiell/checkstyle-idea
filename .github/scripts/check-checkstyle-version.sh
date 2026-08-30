@@ -227,7 +227,11 @@ decide_action() {
 
 # Parses args, computes the current max and latest versions, and prints the
 # verdict. Always returns 0 (an "update available" outcome is not a script
-# error).
+# error). This is the offline-testable decision seam: it makes no `gh`
+# calls of its own (beyond resolve_latest_version's fetch, which --latest
+# bypasses), which is what keeps check-checkstyle-version-test.sh hermetic.
+# `main`, below, wraps this same decision with the issue-lifecycle side
+# effects and is the script's real entry point.
 run_check() {
     parse_args "$@" || return 1
 
@@ -239,6 +243,107 @@ run_check() {
     return 0
 }
 
+ISSUE_LABEL="checkstyle-update"
+BOT_AUTHOR="github-actions[bot]"
+
+# Ensures the tracking-issue label exists. Idempotent; suppressed in dry-run.
+ensure_label() {
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[dry-run] would ensure label '${ISSUE_LABEL}' exists"
+        return 0
+    fi
+    gh label create "${ISSUE_LABEL}" --force --color FBCA04 \
+        --description "Checkstyle upstream has a release this plugin does not yet support" >/dev/null
+}
+
+# Echoes the number of the single open, bot-authored tracking issue, if any.
+# This is a read, so it runs even under --dry-run (it's how dry-run knows
+# whether to report "would create" or "would update").
+find_bot_issue() {
+    gh issue list --label "${ISSUE_LABEL}" --state open --limit 100 --json number,author \
+        --jq ".[] | select(.author.login==\"${BOT_AUTHOR}\") | .number" | head -n1
+}
+
+issue_title() {
+    echo "Checkstyle $1 is available"
+}
+
+issue_body() {
+    local latest="$1"
+    cat <<BODY
+A new Checkstyle release, [${latest}](https://github.com/checkstyle/checkstyle/releases/tag/checkstyle-${latest}), is available upstream and is not yet listed in \`src/main/resources/checkstyle-idea.properties\`.
+
+To add support, see the "Adding a Checkstyle version" recipe in AGENTS.md: add the version to \`checkstyle.versions.supported\`, run \`./gradlew gatherCheckstyleArtifacts\`, run \`./gradlew xTest\`, and update CHANGELOG.md.
+
+If ${latest} should not be supported directly (for example, it is compatible with an existing supported version), adding it as a key in \`checkstyle.versions.map\` instead also clears this alert.
+
+This issue is maintained automatically: it will be closed once the properties file catches up.
+BODY
+}
+
+# Update available, no existing bot issue: create one. Update available,
+# bot issue already open (for this or an older version): edit it in place
+# rather than creating a second issue.
+handle_update_available() {
+    local current="$1" latest="$2"
+    local existing
+    existing="$(find_bot_issue)"
+
+    if [[ "${DRY_RUN}" == true ]]; then
+        if [[ -n "${existing}" ]]; then
+            echo "[dry-run] would update issue #${existing} to ${latest}"
+        else
+            echo "[dry-run] would create issue for ${latest}"
+        fi
+        return 0
+    fi
+
+    ensure_label
+
+    if [[ -n "${existing}" ]]; then
+        gh issue edit "${existing}" --title "$(issue_title "${latest}")" --body "$(issue_body "${latest}")"
+    else
+        gh issue create --title "$(issue_title "${latest}")" --body "$(issue_body "${latest}")" --label "${ISSUE_LABEL}"
+    fi
+}
+
+# Up to date, no bot issue open: no-op. Up to date, bot issue open: confirm
+# and close it (auto-heals; no manual cleanup needed).
+handle_up_to_date() {
+    local current="$1"
+    local existing
+    existing="$(find_bot_issue)"
+
+    [[ -z "${existing}" ]] && return 0
+
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[dry-run] would comment on and close issue #${existing} (now supported as of ${current})"
+        return 0
+    fi
+
+    gh issue comment "${existing}" --body "Checkstyle ${current} is now supported. Closing."
+    gh issue close "${existing}"
+}
+
+# The script's real entry point: the same decision as run_check, plus the
+# issue-lifecycle side effects. Always returns 0 in a non-error case — an
+# "update available" outcome must not make the workflow run go red.
+main() {
+    parse_args "$@" || return 1
+
+    local current latest
+    current="$(current_max_version "${PROPERTIES_FILE}")" || return 1
+    latest="$(resolve_latest_version)" || return 1
+
+    if decide_action "${current}" "${latest}"; then
+        handle_up_to_date "${current}"
+    else
+        handle_update_available "${current}" "${latest}"
+    fi
+
+    return 0
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    run_check "$@"
+    main "$@"
 fi
