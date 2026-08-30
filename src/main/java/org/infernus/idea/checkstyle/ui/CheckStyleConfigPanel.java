@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.CommonBundle;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -42,6 +43,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.ScanScope;
 import org.infernus.idea.checkstyle.util.CheckstyleDownloadHelper;
 import org.infernus.idea.checkstyle.util.Strings;
+import org.infernus.idea.checkstyle.util.ThirdPartyJarDownloadHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -622,12 +624,57 @@ public class CheckStyleConfigPanel extends JPanel {
     private final class AddPathAction implements AnActionButtonRunnable {
         @Override
         public void run(final AnActionButton anActionButton) {
+            final String fileLabel = CheckStyleBundle.message("config.path.add.choice.file");
+            final String urlLabel = CheckStyleBundle.message("config.path.add.choice.url");
+            final String cancelLabel = CommonBundle.getCancelButtonText();
+            final int choice = Messages.showDialog(project,
+                    CheckStyleBundle.message("config.path.add.choice.message"),
+                    CheckStyleBundle.message("config.path.add.choice.title"),
+                    new String[]{fileLabel, urlLabel, cancelLabel}, 0, Messages.getQuestionIcon());
+            if (choice == 0) {
+                runAddFile();
+            } else if (choice == 1) {
+                runAddUrl();
+            }
+        }
+
+        private void runAddFile() {
             final VirtualFile chosen = FileChooser.chooseFile(checkStyleRulesFileChooserDescriptor(),
                     CheckStyleConfigPanel.this, project, ProjectUtil.guessProjectDir(project));
             if (chosen != null) {
                 (pathListModel()).addElement(
                         VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
                 activateCurrentClasspath();
+            }
+        }
+
+        private void runAddUrl() {
+            String url = null;
+            while (true) {
+                url = Messages.showInputDialog(project,
+                        CheckStyleBundle.message("config.path.add.url.prompt"),
+                        CheckStyleBundle.message("config.path.add.url.title"),
+                        Messages.getQuestionIcon(), url, null);
+                if (url == null) {
+                    return;
+                }
+                if (Strings.isHttpUrl(url)) {
+                    break;
+                }
+                Messages.showErrorDialog(project,
+                        CheckStyleBundle.message("config.path.add.url.invalid"),
+                        CheckStyleBundle.message("config.path.add.url.title"));
+            }
+
+            if (pathListModel().contains(url)) {
+                Messages.showWarningDialog(project,
+                        CheckStyleBundle.message("config.path.add.duplicate.text"),
+                        CheckStyleBundle.message("config.path.add.duplicate.title"));
+                return;
+            }
+
+            if (ThirdPartyJarDownloadHelper.forceRefreshWithProgress(project, url, thirdPartyJarCache)) {
+                applyUrlClasspathEntry(url);
             }
         }
     }
