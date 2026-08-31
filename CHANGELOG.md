@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.18.0** New: Added a "Import settings from Gradle" opt-in, which reads a Gradle project's `checkstyle {}` configuration (or, if unconfigured, a raw `task checkstyle(type: Checkstyle)` such as AGP's) during sync and imports its `configFile`, `configProperties`, and `toolVersion` — the Gradle counterpart to the existing Maven import (#439).
 * **26.17.0** New: Added Checkstyle 14.1.0.
 * **26.17.0** Fixed: A rules file's XML entity resolution (#350) no longer allows an absolute `file:` entity reference to read arbitrary local files; resolution is now confined to the rules file's own directory.
 * **26.17.0** New: Third-party check JARs can now be added by URL as well as by local file; the plugin downloads and caches the JAR, and re-downloads only when the entry is explicitly edited (#586).

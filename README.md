@@ -150,6 +150,11 @@ For Maven projects, prefer "Import settings from Maven" for third-party Checksty
 `maven-checkstyle-plugin` dependencies — it resolves the correct path on every machine regardless of where the
 local repository lives, so no committed/shared path is needed at all.
 
+For Gradle projects, "Import settings from Gradle" reads a project's `checkstyle {}` configuration (or, if that's
+unconfigured, a raw `task checkstyle(type: Checkstyle) { ... }` such as Android Gradle Plugin's) during sync, and
+imports its `configFile`, `configProperties`, and `toolVersion`. It does not currently resolve third-party check
+jars from Gradle dependencies.
+
 ### Copy libraries from project directory
 
 The option "Copy libraries from project directory" will tell Checkstyle-IDEA to do the following when creating custom

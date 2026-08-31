@@ -184,6 +184,35 @@ criteria: no "is not unload-safe" / "was not unloaded" in `idea.log`, no memory 
 `Throwable` from `org.infernus.idea.checkstyle` anywhere in the log, and a post-reload re-scan matches the
 recorded violation count.
 
+**Gradle settings import (#439) — manual verification procedure, for reference:** no automated Gradle-sync
+integration test framework exists in this project's tooling (confirmed: no `TestFrameworkType.Plugin.Gradle`
+in `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin:2.18.1`, unlike `TestFrameworkType.Plugin.Maven`)
+— the project already accepts this class of gap for Maven multi-module; the same applies here. Before release,
+with "Import settings from Gradle" toggled both on and off: (1) Groovy DSL, single module, `checkstyle {
+configFile = file(...); configProperties = [...] }`; (2) the Kotlin DSL equivalent; (3) an actual Android/AGP
+sample project using the raw `task checkstyle(type: Checkstyle) {}` pattern, not just a plain-Gradle stand-in;
+(4) a multi-module project with more than one subproject configured, and a `subprojects { apply plugin:
+'checkstyle' }` shape with no root configuration; (5) no `checkstyle` plugin applied at all → no-op, no
+exceptions; (6) a config file referencing `${config_loc}` — Gradle injects `config_loc`/`configDirectory` at
+task *execution* time, not onto the extension, so it never appears in the imported `configProperties`; confirm
+the plugin's own built-in `config_loc` resolution still covers it; (7) delete the `checkstyle {}` block and
+re-sync → the previously-imported location is removed; (8) toggle the opt-in off after a previous import → the
+imported location is left in place, not removed; (9) sync, disable the plugin, restart with the external-system
+data cache still populated, confirm no `ClassNotFoundException`/deserialization error in `idea.log` for
+`CheckstyleGradleModuleData`; (10) repeat scenario 1 against the oldest and newest Gradle versions this project
+intends to support — relevant regardless of IDE version, since `CheckstyleGradleModelBuilder` runs inside the
+*project's* Gradle daemon, not the IDE's. Pass criteria: `.idea/checkstyle-idea.xml` gets the expected
+location/properties/version; no `Throwable` from `org.infernus.idea.checkstyle` in `idea.log`.
+
+The `gradleTooling` source set (`CheckstyleGradleModelBuilder`, injected into the target project's Gradle
+daemon via IntelliJ's generated initscript) must compile against Gradle's own API only, never IntelliJ platform
+classes — `GradleInitScriptUtil` explicitly excludes `lib/app.jar` etc. from injection. `bundledPlugin("com.intellij.gradle")`
+resolves the right `gradle-api-*.jar`/`gradle-tooling-extension-api.jar` via the ordinary Gradle dependency
+mechanism (filtered out of the leaf configuration `intellijPlatformBundledPlugins`) — no hardcoded
+`~/.gradle/caches/.../transformed/...` path needed. The IntelliJ Platform Gradle Plugin patches *every*
+registered `Jar` task in the project to also embed `META-INF/plugin.xml`; `gradleToolingJar` explicitly
+`exclude("META-INF/plugin.xml")`s so the injected jar carries nothing beyond its own classes.
+
 **Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim.
 
 **Release:** Tag and push (e.g. `git tag 26.0.0 && git push origin 26.0.0`). CI builds, creates GitHub release, publishes to JetBrains marketplace.
