@@ -62,6 +62,17 @@ class CheckstyleGradleModelBuilderTest {
         assertThat(model.getConfigFile(), is(configFile.toFile().getAbsolutePath()));
     }
 
+    @Test
+    void toolVersionReflectsAnExplicitlySetValue() {
+        final Project project = ProjectBuilder.builder().build();
+        project.getPluginManager().apply("checkstyle");
+        checkstyleExtension(project).setToolVersion("10.12.1");
+
+        final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
+
+        assertThat(model.getToolVersion(), is("10.12.1"));
+    }
+
     private static CheckstyleExtension checkstyleExtension(final Project project) {
         return project.getExtensions().getByType(CheckstyleExtension.class);
     }
