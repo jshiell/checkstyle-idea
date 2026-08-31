@@ -88,6 +88,22 @@ class CheckstyleGradleModelBuilderTest {
                 is(Map.of("checkstyle.cache.file", cacheFile.toString())));
     }
 
+    @Test
+    void configFileIsNullForANonFileBackedTextResource() {
+        final Project project = ProjectBuilder.builder().build();
+        project.getPluginManager().apply("checkstyle");
+        final CheckstyleExtension checkstyleExtension = checkstyleExtension(project);
+        checkstyleExtension.setConfig(project.getResources().getText().fromString("<module name=\"Checker\"/>"));
+
+        // asFile() really does materialise a real, existing temp file for a non-file-backed resource -
+        // the point of this test is that its existence alone must not be enough to import it.
+        assertThat(checkstyleExtension.getConfigFile().isFile(), is(true));
+
+        final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
+
+        assertThat(model.getConfigFile(), is(nullValue()));
+    }
+
     private static CheckstyleExtension checkstyleExtension(final Project project) {
         return project.getExtensions().getByType(CheckstyleExtension.class);
     }
