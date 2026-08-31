@@ -56,6 +56,14 @@ abstract class MockitoAgentProvider : CommandLineArgumentProvider {
     override fun asArguments() = listOf("-javaagent:${agentFiles.asPath}")
 }
 
+abstract class GradleToolingJarPathProvider : CommandLineArgumentProvider {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val jarFile: RegularFileProperty
+
+    override fun asArguments() = listOf("-Dgradletooling.jar.path=${jarFile.get().asFile.absolutePath}")
+}
+
 tasks {
     named<Test>("test") {
         // MavenMultiVersionImportingTestCase.getMavenVersions() is final as of IDEA 2025.1, so
@@ -194,5 +202,14 @@ listOf("prepareSandbox", "prepareTestSandbox").forEach { taskName ->
 
 tasks.named("jar") {
     dependsOn(gradleToolingJar)
+}
+
+// GradleToolingJarPackagingTripwireTest asserts the built jar's contents directly, so 'test' needs it
+// built first and needs to know where it landed.
+tasks.named<Test>("test") {
+    dependsOn(gradleToolingJar)
+    val jarPathProvider = objects.newInstance(GradleToolingJarPathProvider::class)
+    jarPathProvider.jarFile.set(gradleToolingJar.flatMap { it.archiveFile })
+    jvmArgumentProviders.add(jarPathProvider)
 }
 
