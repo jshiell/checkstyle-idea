@@ -59,6 +59,17 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
                 panel.getPluginConfiguration().isScanBeforeCheckin());
     }
 
+    public void testImportSettingsFromGradleCheckboxRoundTrips() {
+        panel.showPluginConfiguration(PluginConfigurationBuilder.from(configurationManager.getCurrent())
+                .withImportSettingsFromGradle(false)
+                .build());
+
+        panel.getImportSettingsFromGradleCheckbox().setSelected(true);
+
+        assertTrue("a ticked checkbox should be written back",
+                panel.getPluginConfiguration().isImportSettingsFromGradle());
+    }
+
     public void testScrollToSourceIsCarriedThrough() {
         final PluginConfiguration configuration = PluginConfigurationBuilder
                 .from(configurationManager.getCurrent())
