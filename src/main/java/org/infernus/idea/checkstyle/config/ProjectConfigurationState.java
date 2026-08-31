@@ -86,6 +86,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
         private boolean scanBeforeCheckin;
         @Tag
         private boolean importSettingsFromMaven;
+        @Tag
+        private boolean importSettingsFromGradle;
         @XCollection
         private List<String> thirdPartyClasspath;
         @XCollection
@@ -108,6 +110,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
             projectSettings.scrollToSource = currentPluginConfig.isScrollToSource();
             projectSettings.scanBeforeCheckin = currentPluginConfig.isScanBeforeCheckin();
             projectSettings.importSettingsFromMaven = currentPluginConfig.isImportSettingsFromMaven();
+            projectSettings.importSettingsFromGradle = currentPluginConfig.isImportSettingsFromGradle();
 
             projectSettings.thirdPartyClasspath = new ArrayList<>(currentPluginConfig.getThirdPartyClasspath());
             projectSettings.activeLocationIds = new ArrayList<>(currentPluginConfig.getActiveLocationIds());
@@ -155,7 +158,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                         .withThirdPartyClassPath(requireNonNullElseGet(thirdPartyClasspath, ArrayList::new))
                         .withLocations(deserialiseLocations(project))
                         .withActiveLocationIds(new TreeSet<>(requireNonNullElseGet(activeLocationIds, ArrayList::new)))
-                        .withImportSettingsFromMaven(importSettingsFromMaven);
+                        .withImportSettingsFromMaven(importSettingsFromMaven)
+                        .withImportSettingsFromGradle(importSettingsFromGradle);
             }
 
             return new LegacyProjectConfigurationStateDeserialiser(project)

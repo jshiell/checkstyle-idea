@@ -22,6 +22,7 @@ public final class PluginConfigurationBuilder {
     private SortedSet<String> activeLocationIds;
     private boolean scanBeforeCheckin;
     private boolean importSettingsFromMaven;
+    private boolean importSettingsFromGradle;
 
     private PluginConfigurationBuilder(@NotNull final String checkstyleVersion,
                                        @NotNull final ScanScope scanScope,
@@ -32,7 +33,8 @@ public final class PluginConfigurationBuilder {
                                        @NotNull final List<String> thirdPartyClasspath,
                                        @NotNull final SortedSet<String> activeLocationIds,
                                        final boolean scanBeforeCheckin,
-                                       final boolean importSettingsFromMaven) {
+                                       final boolean importSettingsFromMaven,
+                                       final boolean importSettingsFromGradle) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -43,6 +45,7 @@ public final class PluginConfigurationBuilder {
         this.activeLocationIds = activeLocationIds;
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.importSettingsFromMaven = importSettingsFromMaven;
+        this.importSettingsFromGradle = importSettingsFromGradle;
     }
 
     public static PluginConfigurationBuilder defaultConfiguration(@NotNull final Project project) {
@@ -64,6 +67,7 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
+                false,
                 false);
     }
 
@@ -78,6 +82,7 @@ public final class PluginConfigurationBuilder {
                 Collections.emptyList(),
                 Collections.emptySortedSet(),
                 false,
+                false,
                 false);
     }
 
@@ -91,7 +96,8 @@ public final class PluginConfigurationBuilder {
                 source.getThirdPartyClasspath(),
                 source.getActiveLocationIds(),
                 source.isScanBeforeCheckin(),
-                source.isImportSettingsFromMaven());
+                source.isImportSettingsFromMaven(),
+                source.isImportSettingsFromGradle());
     }
 
     public PluginConfigurationBuilder withCheckstyleVersion(@NotNull final String newCheckstyleVersion) {
@@ -144,6 +150,11 @@ public final class PluginConfigurationBuilder {
         return this;
     }
 
+    public PluginConfigurationBuilder withImportSettingsFromGradle(final boolean importSettingsFromGradle) {
+        this.importSettingsFromGradle = importSettingsFromGradle;
+        return this;
+    }
+
     public PluginConfiguration build() {
         return new PluginConfiguration(
                 checkstyleVersion,
@@ -155,7 +166,8 @@ public final class PluginConfigurationBuilder {
                 Objects.requireNonNullElseGet(thirdPartyClasspath, ArrayList::new),
                 Objects.requireNonNullElseGet(activeLocationIds, TreeSet::new),
                 scanBeforeCheckin,
-                importSettingsFromMaven);
+                importSettingsFromMaven,
+                importSettingsFromGradle);
     }
 
     private static ConfigurationLocationFactory configurationLocationFactory(final Project project) {

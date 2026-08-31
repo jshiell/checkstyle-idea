@@ -129,6 +129,33 @@ class PluginConfigurationTest {
         assertEquals(original.hashCode(), copy.hashCode());
     }
 
+    // --- importSettingsFromGradle ---
+
+    @Test
+    void importSettingsFromGradleDefaultsToFalse() {
+        PluginConfiguration config = PluginConfigurationBuilder.testInstance("10.0.0").build();
+        assertFalse(config.isImportSettingsFromGradle());
+    }
+
+    @Test
+    void fromCopiesImportSettingsFromGradle() {
+        PluginConfiguration original = PluginConfigurationBuilder.testInstance("10.0.0")
+                .withImportSettingsFromGradle(true)
+                .build();
+
+        PluginConfiguration copy = PluginConfigurationBuilder.from(original).build();
+
+        assertTrue(copy.isImportSettingsFromGradle());
+    }
+
+    @Test
+    void withImportSettingsFromGradleChangesFlag() {
+        PluginConfiguration config = PluginConfigurationBuilder.testInstance("10.0.0")
+                .withImportSettingsFromGradle(true)
+                .build();
+        assertTrue(config.isImportSettingsFromGradle());
+    }
+
     // --- getLocationById ---
 
     @Test

@@ -25,6 +25,7 @@ public class PluginConfiguration {
     private final SortedSet<String> activeLocationIds;
     private final boolean scanBeforeCheckin;
     private final boolean importSettingsFromMaven;
+    private final boolean importSettingsFromGradle;
 
     PluginConfiguration(@NotNull final String checkstyleVersion,
                         @NotNull final ScanScope scanScope,
@@ -35,7 +36,8 @@ public class PluginConfiguration {
                         @NotNull final List<String> thirdPartyClasspath,
                         @NotNull final SortedSet<String> activeLocationIds,
                         final boolean scanBeforeCheckin,
-                        final boolean importSettingsFromMaven) {
+                        final boolean importSettingsFromMaven,
+                        final boolean importSettingsFromGradle) {
         this.checkstyleVersion = checkstyleVersion;
         this.scanScope = scanScope;
         this.suppressErrors = suppressErrors;
@@ -48,6 +50,7 @@ public class PluginConfiguration {
                 .collect(Collectors.toCollection(TreeSet::new));
         this.scanBeforeCheckin = scanBeforeCheckin;
         this.importSettingsFromMaven = importSettingsFromMaven;
+        this.importSettingsFromGradle = importSettingsFromGradle;
     }
 
     @NotNull
@@ -110,6 +113,10 @@ public class PluginConfiguration {
         return importSettingsFromMaven;
     }
 
+    public boolean isImportSettingsFromGradle() {
+        return importSettingsFromGradle;
+    }
+
     public boolean hasChangedFrom(final Object other) {
         return !this.equals(other) || !locationsAreEqual((PluginConfiguration) other);
     }
@@ -145,13 +152,15 @@ public class PluginConfiguration {
                 && Objects.equals(thirdPartyClasspath, otherDto.thirdPartyClasspath)
                 && Objects.equals(activeLocationIds, otherDto.activeLocationIds)
                 && Objects.equals(scanBeforeCheckin, otherDto.scanBeforeCheckin)
-                && Objects.equals(importSettingsFromMaven, otherDto.importSettingsFromMaven);
+                && Objects.equals(importSettingsFromMaven, otherDto.importSettingsFromMaven)
+                && Objects.equals(importSettingsFromGradle, otherDto.importSettingsFromGradle);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(checkstyleVersion, scanScope, suppressErrors, copyLibs, scrollToSource,
-                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin, importSettingsFromMaven);
+                locations, thirdPartyClasspath, activeLocationIds, scanBeforeCheckin, importSettingsFromMaven,
+                importSettingsFromGradle);
     }
 
 }
