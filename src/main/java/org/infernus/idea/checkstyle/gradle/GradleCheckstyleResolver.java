@@ -25,7 +25,7 @@ public class GradleCheckstyleResolver extends AbstractProjectResolverExtension {
                                            @NotNull final DataNode<ModuleData> ideModule) {
         final CheckstyleGradleModel model = resolverCtx.getExtraProject(gradleModule, CheckstyleGradleModel.class);
         LOG.info("CheckstyleGradleModel for " + gradleModule.getName() + ": "
-                + (model != null ? model.getConfigFilePath() : "null"));
+                + (model != null ? model.getConfigFile() : "null"));
 
         super.populateModuleExtraModels(gradleModule, ideModule);
     }

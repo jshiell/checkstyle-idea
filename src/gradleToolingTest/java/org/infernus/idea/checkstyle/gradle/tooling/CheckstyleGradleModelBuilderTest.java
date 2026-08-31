@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.gradle.tooling;
 
 import org.gradle.api.Project;
+import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CheckstyleGradleModelBuilderTest {
 
@@ -102,6 +105,18 @@ class CheckstyleGradleModelBuilderTest {
         final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
 
         assertThat(model.getConfigFile(), is(nullValue()));
+    }
+
+    @Test
+    void buildAllReturnsNullWhenTheExtensionThrows() {
+        final Project project = mock(Project.class);
+        final ExtensionContainer extensions = mock(ExtensionContainer.class);
+        final CheckstyleExtension checkstyleExtension = mock(CheckstyleExtension.class);
+        when(project.getExtensions()).thenReturn(extensions);
+        when(extensions.findByName("checkstyle")).thenReturn(checkstyleExtension);
+        when(checkstyleExtension.getConfigFile()).thenThrow(new RuntimeException("misbehaving extension"));
+
+        assertThat(builder.buildAll(MODEL_NAME, project), is(nullValue()));
     }
 
     private static CheckstyleExtension checkstyleExtension(final Project project) {
