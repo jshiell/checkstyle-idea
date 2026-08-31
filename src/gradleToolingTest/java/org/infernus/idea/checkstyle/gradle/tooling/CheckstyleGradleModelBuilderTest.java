@@ -6,9 +6,11 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -71,6 +73,19 @@ class CheckstyleGradleModelBuilderTest {
         final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
 
         assertThat(model.getToolVersion(), is("10.12.1"));
+    }
+
+    @Test
+    void configPropertiesContainsStringifiedValues(@TempDir final Path tempDir) {
+        final Project project = ProjectBuilder.builder().withProjectDir(tempDir.toFile()).build();
+        project.getPluginManager().apply("checkstyle");
+        final File cacheFile = tempDir.resolve("build/checkstyle.cache").toFile();
+        checkstyleExtension(project).setConfigProperties(Map.of("checkstyle.cache.file", cacheFile));
+
+        final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
+
+        assertThat(model.getConfigProperties(),
+                is(Map.of("checkstyle.cache.file", cacheFile.toString())));
     }
 
     private static CheckstyleExtension checkstyleExtension(final Project project) {
