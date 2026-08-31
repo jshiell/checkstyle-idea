@@ -113,6 +113,7 @@ configurations.configureEach {
 // bundledPlugin("com.intellij.gradle"), whose lib/ directory happens to contain exactly the Gradle API
 // jars IntelliJ itself bundles for this purpose.
 val gradleTooling: SourceSet = sourceSets.create("gradleTooling")
+val gradleToolingTest: SourceSet = sourceSets.create("gradleToolingTest")
 
 dependencies {
     intellijPlatform {
@@ -141,6 +142,30 @@ dependencies {
     // reference CheckstyleGradleModel by static type; at runtime both land in the same plugin
     // classloader because gradleToolingJar is copied alongside the main jar into checkstyle-idea/lib/.
     compileOnly(gradleTooling.output)
+
+    add(gradleToolingTest.implementationConfigurationName, gradleTooling.output)
+    add(gradleToolingTest.compileOnlyConfigurationName, files(provider {
+        configurations.getByName("intellijPlatformBundledPlugins").filter { file ->
+            file.name.startsWith("gradle-api-") || file.name == "gradle-tooling-extension-api.jar"
+        }
+    }))
+    // ModelBuilderService (IntelliJ's own API, not part of Gradle's distribution) must also be present
+    // at test runtime since the tests instantiate CheckstyleGradleModelBuilder directly. gradle-api
+    // itself is deliberately NOT added here: at runtime CheckstyleExtension etc. come from
+    // gradleTestKit()'s bundled Gradle version instead, and adding both would risk two competing
+    // definitions of the same Gradle API classes on one classpath.
+    add(gradleToolingTest.runtimeOnlyConfigurationName, files(provider {
+        configurations.getByName("intellijPlatformBundledPlugins").filter { file ->
+            file.name == "gradle-tooling-extension-api.jar"
+        }
+    }))
+    add(gradleToolingTest.implementationConfigurationName, gradleTestKit())
+    add(gradleToolingTest.implementationConfigurationName, libs.junit.jupiter.api)
+    add(gradleToolingTest.runtimeOnlyConfigurationName, libs.junit.jupiter.engine)
+    add(gradleToolingTest.runtimeOnlyConfigurationName, libs.junit.platform.launcher)
+    add(gradleToolingTest.implementationConfigurationName, libs.hamcrest)
+    add(gradleToolingTest.implementationConfigurationName, libs.mockito.core)
+    add(gradleToolingTest.implementationConfigurationName, libs.mockito.junit.jupiter)
 
     implementation(libs.commons.io)
     implementation(libs.commons.codec)
@@ -211,5 +236,20 @@ tasks.named<Test>("test") {
     val jarPathProvider = objects.newInstance(GradleToolingJarPathProvider::class)
     jarPathProvider.jarFile.set(gradleToolingJar.flatMap { it.archiveFile })
     jvmArgumentProviders.add(jarPathProvider)
+}
+
+val gradleToolingTestTask = tasks.register<Test>("gradleToolingTest") {
+    group = "verification"
+    description = "Runs the plain-JUnit tests for the 'gradleTooling' source set."
+    testClassesDirs = gradleToolingTest.output.classesDirs
+    classpath = gradleToolingTest.runtimeClasspath
+    useJUnitPlatform()
+    // org.gradle.testfixtures.ProjectBuilder injects synthetic classes via a privateLookupIn handle on
+    // java.lang, which the module system blocks by default outside Gradle's own daemon JVM.
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+}
+
+tasks.named("check") {
+    dependsOn(gradleToolingTestTask)
 }
 
