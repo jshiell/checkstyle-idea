@@ -1,8 +1,14 @@
 package org.infernus.idea.checkstyle.gradle.tooling;
 
 import org.gradle.api.Project;
+import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -41,5 +47,22 @@ class CheckstyleGradleModelBuilderTest {
 
         assertThat(model, is(notNullValue()));
         assertThat(model.getConfigFile(), is(nullValue()));
+    }
+
+    @Test
+    void configFileIsTheAbsolutePathWhenSetToAnExistingFile(@TempDir final Path tempDir) throws IOException {
+        final Project project = ProjectBuilder.builder().withProjectDir(tempDir.toFile()).build();
+        project.getPluginManager().apply("checkstyle");
+        final Path configFile = tempDir.resolve("checkstyle.xml");
+        Files.writeString(configFile, "<module name=\"Checker\"/>");
+        checkstyleExtension(project).setConfigFile(configFile.toFile());
+
+        final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
+
+        assertThat(model.getConfigFile(), is(configFile.toFile().getAbsolutePath()));
+    }
+
+    private static CheckstyleExtension checkstyleExtension(final Project project) {
+        return project.getExtensions().getByType(CheckstyleExtension.class);
     }
 }
