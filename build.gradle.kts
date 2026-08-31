@@ -96,17 +96,43 @@ configurations.configureEach {
     }
 }
 
+// The 'gradleTooling' source set builds the ModelBuilderService that runs inside a *target project's*
+// Gradle daemon (injected via IntelliJ's generated initscript), not inside the IDE process. It must
+// compile against Gradle's own API only — no IntelliJ platform classes — so its output jar is safe to
+// inject into an arbitrary Gradle daemon. Filtering these two jars out of 'main's resolved compile
+// classpath (rather than hardcoding their cache-transform paths) means this stays correct across
+// machines and IntelliJ Platform Gradle Plugin cache-path changes: 'main' already depends on
+// bundledPlugin("com.intellij.gradle"), whose lib/ directory happens to contain exactly the Gradle API
+// jars IntelliJ itself bundles for this purpose.
+val gradleTooling: SourceSet = sourceSets.create("gradleTooling")
+
 dependencies {
     intellijPlatform {
         intellijIdeaCommunity(libs.versions.intellij.idea.community.get())
 
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
+        bundledPlugin("com.intellij.gradle")
         bundledModule("intellij.platform.vcs.impl")
 
         testFramework(TestFrameworkType.Platform)
         testFramework(TestFrameworkType.Plugin.Maven)
     }
+
+    // 'intellijPlatformBundledPlugins' is a leaf configuration (no extendsFrom back to 'compileOnly' /
+    // 'implementation'), so resolving it here to source these two jars cannot form a dependency cycle
+    // with 'gradleTooling's own compileOnly classpath — unlike referencing 'main's full compileClasspath,
+    // which does extend back through 'compileOnly' once that also carries gradleTooling.output (below).
+    add(gradleTooling.compileOnlyConfigurationName, files(provider {
+        configurations.getByName("intellijPlatformBundledPlugins").filter { file ->
+            file.name.startsWith("gradle-api-") || file.name == "gradle-tooling-extension-api.jar"
+        }
+    }))
+
+    // 'gradleTooling's classes must be visible on 'main's classpath so GradleCheckstyleResolver can
+    // reference CheckstyleGradleModel by static type; at runtime both land in the same plugin
+    // classloader because gradleToolingJar is copied alongside the main jar into checkstyle-idea/lib/.
+    compileOnly(gradleTooling.output)
 
     implementation(libs.commons.io)
     implementation(libs.commons.codec)
@@ -149,3 +175,24 @@ idea.module {
     //testSourceDirs.addAll(catSourceSet.getResources().getSrcDirs())
     //scopes.TEST.plus.addAll(listOf(configurations.getByName(catSourceSet.getRuntimeConfigurationName())))
 }
+
+val gradleToolingJar = tasks.register<Jar>("gradleToolingJar") {
+    archiveBaseName.set("checkstyle-idea-gradle-tooling")
+    from(gradleTooling.output)
+    // The IntelliJ Platform Gradle Plugin patches every registered Jar task in this project to also
+    // embed the main plugin descriptor; exclude it so this jar — which gets injected into an arbitrary
+    // target project's Gradle daemon — carries nothing beyond our own tooling classes and services file.
+    exclude("META-INF/plugin.xml")
+}
+
+listOf("prepareSandbox", "prepareTestSandbox").forEach { taskName ->
+    tasks.named<Sync>(taskName) {
+        dependsOn(gradleToolingJar)
+        from(gradleToolingJar) { into("checkstyle-idea/lib") }
+    }
+}
+
+tasks.named("jar") {
+    dependsOn(gradleToolingJar)
+}
+

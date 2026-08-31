@@ -22,6 +22,7 @@
 
     <depends>com.intellij.modules.java</depends>
     <depends optional="true" config-file="checkstyle-idea-maven.xml">org.jetbrains.idea.maven</depends>
+    <depends optional="true" config-file="checkstyle-idea-gradle.xml">com.intellij.gradle</depends>
 
     <dependencies>
         <module name="intellij.platform.vcs.impl"/>
