@@ -141,7 +141,10 @@ dependencies {
     // 'gradleTooling's classes must be visible on 'main's classpath so GradleCheckstyleResolver can
     // reference CheckstyleGradleModel by static type; at runtime both land in the same plugin
     // classloader because gradleToolingJar is copied alongside the main jar into checkstyle-idea/lib/.
+    // 'compileOnly' is not transitive to 'test' by default, so GradleCheckstyleResolverTest needs its
+    // own testCompileOnly dependency to reference the same classes.
     compileOnly(gradleTooling.output)
+    testCompileOnly(gradleTooling.output)
 
     add(gradleToolingTest.implementationConfigurationName, gradleTooling.output)
     add(gradleToolingTest.compileOnlyConfigurationName, files(provider {
@@ -252,4 +255,3 @@ val gradleToolingTestTask = tasks.register<Test>("gradleToolingTest") {
 tasks.named("check") {
     dependsOn(gradleToolingTestTask)
 }
-
