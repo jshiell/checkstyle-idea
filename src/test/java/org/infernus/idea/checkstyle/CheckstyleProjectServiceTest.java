@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 
 public class CheckstyleProjectServiceTest {
-    private static final String BUNDLED_VERSION = "14.0.0";
+    private static final String BUNDLED_VERSION = "14.1.0";
     private static final String NON_BUNDLED_VERSION = "10.4";
 
     private Project project;

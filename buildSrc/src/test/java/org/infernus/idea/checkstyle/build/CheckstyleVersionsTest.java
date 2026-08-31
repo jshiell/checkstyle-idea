@@ -19,7 +19,7 @@ public class CheckstyleVersionsTest {
         assertNotNull(bundled);
         assertFalse(bundled.isEmpty());
         assertTrue(bundled.contains("10.0"));
-        assertTrue(bundled.contains("14.0.0"));
+        assertTrue(bundled.contains("14.1.0"));
     }
 
     @Test

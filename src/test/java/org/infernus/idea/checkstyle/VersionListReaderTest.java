@@ -51,13 +51,13 @@ public class VersionListReaderTest {
         VersionListReader underTest = new VersionListReader();
         assertNotNull(underTest.getBundledVersions());
         assertFalse(underTest.getBundledVersions().isEmpty());
-        assertTrue(underTest.getBundledVersions().contains("14.0.0"));
+        assertTrue(underTest.getBundledVersions().contains("14.1.0"));
     }
 
     @Test
     public void testIsBundledReturnsTrueForBundledVersion() {
         VersionListReader underTest = new VersionListReader();
-        assertTrue(underTest.isBundled("14.0.0"));
+        assertTrue(underTest.isBundled("14.1.0"));
     }
 
     @Test

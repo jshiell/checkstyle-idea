@@ -135,7 +135,7 @@ test_current_max_version_sample_fixture() {
 test_current_max_version_real_properties_file() {
     local actual
     actual="$(current_max_version "${REAL_PROPERTIES}")"
-    assert_eq "14.0.0" "${actual}" "current_max_version on real properties file"
+    assert_eq "14.1.0" "${actual}" "current_max_version on real properties file"
 }
 
 test_select_latest_release_tag_picks_max_matching_tag() {

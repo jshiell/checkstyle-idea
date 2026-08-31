@@ -30,6 +30,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.17.0: New: Added Checkstyle 14.1.0.</li>
     <li>26.17.0: Fixed: A rules file's XML entity resolution (#350) no longer allows an absolute file: entity reference to read arbitrary local files; resolution is now confined to the rules file's own directory.</li>
     <li>26.17.0: New: Third-party check JARs can now be added by URL as well as by local file; the plugin downloads and caches the JAR, and re-downloads only when the entry is explicitly edited (#586).</li>
     <li>26.17.0: Fixed: ConfigurationListener callbacks (e.g. the tool window's configuration override dropdown) are now always dispatched on the EDT, fixing a potential threading violation when the configuration changes from a background thread — Maven project sync or the Detect Checkstyle Configuration File action (#700).</li>
