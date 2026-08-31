@@ -5,6 +5,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -29,5 +30,16 @@ class CheckstyleGradleModelBuilderTest {
         final Project project = ProjectBuilder.builder().build();
 
         assertThat(builder.buildAll(MODEL_NAME, project), is(nullValue()));
+    }
+
+    @Test
+    void configFileIsNullWhenCheckstylePluginIsAppliedButNothingIsConfigured() {
+        final Project project = ProjectBuilder.builder().build();
+        project.getPluginManager().apply("checkstyle");
+
+        final CheckstyleGradleModel model = (CheckstyleGradleModel) builder.buildAll(MODEL_NAME, project);
+
+        assertThat(model, is(notNullValue()));
+        assertThat(model.getConfigFile(), is(nullValue()));
     }
 }
