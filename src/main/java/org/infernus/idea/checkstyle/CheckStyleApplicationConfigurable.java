@@ -210,7 +210,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         applicationConfigurationState.setActiveGlobalLocationIds(globalLocationTableModel.getActiveIds());
 
         // Invalidate checker caches in all open projects so stale global-location checkers are evicted.
-        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
+        final ProjectManager projectManager = ApplicationManager.getApplication() == null ? null : ProjectManager.getInstanceIfCreated();
         if (projectManager != null) {
             for (final Project project : projectManager.getOpenProjects()) {
                 project.getService(CheckerFactoryCache.class).invalidate();

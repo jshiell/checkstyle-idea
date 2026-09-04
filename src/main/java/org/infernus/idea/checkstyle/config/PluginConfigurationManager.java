@@ -20,7 +20,15 @@ public class PluginConfigurationManager {
     private volatile PluginConfiguration cachedConfiguration;
 
     public PluginConfigurationManager(@NotNull final Project project) {
-        this(project, runnable -> ApplicationManager.getApplication().invokeLater(runnable));
+        this(project, runnable -> {
+            var app = ApplicationManager.getApplication();
+            if (app != null) {
+                app.invokeLater(runnable);
+            } else {
+                // Headless or test environment where Application is not available - run synchronously.
+                runnable.run();
+            }
+        });
     }
 
     PluginConfigurationManager(@NotNull final Project project, @NotNull final Consumer<Runnable> edtDispatcher) {

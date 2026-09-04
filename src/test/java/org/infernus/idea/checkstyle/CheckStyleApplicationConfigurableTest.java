@@ -102,7 +102,7 @@ class CheckStyleApplicationConfigurableTest {
 
     @Test
     void applyWithBlankFieldClearsOverride() {
-        applicationConfiguration_state.setArtifactRepositoryBaseUrlOverride("https://mirror.example.com/repo/");
+        applicationConfigurationState.setArtifactRepositoryBaseUrlOverride("https://mirror.example.com/repo/");
         configurable.reset();
 
         configurable.getArtifactRepositoryBaseUrlOverrideField().setText("   ");
@@ -124,7 +124,7 @@ class CheckStyleApplicationConfigurableTest {
     @Test
     void resetLoadsUsernameAndPasswordFromPersistedUsername() {
         applicationConfigurationState.setArtifactRepositoryOverrideUsername("jane");
-        credentials_store.setPassword("jane", "secret");
+        credentialsStore.setPassword("jane", "secret");
 
         configurable.reset();
 
@@ -191,7 +191,7 @@ class CheckStyleApplicationConfigurableTest {
     @Test
     void isNotModifiedWhenUsernameAndPasswordUnchangedAfterReset() {
         applicationConfigurationState.setArtifactRepositoryOverrideUsername("alice");
-        credentials_store.setPassword("alice", "secret");
+        credentialsStore.setPassword("alice", "secret");
         configurable.reset();
 
         assertFalse(configurable.isModified());
@@ -222,7 +222,7 @@ class CheckStyleApplicationConfigurableTest {
 
         assertTrue(applicationConfigurationState.isUseGlobalRulesByDefault());
         assertEquals(List.of(location), applicationConfigurationState.getGlobalLocations());
-        assertEquals(List.of("glob-1"), application_configuration_state.getActiveGlobalLocationIds());
+        assertEquals(List.of("glob-1"), applicationConfigurationState.getActiveGlobalLocationIds());
         assertFalse(configurable.isModified());
     }
 
@@ -232,8 +232,8 @@ class CheckStyleApplicationConfigurableTest {
                 new ApplicationConfigurationState.GlobalConfigurationLocation("id-1", "LOCAL_FILE", "c:/1.xml", "One", "All");
         ApplicationConfigurationState.GlobalConfigurationLocation two =
                 new ApplicationConfigurationState.GlobalConfigurationLocation("id-2", "LOCAL_FILE", "c:/2.xml", "Two", "All");
-        application_configuration_state.setGlobalLocations(List.of(one, two));
-        application_configuration_state.setActiveGlobalLocationIds(List.of("id-1", "id-2"));
+        applicationConfigurationState.setGlobalLocations(List.of(one, two));
+        applicationConfigurationState.setActiveGlobalLocationIds(List.of("id-1", "id-2"));
 
         configurable.reset();
         GlobalLocationTableModel tableModel = getPrivateField("globalLocationTableModel", GlobalLocationTableModel.class);
