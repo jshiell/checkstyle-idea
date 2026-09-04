@@ -35,7 +35,12 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.InputStream;
-import java.util.LinkedHashSet;\r\nimport java.util.List;\r\nimport java.util.Set;\r\nimport java.util.ArrayList;\r\nimport java.util.Objects;\r\n
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.Objects;
+
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 /**
