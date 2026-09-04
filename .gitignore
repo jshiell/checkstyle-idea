@@ -12,6 +12,7 @@ CheckStyle-IDEA.zip
 .gradle/
 gradle-app.setting
 /.gradletasknamecache
+/.gradle-temp/
 _support/
 /out/
 .intellijPlatform/
