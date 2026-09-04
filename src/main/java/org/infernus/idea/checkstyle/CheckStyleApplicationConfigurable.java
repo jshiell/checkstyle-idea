@@ -164,7 +164,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             return true;
         }
 
-<<        String typedUsername = emptyIfNull(normalise(artifactRepositoryOverrideUsernameField.getText()));
+        String typedUsername = emptyIfNull(normalise(artifactRepositoryOverrideUsernameField.getText()));
         String persistedUsername = emptyIfNull(applicationConfigurationState.getArtifactRepositoryOverrideUsername());
         if (!typedUsername.equals(persistedUsername)) {
             return true;
@@ -184,7 +184,9 @@ public class CheckStyleApplicationConfigurable implements Configurable {
             return true;
         }
 
-        return false;\n    }\n
+        return false;
+    }
+
     @Override
     public void apply() {
         String previousUsername = emptyIfNull(applicationConfigurationState.getArtifactRepositoryOverrideUsername());
@@ -207,7 +209,8 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         applicationConfigurationState.setGlobalLocations(globalLocationTableModel.getLocations());
         applicationConfigurationState.setActiveGlobalLocationIds(globalLocationTableModel.getActiveIds());
 
-        // Invalidate checker caches in all open projects so stale global-location checkers are evicted.\n        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
+        // Invalidate checker caches in all open projects so stale global-location checkers are evicted.
+        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
         if (projectManager != null) {
             for (final Project project : projectManager.getOpenProjects()) {
                 project.getService(CheckerFactoryCache.class).invalidate();
@@ -298,12 +301,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
                 globalLocationTableModel.removeLocationAt(selectedRow);
             }
         });
-<<<<<<< HEAD
         tableDecorator.setPreferredSize(DECORATOR_DIMENSIONS);
-
-        return tableDecorator.createPanel();
-=======
->>>>>>> 3b0fead4 (Refactor CheckStyleApplicationConfigurable)
     }
 
 }
