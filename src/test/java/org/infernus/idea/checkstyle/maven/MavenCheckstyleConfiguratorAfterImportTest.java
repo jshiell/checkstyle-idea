@@ -275,9 +275,10 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         fixtureFile(".placeholder", "");  // required: sets up mavenProject.getDirectoryFile(),
                                            // which createConfigurationLocation() dereferences on the
                                            // way to the classpath-resource fallback branch. The classloader
-                                           // now builds successfully (the version downloads fine); the
-                                           // resource is simply not present in it, so resolution still
-                                           // fails, just for a different reason than before.
+                                           // now builds successfully (setUp()'s default stub returns no
+                                           // jars, so there's nothing to download); the resource is simply
+                                           // not present in it, so resolution still fails, just for a
+                                           // different reason than before.
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withLocations(new TreeSet<>())
