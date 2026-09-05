@@ -60,6 +60,8 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
         when(project.getService(ConfigurationInvalidator.class)).thenReturn(invalidator);
         when(project.getService(DaemonCodeAnalyzer.class)).thenReturn(daemonCodeAnalyzer);
         when(project.getService(CheckstyleProjectService.class)).thenReturn(checkstyleProjectService);
+        // A real Project never returns null here, and Mockito's any(Condition.class) would not match null.
+        when(project.getDisposed()).thenReturn(o -> project.isDisposed());
 
         // Scoped and thread-local, so it never installs a global application the way setApplication would.
         Application application = mock(Application.class);
@@ -127,6 +129,15 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
         listener.onProjectTrusted(project);
 
         verify(invalidator).invalidateCachedResources();
+    }
+
+    @Test
+    void aTrustChangeRestartsTheDaemonSoHighlightingRefreshes() {
+        TrustedProjectsListener listener = executeAndCaptureListener();
+
+        listener.onProjectTrusted(project);
+
+        verify(daemonCodeAnalyzer).restart();
     }
 
     @Test
