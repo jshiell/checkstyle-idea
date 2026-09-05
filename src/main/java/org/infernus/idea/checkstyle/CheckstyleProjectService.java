@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.ide.trustedProjects.TrustedProjects;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -181,8 +182,23 @@ public class CheckstyleProjectService implements Disposable {
         }
     }
 
+    /**
+     * Third-party classpath entries are attacker-controllable - a malicious project can name any local jar,
+     * or an arbitrary URL, in its own {@code .idea/checkstyle-idea.xml} - and Checkstyle will load and
+     * instantiate classes from them. So they are only honoured for trusted projects.
+     * <p>
+     * The emptiness check must stay first: {@code isProjectTrusted} needs a real application, which the
+     * unit tests passing no third-party entries do not bootstrap. The trust check must also stay ahead of
+     * {@link #toListOfUrls}, which downloads {@code https://} entries - gating any later would still let an
+     * untrusted project trigger an attacker-chosen outbound fetch on project open.
+     */
     @NotNull
     private List<URL> resolveThirdPartyUrls(@Nullable final List<String> jarFilePaths, final boolean copyLibs) {
+        if (jarFilePaths != null && !jarFilePaths.isEmpty() && !TrustedProjects.isProjectTrusted(project)) {
+            LOG.info("Skipping third-party Checkstyle classpath: project is not trusted");
+            return List.of();
+        }
+
         List<URL> urls = toListOfUrls(jarFilePaths);
         if (copyLibs && !urls.isEmpty()) {
             Optional<File> copyDir = tempDirProvider.forCopiedLibraries(project);

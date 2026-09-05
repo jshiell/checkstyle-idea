@@ -68,6 +68,13 @@ public class CheckstyleProjectServiceTest {
         return trustedProjects;
     }
 
+    private static MockedStatic<TrustedProjects> anUntrustedProject(final Project untrustedProject) {
+        MockedStatic<TrustedProjects> trustedProjects =
+                mockStatic(TrustedProjects.class, withSettings().strictness(Strictness.LENIENT));
+        trustedProjects.when(() -> TrustedProjects.isProjectTrusted(untrustedProject)).thenReturn(false);
+        return trustedProjects;
+    }
+
     @Test
     public void readingSupportedVersionsReturnsASetOfVersions() {
         SortedSet<String> versions = underTest.getSupportedVersions();
@@ -121,6 +128,22 @@ public class CheckstyleProjectServiceTest {
         try (MockedStatic<TrustedProjects> ignored = aTrustedProject(project)) {
             URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
             assertThat(Arrays.asList(classLoader.getURLs()), hasItem(thirdPartyJar.toUri().toURL()));
+        }
+    }
+
+    @Test
+    public void untrustedProjectExcludesThirdPartyJarsButStillLoadsCheckstyle(@TempDir final Path tempDir)
+            throws Exception {
+        Path thirdPartyJar = tempDir.resolve("third-party.jar");
+        thirdPartyJar.toFile().createNewFile();
+
+        underTest.activateCheckstyleVersion(BUNDLED_VERSION, List.of(thirdPartyJar.toString()));
+
+        try (MockedStatic<TrustedProjects> ignored = anUntrustedProject(project)) {
+            URLClassLoader classLoader = (URLClassLoader) underTest.underlyingClassLoader();
+
+            assertThat(Arrays.asList(classLoader.getURLs()), not(hasItem(thirdPartyJar.toUri().toURL())));
+            assertThat(classLoader.loadClass("com.puppycrawl.tools.checkstyle.Checker"), is(not(nullValue())));
         }
     }
 
