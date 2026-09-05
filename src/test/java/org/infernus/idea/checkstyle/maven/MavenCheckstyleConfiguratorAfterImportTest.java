@@ -18,6 +18,7 @@ import kotlin.sequences.SequencesKt;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -343,6 +344,30 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertTrue(mavenLocation.isPresent());
         assertEquals(ConfigurationType.PLUGIN_CLASSPATH, mavenLocation.get().getType());
         assertEquals("our_checks.xml", mavenLocation.get().getLocation());
+    }
+
+    public void testConfigLocationOnClasspathWithNonBundledVersionAndFailedDownloadDoesNotThrow() throws Exception {
+        enableMavenImport();
+        fixtureFile(".placeholder", "");  // required: sets up mavenProject.getDirectoryFile()
+        configManager.setCurrent(
+            PluginConfigurationBuilder.from(configManager.getCurrent())
+                .withLocations(new TreeSet<>())
+                .withActiveLocationIds(new TreeSet<>())
+                .build(),
+            true);
+
+        when(checkstyleArtifactDownloader.download("10.21.3"))
+            .thenThrow(new CheckstyleDownloadException("connection refused"));
+
+        var config = new Element("configuration");
+        config.addContent(new Element("configLocation").setText("classpath-resource-that-does-not-exist.xml"));
+        MavenPlugin plugin = pluginWithConfig(config);
+        when(plugin.getDependencies()).thenReturn(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.21.3")));
+
+        configurator.afterImport(context); // must not throw
+
+        assertTrue(configManager.getCurrent().getLocations().stream()
+            .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
     }
 
     public void testOnlySuppressionLocationChangesUpdatesProperties() throws Exception {
