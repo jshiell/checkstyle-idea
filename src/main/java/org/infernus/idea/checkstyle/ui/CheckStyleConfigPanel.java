@@ -233,10 +233,10 @@ public class CheckStyleConfigPanel extends JPanel {
         configFilePanel.add(copyLibsCheckbox, new GridBagConstraints(
                 0, 3, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(scanBeforeCheckinCheckbox, new GridBagConstraints(
+        configFilePanel.add(importSettingsFromGradleCheckbox, new GridBagConstraints(
                 2, 3, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
-        configFilePanel.add(importSettingsFromGradleCheckbox, new GridBagConstraints(
+        configFilePanel.add(scanBeforeCheckinCheckbox, new GridBagConstraints(
                 0, 4, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL, COMPONENT_INSETS, 0, 0));
         configFilePanel.add(buildRuleFilePanel(), new GridBagConstraints(
