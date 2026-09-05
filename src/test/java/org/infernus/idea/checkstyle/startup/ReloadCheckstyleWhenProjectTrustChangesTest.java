@@ -112,4 +112,20 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
 
         verifyNoInteractions(invalidator);
     }
+
+    /**
+     * Regression test: the subscription must stay live after a trust event for a foreign project. An
+     * earlier design used the one-shot {@code onceWhenProjectTrusted} helper, which self-disconnects on the
+     * first event for <em>any</em> project - so with two projects open, trusting the other one permanently
+     * broke this one's reactivation.
+     */
+    @Test
+    void aTrustChangeForAnotherProjectDoesNotConsumeThisProjectsSubscription() {
+        TrustedProjectsListener listener = executeAndCaptureListener();
+
+        listener.onProjectTrusted(otherProject);
+        listener.onProjectTrusted(project);
+
+        verify(invalidator).invalidateCachedResources();
+    }
 }
