@@ -90,6 +90,7 @@
 
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.DisableCheckstyleLogging"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.PromptForMissingCheckstyleVersion"/>
+        <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.ReloadCheckstyleWhenProjectTrustChanges"/>
 
         <projectConfigurable key="plugin.configuration-name"
                              instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
