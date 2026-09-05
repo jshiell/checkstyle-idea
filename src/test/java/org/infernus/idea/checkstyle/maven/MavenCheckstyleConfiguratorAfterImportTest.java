@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.maven;
 
+import com.intellij.ide.trustedProjects.TrustedProjects;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -11,7 +12,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import kotlin.sequences.SequencesKt;
+import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
@@ -25,9 +29,14 @@ import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.model.MavenPlugin;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.utils.MavenUtil;
+import org.mockito.MockedStatic;
+import org.mockito.quality.Strictness;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static org.mockito.Mockito.anyString;
 
 public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTestCase {
 
@@ -36,11 +45,14 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     private MavenAfterImportConfigurator.Context context;
     private MavenProject mavenProject;
     private Path physicalTempDir;
+    private CheckstyleArtifactDownloader checkstyleArtifactDownloader;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        configurator = new MavenCheckstyleConfigurator();
+        checkstyleArtifactDownloader = mock(CheckstyleArtifactDownloader.class);
+        when(checkstyleArtifactDownloader.download(anyString())).thenReturn(List.of());
+        configurator = new MavenCheckstyleConfigurator(checkstyleArtifactDownloader);
         configManager = getProject().getService(PluginConfigurationManager.class);
 
         physicalTempDir = Files.createTempDirectory("maven-test");
@@ -280,6 +292,56 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
 
         assertTrue(configManager.getCurrent().getLocations().stream()
             .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
+    }
+
+    public void testConfigLocationOnClasspathWithNonBundledVersionAndSuccessfulDownloadResolves() throws Exception {
+        enableMavenImport();
+        fixtureFile(".placeholder", "");  // required: sets up mavenProject.getDirectoryFile()
+        configManager.setCurrent(
+            PluginConfigurationBuilder.from(configManager.getCurrent())
+                .withLocations(new TreeSet<>())
+                .withActiveLocationIds(new TreeSet<>())
+                .build(),
+            true);
+
+        final Path fakeM2Root = physicalTempDir.resolve("fake-m2-repo");
+        Files.createDirectories(fakeM2Root);
+        when(mavenProject.getLocalRepositoryPath()).thenReturn(fakeM2Root);
+
+        final MavenId thirdPartyJarId = new MavenId("com.checkstyle.third.party.rules", "cool-stuff", "3.2.1");
+        final Path thirdPartyJarPath = MavenUtil.getArtifactPath(fakeM2Root, thirdPartyJarId, "jar", null);
+        Files.createDirectories(thirdPartyJarPath.getParent());
+        try (var out = Files.newOutputStream(thirdPartyJarPath);
+             var zip = new ZipOutputStream(out)) {
+            zip.putNextEntry(new ZipEntry("our_checks.xml"));
+            zip.write("<config></config>".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        final Path placeholderEngineJar = physicalTempDir.resolve("checkstyle-10.21.3-placeholder.jar");
+        Files.createFile(placeholderEngineJar);
+        when(checkstyleArtifactDownloader.download("10.21.3")).thenReturn(List.of(placeholderEngineJar));
+
+        var config = new Element("configuration");
+        config.addContent(new Element("configLocation").setText("our_checks.xml"));
+        MavenPlugin plugin = pluginWithConfig(config);
+        when(plugin.getDependencies()).thenReturn(List.of(
+            dep("com.puppycrawl.tools", "checkstyle", "10.21.3"),
+            dep("com.checkstyle.third.party.rules", "cool-stuff", "3.2.1")));
+
+        try (MockedStatic<TrustedProjects> ignored = mockStatic(TrustedProjects.class,
+                withSettings().strictness(Strictness.LENIENT))) {
+            ignored.when(() -> TrustedProjects.isProjectTrusted(getProject())).thenReturn(true);
+
+            configurator.afterImport(context);
+        }
+
+        var mavenLocation = configManager.getCurrent().getLocations().stream()
+            .filter(loc -> "maven-config-location".equals(loc.getId()))
+            .findFirst();
+        assertTrue(mavenLocation.isPresent());
+        assertEquals(ConfigurationType.PLUGIN_CLASSPATH, mavenLocation.get().getType());
+        assertEquals("our_checks.xml", mavenLocation.get().getLocation());
     }
 
     public void testOnlySuppressionLocationChangesUpdatesProperties() throws Exception {

@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.stream.StreamSupport;
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.BuildersKt;
+import org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver;
+import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -67,6 +69,17 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     // Reserved ID — must not be used as a user-defined location ID.
     // On every Maven sync any location with this ID is replaced unconditionally.
     private static final String MAVEN_CONFIG_LOCATION_ID = "maven-config-location";
+
+    private final CheckstyleArtifactDownloader checkstyleArtifactDownloader;
+
+    public MavenCheckstyleConfigurator() {
+        this(CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
+            () -> new ArtifactDownloadBaseUrlResolver().resolve()));
+    }
+
+    MavenCheckstyleConfigurator(@NotNull final CheckstyleArtifactDownloader checkstyleArtifactDownloader) {
+        this.checkstyleArtifactDownloader = checkstyleArtifactDownloader;
+    }
 
     @Override
     public void afterImport(@NotNull final MavenAfterImportConfigurator.Context context) {
@@ -449,7 +462,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
     }
 
-    private static void updatePluginConfigLocationsFromMavenPlugin(
+    private void updatePluginConfigLocationsFromMavenPlugin(
             final MavenPlugin checkstyleMavenPlugin,
             final PluginConfiguration currentPluginConfiguration,
             final MavenProject mavenProject,
@@ -491,7 +504,8 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         // Checkstyle version and the new third party classpath.
         final var tempConfiguration = pluginConfigurationBuilder.build();
         final var checkstyleProjectService = CheckstyleProjectService.forVersion(project,
-            tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
+            tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath(),
+            checkstyleArtifactDownloader);
         final ConfigurationLocation configurationLocation;
         try {
             // CheckStylePluginException is the plugin's general-purpose exception type, so this also
