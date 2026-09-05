@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -145,6 +146,26 @@ public class CheckstyleProjectServiceTest {
             assertThat(Arrays.asList(classLoader.getURLs()), not(hasItem(thirdPartyJar.toUri().toURL())));
             assertThat(classLoader.loadClass("com.puppycrawl.tools.checkstyle.Checker"), is(not(nullValue())));
         }
+    }
+
+    @Test
+    public void untrustedProjectNeverFetchesAUrlThirdPartyClasspathEntry(@TempDir final Path tempDir) {
+        final AtomicBoolean fetched = new AtomicBoolean(false);
+        final ThirdPartyJarCache thirdPartyJarCache = new ThirdPartyJarCache(tempDir.resolve("third-party-jars"),
+                (url, target) -> {
+                    fetched.set(true);
+                    throw new IOException("an untrusted project must not reach the network");
+                });
+
+        final CheckstyleProjectService service =
+                new CheckstyleProjectService(project, mock(CheckstyleArtifactDownloader.class), thirdPartyJarCache);
+        service.activateCheckstyleVersion(BUNDLED_VERSION, List.of("https://example.invalid/custom-check.jar"));
+
+        try (MockedStatic<TrustedProjects> ignored = anUntrustedProject(project)) {
+            service.underlyingClassLoader();
+        }
+
+        assertFalse(fetched.get(), "an untrusted project must not download third-party check JARs");
     }
 
     @Test
