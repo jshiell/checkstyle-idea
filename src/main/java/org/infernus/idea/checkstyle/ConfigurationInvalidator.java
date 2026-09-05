@@ -22,7 +22,13 @@ public class ConfigurationInvalidator {
         this.pluginConfigurationManager = project.getService(PluginConfigurationManager.class);
     }
 
-    public void invalidateCachedResources() {
+    /**
+     * Synchronised because the trust-change listener can invalidate from a background thread, while the
+     * three older call sites (settings apply/reset, the reset-rules action) are EDT-only and were
+     * therefore serialised by construction. Two concurrent invalidations would otherwise both snapshot
+     * and both destroy the same cached checker.
+     */
+    public synchronized void invalidateCachedResources() {
         checkerFactoryCache.invalidate();
 
         PluginConfiguration config = pluginConfigurationManager.getCurrent();
