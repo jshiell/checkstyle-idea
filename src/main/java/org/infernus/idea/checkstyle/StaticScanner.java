@@ -63,6 +63,15 @@ public class StaticScanner implements Disposable {
     public void asyncScanFiles(final List<VirtualFile> files,
                                final ConfigurationLocation overrideConfigLocation,
                                final ResultHandling resultHandling) {
+        asyncScanFiles(files, overrideConfigLocation, resultHandling, null);
+    }
+
+    // Package-private overload letting tests observe dispatch deterministically via a listener
+    // registered before submission, rather than racing StaticScanner's own async completion.
+    void asyncScanFiles(final List<VirtualFile> files,
+                        final ConfigurationLocation overrideConfigLocation,
+                        final ResultHandling resultHandling,
+                        final ScannerListener additionalListener) {
         LOG.debug("Scanning current file(s).");
 
         if (files == null) {
@@ -72,6 +81,9 @@ public class StaticScanner implements Disposable {
 
         final ScanFiles checkFiles = new ScanFiles(project, files, overrideConfigLocation);
         checkFiles.addListener(new UiFeedbackScannerListener(project, resultHandling));
+        if (additionalListener != null) {
+            checkFiles.addListener(additionalListener);
+        }
         runAsyncCheck(checkFiles);
     }
 
