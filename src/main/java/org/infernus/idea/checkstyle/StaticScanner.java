@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.infernus.idea.checkstyle.util.Async.NO_TIMEOUT;
 import static org.infernus.idea.checkstyle.util.Async.executeOnPooledThread;
@@ -21,7 +22,10 @@ import static org.infernus.idea.checkstyle.util.Async.whenFinished;
 public class StaticScanner implements Disposable {
     private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(StaticScanner.class);
 
+    // Tracked only so stopChecks() can cancel outstanding work; "is a scan in progress" is driven
+    // solely by activeScans below, since that never has to guess whether a Future is done yet.
     private final Set<Future<?>> checksInProgress = new HashSet<>();
+    private final AtomicInteger activeScans = new AtomicInteger();
     private final Project project;
 
     public StaticScanner(@NotNull final Project project) {
@@ -36,32 +40,7 @@ public class StaticScanner implements Disposable {
      * @return true if a scan is in progress.
      */
     public boolean isScanInProgress() {
-        synchronized (checksInProgress) {
-            return !checksInProgress.isEmpty();
-        }
-    }
-
-    private <T> Future<T> checkInProgress(final Future<T> checkFuture) {
-        synchronized (checksInProgress) {
-            if (!checkFuture.isDone()) {
-                checksInProgress.add(checkFuture);
-            }
-        }
-        return checkFuture;
-    }
-
-    private Future<List<ScanResult>> addToProgressAndRegisterListener(final Future<List<ScanResult>> checkFuture,
-                                                                       final ScanFiles checker) {
-        // Both operations share the same lock: checkComplete() (called by ScanCompletionTracker) also
-        // synchronizes on checksInProgress, so it cannot execute between our isDone() check and the
-        // listener registration, eliminating the race where the future could be stranded in the set.
-        synchronized (checksInProgress) {
-            checker.addListener(new ScanCompletionTracker(checkFuture));
-            if (!checkFuture.isDone()) {
-                checksInProgress.add(checkFuture);
-            }
-        }
-        return checkFuture;
+        return activeScans.get() > 0;
     }
 
     public void stopChecks() {
@@ -69,21 +48,12 @@ public class StaticScanner implements Disposable {
             checksInProgress.forEach(task -> task.cancel(true));
             checksInProgress.clear();
         }
+        activeScans.set(0);
     }
 
     @Override
     public void dispose() {
         stopChecks();
-    }
-
-    private <T> void checkComplete(final Future<T> task) {
-        if (task == null) {
-            return;
-        }
-
-        synchronized (checksInProgress) {
-            checksInProgress.remove(task);
-        }
     }
 
     public void asyncScanFiles(final List<VirtualFile> files, final ConfigurationLocation overrideConfigLocation) {
@@ -119,16 +89,22 @@ public class StaticScanner implements Disposable {
     }
 
     private Future<List<ScanResult>> runAsyncCheck(final ScanFiles checker) {
-        return addToProgressAndRegisterListener(executeOnPooledThread(checker), checker);
+        // Mark the scan pending and register the completion listener *before* submitting the checker
+        // to the pool. A fast scan (e.g. an empty file list) can otherwise run to completion, and fire
+        // its listeners, before this method finishes its own bookkeeping - stranding the scan as
+        // "not in progress" even though it was genuinely dispatched.
+        activeScans.incrementAndGet();
+        checker.addListener(new ScanCompletionTracker());
+
+        final Future<List<ScanResult>> future = executeOnPooledThread(checker);
+        synchronized (checksInProgress) {
+            checksInProgress.removeIf(Future::isDone);
+            checksInProgress.add(future);
+        }
+        return future;
     }
 
     private class ScanCompletionTracker implements ScannerListener {
-
-        private final Future<List<ScanResult>> future;
-
-        ScanCompletionTracker(final Future<List<ScanResult>> future) {
-            this.future = future;
-        }
 
         @Override
         public void scanStarting(final List<PsiFile> filesToScan) {
@@ -140,12 +116,12 @@ public class StaticScanner implements Disposable {
 
         @Override
         public void scanCompletedSuccessfully(final List<ScanResult> scanResults) {
-            checkComplete(future);
+            activeScans.updateAndGet(count -> Math.max(0, count - 1));
         }
 
         @Override
         public void scanFailedWithError(final CheckStylePluginException error) {
-            checkComplete(future);
+            activeScans.updateAndGet(count -> Math.max(0, count - 1));
         }
     }
 
