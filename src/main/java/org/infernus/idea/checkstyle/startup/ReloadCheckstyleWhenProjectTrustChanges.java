@@ -65,15 +65,22 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
         connection.subscribe(TrustedProjectsListener.TOPIC, new TrustedProjectsListener() {
             @Override
             public void onProjectTrusted(@NotNull final Project trusted) {
-                reload();
+                reload(trusted);
             }
 
             @Override
             public void onProjectUntrusted(@NotNull final Project untrusted) {
-                reload();
+                reload(untrusted);
             }
 
-            private void reload() {
+            /**
+             * {@code TrustedProjectsListener.TOPIC} is published on the application bus, so this fires for
+             * every open project, not just ours.
+             */
+            private void reload(@NotNull final Project eventProject) {
+                if (!project.equals(eventProject)) {
+                    return;
+                }
                 backgroundDispatcher.accept(() -> {
                     project.getService(ConfigurationInvalidator.class).invalidateCachedResources();
                     ApplicationManager.getApplication().invokeLater(

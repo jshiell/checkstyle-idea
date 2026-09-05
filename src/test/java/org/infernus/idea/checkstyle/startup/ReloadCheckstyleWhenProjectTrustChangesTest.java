@@ -103,4 +103,13 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
 
         verify(invalidator).invalidateCachedResources();
     }
+
+    @Test
+    void trustingADifferentProjectDoesNotInvalidateThisProject() {
+        TrustedProjectsListener listener = executeAndCaptureListener();
+
+        listener.onProjectTrusted(otherProject);
+
+        verifyNoInteractions(invalidator);
+    }
 }
