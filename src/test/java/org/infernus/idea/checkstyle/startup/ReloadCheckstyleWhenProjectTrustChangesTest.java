@@ -130,6 +130,16 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     }
 
     @Test
+    void anUntrustedProjectWithThirdPartyJarsConfiguredIsWarnedOnStartup() {
+        when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
+        trustState = ThreeState.NO;
+
+        executeAndCaptureListener();
+
+        verify(warner).showWarning(eq(project), any(String.class));
+    }
+
+    @Test
     void aTrustChangeForAnAlreadyDisposedProjectIsIgnored() {
         TrustedProjectsListener listener = executeAndCaptureListener();
         when(project.isDisposed()).thenReturn(true);

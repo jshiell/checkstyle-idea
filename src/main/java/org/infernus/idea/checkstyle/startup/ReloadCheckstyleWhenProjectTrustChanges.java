@@ -13,12 +13,15 @@ import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.ConfigurationInvalidator;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
 /**
  * Third-party check JARs are only loaded for trusted projects, so when a project's trust state changes the
@@ -61,6 +64,13 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
     @Nullable
     @Override
     public Object execute(@NotNull final Project project, @NotNull final Continuation<? super Unit> continuation) {
+        // Only on an explicit NO - while the trust dialog is still open the state is UNSURE, and telling the
+        // user their project is untrusted before they have answered would be nonsense.
+        if (!project.getService(PluginConfigurationManager.class).getCurrent().getThirdPartyClasspath().isEmpty()
+                && trustState.apply(project) == ThreeState.NO) {
+            warner.showWarning(project, message("startup.untrusted-project.third-party-classpath-skipped"));
+        }
+
         MessageBusConnection connection = connectionFactory.connect(project.getService(CheckstyleProjectService.class));
         connection.subscribe(TrustedProjectsListener.TOPIC, new TrustedProjectsListener() {
             @Override
