@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.ide.trustedProjects.TrustedProjects;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -8,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
+import org.mockito.quality.Strictness;
 
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
@@ -51,6 +54,18 @@ public class CheckstyleProjectServiceTest {
                 .thenReturn(new org.infernus.idea.checkstyle.checker.CheckerFactoryCache());
 
         underTest = new CheckstyleProjectService(project);
+    }
+
+    /**
+     * Third-party classpath entries are only loaded for trusted projects, so every test that expects a
+     * non-empty third-party classpath to reach the classloader has to say so explicitly. Lenient, because
+     * a test may build no classloader at all on some paths and never exercise the stub.
+     */
+    private static MockedStatic<TrustedProjects> aTrustedProject(final Project trustedProject) {
+        MockedStatic<TrustedProjects> trustedProjects =
+                mockStatic(TrustedProjects.class, withSettings().strictness(Strictness.LENIENT));
+        trustedProjects.when(() -> TrustedProjects.isProjectTrusted(trustedProject)).thenReturn(true);
+        return trustedProjects;
     }
 
     @Test
@@ -103,8 +118,10 @@ public class CheckstyleProjectServiceTest {
                 new CheckstyleProjectService(project, mockDownloader);
         serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION, List.of(thirdPartyJar.toString()));
 
-        URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
-        assertThat(Arrays.asList(classLoader.getURLs()), hasItem(thirdPartyJar.toUri().toURL()));
+        try (MockedStatic<TrustedProjects> ignored = aTrustedProject(project)) {
+            URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
+            assertThat(Arrays.asList(classLoader.getURLs()), hasItem(thirdPartyJar.toUri().toURL()));
+        }
     }
 
     @Test
@@ -125,9 +142,11 @@ public class CheckstyleProjectServiceTest {
         serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION,
                 List.of("https://example.invalid/custom-check.jar"));
 
-        final URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
-        final Path resolvedCacheFile = thirdPartyJarCache.resolve("https://example.invalid/custom-check.jar");
-        assertThat(Arrays.asList(classLoader.getURLs()), hasItem(resolvedCacheFile.toUri().toURL()));
+        try (MockedStatic<TrustedProjects> ignored = aTrustedProject(project)) {
+            final URLClassLoader classLoader = (URLClassLoader) serviceWithDownloader.underlyingClassLoader();
+            final Path resolvedCacheFile = thirdPartyJarCache.resolve("https://example.invalid/custom-check.jar");
+            assertThat(Arrays.asList(classLoader.getURLs()), hasItem(resolvedCacheFile.toUri().toURL()));
+        }
     }
 
     @Test
@@ -152,9 +171,11 @@ public class CheckstyleProjectServiceTest {
         serviceWithDownloader.activateCheckstyleVersion(NON_BUNDLED_VERSION,
                 List.of(otherThirdPartyJar.toString(), failingUrl));
 
-        final CheckStylePluginException ex = assertThrows(CheckStylePluginException.class,
-                serviceWithDownloader::underlyingClassLoader);
-        assertThat(ex.getMessage(), containsString(failingUrl));
+        try (MockedStatic<TrustedProjects> ignored = aTrustedProject(project)) {
+            final CheckStylePluginException ex = assertThrows(CheckStylePluginException.class,
+                    serviceWithDownloader::underlyingClassLoader);
+            assertThat(ex.getMessage(), containsString(failingUrl));
+        }
     }
 
     private static byte[] validZipBytes() throws IOException {
@@ -240,10 +261,12 @@ public class CheckstyleProjectServiceTest {
         underTest = new CheckstyleProjectService(project, tempDirProvider);
         underTest.activateCheckstyleVersion(BUNDLED_VERSION, List.of(thirdPartyJar.toString()));
 
-        URLClassLoader classLoader = (URLClassLoader) underTest.underlyingClassLoader();
-        URL originalUrl = thirdPartyJar.toUri().toURL();
-        URL copiedUrl = copyDir.resolve("ext.jar").toUri().toURL();
-        assertThat(Arrays.asList(classLoader.getURLs()), allOf(not(hasItem(originalUrl)), hasItem(copiedUrl)));
+        try (MockedStatic<TrustedProjects> ignored = aTrustedProject(project)) {
+            URLClassLoader classLoader = (URLClassLoader) underTest.underlyingClassLoader();
+            URL originalUrl = thirdPartyJar.toUri().toURL();
+            URL copiedUrl = copyDir.resolve("ext.jar").toUri().toURL();
+            assertThat(Arrays.asList(classLoader.getURLs()), allOf(not(hasItem(originalUrl)), hasItem(copiedUrl)));
+        }
     }
 
     @Test
