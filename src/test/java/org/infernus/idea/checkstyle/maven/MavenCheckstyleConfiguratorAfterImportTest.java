@@ -257,6 +257,31 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
             .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
     }
 
+    public void testConfigLocationOnClasspathWithNonBundledVersionDoesNotThrow() throws Exception {
+        enableMavenImport();
+        fixtureFile(".placeholder", "");  // required: sets up mavenProject.getDirectoryFile(),
+                                           // which createConfigurationLocation() dereferences on the
+                                           // way to the classpath-resource fallback branch, before this
+                                           // increment's fix is even reached — every sibling test that
+                                           // exercises createConfigurationLocation() does this too.
+        configManager.setCurrent(
+            PluginConfigurationBuilder.from(configManager.getCurrent())
+                .withLocations(new TreeSet<>())
+                .withActiveLocationIds(new TreeSet<>())
+                .build(),
+            true);
+
+        var config = new Element("configuration");
+        config.addContent(new Element("configLocation").setText("classpath-resource-that-does-not-exist.xml"));
+        MavenPlugin plugin = pluginWithConfig(config);
+        when(plugin.getDependencies()).thenReturn(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.21.3")));
+
+        configurator.afterImport(context); // must not throw
+
+        assertTrue(configManager.getCurrent().getLocations().stream()
+            .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
+    }
+
     public void testOnlySuppressionLocationChangesUpdatesProperties() throws Exception {
         enableMavenImport();
         fixtureFile("checkstyle.xml", "<config></config>");

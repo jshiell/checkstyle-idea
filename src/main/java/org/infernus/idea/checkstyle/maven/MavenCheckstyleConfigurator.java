@@ -22,6 +22,7 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
+import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -493,8 +494,18 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             tempConfiguration.getCheckstyleVersion(), tempConfiguration.getThirdPartyClasspath());
         final ConfigurationLocation configurationLocation;
         try {
+            // CheckStylePluginException is the plugin's general-purpose exception type, so this also
+            // catches failures other than "not bundled and not downloaded" that could occur inside
+            // createConfigurationLocation() (e.g. from ConfigurationLocationFactory.create()). That's
+            // intentional and consistent with the null-return handling a few lines below: any failure to
+            // resolve this best-effort, auto-detected <configLocation> should log and move on rather than
+            // abort the whole Maven import.
             configurationLocation = createConfigurationLocation(project, mavenProject,
                 checkstyleProjectService, mavenPluginConfigLocation);
+        } catch (final CheckStylePluginException e) {
+            LOG.warn("Could not resolve <configLocation>" + mavenPluginConfigLocation
+                + "</configLocation> from the Checkstyle plugin classpath: " + e.getMessage(), e);
+            return;
         } finally {
             checkstyleProjectService.dispose();
         }
