@@ -95,7 +95,7 @@ public class StaticScanner implements Disposable {
                                final ResultHandling resultHandling) {
         LOG.debug("Scanning current file(s).");
 
-        if (files == null || files.isEmpty()) {
+        if (files == null) {
             LOG.debug("No files provided.");
             return;
         }
