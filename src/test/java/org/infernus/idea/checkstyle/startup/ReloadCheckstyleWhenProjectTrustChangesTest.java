@@ -8,6 +8,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Condition;
 import com.intellij.util.ThreeState;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import kotlin.coroutines.Continuation;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
@@ -38,6 +39,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     private MessageBusConnection connection;
     private ReloadCheckstyleWhenProjectTrustChanges.Warner warner;
     private MockedStatic<ApplicationManager> applicationManager;
+    private Application application;
     private ThreeState trustState;
 
     @BeforeEach
@@ -64,7 +66,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
         when(project.getDisposed()).thenReturn(o -> project.isDisposed());
 
         // Scoped and thread-local, so it never installs a global application the way setApplication would.
-        Application application = mock(Application.class);
+        application = mock(Application.class);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -178,6 +180,26 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
         executeAndCaptureListener();
 
         verifyNoInteractions(warner);
+    }
+
+    /**
+     * The behavioural tests above all inject a fake {@link
+     * ReloadCheckstyleWhenProjectTrustChanges.ConnectionFactory}, so by construction they cannot notice if the
+     * real wiring regressed to a self-disconnecting one-shot subscription, nor if it used the {@code Project}
+     * as the parent disposable - which JetBrains explicitly prohibits, as it leaks the plugin's classloader
+     * across a dynamic unload. This test exercises the production default instead.
+     */
+    @Test
+    void theProductionWiringSubscribesForTheProjectServicesLifetimeAndNeverDisconnects() {
+        MessageBus messageBus = mock(MessageBus.class);
+        when(messageBus.connect(any(Disposable.class))).thenReturn(connection);
+        when(application.getMessageBus()).thenReturn(messageBus);
+
+        new ReloadCheckstyleWhenProjectTrustChanges().execute(project, mock(Continuation.class));
+
+        verify(messageBus).connect(checkstyleProjectService);
+        verify(connection).subscribe(eq(TrustedProjectsListener.TOPIC), any(TrustedProjectsListener.class));
+        verify(connection, never()).disconnect();
     }
 
     @Test
