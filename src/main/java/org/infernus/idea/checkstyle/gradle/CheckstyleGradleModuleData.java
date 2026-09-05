@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.gradle;
 
 import com.intellij.openapi.externalSystem.model.Key;
+import com.intellij.serialization.PropertyMapping;
 import java.io.Serializable;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ public final class CheckstyleGradleModuleData implements Serializable {
     private final Map<String, String> configProperties;
     private final String toolVersion;
 
+    @PropertyMapping({"gradleProjectPath", "configFile", "configProperties", "toolVersion"})
     public CheckstyleGradleModuleData(@NotNull final String gradleProjectPath,
                                        @Nullable final String configFile,
                                        @NotNull final Map<String, String> configProperties,
