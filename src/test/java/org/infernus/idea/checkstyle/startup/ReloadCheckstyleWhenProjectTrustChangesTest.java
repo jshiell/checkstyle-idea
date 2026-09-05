@@ -140,6 +140,36 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     }
 
     @Test
+    void anUndecidedProjectIsNotWarnedWhileTheTrustDialogIsStillOpen() {
+        when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
+        trustState = ThreeState.UNSURE;
+
+        executeAndCaptureListener();
+
+        verifyNoInteractions(warner);
+    }
+
+    @Test
+    void aTrustedProjectIsNotWarned() {
+        when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
+        trustState = ThreeState.YES;
+
+        executeAndCaptureListener();
+
+        verifyNoInteractions(warner);
+    }
+
+    @Test
+    void anUntrustedProjectWithNoThirdPartyJarsConfiguredIsNotWarned() {
+        when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of());
+        trustState = ThreeState.NO;
+
+        executeAndCaptureListener();
+
+        verifyNoInteractions(warner);
+    }
+
+    @Test
     void aTrustChangeForAnAlreadyDisposedProjectIsIgnored() {
         TrustedProjectsListener listener = executeAndCaptureListener();
         when(project.isDisposed()).thenReturn(true);
