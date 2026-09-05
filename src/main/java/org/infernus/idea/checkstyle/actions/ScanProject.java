@@ -8,6 +8,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import org.infernus.idea.checkstyle.model.ScanScope;
+import org.infernus.idea.checkstyle.toolwindow.CheckStyleToolWindowPanel;
 import org.infernus.idea.checkstyle.util.Async;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,9 +37,9 @@ public class ScanProject extends BaseAction {
         });
     }
 
-    private void executeScan(final Project project, final ScanScope scope, final ToolWindow toolWindow) {
+    void executeScan(final Project project, final ScanScope scope, final ToolWindow toolWindow) {
         try {
-            setProgressText(toolWindow, "plugin.status.in-progress.project");
+            final CheckStyleToolWindowPanel checkStyleToolWindowPanel = CheckStyleToolWindowPanel.panelFor(project);
             final Callable<Void> scanAction;
             if (scope == ScanScope.Everything) {
                 scanAction = new ScanAllFilesInProjectTask(project, getSelectedOverride(toolWindow));
@@ -47,11 +48,15 @@ public class ScanProject extends BaseAction {
                 final VirtualFile[] sourceRoots = projectRootManager.getContentSourceRoots();
                 if (sourceRoots.length > 0) {
                     scanAction = new ScanAllGivenFilesTask(project, sourceRoots, getSelectedOverride(toolWindow));
+                } else if (checkStyleToolWindowPanel != null) {
+                    checkStyleToolWindowPanel.displayWarningResult("plugin.status.in-progress.no-project-source-roots");
+                    scanAction = null;
                 } else {
                     scanAction = null;
                 }
             }
             if (scanAction != null) {
+                setProgressText(toolWindow, "plugin.status.in-progress.project");
                 Async.executeOnPooledThread(scanAction);
             }
         } catch (Throwable e) {
