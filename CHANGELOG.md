@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.18.0** Fixed: Failures downloading a non-bundled Checkstyle version, and Maven auto-import needing one, now report the real underlying reason (e.g. the HTTP status, TLS, or DNS error) instead of a bare, contextless message (#702).
 * **26.18.0** Fixed: Third-party Checkstyle check JARs (`thirdPartyClasspath`) are no longer loaded in untrusted projects, closing a remote code execution vector where a malicious project's `.idea/checkstyle-idea.xml` could point at an attacker-controlled JAR. Third-party checks — and any rules file resolved via the third-party classpath rather than a plain file — activate automatically once the project is trusted.
 * **26.18.0** New: Added a "Import settings from Gradle" opt-in, which reads a Gradle project's `checkstyle {}` configuration (or, if unconfigured, a raw `task checkstyle(type: Checkstyle)` such as AGP's) during sync and imports its `configFile`, `configProperties`, and `toolVersion` — the Gradle counterpart to the existing Maven import (#439).
 * **26.17.0** New: Added Checkstyle 14.1.0.
