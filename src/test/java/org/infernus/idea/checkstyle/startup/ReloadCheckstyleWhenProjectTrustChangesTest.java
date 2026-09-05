@@ -128,4 +128,14 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
 
         verify(invalidator).invalidateCachedResources();
     }
+
+    @Test
+    void aTrustChangeForAnAlreadyDisposedProjectIsIgnored() {
+        TrustedProjectsListener listener = executeAndCaptureListener();
+        when(project.isDisposed()).thenReturn(true);
+
+        listener.onProjectTrusted(project);
+
+        verifyNoInteractions(invalidator);
+    }
 }

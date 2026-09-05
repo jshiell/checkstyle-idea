@@ -78,10 +78,14 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
              * every open project, not just ours.
              */
             private void reload(@NotNull final Project eventProject) {
-                if (!project.equals(eventProject)) {
+                if (!project.equals(eventProject) || project.isDisposed()) {
                     return;
                 }
                 backgroundDispatcher.accept(() -> {
+                    // Re-checked: the project can close between the event and this running on a pooled thread.
+                    if (project.isDisposed()) {
+                        return;
+                    }
                     project.getService(ConfigurationInvalidator.class).invalidateCachedResources();
                     ApplicationManager.getApplication().invokeLater(
                             () -> DaemonCodeAnalyzer.getInstance(project).restart(),
