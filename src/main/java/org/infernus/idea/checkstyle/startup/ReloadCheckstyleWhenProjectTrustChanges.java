@@ -68,6 +68,11 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
                 reload();
             }
 
+            @Override
+            public void onProjectUntrusted(@NotNull final Project untrusted) {
+                reload();
+            }
+
             private void reload() {
                 backgroundDispatcher.accept(() -> {
                     project.getService(ConfigurationInvalidator.class).invalidateCachedResources();
