@@ -269,13 +269,14 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
             .noneMatch(loc -> "maven-config-location".equals(loc.getId())));
     }
 
-    public void testConfigLocationOnClasspathWithNonBundledVersionDoesNotThrow() throws Exception {
+    public void testConfigLocationOnClasspathButResourceMissingDoesNotThrow() throws Exception {
         enableMavenImport();
         fixtureFile(".placeholder", "");  // required: sets up mavenProject.getDirectoryFile(),
                                            // which createConfigurationLocation() dereferences on the
-                                           // way to the classpath-resource fallback branch, before this
-                                           // increment's fix is even reached — every sibling test that
-                                           // exercises createConfigurationLocation() does this too.
+                                           // way to the classpath-resource fallback branch. The classloader
+                                           // now builds successfully (the version downloads fine); the
+                                           // resource is simply not present in it, so resolution still
+                                           // fails, just for a different reason than before.
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withLocations(new TreeSet<>())
