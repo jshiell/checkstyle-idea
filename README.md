@@ -129,7 +129,7 @@ directories/JAR files will be added to CheckStyle's classpath.
 **Third-party checks are only loaded in trusted projects.** Because these entries are read from the project's own
 `.idea/checkstyle-idea.xml`, and because loading a check means running its code, a project that has not been
 trusted gets its third-party classpath skipped entirely — the built-in checks still run as normal. Trusting the
-project (*File* → *Trust Project*, or the banner shown when it was opened) enables them immediately, with no IDE
+project (via the safe-mode banner shown when it was opened, or *Find Action* → *Trust Project*) enables them immediately, with no IDE
 restart. The same applies to a rules file that is resolved via the third-party classpath rather than as a plain
 file: it cannot be loaded until the project is trusted.
 
