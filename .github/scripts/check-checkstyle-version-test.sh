@@ -170,6 +170,30 @@ test_run_check_rejects_invalid_latest() {
     assert_fails "run_check --latest null" run_check_in_subshell --properties "${REAL_PROPERTIES}" --latest null --dry-run
 }
 
+test_select_bot_issue_matches_app_prefixed_login() {
+    local actual
+    actual="$(printf '%s' '[{"number":701,"author":{"login":"app/github-actions","is_bot":true}}]' | select_bot_issue)"
+    assert_eq "701" "${actual}" "select_bot_issue matches app/github-actions"
+}
+
+test_select_bot_issue_matches_bracket_suffixed_login() {
+    local actual
+    actual="$(printf '%s' '[{"number":42,"author":{"login":"github-actions[bot]","is_bot":true}}]' | select_bot_issue)"
+    assert_eq "42" "${actual}" "select_bot_issue matches github-actions[bot]"
+}
+
+test_select_bot_issue_ignores_non_bot_author() {
+    local actual
+    actual="$(printf '%s' '[{"number":5,"author":{"login":"someuser","is_bot":false}}]' | select_bot_issue)"
+    assert_eq "" "${actual}" "select_bot_issue ignores non-bot author"
+}
+
+test_select_bot_issue_ignores_unrelated_bot() {
+    local actual
+    actual="$(printf '%s' '[{"number":9,"author":{"login":"dependabot[bot]","is_bot":true}}]' | select_bot_issue)"
+    assert_eq "" "${actual}" "select_bot_issue ignores an unrelated bot"
+}
+
 test_run_check_treats_map_key_as_handled() {
     local scratch
     scratch="$(mktemp)"
@@ -201,6 +225,10 @@ test_run_check_reports_update_available
 test_run_check_reports_up_to_date
 test_run_check_rejects_invalid_latest
 test_run_check_treats_map_key_as_handled
+test_select_bot_issue_matches_app_prefixed_login
+test_select_bot_issue_matches_bracket_suffixed_login
+test_select_bot_issue_ignores_non_bot_author
+test_select_bot_issue_ignores_unrelated_bot
 
 if [[ "${FAILURES}" -gt 0 ]]; then
     echo "${FAILURES} test(s) failed." >&2

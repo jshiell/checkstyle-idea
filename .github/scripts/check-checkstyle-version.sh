@@ -244,7 +244,6 @@ run_check() {
 }
 
 ISSUE_LABEL="checkstyle-update"
-BOT_AUTHOR="github-actions[bot]"
 
 # Ensures the tracking-issue label exists. Idempotent; suppressed in dry-run.
 ensure_label() {
@@ -256,12 +255,23 @@ ensure_label() {
         --description "Checkstyle upstream has a release this plugin does not yet support" >/dev/null
 }
 
+# Filters `gh issue list --json number,author` JSON (read from stdin) down
+# to the single open github-actions-bot-authored issue, if any, and echoes
+# its number. gh's reported login for the same bot actor varies by call
+# ("app/github-actions" from issue list/view, bare "github-actions" over
+# GraphQL, "github-actions[bot]" elsewhere), so this matches on is_bot plus
+# a substring rather than an exact string, while still excluding other bots
+# (e.g. dependabot).
+select_bot_issue() {
+    jq -r '.[] | select(.author.is_bot==true and (.author.login | test("github-actions"))) | .number' | head -n1
+}
+
 # Echoes the number of the single open, bot-authored tracking issue, if any.
 # This is a read, so it runs even under --dry-run (it's how dry-run knows
 # whether to report "would create" or "would update").
 find_bot_issue() {
     gh issue list --label "${ISSUE_LABEL}" --state open --limit 100 --json number,author \
-        --jq ".[] | select(.author.login==\"${BOT_AUTHOR}\") | .number" | head -n1
+        | select_bot_issue
 }
 
 issue_title() {
