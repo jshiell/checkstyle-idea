@@ -54,9 +54,11 @@ public class CheckstyleArtifactDownloader {
     public List<Path> download(@NotNull final String version) {
         try {
             return resolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", version);
+        } catch (CheckstyleDownloadException e) {
+            throw e;
         } catch (Exception e) {
-            throw new CheckstyleDownloadException(
-                    "Failed to download Checkstyle " + version, e);
+            String detail = e.getClass().getSimpleName() + (e.getMessage() != null ? ": " + e.getMessage() : "");
+            throw new CheckstyleDownloadException(detail, e);
         }
     }
 

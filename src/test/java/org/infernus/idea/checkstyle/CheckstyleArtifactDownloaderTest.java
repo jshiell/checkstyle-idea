@@ -76,6 +76,29 @@ public class CheckstyleArtifactDownloaderTest {
     }
 
     @Test
+    void downloadExceptionMessageIncludesUnderlyingCauseDetail() throws Exception {
+        when(mockResolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", "10.21.3"))
+                .thenThrow(new java.io.IOException("HTTP 404 downloading https://repo.example/checkstyle-10.21.3.jar"));
+
+        CheckstyleDownloadException thrown = assertThrows(CheckstyleDownloadException.class,
+                () -> downloader.download("10.21.3"));
+
+        assertTrue(thrown.getMessage().contains("HTTP 404 downloading https://repo.example/checkstyle-10.21.3.jar"));
+    }
+
+    @Test
+    void downloadPassesThroughExistingCheckstyleDownloadExceptionUnwrapped() throws Exception {
+        CheckstyleDownloadException original = new CheckstyleDownloadException("No manifest entry found for Checkstyle 10.21.3");
+        when(mockResolver.resolveTransitively("com.puppycrawl.tools", "checkstyle", "10.21.3"))
+                .thenThrow(original);
+
+        CheckstyleDownloadException thrown = assertThrows(CheckstyleDownloadException.class,
+                () -> downloader.download("10.21.3"));
+
+        assertSame(original, thrown);
+    }
+
+    @Test
     void createFactoryReturnsNonNullDownloader() {
         CheckstyleArtifactDownloader created = CheckstyleArtifactDownloader.create(
                 m2Root, () -> new ArtifactRepositoryLocation("https://repo1.maven.org/maven2/", Optional.empty()));
