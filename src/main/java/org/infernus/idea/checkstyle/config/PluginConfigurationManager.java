@@ -20,7 +20,15 @@ public class PluginConfigurationManager {
     private volatile PluginConfiguration cachedConfiguration;
 
     public PluginConfigurationManager(@NotNull final Project project) {
-        this(project, runnable -> ApplicationManager.getApplication().invokeLater(runnable));
+        this(project, runnable -> {
+            var app = ApplicationManager.getApplication();
+            if (app != null) {
+                app.invokeLater(runnable);
+            } else {
+                // Headless or test environment where Application is not available - run synchronously.
+                runnable.run();
+            }
+        });
     }
 
     PluginConfigurationManager(@NotNull final Project project, @NotNull final Consumer<Runnable> edtDispatcher) {
@@ -71,6 +79,18 @@ public class PluginConfigurationManager {
         if (fireEvents) {
             fireConfigurationChanged();
         }
+    }
+
+    /**
+     * {@link #getCurrent()} and {@link #setCurrent(PluginConfiguration, boolean)} share the same
+     * {@link #cachedConfiguration} field.
+     * <p>
+     * This method needs to be synchronized to avoid a race condition
+     * where one thread is reading the cached configuration while another thread is writing to it.
+     */
+    public synchronized void invalidate() {
+        cachedConfiguration = null;
+        fireConfigurationChanged();
     }
 
     private ProjectConfigurationState projectConfigurationState() {

@@ -95,6 +95,7 @@ tasks {
             options.compilerArgs.addAll(listOf("-Xlint:unchecked"))
         }
     }
+
 }
 
 // workaround for Checkstyle#14123

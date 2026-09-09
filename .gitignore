@@ -12,6 +12,7 @@ CheckStyle-IDEA.zip
 .gradle/
 gradle-app.setting
 /.gradletasknamecache
+/.gradle-temp/
 _support/
 /out/
 .intellijPlatform/
@@ -27,3 +28,6 @@ _support/
 /buildSrc/bin/
 /.opencode/
 /.claude/
+# Additional AI Resources
+/.ai-playbook/
+

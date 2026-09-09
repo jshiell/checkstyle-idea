@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
@@ -15,11 +16,14 @@ import com.intellij.ui.content.Content;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
+import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
+import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +38,8 @@ import java.io.InputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
@@ -204,6 +210,11 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         configurationOverrideModel.removeAllElements();
         configurationOverrideModel.addElement(defaultOverride);
         configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
+        globalConfigurationLocations().forEach(location -> {
+            if (!containsById(location.getId())) {
+                configurationOverrideModel.addElement(location);
+            }
+        });
         configurationOverrideModel.setSelectedItem(defaultOverride);
     }
 
@@ -471,6 +482,59 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         return treeBuilder.groupedBy();
     }
 
+    private List<ConfigurationLocation> globalConfigurationLocations() {
+        if (ApplicationManager.getApplication() == null) {
+            return List.of();
+        }
+        final ApplicationConfigurationState appState = ApplicationManager.getApplication().getService(ApplicationConfigurationState.class);
+        if (!appState.isUseGlobalRulesByDefault()) {
+            return List.of();
+        }
+        final ConfigurationLocationFactory locationFactory = project.getService(ConfigurationLocationFactory.class);
+        final List<ConfigurationLocation> locations = new ArrayList<>();
+        for (ApplicationConfigurationState.GlobalConfigurationLocation locationDto : appState.getGlobalLocations()) {
+            deserializeGlobalLocation(locationDto, locationFactory, locations);
+        }
+        return locations;
+    }
+
+    private void deserializeGlobalLocation(ApplicationConfigurationState.GlobalConfigurationLocation locationDto,
+                                           ConfigurationLocationFactory locationFactory,
+                                           List<ConfigurationLocation> locations) {
+        final ConfigurationType type = ConfigurationType.parse(locationDto.type);
+        if (type == null) {
+            return;
+        }
+        try {
+            final ConfigurationLocation globalLocation = locationFactory.create(
+                    project,
+                    locationDto.id,
+                    type,
+                    Objects.requireNonNullElse(locationDto.location, "").trim(),
+                    locationDto.description,
+                    null);
+            globalLocation.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(
+                    project,
+                    Objects.requireNonNullElse(locationDto.scope, NamedScopeHelper.DEFAULT_SCOPE_ID)));
+            if (locationDto.properties != null) {
+                globalLocation.setProperties(locationDto.properties);
+            }
+            locations.add(globalLocation);
+        } catch (Exception e) {
+            LOG.error("Failed to deserialize global location for tool window: " + locationDto, e);
+        }
+    }
+
+    private boolean containsById(@NotNull final String locationId) {
+        for (int i = 0; i < configurationOverrideModel.getSize(); i++) {
+            final ConfigurationLocation location = configurationOverrideModel.getElementAt(i);
+            if (locationId.equals(location.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private PluginConfigurationManager configurationManager() {
         return project.getService(PluginConfigurationManager.class);
     }
@@ -532,3 +596,5 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         FORWARD, BACKWARD
     }
 }
+
+
