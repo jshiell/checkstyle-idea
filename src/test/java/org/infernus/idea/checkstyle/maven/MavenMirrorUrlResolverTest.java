@@ -167,4 +167,77 @@ class MavenMirrorUrlResolverTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsReturnsConfiguredAbsolutePath(@TempDir final Path localRepo) throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <localRepository>%s</localRepository>
+                </settings>
+                """.formatted(localRepo.toString().replace("\\", "/")));
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertEquals(Optional.of(localRepo), result);
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsInterpolatesUserHomeSystemProperty() throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <localRepository>${user.home}/custom-m2-repo</localRepository>
+                </settings>
+                """);
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertEquals(Optional.of(Path.of(System.getProperty("user.home"), "custom-m2-repo")), result);
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsReturnsEmptyWhenSettingsFileDoesNotExist() {
+        Path missing = tempDir.resolve("does-not-exist.xml");
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(missing);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsReturnsEmptyWhenLocalRepositoryAbsent() throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                </settings>
+                """);
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsReturnsEmptyWhenLocalRepositoryBlank() throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <localRepository>   </localRepository>
+                </settings>
+                """);
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsReturnsEmptyWhenValueIsRelative() throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <localRepository>relative/path/to/repo</localRepository>
+                </settings>
+                """);
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertTrue(result.isEmpty());
+    }
 }
