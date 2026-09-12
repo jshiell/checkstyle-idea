@@ -139,7 +139,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withImportSettingsFromMaven(true)
-                .withCheckstyleVersion("10.26.0")
+                .withCheckstyleVersion("10.25.1")
                 .build(),
             true);
         pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.26.1")));
