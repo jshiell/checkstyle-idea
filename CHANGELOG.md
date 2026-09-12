@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.18.1** Fixed: The plugin could end up configured with a Checkstyle version it doesn't support — inherited from `maven-checkstyle-plugin`'s own default, from an explicit Maven dependency override, or from a stale/hand-edited persisted setting — which always failed downloading with "No manifest entry found" and never appeared in the version dropdown. An unsupported version is now rejected at both the Maven import and the settings-load stage, falling back to the current or default version instead (#705).
 * **26.18.1** Fixed: "Import settings from Gradle" no longer fails Gradle sync with "compiled by a more recent version of the Java Runtime" when the target project's Gradle daemon runs an older JDK (>=17) than the one used to build the plugin (#704).
 * **26.18.0** Fixed: "Import settings from Maven" now resolves a `<configLocation>` that lives inside a third-party rules JAR even when the POM declares a Checkstyle engine version that isn't bundled with the plugin, downloading it on demand instead of silently dropping the location (#703).
 * **26.18.0** Fixed: Failures downloading a non-bundled Checkstyle version, and Maven auto-import needing one, now report the real underlying reason (e.g. the HTTP status, TLS, or DNS error) instead of a bare, contextless message (#702).
