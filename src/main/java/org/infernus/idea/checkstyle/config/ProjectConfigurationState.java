@@ -193,7 +193,8 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                 return mapped;
             }
             LOG.warn("Persisted Checkstyle version '" + checkstyleVersion
-                    + "' is not a version this plugin supports; using the default version instead");
+                    + "' is not a version this plugin supports and has no known mapping; using the default "
+                    + "version instead");
             return vlr.getDefaultVersion();
         }
 
