@@ -16,6 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import kotlin.sequences.SequencesKt;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
+import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
@@ -30,10 +31,12 @@ import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.model.MavenPlugin;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.utils.MavenUtil;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.quality.Strictness;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -120,6 +123,26 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     }
 
     // --- tests ---
+
+    public void testProductionConstructorBuildsDownloaderFromLocalRepositoryPathResolver() throws Exception {
+        Path sentinelM2Root = Files.createTempDirectory("checkstyle-idea-m2root-sentinel");
+        // A synthetic version, not a real released one, so this can only be found via the sentinel
+        // m2Root wired in below - never coincidentally present in a developer's real ~/.m2/repository.
+        String sentinelVersion = "0.0.0-local-repository-path-resolver-sentinel";
+        Path fixtureJar = sentinelM2Root.resolve("com/puppycrawl/tools/checkstyle")
+            .resolve(sentinelVersion)
+            .resolve("checkstyle-" + sentinelVersion + ".jar");
+        Files.createDirectories(fixtureJar.getParent());
+        Files.createFile(fixtureJar);
+
+        try (MockedConstruction<LocalRepositoryPathResolver> ignored = mockConstruction(
+                LocalRepositoryPathResolver.class,
+                (mock, mockContext) -> when(mock.resolve()).thenReturn(sentinelM2Root))) {
+            MavenCheckstyleConfigurator productionConfigurator = new MavenCheckstyleConfigurator();
+
+            assertTrue(productionConfigurator.getCheckstyleArtifactDownloader().isAvailableLocally(sentinelVersion));
+        }
+    }
 
     public void testImportSettingsFromMavenIsDisabledDoesNothing() {
         configManager.setCurrent(

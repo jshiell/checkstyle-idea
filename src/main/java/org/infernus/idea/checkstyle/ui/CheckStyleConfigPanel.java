@@ -27,6 +27,7 @@ import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
 import org.infernus.idea.checkstyle.ThirdPartyJarCache;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.actions.DetectConventionalConfigurationLocation;
@@ -105,7 +106,7 @@ public class CheckStyleConfigPanel extends JPanel {
         this.checkerFactoryCache = project.getService(CheckerFactoryCache.class);
         this.pluginConfigurationManager = project.getService(PluginConfigurationManager.class);
         this.versionListReader = new VersionListReader();
-        this.m2Root = CheckstyleArtifactDownloader.defaultM2Root();
+        this.m2Root = new LocalRepositoryPathResolver().resolve();
 
         refreshVersionSuffixCache();
         csVersionDropdown = buildCheckstyleVersionComboBox();
@@ -383,6 +384,10 @@ public class CheckStyleConfigPanel extends JPanel {
 
     public JCheckBox getScanBeforeCheckinCheckbox() {
         return scanBeforeCheckinCheckbox;
+    }
+
+    Path getM2Root() {
+        return m2Root;
     }
 
     public JCheckBox getImportSettingsFromGradleCheckbox() {

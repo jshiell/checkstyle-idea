@@ -58,7 +58,7 @@ public class CheckstyleProjectService implements Disposable {
     public CheckstyleProjectService(@NotNull final Project project) {
         this(project, pluginConfigurationManager(project).getCurrent().getCheckstyleVersion(),
                 pluginConfigurationManager(project).getCurrent().getThirdPartyClasspath(),
-                CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
+                CheckstyleArtifactDownloader.create(new LocalRepositoryPathResolver().resolve(),
                         () -> new ArtifactDownloadBaseUrlResolver().resolve()),
                 new TempDirProvider(), ThirdPartyJarCache.create(), true);
     }

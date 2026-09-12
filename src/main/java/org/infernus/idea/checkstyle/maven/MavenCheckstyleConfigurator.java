@@ -21,6 +21,7 @@ import kotlinx.coroutines.BuildersKt;
 import org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -74,12 +75,17 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     private final CheckstyleArtifactDownloader checkstyleArtifactDownloader;
 
     public MavenCheckstyleConfigurator() {
-        this(CheckstyleArtifactDownloader.create(CheckstyleArtifactDownloader.defaultM2Root(),
+        this(CheckstyleArtifactDownloader.create(new LocalRepositoryPathResolver().resolve(),
             () -> new ArtifactDownloadBaseUrlResolver().resolve()));
     }
 
     MavenCheckstyleConfigurator(@NotNull final CheckstyleArtifactDownloader checkstyleArtifactDownloader) {
         this.checkstyleArtifactDownloader = checkstyleArtifactDownloader;
+    }
+
+    @NotNull
+    CheckstyleArtifactDownloader getCheckstyleArtifactDownloader() {
+        return checkstyleArtifactDownloader;
     }
 
     @Override

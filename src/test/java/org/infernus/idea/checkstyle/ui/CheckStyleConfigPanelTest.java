@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
 import org.infernus.idea.checkstyle.ThirdPartyJarCache;
 import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanOutcome;
 import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanResult;
@@ -14,11 +15,18 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.mockito.MockedConstruction;
+
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
 
 public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
 
@@ -306,6 +314,18 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
         assertEquals(1, panel.getPluginConfiguration().getThirdPartyClasspath().stream()
                 .filter("https://example.invalid/custom-check.jar"::equals)
                 .count());
+    }
+
+    public void testM2RootComesFromLocalRepositoryPathResolver() throws Exception {
+        Path sentinelM2Root = Files.createTempDirectory("checkstyle-idea-m2root-sentinel");
+
+        try (MockedConstruction<LocalRepositoryPathResolver> ignored = mockConstruction(
+                LocalRepositoryPathResolver.class,
+                (mock, context) -> when(mock.resolve()).thenReturn(sentinelM2Root))) {
+            CheckStyleConfigPanel panelWithSentinelM2Root = new CheckStyleConfigPanel(getProject());
+
+            assertEquals(sentinelM2Root, panelWithSentinelM2Root.getM2Root());
+        }
     }
 
     public void testNormalizeCapturedUrlTrimsSurroundingWhitespace() {

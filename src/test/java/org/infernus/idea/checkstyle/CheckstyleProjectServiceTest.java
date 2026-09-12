@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.quality.Strictness;
 
@@ -260,6 +261,27 @@ public class CheckstyleProjectServiceTest {
                 CheckstyleProjectService.forVersion(project, BUNDLED_VERSION, null, mockDownloader);
 
         assertThat(service.getDownloader(), is(mockDownloader));
+    }
+
+    @Test
+    public void productionConstructorBuildsDownloaderFromLocalRepositoryPathResolver(@TempDir final Path sentinelM2Root)
+            throws Exception {
+        // A synthetic version, not a real released one, so this can only be found via the sentinel
+        // m2Root wired in below - never coincidentally present in a developer's real ~/.m2/repository.
+        String sentinelVersion = "0.0.0-local-repository-path-resolver-sentinel";
+        Path fixtureJar = sentinelM2Root.resolve("com/puppycrawl/tools/checkstyle")
+                .resolve(sentinelVersion)
+                .resolve("checkstyle-" + sentinelVersion + ".jar");
+        Files.createDirectories(fixtureJar.getParent());
+        Files.createFile(fixtureJar);
+
+        try (MockedConstruction<LocalRepositoryPathResolver> ignored = mockConstruction(
+                LocalRepositoryPathResolver.class,
+                (mock, context) -> when(mock.resolve()).thenReturn(sentinelM2Root))) {
+            CheckstyleProjectService service = new CheckstyleProjectService(project);
+
+            assertTrue(service.getDownloader().isAvailableLocally(sentinelVersion));
+        }
     }
 
     @Test
