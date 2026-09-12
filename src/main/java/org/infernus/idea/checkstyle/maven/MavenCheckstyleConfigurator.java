@@ -21,6 +21,7 @@ import kotlinx.coroutines.BuildersKt;
 import org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
@@ -112,11 +113,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
 
         final var pluginConfigurationBuilder = PluginConfigurationBuilder.from(
             currentPluginConfiguration);
-        if (checkstyleDependencyMavenId != null
-            && checkstyleDependencyMavenId.getVersion() != null) {
-            pluginConfigurationBuilder.withCheckstyleVersion(
-                checkstyleDependencyMavenId.getVersion());
-        }
+        applyCheckstyleVersion(checkstyleDependencyMavenId, currentPluginConfiguration, pluginConfigurationBuilder);
 
         pluginConfigurationBuilder.withThirdPartyClassPath(
             createThirdPartyClasspath(checkstyleMavenPlugin, mavenProject));
@@ -133,6 +130,23 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         final var newPluginConfiguration = pluginConfigurationBuilder.build();
         if (currentPluginConfiguration.hasChangedFrom(newPluginConfiguration)) {
             pluginConfigurationManager.setCurrent(newPluginConfiguration, true);
+        }
+    }
+
+    private static void applyCheckstyleVersion(@Nullable final MavenId checkstyleDependencyMavenId,
+                                                @NotNull final PluginConfiguration currentPluginConfiguration,
+                                                @NotNull final PluginConfigurationBuilder pluginConfigurationBuilder) {
+        if (checkstyleDependencyMavenId == null || checkstyleDependencyMavenId.getVersion() == null) {
+            return;
+        }
+
+        final String version = checkstyleDependencyMavenId.getVersion();
+        if (new VersionListReader().getSupportedVersions().contains(version)) {
+            pluginConfigurationBuilder.withCheckstyleVersion(version);
+        } else {
+            LOG.warn("Maven project reports Checkstyle version '" + version
+                    + "', which is not a version this plugin supports; leaving the current version ('"
+                    + currentPluginConfiguration.getCheckstyleVersion() + "') unchanged");
         }
     }
 

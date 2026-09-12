@@ -93,7 +93,18 @@ public class LegacyProjectConfigurationStateDeserialiser {
         if (result == null) {
             return vlr.getDefaultVersion();
         }
-        return vlr.getReplacementMap().getOrDefault(result.toString(), result.toString());
+        final String value = result.toString();
+        if (vlr.isLatest(value) || vlr.getSupportedVersions().contains(value)) {
+            return value;
+        }
+        final String mapped = vlr.getReplacementMap().get(value);
+        if (mapped != null) {
+            return mapped;
+        }
+        LOG.warn("Persisted Checkstyle version '" + value
+                + "' is not a version this plugin supports and has no known mapping; using the default "
+                + "version instead");
+        return vlr.getDefaultVersion();
     }
 
     @NotNull

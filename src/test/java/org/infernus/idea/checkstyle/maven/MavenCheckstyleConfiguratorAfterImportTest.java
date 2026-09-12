@@ -125,14 +125,14 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
                 .withImportSettingsFromMaven(false)
-                .withCheckstyleVersion("10.26.0")
+                .withCheckstyleVersion("10.25.1")
                 .build(),
             true);
         pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.26.1")));
 
         configurator.afterImport(context);
 
-        assertEquals("10.26.0", configManager.getCurrent().getCheckstyleVersion());
+        assertEquals("10.25.1", configManager.getCurrent().getCheckstyleVersion());
     }
 
     public void testImportSettingsFromMavenIsEnabledUpdatesVersion() {
@@ -147,6 +147,20 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         configurator.afterImport(context);
 
         assertEquals("10.26.1", configManager.getCurrent().getCheckstyleVersion());
+    }
+
+    public void testImportSettingsFromMavenIsEnabledWithUnsupportedVersionLeavesVersionUnchanged() {
+        configManager.setCurrent(
+            PluginConfigurationBuilder.from(configManager.getCurrent())
+                .withImportSettingsFromMaven(true)
+                .withCheckstyleVersion("10.25.1")
+                .build(),
+            true);
+        pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "not-a-real-version")));
+
+        configurator.afterImport(context);
+
+        assertEquals("10.25.1", configManager.getCurrent().getCheckstyleVersion());
     }
 
     public void testImportSettingsFromMavenIsEnabledUpdatesThirdPartyClasspath() {

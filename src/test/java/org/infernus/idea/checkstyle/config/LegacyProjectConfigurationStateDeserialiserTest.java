@@ -3,6 +3,7 @@ package org.infernus.idea.checkstyle.config;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ScanScope;
@@ -85,6 +86,19 @@ public class LegacyProjectConfigurationStateDeserialiserTest {
         assertThat(configList.get(2).getProperties(), equalTo(Map.of(
                 "checkstyle.classdataabstractioncoupling.excludeclassesregexps", ""
         )));
+    }
+
+    @Test
+    public void unsupportedAndUnmappedCheckstyleVersionFallsBackToDefault() {
+        final Map<String, String> configuration = new HashMap<>(testConfiguration().legacyConfiguration());
+        configuration.put("checkstyle-version", "not-a-real-version");
+
+        final PluginConfiguration pluginConfiguration = new LegacyProjectConfigurationStateDeserialiser(project)
+                .deserialise(PluginConfigurationBuilder.testInstance("10.1"),
+                        new ProjectConfigurationState.ProjectSettings(configuration))
+                .build();
+
+        assertThat(pluginConfiguration.getCheckstyleVersion(), equalTo(new VersionListReader().getDefaultVersion()));
     }
 
     @NotNull

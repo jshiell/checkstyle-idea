@@ -77,7 +77,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
     }
 
     @Test
-    public void afterImportImportSettingsFromMavenIsEnabledAndInheritingMavenPluginCheckstyleVersionUpdatesVersionWithInheritedValue()
+    public void afterImportImportSettingsFromMavenIsEnabledAndInheritingUnsupportedMavenPluginCheckstyleVersionLeavesVersionUnchanged()
         throws Exception {
         final var pluginConfigurationManager = getProject().getService(
             PluginConfigurationManager.class);
@@ -85,7 +85,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
         final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(
             pluginConfigurationManager.getCurrent());
         updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withCheckstyleVersion("10.26.1");
+            .withCheckstyleVersion("14.1.0");
         pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
 
         createProjectPom(PROJECT_INFO + """
@@ -103,7 +103,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));
 
-        assertEquals("9.3", pluginConfigurationManager.getCurrent().getCheckstyleVersion());
+        assertEquals("14.1.0", pluginConfigurationManager.getCurrent().getCheckstyleVersion());
     }
 
     @Test

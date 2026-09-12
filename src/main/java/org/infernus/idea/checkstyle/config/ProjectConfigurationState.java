@@ -70,10 +70,10 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
     static class ProjectSettings {
 
         @Attribute
-        private String serialisationVersion;
+        String serialisationVersion;
 
         @Tag
-        private String checkstyleVersion;
+        String checkstyleVersion;
         @Tag
         private String scanScope;
         @Tag
@@ -147,9 +147,7 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                                             @NotNull final Project project) {
             if (Objects.equals(serialisationVersion, "2")) {
                 return builder
-                        .withCheckstyleVersion(requireNonNullElseGet(
-                                checkstyleVersion,
-                                () -> new VersionListReader().getDefaultVersion()))
+                        .withCheckstyleVersion(resolveCheckstyleVersion())
                         .withScanScope(lookupScanScope())
                         .withSuppressErrors(suppressErrors)
                         .withCopyLibraries(copyLibs)
@@ -179,6 +177,24 @@ public class ProjectConfigurationState implements PersistentStateComponent<Proje
                 }
             });
             return configurationLocations;
+        }
+
+        @NotNull
+        private String resolveCheckstyleVersion() {
+            final VersionListReader vlr = new VersionListReader();
+            if (checkstyleVersion == null) {
+                return vlr.getDefaultVersion();
+            }
+            if (vlr.isLatest(checkstyleVersion) || vlr.getSupportedVersions().contains(checkstyleVersion)) {
+                return checkstyleVersion;
+            }
+            final String mapped = vlr.getReplacementMap().get(checkstyleVersion);
+            if (mapped != null) {
+                return mapped;
+            }
+            LOG.warn("Persisted Checkstyle version '" + checkstyleVersion
+                    + "' is not a version this plugin supports; using the default version instead");
+            return vlr.getDefaultVersion();
         }
 
         @NotNull

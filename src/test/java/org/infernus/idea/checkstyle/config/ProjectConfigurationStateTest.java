@@ -84,6 +84,42 @@ class ProjectConfigurationStateTest {
         assertThat(resolvedByteCountOf(deserialisedCanonical, checkstyleClassLoader), is(resolvedByteCountOf(deserialisedCopy, checkstyleClassLoader)));
     }
 
+    @Test
+    void anUnsupportedPersistedCheckstyleVersionFallsBackToTheDefault() {
+        final ProjectConfigurationState.ProjectSettings settings = new ProjectConfigurationState.ProjectSettings();
+        settings.serialisationVersion = "2";
+        settings.checkstyleVersion = "not-a-real-version";
+
+        final PluginConfiguration result = settings.populate(
+                PluginConfigurationBuilder.testInstance(BUNDLED_VERSION), project).build();
+
+        assertThat(result.getCheckstyleVersion(), is(new VersionListReader().getDefaultVersion()));
+    }
+
+    @Test
+    void theLatestSentinelPersistedCheckstyleVersionIsPreserved() {
+        final ProjectConfigurationState.ProjectSettings settings = new ProjectConfigurationState.ProjectSettings();
+        settings.serialisationVersion = "2";
+        settings.checkstyleVersion = VersionListReader.LATEST_VERSION;
+
+        final PluginConfiguration result = settings.populate(
+                PluginConfigurationBuilder.testInstance(BUNDLED_VERSION), project).build();
+
+        assertThat(result.getCheckstyleVersion(), is(VersionListReader.LATEST_VERSION));
+    }
+
+    @Test
+    void aPersistedCheckstyleVersionWithAKnownReplacementIsRemapped() {
+        final ProjectConfigurationState.ProjectSettings settings = new ProjectConfigurationState.ProjectSettings();
+        settings.serialisationVersion = "2";
+        settings.checkstyleVersion = "10.26.0";
+
+        final PluginConfiguration result = settings.populate(
+                PluginConfigurationBuilder.testInstance(BUNDLED_VERSION), project).build();
+
+        assertThat(result.getCheckstyleVersion(), is(new VersionListReader().getReplacementMap().get("10.26.0")));
+    }
+
     private ClassLoader activatedCheckstyleClassLoader() {
         final CheckstyleProjectService checkstyleProjectService = new CheckstyleProjectService(project);
         checkstyleProjectService.activateCheckstyleVersion(BUNDLED_VERSION, null);
