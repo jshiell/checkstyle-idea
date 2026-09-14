@@ -14,45 +14,48 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 ./gradlew csaccessTest_cs_13.0.0  # Test specific Checkstyle version
 ```
 
-### Gradle needs to mount a DMG (the nono sandbox blocks it)
+### Gradle DMG/hdiutil: fixed for build/test/buildPlugin/runIde; verifyPlugin is the one exception
 
-On macOS the IntelliJ Platform plugin extracts `ideaIC-*.dmg` by running `hdiutil attach`. Under the `nono`
-sandbox this fails during dependency resolution with `Process 'command 'hdiutil'' finished with non-zero exit
-value 1` (`hdiutil: attach failed - Operation not permitted`).
+`build.gradle.kts`'s `intellijIdeaCommunity(...)` sets `useInstaller = false`. Confirmed by disassembling
+`intellij-platform-gradle-plugin-2.18.1.jar`: `IntelliJPlatformDependencyConfiguration.useInstaller` switches
+between the IDE installer (a `.dmg` on macOS, Maven coordinate group `idea`) and the plain archive (`.zip`,
+group `com.jetbrains.intellij.idea`) from the IntelliJ Maven repository. With it `false`, Gradle downloads and
+unpacks `ideaIC-<version>.zip` directly — no `hdiutil attach` at all. Verified 2026-09-14 entirely inside the
+`nono` sandbox: `./gradlew test` (781 + 75 csaccess tests), `buildPlugin`, and an actual `runIde` launch
+(Welcome Frame shown, AWT event loop running, no errors) all succeeded with zero `hdiutil` invocations.
 
-The cause is specifically that **`hdiutil` must create a mount point under `/Volumes`, and `/Volumes` is
-granted read-only**. Diagnose it with `nono why --path /Volumes --op write`. Beware: a profile granting
-`filesystem.allow: ["/Volumes"]` is *not* sufficient — the inherited `system_read_macos` group also covers
-`/Volumes` with read access and wins, so the capability list advertises `readwrite` while enforcement is
-read-only. Use `hdiutil imageinfo` to confirm the DMG itself is fine — it works under the sandbox and rules
-out corruption. `hdiutil attach -nomount` does **not** work despite needing no mount point: it checksums the
-image, then still fails with `attach failed - Operation not permitted`. Passing an explicit `-mountpoint`
-outside `/Volumes` fails the same way, so the block is on attaching at all, not on writing to `/Volumes`.
+**`verifyPlugin` still needs `hdiutil` and must run outside the sandbox.** It resolves its own IDEs
+independently of the main `intellijIdeaCommunity` dependency. Confirmed by disassembling
+`IntelliJPlatformExtension.PluginVerification.Ides`: `recommended()` / `defaultRecommended()` / `latest()` all
+route through `createInstallerDependencies(...)`, whose Kotlin default-args bridge hardcodes `useInstaller =
+true` (`iconst_1`) whenever the caller doesn't override it — there is no DSL knob on these convenience methods
+to change that. The only escape is replacing `recommended()` with explicit
+`ides { create(IntelliJPlatformType.IdeaCommunity, "<version>") { useInstaller = false } }` entries per version,
+which was rejected as too invasive (loses auto-tracking of base + next-major, needs a manual update every
+version bump). So `verifyPlugin` alone still hits the `.dmg` path below and needs a real terminal.
 
-Two things that do **not** get around this: the `dangerouslyDisableSandbox` tool flag (nono wraps the whole
-`claude` process, so the flag is irrelevant to it), and running `! ./gradlew …` from the prompt (that executes
-in the same session, inside the same sandbox). Re-extraction has to happen in a **real terminal outside
-Claude Code**; one `./gradlew build` there repopulates the cache and every later sandboxed build hits it.
+For `verifyPlugin`'s `.dmg` extraction: `hdiutil` must create a mount point under `/Volumes`, which advertises
+`readwrite` in the sandbox capability list but enforces read-only (the inherited `system_read_macos` group's
+read grant wins over an explicit `/Volumes` `readwrite` grant — `nono why --path /Volumes --op write`
+misreports this as allowed). `hdiutil imageinfo` confirms the DMG itself is fine; `hdiutil attach -nomount` and
+an explicit `-mountpoint` outside `/Volumes` fail the same way — the block is on attaching at all. Neither
+`dangerouslyDisableSandbox` nor running `! ./gradlew …` from the prompt gets around it (both still execute
+inside the same sandboxed `claude` process). Re-extraction has to happen in a **real terminal outside Claude
+Code**; one `./gradlew verifyPlugin` there repopulates the cache and every later sandboxed run of it hits that
+cache — the result lives in `~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a
+configuration-cache hit skips re-extraction. **A failed attempt wipes and recreates the transform's
+`transformed/` directory**, so every later run fails until an unsandboxed run re-extracts it.
 
-**A Gradle daemon started while sandboxed keeps failing the same way even after you exit the sandbox** — the
-daemon process outlives the sandbox lift and goes on serving the broken state. If the same `hdiutil` error
-recurs immediately after running the fix build in a real terminal, run `./gradlew --stop` before concluding
-the fix didn't work; that's the actual missing step, not a second permission problem.
-
-This only bites when the extraction has to run again — the result lives in
-`~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a configuration cache hit skips it.
-Adding a task option such as `--tests` misses that cache and triggers it, and so does a task set that has no
-cache entry yet. **A failed attempt wipes and recreates the transform's `transformed/` directory, so every
-later build fails until an unsandboxed `./gradlew build` re-extracts it.**
-
-**`buildSearchableOptions` can fail under a spawned subagent even when the top-level session succeeds
-on the identical task.** Observed once: a background `implementation` agent's `./gradlew build` failed
-at `buildSearchableOptions` with `FileAlreadyExistsException` writing to `~/Library/Application
-Support/JetBrains`, confirmed `DENIED` via `nono why --path ... --op write`; the exact same
-`./gradlew build` run from the top-level session moments later succeeded cleanly. Mechanism unconfirmed
-(possibly a narrower grant for spawned agents, possibly transient) — if only a subagent reports this
-specific failure, don't treat it as a real regression; re-run `./gradlew build` from the top-level
-session before concluding anything broke.
+**A Gradle daemon started before a sandbox profile grant change keeps enforcing the old Seatbelt profile for
+its child processes even after the grant is added — this bites more than just the `hdiutil` case above.**
+Observed 2026-09-14: after a new `~/Library/Application Support/JetBrains` read/write grant was added
+mid-session, `buildSearchableOptions` kept failing with `FileAlreadyExistsException` on that exact path
+(`java.nio.file.FileAlreadyExistsException` from `PathManager.getCommonDataPath`) until `./gradlew --stop` was
+run; the very next `buildPlugin` invocation then succeeded cleanly. This supersedes an earlier note here that
+attributed the identical failure to something subagent-specific and "mechanism unconfirmed" — it reproduced
+identically and repeatedly from the top-level session too, and the real cause was a missing sandbox grant plus
+a stale daemon, not anything about subagents. **Always run `./gradlew --stop` after any sandbox profile/grant
+change**, not only after repairing a poisoned DMG transform cache.
 
 Driving JUnit directly with `javac`, as a way to test without Gradle, **does not work for anything that
 extends `LightPlatformTestCase`** in 2024.3. The platform is split across `lib/modules/*.jar` v2 content

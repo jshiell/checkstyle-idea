@@ -125,7 +125,9 @@ tasks.named<JavaCompile>("compileGradleToolingJava") {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(libs.versions.intellij.idea.community.get())
+        intellijIdeaCommunity(libs.versions.intellij.idea.community.get()) {
+            useInstaller = false
+        }
 
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
