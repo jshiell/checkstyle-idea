@@ -17,6 +17,7 @@ _support/
 .intellijPlatform/
 /improvements.md
 /plan.md
+/plan-*.md
 /.classpath
 /.settings/
 /.project

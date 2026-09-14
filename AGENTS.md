@@ -106,6 +106,10 @@ behaviour (e.g. interrupting a caller thread from another thread). A pre-existin
 that helper thread will fail the test with `AssertionFailedError: N uncaught exceptions` instead of the
 assertion you meant to check — catch it explicitly inside the thread's `Runnable`.
 
+**Verifying a fix to a threading/listener/polling test:** a single green run proves little for this class of
+bug. After changing a test or the code it exercises for a race, ordering, or polling issue, rerun that test
+10x on its own before trusting it, in addition to the full-suite run already required before committing.
+
 **Services:** Registered in `plugin.xml`, accessed via `project.getService(...)`. Key: `CheckstyleProjectService`, `StaticScanner`.
 
 **Using a class from a v2 content module:** classes that live only in `lib/modules/*.jar` (e.g.
@@ -227,7 +231,10 @@ registered `Jar` task in the project to also embed `META-INF/plugin.xml`; `gradl
 4. Update CHANGELOG.md and, for a user-visible change, the `<change-notes>` block in `plugin.xml` — both are
    added under the **current** `version` from `build.gradle.kts`. This repo does not use an `Unreleased`
    heading; pending changes accumulate under that not-yet-tagged version until it is actually released
-   (`git tag` + push, per Release below).
+   (`git tag` + push, per Release below). Never add an entry under a version number that isn't already the
+   current `version` in `build.gradle.kts` — check that file first rather than guessing the next number.
+5. Planning for an issue produces a `plan-<issue>.md` file at repo root (gitignored via `/plan-*.md`, not
+   committed) — this is the working convention for `/plan-issue`-style sessions, not a build artifact.
 
 ## Known Non-Issues
 
