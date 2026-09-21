@@ -230,9 +230,60 @@ mode.
 
 ## Frequently Asked Questions
 
+### Which Java Version?
+
 If you're on OS X, use IDEA with the bundled JVM. Otherwise, please ensure IDEA is running using Java 11 or later.
 [Jetbrains offer a support document on this
 subject](https://intellij-support.jetbrains.com/entries/23455956-Selecting-the-JDK-version-the-IDE-will-run-under).
+
+### Why do some tests fail on Windows?
+
+Some tests assume Unix-style file paths (forward slashes, no drive letters), so a handful fails when run natively on
+Windows. CI runs on Linux, where they pass. To get the same result as CI on Windows, run the build in a Linux container
+with Docker (or from a WSL2 shell).
+
+Prerequisites: Docker Desktop is running, and your branch is pushed to GitHub (the container clones it from there, so it
+won't see local, unpushed commits).
+
+1. In an empty folder, create a file named `Dockerfile`:
+
+```dockerfile
+   FROM bellsoft/liberica-openjdk-debian:21
+
+   RUN apt-get update && apt-get install -y --no-install-recommends \
+         git ca-certificates fontconfig libfreetype6 libxext6 libxrender1 libxtst6 libxi6 \
+       && rm -rf /var/lib/apt/lists/*
+
+   ARG REPO=https://github.com/<yourGitHubHandle>/checkstyle-idea.git
+   ARG BRANCH=the/desired-branch
+
+   WORKDIR /work
+   RUN git clone --branch ${BRANCH} ${REPO} .
+
+   # Mirrors CI (`./gradlew build`). "|| true" lets the image build even if tests fail, so the reports survive.
+   RUN --mount=type=cache,target=/root/.gradle ./gradlew build --console=plain || true
+```
+
+2. Build it, pointing at your fork and branch (keep this on one line so it works in any shell):
+
+```
+   docker build --progress=plain --no-cache -t cs-tests --build-arg REPO=https://github.com/<your-handle>/checkstyle-idea.git --build-arg BRANCH=<your-branch> .
+```
+
+> `--no-cache` makes sure the latest commits are cloned. The first run can take up to ~20 minutes while the IDE
+> distribution downloads. Because of `|| true`, a successful `docker build` doesn't mean the tests passed, so check the
+> `BUILD SUCCESSFUL` / `BUILD FAILED` line near the end of the output, or the reports below.
+
+3. Copy the results out of the image:
+
+```
+   docker create --name cs-out cs-tests
+   docker cp cs-out:/work/build/reports ./cs-reports
+   docker cp cs-out:/work/build/test-results ./cs-test-results
+   docker rm cs-out
+```
+
+4. Open `cs-reports/tests/test/index.html` in a browser
 
 ## Limitations
 
