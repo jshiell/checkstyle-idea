@@ -4,26 +4,23 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.psi.PsiFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
-import com.intellij.psi.PsiFile;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
-import org.infernus.idea.checkstyle.config.ApplicationConfigurationState;
 import org.infernus.idea.checkstyle.config.ConfigurationListener;
+import org.infernus.idea.checkstyle.config.GlobalConfigurationLocations;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
-import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
-import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.model.ScanResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,13 +30,12 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.Objects;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
@@ -210,12 +206,21 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         configurationOverrideModel.removeAllElements();
         configurationOverrideModel.addElement(defaultOverride);
         configurationManager().getCurrent().getLocations().forEach(configurationOverrideModel::addElement);
-        globalConfigurationLocations().forEach(location -> {
+        addAvailableGlobalConfigurationLocations();
+        configurationOverrideModel.setSelectedItem(defaultOverride);
+    }
+
+
+    /**
+     * Offer every global location, active or not: like the project locations above, this picker is for
+     * choosing a one-off override, so it isn't limited to the locations that apply by default.
+     */
+    private void addAvailableGlobalConfigurationLocations() {
+        new GlobalConfigurationLocations(project).availableLocations().forEach(location -> {
             if (!containsById(location.getId())) {
                 configurationOverrideModel.addElement(location);
             }
         });
-        configurationOverrideModel.setSelectedItem(defaultOverride);
     }
 
     public void showToolWindow() {
@@ -482,49 +487,6 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         return treeBuilder.groupedBy();
     }
 
-    private List<ConfigurationLocation> globalConfigurationLocations() {
-        if (ApplicationManager.getApplication() == null) {
-            return List.of();
-        }
-        final ApplicationConfigurationState appState = ApplicationManager.getApplication().getService(ApplicationConfigurationState.class);
-        if (!appState.isUseGlobalRulesByDefault()) {
-            return List.of();
-        }
-        final ConfigurationLocationFactory locationFactory = project.getService(ConfigurationLocationFactory.class);
-        final List<ConfigurationLocation> locations = new ArrayList<>();
-        for (ApplicationConfigurationState.GlobalConfigurationLocation locationDto : appState.getGlobalLocations()) {
-            deserializeGlobalLocation(locationDto, locationFactory, locations);
-        }
-        return locations;
-    }
-
-    private void deserializeGlobalLocation(ApplicationConfigurationState.GlobalConfigurationLocation locationDto,
-                                           ConfigurationLocationFactory locationFactory,
-                                           List<ConfigurationLocation> locations) {
-        final ConfigurationType type = ConfigurationType.parse(locationDto.type);
-        if (type == null) {
-            return;
-        }
-        try {
-            final ConfigurationLocation globalLocation = locationFactory.create(
-                    project,
-                    locationDto.id,
-                    type,
-                    Objects.requireNonNullElse(locationDto.location, "").trim(),
-                    locationDto.description,
-                    null);
-            globalLocation.setNamedScope(NamedScopeHelper.getScopeByIdWithDefaultFallback(
-                    project,
-                    Objects.requireNonNullElse(locationDto.scope, NamedScopeHelper.DEFAULT_SCOPE_ID)));
-            if (locationDto.properties != null) {
-                globalLocation.setProperties(locationDto.properties);
-            }
-            locations.add(globalLocation);
-        } catch (Exception e) {
-            LOG.error("Failed to deserialize global location for tool window: " + locationDto, e);
-        }
-    }
-
     private boolean containsById(@NotNull final String locationId) {
         for (int i = 0; i < configurationOverrideModel.getSize(); i++) {
             final ConfigurationLocation location = configurationOverrideModel.getElementAt(i);
@@ -596,5 +558,3 @@ public class CheckStyleToolWindowPanel extends JPanel implements ConfigurationLi
         FORWARD, BACKWARD
     }
 }
-
-
