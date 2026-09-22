@@ -55,6 +55,19 @@ class GlobalLocationTableModelTest {
     }
 
     @Test
+    void setValueAtTrueOnAlreadyActiveRowKeepsItActive() {
+        GlobalLocationTableModel model = new GlobalLocationTableModel();
+        GlobalConfigurationLocation first = new GlobalConfigurationLocation("id-1", "LOCAL_FILE", "c:/a.xml", "A", "All");
+        model.setLocations(List.of(first), List.of("id-1"));
+
+        // Passing true on an already active row should NOT deactivate it
+        model.setValueAt(true, 0, 0);
+
+        assertTrue((Boolean) model.getValueAt(0, 0));
+        assertEquals(List.of("id-1"), model.getActiveIds());
+    }
+
+    @Test
     void updateLocationAtMovesActiveIdToUpdatedLocationId() {
         GlobalLocationTableModel model = new GlobalLocationTableModel();
         GlobalConfigurationLocation original = new GlobalConfigurationLocation("id-1", "LOCAL_FILE", "c:/a.xml", "A", "All");

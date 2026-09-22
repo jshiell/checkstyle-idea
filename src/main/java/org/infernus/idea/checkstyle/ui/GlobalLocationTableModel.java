@@ -110,18 +110,29 @@ public class GlobalLocationTableModel extends AbstractTableModel {
         return columnIndex == COLUMN_ACTIVE;
     }
 
+    /**
+     * Sets the value at the specified cell in the table model.
+     * <p>
+     * Only the {@code COLUMN_ACTIVE} column is editable. Updating this cell toggles
+     * the active state of the {@link GlobalConfigurationLocation} at the given row by
+     * adding or removing its identifier from the active set. A table cell update event
+     * is fired if the active state changes.
+     *
+     * @param aValue      the new value to set, typically a {@link Boolean} indicating whether the location is active
+     * @param rowIndex    the row index of the location being updated
+     * @param columnIndex the column index of the cell being edited (must be {@code COLUMN_ACTIVE})
+     * @throws IllegalArgumentException  if {@code columnIndex} is not {@code COLUMN_ACTIVE}
+     * @throws IndexOutOfBoundsException if {@code rowIndex} is out of bounds
+     */
     @Override
     public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-        if (columnIndex == COLUMN_ACTIVE) {
-            final String id = locations.get(rowIndex).id;
-            if (activeIds.contains(id)) {
-                activeIds.remove(id);
-            } else {
-                activeIds.add(id);
-            }
-            fireTableCellUpdated(rowIndex, COLUMN_ACTIVE);
-        } else {
+        if (columnIndex != COLUMN_ACTIVE) {
             throw new IllegalArgumentException("Column is not editable: " + columnIndex);
+        }
+        final String id = locations.get(rowIndex).id;
+        final boolean changed = Boolean.TRUE.equals(aValue) ? activeIds.add(id) : activeIds.remove(id);
+        if (changed) {
+            fireTableCellUpdated(rowIndex, COLUMN_ACTIVE);
         }
     }
 
