@@ -1,6 +1,11 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.19.0** Fixed: A `PROJECT_RELATIVE` Checkstyle configuration location's stored path could be
+  corrupted — a path segment repeatedly duplicated, or `$PROJECT_DIR$` replaced outright by a
+  machine-specific absolute path — because the plugin's own path tokenisation used a different, less
+  stable notion of "the project directory" than the one the IDE itself uses to expand and collapse
+  `$PROJECT_DIR$` in persisted settings, most visible in multi-module Gradle projects (#708).
 * **26.19.0** New: Added support for global configuration settings, which apply across all projects (#707). Thanks to @alexBlakeGoudemond.
 * **26.18.2** Fixed: Downloading a non-bundled Checkstyle version now honours a `<localRepository>` override in the user's Maven `settings.xml`, instead of always caching to `~/.m2/repository` (#706).
 * **26.18.2** Fixed: The plugin could end up configured with a Checkstyle version it doesn't support — inherited from `maven-checkstyle-plugin`'s own default, from an explicit Maven dependency override, or from a stale/hand-edited persisted setting — which always failed downloading with "No manifest entry found" and never appeared in the version dropdown. An unsupported version is now rejected at both the Maven import and the settings-load stage, falling back to the current or default version instead (#705).
