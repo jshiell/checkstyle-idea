@@ -5,6 +5,13 @@ import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.model.BundledConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
+import org.infernus.idea.checkstyle.model.ConfigurationType;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class LocationPanelTest extends LightPlatformTestCase {
 
@@ -46,5 +53,30 @@ public class LocationPanelTest extends LightPlatformTestCase {
         assertTrue("built-in radio should be selected", panel.builtInLocationRadio().isSelected());
         assertEquals(BundledConfig.GOOGLE_CHECKS, panel.builtInComboBox().getSelectedItem());
         assertEquals("Existing Custom Description", panel.descriptionField().getText());
+    }
+
+    public void testApplyChangesToDoesNotRewriteAnUnmodifiedFileLocation() {
+        final ConfigurationLocation location = mock(ConfigurationLocation.class);
+        when(location.getType()).thenReturn(ConfigurationType.PROJECT_RELATIVE);
+        when(location.getLocation()).thenReturn("/absolute/path/to/rules.xml");
+        when(location.getDescription()).thenReturn("aDescription");
+
+        panel.setConfigurationLocation(location);
+        panel.applyChangesTo(location);
+
+        verify(location, never()).setLocation(any());
+    }
+
+    public void testApplyChangesToStillAppliesAGenuinelyChangedFileLocation() {
+        final ConfigurationLocation location = mock(ConfigurationLocation.class);
+        when(location.getType()).thenReturn(ConfigurationType.PROJECT_RELATIVE);
+        when(location.getLocation()).thenReturn("/absolute/path/to/rules.xml");
+        when(location.getDescription()).thenReturn("aDescription");
+
+        panel.setConfigurationLocation(location);
+        panel.fileLocationField().setText("/absolute/path/to/another-rules.xml");
+        panel.applyChangesTo(location);
+
+        verify(location).setLocation("/absolute/path/to/another-rules.xml");
     }
 }

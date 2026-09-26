@@ -62,6 +62,8 @@ public class LocationPanel extends JPanel {
 
     private final Project project;
 
+    private String originalLocationText;
+
     public LocationPanel(final Project project) {
         super(new GridBagLayout());
 
@@ -365,11 +367,13 @@ public class LocationPanel extends JPanel {
             fileLocationField.setText(null);
             enabledLocation(FILE);
             descriptionField.setText(null);
+            originalLocationText = null;
 
         } else if (configurationLocation.getType() == LOCAL_FILE
                 || configurationLocation.getType() == PROJECT_RELATIVE) {
             fileLocationRadio.setSelected(true);
-            fileLocationField.setText(configurationLocation.getLocation());
+            originalLocationText = configurationLocation.getLocation();
+            fileLocationField.setText(originalLocationText);
             relativeFileCheckbox.setSelected(configurationLocation.getType() == PROJECT_RELATIVE);
             enabledLocation(FILE);
             descriptionField.setText(configurationLocation.getDescription());
@@ -377,14 +381,16 @@ public class LocationPanel extends JPanel {
         } else if (configurationLocation.getType() == HTTP_URL
                 || configurationLocation.getType() == INSECURE_HTTP_URL) {
             urlLocationRadio.setSelected(true);
-            urlLocationField.setText(configurationLocation.getLocation());
+            originalLocationText = configurationLocation.getLocation();
+            urlLocationField.setText(originalLocationText);
             insecureHttpCheckbox.setSelected(configurationLocation.getType() == INSECURE_HTTP_URL);
             enabledLocation(HTTP);
             descriptionField.setText(configurationLocation.getDescription());
 
         } else if (configurationLocation.getType() == PLUGIN_CLASSPATH) {
             classpathLocationRadio.setSelected(true);
-            classpathLocationField.setText(configurationLocation.getLocation());
+            originalLocationText = configurationLocation.getLocation();
+            classpathLocationField.setText(originalLocationText);
             enabledLocation(CLASSPATH);
             descriptionField.setText(configurationLocation.getDescription());
 
@@ -393,6 +399,7 @@ public class LocationPanel extends JPanel {
             builtInComboBox.setSelectedItem(((BundledConfigurationLocation) configurationLocation).getBundledConfig());
             enabledLocation(BUILT_IN);
             descriptionField.setText(configurationLocation.getDescription());
+            originalLocationText = null;
 
         } else {
             throw new IllegalArgumentException("Unsupported configuration type: " + configurationLocation.getType());
@@ -416,13 +423,17 @@ public class LocationPanel extends JPanel {
      */
     public void applyChangesTo(final ConfigurationLocation location) {
         location.setDescription(descriptionField.getText());
-        if (fileLocationField.isEnabled() && isNotBlank(fileLocation())) {
+        if (fileLocationField.isEnabled() && isNotBlank(fileLocation()) && hasLocationChanged(fileLocation())) {
             location.setLocation(fileLocation());
-        } else if (urlLocationField.isEnabled() && isNotBlank(urlLocation())) {
+        } else if (urlLocationField.isEnabled() && isNotBlank(urlLocation()) && hasLocationChanged(urlLocation())) {
             location.setLocation(urlLocation());
-        } else if (classpathLocationField.isEnabled() && isNotBlank(classpathLocation())) {
+        } else if (classpathLocationField.isEnabled() && isNotBlank(classpathLocation()) && hasLocationChanged(classpathLocation())) {
             location.setLocation(classpathLocation());
         }
+    }
+
+    private boolean hasLocationChanged(final String newLocationText) {
+        return !newLocationText.equals(originalLocationText);
     }
 
     JRadioButton builtInLocationRadio() {
@@ -435,6 +446,10 @@ public class LocationPanel extends JPanel {
 
     JTextField descriptionField() {
         return descriptionField;
+    }
+
+    JTextField fileLocationField() {
+        return fileLocationField;
     }
 
     private final class BrowseAction extends AbstractAction {
