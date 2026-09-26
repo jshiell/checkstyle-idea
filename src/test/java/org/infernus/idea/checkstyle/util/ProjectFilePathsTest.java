@@ -111,6 +111,22 @@ public class ProjectFilePathsTest {
         assertThat(reloaded, is(equalTo("$PROJECT_DIR$/../another-project/rules.xml")));
     }
 
+    @Test
+    public void repeatedLoadCyclesNeverGrowTheStoredLocationOnceBothStepsShareOneAnchor() {
+        // Models N cycles of "platform expands $PROJECT_DIR$ (anchor = the project's stable base path),
+        // then the plugin re-tokenises via ProjectFilePaths (now the SAME anchor, post #708 fix)":
+        // detokenise -> makeProjectRelative -> tokenise, repeated, must reach a fixed point after one cycle.
+        String current = "$PROJECT_DIR$/mim-tests/rules.xml";
+        for (int cycle = 0; cycle < 5; cycle++) {
+            final String expanded = underTest.detokenise(current);
+            final String retokenised = underTest.tokenise(underTest.makeProjectRelative(expanded));
+            assertThat("cycle " + cycle + " must not drift from the previous value",
+                    retokenised, is(equalTo(current)));
+            current = retokenised;
+        }
+        assertThat(current, is(equalTo("$PROJECT_DIR$/mim-tests/rules.xml")));
+    }
+
     private ProjectFilePaths projectFilePathsForUnix() {
         Project project = mock(Project.class);
         VirtualFile projectBaseFile = mock(VirtualFile.class);

@@ -11,10 +11,22 @@ import org.jetbrains.annotations.Nullable;
 
 public class ProjectPaths {
 
+    /**
+     * Anchored to {@link Project#getBasePath()} rather than {@link ProjectUtil#guessProjectDir}: the
+     * platform's own automatic $PROJECT_DIR$ macro substitution (which runs unconditionally over this
+     * plugin's persisted XML on every load/save, independently of {@link ProjectFilePaths}'s own
+     * tokenise/detokenise) is anchored to the project's base path too. guessProjectDir()'s "normal" path
+     * instead derives from every module's content roots in the workspace model; if any of them is an
+     * ancestor of the true project directory (e.g. a composite-build/settings-root pseudo-module), that
+     * silently diverges from the platform's anchor and corrupts persisted PROJECT_RELATIVE paths (#708).
+     */
     @Nullable
     public VirtualFile projectPath(@NotNull final Project project) {
-        // workaround to allow testing with Jetbrain's love of static shite
-        return ProjectUtil.guessProjectDir(project);
+        final String basePath = project.getBasePath();
+        if (basePath == null) {
+            return null;
+        }
+        return LocalFileSystem.getInstance().findFileByPath(basePath);
     }
 
     @Nullable

@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.config;
 
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.testFramework.ServiceContainerUtil;
@@ -13,6 +15,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
+import org.jetbrains.annotations.NotNull;
 
 public class ConventionalConfigurationLocationScannerTest extends BasePlatformTestCase {
 
@@ -22,6 +25,21 @@ public class ConventionalConfigurationLocationScannerTest extends BasePlatformTe
         // The light project fixture is reused across test methods, so PluginConfigurationManager's
         // state (including anything a previous test's rescan() added) otherwise leaks between tests.
         configManager().setCurrent(PluginConfigurationBuilder.defaultConfiguration(getProject()).build(), false);
+
+        // #708 anchored the real ProjectPaths.projectPath() to Project#getBasePath(), which is correct
+        // for a real IDE project but stale here: this light project fixture is reused across every test
+        // method in this class, and the on-disk temp directory backing getBasePath() is torn down after
+        // the first method that runs, so getBasePath() dangles for every subsequent one. guessProjectDir()
+        // still resolves to this fixture's actual (still-live) in-memory VFS root - the same directory
+        // myFixture.addFileToProject() writes into - throughout the class's lifetime, so give this test
+        // its own stable ProjectPaths anchored there instead of exercising the fixture-reuse quirk.
+        final VirtualFile stableProjectDir = ProjectUtil.guessProjectDir(getProject());
+        ServiceContainerUtil.replaceService(getProject(), ProjectPaths.class, new ProjectPaths() {
+            @Override
+            public VirtualFile projectPath(final @NotNull Project project) {
+                return stableProjectDir;
+            }
+        }, getTestRootDisposable());
     }
 
     private PluginConfigurationManager configManager() {
