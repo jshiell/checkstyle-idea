@@ -22,7 +22,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,6 +122,31 @@ public class RelativeFileConfigurationLocationTest {
 
         assertThat(loc.getRawLocation(),
                 is(equalTo("$PROJECT_DIR$/codingstyle/etc/checkstyle.xml")));
+    }
+
+    @Test
+    public void cloningDoesNotRederiveTheRawLocation() {
+        ProjectPaths projectPaths = mock(ProjectPaths.class);
+        VirtualFile base = mock(VirtualFile.class);
+        when(base.getPath()).thenReturn("/the/base");
+        when(projectPaths.projectPath(any())).thenReturn(base);
+
+        Project mockProject = TestHelper.mockProject();
+        ProjectFilePaths filePaths = ProjectFilePaths.testInstanceWith(mockProject, '/',
+                file -> FilenameUtils.separatorsToUnix(file.getPath()), projectPaths);
+        when(mockProject.getService(ProjectFilePaths.class)).thenReturn(filePaths);
+
+        RelativeFileConfigurationLocation original =
+                new RelativeFileConfigurationLocation(mockProject, UUID.randomUUID().toString());
+        original.setLocation("/the/base/mim-tests/rules.xml");
+        assertThat(original.getRawLocation(), is(equalTo("$PROJECT_DIR$/mim-tests/rules.xml")));
+
+        clearInvocations(projectPaths);
+
+        RelativeFileConfigurationLocation cloned = (RelativeFileConfigurationLocation) original.clone();
+
+        verify(projectPaths, never()).projectPath(any());
+        assertThat(cloned.getRawLocation(), is(equalTo("$PROJECT_DIR$/mim-tests/rules.xml")));
     }
 
 }

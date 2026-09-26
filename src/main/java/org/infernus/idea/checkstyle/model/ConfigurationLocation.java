@@ -502,8 +502,11 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     public abstract Object clone();
 
     ConfigurationLocation cloneCommonPropertiesTo(final ConfigurationLocation cloned) {
+        // Copies the stored value directly rather than round-tripping through getLocation()/setLocation():
+        // that round trip re-resolves the project base directory, and a clone must reproduce the original
+        // exactly, not recompute it (#708).
+        cloned.location = this.location;
         cloned.setDescription(getDescription());
-        cloned.setLocation(getLocation());
         cloned.setProperties(new HashMap<>(getProperties()));
         cloned.setNamedScope(getNamedScope().orElse(NamedScopeHelper.getDefaultScope(project)));
         return cloned;
