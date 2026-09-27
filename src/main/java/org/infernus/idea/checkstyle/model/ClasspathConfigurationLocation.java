@@ -1,9 +1,11 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +27,12 @@ public class ClasspathConfigurationLocation extends ConfigurationLocation {
     ClasspathConfigurationLocation(@NotNull final Project project,
                                    @NotNull final String id) {
         super(id, ConfigurationType.PLUGIN_CLASSPATH, project);
+    }
+
+    ClasspathConfigurationLocation(@NotNull final Project project,
+                                   @NotNull final String id,
+                                   @Nullable final Disposable disposableParent) {
+        super(id, ConfigurationType.PLUGIN_CLASSPATH, project, disposableParent);
     }
 
     @NotNull

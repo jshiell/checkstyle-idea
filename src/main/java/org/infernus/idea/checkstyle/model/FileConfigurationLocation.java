@@ -1,5 +1,6 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -38,6 +39,19 @@ public class FileConfigurationLocation extends ConfigurationLocation {
                               @NotNull final String id,
                               @NotNull final ConfigurationType configurationType) {
         super(id, configurationType, project);
+    }
+
+    FileConfigurationLocation(@NotNull final Project project,
+                              @NotNull final String id,
+                              @Nullable final Disposable disposableParent) {
+        this(project, id, ConfigurationType.LOCAL_FILE, disposableParent);
+    }
+
+    FileConfigurationLocation(@NotNull final Project project,
+                              @NotNull final String id,
+                              @NotNull final ConfigurationType configurationType,
+                              @Nullable final Disposable disposableParent) {
+        super(id, configurationType, project, disposableParent);
     }
 
     @Override

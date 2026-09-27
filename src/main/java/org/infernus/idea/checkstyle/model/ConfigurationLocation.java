@@ -72,18 +72,31 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
     public ConfigurationLocation(@NotNull final String id,
                                  @NotNull final ConfigurationType type,
                                  @NotNull final Project project) {
+        this(id, type, project, null);
+    }
+
+    /**
+     * As {@link #ConfigurationLocation(String, ConfigurationType, Project)}, but the scope-change listeners
+     * are parented to {@code disposableParent} instead of the project's shared {@link CheckerFactoryCache},
+     * so they are torn down with a caller-owned lifetime (e.g. a dialogue) rather than for the life of the
+     * project. Passing {@code null} reproduces the original behaviour exactly.
+     */
+    ConfigurationLocation(@NotNull final String id,
+                          @NotNull final ConfigurationType type,
+                          @NotNull final Project project,
+                          @Nullable final Disposable disposableParent) {
         this.id = id;
         this.type = type;
         this.project = project;
         this.namedScope = NamedScopeHelper.getDefaultScope(project);
-        this.initializeFutureScopeChangeHandling();
+        this.initializeFutureScopeChangeHandling(disposableParent);
     }
 
     /**
      * Refreshes the named scope if the scopes have been changed.
      */
-    private void initializeFutureScopeChangeHandling() {
-        Disposable parent = project.getService(CheckerFactoryCache.class);
+    private void initializeFutureScopeChangeHandling(@Nullable final Disposable disposableParent) {
+        Disposable parent = disposableParent != null ? disposableParent : project.getService(CheckerFactoryCache.class);
         NamedScopeManager.getInstance(project).addScopeListener(this::scopeChanged, parent);
         DependencyValidationManager.getInstance(project).addScopeListener(this::scopeChanged, parent);
     }

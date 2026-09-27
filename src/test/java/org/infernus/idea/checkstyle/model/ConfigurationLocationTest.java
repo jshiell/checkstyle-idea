@@ -1,11 +1,18 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.packageDependencies.DependencyValidationManager;
+import com.intellij.psi.search.scope.packageSet.InvalidPackageSet;
+import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.psi.search.scope.packageSet.NamedScopeManager;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.checker.CheckerFactoryCache;
 import org.infernus.idea.checkstyle.config.Descriptor;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.infernus.idea.checkstyle.util.ProjectFilePaths;
@@ -24,6 +31,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static java.lang.String.format;
+import static org.infernus.idea.checkstyle.model.NamedScopeHelper.DEFAULT_SCOPE_ID;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
@@ -219,6 +227,36 @@ public class ConfigurationLocationTest {
     }
 
     @Test
+    public void aSuppliedDisposableParentStopsReceivingScopeChangesOnceDisposed() {
+        final DependencyValidationManager dependencyValidationManager = mock(DependencyValidationManager.class);
+        final NamedScope initialScope = new NamedScope("myScope", new InvalidPackageSet("initial"));
+        when(dependencyValidationManager.getScope(DEFAULT_SCOPE_ID)).thenReturn(initialScope);
+
+        final Project project = mock(Project.class);
+        when(project.getService(CheckerFactoryCache.class)).thenReturn(new CheckerFactoryCache());
+        when(project.getService(NamedScopeManager.class)).thenReturn(new NamedScopeManager(project));
+        when(project.getService(DependencyValidationManager.class)).thenReturn(dependencyValidationManager);
+
+        final Disposable disposableParent = Disposer.newDisposable();
+        final TestConfigurationLocation location = new TestConfigurationLocation("aLocation", project, disposableParent);
+        location.setNamedScope(initialScope);
+
+        final NamedScope scopeAfterFirstChange = new NamedScope("myScope", new InvalidPackageSet("after-first-change"));
+        when(dependencyValidationManager.getScope("myScope")).thenReturn(scopeAfterFirstChange);
+        NamedScopeManager.getInstance(project).fireScopeListeners();
+        assertThat(location.getNamedScope(), is(Optional.of(scopeAfterFirstChange)));
+
+        Disposer.dispose(disposableParent);
+
+        final NamedScope scopeAfterDisposal = new NamedScope("myScope", new InvalidPackageSet("after-disposal"));
+        when(dependencyValidationManager.getScope("myScope")).thenReturn(scopeAfterDisposal);
+        NamedScopeManager.getInstance(project).fireScopeListeners();
+
+        assertThat("scope change after disposal must not reach a disposed parent",
+                location.getNamedScope(), is(Optional.of(scopeAfterFirstChange)));
+    }
+
+    @Test
     public void checkModuleFileResolvesEachModuleAgainstItsOwnDirectory(@TempDir final Path moduleOneDir,
                                                                         @TempDir final Path moduleTwoDir) throws IOException {
         final String fileName = "csidea-test-fixture-537.xml";
@@ -305,6 +343,12 @@ public class ConfigurationLocationTest {
 
             setLocation(content);
             setNamedScope(TestHelper.NAMED_SCOPE);
+        }
+
+        TestConfigurationLocation(final String content, final Project project, final Disposable disposableParent) {
+            super("anId", ConfigurationType.LOCAL_FILE, project, disposableParent);
+
+            setLocation(content);
         }
 
         @NotNull

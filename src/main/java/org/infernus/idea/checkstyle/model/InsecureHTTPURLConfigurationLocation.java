@@ -1,7 +1,9 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -22,6 +24,12 @@ public class InsecureHTTPURLConfigurationLocation extends HTTPURLConfigurationLo
     public InsecureHTTPURLConfigurationLocation(@NotNull final Project project,
                                  @NotNull final String id) {
         super(id, ConfigurationType.INSECURE_HTTP_URL, project);
+    }
+
+    InsecureHTTPURLConfigurationLocation(@NotNull final Project project,
+                                 @NotNull final String id,
+                                 @Nullable final Disposable disposableParent) {
+        super(id, ConfigurationType.INSECURE_HTTP_URL, project, disposableParent);
     }
 
     @Override

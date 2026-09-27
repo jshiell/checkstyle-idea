@@ -1,9 +1,11 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -38,6 +40,26 @@ public class ConfigurationLocationFactory {
                                                  final String location,
                                                  final String description,
                                                  final NamedScope namedScope) {
+        return create(project, id, type, location, description, namedScope, null);
+    }
+
+    /**
+     * As {@link #create(Project, String, ConfigurationType, String, String, NamedScope)}, but a freshly
+     * constructed {@code LOCAL_FILE}, {@code HTTP_URL}, {@code INSECURE_HTTP_URL} or {@code PLUGIN_CLASSPATH}
+     * location's scope-change listeners are parented to {@code disposableParent} rather than the project's
+     * shared {@code CheckerFactoryCache}. Ignored for other types, and for a location returned from the
+     * instance cache instead of freshly constructed. Passing {@code null} reproduces the original behaviour.
+     *
+     * @param disposableParent the disposable to parent scope-change listeners to, or {@code null}.
+     * @return the location.
+     */
+    public @NotNull ConfigurationLocation create(final Project project,
+                                                 final String id,
+                                                 final ConfigurationType type,
+                                                 final String location,
+                                                 final String description,
+                                                 final NamedScope namedScope,
+                                                 @Nullable final Disposable disposableParent) {
         if (type == null) {
             throw new IllegalArgumentException("Type is required");
         }
@@ -46,7 +68,7 @@ public class ConfigurationLocationFactory {
 
         switch (type) {
             case LOCAL_FILE:
-                configurationLocation = new FileConfigurationLocation(project, id);
+                configurationLocation = new FileConfigurationLocation(project, id, disposableParent);
                 break;
 
             case PROJECT_RELATIVE:
@@ -54,15 +76,15 @@ public class ConfigurationLocationFactory {
                 break;
 
             case HTTP_URL:
-                configurationLocation = new HTTPURLConfigurationLocation(project, id);
+                configurationLocation = new HTTPURLConfigurationLocation(project, id, disposableParent);
                 break;
 
             case INSECURE_HTTP_URL:
-                configurationLocation = new InsecureHTTPURLConfigurationLocation(project, id);
+                configurationLocation = new InsecureHTTPURLConfigurationLocation(project, id, disposableParent);
                 break;
 
             case PLUGIN_CLASSPATH:
-                configurationLocation = new ClasspathConfigurationLocation(project, id);
+                configurationLocation = new ClasspathConfigurationLocation(project, id, disposableParent);
                 break;
 
             case BUNDLED:

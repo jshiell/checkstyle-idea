@@ -1,9 +1,11 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLException;
 import java.io.BufferedInputStream;
@@ -58,6 +60,19 @@ public class HTTPURLConfigurationLocation extends ConfigurationLocation {
                                  @NotNull final ConfigurationType configurationType,
                                  @NotNull final Project project) {
         super(id, configurationType, project);
+    }
+
+    HTTPURLConfigurationLocation(@NotNull final Project project,
+                                 @NotNull final String id,
+                                 @Nullable final Disposable disposableParent) {
+        this(id, ConfigurationType.HTTP_URL, project, disposableParent);
+    }
+
+    HTTPURLConfigurationLocation(@NotNull final String id,
+                                 @NotNull final ConfigurationType configurationType,
+                                 @NotNull final Project project,
+                                 @Nullable final Disposable disposableParent) {
+        super(id, configurationType, project, disposableParent);
     }
 
     @NotNull
