@@ -1,11 +1,77 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.TestDialog;
+import com.intellij.openapi.ui.TestDialogManager;
 import com.intellij.testFramework.LightPlatformTestCase;
+import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 
 public class GlobalLocationDialogueTest extends LightPlatformTestCase {
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        TestDialogManager.setTestDialog(TestDialog.OK, getTestRootDisposable());
+    }
+
+    public void testPreviousButtonIsDisabledOnTheOnlySelectStep() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+        try {
+            assertFalse(dialogue.previousButton().isEnabled());
+        } finally {
+            dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+        }
+    }
+
+    public void testCommitButtonIsLabelledFinish() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+        try {
+            assertEquals(CheckStyleBundle.message("config.file.okay.text"), dialogue.commitButton().getText());
+        } finally {
+            dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+        }
+    }
+
+    public void testCommittingWithAValidLocationAndDescriptionClosesTheDialogueWithOk() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+        dialogue.fileLocationField().setText("/path/to/rules.xml");
+        dialogue.descriptionField().setText("My Rules");
+
+        dialogue.commitButton().doClick();
+
+        assertTrue(dialogue.isOK());
+        final GlobalConfigurationLocation location = dialogue.getGlobalConfigurationLocation();
+        assertEquals("/path/to/rules.xml", location.location);
+        assertEquals("My Rules", location.description);
+    }
+
+    public void testCommittingWithABlankLocationDoesNotCloseTheDialogue() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+        try {
+            dialogue.descriptionField().setText("My Rules");
+
+            dialogue.commitButton().doClick();
+
+            assertFalse(dialogue.isOK());
+        } finally {
+            dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+        }
+    }
+
+    public void testCommittingWithABlankDescriptionDoesNotCloseTheDialogue() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
+        try {
+            dialogue.fileLocationField().setText("/path/to/rules.xml");
+
+            dialogue.commitButton().doClick();
+
+            assertFalse(dialogue.isOK());
+        } finally {
+            dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+        }
+    }
 
     public void testFileRadioIsSelectedByDefaultForANewLocation() {
         final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);

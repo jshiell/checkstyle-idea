@@ -5,10 +5,12 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
+import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -56,6 +59,9 @@ public class GlobalLocationDialogue extends DialogWrapper {
     private final JTextField descriptionField = new JTextField(40);
     private final ComboBox<String> scopeCombo = new ComboBox<>();
 
+    private final JButton commitButton = new JButton();
+    private final JButton previousButton = new JButton(CheckStyleBundle.message("config.file.previous.text"));
+
     @Nullable
     private final GlobalConfigurationLocation existingLocation;
 
@@ -67,7 +73,63 @@ public class GlobalLocationDialogue extends DialogWrapper {
                 : CheckStyleBundle.message("config.file.edit.title"));
         setSize(WIDTH, MIN_HEIGHT);
         initialiseRadios();
+        initialiseWizardButtons();
         init();
+    }
+
+    private void initialiseWizardButtons() {
+        commitButton.setText(CheckStyleBundle.message("config.file.okay.text"));
+        commitButton.setToolTipText(CheckStyleBundle.message("config.file.okay.tooltip"));
+        commitButton.addActionListener(this::onCommit);
+
+        previousButton.setToolTipText(CheckStyleBundle.message("config.file.previous.tooltip"));
+        previousButton.setEnabled(false);
+    }
+
+    @Override
+    protected JComponent createSouthPanel() {
+        final JPanel bottomPanel = new JPanel(new GridBagLayout());
+        bottomPanel.setBorder(JBUI.Borders.empty(4, 8, 8, 8));
+        final Insets insets = JBUI.insets(4);
+
+        final JButton cancelButton = new JButton(getCancelAction());
+
+        if (SystemInfoRt.isMac) {
+            bottomPanel.add(cancelButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+            bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        } else {
+            bottomPanel.add(Box.createHorizontalGlue(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+            bottomPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+        }
+        bottomPanel.add(previousButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0));
+        bottomPanel.add(commitButton, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0));
+
+        return bottomPanel;
+    }
+
+    private void onCommit(final ActionEvent event) {
+        commitButton.setEnabled(false);
+
+        if (selectedLocationText().isBlank()) {
+            showValidationError(CheckStyleBundle.message("config.file.no-file"));
+            return;
+        }
+        if (descriptionField.getText().isBlank()) {
+            showValidationError(CheckStyleBundle.message("config.file.no-description"));
+            return;
+        }
+        close(OK_EXIT_CODE);
+    }
+
+    private void showValidationError(final String message) {
+        Messages.showErrorDialog(getContentPanel(), message, CheckStyleBundle.message("config.file.error.title"));
+        commitButton.setEnabled(true);
     }
 
     private void initialiseRadios() {
@@ -231,25 +293,6 @@ public class GlobalLocationDialogue extends DialogWrapper {
         scopeCombo.setSelectedItem(scope);
     }
 
-    @Override
-    protected void doOKAction() {
-        if (selectedLocationText().isBlank()) {
-            Messages.showErrorDialog(
-                    getContentPanel(),
-                    CheckStyleBundle.message("config.file.no-file"),
-                    CheckStyleBundle.message("config.file.error.title"));
-            return;
-        }
-        if (descriptionField.getText().isBlank()) {
-            Messages.showErrorDialog(
-                    getContentPanel(),
-                    CheckStyleBundle.message("config.file.no-description"),
-                    CheckStyleBundle.message("config.file.error.title"));
-            return;
-        }
-        super.doOKAction();
-    }
-
     private ConfigurationType selectedType() {
         if (urlLocationRadio.isSelected()) {
             return insecureHttpCheckbox.isSelected() ? ConfigurationType.INSECURE_HTTP_URL : ConfigurationType.HTTP_URL;
@@ -333,6 +376,16 @@ public class GlobalLocationDialogue extends DialogWrapper {
     @NotNull
     ComboBox<String> scopeCombo() {
         return scopeCombo;
+    }
+
+    @NotNull
+    JButton commitButton() {
+        return commitButton;
+    }
+
+    @NotNull
+    JButton previousButton() {
+        return previousButton;
     }
 
     private void initialiseScopeChoices() {
