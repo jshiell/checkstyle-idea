@@ -1,10 +1,13 @@
 package org.infernus.idea.checkstyle.ui;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -12,7 +15,11 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import com.intellij.util.ui.JBUI;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
+import org.infernus.idea.checkstyle.CheckstyleProjectService;
+import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +28,10 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -62,12 +72,35 @@ public class GlobalLocationDialogue extends DialogWrapper {
     private final JButton commitButton = new JButton();
     private final JButton previousButton = new JButton(CheckStyleBundle.message("config.file.previous.text"));
 
+    private final JPanel centrePanel = new JPanel(new BorderLayout());
+
+    private enum Step {
+        SELECT, PROPERTIES
+    }
+
+    private Step currentStep = Step.SELECT;
+
+    private JPanel selectPanel;
+    private PropertiesPanel propertiesPanel;
+
     @Nullable
     private final GlobalConfigurationLocation existingLocation;
 
+    private final Project borrowedProject;
+    private final String id;
+
     public GlobalLocationDialogue(@Nullable final GlobalConfigurationLocation existing) {
+        this(existing, borrowedProject());
+    }
+
+    GlobalLocationDialogue(@Nullable final GlobalConfigurationLocation existing,
+                          @NotNull final Project borrowedProject) {
         super(true);
         this.existingLocation = existing;
+        this.borrowedProject = borrowedProject;
+        this.id = (existingLocation != null && existingLocation.id != null)
+                ? existingLocation.id
+                : UUID.randomUUID().toString();
         setTitle(existing == null
                 ? CheckStyleBundle.message("config.file.add.title")
                 : CheckStyleBundle.message("config.file.edit.title"));
@@ -77,13 +110,47 @@ public class GlobalLocationDialogue extends DialogWrapper {
         init();
     }
 
+    @NotNull
+    private static Project borrowedProject() {
+        final ProjectManager projectManager = ProjectManager.getInstanceIfCreated();
+        if (projectManager != null) {
+            final Project[] openProjects = projectManager.getOpenProjects();
+            if (openProjects.length > 0) {
+                return openProjects[0];
+            }
+        }
+        return ProjectManager.getInstance().getDefaultProject();
+    }
+
     private void initialiseWizardButtons() {
-        commitButton.setText(CheckStyleBundle.message("config.file.okay.text"));
-        commitButton.setToolTipText(CheckStyleBundle.message("config.file.okay.tooltip"));
+        commitButton.setText(CheckStyleBundle.message("config.file.next.text"));
+        commitButton.setToolTipText(CheckStyleBundle.message("config.file.next.text"));
         commitButton.addActionListener(this::onCommit);
 
         previousButton.setToolTipText(CheckStyleBundle.message("config.file.previous.tooltip"));
         previousButton.setEnabled(false);
+        previousButton.addActionListener(e -> moveToStep(Step.SELECT));
+    }
+
+    private void moveToStep(final Step newStep) {
+        centrePanel.remove(currentStep == Step.SELECT ? selectPanel : propertiesPanel);
+        currentStep = newStep;
+
+        if (newStep == Step.PROPERTIES) {
+            commitButton.setText(CheckStyleBundle.message("config.file.okay.text"));
+            commitButton.setToolTipText(CheckStyleBundle.message("config.file.okay.tooltip"));
+            previousButton.setEnabled(true);
+            centrePanel.add(propertiesPanel, BorderLayout.CENTER);
+        } else {
+            commitButton.setText(CheckStyleBundle.message("config.file.next.text"));
+            commitButton.setToolTipText(CheckStyleBundle.message("config.file.next.text"));
+            previousButton.setEnabled(false);
+            centrePanel.add(selectPanel, BorderLayout.CENTER);
+        }
+
+        commitButton.setEnabled(true);
+        centrePanel.revalidate();
+        centrePanel.repaint();
     }
 
     @Override
@@ -116,6 +183,11 @@ public class GlobalLocationDialogue extends DialogWrapper {
     private void onCommit(final ActionEvent event) {
         commitButton.setEnabled(false);
 
+        if (currentStep == Step.PROPERTIES) {
+            close(OK_EXIT_CODE);
+            return;
+        }
+
         if (selectedLocationText().isBlank()) {
             showValidationError(CheckStyleBundle.message("config.file.no-file"));
             return;
@@ -124,7 +196,55 @@ public class GlobalLocationDialogue extends DialogWrapper {
             showValidationError(CheckStyleBundle.message("config.file.no-description"));
             return;
         }
-        close(OK_EXIT_CODE);
+
+        final ConfigurationType type = selectedType();
+        if (type == ConfigurationType.PLUGIN_CLASSPATH) {
+            close(OK_EXIT_CODE);
+            return;
+        }
+
+        scanForProperties(type);
+    }
+
+    /**
+     * Builds the location the user described, clones it (the factory's instance cache may hand back a
+     * live object already active in the borrowed project - see {@link ConfigurationLocationFactory}'s own
+     * equality javadoc), and resolves the clone using a throwaway, disposable {@link CheckstyleProjectService}
+     * pinned to an explicit bundled version. Moves to the properties step if the file declares any, otherwise
+     * finishes immediately.
+     */
+    private void scanForProperties(@NotNull final ConfigurationType type) {
+        final ConfigurationLocationFactory factory = borrowedProject.getService(ConfigurationLocationFactory.class);
+        final ConfigurationLocation built = factory.create(
+                borrowedProject, id, type, selectedLocationText().trim(), descriptionField.getText().trim(),
+                null, getDisposable());
+        final ConfigurationLocation location = (ConfigurationLocation) built.clone();
+
+        final CheckstyleProjectService scanService = CheckstyleProjectService.forVersion(
+                borrowedProject, bundledCheckstyleVersion(), null);
+        Disposer.register(getDisposable(), scanService);
+
+        final Map<String, String> properties;
+        try (InputStream ignored = location.resolve(scanService.underlyingClassLoader())) {
+            properties = location.getProperties();
+        } catch (IOException e) {
+            showValidationError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
+            return;
+        }
+
+        if (properties.isEmpty()) {
+            close(OK_EXIT_CODE);
+            return;
+        }
+
+        propertiesPanel = new PropertiesPanel(borrowedProject, scanService);
+        propertiesPanel.setConfigurationLocation(location);
+        moveToStep(Step.PROPERTIES);
+    }
+
+    @NotNull
+    private static String bundledCheckstyleVersion() {
+        return new VersionListReader().getBundledVersions().last();
     }
 
     private void showValidationError(final String message) {
@@ -177,7 +297,9 @@ public class GlobalLocationDialogue extends DialogWrapper {
     protected JComponent createCenterPanel() {
         initialiseScopeChoices();
         createGlobalConfigurationInputsIfNeeded();
-        return globalSettingsPanelLayout();
+        selectPanel = globalSettingsPanelLayout();
+        centrePanel.add(selectPanel, BorderLayout.CENTER);
+        return centrePanel;
     }
 
     private @NotNull JPanel globalSettingsPanelLayout() {
@@ -321,9 +443,6 @@ public class GlobalLocationDialogue extends DialogWrapper {
         if (!isOK()) {
             return null;
         }
-        final String id = (existingLocation != null && existingLocation.id != null)
-                ? existingLocation.id
-                : UUID.randomUUID().toString();
         return new GlobalConfigurationLocation(
                 id,
                 selectedType().name(),

@@ -8,6 +8,10 @@ import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class GlobalLocationDialogueTest extends LightPlatformTestCase {
 
     @Override
@@ -16,7 +20,79 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
         TestDialogManager.setTestDialog(TestDialog.OK, getTestRootDisposable());
     }
 
-    public void testPreviousButtonIsDisabledOnTheOnlySelectStep() {
+    public void testSelectingAFileWithPropertiesMovesToThePropertiesStepInsteadOfClosing() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, """
+                    <module name="Checker">
+                    <module name="TestFilter">
+                      <property name="file" value="${my-property}/a-file.xml"/>
+                    </module>
+                    </module>""");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+            dialogue.descriptionField().setText("My Rules");
+
+            dialogue.commitButton().doClick();
+
+            assertFalse("dialogue should not have closed yet", dialogue.isOK());
+            assertTrue("Previous should now be enabled on the properties step", dialogue.previousButton().isEnabled());
+            assertEquals(CheckStyleBundle.message("config.file.okay.text"), dialogue.commitButton().getText());
+
+            dialogue.commitButton().doClick();
+            assertTrue(dialogue.isOK());
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testSelectingAFileWithNoPropertiesFinishesImmediately() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, "<module name=\"Checker\"/>");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+            dialogue.descriptionField().setText("My Rules");
+
+            dialogue.commitButton().doClick();
+
+            assertTrue(dialogue.isOK());
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testPreviousFromThePropertiesStepReturnsToSelectWithNextRelabelled() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, """
+                    <module name="Checker">
+                    <module name="TestFilter">
+                      <property name="file" value="${my-property}/a-file.xml"/>
+                    </module>
+                    </module>""");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            try {
+                dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+                dialogue.descriptionField().setText("My Rules");
+                dialogue.commitButton().doClick();
+
+                dialogue.previousButton().doClick();
+
+                assertFalse(dialogue.previousButton().isEnabled());
+                assertEquals(CheckStyleBundle.message("config.file.next.text"), dialogue.commitButton().getText());
+            } finally {
+                dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+            }
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testPreviousButtonIsDisabledOnTheSelectStep() {
         final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
         try {
             assertFalse(dialogue.previousButton().isEnabled());
@@ -25,26 +101,33 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
         }
     }
 
-    public void testCommitButtonIsLabelledFinish() {
+    public void testCommitButtonIsLabelledNextOnTheSelectStep() {
         final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
         try {
-            assertEquals(CheckStyleBundle.message("config.file.okay.text"), dialogue.commitButton().getText());
+            assertEquals(CheckStyleBundle.message("config.file.next.text"), dialogue.commitButton().getText());
         } finally {
             dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
         }
     }
 
-    public void testCommittingWithAValidLocationAndDescriptionClosesTheDialogueWithOk() {
-        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
-        dialogue.fileLocationField().setText("/path/to/rules.xml");
-        dialogue.descriptionField().setText("My Rules");
+    public void testCommittingWithAValidLocationAndDescriptionClosesTheDialogueWithOk() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, "<module name=\"Checker\"/>");
 
-        dialogue.commitButton().doClick();
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+            dialogue.descriptionField().setText("My Rules");
 
-        assertTrue(dialogue.isOK());
-        final GlobalConfigurationLocation location = dialogue.getGlobalConfigurationLocation();
-        assertEquals("/path/to/rules.xml", location.location);
-        assertEquals("My Rules", location.description);
+            dialogue.commitButton().doClick();
+
+            assertTrue(dialogue.isOK());
+            final GlobalConfigurationLocation location = dialogue.getGlobalConfigurationLocation();
+            assertEquals(rulesFile.toAbsolutePath().toString(), location.location);
+            assertEquals("My Rules", location.description);
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
     }
 
     public void testCommittingWithABlankLocationDoesNotCloseTheDialogue() {
