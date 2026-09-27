@@ -130,6 +130,20 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
         }
     }
 
+    public void testSelectingClasspathFinishesImmediatelyWithoutResolvingIt() {
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+        dialogue.classpathLocationRadio().doClick();
+        dialogue.classpathLocationField().setText("this/classpath/resource/does-not-exist.xml");
+        dialogue.descriptionField().setText("My Rules");
+
+        dialogue.commitButton().doClick();
+
+        assertTrue("a classpath location must never be resolved from this dialogue", dialogue.isOK());
+        final GlobalConfigurationLocation location = dialogue.getGlobalConfigurationLocation();
+        assertEquals(ConfigurationType.PLUGIN_CLASSPATH.name(), location.type);
+        assertEquals("this/classpath/resource/does-not-exist.xml", location.location);
+    }
+
     public void testCommittingWithABlankLocationDoesNotCloseTheDialogue() {
         final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
         try {
