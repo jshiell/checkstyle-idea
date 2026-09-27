@@ -144,6 +144,47 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
         assertEquals("this/classpath/resource/does-not-exist.xml", location.location);
     }
 
+    public void testFinishingFromThePropertiesStepCommitsItsValuesIntoTheDto() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, """
+                    <module name="Checker">
+                    <module name="TestFilter">
+                      <property name="file" value="${my-property}/a-file.xml" default="a-default-value"/>
+                    </module>
+                    </module>""");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+            dialogue.descriptionField().setText("My Rules");
+            dialogue.commitButton().doClick();
+
+            dialogue.commitButton().doClick();
+
+            assertTrue(dialogue.isOK());
+            final GlobalConfigurationLocation location = dialogue.getGlobalConfigurationLocation();
+            assertEquals("a-default-value", location.properties.get("my-property"));
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testFinishingWithNoPropertiesFoundLeavesThePropertiesMapNull() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, "<module name=\"Checker\"/>");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+            dialogue.fileLocationField().setText(rulesFile.toAbsolutePath().toString());
+            dialogue.descriptionField().setText("My Rules");
+            dialogue.commitButton().doClick();
+
+            assertNull(dialogue.getGlobalConfigurationLocation().properties);
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
     public void testCommittingWithABlankLocationDoesNotCloseTheDialogue() {
         final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null);
         try {

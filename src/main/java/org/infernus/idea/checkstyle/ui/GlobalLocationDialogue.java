@@ -443,13 +443,18 @@ public class GlobalLocationDialogue extends DialogWrapper {
         if (!isOK()) {
             return null;
         }
-        return new GlobalConfigurationLocation(
+        final GlobalConfigurationLocation result = new GlobalConfigurationLocation(
                 id,
                 selectedType().name(),
                 selectedLocationText().trim(),
                 descriptionField.getText().trim(),
                 (String) scopeCombo.getSelectedItem()
         );
+        if (propertiesPanel != null) {
+            final Map<String, String> properties = propertiesPanel.getConfigurationLocation().getProperties();
+            result.properties = properties.isEmpty() ? null : properties;
+        }
+        return result;
     }
 
     @NotNull
