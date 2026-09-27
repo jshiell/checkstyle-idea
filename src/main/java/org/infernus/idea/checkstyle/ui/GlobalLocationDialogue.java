@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,17 +31,30 @@ import java.util.UUID;
 public class GlobalLocationDialogue extends DialogWrapper {
 
     private static final int WIDTH = 500;
-    private static final int MIN_HEIGHT = 160;
+    private static final int MIN_HEIGHT = 260;
 
-    // Only types that make sense globally (PROJECT_RELATIVE is intentionally excluded).
-    private final ComboBox<ConfigurationType> typeCombo = new ComboBox<>(new ConfigurationType[]{
-            ConfigurationType.LOCAL_FILE,
-            ConfigurationType.HTTP_URL,
-            ConfigurationType.INSECURE_HTTP_URL
-    });
-    private final ComboBox<String> scopeCombo = new ComboBox<>();
-    private final JTextField locationField = new JTextField(40);
+    private enum LocationType {
+        FILE, HTTP, CLASSPATH
+    }
+
+    private final JRadioButton fileLocationRadio = new JRadioButton(CheckStyleBundle.message("config.file.file.text"));
+    private final JRadioButton urlLocationRadio = new JRadioButton(CheckStyleBundle.message("config.file.url.text"));
+    private final JRadioButton classpathLocationRadio = new JRadioButton(CheckStyleBundle.message("config.file.classpath.text"));
+
+    private final JLabel fileLocationLabel = new JLabel(CheckStyleBundle.message("config.file.file.label"));
+    private final JLabel urlLocationLabel = new JLabel(CheckStyleBundle.message("config.file.url.label"));
+    private final JLabel classpathLocationLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.label"));
+
+    private final JTextField fileLocationField = new JTextField(40);
+    private final JTextField urlLocationField = new JTextField(40);
+    private final JTextField classpathLocationField = new JTextField(40);
+
+    private final JButton browseButton = new JButton(CheckStyleBundle.message("config.file.browse.text"));
+    private final JCheckBox insecureHttpCheckbox = new JCheckBox(CheckStyleBundle.message("config.file.insecure-http.text"));
+    private final JLabel classpathLocationReminderLabel = new JLabel(CheckStyleBundle.message("config.file.classpath.reminder"));
+
     private final JTextField descriptionField = new JTextField(40);
+    private final ComboBox<String> scopeCombo = new ComboBox<>();
 
     @Nullable
     private final GlobalConfigurationLocation existingLocation;
@@ -54,7 +66,48 @@ public class GlobalLocationDialogue extends DialogWrapper {
                 ? CheckStyleBundle.message("config.file.add.title")
                 : CheckStyleBundle.message("config.file.edit.title"));
         setSize(WIDTH, MIN_HEIGHT);
+        initialiseRadios();
         init();
+    }
+
+    private void initialiseRadios() {
+        browseButton.setToolTipText(CheckStyleBundle.message("config.file.browse.tooltip"));
+        insecureHttpCheckbox.setToolTipText(CheckStyleBundle.message("config.file.insecure-http.tooltip"));
+
+        final ButtonGroup locationGroup = new ButtonGroup();
+        locationGroup.add(fileLocationRadio);
+        locationGroup.add(urlLocationRadio);
+        locationGroup.add(classpathLocationRadio);
+
+        fileLocationRadio.addActionListener(e -> enabledLocation(LocationType.FILE));
+        urlLocationRadio.addActionListener(e -> enabledLocation(LocationType.HTTP));
+        classpathLocationRadio.addActionListener(e -> enabledLocation(LocationType.CLASSPATH));
+
+        browseButton.addActionListener(e -> {
+            final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
+                    .withFileFilter(file -> "xml".equalsIgnoreCase(file.getExtension()));
+            final VirtualFile chosen = FileChooser.chooseFile(descriptor, null, null);
+            if (chosen != null) {
+                fileLocationField.setText(VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
+            }
+        });
+
+        fileLocationRadio.setSelected(true);
+        enabledLocation(LocationType.FILE);
+    }
+
+    private void enabledLocation(final LocationType locationType) {
+        fileLocationLabel.setEnabled(locationType == LocationType.FILE);
+        fileLocationField.setEnabled(locationType == LocationType.FILE);
+        browseButton.setEnabled(locationType == LocationType.FILE);
+
+        urlLocationLabel.setEnabled(locationType == LocationType.HTTP);
+        urlLocationField.setEnabled(locationType == LocationType.HTTP);
+        insecureHttpCheckbox.setEnabled(locationType == LocationType.HTTP);
+
+        classpathLocationLabel.setEnabled(locationType == LocationType.CLASSPATH);
+        classpathLocationField.setEnabled(locationType == LocationType.CLASSPATH);
+        classpathLocationReminderLabel.setEnabled(locationType == LocationType.CLASSPATH);
     }
 
     @Nullable
@@ -62,58 +115,88 @@ public class GlobalLocationDialogue extends DialogWrapper {
     protected JComponent createCenterPanel() {
         initialiseScopeChoices();
         createGlobalConfigurationInputsIfNeeded();
-        final JButton browseButton = new JButton(CheckStyleBundle.message("config.file.browse.text"));
-        browseButton.setToolTipText(CheckStyleBundle.message("config.file.browse.tooltip"));
-        browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE);
-        
-        browseButton.addActionListener(e -> {
-            final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                    .withFileFilter(file -> "xml".equalsIgnoreCase(file.getExtension()));
-            final VirtualFile chosen = FileChooser.chooseFile(descriptor, null, null);
-            if (chosen != null) {
-                locationField.setText(VfsUtilCore.virtualToIoFile(chosen).getAbsolutePath());
-            }
-        });
-        typeCombo.addActionListener(e ->
-                browseButton.setEnabled(typeCombo.getSelectedItem() == ConfigurationType.LOCAL_FILE));
-
-        return globalSettingsPanelLayout(browseButton);
+        return globalSettingsPanelLayout();
     }
 
-    private @NotNull JPanel globalSettingsPanelLayout(@NotNull final JButton browseButton) {
+    private @NotNull JPanel globalSettingsPanelLayout() {
         final JPanel panel = new JPanel(new GridBagLayout());
         final Insets insets = new Insets(4, 4, 4, 4);
-        final JPanel locationRow = new JPanel(new BorderLayout(4, 0));
-        locationRow.add(locationField, BorderLayout.CENTER);
-        locationRow.add(browseButton, BorderLayout.EAST);
+        final Insets radioInsets = new Insets(8, 4, 4, 4);
+        int row = 0;
 
-        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.type.label")),
-                new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                        GridBagConstraints.NONE, insets, 0, 0));
-        panel.add(typeCombo,
-                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
-
-        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.location.label")),
-                new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
-                        GridBagConstraints.NONE, insets, 0, 0));
-        panel.add(locationRow,
-                new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
-                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
-
-        panel.add(new JLabel(CheckStyleBundle.message("config.global.location.description.label")),
-                new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+        panel.add(new JLabel(CheckStyleBundle.message("config.file.description.text")),
+                new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
                         GridBagConstraints.NONE, insets, 0, 0));
         panel.add(descriptionField,
-                new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                         GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        row++;
+
+        panel.add(fileLocationRadio,
+                new GridBagConstraints(0, row, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        row++;
+
+        final JPanel fileLocationRow = new JPanel(new BorderLayout(4, 0));
+        fileLocationRow.add(fileLocationField, BorderLayout.CENTER);
+        fileLocationRow.add(browseButton, BorderLayout.EAST);
+
+        panel.add(fileLocationLabel,
+                new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(fileLocationRow,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        row++;
+
+        panel.add(urlLocationRadio,
+                new GridBagConstraints(0, row, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, radioInsets, 0, 0));
+        row++;
+
+        panel.add(urlLocationLabel,
+                new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(urlLocationField,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        row++;
+
+        panel.add(insecureHttpCheckbox,
+                new GridBagConstraints(1, row, 2, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        row++;
+
+        panel.add(classpathLocationRadio,
+                new GridBagConstraints(0, row, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.NONE, radioInsets, 0, 0));
+        row++;
+
+        panel.add(classpathLocationLabel,
+                new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
+                        GridBagConstraints.NONE, insets, 0, 0));
+        panel.add(classpathLocationField,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        row++;
+
+        panel.add(classpathLocationReminderLabel,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                        GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        row++;
+
+        panel.add(Box.createVerticalGlue(),
+                new GridBagConstraints(0, row, 3, 1, 0.0, 1.0, GridBagConstraints.WEST,
+                        GridBagConstraints.VERTICAL, insets, 0, 0));
+        row++;
 
         panel.add(new JLabel(CheckStyleBundle.message("config.file.scope.label")),
-                new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,
+                new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,
                         GridBagConstraints.NONE, insets, 0, 0));
         panel.add(scopeCombo,
-                new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0, GridBagConstraints.WEST,
+                new GridBagConstraints(1, row, 2, 1, 1.0, 0.0, GridBagConstraints.WEST,
                         GridBagConstraints.HORIZONTAL, insets, 0, 0));
+
         return panel;
     }
 
@@ -122,10 +205,24 @@ public class GlobalLocationDialogue extends DialogWrapper {
             return;
         }
         final ConfigurationType type = ConfigurationType.parse(existingLocation.type);
-        if (type != null) {
-            typeCombo.setSelectedItem(type);
+        final String location = Objects.requireNonNullElse(existingLocation.location, "");
+        if (type == ConfigurationType.HTTP_URL || type == ConfigurationType.INSECURE_HTTP_URL) {
+            urlLocationRadio.setSelected(true);
+            urlLocationField.setText(location);
+            insecureHttpCheckbox.setSelected(type == ConfigurationType.INSECURE_HTTP_URL);
+            enabledLocation(LocationType.HTTP);
+
+        } else if (type == ConfigurationType.PLUGIN_CLASSPATH) {
+            classpathLocationRadio.setSelected(true);
+            classpathLocationField.setText(location);
+            enabledLocation(LocationType.CLASSPATH);
+
+        } else {
+            fileLocationRadio.setSelected(true);
+            fileLocationField.setText(location);
+            enabledLocation(LocationType.FILE);
         }
-        locationField.setText(Objects.requireNonNullElse(existingLocation.location, ""));
+
         descriptionField.setText(Objects.requireNonNullElse(existingLocation.description, ""));
         final String scope = Objects.requireNonNullElse(existingLocation.scope, NamedScopeHelper.DEFAULT_SCOPE_ID);
         if (!hasScopeChoice(scope)) {
@@ -136,7 +233,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        if (locationField.getText().isBlank()) {
+        if (selectedLocationText().isBlank()) {
             Messages.showErrorDialog(
                     getContentPanel(),
                     CheckStyleBundle.message("config.file.no-file"),
@@ -153,6 +250,24 @@ public class GlobalLocationDialogue extends DialogWrapper {
         super.doOKAction();
     }
 
+    private ConfigurationType selectedType() {
+        if (urlLocationRadio.isSelected()) {
+            return insecureHttpCheckbox.isSelected() ? ConfigurationType.INSECURE_HTTP_URL : ConfigurationType.HTTP_URL;
+        } else if (classpathLocationRadio.isSelected()) {
+            return ConfigurationType.PLUGIN_CLASSPATH;
+        }
+        return ConfigurationType.LOCAL_FILE;
+    }
+
+    private String selectedLocationText() {
+        if (urlLocationRadio.isSelected()) {
+            return urlLocationField.getText();
+        } else if (classpathLocationRadio.isSelected()) {
+            return classpathLocationField.getText();
+        }
+        return fileLocationField.getText();
+    }
+
     /**
      * Returns the configured location DTO, or {@code null} if the dialogue was cancelled.
      *
@@ -166,24 +281,58 @@ public class GlobalLocationDialogue extends DialogWrapper {
         final String id = (existingLocation != null && existingLocation.id != null)
                 ? existingLocation.id
                 : UUID.randomUUID().toString();
-        final ConfigurationType type = (ConfigurationType) typeCombo.getSelectedItem();
         return new GlobalConfigurationLocation(
                 id,
-                type != null ? type.name() : ConfigurationType.LOCAL_FILE.name(),
-                locationField.getText().trim(),
+                selectedType().name(),
+                selectedLocationText().trim(),
                 descriptionField.getText().trim(),
                 (String) scopeCombo.getSelectedItem()
         );
     }
 
     @NotNull
-    JTextField getLocationField() {
-        return locationField;
+    JRadioButton fileLocationRadio() {
+        return fileLocationRadio;
     }
 
     @NotNull
-    JTextField getDescriptionField() {
+    JRadioButton urlLocationRadio() {
+        return urlLocationRadio;
+    }
+
+    @NotNull
+    JRadioButton classpathLocationRadio() {
+        return classpathLocationRadio;
+    }
+
+    @NotNull
+    JTextField fileLocationField() {
+        return fileLocationField;
+    }
+
+    @NotNull
+    JTextField urlLocationField() {
+        return urlLocationField;
+    }
+
+    @NotNull
+    JTextField classpathLocationField() {
+        return classpathLocationField;
+    }
+
+    @NotNull
+    JCheckBox insecureHttpCheckbox() {
+        return insecureHttpCheckbox;
+    }
+
+    @NotNull
+    JTextField descriptionField() {
         return descriptionField;
+    }
+
+    @NotNull
+    ComboBox<String> scopeCombo() {
+        return scopeCombo;
     }
 
     private void initialiseScopeChoices() {
@@ -216,5 +365,5 @@ public class GlobalLocationDialogue extends DialogWrapper {
         }
         return false;
     }
-    
+
 }
