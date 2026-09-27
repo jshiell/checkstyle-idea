@@ -30,6 +30,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -219,6 +220,9 @@ public class GlobalLocationDialogue extends DialogWrapper {
                 borrowedProject, id, type, selectedLocationText().trim(), descriptionField.getText().trim(),
                 null, getDisposable());
         final ConfigurationLocation location = (ConfigurationLocation) built.clone();
+        if (existingLocation != null && existingLocation.properties != null) {
+            location.setProperties(new HashMap<>(existingLocation.properties));
+        }
 
         final CheckstyleProjectService scanService = CheckstyleProjectService.forVersion(
                 borrowedProject, bundledCheckstyleVersion(), null);

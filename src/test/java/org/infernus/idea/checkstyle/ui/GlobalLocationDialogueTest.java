@@ -6,11 +6,15 @@ import com.intellij.openapi.ui.TestDialogManager;
 import com.intellij.testFramework.LightPlatformTestCase;
 import org.infernus.idea.checkstyle.CheckStyleBundle;
 import org.infernus.idea.checkstyle.config.ApplicationConfigurationState.GlobalConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocation;
+import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GlobalLocationDialogueTest extends LightPlatformTestCase {
 
@@ -180,6 +184,69 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
             dialogue.commitButton().doClick();
 
             assertNull(dialogue.getGlobalConfigurationLocation().properties);
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testEditingAnExistingLocationSeedsItsSavedPropertiesBeforeScanning() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, """
+                    <module name="Checker">
+                    <module name="TestFilter">
+                      <property name="file" value="${my-property}/a-file.xml" default="file-default"/>
+                    </module>
+                    </module>""");
+
+            final GlobalConfigurationLocation existing = new GlobalConfigurationLocation(
+                    "an-id", ConfigurationType.LOCAL_FILE.name(),
+                    rulesFile.toAbsolutePath().toString(), "My Rules");
+            existing.properties = new HashMap<>(Map.of("my-property", "previously-saved-value"));
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(existing, getProject());
+            dialogue.commitButton().doClick();
+
+            dialogue.commitButton().doClick();
+
+            assertTrue(dialogue.isOK());
+            final GlobalConfigurationLocation result = dialogue.getGlobalConfigurationLocation();
+            assertEquals("previously-saved-value", result.properties.get("my-property"));
+        } finally {
+            Files.deleteIfExists(rulesFile);
+        }
+    }
+
+    public void testScanningOnNextDoesNotMutateALocationAlreadyActiveInTheBorrowedProject() throws IOException {
+        final Path rulesFile = Files.createTempFile("global-location-test", ".xml");
+        try {
+            Files.writeString(rulesFile, """
+                    <module name="Checker">
+                    <module name="TestFilter">
+                      <property name="file" value="${my-property}/a-file.xml" default="file-default"/>
+                    </module>
+                    </module>""");
+
+            final ConfigurationLocationFactory factory =
+                    getProject().getService(ConfigurationLocationFactory.class);
+            final ConfigurationLocation liveLocation = factory.create(
+                    getProject(), "existing-id", ConfigurationType.LOCAL_FILE,
+                    rulesFile.toAbsolutePath().toString(), "My Rules", null);
+            liveLocation.setProperties(new HashMap<>(Map.of("old-property", "keep-me")));
+
+            final GlobalConfigurationLocation existing = new GlobalConfigurationLocation(
+                    "existing-id", ConfigurationType.LOCAL_FILE.name(),
+                    rulesFile.toAbsolutePath().toString(), "My Rules");
+
+            final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(existing, getProject());
+            try {
+                dialogue.commitButton().doClick();
+
+                assertEquals("scanning must clone before resolving, not mutate the live, already-active location",
+                        Map.of("old-property", "keep-me"), liveLocation.getProperties());
+            } finally {
+                dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+            }
         } finally {
             Files.deleteIfExists(rulesFile);
         }
