@@ -100,13 +100,20 @@
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.PromptForMissingCheckstyleVersion"/>
         <postStartupActivity implementation="org.infernus.idea.checkstyle.startup.ReloadCheckstyleWhenProjectTrustChanges"/>
 
-        <projectConfigurable key="plugin.configuration-name"
-                             instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
-                             parentId="tools" />
-
-        <applicationConfigurable key="config.application.configuration-name"
-                                 instance="org.infernus.idea.checkstyle.CheckStyleApplicationConfigurable"
+        <applicationConfigurable id="org.infernus.idea.checkstyle.group"
+                                 key="plugin.configuration-name"
+                                 instance="org.infernus.idea.checkstyle.CheckStyleGroupConfigurable"
                                  parentId="tools" />
+
+        <projectConfigurable id="org.infernus.idea.checkstyle.project"
+                             key="plugin.project.configuration-name"
+                             instance="org.infernus.idea.checkstyle.CheckStyleConfigurable"
+                             parentId="org.infernus.idea.checkstyle.group" />
+
+        <applicationConfigurable id="org.infernus.idea.checkstyle.global"
+                                 key="config.application.configuration-name"
+                                 instance="org.infernus.idea.checkstyle.CheckStyleApplicationConfigurable"
+                                 parentId="org.infernus.idea.checkstyle.group" />
 
         <moduleConfigurationEditorProvider implementation="org.infernus.idea.checkstyle.CheckstyleModuleConfigurationEditorProvider"/>
 
