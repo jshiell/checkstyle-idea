@@ -38,9 +38,14 @@ import java.util.UUID;
 
 
 /**
- * A lightweight add/edit dialogue for global (IDE-wide) Checkstyle rule locations.
- * Does not require a project context; no Checkstyle validation is performed at entry time —
- * validation occurs when the location is first used by a project scan.
+ * A wizard-style add/edit dialogue for global (IDE-wide) Checkstyle rule locations: a SELECT step
+ * (radio choice of File/URL/Classpath, plus description and scope) followed, for File/URL locations
+ * that declare any {@code ${property}} placeholders, by a PROPERTIES step for editing their values.
+ * Has no project context of its own; property discovery scans the location via a "borrowed" open
+ * project (or the default project, if none are open) and a throwaway {@link CheckstyleProjectService}
+ * pinned to an explicit bundled Checkstyle version, so this never depends on which project happens to
+ * be borrowed. Classpath locations skip scanning entirely, since resolving one depends on the borrowed
+ * project's own registered Checkstyle version and classpath rather than anything this dialogue controls.
  */
 public class GlobalLocationDialogue extends DialogWrapper {
 
