@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TestDialog;
 import com.intellij.openapi.ui.TestDialogManager;
 import com.intellij.testFramework.LightPlatformTestCase;
@@ -250,6 +251,53 @@ public class GlobalLocationDialogueTest extends LightPlatformTestCase {
         } finally {
             Files.deleteIfExists(rulesFile);
         }
+    }
+
+    public void testDecliningToSaveAfterAResolveFailureReturnsToTheSelectStep() {
+        TestDialogManager.setTestDialog(message -> Messages.NO, getTestRootDisposable());
+
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+        try {
+            dialogue.fileLocationField().setText("/does/not/exist/global-location-test.xml");
+            dialogue.descriptionField().setText("My Rules");
+
+            dialogue.commitButton().doClick();
+
+            assertFalse(dialogue.isOK());
+            assertTrue("commit button should be re-enabled so the user can try again",
+                    dialogue.commitButton().isEnabled());
+        } finally {
+            dialogue.close(DialogWrapper.CANCEL_EXIT_CODE);
+        }
+    }
+
+    public void testSavingAnywayAfterAResolveFailureFinishesWithoutScanning() {
+        TestDialogManager.setTestDialog(message -> Messages.YES, getTestRootDisposable());
+
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(null, getProject());
+        dialogue.fileLocationField().setText("/does/not/exist/global-location-test.xml");
+        dialogue.descriptionField().setText("My Rules");
+
+        dialogue.commitButton().doClick();
+
+        assertTrue(dialogue.isOK());
+        assertNull(dialogue.getGlobalConfigurationLocation().properties);
+    }
+
+    public void testSavingAnywayAfterAResolveFailureLeavesAnExistingLocationsPropertiesUnchanged() {
+        TestDialogManager.setTestDialog(message -> Messages.YES, getTestRootDisposable());
+
+        final GlobalConfigurationLocation existing = new GlobalConfigurationLocation(
+                "an-id", ConfigurationType.LOCAL_FILE.name(),
+                "/does/not/exist/global-location-test.xml", "My Rules");
+        existing.properties = new HashMap<>(Map.of("my-property", "previously-saved-value"));
+
+        final GlobalLocationDialogue dialogue = new GlobalLocationDialogue(existing, getProject());
+
+        dialogue.commitButton().doClick();
+
+        assertTrue(dialogue.isOK());
+        assertEquals("previously-saved-value", dialogue.getGlobalConfigurationLocation().properties.get("my-property"));
     }
 
     public void testCommittingWithABlankLocationDoesNotCloseTheDialogue() {

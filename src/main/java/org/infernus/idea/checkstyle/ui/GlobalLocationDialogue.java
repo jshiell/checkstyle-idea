@@ -83,6 +83,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
 
     private JPanel selectPanel;
     private PropertiesPanel propertiesPanel;
+    private boolean savedWithoutScanning;
 
     @Nullable
     private final GlobalConfigurationLocation existingLocation;
@@ -232,7 +233,7 @@ public class GlobalLocationDialogue extends DialogWrapper {
         try (InputStream ignored = location.resolve(scanService.underlyingClassLoader())) {
             properties = location.getProperties();
         } catch (IOException e) {
-            showValidationError(CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()));
+            handleResolveFailure(e);
             return;
         }
 
@@ -254,6 +255,28 @@ public class GlobalLocationDialogue extends DialogWrapper {
     private void showValidationError(final String message) {
         Messages.showErrorDialog(getContentPanel(), message, CheckStyleBundle.message("config.file.error.title"));
         commitButton.setEnabled(true);
+    }
+
+    /**
+     * The location couldn't be resolved (e.g. offline HTTP, a missing file). Rather than unconditionally
+     * blocking Next, offer a "save anyway" escape hatch - Yes finishes with whatever properties the location
+     * already had (unchanged in edit mode, none for a new location); No returns to the SELECT step.
+     */
+    private void handleResolveFailure(@NotNull final IOException e) {
+        Messages.showErrorDialog(borrowedProject, CheckStyleBundle.message("config.file.resolve-failed", e.getMessage()),
+                CheckStyleBundle.message("config.file.error.title"));
+
+        final int choice = Messages.showYesNoDialog(borrowedProject,
+                CheckStyleBundle.message("config.file.resolve-failed.save-anyway"),
+                CheckStyleBundle.message("config.file.error.title"),
+                Messages.getQuestionIcon());
+
+        if (choice == Messages.YES) {
+            savedWithoutScanning = true;
+            close(OK_EXIT_CODE);
+        } else {
+            commitButton.setEnabled(true);
+        }
     }
 
     private void initialiseRadios() {
@@ -457,6 +480,8 @@ public class GlobalLocationDialogue extends DialogWrapper {
         if (propertiesPanel != null) {
             final Map<String, String> properties = propertiesPanel.getConfigurationLocation().getProperties();
             result.properties = properties.isEmpty() ? null : properties;
+        } else if (savedWithoutScanning && existingLocation != null) {
+            result.properties = existingLocation.properties;
         }
         return result;
     }
