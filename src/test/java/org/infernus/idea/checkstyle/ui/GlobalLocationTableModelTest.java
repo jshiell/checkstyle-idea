@@ -24,9 +24,8 @@ class GlobalLocationTableModelTest {
         assertEquals(List.of("id-1"), model.getActiveIds());
         assertEquals(true, model.getValueAt(0, 0));
         assertEquals("A", model.getValueAt(0, 1));
-        assertEquals("LOCAL_FILE", model.getValueAt(0, 2));
-        assertEquals("c:/a.xml", model.getValueAt(0, 3));
-        assertEquals("All", model.getValueAt(0, 4));
+        assertEquals("c:/a.xml", model.getValueAt(0, 2));
+        assertEquals("All", model.getValueAt(0, 3));
     }
 
     @Test
@@ -36,7 +35,7 @@ class GlobalLocationTableModelTest {
 
         model.setLocations(List.of(location), List.of());
 
-        assertEquals(NamedScopeHelper.DEFAULT_SCOPE_ID, model.getValueAt(0, 4));
+        assertEquals(NamedScopeHelper.DEFAULT_SCOPE_ID, model.getValueAt(0, 3));
     }
 
     @Test

@@ -40,9 +40,6 @@ public class CheckStyleApplicationConfigurable implements Configurable {
     public static final int LOCATION_INPUT_MIN_WIDTH = 120;
     public static final int LOCATION_INPUT_PREFERRED_WIDTH = 180;
     public static final int LOCATION_INPUT_MAX_WIDTH = 240;
-    public static final int TYPE_INPUT_MIN_WDITH = 80;
-    public static final int TYPE_INPUT_PREFERRED_WIDTH = 120;
-    public static final int TYPE_INPUT_MAX_WIDTH = 160;
     public static final int SCOPE_INPUT_MIN_WIDTH = 60;
     public static final int SCOPE_INPUT_PREFERRED_WIDTH = 100;
     public static final int SCOPE_INPUT_MAX_WIDTH = 160;
@@ -101,8 +98,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         globalLocationTable.getTableHeader().setReorderingAllowed(false);
 
         setColumnWidth(globalLocationTable, 1, LOCATION_INPUT_MIN_WIDTH, LOCATION_INPUT_PREFERRED_WIDTH, LOCATION_INPUT_MAX_WIDTH);
-        setColumnWidth(globalLocationTable, 2, TYPE_INPUT_MIN_WDITH, TYPE_INPUT_PREFERRED_WIDTH, TYPE_INPUT_MAX_WIDTH);
-        setColumnWidth(globalLocationTable, 4, SCOPE_INPUT_MIN_WIDTH, SCOPE_INPUT_PREFERRED_WIDTH, SCOPE_INPUT_MAX_WIDTH);
+        setColumnWidth(globalLocationTable, 3, SCOPE_INPUT_MIN_WIDTH, SCOPE_INPUT_PREFERRED_WIDTH, SCOPE_INPUT_MAX_WIDTH);
 
         final var activeColumn = globalLocationTable.getColumnModel().getColumn(0);
         activeColumn.setMinWidth(ACTIVE_COL_MIN_WIDTH);

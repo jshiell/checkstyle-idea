@@ -26,10 +26,9 @@ public class GlobalLocationTableModel extends AbstractTableModel {
 
     private static final int COLUMN_ACTIVE = 0;
     private static final int COLUMN_DESCRIPTION = 1;
-    private static final int COLUMN_TYPE = 2;
-    private static final int COLUMN_LOCATION = 3;
-    private static final int COLUMN_SCOPE = 4;
-    private static final int NUMBER_OF_COLUMNS = 5;
+    private static final int COLUMN_LOCATION = 2;
+    private static final int COLUMN_SCOPE = 3;
+    private static final int NUMBER_OF_COLUMNS = 4;
 
     private final List<GlobalConfigurationLocation> locations = new ArrayList<>();
     /** IDs of locations whose "Active" checkbox is checked. Insertion-ordered for stable round-trips. */
@@ -98,7 +97,6 @@ public class GlobalLocationTableModel extends AbstractTableModel {
         return switch (column) {
             case COLUMN_ACTIVE -> CheckStyleBundle.message("config.file.locations.table.0");
             case COLUMN_DESCRIPTION -> CheckStyleBundle.message("config.file.locations.table.1");
-            case COLUMN_TYPE -> CheckStyleBundle.message("config.global.locations.table.type");
             case COLUMN_LOCATION -> CheckStyleBundle.message("config.file.locations.table.2");
             case COLUMN_SCOPE -> CheckStyleBundle.message("config.file.locations.table.3");
             default -> throw new IllegalArgumentException("Invalid column: " + column);
@@ -147,7 +145,6 @@ public class GlobalLocationTableModel extends AbstractTableModel {
         return switch (columnIndex) {
             case COLUMN_ACTIVE -> activeIds.contains(location.id);
             case COLUMN_DESCRIPTION -> Objects.requireNonNullElse(location.description, "");
-            case COLUMN_TYPE -> Objects.requireNonNullElse(location.type, "");
             case COLUMN_LOCATION -> Objects.requireNonNullElse(location.location, "");
             case COLUMN_SCOPE -> Objects.requireNonNullElse(location.scope, NamedScopeHelper.DEFAULT_SCOPE_ID);
             default -> throw new IllegalArgumentException("Invalid column: " + columnIndex);
