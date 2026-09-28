@@ -1,6 +1,8 @@
 package org.infernus.idea.checkstyle.model;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.scope.packageSet.NamedScope;
 import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.BundledConfig;
@@ -98,5 +100,27 @@ public class ConfigurationLocationFactoryTest {
         final BundledConfigurationLocation bcl = (BundledConfigurationLocation) cl;
         assertEquals(BundledConfig.SUN_CHECKS, bcl.getBundledConfig());
         assertEquals(BundledConfig.SUN_CHECKS.getId(), bcl.getId());
+    }
+
+    @Test
+    public void aDisposableParentedLocationIsNeverServedFromOrWrittenIntoTheSharedCache() {
+        final Disposable disposableParent = Disposer.newDisposable();
+        try {
+            final ConfigurationLocation first = underTest.create(project, "anId", ConfigurationType.LOCAL_FILE,
+                    "/a/path.xml", "A description", allScope, disposableParent);
+            final ConfigurationLocation second = underTest.create(project, "anId", ConfigurationType.LOCAL_FILE,
+                    "/a/path.xml", "A description", allScope, disposableParent);
+
+            assertNotSame(first, second,
+                    "a disposable-parented call must always construct fresh, never read from the cache");
+
+            final ConfigurationLocation cached = underTest.create(project, "anId", ConfigurationType.LOCAL_FILE,
+                    "/a/path.xml", "A description", allScope);
+
+            assertNotSame(first, cached,
+                    "a disposable-parented instance must never have been written into the shared cache");
+        } finally {
+            Disposer.dispose(disposableParent);
+        }
     }
 }

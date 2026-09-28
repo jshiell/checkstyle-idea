@@ -44,11 +44,15 @@ public class ConfigurationLocationFactory {
     }
 
     /**
-     * As {@link #create(Project, String, ConfigurationType, String, String, NamedScope)}, but a freshly
-     * constructed {@code LOCAL_FILE}, {@code HTTP_URL}, {@code INSECURE_HTTP_URL} or {@code PLUGIN_CLASSPATH}
-     * location's scope-change listeners are parented to {@code disposableParent} rather than the project's
-     * shared {@code CheckerFactoryCache}. Ignored for other types, and for a location returned from the
-     * instance cache instead of freshly constructed. Passing {@code null} reproduces the original behaviour.
+     * As {@link #create(Project, String, ConfigurationType, String, String, NamedScope)}, but when
+     * {@code disposableParent} is supplied the call bypasses {@link #instanceCache} entirely - it always
+     * constructs fresh (with a {@code LOCAL_FILE}, {@code HTTP_URL}, {@code INSECURE_HTTP_URL} or
+     * {@code PLUGIN_CLASSPATH} location's scope-change listeners parented to it instead of the project's
+     * shared {@code CheckerFactoryCache}), and never writes the result into the cache. A caller-owned,
+     * disposable-parented instance must never be handed out by a later cache lookup after its parent -
+     * and so its listeners - has been disposed; bypassing the cache in both directions is what guarantees
+     * that, and also means this can never return a live instance already shared with the rest of the
+     * project. Passing {@code null} reproduces the original, cached behaviour exactly.
      *
      * @param disposableParent the disposable to parent scope-change listeners to, or {@code null}.
      * @return the location.
@@ -100,6 +104,10 @@ public class ConfigurationLocationFactory {
         configurationLocation.setLocation(location);
         configurationLocation.setDescription(description);
         configurationLocation.setNamedScope(namedScope);
+
+        if (disposableParent != null) {
+            return configurationLocation;
+        }
 
         synchronized (instanceCache) {
             ConfigurationLocation cachedLocation = instanceCache.get(configurationLocation);

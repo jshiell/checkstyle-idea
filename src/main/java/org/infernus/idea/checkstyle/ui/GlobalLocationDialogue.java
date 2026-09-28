@@ -214,18 +214,20 @@ public class GlobalLocationDialogue extends DialogWrapper {
     }
 
     /**
-     * Builds the location the user described, clones it (the factory's instance cache may hand back a
-     * live object already active in the borrowed project - see {@link ConfigurationLocationFactory}'s own
-     * equality javadoc), and resolves the clone using a throwaway, disposable {@link CheckstyleProjectService}
-     * pinned to an explicit bundled version. Moves to the properties step if the file declares any, otherwise
-     * finishes immediately.
+     * Builds the location the user described, parented to this dialogue's own {@link #getDisposable()} so
+     * its scope-change listeners are torn down when the dialogue closes rather than leaking onto the
+     * borrowed project's shared {@code CheckerFactoryCache} for the life of the session. Because it is
+     * disposable-parented, {@link ConfigurationLocationFactory} always constructs it fresh and never reads
+     * it from, or writes it into, the shared instance cache - so this can neither hand back nor poison the
+     * cache with a live object already active in the borrowed project. Resolves it using a throwaway,
+     * disposable {@link CheckstyleProjectService} pinned to an explicit bundled version. Moves to the
+     * properties step if the file declares any, otherwise finishes immediately.
      */
     private void scanForProperties(@NotNull final ConfigurationType type) {
         final ConfigurationLocationFactory factory = borrowedProject.getService(ConfigurationLocationFactory.class);
-        final ConfigurationLocation built = factory.create(
+        final ConfigurationLocation location = factory.create(
                 borrowedProject, id, type, selectedLocationText().trim(), descriptionField.getText().trim(),
                 null, getDisposable());
-        final ConfigurationLocation location = (ConfigurationLocation) built.clone();
         if (existingLocation != null && existingLocation.properties != null) {
             location.setProperties(new HashMap<>(existingLocation.properties));
         }
