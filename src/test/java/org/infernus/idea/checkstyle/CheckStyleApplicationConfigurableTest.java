@@ -79,6 +79,11 @@ class CheckStyleApplicationConfigurableTest {
     }
 
     @Test
+    void displayNameIsCheckstyleGlobal() {
+        assertEquals("Checkstyle Global", configurable.getDisplayName());
+    }
+
+    @Test
     void isNotModifiedInitially() {
         assertFalse(configurable.isModified());
     }

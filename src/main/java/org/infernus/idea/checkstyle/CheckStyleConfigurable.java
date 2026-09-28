@@ -30,7 +30,7 @@ public class CheckStyleConfigurable implements Configurable {
     }
 
     public String getDisplayName() {
-        return CheckStyleBundle.message("plugin.configuration-name");
+        return CheckStyleBundle.message("plugin.project.configuration-name");
     }
 
     public String getHelpTopic() {

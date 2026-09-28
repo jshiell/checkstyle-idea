@@ -20,6 +20,10 @@ public class CheckStyleConfigurableTest extends LightPlatformTestCase {
         panel = (CheckStyleConfigPanel) configurable.createComponent();
     }
 
+    public void testDisplayNameIsCheckstyleProject() {
+        assertEquals("Checkstyle Project", configurable.getDisplayName());
+    }
+
     public void testApplyPersistsAToggleOfTheCheckbox() {
         panel.getScanBeforeCheckinCheckbox().setSelected(true);
 
