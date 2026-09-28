@@ -1,6 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.19.0** Changed: The "Checkstyle" and "Checkstyle Downloads" settings pages are now "Checkstyle Project" and "Checkstyle Global", nested under a new "Checkstyle" parent (Settings > Tools > Checkstyle).
 * **26.19.0** Fixed: Path segment duplicated in project relative locations (#708).
 * **26.19.0** New: Added support for global configuration settings, which apply across all projects (#707). Thanks to @alexBlakeGoudemond.
 * **26.19.0** New: The global rule location dialog now matches the per-project one — a radio-button choice of File/URL/Classpath, and a properties step that auto-discovers and lets you edit any `${property}` placeholders declared in the rules file (#707).
