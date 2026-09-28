@@ -85,7 +85,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
         final var updatedConfigurationBuilder = PluginConfigurationBuilder.from(
             pluginConfigurationManager.getCurrent());
         updatedConfigurationBuilder.withImportSettingsFromMaven(true)
-            .withCheckstyleVersion("14.1.0");
+            .withCheckstyleVersion("14.3.0");
         pluginConfigurationManager.setCurrent(updatedConfigurationBuilder.build(), true);
 
         createProjectPom(PROJECT_INFO + """
@@ -103,7 +103,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));
 
-        assertEquals("14.1.0", pluginConfigurationManager.getCurrent().getCheckstyleVersion());
+        assertEquals("14.3.0", pluginConfigurationManager.getCurrent().getCheckstyleVersion());
     }
 
     @Test
