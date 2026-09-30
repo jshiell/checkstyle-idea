@@ -44,6 +44,14 @@ class CheckstyleGradleModelBuilderTest {
     }
 
     @Test
+    void buildAllReturnsNullWhenTheGradleApiIsMissingAMethod() {
+        final Project project = mock(Project.class);
+        when(project.getExtensions()).thenThrow(new NoSuchMethodError("older Gradle lacks this method"));
+
+        assertThat(builder.buildAll(MODEL_NAME, project), is(nullValue()));
+    }
+
+    @Test
     void configFileIsNullWhenCheckstylePluginIsAppliedButNothingIsConfigured() {
         final Project project = ProjectBuilder.builder().build();
         project.getPluginManager().apply("checkstyle");

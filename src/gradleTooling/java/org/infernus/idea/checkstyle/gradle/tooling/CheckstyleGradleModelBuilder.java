@@ -33,7 +33,7 @@ public class CheckstyleGradleModelBuilder implements ModelBuilderService {
     public Object buildAll(final String modelName, final Project project) {
         try {
             return buildModel(project);
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             return null;
         }
     }
