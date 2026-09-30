@@ -17,12 +17,12 @@ import org.infernus.idea.checkstyle.config.PasswordSafeArtifactRepositoryCredent
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.ui.GlobalLocationDialogue;
 import org.infernus.idea.checkstyle.ui.GlobalLocationTableModel;
+import org.infernus.idea.checkstyle.ui.LocationTableColumns;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Objects;
@@ -35,14 +35,6 @@ import java.util.Objects;
 public class CheckStyleApplicationConfigurable implements Configurable {
 
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 150);
-    public static final int ACTIVE_COL_MIN_WIDTH = 40;
-    public static final int ACTIVE_COL_MAX_WIDTH = 50;
-    public static final int LOCATION_INPUT_MIN_WIDTH = 120;
-    public static final int LOCATION_INPUT_PREFERRED_WIDTH = 180;
-    public static final int LOCATION_INPUT_MAX_WIDTH = 240;
-    public static final int SCOPE_INPUT_MIN_WIDTH = 60;
-    public static final int SCOPE_INPUT_PREFERRED_WIDTH = 100;
-    public static final int SCOPE_INPUT_MAX_WIDTH = 160;
 
     private final ApplicationConfigurationState applicationConfigurationState;
     private final ArtifactRepositoryCredentialsStore credentialsStore;
@@ -97,14 +89,7 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         globalLocationTable.setStriped(true);
         globalLocationTable.getTableHeader().setReorderingAllowed(false);
 
-        setColumnWidth(globalLocationTable, 1, LOCATION_INPUT_MIN_WIDTH, LOCATION_INPUT_PREFERRED_WIDTH, LOCATION_INPUT_MAX_WIDTH);
-        setColumnWidth(globalLocationTable, 3, SCOPE_INPUT_MIN_WIDTH, SCOPE_INPUT_PREFERRED_WIDTH, SCOPE_INPUT_MAX_WIDTH);
-
-        final var activeColumn = globalLocationTable.getColumnModel().getColumn(0);
-        activeColumn.setMinWidth(ACTIVE_COL_MIN_WIDTH);
-        activeColumn.setPreferredWidth(ACTIVE_COL_MAX_WIDTH);
-        activeColumn.setMaxWidth(ACTIVE_COL_MAX_WIDTH);
-        activeColumn.setResizable(false);
+        LocationTableColumns.apply(globalLocationTable);
 
         reset();
 
@@ -143,13 +128,6 @@ public class CheckStyleApplicationConfigurable implements Configurable {
         description.setWrapStyleWord(true);
         description.setLineWrap(true);
         return description;
-    }
-
-    private static void setColumnWidth(JTable table, int index, int min, int preferred, int max) {
-        final TableColumn column = table.getColumnModel().getColumn(index);
-        column.setMinWidth(min);
-        column.setPreferredWidth(preferred);
-        column.setMaxWidth(max);
     }
 
     @Override

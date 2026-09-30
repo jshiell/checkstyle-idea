@@ -8,7 +8,7 @@ import javax.swing.table.TableColumn;
 /**
  * Column sizing shared by the project and global configuration location tables.
  */
-final class LocationTableColumns {
+public final class LocationTableColumns {
 
     private static final int ACTIVE_COLUMN = 0;
     private static final int DESCRIPTION_COLUMN = 1;
@@ -23,7 +23,7 @@ final class LocationTableColumns {
     private static final int SCOPE_PREFERRED_WIDTH = 100;
     private static final int SCOPE_MAX_WIDTH = 160;
 
-    static void apply(@NotNull final JBTable table) {
+    public static void apply(@NotNull final JBTable table) {
         final TableColumn activeColumn = table.getColumnModel().getColumn(ACTIVE_COLUMN);
         activeColumn.setMinWidth(ACTIVE_MIN_WIDTH);
         activeColumn.setPreferredWidth(ACTIVE_MAX_WIDTH);
