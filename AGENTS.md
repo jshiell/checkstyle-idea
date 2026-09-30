@@ -248,6 +248,9 @@ touch them; turning the opt-in on takes effect at the next sync.
    current `version` in `build.gradle.kts` — check that file first rather than guessing the next number.
 5. Planning for an issue produces a `plan-<issue>.md` file at repo root (gitignored via `/plan-*.md`, not
    committed) — this is the working convention for `/plan-issue`-style sessions, not a build artifact.
+   For a plan with more than five increments, implement in a fresh session every 3–4 increments
+   (`/clear`, then resume from `plan-<issue>.md`) rather than one long session: the 9-increment
+   `GlobalLocationDialogue` work needed three `/compact`s and lost context each time.
 
 ## Known Non-Issues
 
