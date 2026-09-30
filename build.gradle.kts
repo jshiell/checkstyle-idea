@@ -118,10 +118,13 @@ val gradleToolingTest: SourceSet = sourceSets.create("gradleToolingTest")
 
 tasks.named<JavaCompile>("compileGradleToolingJava") {
     // Runs inside an arbitrary target project's own Gradle daemon (see the gradleTooling source-set
-    // comment above), not the IDE's bundled JDK — must stay loadable on older daemon JVMs than this
-    // plugin's own JDK-21 toolchain. 17 is an LTS baseline (not 16, the actual language-feature floor for
-    // CheckstyleGradleModelBuilder's pattern-matching instanceof) chosen to match common daemon JVMs.
-    options.release.set(17)
+    // comment above), not the IDE's bundled JDK. Java 8 because (1) the Tooling API of older Gradle versions
+    // (5.x/6.x) parses these classes in the IDE process with a bundled ASM that rejects newer class file
+    // versions (#710), and (2) the daemon may run a JDK 8. Matches IntelliJ's own injected tooling jars.
+    // GradleToolingJarPackagingTripwireTest enforces it; if a future toolchain drops --release 8, that
+    // test forces a conscious decision about the new floor.
+    options.release.set(8)
+    options.compilerArgs.add("-Xlint:-options") // javac 21 warns that release 8 is obsolete
 }
 
 dependencies {

@@ -64,10 +64,10 @@ class GradleToolingJarPackagingTripwireTest {
     }
 
     @Test
-    void jarClassesTargetNoNewerThanJava17() throws IOException {
-        // class file major_version 61 == Java 17; the target project's own Gradle daemon may run an
+    void jarClassesTargetNoNewerThanJava8() throws IOException {
+        // class file major_version 52 == Java 8; the target project's own Gradle daemon may run an
         // older JDK than the one used to build this plugin, and cannot load classes above its own version.
-        final int maxSupportedMajorVersion = 61;
+        final int maxSupportedMajorVersion = 52;
 
         try (JarFile jarFile = new JarFile(gradleToolingJarFile())) {
             final Enumeration<JarEntry> entries = jarFile.entries();
@@ -82,7 +82,7 @@ class GradleToolingJarPackagingTripwireTest {
                     final int majorVersion = stream.readUnsignedShort();
                     assertTrue(majorVersion <= maxSupportedMajorVersion,
                             entry.getName() + " has class file major version " + majorVersion
-                                    + ", which is newer than Java 17 (" + maxSupportedMajorVersion + ")");
+                                    + ", which is newer than Java 8 (" + maxSupportedMajorVersion + ")");
                 }
             }
         }

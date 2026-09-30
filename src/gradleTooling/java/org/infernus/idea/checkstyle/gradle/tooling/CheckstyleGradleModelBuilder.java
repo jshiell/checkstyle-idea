@@ -2,6 +2,7 @@ package org.infernus.idea.checkstyle.gradle.tooling;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.gradle.api.Project;
@@ -39,8 +40,8 @@ public class CheckstyleGradleModelBuilder implements ModelBuilderService {
 
     private static CheckstyleGradleModel buildModel(final Project project) {
         final Object rawExtension = project.getExtensions().findByName("checkstyle");
-        final CheckstyleExtension extension = rawExtension instanceof CheckstyleExtension checkstyleExtension
-                ? checkstyleExtension : null;
+        final CheckstyleExtension extension = rawExtension instanceof CheckstyleExtension
+                ? (CheckstyleExtension) rawExtension : null;
         final boolean extensionPresent = extension != null;
 
         final String toolVersion = extension != null ? extension.getToolVersion() : null;
@@ -92,7 +93,7 @@ public class CheckstyleGradleModelBuilder implements ModelBuilderService {
 
     private static Map<String, String> stringifyConfigProperties(final Map<String, Object> configProperties) {
         if (configProperties == null) {
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         final Map<String, String> result = new LinkedHashMap<>();
