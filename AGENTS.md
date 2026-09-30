@@ -208,7 +208,8 @@ imported location is left in place, not removed; (9) sync, disable the plugin, r
 data cache still populated, confirm no `ClassNotFoundException`/deserialization error in `idea.log` for
 `CheckstyleGradleModuleData`; (10) repeat scenario 1 against the oldest and newest Gradle versions this project
 intends to support — relevant regardless of IDE version, since `CheckstyleGradleModelBuilder` runs inside the
-*project's* Gradle daemon, not the IDE's. Pass criteria: `.idea/checkstyle-idea.xml` gets the expected
+*project's* Gradle daemon, not the IDE's; this must include Gradle 5.6.4 and 6.9.4 on a JDK 8 Gradle JVM, opt-in
+both off and on (#710); Pass criteria: `.idea/checkstyle-idea.xml` gets the expected
 location/properties/version; no `Throwable` from `org.infernus.idea.checkstyle` in `idea.log`.
 
 The `gradleTooling` source set (`CheckstyleGradleModelBuilder`, injected into the target project's Gradle
@@ -219,6 +220,13 @@ mechanism (filtered out of the leaf configuration `intellijPlatformBundledPlugin
 `~/.gradle/caches/.../transformed/...` path needed. The IntelliJ Platform Gradle Plugin patches *every*
 registered `Jar` task in the project to also embed `META-INF/plugin.xml`; `gradleToolingJar` explicitly
 `exclude("META-INF/plugin.xml")`s so the injected jar carries nothing beyond its own classes.
+
+The `gradleTooling` source set compiles with `--release 8` (#710). The Tooling API of the project's Gradle
+version serialises these classes in the *IDE* process using its own bundled ASM (7.x in Gradle 5/6), which throws
+`Unsupported class file major version` on anything newer — and that happens on every sync, opt-in or not, because
+`GradleCheckstyleResolver` registers the classes unconditionally. A JDK 8 daemon also has to load them.
+`GradleToolingJarPackagingTripwireTest` fails if any class exceeds major version 52. `buildAll` catches
+`Throwable`, not `Exception`, since API drift on old Gradle surfaces as `NoSuchMethodError`.
 
 **Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim.
 
