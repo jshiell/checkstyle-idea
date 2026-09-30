@@ -7,10 +7,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskId;
+import com.intellij.openapi.project.Project;
 import java.util.Map;
+import java.util.Set;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.idea.IdeaModule;
+import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModel;
+import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModelBuilder;
 import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModelImpl;
 import org.jetbrains.plugins.gradle.service.project.GradleProjectResolverExtension;
 import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext;
@@ -18,6 +24,7 @@ import org.jetbrains.plugins.gradle.util.GradleConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -100,6 +107,86 @@ class GradleCheckstyleResolverTest {
         assertThat(restored.getConfigFile(), is(original.getConfigFile()));
         assertThat(restored.getConfigProperties(), is(original.getConfigProperties()));
         assertThat(restored.getToolVersion(), is(original.getToolVersion()));
+    }
+
+    @Test
+    void registersTheToolingClassesWhenGradleImportIsEnabled() {
+        givenProjectWithGradleImport(true);
+
+        assertThat(resolver.getExtraProjectModelClasses(), hasItems(CheckstyleGradleModel.class));
+        assertThat(resolver.getToolingExtensionsClasses(), hasItems(CheckstyleGradleModelBuilder.class,
+                CheckstyleGradleModel.class, CheckstyleGradleModelImpl.class));
+    }
+
+    @Test
+    void registersNoToolingClassesWhenGradleImportIsDisabled() {
+        givenProjectWithGradleImport(false);
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    @Test
+    void registersNoToolingClassesWhenTheProjectCannotBeFound() {
+        final ExternalSystemTaskId taskId = mock(ExternalSystemTaskId.class);
+        when(resolverContext.getExternalSystemTaskId()).thenReturn(taskId);
+        when(taskId.findProject()).thenReturn(null);
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    @Test
+    void registersNoToolingClassesWhenThereIsNoTaskId() {
+        when(resolverContext.getExternalSystemTaskId()).thenReturn(null);
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    @Test
+    void registersNoToolingClassesWhenTheResolverContextHasNotBeenSet() {
+        assertNoClassesRegistered(new GradleCheckstyleResolver());
+    }
+
+    @Test
+    void registersNoToolingClassesWhenTheProjectIsDisposed() {
+        final Project project = givenProjectWithGradleImport(true);
+        when(project.isDisposed()).thenReturn(true);
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    @Test
+    void registersNoToolingClassesWhenTheConfigurationManagerIsUnavailable() {
+        final Project project = givenProjectWithGradleImport(true);
+        when(project.getService(PluginConfigurationManager.class)).thenReturn(null);
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    @Test
+    void registersNoToolingClassesWhenReadingTheConfigurationFails() {
+        final Project project = givenProjectWithGradleImport(true);
+        when(project.getService(PluginConfigurationManager.class)).thenThrow(new IllegalStateException("boom"));
+
+        assertNoClassesRegistered(resolver);
+    }
+
+    private Project givenProjectWithGradleImport(final boolean enabled) {
+        final Project project = mock(Project.class);
+        final PluginConfigurationManager configurationManager = mock(PluginConfigurationManager.class);
+        when(configurationManager.getCurrent()).thenReturn(PluginConfigurationBuilder.testInstance("10.0.0")
+                .withImportSettingsFromGradle(enabled)
+                .build());
+        when(project.getService(PluginConfigurationManager.class)).thenReturn(configurationManager);
+
+        final ExternalSystemTaskId taskId = mock(ExternalSystemTaskId.class);
+        when(taskId.findProject()).thenReturn(project);
+        when(resolverContext.getExternalSystemTaskId()).thenReturn(taskId);
+        return project;
+    }
+
+    private static void assertNoClassesRegistered(final GradleCheckstyleResolver resolver) {
+        assertThat(resolver.getExtraProjectModelClasses(), is(Set.of()));
+        assertThat(resolver.getToolingExtensionsClasses(), is(Set.of()));
     }
 
     @SuppressWarnings("unchecked")

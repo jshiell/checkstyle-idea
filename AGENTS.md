@@ -223,8 +223,10 @@ registered `Jar` task in the project to also embed `META-INF/plugin.xml`; `gradl
 
 The `gradleTooling` source set compiles with `--release 8` (#710). The Tooling API of the project's Gradle
 version serialises these classes in the *IDE* process using its own bundled ASM (7.x in Gradle 5/6), which throws
-`Unsupported class file major version` on anything newer — and that happens on every sync, opt-in or not, because
-`GradleCheckstyleResolver` registers the classes unconditionally. A JDK 8 daemon also has to load them.
+`Unsupported class file major version` on anything newer. A JDK 8 daemon also has to load them.
+`GradleCheckstyleResolver` additionally registers the model/tooling classes only when the project has opted in
+(`isGradleImportEnabled()`, which must never throw and treats any doubt as "off"), so non-users' syncs never
+touch them; turning the opt-in on takes effect at the next sync.
 `GradleToolingJarPackagingTripwireTest` fails if any class exceeds major version 52. `buildAll` catches
 `Throwable`, not `Exception`, since API drift on old Gradle surfaces as `NoSuchMethodError`.
 

@@ -2,9 +2,13 @@ package org.infernus.idea.checkstyle.gradle;
 
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.ModuleData;
+import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskId;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import java.util.Map;
 import java.util.Set;
 import org.gradle.tooling.model.idea.IdeaModule;
+import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModel;
 import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModelBuilder;
 import org.infernus.idea.checkstyle.gradle.tooling.CheckstyleGradleModelImpl;
@@ -23,6 +27,8 @@ import org.jetbrains.plugins.gradle.service.project.AbstractProjectResolverExten
  */
 public class GradleCheckstyleResolver extends AbstractProjectResolverExtension {
 
+    private static final Logger LOG = Logger.getInstance(GradleCheckstyleResolver.class);
+
     @Override
     public void populateModuleExtraModels(@NotNull final IdeaModule gradleModule,
                                            @NotNull final DataNode<ModuleData> ideModule) {
@@ -37,14 +43,40 @@ public class GradleCheckstyleResolver extends AbstractProjectResolverExtension {
     @NotNull
     @Override
     public Set<Class<?>> getExtraProjectModelClasses() {
-        return Set.of(CheckstyleGradleModel.class);
+        return isGradleImportEnabled() ? Set.of(CheckstyleGradleModel.class) : Set.of();
     }
 
     @NotNull
     @Override
     public Set<Class<?>> getToolingExtensionsClasses() {
-        return Set.of(CheckstyleGradleModelBuilder.class, CheckstyleGradleModel.class,
-                CheckstyleGradleModelImpl.class);
+        return isGradleImportEnabled()
+                ? Set.of(CheckstyleGradleModelBuilder.class, CheckstyleGradleModel.class,
+                        CheckstyleGradleModelImpl.class)
+                : Set.of();
+    }
+
+    /**
+     * The model and tooling classes are only handed to Gradle's Tooling API when the project has opted in:
+     * older Gradle versions inspect every registered class while serialising the sync action, so registering
+     * them unconditionally puts them in the blast radius of every Gradle sync (#710). Must never throw, as
+     * that would fail the sync of every Gradle project; any doubt means "not enabled".
+     */
+    private boolean isGradleImportEnabled() {
+        try {
+            if (resolverCtx == null) {
+                return false;
+            }
+            final ExternalSystemTaskId taskId = resolverCtx.getExternalSystemTaskId();
+            final Project project = taskId != null ? taskId.findProject() : null;
+            if (project == null || project.isDisposed()) {
+                return false;
+            }
+            final PluginConfigurationManager configurationManager = project.getService(PluginConfigurationManager.class);
+            return configurationManager != null && configurationManager.getCurrent().isImportSettingsFromGradle();
+        } catch (final RuntimeException e) {
+            LOG.warn("Could not determine whether Gradle settings import is enabled; treating it as disabled", e);
+            return false;
+        }
     }
 
     @NotNull

@@ -1,7 +1,7 @@
 
 # CheckStyle-IDEA Changelog
 
-* **26.19.0** Fixed: Gradle sync no longer fails on Gradle 5.x/6.x with "Unsupported class file major version 61", even with "Import settings from Gradle" disabled; the Gradle import now also works with older Gradle JVMs (#710).
+* **26.19.0** Fixed: Gradle sync no longer fails on Gradle 5.x/6.x with "Unsupported class file major version 61", even with "Import settings from Gradle" disabled; the Gradle tooling classes are now only registered when the import is enabled, and work with older Gradle JVMs (#710).
 * **26.19.0** New: Added Checkstyle 14.3.0.
 * **26.19.0** Changed: The "Checkstyle" and "Checkstyle Downloads" settings pages are now "Checkstyle Project" and "Checkstyle Global", nested under a new "Checkstyle" parent (Settings > Tools > Checkstyle).
 * **26.19.0** Fixed: Path segment duplicated in project relative locations (#708).
