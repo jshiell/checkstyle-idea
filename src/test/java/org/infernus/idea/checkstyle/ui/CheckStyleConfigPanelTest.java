@@ -1,6 +1,7 @@
 package org.infernus.idea.checkstyle.ui;
 
 import com.intellij.testFramework.LightPlatformTestCase;
+import com.intellij.ui.table.JBTable;
 import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
 import org.infernus.idea.checkstyle.ThirdPartyJarCache;
 import org.infernus.idea.checkstyle.config.ConventionalConfigurationLocationScanner.ScanOutcome;
@@ -15,6 +16,7 @@ import org.infernus.idea.checkstyle.model.ConfigurationLocationFactory;
 import org.infernus.idea.checkstyle.model.ConfigurationType;
 import org.infernus.idea.checkstyle.model.NamedScopeHelper;
 
+import javax.swing.table.TableColumn;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -39,6 +41,22 @@ public class CheckStyleConfigPanelTest extends LightPlatformTestCase {
         configurationManager = getProject().getService(PluginConfigurationManager.class);
         configurationManager.setCurrent(PluginConfigurationBuilder.defaultConfiguration(getProject()).build(), false);
         panel = new CheckStyleConfigPanel(getProject());
+    }
+
+    public void testLocationTableColumnsMatchTheGlobalTable() {
+        final JBTable global = new JBTable(new GlobalLocationTableModel());
+        LocationTableColumns.apply(global);
+        final JBTable project = panel.locationTable();
+
+        for (int index = 0; index < global.getColumnCount(); index++) {
+            final TableColumn expected = global.getColumnModel().getColumn(index);
+            final TableColumn actual = project.getColumnModel().getColumn(index);
+            assertEquals("min width of column " + index, expected.getMinWidth(), actual.getMinWidth());
+            assertEquals("preferred width of column " + index, expected.getPreferredWidth(), actual.getPreferredWidth());
+            assertEquals("max width of column " + index, expected.getMaxWidth(), actual.getMaxWidth());
+            assertEquals("resizable of column " + index, expected.getResizable(), actual.getResizable());
+        }
+        assertEquals(global.getAutoResizeMode(), project.getAutoResizeMode());
     }
 
     public void testAnUntouchedCheckboxReturnsTheLiveScanBeforeCheckin() {

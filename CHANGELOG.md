@@ -2,6 +2,7 @@
 # CheckStyle-IDEA Changelog
 
 * **26.19.0** New: Added Checkstyle 14.3.0.
+* **26.19.0** Changed: The rule locations table on the "Checkstyle Project" settings page now uses the same column widths as the "Checkstyle Global" page.
 * **26.19.0** Changed: The "Checkstyle" and "Checkstyle Downloads" settings pages are now "Checkstyle Project" and "Checkstyle Global", nested under a new "Checkstyle" parent (Settings > Tools > Checkstyle).
 * **26.19.0** Fixed: Path segment duplicated in project relative locations (#708).
 * **26.19.0** New: Added support for global configuration settings, which apply across all projects (#707). Thanks to @alexBlakeGoudemond.

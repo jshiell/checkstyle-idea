@@ -49,7 +49,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
@@ -65,10 +64,6 @@ import static java.util.Objects.requireNonNullElseGet;
  */
 public class CheckStyleConfigPanel extends JPanel {
     private static final Insets COMPONENT_INSETS = JBUI.insets(4);
-    private static final int ACTIVE_COL_MIN_WIDTH = 40;
-    private static final int ACTIVE_COL_MAX_WIDTH = 50;
-    private static final int DESC_COL_MIN_WIDTH = 100;
-    private static final int DESC_COL_MAX_WIDTH = 200;
     private static final Dimension DECORATOR_DIMENSIONS = new Dimension(300, 50);
 
     private final JList<String> pathList = new JBList<>(new DefaultListModel<>());
@@ -251,9 +246,7 @@ public class CheckStyleConfigPanel extends JPanel {
     }
 
     private JPanel buildRuleFilePanel() {
-        setColumnWith(locationTable, 0, ACTIVE_COL_MIN_WIDTH, ACTIVE_COL_MAX_WIDTH, ACTIVE_COL_MAX_WIDTH);
-        setColumnWith(locationTable, 1, DESC_COL_MIN_WIDTH, DESC_COL_MAX_WIDTH, DESC_COL_MAX_WIDTH);
-        locationTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        LocationTableColumns.apply(locationTable);
         locationTable.setStriped(true);
         locationTable.getTableHeader().setReorderingAllowed(false);
 
@@ -290,20 +283,6 @@ public class CheckStyleConfigPanel extends JPanel {
         container.add(new TitledSeparator(CheckStyleBundle.message("config.path.tab")), BorderLayout.NORTH);
         container.add(pathListDecorator.createPanel(), BorderLayout.CENTER);
         return container;
-    }
-
-    private void setColumnWith(final JTable table,
-                               final int columnIndex,
-                               final int minSize,
-                               final int preferredSize,
-                               final Integer maxSize) {
-        final TableColumn column = table.getColumnModel().getColumn(columnIndex);
-        column.setMinWidth(minSize);
-        column.setWidth(preferredSize);
-        column.setPreferredWidth(preferredSize);
-        if (maxSize != null) {
-            column.setMaxWidth(maxSize);
-        }
     }
 
     private void setThirdPartyClasspath(final List<String> classpath) {
@@ -878,6 +857,10 @@ public class CheckStyleConfigPanel extends JPanel {
 
     LocationTableModel locationModel() {
         return locationModel;
+    }
+
+    JBTable locationTable() {
+        return locationTable;
     }
 
     private final class EnableWhenSelectedAndRemovable implements AnActionButtonUpdater {
