@@ -4,7 +4,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat;
@@ -19,7 +18,6 @@ import java.util.Collections;
  */
 public class GradlePluginMain implements Plugin<Project> {
     public static final String CSLIB_TARGET_SUBFOLDER = "checkstyle/lib";
-    private static final String CSCLASSES_TARGET_SUBFOLDER = "checkstyle/classes";
 
     private CheckstyleVersions supportedCsVersions = null;
 
@@ -34,9 +32,6 @@ public class GradlePluginMain implements Plugin<Project> {
         createCrossCheckTasks(project);
         createCheckstyleArtifactTasks(project);
         new CustomSourceSetCreator(project).setupCoverageVerification();
-
-        addCheckstyleFilesToSandbox(project, false);
-        addCheckstyleFilesToSandbox(project, true);
     }
 
     private void establishSourceSets(final Project project) {
@@ -96,6 +91,8 @@ public class GradlePluginMain implements Plugin<Project> {
     private void createCheckstyleArtifactTasks(final Project project) {
         TaskProvider<GatherCheckstyleArtifactsTask> taskProvider =
                 project.getTasks().register(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
+        project.getTasks().named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+                .configure(processResources -> processResources.dependsOn(taskProvider));
         taskProvider.configure((GatherCheckstyleArtifactsTask task) -> {
             project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(task);
 
@@ -105,38 +102,6 @@ public class GradlePluginMain implements Plugin<Project> {
                 SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
                 mainSourceSet.getResources().srcDir(task.getClassPathsInfoFile().getParentFile());
             }
-        });
-    }
-
-    private void addCheckstyleFilesToSandbox(final Project project, final boolean test) {
-        final TaskContainer tasks = project.getTasks();
-        final String prepareTaskName;
-        if (test) {
-            prepareTaskName = "prepareTestSandbox";
-        } else {
-            prepareTaskName = "prepareSandbox";
-        }
-
-        final TaskProvider<Sync> prepareSandbox = tasks.named(prepareTaskName, Sync.class);
-        final TaskProvider<GatherCheckstyleArtifactsTask> gatherTask =
-                tasks.named(GatherCheckstyleArtifactsTask.NAME, GatherCheckstyleArtifactsTask.class);
-
-
-        final JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
-        final SourceSet csaccessSourceSet =
-                java.getSourceSets().getByName(CustomSourceSetCreator.CSACCESS_SOURCESET_NAME);
-
-        tasks.named("processResources").configure(task -> task.dependsOn(gatherTask));
-
-        prepareSandbox.configure(task -> {
-            task.dependsOn(gatherTask);
-            task.dependsOn(tasks.named(csaccessSourceSet.getClassesTaskName()));
-
-            task.from(gatherTask.map(GatherCheckstyleArtifactsTask::getBundledJarsDir), spec ->
-                    spec.into("checkstyle-idea/" + CSLIB_TARGET_SUBFOLDER));
-
-            task.from(csaccessSourceSet.getOutput(), spec ->
-                    spec.into("checkstyle-idea/" + CSCLASSES_TARGET_SUBFOLDER));
         });
     }
 }

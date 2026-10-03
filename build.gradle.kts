@@ -1,5 +1,7 @@
 import org.infernus.idea.checkstyle.build.CheckstyleVersions
+import org.infernus.idea.checkstyle.build.GatherCheckstyleArtifactsTask
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 repositories {
     mavenCentral()
@@ -235,10 +237,27 @@ val gradleToolingJar = tasks.register<Jar>("gradleToolingJar") {
     exclude("META-INF/plugin.xml")
 }
 
-listOf("prepareSandbox", "prepareTestSandbox").forEach { taskName ->
-    tasks.named<Sync>(taskName) {
-        dependsOn(gradleToolingJar)
-        from(gradleToolingJar) { into("checkstyle-idea/lib") }
+val gatherCheckstyleArtifacts = tasks.named<GatherCheckstyleArtifactsTask>(GatherCheckstyleArtifactsTask.NAME)
+val csaccessOutput = sourceSets.named("csaccess").map { it.output }
+
+// Every sandbox variant (prepareSandbox, prepareTestSandbox, prepareSandbox_runIde, ...) needs the
+// Checkstyle classes, libs and tooling jar, so match on the task type rather than a list of names.
+tasks.withType<PrepareSandboxTask>().configureEach {
+    dependsOn(gatherCheckstyleArtifacts, gradleToolingJar, tasks.named("csaccessClasses"))
+    from(gatherCheckstyleArtifacts.map { it.bundledJarsDir }) { into("checkstyle-idea/checkstyle/lib") }
+    from(csaccessOutput) { into("checkstyle-idea/checkstyle/classes") }
+    from(gradleToolingJar) { into("checkstyle-idea/lib") }
+}
+
+// runIde, runIdeBackend, etc. each get their own prepareSandbox_* task; a sandbox without the Checkstyle
+// classes, libs and tooling jar loads fine but fails the first time the plugin needs its classloader.
+tasks.withType<PrepareSandboxTask>().configureEach {
+    val pluginDir = destinationDir.resolve("checkstyle-idea")
+    val toolingJarName = "lib/checkstyle-idea-gradle-tooling-${project.version}.jar"
+    doLast {
+        val missing = listOf("checkstyle/classes", "checkstyle/lib", toolingJarName)
+            .filter { !pluginDir.resolve(it).exists() }
+        check(missing.isEmpty()) { "Sandbox $pluginDir is missing $missing" }
     }
 }
 
