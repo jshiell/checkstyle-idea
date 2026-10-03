@@ -141,7 +141,14 @@ rendering it (`MessageFormat.format(pattern, args)`), not by inspection; a test 
 
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
-**Sandbox:** `build/idea-sandbox/` — not auto-cleaned; delete manually if stale.
+**Sandbox:** `.intellijPlatform/sandbox/checkstyle-idea/IC-<version>/` — not auto-cleaned (`cleanSandbox` exists);
+delete manually if stale. Each IDE-launching task has its own prepare task and plugins dir: `runIde` uses
+`prepareSandbox_runIde` → `plugins_runIde/`, tests use `plugins-test/`, and `plugins/` belongs to plain
+`prepareSandbox`. Contents of one tell you nothing about another. `build.gradle.kts` wires the Checkstyle
+classes/libs and the Gradle tooling jar into every `PrepareSandboxTask` by type, and fails the task if
+`checkstyle/classes`, `checkstyle/lib` or the tooling jar is missing — a sandbox lacking them otherwise loads
+fine and then dies with "Could not determine plugin directory or build directory" the first time a
+classloader is needed.
 
 **`./gradlew verifyPlugin` works** — as of the 2025.1 base version with IntelliJ Platform Gradle Plugin
 2.18.1. It previously aborted on the descriptor check (`The plugin name 'CheckStyle-IDEA' should not include
