@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -29,5 +31,12 @@ final class PluginBasePathCandidates {
             }
         }
         return null;
+    }
+
+    @NotNull
+    static String describeRejected(@NotNull final List<String> candidatePaths) {
+        return candidatePaths.stream()
+                .map(path -> Objects.requireNonNullElse(path, "(not found)"))
+                .collect(Collectors.joining(", "));
     }
 }

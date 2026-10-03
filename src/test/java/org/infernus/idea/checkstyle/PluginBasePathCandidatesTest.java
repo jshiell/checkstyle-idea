@@ -54,4 +54,15 @@ class PluginBasePathCandidatesTest {
 
         assertNull(result);
     }
+
+    @Test
+    void describesRejectedCandidatesIncludingMissingOnes() {
+        final List<String> paths = new ArrayList<>();
+        paths.add("/plugins/checkstyle-idea");
+        paths.add(null);
+
+        final String description = PluginBasePathCandidates.describeRejected(paths);
+
+        assertEquals("/plugins/checkstyle-idea, (not found)", description);
+    }
 }

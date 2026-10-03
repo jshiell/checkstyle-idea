@@ -231,7 +231,8 @@ public class CheckstyleClassLoaderContainer {
         }
 
         if (unitTestingClassPath == null) {
-            throw new CheckStylePluginException("Could not determine plugin directory or build directory");
+            throw new CheckStylePluginException("Could not determine plugin directory or build directory: "
+                    + "no plugin directory containing checkstyle/classes, and no build output on the classpath");
         }
         return unitTestingClassPath;
     }
@@ -287,7 +288,13 @@ public class CheckstyleClassLoaderContainer {
                 this::getPluginPath,
                 this::getPreinstalledPluginPath);
 
-        return PluginBasePathCandidates.selectFirstValid(candidates, this::hasExpectedLayout);
+        final String basePath = PluginBasePathCandidates.selectFirstValid(candidates, this::hasExpectedLayout);
+        if (basePath == null) {
+            LOG.warn("No plugin directory containing checkstyle/classes was found; tried: "
+                    + PluginBasePathCandidates.describeRejected(
+                            candidates.stream().map(Supplier::get).toList()));
+        }
+        return basePath;
     }
 
     /**
