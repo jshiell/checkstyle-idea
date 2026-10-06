@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import org.infernus.idea.checkstyle.TestHelper;
+import org.infernus.idea.checkstyle.UnsupportedImportedVersionWarner;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -32,6 +33,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -45,7 +48,10 @@ class GradleCheckstyleDataServiceTest {
     private final ProjectData projectData = mock(ProjectData.class);
     private final IdeModelsProvider modelsProvider = mock(IdeModelsProvider.class);
 
-    private final GradleCheckstyleDataService dataService = new GradleCheckstyleDataService();
+    private final UnsupportedImportedVersionWarner.Notifier notifier =
+            mock(UnsupportedImportedVersionWarner.Notifier.class);
+    private final GradleCheckstyleDataService dataService =
+            new GradleCheckstyleDataService(new UnsupportedImportedVersionWarner(notifier));
 
     @BeforeEach
     void setUp() {
@@ -176,6 +182,7 @@ class GradleCheckstyleDataServiceTest {
                 projectData, project, modelsProvider);
 
         assertThat(capturedConfiguration().getCheckstyleVersion(), is(current.getCheckstyleVersion()));
+        verify(notifier).showWarning(eq(project), contains("not-a-real-version"));
     }
 
     @Test

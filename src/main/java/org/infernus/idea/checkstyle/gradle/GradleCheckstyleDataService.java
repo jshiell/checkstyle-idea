@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import org.infernus.idea.checkstyle.UnsupportedImportedVersionWarner;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -42,6 +43,16 @@ public class GradleCheckstyleDataService implements ProjectDataService<Checkstyl
     // On every Gradle sync any location with this ID is replaced unconditionally.
     static final String GRADLE_CONFIG_LOCATION_ID = "gradle-config-location";
     static final String GRADLE_CONFIG_LOCATION_DESCRIPTION = "Gradle Config Location";
+
+    private final UnsupportedImportedVersionWarner unsupportedVersionWarner;
+
+    public GradleCheckstyleDataService() {
+        this(new UnsupportedImportedVersionWarner());
+    }
+
+    GradleCheckstyleDataService(@NotNull final UnsupportedImportedVersionWarner unsupportedVersionWarner) {
+        this.unsupportedVersionWarner = unsupportedVersionWarner;
+    }
 
     @NotNull
     @Override
@@ -120,7 +131,7 @@ public class GradleCheckstyleDataService implements ProjectDataService<Checkstyl
             configLocations.add(location);
             activeConfigLocationIds.add(location.getId());
 
-            applyToolVersion(data.getToolVersion(), currentPluginConfiguration, pluginConfigurationBuilder);
+            applyToolVersion(project, data.getToolVersion(), currentPluginConfiguration, pluginConfigurationBuilder);
         }
         // If no incoming module has a usable configFile, the reserved-id location has already been
         // removed above and nothing further needs to happen here.
@@ -154,9 +165,10 @@ public class GradleCheckstyleDataService implements ProjectDataService<Checkstyl
         return Path.of(file.getAbsolutePath()).startsWith(Path.of(basePath));
     }
 
-    private static void applyToolVersion(@Nullable final String toolVersion,
-                                          @NotNull final PluginConfiguration currentPluginConfiguration,
-                                          @NotNull final PluginConfigurationBuilder pluginConfigurationBuilder) {
+    private void applyToolVersion(@NotNull final Project project,
+                                  @Nullable final String toolVersion,
+                                  @NotNull final PluginConfiguration currentPluginConfiguration,
+                                  @NotNull final PluginConfigurationBuilder pluginConfigurationBuilder) {
         if (toolVersion == null) {
             return;
         }
@@ -172,6 +184,8 @@ public class GradleCheckstyleDataService implements ProjectDataService<Checkstyl
             LOG.warn("Gradle project reports Checkstyle tool version '" + toolVersion
                     + "', which is not a version this plugin supports; leaving the current version ('"
                     + currentPluginConfiguration.getCheckstyleVersion() + "') unchanged");
+            unsupportedVersionWarner.warnIfUnsupported(project, "Gradle", toolVersion,
+                    currentPluginConfiguration.getCheckstyleVersion());
         }
     }
 }
