@@ -1,6 +1,8 @@
 
 # CheckStyle-IDEA Changelog
 
+* **26.19.1** Fixed: Maven and Gradle import now apply the replacement for a Checkstyle version this plugin maps to a supported one (e.g. 10.21.2 becomes 10.21.3) instead of ignoring it (#705).
+* **26.19.1** Changed: A Checkstyle version reported by a Maven dependency or Gradle toolVersion that this plugin neither supports nor replaces now shows a warning, once per project and version per session, instead of being ignored silently (#705).
 * **26.19.1** Fixed: The `<localRepository>` override in Maven `settings.xml` was ignored on newer IDEs (2026.1.x and later, `NoSuchMethodError`) (#706).
 * **26.19.0** Fixed: Gradle sync no longer fails on Gradle 5.x/6.x with "Unsupported class file major version 61", even with "Import settings from Gradle" disabled; the Gradle tooling classes are now only registered when the import is enabled, and work with older Gradle JVMs (#710).
 * **26.19.0** New: Added Checkstyle 14.3.0.
