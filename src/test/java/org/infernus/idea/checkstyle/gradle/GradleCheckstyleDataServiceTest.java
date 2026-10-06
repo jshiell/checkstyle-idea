@@ -154,6 +154,18 @@ class GradleCheckstyleDataServiceTest {
     }
 
     @Test
+    void mappedToolVersionIsReplacedWithItsSupportedTarget(@TempDir final Path tempDir) throws Exception {
+        givenCurrentConfiguration(configuration(true));
+        final File configFile = existingFile(tempDir, "checkstyle.xml");
+
+        dataService.onSuccessImport(
+                List.of(moduleNode(":", configFile.toPath(), Map.of(), "10.21.2")),
+                projectData, project, modelsProvider);
+
+        assertThat(capturedConfiguration().getCheckstyleVersion(), is("10.21.3"));
+    }
+
+    @Test
     void unsupportedToolVersionLeavesTheCheckstyleVersionUnchanged(@TempDir final Path tempDir) throws Exception {
         final PluginConfiguration current = configuration(true);
         givenCurrentConfiguration(current);

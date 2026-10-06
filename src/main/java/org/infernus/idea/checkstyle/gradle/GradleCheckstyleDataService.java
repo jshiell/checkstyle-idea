@@ -161,8 +161,13 @@ public class GradleCheckstyleDataService implements ProjectDataService<Checkstyl
             return;
         }
 
-        if (new VersionListReader().getSupportedVersions().contains(toolVersion)) {
-            pluginConfigurationBuilder.withCheckstyleVersion(toolVersion);
+        final Optional<String> supportedVersion = new VersionListReader().resolveSupportedVersion(toolVersion);
+        if (supportedVersion.isPresent()) {
+            if (!supportedVersion.get().equals(toolVersion)) {
+                LOG.info("Gradle project reports Checkstyle tool version '" + toolVersion
+                        + "', which this plugin replaces with '" + supportedVersion.get() + "'");
+            }
+            pluginConfigurationBuilder.withCheckstyleVersion(supportedVersion.get());
         } else {
             LOG.warn("Gradle project reports Checkstyle tool version '" + toolVersion
                     + "', which is not a version this plugin supports; leaving the current version ('"
