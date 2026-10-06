@@ -147,8 +147,13 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
 
         final String version = checkstyleDependencyMavenId.getVersion();
-        if (new VersionListReader().getSupportedVersions().contains(version)) {
-            pluginConfigurationBuilder.withCheckstyleVersion(version);
+        final Optional<String> supportedVersion = new VersionListReader().resolveSupportedVersion(version);
+        if (supportedVersion.isPresent()) {
+            if (!supportedVersion.get().equals(version)) {
+                LOG.info("Maven project reports Checkstyle version '" + version
+                        + "', which this plugin replaces with '" + supportedVersion.get() + "'");
+            }
+            pluginConfigurationBuilder.withCheckstyleVersion(supportedVersion.get());
         } else {
             LOG.warn("Maven project reports Checkstyle version '" + version
                     + "', which is not a version this plugin supports; leaving the current version ('"

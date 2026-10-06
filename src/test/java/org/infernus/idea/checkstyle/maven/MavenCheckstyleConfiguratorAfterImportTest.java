@@ -172,6 +172,20 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         assertEquals("10.26.1", configManager.getCurrent().getCheckstyleVersion());
     }
 
+    public void testImportSettingsFromMavenIsEnabledAppliesReplacementForMappedVersion() {
+        configManager.setCurrent(
+            PluginConfigurationBuilder.from(configManager.getCurrent())
+                .withImportSettingsFromMaven(true)
+                .withCheckstyleVersion("10.25.1")
+                .build(),
+            true);
+        pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.21.2")));
+
+        configurator.afterImport(context);
+
+        assertEquals("10.21.3", configManager.getCurrent().getCheckstyleVersion());
+    }
+
     public void testImportSettingsFromMavenIsEnabledWithUnsupportedVersionLeavesVersionUnchanged() {
         configManager.setCurrent(
             PluginConfigurationBuilder.from(configManager.getCurrent())
