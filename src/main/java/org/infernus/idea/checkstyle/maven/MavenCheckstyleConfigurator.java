@@ -22,6 +22,7 @@ import org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
 import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
+import org.infernus.idea.checkstyle.UnsupportedImportedVersionWarner;
 import org.infernus.idea.checkstyle.VersionListReader;
 import org.infernus.idea.checkstyle.config.PluginConfiguration;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
@@ -73,6 +74,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     private static final String MAVEN_CONFIG_LOCATION_ID = "maven-config-location";
 
     private final CheckstyleArtifactDownloader checkstyleArtifactDownloader;
+    private final UnsupportedImportedVersionWarner unsupportedVersionWarner;
 
     public MavenCheckstyleConfigurator() {
         this(CheckstyleArtifactDownloader.create(new LocalRepositoryPathResolver().resolve(),
@@ -80,7 +82,13 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
     }
 
     MavenCheckstyleConfigurator(@NotNull final CheckstyleArtifactDownloader checkstyleArtifactDownloader) {
+        this(checkstyleArtifactDownloader, new UnsupportedImportedVersionWarner());
+    }
+
+    MavenCheckstyleConfigurator(@NotNull final CheckstyleArtifactDownloader checkstyleArtifactDownloader,
+                                @NotNull final UnsupportedImportedVersionWarner unsupportedVersionWarner) {
         this.checkstyleArtifactDownloader = checkstyleArtifactDownloader;
+        this.unsupportedVersionWarner = unsupportedVersionWarner;
     }
 
     @NotNull
@@ -114,12 +122,14 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return;
         }
 
-        final var checkstyleDependencyMavenId = findCheckstyleMavenId(checkstyleMavenPlugin,
-            mavenProject, project);
+        final var explicitCheckstyleMavenId = findExplicitCheckstyleMavenId(checkstyleMavenPlugin);
+        final var checkstyleDependencyMavenId = explicitCheckstyleMavenId.orElseGet(
+            () -> findCheckstyleMavenIdInPom(project, mavenProject, checkstyleMavenPlugin));
 
         final var pluginConfigurationBuilder = PluginConfigurationBuilder.from(
             currentPluginConfiguration);
-        applyCheckstyleVersion(checkstyleDependencyMavenId, currentPluginConfiguration, pluginConfigurationBuilder);
+        applyCheckstyleVersion(project, checkstyleDependencyMavenId, explicitCheckstyleMavenId.isPresent(),
+            currentPluginConfiguration, pluginConfigurationBuilder);
 
         pluginConfigurationBuilder.withThirdPartyClassPath(
             createThirdPartyClasspath(checkstyleMavenPlugin, mavenProject));
@@ -139,8 +149,10 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         }
     }
 
-    private static void applyCheckstyleVersion(@Nullable final MavenId checkstyleDependencyMavenId,
-                                                @NotNull final PluginConfiguration currentPluginConfiguration,
+    private void applyCheckstyleVersion(@NotNull final Project project,
+                                        @Nullable final MavenId checkstyleDependencyMavenId,
+                                        final boolean declaredByUser,
+                                        @NotNull final PluginConfiguration currentPluginConfiguration,
                                                 @NotNull final PluginConfigurationBuilder pluginConfigurationBuilder) {
         if (checkstyleDependencyMavenId == null || checkstyleDependencyMavenId.getVersion() == null) {
             return;
@@ -158,6 +170,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             LOG.warn("Maven project reports Checkstyle version '" + version
                     + "', which is not a version this plugin supports; leaving the current version ('"
                     + currentPluginConfiguration.getCheckstyleVersion() + "') unchanged");
+            // A version inherited from the Maven plugin's own POM is its default, not something the user chose.
+            if (declaredByUser) {
+                unsupportedVersionWarner.warnIfUnsupported(project, "Maven", version,
+                        currentPluginConfiguration.getCheckstyleVersion());
+            }
         }
     }
 
@@ -355,13 +372,11 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         return VirtualFileManager.getInstance().findFileByNioPath(pomPath);
     }
 
-    @Nullable
-    private static MavenId findCheckstyleMavenId(@NotNull final MavenPlugin checkstyleMavenPlugin,
-        @NotNull final MavenProject mavenProject, @NotNull final Project project) {
+    @NotNull
+    private static Optional<MavenId> findExplicitCheckstyleMavenId(@NotNull final MavenPlugin checkstyleMavenPlugin) {
         return checkstyleMavenPlugin.getDependencies().stream().filter(
             dependency -> CHECKSTYLE_MAVEN_ID.equals(dependency.getGroupId(),
-                dependency.getArtifactId())).findFirst().orElseGet(
-            () -> findCheckstyleMavenIdInPom(project, mavenProject, checkstyleMavenPlugin));
+                dependency.getArtifactId())).findFirst();
     }
 
     @Nullable

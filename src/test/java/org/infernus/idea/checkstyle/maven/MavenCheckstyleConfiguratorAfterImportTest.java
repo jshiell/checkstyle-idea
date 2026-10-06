@@ -9,6 +9,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -16,7 +17,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import kotlin.sequences.SequencesKt;
 import org.infernus.idea.checkstyle.CheckstyleArtifactDownloader;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import org.infernus.idea.checkstyle.LocalRepositoryPathResolver;
+import org.infernus.idea.checkstyle.UnsupportedImportedVersionWarner;
 import org.infernus.idea.checkstyle.config.PluginConfigurationBuilder;
 import org.infernus.idea.checkstyle.config.PluginConfigurationManager;
 import org.infernus.idea.checkstyle.exception.CheckstyleDownloadException;
@@ -31,11 +36,18 @@ import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.model.MavenPlugin;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.utils.MavenUtil;
+import org.jetbrains.annotations.NotNull;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.quality.Strictness;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -50,13 +62,16 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     private MavenProject mavenProject;
     private Path physicalTempDir;
     private CheckstyleArtifactDownloader checkstyleArtifactDownloader;
+    private UnsupportedImportedVersionWarner.Notifier notifier;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         checkstyleArtifactDownloader = mock(CheckstyleArtifactDownloader.class);
         when(checkstyleArtifactDownloader.download(anyString())).thenReturn(List.of());
-        configurator = new MavenCheckstyleConfigurator(checkstyleArtifactDownloader);
+        notifier = mock(UnsupportedImportedVersionWarner.Notifier.class);
+        configurator = new MavenCheckstyleConfigurator(checkstyleArtifactDownloader,
+            new UnsupportedImportedVersionWarner(notifier));
         configManager = getProject().getService(PluginConfigurationManager.class);
 
         physicalTempDir = Files.createTempDirectory("maven-test");
@@ -76,7 +91,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         context = mock(MavenAfterImportConfigurator.Context.class);
         when(context.getProject()).thenReturn(getProject());
         when(context.getMavenProjectsWithModules())
-            .thenReturn(SequencesKt.asSequence(List.of(projectWithModules).iterator()));
+            .thenAnswer(invocation -> SequencesKt.asSequence(List.of(projectWithModules).iterator()));
     }
 
     private MavenPlugin pluginWithConfig(final Element configElement) {
@@ -184,6 +199,45 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
         configurator.afterImport(context);
 
         assertEquals("10.21.3", configManager.getCurrent().getCheckstyleVersion());
+    }
+
+    public void testUnsupportedDeclaredVersionWarnsOncePerVersionAcrossImports() {
+        enableMavenImport();
+        pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "99.0.0")));
+
+        configurator.afterImport(context);
+        configurator.afterImport(context);
+
+        verify(notifier, times(1)).showWarning(eq(getProject()), contains("99.0.0"));
+    }
+
+    public void testUnsupportedDeclaredVersionShowsAWarningBalloon() {
+        enableMavenImport();
+        pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "99.0.0")));
+        final List<Notification> shown = new ArrayList<>();
+        getProject().getMessageBus().connect(getTestRootDisposable()).subscribe(Notifications.TOPIC,
+            new Notifications() {
+                @Override
+                public void notify(@NotNull final Notification notification) {
+                    shown.add(notification);
+                }
+            });
+        final var realNotifierConfigurator = new MavenCheckstyleConfigurator(checkstyleArtifactDownloader);
+
+        realNotifierConfigurator.afterImport(context);
+
+        assertEquals(1, shown.size());
+        assertEquals(NotificationType.WARNING, shown.get(0).getType());
+        assertTrue(shown.get(0).getContent().contains("99.0.0"));
+    }
+
+    public void testMappedDeclaredVersionDoesNotWarn() {
+        enableMavenImport();
+        pluginWithDependencies(List.of(dep("com.puppycrawl.tools", "checkstyle", "10.21.2")));
+
+        configurator.afterImport(context);
+
+        verify(notifier, never()).showWarning(any(), anyString());
     }
 
     public void testImportSettingsFromMavenIsEnabledWithUnsupportedVersionLeavesVersionUnchanged() {
