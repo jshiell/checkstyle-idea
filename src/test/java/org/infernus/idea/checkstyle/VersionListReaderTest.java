@@ -4,6 +4,8 @@ package org.infernus.idea.checkstyle;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -86,5 +88,24 @@ public class VersionListReaderTest {
     public void isLatestReturnsFalseForConcreteVersion() {
         VersionListReader underTest = new VersionListReader();
         assertFalse(underTest.isLatest("10.0"));
+    }
+
+    @Test
+    public void resolveSupportedVersionReturnsSupportedVersionItself() {
+        VersionListReader underTest = new VersionListReader("checkstyle-idea.resolve.properties");
+        assertEquals(Optional.of("7.2"), underTest.resolveSupportedVersion("7.2"));
+    }
+
+    @Test
+    public void resolveSupportedVersionReturnsMappedTargetForReplacedVersion() {
+        VersionListReader underTest = new VersionListReader("checkstyle-idea.resolve.properties");
+        assertEquals(Optional.of("7.1"), underTest.resolveSupportedVersion("7.0"));
+        assertEquals(Optional.of("7.2"), underTest.resolveSupportedVersion("6.9"));
+    }
+
+    @Test
+    public void resolveSupportedVersionReturnsEmptyForUnknownVersion() {
+        VersionListReader underTest = new VersionListReader("checkstyle-idea.resolve.properties");
+        assertEquals(Optional.empty(), underTest.resolveSupportedVersion("99.0.0"));
     }
 }

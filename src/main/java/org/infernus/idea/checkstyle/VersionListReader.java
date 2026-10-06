@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -200,6 +201,20 @@ public class VersionListReader {
     @NotNull
     public SortedMap<String, String> getReplacementMap() {
         return replacementMap;
+    }
+
+    /**
+     * Resolves a Checkstyle version reported by an external source to one this plugin supports.
+     *
+     * @param version the reported version
+     * @return the version itself if supported, its replacement if mapped, otherwise empty
+     */
+    @NotNull
+    public Optional<String> resolveSupportedVersion(@NotNull final String version) {
+        if (supportedVersions.contains(version)) {
+            return Optional.of(version);
+        }
+        return Optional.ofNullable(replacementMap.get(version));
     }
 
     @NotNull
