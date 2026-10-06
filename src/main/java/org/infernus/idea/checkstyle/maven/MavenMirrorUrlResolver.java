@@ -19,6 +19,9 @@ import java.util.Optional;
  * that touches {@code org.jetbrains.idea.maven.*} classes, so {@link org.infernus.idea.checkstyle.ArtifactDownloadBaseUrlResolver}
  * can safely guard against the optional dependency being absent by catching any {@link Throwable} around
  * calls into this class - no such symbol crosses into its own bytecode.
+ * <p>
+ * {@code <localRepository>} is read with the bundled Maven settings model rather than a {@code MavenUtil}
+ * method, because the platform's signatures for that lookup differ between IDE versions.
  */
 public final class MavenMirrorUrlResolver {
 
@@ -80,7 +83,9 @@ public final class MavenMirrorUrlResolver {
         if (settingsFile == null || !Files.exists(settingsFile)) {
             return Optional.empty();
         }
-        String localRepository = MavenUtil.getRepositoryFromSettings(settingsFile);
+        String localRepository = MavenServerCredentialsResolver.readSettings(settingsFile, true)
+                .map(settings -> MavenServerCredentialsResolver.resolvePlaceholders(settings.getLocalRepository()))
+                .orElse(null);
         if (localRepository == null || localRepository.isBlank()) {
             return Optional.empty();
         }

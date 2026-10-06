@@ -13,7 +13,7 @@ import org.sonatype.plexus.components.cipher.DefaultPlexusCipher;
 import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -51,7 +51,7 @@ public final class MavenServerCredentialsResolver {
             @NotNull final Path settingsFile,
             @NotNull final Path settingsSecurityFile,
             @NotNull final String mirrorUrl) {
-        Optional<Settings> settings = readSettings(settingsFile);
+        Optional<Settings> settings = readSettings(settingsFile, false);
         if (settings.isEmpty()) {
             return Optional.empty();
         }
@@ -74,13 +74,17 @@ public final class MavenServerCredentialsResolver {
         return ArtifactRepositoryCredentials.of(username, password);
     }
 
+    /**
+     * Reads {@code settings.xml}. A strict read fails on any element the bundled Maven model does not know;
+     * a lenient read ignores them, for callers that only need one well-known element.
+     */
     @NotNull
-    private static Optional<Settings> readSettings(@NotNull final Path settingsFile) {
+    static Optional<Settings> readSettings(@NotNull final Path settingsFile, final boolean lenient) {
         if (!Files.exists(settingsFile)) {
             return Optional.empty();
         }
-        try (Reader reader = Files.newBufferedReader(settingsFile)) {
-            return Optional.of(new SettingsXpp3Reader().read(reader));
+        try (InputStream stream = Files.newInputStream(settingsFile)) {
+            return Optional.of(new SettingsXpp3Reader().read(stream, !lenient));
         } catch (IOException | XmlPullParserException e) {
             LOG.warn("Failed to parse Maven settings.xml at " + settingsFile, e);
             return Optional.empty();
@@ -111,7 +115,7 @@ public final class MavenServerCredentialsResolver {
     }
 
     @Nullable
-    private static String resolvePlaceholders(@Nullable final String value) {
+    static String resolvePlaceholders(@Nullable final String value) {
         if (value == null) {
             return null;
         }

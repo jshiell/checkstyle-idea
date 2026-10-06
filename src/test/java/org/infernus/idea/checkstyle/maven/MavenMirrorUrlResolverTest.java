@@ -3,7 +3,9 @@ package org.infernus.idea.checkstyle.maven;
 import org.infernus.idea.checkstyle.ArtifactRepositoryCredentials;
 import org.infernus.idea.checkstyle.ArtifactRepositoryLocation;
 import org.junit.jupiter.api.Test;
+import org.jetbrains.idea.maven.utils.MavenUtil;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
 
 class MavenMirrorUrlResolverTest {
 
@@ -239,5 +242,36 @@ class MavenMirrorUrlResolverTest {
         Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsDoesNotDependOnMavenUtil(@TempDir final Path localRepo) throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <localRepository>%s</localRepository>
+                </settings>
+                """.formatted(localRepo.toString().replace("\\", "/")));
+
+        try (MockedStatic<MavenUtil> ignored = mockStatic(MavenUtil.class, invocation -> {
+            throw new NoSuchMethodError(invocation.getMethod().getName());
+        })) {
+            Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+            assertEquals(Optional.of(localRepo), result);
+        }
+    }
+
+    @Test
+    void resolveLocalRepositoryFromSettingsIgnoresUnknownElements(@TempDir final Path localRepo) throws IOException {
+        Path settingsFile = writeSettings("""
+                <settings>
+                  <somethingNew/>
+                  <localRepository>%s</localRepository>
+                </settings>
+                """.formatted(localRepo.toString().replace("\\", "/")));
+
+        Optional<Path> result = MavenMirrorUrlResolver.resolveLocalRepositoryFromSettings(settingsFile);
+
+        assertEquals(Optional.of(localRepo), result);
     }
 }
