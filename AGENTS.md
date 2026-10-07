@@ -237,7 +237,7 @@ touch them; turning the opt-in on takes effect at the next sync.
 `GradleToolingJarPackagingTripwireTest` fails if any class exceeds major version 52. `buildAll` catches
 `Throwable`, not `Exception`, since API drift on old Gradle surfaces as `NoSuchMethodError`.
 
-**Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim.
+**Eclipse-CS variables supported:** `basedir`, `project_loc`, `workspace_loc`, `config_loc`, `samedir`, built per-module in `CheckerFactory`. References in the rules file (`${prop}`) are resolved by Checkstyle itself, via `ListPropertyResolver`. Checkstyle's resolution is single-pass, so references appearing in *user property values* are expanded plugin-side by `PropertyExpander` before the built-ins are merged in - this is what lets one property resolve differently per module. Unresolvable references are left verbatim. These names live in `BuiltInProperties`: they are never discovered as editable properties, and a stored one is dropped on reconcile only when blank (a non-blank value is a deliberate override, e.g. Gradle's `config_loc`). Matching is case-sensitive, so `baseDir` is still discovered.
 
 **Release:** Tag and push (e.g. `git tag 26.0.0 && git push origin 26.0.0`). CI builds, creates GitHub release, publishes to JetBrains marketplace.
 

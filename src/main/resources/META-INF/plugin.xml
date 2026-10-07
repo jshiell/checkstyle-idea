@@ -31,6 +31,7 @@
     <change-notes>
         <![CDATA[
 <ul>
+    <li>26.19.1: Fixed: Built-in properties (basedir, project_loc, workspace_loc, config_loc, samedir) are no longer offered as editable properties; blank ones are removed when a location is next scanned, and global locations are cleaned when next saved. A non-blank value you have set for one is kept as an override (#712).</li>
     <li>26.19.1: Fixed: Maven and Gradle import now apply the replacement for a Checkstyle version this plugin maps to a supported one (e.g. 10.21.2 becomes 10.21.3) instead of ignoring it (#705).</li>
     <li>26.19.1: Changed: A Checkstyle version reported by a Maven dependency or Gradle toolVersion that this plugin neither supports nor replaces now shows a warning, once per project and version per session, instead of being ignored silently (#705).</li>
     <li>26.19.1: Fixed: The &lt;localRepository&gt; override in Maven settings.xml was ignored on newer IDEs (2026.1.x and later, NoSuchMethodError) (#706).</li>
