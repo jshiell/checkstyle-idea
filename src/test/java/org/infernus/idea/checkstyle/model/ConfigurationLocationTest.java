@@ -33,6 +33,7 @@ import java.util.*;
 import static java.lang.String.format;
 import static org.infernus.idea.checkstyle.model.NamedScopeHelper.DEFAULT_SCOPE_ID;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.nullValue;
@@ -68,6 +69,19 @@ public class ConfigurationLocationTest {
             <module name="TestFilter">&someUndeclaredEntity;</module>
             </module>""";
 
+    private static final String TEST_FILE_WITH_BUILT_INS = """
+            <module name="Checker">
+            <module name="SuppressionFilter">
+              <property name="file" value="${config_loc}/suppressions.xml"/>
+              <property name="a" value="${basedir}"/>
+              <property name="b" value="${project_loc}"/>
+              <property name="c" value="${workspace_loc}"/>
+              <property name="d" value="${samedir}"/>
+              <property name="e" value="${property-one}"/>
+              <property name="f" value="${baseDir}"/>
+            </module>
+            </module>""";
+
     private TestConfigurationLocation underTest;
 
     @BeforeEach
@@ -83,6 +97,25 @@ public class ConfigurationLocationTest {
         assertThat(underTest.getProperties(), hasEntry("property-one", ""));
         assertThat(underTest.getProperties(), hasEntry("property-two", ""));
         assertThat(underTest.getProperties(), hasEntry("property-three", ""));
+    }
+
+    @Test
+    public void builtInPropertiesAreNotDiscovered() throws IOException {
+        final var location = new TestConfigurationLocation(TEST_FILE_WITH_BUILT_INS);
+
+        location.resolve(getClass().getClassLoader()).close();
+
+        assertThat(location.getProperties().keySet(), containsInAnyOrder("property-one", "baseDir"));
+    }
+
+    @Test
+    public void blankBuiltInPropertiesAreRemovedWhenTheLocationIsScanned() throws IOException {
+        final var location = new TestConfigurationLocation(TEST_FILE_WITH_BUILT_INS);
+        location.setProperties(Map.of("config_loc", ""));
+
+        location.resolve(getClass().getClassLoader()).close();
+
+        assertThat(location.getProperties(), not(hasKey("config_loc")));
     }
 
     @Test

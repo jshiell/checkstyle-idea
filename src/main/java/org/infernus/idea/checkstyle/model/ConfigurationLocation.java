@@ -322,7 +322,7 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
                                              @Nullable final String value,
                                              @Nullable final String defaultValue) {
         final var property = extractNameAndDefault(value, defaultValue);
-        if (property != null) {
+        if (property != null && !BuiltInProperties.isBuiltIn(property.first)) {
             propertiesAndDefaults.put(property.first, property.second);
         }
     }
