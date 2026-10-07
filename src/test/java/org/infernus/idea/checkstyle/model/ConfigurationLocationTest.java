@@ -119,6 +119,16 @@ public class ConfigurationLocationTest {
     }
 
     @Test
+    public void nonBlankBuiltInPropertyOverridesAreRetainedWhenTheLocationIsScanned() throws IOException {
+        final var location = new TestConfigurationLocation(TEST_FILE_WITH_BUILT_INS);
+        location.setProperties(Map.of("config_loc", "/x"));
+
+        location.resolve(getClass().getClassLoader()).close();
+
+        assertThat(location.getProperties(), hasEntry("config_loc", "/x"));
+    }
+
+    @Test
     public void propertiesAreRereadWhenTheLocationIsChanged() throws IOException {
         underTest.resolve(getClass().getClassLoader()).close();
 

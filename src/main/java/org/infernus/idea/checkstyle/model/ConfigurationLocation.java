@@ -378,7 +378,12 @@ public abstract class ConfigurationLocation implements Cloneable, Comparable<Con
             }
         }
 
-        properties.keySet().removeIf(propertyName -> !propertiesInFile.containsKey(propertyName));
+        properties.entrySet().removeIf(entry -> !propertiesInFile.containsKey(entry.getKey())
+                && !isBuiltInOverride(entry.getKey(), entry.getValue()));
+    }
+
+    private static boolean isBuiltInOverride(final String propertyName, final String value) {
+        return BuiltInProperties.isBuiltIn(propertyName) && value != null && !value.isBlank();
     }
 
     @Nullable
