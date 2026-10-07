@@ -10,7 +10,13 @@ import java.util.Set;
  */
 public final class BuiltInProperties {
 
-    public static final Set<String> NAMES = Set.of("basedir", "project_loc", "workspace_loc", "config_loc", "samedir");
+    public static final String BASEDIR = "basedir";
+    public static final String PROJECT_LOC = "project_loc";
+    public static final String WORKSPACE_LOC = "workspace_loc";
+    public static final String CONFIG_LOC = "config_loc";
+    public static final String SAMEDIR = "samedir";
+
+    public static final Set<String> NAMES = Set.of(BASEDIR, PROJECT_LOC, WORKSPACE_LOC, CONFIG_LOC, SAMEDIR);
 
     private BuiltInProperties() {
     }

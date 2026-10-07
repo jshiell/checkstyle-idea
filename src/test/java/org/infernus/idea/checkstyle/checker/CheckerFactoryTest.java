@@ -9,6 +9,7 @@ import org.infernus.idea.checkstyle.TestHelper;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
 import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
+import org.infernus.idea.checkstyle.model.BuiltInProperties;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,6 +106,16 @@ class CheckerFactoryTest {
         checkerFactoryWith(projectPathsReturning(module, moduleDir)).checker(module, location);
 
         assertThat(propertiesPassedTo(checkstyleActions).get("basedir"), is(moduleDir.toFile().getAbsolutePath()));
+    }
+
+    @Test
+    void theBuiltInPropertiesPassedToCheckstyleAreThoseDeclaredByBuiltInProperties(@TempDir final Path moduleDir) {
+        CheckstyleActions checkstyleActions = stubCheckstyleInstance();
+        Module module = mockModule("a-module");
+
+        checkerFactoryWith(projectPathsReturning(module, moduleDir)).checker(module, location);
+
+        assertThat(propertiesPassedTo(checkstyleActions).keySet(), is(BuiltInProperties.NAMES));
     }
 
     @Test

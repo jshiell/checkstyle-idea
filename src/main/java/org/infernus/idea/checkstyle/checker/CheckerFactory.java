@@ -8,6 +8,7 @@ import org.infernus.idea.checkstyle.CheckstyleProjectService;
 import org.infernus.idea.checkstyle.exception.ActionableCheckstyleException;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.infernus.idea.checkstyle.exception.CheckstyleToolException;
+import org.infernus.idea.checkstyle.model.BuiltInProperties;
 import org.infernus.idea.checkstyle.model.ConfigurationLocation;
 import org.infernus.idea.checkstyle.util.Notifications;
 import org.infernus.idea.checkstyle.util.ProjectPaths;
@@ -114,16 +115,16 @@ public class CheckerFactory {
     private Map<String, String> eclipseCsProperties(final ConfigurationLocation location,
                                                     final Module module) {
         final Map<String, String> builtIns = new HashMap<>();
-        builtIns.put("basedir", basePathFor(module));
+        builtIns.put(BuiltInProperties.BASEDIR, basePathFor(module));
 
-        builtIns.put("project_loc", project.getBasePath());
-        builtIns.put("workspace_loc", project.getBasePath());
+        builtIns.put(BuiltInProperties.PROJECT_LOC, project.getBasePath());
+        builtIns.put(BuiltInProperties.WORKSPACE_LOC, project.getBasePath());
 
         final String locationBaseDir = Optional.ofNullable(location.getBaseDir())
                 .map(File::toString)
                 .orElseGet(project::getBasePath);
-        builtIns.put("config_loc", locationBaseDir);
-        builtIns.put("samedir", locationBaseDir);
+        builtIns.put(BuiltInProperties.CONFIG_LOC, locationBaseDir);
+        builtIns.put(BuiltInProperties.SAMEDIR, locationBaseDir);
 
         return builtIns;
     }
