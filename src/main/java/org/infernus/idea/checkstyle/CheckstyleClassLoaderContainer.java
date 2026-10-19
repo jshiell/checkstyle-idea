@@ -1,9 +1,8 @@
 package org.infernus.idea.checkstyle;
 
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.cl.PluginAwareClassLoader;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.lang.UrlClassLoader;
 import org.infernus.idea.checkstyle.csapi.CheckstyleActions;
@@ -305,12 +304,20 @@ public class CheckstyleClassLoaderContainer {
     @Nullable
     private String getDescriptorPluginPath() {
         try {
-            final PluginDescriptor descriptor = PluginManager.getPluginByClass(getClass());
-            if (descriptor != null) {
-                return descriptor.getPluginPath().toString();
-            }
+            return pluginPathOf(getClass().getClassLoader());
         } catch (RuntimeException ignored) {
             // ok, if this fails, we are in a unit test situation where the plugin system is not initialized
+        }
+        return null;
+    }
+
+    /**
+     * Does what the {@code @Internal} {@code PluginManager.getPluginByClass} does, using only public API.
+     */
+    @Nullable
+    static String pluginPathOf(@Nullable final ClassLoader classLoader) {
+        if (classLoader instanceof PluginAwareClassLoader pluginClassLoader) {
+            return pluginClassLoader.getPluginDescriptor().getPluginPath().toString();
         }
         return null;
     }

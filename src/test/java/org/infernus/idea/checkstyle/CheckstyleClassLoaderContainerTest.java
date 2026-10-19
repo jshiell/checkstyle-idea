@@ -1,5 +1,7 @@
 package org.infernus.idea.checkstyle;
 
+import com.intellij.ide.plugins.cl.PluginAwareClassLoader;
+import com.intellij.openapi.extensions.PluginDescriptor;
 import org.infernus.idea.checkstyle.exception.CheckStylePluginException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -12,9 +14,27 @@ import java.util.zip.ZipEntry;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 
 public class CheckstyleClassLoaderContainerTest {
+
+    @Test
+    void pluginPathIsUnknownForAnOrdinaryClassLoader() {
+        assertNull(CheckstyleClassLoaderContainer.pluginPathOf(getClass().getClassLoader()));
+    }
+
+    @Test
+    void pluginPathIsTakenFromThePluginDescriptorOfAPluginAwareClassLoader(@TempDir final Path pluginDir) {
+        final PluginDescriptor descriptor = mock(PluginDescriptor.class);
+        when(descriptor.getPluginPath()).thenReturn(pluginDir);
+        final ClassLoader pluginClassLoader = mock(ClassLoader.class,
+                withSettings().extraInterfaces(PluginAwareClassLoader.class));
+        when(((PluginAwareClassLoader) pluginClassLoader).getPluginDescriptor()).thenReturn(descriptor);
+
+        assertEquals(pluginDir.toString(), CheckstyleClassLoaderContainer.pluginPathOf(pluginClassLoader));
+    }
 
     @Test
     void constructorWithDownloadedJarsAcceptsEmptyList() {
