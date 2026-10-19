@@ -24,6 +24,15 @@ unpacks `ideaIC-<version>.zip` directly — no `hdiutil attach` at all. Verified
 `nono` sandbox: `./gradlew test` (781 + 75 csaccess tests), `buildPlugin`, and an actual `runIde` launch
 (Welcome Frame shown, AWT event loop running, no errors) all succeeded with zero `hdiutil` invocations.
 
+Re-observed 2026-10-19 on plugin 2.19.0 with base 2026.1.5 (the disassembly above was of 2.18.1 and was **not**
+repeated for 2.19.0 — this is behavioural evidence only): the Gradle cache holds
+`com.jetbrains.intellij.idea:ideaIC:2026.1.5` (the zip), extracted to `transformed/ideaIC-2026.1.5` with `build.txt`
+at the root (the dmg layout has `Resources/build.txt` and an `-aarch64` suffix, which is why `.claude/preflight.sh`
+needed to accept both). The plugin warns "IC no longer published since 2025.3, use intellijIdea(...)" but still
+resolves `ideaIC`; switching to `intellijIdea(...)` is a follow-up. Test counts on 2026.1.5 equal those on 2025.1.7.2:
+881 `test`, 75 `runCsaccessTests` (3 skipped), 14 `gradleToolingTest`. `xtest` disables JUnit XML (buildSrc
+`CsaccessTestTask`), so per-version counts are only in the base task's `build/reports/tests/runCsaccessTests`.
+
 **`verifyPlugin` still needs `hdiutil` and must run outside the sandbox.** It resolves its own IDEs
 independently of the main `intellijIdeaCommunity` dependency. Confirmed by disassembling
 `IntelliJPlatformExtension.PluginVerification.Ides`: `recommended()` / `defaultRecommended()` / `latest()` all
@@ -74,7 +83,7 @@ distribution.
 - `src/csaccess/java/` — code isolated behind per-version classloaders (compiled against base Checkstyle 10.0)
 - `src/csaccessTest/java/` — tests for csaccess; `xTest` runs against all supported versions
 - `buildSrc/` — custom Gradle plugin: source sets, artifact gathering, cross-version test tasks, JaCoCo (60% min for csaccess)
-- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.18.1; IDEA Community 2025.1.7.2
+- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.19.0; IDEA Community 2026.1.5
 
 ## Key Concepts
 
@@ -139,6 +148,16 @@ key is unaffected — empty `params` skips `MessageFormat` entirely. Verify a ne
 rendering it (`MessageFormat.format(pattern, args)`), not by inspection; a test that compares
 `CheckStyleBundle.message(key, arg)` against itself proves nothing about the properties file.
 
+**2026.1 platform changes that bite tests and listeners (verified by decompiling 2026.1.5):**
+`ModuleRootManager.getInstance(module)` is now `ProjectRootManager.getInstance(module.getProject())
+.getModuleRootManager(module)`, so a mocked `Module` needs `getProject()` plus a mocked `ProjectRootManager` behind
+`project.getService(ProjectRootManager.class)` (one per project — a second stub replaces the first). Raw Swing
+mouse/key handlers and modal-`DialogWrapper` buttons no longer run with the write-intent lock
+(`idea.wrap.high.level.input.events.in.write.intent` defaults to `false`); `AnAction`s, `Application.invokeLater`
+and `com.intellij.ui.treeStructure.Tree` key events still do. The audit of this plugin's listeners found no call
+that asserts, but `Configurable.apply()`, `LocationDialogue` and `LocationPanel.BrowseAction` were reasoned about,
+not observed at runtime.
+
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
 **Sandbox:** `.intellijPlatform/sandbox/checkstyle-idea/IC-<version>/` — not auto-cleaned (`cleanSandbox` exists);
@@ -150,8 +169,9 @@ classes/libs and the Gradle tooling jar into every `PrepareSandboxTask` by type,
 fine and then dies with "Could not determine plugin directory or build directory" the first time a
 classloader is needed.
 
-**`./gradlew verifyPlugin` works** — as of the 2025.1 base version with IntelliJ Platform Gradle Plugin
-2.18.1. It previously aborted on the descriptor check (`The plugin name 'CheckStyle-IDEA' should not include
+**`./gradlew verifyPlugin` resolves its IDEs and produces per-IDE verdicts** — as of the 2026.1 base version with
+IntelliJ Platform Gradle Plugin 2.19.0 (it first worked on 2025.1 with 2.18.1). It exits non-zero on 2026-10-19
+only because of IU-263, a pre-release IDE; see below. It previously aborted on the descriptor check (`The plugin name 'CheckStyle-IDEA' should not include
 the word 'IDEA'`) before reaching class resolution; `pluginVerification { freeArgs = listOf("-mute",
 "TemplateWordInPluginName") }` in `build.gradle.kts` settles that. It resolves its own IDEs, so no `ides { }`
 block is needed, and it verifies against both the base version and the next major — useful because
@@ -162,9 +182,26 @@ because tests run on a flat classpath.
 
 Read `build/reports/pluginVerifier/<IDE>/plugins/CheckStyle-IDEA/<version>/verification-verdict.txt`.
 **Blocking:** any unresolved class or method reference, or any internal-API usage. **Not blocking:** a
-changed count of deprecated or experimental usages — those move with every platform bump. As of 26.16.0 both
-IC-251 and IC-252 report `Compatible`, with no deprecated usages and 12 experimental ones (see Known
-Non-Issues).
+changed count of deprecated or experimental usages — those move with every platform bump. Since the 2026.1 base
+the verifier runs **Ultimate** builds (IU), not IC, and verifies three IDEs: IU-261 (the base), IU-262 (2026.2.3, the
+released next major) and IU-263 (pre-release). Judge each from its own `verification-verdict.txt`; do not rely on
+the task's exit code. As of 26.19.1 on 2026-10-19:
+
+| IDE | Verdict | Deprecated | Experimental | Internal |
+|---|---|---|---|---|
+| IU-261 | Compatible | 13 | 18 | 0 |
+| IU-262 | Compatible | 13 | 13 | 0 |
+| IU-263 | 20 possible compatibility problems, 1 missing mandatory dependency | 14 (+1 scheduled for removal) | 13 | 0 |
+
+The extra 5 experimental usages on 261 are `TrustedProjectsListener` (no longer experimental on 262). **IU-263 is
+a known, accepted failure for now:** the unresolved classes are `com.intellij.openapi.vcs.*` (`CheckinProjectPanel`,
+`CommitExecutor`, `ChangeListManager`, `BooleanCommitOption`) and `com.intellij.util.xml.*` (`DomElement`,
+`GenericDomValue`), and the failed mandatory dependency is `com.intellij.modules.xml`, whose resolution chain breaks
+inside the IDE itself (content module `intellij.spellchecker.xml`). Whether that is a pre-release packaging artefact
+or a real module move that needs new `<dependencies>` entries is **unconfirmed** — recheck when 263 reaches a
+release candidate. Two APIs became `@ApiStatus.Internal` in 2026.1/2026.2 and were replaced: `TrustedProjects.
+getProjectTrustedState` (now `isProjectTrusted`, which cannot tell "not trusted" from "not decided") and
+`PluginManager.getPluginByClass` (now `PluginAwareClassLoader.getPluginDescriptor()`).
 
 If you ever do need the CLI directly, `-Dplugin.verifier.home.dir="$TMPDIR/pv-home"` is required under the
 sandbox — the default `~/.pluginVerifier` is not writable.
@@ -271,7 +308,8 @@ Do not re-raise these as bugs:
 - **`setForkEvery(1)`**: Not actually set in the build; only `jvmArgs("-Xshare:off")` and `useJUnitPlatform()`.
 - **`CheckerFactoryCacheTest`**: Was documented here as 8 pre-existing failures. No longer true — as of 2026-08-18 it runs 8 tests, 0 failures under `./gradlew build`. Do not reinstate it as a known-failure baseline; a failure there now is a real regression.
 - **`PsiFileValidator.isInNamedScopeIfPresent()`**: Was a real bug (empty stream from null scopes returned `false`), now fixed.
-- **Experimental API usages reported by `verifyPlugin`**: The 12 remaining ones are all
-  `MavenAfterImportConfigurator` and `MavenWorkspaceConfigurator.MavenProjectWithModules`. JetBrains marks
+- **Experimental API usages reported by `verifyPlugin`**: 13 are Maven importing API
+  (`MavenAfterImportConfigurator`, `MavenWorkspaceConfigurator.MavenProjectWithModules`) plus one
+  `AbstractBatchSuppressByNoInspectionComment`; IU-261 adds 5 for `TrustedProjectsListener`. JetBrains marks
   the whole Maven importing API `@ApiStatus.Experimental` and offers no alternative extension point for
   post-import configuration, so these cannot be removed without dropping the Maven settings import.
