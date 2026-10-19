@@ -24,13 +24,16 @@ unpacks `ideaIC-<version>.zip` directly — no `hdiutil attach` at all. Verified
 `nono` sandbox: `./gradlew test` (781 + 75 csaccess tests), `buildPlugin`, and an actual `runIde` launch
 (Welcome Frame shown, AWT event loop running, no errors) all succeeded with zero `hdiutil` invocations.
 
-Re-observed 2026-10-19 on plugin 2.19.0 with base 2026.1.5 (the disassembly above was of 2.18.1 and was **not**
-repeated for 2.19.0 — this is behavioural evidence only): the Gradle cache holds
+Re-checked 2026-10-19 on plugin 2.19.0 with base 2026.1.5. Both disassembly claims here still hold in
+`intellij-platform-gradle-plugin-2.19.0.jar`: `IntelliJPlatformDependencyConfiguration.useInstaller` is still a
+`Property<Boolean>`, and `IntelliJPlatformExtension$PluginVerification$Ides.createInstallerDependencies$default`
+still turns an omitted flag into `true` (`iconst_2; iand` mask test, then `iconst_1; istore_2`). Behaviourally: the Gradle cache holds
 `com.jetbrains.intellij.idea:ideaIC:2026.1.5` (the zip), extracted to `transformed/ideaIC-2026.1.5` with `build.txt`
 at the root (the dmg layout has `Resources/build.txt` and an `-aarch64` suffix, which is why `.claude/preflight.sh`
 needed to accept both). The plugin warns "IC no longer published since 2025.3, use intellijIdea(...)" but still
-resolves `ideaIC`; switching to `intellijIdea(...)` is a follow-up. Test counts on 2026.1.5 equal those on 2025.1.7.2:
-881 `test`, 75 `runCsaccessTests` (3 skipped), 14 `gradleToolingTest`. `xtest` disables JUnit XML (buildSrc
+resolves `ideaIC`; switching to `intellijIdea(...)` is a follow-up. Test counts on 2026.1.5 equalled those on 2025.1.7.2
+at the bump: 881 `test`, 75 `runCsaccessTests` (3 skipped), 14 `gradleToolingTest` (`test` has since grown to
+882 with the `pluginPathOf` tests and the trust-test change). `xtest` disables JUnit XML (buildSrc
 `CsaccessTestTask`), so per-version counts are only in the base task's `build/reports/tests/runCsaccessTests`.
 
 **`verifyPlugin` still needs `hdiutil` and must run outside the sandbox.** It resolves its own IDEs
