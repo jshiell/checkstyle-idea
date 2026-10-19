@@ -58,7 +58,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
                     </plugin>
                 </plugins>
             </build>
-            """.stripIndent());
+            """.stripIndent(), false);
 
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));
@@ -98,7 +98,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
                     </plugin>
                 </plugins>
             </build>
-            """.stripIndent());
+            """.stripIndent(), false);
 
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));
@@ -134,7 +134,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
                     </plugin>
                 </plugins>
             </build>
-            """.stripIndent());
+            """.stripIndent(), false);
 
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));
@@ -173,7 +173,7 @@ public class MavenCheckstyleConfiguratorTest extends MavenMultiVersionImportingT
                     </plugin>
                 </plugins>
             </build>
-            """.stripIndent());
+            """.stripIndent(), false);
 
         BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
             (scope, continuation) -> importProjectAsync(continuation));

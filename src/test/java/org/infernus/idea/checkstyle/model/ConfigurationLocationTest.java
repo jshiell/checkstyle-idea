@@ -5,6 +5,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packageDependencies.DependencyValidationManager;
@@ -310,8 +311,8 @@ public class ConfigurationLocationTest {
         final ProjectPaths projectPaths = mock(ProjectPaths.class);
         when(project.getService(ProjectPaths.class)).thenReturn(projectPaths);
 
-        final Module moduleOne = mockModuleIn(moduleOneDir, projectPaths);
-        final Module moduleTwo = mockModuleIn(moduleTwoDir, projectPaths);
+        final Module moduleOne = mockModuleIn(moduleOneDir, project, projectPaths);
+        final Module moduleTwo = mockModuleIn(moduleTwoDir, project, projectPaths);
 
         final TestConfigurationLocation location = new TestConfigurationLocation(TEST_FILE, project);
 
@@ -326,21 +327,32 @@ public class ConfigurationLocationTest {
     }
 
     /**
-     * Module.getComponent(ModuleRootManager.class) is what {@code ModuleRootManager.getInstance(module)}
-     * resolves to under the hood - confirmed by decompiling the platform's ModuleRootManager class.
+     * {@code ModuleRootManager.getInstance(module)} resolves to
+     * {@code ProjectRootManager.getInstance(module.getProject()).getModuleRootManager(module)} - confirmed by
+     * decompiling the platform's ModuleRootManager class (2026.1).
      */
-    private Module mockModuleIn(final Path moduleDir, final ProjectPaths projectPaths) {
+    private Module mockModuleIn(final Path moduleDir, final Project project, final ProjectPaths projectPaths) {
         final Module module = mock(Module.class);
+        when(module.getProject()).thenReturn(project);
 
         final ModuleRootManager rootManager = mock(ModuleRootManager.class);
         when(rootManager.getContentEntries()).thenReturn(new ContentEntry[0]);
-        when(module.getComponent(ModuleRootManager.class)).thenReturn(rootManager);
+        when(projectRootManagerOf(project).getModuleRootManager(module)).thenReturn(rootManager);
 
         final VirtualFile moduleVirtualDir = mock(VirtualFile.class);
         when(moduleVirtualDir.getPath()).thenReturn(moduleDir.toString());
         when(projectPaths.modulePath(module)).thenReturn(moduleVirtualDir);
 
         return module;
+    }
+
+    private ProjectRootManager projectRootManagerOf(final Project project) {
+        ProjectRootManager projectRootManager = project.getService(ProjectRootManager.class);
+        if (projectRootManager == null) {
+            projectRootManager = mock(ProjectRootManager.class);
+            when(project.getService(ProjectRootManager.class)).thenReturn(projectRootManager);
+        }
+        return projectRootManager;
     }
 
     private void updatePropertyOn(final ConfigurationLocation configurationLocation,
@@ -450,7 +462,7 @@ public class ConfigurationLocationTest {
         final ProjectPaths projectPaths = mock(ProjectPaths.class);
         when(project.getService(ProjectPaths.class)).thenReturn(projectPaths);
 
-        final Module module = mockModuleIn(moduleDir, projectPaths);
+        final Module module = mockModuleIn(moduleDir, project, projectPaths);
 
         final ConfigurationLocation location = new BaseDirTestConfigurationLocation(project, rulesFileDir.toFile());
 

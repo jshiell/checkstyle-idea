@@ -61,6 +61,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
     private MavenAfterImportConfigurator.Context context;
     private MavenProject mavenProject;
     private Path physicalTempDir;
+    private Path localRepository;
     private CheckstyleArtifactDownloader checkstyleArtifactDownloader;
     private UnsupportedImportedVersionWarner.Notifier notifier;
 
@@ -76,12 +77,13 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
 
         physicalTempDir = Files.createTempDirectory("maven-test");
         VfsRootAccess.allowRootAccess(getTestRootDisposable(), physicalTempDir.toString());
+        localRepository = physicalTempDir.resolve("local-repository");
 
         mavenProject = mock(MavenProject.class);
         when(mavenProject.getMavenId()).thenReturn(new MavenId("test", "test", "1"));
         when(mavenProject.findPlugin("org.apache.maven.plugins", "maven-checkstyle-plugin"))
             .thenReturn(null);
-        when(mavenProject.getLocalRepositoryPath()).thenReturn(MavenUtil.resolveDefaultLocalRepository(null));
+        when(mavenProject.getLocalRepositoryPath()).thenReturn(localRepository);
         when(mavenProject.getFile()).thenReturn(mock(VirtualFile.class));
 
         @SuppressWarnings("unchecked")
@@ -267,7 +269,7 @@ public class MavenCheckstyleConfiguratorAfterImportTest extends BasePlatformTest
 
         configurator.afterImport(context);
 
-        String expectedJar = MavenUtil.resolveDefaultLocalRepository(null)
+        String expectedJar = localRepository
             + "/com/checkstyle/third/party/rules/cool-stuff/3.2.1/cool-stuff-3.2.1.jar"
                 .replace("/", File.separator);
         assertEquals(List.of(expectedJar), configManager.getCurrent().getThirdPartyClasspath());
