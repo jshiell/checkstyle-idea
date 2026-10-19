@@ -7,7 +7,6 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Condition;
-import com.intellij.util.ThreeState;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import kotlin.coroutines.Continuation;
@@ -40,7 +39,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     private ReloadCheckstyleWhenProjectTrustChanges.Warner warner;
     private MockedStatic<ApplicationManager> applicationManager;
     private Application application;
-    private ThreeState trustState;
+    private boolean trusted;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +50,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
         checkstyleProjectService = mock(CheckstyleProjectService.class);
         connection = mock(MessageBusConnection.class);
         warner = mock(ReloadCheckstyleWhenProjectTrustChanges.Warner.class);
-        trustState = ThreeState.YES;
+        trusted = true;
 
         pluginConfig = mock(PluginConfiguration.class);
         when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of());
@@ -82,7 +81,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
 
     private TrustedProjectsListener executeAndCaptureListener() {
         ReloadCheckstyleWhenProjectTrustChanges activity = new ReloadCheckstyleWhenProjectTrustChanges(
-                parentDisposable -> connection, warner, Runnable::run, p -> trustState);
+                parentDisposable -> connection, warner, Runnable::run, p -> trusted);
         activity.execute(project, mock(Continuation.class));
 
         ArgumentCaptor<TrustedProjectsListener> listener = ArgumentCaptor.forClass(TrustedProjectsListener.class);
@@ -143,9 +142,9 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     }
 
     @Test
-    void anUntrustedProjectWithThirdPartyJarsConfiguredIsWarnedOnStartup() {
+    void aProjectThatIsNotTrustedAndHasThirdPartyJarsConfiguredIsWarnedOnStartup() {
         when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
-        trustState = ThreeState.NO;
+        trusted = false;
 
         executeAndCaptureListener();
 
@@ -153,19 +152,9 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     }
 
     @Test
-    void anUndecidedProjectIsNotWarnedWhileTheTrustDialogIsStillOpen() {
-        when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
-        trustState = ThreeState.UNSURE;
-
-        executeAndCaptureListener();
-
-        verifyNoInteractions(warner);
-    }
-
-    @Test
     void aTrustedProjectIsNotWarned() {
         when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of("/some/custom-check.jar"));
-        trustState = ThreeState.YES;
+        trusted = true;
 
         executeAndCaptureListener();
 
@@ -175,7 +164,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
     @Test
     void anUntrustedProjectWithNoThirdPartyJarsConfiguredIsNotWarned() {
         when(pluginConfig.getThirdPartyClasspath()).thenReturn(List.of());
-        trustState = ThreeState.NO;
+        trusted = false;
 
         executeAndCaptureListener();
 

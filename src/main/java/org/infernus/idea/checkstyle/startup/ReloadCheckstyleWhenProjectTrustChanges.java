@@ -7,7 +7,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
-import com.intellij.util.ThreeState;
 import com.intellij.util.messages.MessageBusConnection;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.infernus.idea.checkstyle.CheckStyleBundle.message;
 
@@ -42,32 +41,33 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
     private final ConnectionFactory connectionFactory;
     private final Warner warner;
     private final Consumer<Runnable> backgroundDispatcher;
-    private final Function<Project, ThreeState> trustState;
+    private final Predicate<Project> projectIsTrusted;
 
     public ReloadCheckstyleWhenProjectTrustChanges() {
         this(parentDisposable -> ApplicationManager.getApplication().getMessageBus().connect(parentDisposable),
                 Notifications::showWarning,
                 ApplicationManager.getApplication()::executeOnPooledThread,
-                TrustedProjects.INSTANCE::getProjectTrustedState);
+                TrustedProjects::isProjectTrusted);
     }
 
     ReloadCheckstyleWhenProjectTrustChanges(@NotNull final ConnectionFactory connectionFactory,
                                             @NotNull final Warner warner,
                                             @NotNull final Consumer<Runnable> backgroundDispatcher,
-                                            @NotNull final Function<Project, ThreeState> trustState) {
+                                            @NotNull final Predicate<Project> projectIsTrusted) {
         this.connectionFactory = connectionFactory;
         this.warner = warner;
         this.backgroundDispatcher = backgroundDispatcher;
-        this.trustState = trustState;
+        this.projectIsTrusted = projectIsTrusted;
     }
 
     @Nullable
     @Override
     public Object execute(@NotNull final Project project, @NotNull final Continuation<? super Unit> continuation) {
-        // Only on an explicit NO - while the trust dialog is still open the state is UNSURE, and telling the
-        // user their project is untrusted before they have answered would be nonsense.
+        // TrustedProjects offers no public way to tell an explicit "no" from "not decided yet" (that is the
+        // @Internal getProjectTrustedState), so a project with no recorded decision is warned too. The trust
+        // dialog normally resolves before the project opens, so that should only be an unusual open path.
         if (!project.getService(PluginConfigurationManager.class).getCurrent().getThirdPartyClasspath().isEmpty()
-                && trustState.apply(project) == ThreeState.NO) {
+                && !projectIsTrusted.test(project)) {
             warner.showWarning(project, message("startup.untrusted-project.third-party-classpath-skipped"));
         }
 
