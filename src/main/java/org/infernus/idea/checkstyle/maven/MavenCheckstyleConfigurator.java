@@ -134,7 +134,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         pluginConfigurationBuilder.withThirdPartyClassPath(
             createThirdPartyClasspath(checkstyleMavenPlugin, mavenProject));
 
-        final var mavenDomProjectModel = ReadAction.compute(() ->
+        final var mavenDomProjectModel = ReadAction.computeBlocking(() ->
             MavenDomUtil.getMavenDomProjectModel(project, mavenProject.getFile()));
 
         updatePluginConfigLocationsFromMavenPlugin(checkstyleMavenPlugin,
@@ -395,7 +395,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
             return null;
         }
 
-        return ReadAction.compute(() -> {
+        return ReadAction.computeBlocking(() -> {
             final var mavenDomProjectModel = MavenDomUtil.getMavenDomProjectModel(project, checkstylePluginVirtualFile);
             if (mavenDomProjectModel == null) {
                 LOG.warn("Maven DOM project model unavailable for " + checkstylePluginVirtualFile.getPath());
@@ -538,7 +538,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
 
         final String rawConfigLocation = configLocationElement.getText();
         final String mavenPluginConfigLocation = mavenDomProjectModel != null
-            ? ReadAction.compute(() -> MavenPropertyResolver.resolve(rawConfigLocation, mavenDomProjectModel))
+            ? ReadAction.computeBlocking(() -> MavenPropertyResolver.resolve(rawConfigLocation, mavenDomProjectModel))
             : rawConfigLocation;
         // This must come after the PluginConfigurationBuilder is modified with the new
         // Checkstyle version and the new third party classpath.
@@ -590,7 +590,7 @@ public class MavenCheckstyleConfigurator implements MavenAfterImportConfigurator
         if (suppressionLocation != null && suppressionLocation.getText() != null) {
             final String rawValue = suppressionLocation.getText();
             final String resolvedValue = mavenDomProjectModel != null
-                ? ReadAction.compute(() -> MavenPropertyResolver.resolve(rawValue, mavenDomProjectModel))
+                ? ReadAction.computeBlocking(() -> MavenPropertyResolver.resolve(rawValue, mavenDomProjectModel))
                 : rawValue;
             configurationLocation.setProperties(Map.of(propertyName, resolvedValue));
         }
