@@ -98,7 +98,7 @@ public class ReloadCheckstyleWhenProjectTrustChanges implements ProjectActivity 
                     }
                     project.getService(ConfigurationInvalidator.class).invalidateCachedResources();
                     ApplicationManager.getApplication().invokeLater(
-                            () -> DaemonCodeAnalyzer.getInstance(project).restart(),
+                            () -> DaemonCodeAnalyzer.getInstance(project).restart("CheckStyle project trust changed"),
                             project.getDisposed());
                 });
             }

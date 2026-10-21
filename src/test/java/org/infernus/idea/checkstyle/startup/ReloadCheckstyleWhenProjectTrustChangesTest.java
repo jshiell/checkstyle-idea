@@ -138,7 +138,7 @@ class ReloadCheckstyleWhenProjectTrustChangesTest {
 
         listener.onProjectTrusted(project);
 
-        verify(daemonCodeAnalyzer).restart();
+        verify(daemonCodeAnalyzer).restart(any(Object.class));
     }
 
     @Test
