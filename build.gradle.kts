@@ -131,7 +131,7 @@ tasks.named<JavaCompile>("compileGradleToolingJava") {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(libs.versions.intellij.idea.community.get()) {
+        intellijIdea(libs.versions.intellij.idea.get()) {
             useInstaller = false
         }
 

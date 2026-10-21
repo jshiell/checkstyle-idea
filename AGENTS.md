@@ -16,11 +16,11 @@ IntelliJ IDEA plugin providing real-time Checkstyle feedback. Java, JDK 21, Grad
 
 ### Gradle DMG/hdiutil: fixed for build/test/buildPlugin/runIde; verifyPlugin is the one exception
 
-`build.gradle.kts`'s `intellijIdeaCommunity(...)` sets `useInstaller = false`. Confirmed by disassembling
+`build.gradle.kts`'s `intellijIdea(...)` sets `useInstaller = false`. Confirmed by disassembling
 `intellij-platform-gradle-plugin-2.18.1.jar`: `IntelliJPlatformDependencyConfiguration.useInstaller` switches
 between the IDE installer (a `.dmg` on macOS, Maven coordinate group `idea`) and the plain archive (`.zip`,
 group `com.jetbrains.intellij.idea`) from the IntelliJ Maven repository. With it `false`, Gradle downloads and
-unpacks `ideaIC-<version>.zip` directly — no `hdiutil attach` at all. Verified 2026-09-14 entirely inside the
+unpacks `idea-<version>.zip` directly — no `hdiutil attach` at all. Verified 2026-09-14 entirely inside the
 `nono` sandbox: `./gradlew test` (781 + 75 csaccess tests), `buildPlugin`, and an actual `runIde` launch
 (Welcome Frame shown, AWT event loop running, no errors) all succeeded with zero `hdiutil` invocations.
 
@@ -28,16 +28,17 @@ Re-checked 2026-10-19 on plugin 2.19.0 with base 2026.1.5. Both disassembly clai
 `intellij-platform-gradle-plugin-2.19.0.jar`: `IntelliJPlatformDependencyConfiguration.useInstaller` is still a
 `Property<Boolean>`, and `IntelliJPlatformExtension$PluginVerification$Ides.createInstallerDependencies$default`
 still turns an omitted flag into `true` (`iconst_2; iand` mask test, then `iconst_1; istore_2`). Behaviourally: the Gradle cache holds
-`com.jetbrains.intellij.idea:ideaIC:2026.1.5` (the zip), extracted to `transformed/ideaIC-2026.1.5` with `build.txt`
+`com.jetbrains.intellij.idea:idea:2026.1.5` (the zip), extracted to `transformed/idea-2026.1.5` with `build.txt`
 at the root (the dmg layout has `Resources/build.txt` and an `-aarch64` suffix, which is why `.claude/preflight.sh`
-needed to accept both). The plugin warns "IC no longer published since 2025.3, use intellijIdea(...)" but still
-resolves `ideaIC`; switching to `intellijIdea(...)` is a follow-up. Test counts on 2026.1.5 equalled those on 2025.1.7.2
+needed to accept both). On 2026-10-21 the dependency moved from `intellijIdeaCommunity(...)` (`ideaIC`, which the
+plugin warned is "no longer published since 2025.3") to `intellijIdea(...)`, the unified distribution (IU); `test`
+still passed (882) and the warning is gone. Test counts on 2026.1.5 equalled those on 2025.1.7.2
 at the bump: 881 `test`, 75 `runCsaccessTests` (3 skipped), 14 `gradleToolingTest` (`test` has since grown to
 882 with the `pluginPathOf` tests and the trust-test change). `xtest` disables JUnit XML (buildSrc
 `CsaccessTestTask`), so per-version counts are only in the base task's `build/reports/tests/runCsaccessTests`.
 
 **`verifyPlugin` still needs `hdiutil` and must run outside the sandbox.** It resolves its own IDEs
-independently of the main `intellijIdeaCommunity` dependency. Confirmed by disassembling
+independently of the main `intellijIdea` dependency. Confirmed by disassembling
 `IntelliJPlatformExtension.PluginVerification.Ides`: `recommended()` / `defaultRecommended()` / `latest()` all
 route through `createInstallerDependencies(...)`, whose Kotlin default-args bridge hardcodes `useInstaller =
 true` (`iconst_1`) whenever the caller doesn't override it — there is no DSL knob on these convenience methods
@@ -54,7 +55,7 @@ an explicit `-mountpoint` outside `/Volumes` fail the same way — the block is 
 `dangerouslyDisableSandbox` nor running `! ./gradlew …` from the prompt gets around it (both still execute
 inside the same sandboxed `claude` process). Re-extraction has to happen in a **real terminal outside Claude
 Code**; one `./gradlew verifyPlugin` there repopulates the cache and every later sandboxed run of it hits that
-cache — the result lives in `~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*`, and a
+cache — the result lives in `~/.gradle/caches/<gradle-version>/transforms/*/transformed/idea-*`, and a
 configuration-cache hit skips re-extraction. **A failed attempt wipes and recreates the transform's
 `transformed/` directory**, so every later run fails until an unsandboxed run re-extracts it.
 
@@ -86,7 +87,7 @@ distribution.
 - `src/csaccess/java/` — code isolated behind per-version classloaders (compiled against base Checkstyle 10.0)
 - `src/csaccessTest/java/` — tests for csaccess; `xTest` runs against all supported versions
 - `buildSrc/` — custom Gradle plugin: source sets, artifact gathering, cross-version test tasks, JaCoCo (60% min for csaccess)
-- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.19.0; IDEA Community 2026.1.5
+- `build.gradle.kts` — main build config; IntelliJ Platform Gradle Plugin 2.19.0; IntelliJ IDEA 2026.1.5
 
 ## Key Concepts
 
@@ -135,7 +136,7 @@ module, and omitting the `plugin.xml` half compiles cleanly but fails at runtime
 `./gradlew test` will not catch it either: tests run on a flat classpath. Use the plugin verifier (below).
 
 **Verifying platform API behaviour:** the resolved IDE distribution lives at
-`~/.gradle/caches/<gradle-version>/transforms/*/transformed/ideaIC-*/lib/*.jar` (plus `lib/modules/*.jar` for
+`~/.gradle/caches/<gradle-version>/transforms/*/transformed/idea-*/lib/*.jar` (plus `lib/modules/*.jar` for
 v2 content modules). To confirm real behaviour rather than assume it: `unzip -o -j <jar> '<path/To/Class.class>'
 -d <tmpdir>` then `javap -p -v <Class>.class` — annotations like `@ApiStatus.Internal` show as
 `RuntimeInvisibleAnnotations` in `-v` output. Most core platform classes are in `lib/app-client.jar`,
@@ -163,7 +164,7 @@ not observed at runtime.
 
 **Debug logging:** IDEA Help > Debug Log Settings > `#org.infernus.idea.checkstyle`
 
-**Sandbox:** `.intellijPlatform/sandbox/checkstyle-idea/IC-<version>/` — not auto-cleaned (`cleanSandbox` exists);
+**Sandbox:** `.intellijPlatform/sandbox/checkstyle-idea/IU-<version>/` — not auto-cleaned (`cleanSandbox` exists);
 delete manually if stale. Each IDE-launching task has its own prepare task and plugins dir: `runIde` uses
 `prepareSandbox_runIde` → `plugins_runIde/`, tests use `plugins-test/`, and `plugins/` belongs to plain
 `prepareSandbox`. Contents of one tell you nothing about another. `build.gradle.kts` wires the Checkstyle
