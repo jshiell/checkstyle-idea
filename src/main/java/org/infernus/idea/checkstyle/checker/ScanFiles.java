@@ -63,7 +63,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
     }
 
     private Map<Module, Set<PsiFile>> mapsModulesToFiles() {
-        return ReadAction.compute(() -> {
+        return ReadAction.computeBlocking(() -> {
             final Map<Module, Set<PsiFile>> modulesToFiles = new HashMap<>();
             for (final PsiFile file : files) {
                 final Module module = ModuleUtil.findModuleForPsiElement(file);
@@ -130,7 +130,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
     }
 
     private List<PsiFile> buildFilesList(final PsiManager psiManager, final VirtualFile virtualFile) {
-        return ReadAction.compute(() -> {
+        return ReadAction.computeBlocking(() -> {
             final FindChildFiles visitor = new FindChildFiles(psiManager);
             VfsUtilCore.visitChildrenRecursively(virtualFile, visitor);
             return visitor.locatedFiles;
@@ -220,7 +220,7 @@ public class ScanFiles implements Callable<List<ScanResult>> {
     private Set<PsiFile> filesInScanScope(final Set<PsiFile> filesToScan,
                                           final Module module,
                                           final PluginConfiguration pluginConfiguration) {
-        return ReadAction.compute(() -> filesToScan.stream()
+        return ReadAction.computeBlocking(() -> filesToScan.stream()
                 .filter(file -> PsiFileValidator.isScannable(file, module, pluginConfiguration, this.overrideConfigLocation))
                 .collect(Collectors.toSet()));
     }
