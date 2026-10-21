@@ -49,7 +49,7 @@ public final class NamedScopeHelper {
     }
 
     public static boolean isFileInScope(final PsiFile psiFile, @NotNull final NamedScope namedScope) {
-        return ReadAction.compute(() -> {
+        return ReadAction.computeBlocking(() -> {
             final PackageSet packageSet = namedScope.getValue();
             if (packageSet == null) {
                 return true;
