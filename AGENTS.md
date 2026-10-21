@@ -189,13 +189,13 @@ Read `build/reports/pluginVerifier/<IDE>/plugins/CheckStyle-IDEA/<version>/verif
 changed count of deprecated or experimental usages — those move with every platform bump. Since the 2026.1 base
 the verifier runs **Ultimate** builds (IU), not IC, and verifies three IDEs: IU-261 (the base), IU-262 (2026.2.3, the
 released next major) and IU-263 (pre-release). Judge each from its own `verification-verdict.txt`; do not rely on
-the task's exit code. As of 26.19.1 on 2026-10-19:
+the task's exit code. As of 26.20.0 on 2026-10-21:
 
 | IDE | Verdict | Deprecated | Experimental | Internal |
 |---|---|---|---|---|
-| IU-261 | Compatible | 13 | 18 | 0 |
-| IU-262 | Compatible | 13 | 13 | 0 |
-| IU-263 | 20 possible compatibility problems, 1 missing mandatory dependency | 14 | 13 | 0 |
+| IU-261 | Compatible | 0 | 18 | 0 |
+| IU-262 | Compatible | 0 | 13 | 0 |
+| IU-263 | 20 possible compatibility problems, 1 missing mandatory dependency | 1 | 13 | 0 |
 
 The extra 5 experimental usages on 261 are `TrustedProjectsListener` (no longer experimental on 262). **IU-263 is
 a known, accepted failure for now:** the unresolved classes are `com.intellij.openapi.vcs.*` (`CheckinProjectPanel`,
