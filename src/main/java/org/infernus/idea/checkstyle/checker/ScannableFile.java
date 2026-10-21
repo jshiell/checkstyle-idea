@@ -84,14 +84,14 @@ import static java.util.Optional.ofNullable;
                 .map(currentFile -> ScannableFile.create(currentFile, module))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-        return ReadAction.compute(action);
+        return ReadAction.computeBlocking(action);
     }
 
     @Nullable
     private static ScannableFile create(@NotNull final PsiFile psiFile, @Nullable final Module module) {
         try {
             final CreateScannableFileAction fileAction = new CreateScannableFileAction(psiFile, module);
-            ReadAction.run(fileAction);
+            ReadAction.runBlocking(fileAction);
 
             if (fileAction.getFailure() != null) {
                 throw fileAction.getFailure();
