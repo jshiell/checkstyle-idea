@@ -103,7 +103,7 @@ public class ScanCurrentFile extends BaseAction {
     @NotNull
     private static PsiFile psiFileFor(@NotNull final Project project,
                                       @NotNull final VirtualFile selectedFile) {
-        return ReadAction.compute(() -> {
+        return ReadAction.computeBlocking(() -> {
             final PsiFile psiFile = PsiManager.getInstance(project).findFile(selectedFile);
             if (psiFile == null) {
                 throw new UnsupportedOperationException("PsiFile of " + selectedFile + " is null!");
@@ -116,7 +116,7 @@ public class ScanCurrentFile extends BaseAction {
                                                        @NotNull final VirtualFile selectedFile,
                                                        @NotNull ScanScope scanScope) {
         if (scanScope != ScanScope.Everything) {
-            return ReadAction.compute(() -> {
+            return ReadAction.computeBlocking(() -> {
                 final ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
                 if (!projectFileIndex.isInSourceContent(selectedFile)) {
                     return false;
