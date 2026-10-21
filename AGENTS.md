@@ -194,7 +194,7 @@ the task's exit code. As of 26.19.1 on 2026-10-19:
 |---|---|---|---|---|
 | IU-261 | Compatible | 13 | 18 | 0 |
 | IU-262 | Compatible | 13 | 13 | 0 |
-| IU-263 | 20 possible compatibility problems, 1 missing mandatory dependency | 14 (+1 scheduled for removal) | 13 | 0 |
+| IU-263 | 20 possible compatibility problems, 1 missing mandatory dependency | 14 | 13 | 0 |
 
 The extra 5 experimental usages on 261 are `TrustedProjectsListener` (no longer experimental on 262). **IU-263 is
 a known, accepted failure for now:** the unresolved classes are `com.intellij.openapi.vcs.*` (`CheckinProjectPanel`,
