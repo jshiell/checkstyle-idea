@@ -61,8 +61,16 @@ public class ServiceLayerBasicTest {
             createChecker(CONFIG_FILE_CONTENTS_HOLDER);
             fail("expected exception was not thrown");
         } catch (CheckstyleToolException e) {
-            assertThat(e.getMessage(), containsString("FileContentsHolder"));
+            assertThat(messagesInCauseChain(e), containsString("FileContentsHolder"));
         }
+    }
+
+    private static String messagesInCauseChain(final Throwable throwable) {
+        final StringBuilder messages = new StringBuilder();
+        for (Throwable current = throwable; current != null; current = current.getCause()) {
+            messages.append(current.getMessage()).append('\n');
+        }
+        return messages.toString();
     }
 
     private void createChecker(@NotNull final String configXmlFile)
