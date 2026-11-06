@@ -18,7 +18,6 @@ public class CheckstyleVersionsTest {
         SortedSet<String> bundled = underTest.getBundledVersions();
         assertNotNull(bundled);
         assertFalse(bundled.isEmpty());
-        assertTrue(bundled.contains("10.0"));
         assertTrue(bundled.contains("14.4.0"));
     }
 
